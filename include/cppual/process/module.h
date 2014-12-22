@@ -1,0 +1,178 @@
+/*
+ * Product: C++ Unified Abstraction Library
+ * Author: Kurec
+ * Description: This file is a part of CPPUAL.
+ *
+ * Copyright (C) 2012 - 2014 Kurec
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef CPPUAL_PROCESS_MODULE_H_
+#define CPPUAL_PROCESS_MODULE_H_
+#ifdef __cplusplus
+
+#include <memory>
+#include <functional>
+#include <unordered_map>
+#include <cppual/types.h>
+#include <cppual/flags.h>
+#include <cppual/signal.h>
+#include <cppual/noncopyable.h>
+
+using std::string;
+using std::shared_ptr;
+using std::unordered_map;
+
+namespace cppual { namespace Process {
+
+class Module final : public NonCopyable
+{
+public:
+	enum Flag
+	{
+		AbsolutePath = 1 << 1, // explicitly provide full path
+		AddExt       = 1 << 2  // add library extension (ex. ".so" or ".dll")
+	};
+
+	enum class ResolvePolicy : unsigned char
+	{
+		Static = 0, // use as data file or load as static library
+		Immediate,  // resolve everything ot load
+		Unresolved  // don't resolve any object or function references
+	};
+
+	typedef BitSet<Module::Flag> Flags;
+	typedef Signal<void()>       signal_type;
+
+	Module () = default;
+	Module (Module&&) = default;
+	Module& operator = (Module&&) = default;
+	bool attach () noexcept;
+	void detach () noexcept;
+
+	Module (cchar*        path,
+			bool          attach = true,
+			ResolvePolicy policy = ResolvePolicy::Unresolved,
+			Flags         flags  = AddExt) noexcept;
+
+	string const& path () const noexcept { return m_gLibPath; }
+	void*         handle () const noexcept { return m_pHandle; }
+	ResolvePolicy policy () const noexcept { return m_eResolve; }
+	bool          is_attached () const noexcept { return m_pHandle; }
+
+	bool contains (string const& gName) const noexcept
+	{ return address (gName.c_str ()); }
+
+	bool contains (cchar* pName) const noexcept
+	{ return address (pName); }
+
+	~Module ()
+	{ if (m_eResolve != ResolvePolicy::Static) detach (); }
+
+	template <typename T>
+	T* get (cchar* pName) const noexcept
+	{ return static_cast<T*> (address (pName)); }
+
+	template <typename TRet, typename... TArgs>
+	bool get (cchar* pName, TRet(*& fn)(TArgs...)) const
+	{
+		typedef TRet (* Func)(TArgs...);
+		static thread_local union { void* object; Func func; } convert1;
+		convert1.object = address (pName);
+		return fn = convert1.func;
+	}
+
+	template <typename TRet, typename... TArgs>
+	TRet call (cchar* pName, TArgs&&... args) const
+	{
+		typedef TRet (* Func)(TArgs...);
+		static thread_local union { void* object; Func func; } convert2;
+		convert2.object = address (pName);
+		if (!convert2.func) std::bad_function_call ();
+		return (*convert2.func)(std::forward<TArgs> (args)...);
+	}
+
+private:
+	void*		  m_pHandle;
+	string const  m_gLibPath;
+	ResolvePolicy m_eResolve;
+
+	void* address (cchar* name) const noexcept;
+};
+
+// =========================================================
+
+extern "C" struct ModuleParams
+{
+	cchar* name;
+	cchar* provides;
+	cchar* desc;
+	void * iface;
+	int    version;
+};
+
+template <typename Iterface,
+		  typename Allocator =
+		  std::allocator<std::pair<const string, std::pair<Module, ModuleParams> > >
+		  >
+class ModuleManager
+{
+public:
+	typedef typename Allocator::size_type   size_type;
+	typedef typename Allocator::value_type  pair_type;
+	typedef string                          key_type;
+	typedef string const                    const_key;
+	typedef std::hash<key_type>             hash_type;
+	typedef std::equal_to<key_type>         equal_type;
+	typedef std::pair<Module, ModuleParams> value_type;
+	typedef Iterface                        iface_type;
+	typedef Allocator                       allocator_type;
+
+	typedef unordered_map
+	<key_type, value_type, hash_type, equal_type, allocator_type> map_type;
+
+	ModuleManager () = default;
+	ModuleManager (const_key& modules_dir, allocator_type& = allocator_type ());
+	ModuleManager (ModuleManager&&);
+	ModuleManager& operator = (ModuleManager&&);
+
+	bool load (const_key& modules_dir);
+	bool load_module (const_key& path);
+	bool is_registered (const_key& name) noexcept;
+	void release_module (const_key& name);
+
+	void release ()                { m_gModuleMap.clear ();        }
+	bool empty   () const noexcept { return m_gModuleMap.empty (); }
+
+	Module* module (const_key& module_name) const noexcept
+	{ return &m_gModuleMap[module_name].first; }
+
+	key_type description (const_key& module_name) const noexcept
+	{ return m_gModuleMap[module_name].second.desc; }
+
+	int version (const_key& module_name) const noexcept
+	{ return m_gModuleMap[module_name].second.version; }
+
+	iface_type* interface (const_key& module_name) const noexcept
+	{ return static_cast<iface_type*> (m_gModuleMap[module_name].second.iface); }
+
+private:
+	mutable map_type m_gModuleMap;
+};
+
+} } // namespace Process
+
+#endif // __cplusplus
+#endif // CPPUAL_PROCESS_MODULE_H_
