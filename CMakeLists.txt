@@ -10,7 +10,7 @@ find_package(OpenGL   REQUIRED)
 find_package(GLEW     REQUIRED)
 find_package(Freetype REQUIRED)
 
-include(../../projects/cross/cpp14cmake)
+include(cmake/cpp14defs)
 aux_source_directory(. SRC_LIST)
 include_directories(include ${FREETYPE_INCLUDE_DIRS})
 
