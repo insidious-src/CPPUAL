@@ -32,7 +32,7 @@ PoolAllocator::PoolAllocator (size_type  uBlkCount,
 							  align_type uBlkAlign)
 : m_uNumAlloc (),
   m_gOwner (*this),
-  m_pBegin (uBlkCount ? ::operator new[] (uBlkCount * uBlkSize) : nullptr),
+  m_pBegin (uBlkCount ? ::operator new (uBlkCount * uBlkSize) : nullptr),
   m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
 								nullptr),
   m_pFreeList (),
@@ -55,7 +55,7 @@ PoolAllocator::PoolAllocator (Allocator& pOwner,
 															uBlkCount * uBlkSize,
 															alignof (size_type))) :
 								  nullptr) :
-							(uBlkCount? ::operator new[] (uBlkCount * uBlkSize) : nullptr)),
+							(uBlkCount? ::operator new (uBlkCount * uBlkSize) : nullptr)),
   m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
 								nullptr),
   m_pFreeList (),
@@ -88,7 +88,7 @@ PoolAllocator::~PoolAllocator ()
 	if (m_pBegin == nullptr) return;
 
 	if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
-	else delete[] static_cast<math_pointer> (m_pBegin);
+	else ::operator delete (m_pBegin);
 }
 
 void PoolAllocator::initialize () noexcept

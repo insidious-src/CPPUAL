@@ -53,8 +53,8 @@ public:
 
 	size_type size () const noexcept
 	{
-		return static_cast<size_type> (static_cast<u8*> (m_pEnd) -
-									   static_cast<u8*> (m_pBegin));
+		return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
+									   static_cast<math_pointer> (m_pBegin));
 	}
 
 	bool is_shared () const noexcept

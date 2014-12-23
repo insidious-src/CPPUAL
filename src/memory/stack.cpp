@@ -30,7 +30,7 @@ StackedAllocator::StackedAllocator (size_type uSize)
 : //m_gSharedName (),
   m_uNumAlloc (),
   m_gOwner (*this),
-  m_pCurMarker (uSize > 0 ? ::operator new[] (uSize) : nullptr),
+  m_pCurMarker (uSize > 0 ? ::operator new (uSize) : nullptr),
   m_pBegin (m_pCurMarker),
   m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + uSize : nullptr),
   m_bIsMemShared ()
@@ -45,7 +45,7 @@ StackedAllocator::StackedAllocator (Allocator& pOwner, size_type uSize)
 								  static_cast<pointer> (pOwner.allocate (
 															uSize, alignof (uptr))) :
 								  nullptr) :
-							 (uSize > 0 ? ::operator new[] (uSize) : nullptr)),
+							 (uSize > 0 ? ::operator new (uSize) : nullptr)),
   m_pBegin (m_pCurMarker),
   m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + uSize : nullptr),
 
@@ -68,7 +68,7 @@ StackedAllocator::~StackedAllocator ()
 	if (m_pBegin == nullptr) return;
 
 	if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
-	else if (!m_bIsMemShared) delete[] static_cast<math_pointer> (m_pBegin);
+	else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
 void* StackedAllocator::allocate (size_type uBytes, align_type uAlign) noexcept

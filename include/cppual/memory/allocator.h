@@ -114,7 +114,7 @@ public:
 
 	template <class U, typename... Args>
 	static void construct (U* p, Args&&... args)
-	{ ::new (static_cast<void*>(p)) U (std::forward<Args> (args)...); }
+	{ new (p) U (std::forward<Args> (args)...); }
 
 	template <class U>
 	static void destroy (U* p)
@@ -190,7 +190,7 @@ public:
 
 	template<class U, typename... Args>
 	static void construct (U* p, Args&&... args)
-	{ ::new (static_cast<void*>(p)) U (std::forward<Args> (args)...); }
+	{ new (p) U (std::forward<Args> (args)...); }
 
 	template <class U>
 	static void destroy (U* p)
@@ -252,7 +252,7 @@ struct AllocatorPolicy <T, void> : std::allocator<T>
 { using std::allocator<T>::allocator; };
 
 template <typename T>
-using GenericPolicy = AllocatorPolicy <T, Allocator>;
+using GenericPolicy = AllocatorPolicy<T, Allocator>;
 
 template <typename T>
 using AllocatorType = typename

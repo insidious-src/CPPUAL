@@ -27,10 +27,9 @@ using std::string;
 namespace cppual { namespace Memory {
 
 HeapAllocator::HeapAllocator (size_type uSize)
-: //m_gSharedName (),
-  m_uNumAlloc (),
+: m_uNumAlloc (),
   m_gOwner (*this),
-  m_pBegin (uSize >= sizeof (FreeBlock) ? ::operator new[] (uSize) : nullptr),
+  m_pBegin (uSize >= sizeof (FreeBlock) ? ::operator new (uSize) : nullptr),
   m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
   m_pFreeBlocks (reinterpret_cast<FreeBlock*> (m_pBegin)),
   m_bIsMemShared ()
@@ -43,15 +42,14 @@ HeapAllocator::HeapAllocator (size_type uSize)
 }
 
 HeapAllocator::HeapAllocator (Allocator& pOwner, size_type uSize)
-: //m_gSharedName (),
-  m_uNumAlloc (),
+: m_uNumAlloc (),
   m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pBegin (&m_gOwner != this ?
 							 (uSize >= sizeof (FreeBlock) ?
 								  static_cast<pointer> (pOwner.allocate (
 															uSize, alignof (size_type))) :
 								  nullptr) :
-							 (uSize > 0 ? ::operator new[] (uSize) : nullptr)),
+							 (uSize > 0 ? ::operator new (uSize) : nullptr)),
   m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
   m_pFreeBlocks (reinterpret_cast<FreeBlock*> (m_pBegin)),
   m_bIsMemShared (&m_gOwner != this ? m_gOwner.is_shared () : false)
@@ -84,7 +82,7 @@ HeapAllocator::~HeapAllocator ()
 	if (m_pBegin == nullptr) return;
 
 	if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
-	else if (!m_bIsMemShared) delete[] static_cast<math_pointer> (m_pBegin);
+	else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
 void* HeapAllocator::allocate (size_type uSize, align_type uAlign) noexcept
@@ -288,9 +286,9 @@ inline ListAllocator::Header* find (ListAllocator::Header*          hdr,
 // =========================================================
 
 ListAllocator::ListAllocator (size_type uSize)
-: m_pBegin (uSize >= sizeof (Header) + sizeof (size_type) ? new u8[uSize] : nullptr),
+: m_pBegin (uSize >= sizeof (Header) + sizeof (size_type) ? ::operator new (uSize) : nullptr),
   m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
-  m_pFirstFreeBlock (static_cast<Header*> (static_cast<void*> (m_pBegin))),
+  m_pFirstFreeBlock (static_cast<Header*> (m_pBegin)),
   m_uNumAlloc (),
   m_gOwner (*this),
   m_bIsMemShared ()
@@ -307,7 +305,7 @@ ListAllocator::ListAllocator (Allocator& pOwner, size_type uSize)
 				static_cast<pointer> (pOwner.allocate (uSize, alignof (Header))) :
 				nullptr),
   m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
-  m_pFirstFreeBlock (static_cast<Header*> (static_cast<void*> (m_pBegin))),
+  m_pFirstFreeBlock (static_cast<Header*> (m_pBegin)),
   m_uNumAlloc (),
   m_gOwner (m_pBegin ? pOwner : *this),
   m_bIsMemShared (&m_gOwner != this ? m_gOwner.is_shared () : false)
@@ -324,7 +322,7 @@ ListAllocator::~ListAllocator ()
 	if (m_pBegin == nullptr) return;
 
 	if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
-	else if (!m_bIsMemShared) delete[] static_cast<math_pointer> (m_pBegin);
+	else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
 void ListAllocator::defragment () noexcept
