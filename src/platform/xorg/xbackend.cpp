@@ -33,7 +33,7 @@ namespace { namespace Xcb { // optimize for unit internal usage
 inline Connection x11_connection (cchar* pName) noexcept
 {
 	static thread_local Connection pDisplay    = nullptr;
-	static thread_local cchar*     pCachedName = nullptr;
+	static thread_local cchar*     pCachedName = "";
 
 	return pDisplay and pName == pCachedName ?
 				pDisplay : pDisplay = XOpenDisplay (pCachedName = pName);
@@ -48,7 +48,7 @@ inline Connection get_connection (cchar* pName) noexcept
 
 XDisplay::XDisplay (cchar* pName) noexcept
 : IDisplay (Xcb::get_connection (pName), Xcb::x11_connection (pName)),
-  m_gName     (native () ? pName : nullptr)
+  m_gName  (native () ? pName : nullptr)
 {
 	if (!native ()) return;
 
@@ -74,8 +74,7 @@ void XDisplay::flush () noexcept
 
 int XDisplay::screenCount () const noexcept
 {
-	return native () ? xcb_setup_roots_length (xcb_get_setup (native ().get<xcb_connection_t> ())) :
-					 int ();
+	return xcb_setup_roots_length (xcb_get_setup (native ().get<xcb_connection_t> ()));
 }
 
 } } // namespace Ui

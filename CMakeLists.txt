@@ -49,6 +49,8 @@ add_library(cppual-core SHARED
 	src/memory/heap.cpp
 	include/cppual/memory/heap.h
 	src/memory/shared.cpp
+	include/cppual/memory/page.h
+	src/memory/page.cpp
 	include/cppual/memory/shared.h
 	src/process/proc_model.cpp
 	include/cppual/process/proc_model.h
