@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <atomic>
-#include <cppual/platform/wm.h>
+#include <cppual/ui/wm.h>
 
 using std::atomic_bool;
 

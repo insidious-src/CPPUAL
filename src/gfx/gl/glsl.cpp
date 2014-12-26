@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <iterator>
 #include <cppual/mstring.h>
+#include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/glsl.h>
 #include "gldef.h"
 
@@ -225,7 +226,7 @@ bool Shader::compile () noexcept
 
 	// check the compilation status
 	glGetShaderiv (id (), GL::CompileStatus, &nStatus);
-	nStatus == GL::GLTrue ? m_gStates += Shader::IsCompiled :
+	nStatus == GL::TRUE ? m_gStates += Shader::IsCompiled :
 										 m_gStates -= Shader::IsCompiled;
 
 	return m_gStates.hasBit (Shader::IsCompiled);
@@ -268,7 +269,7 @@ bool SLProgram::link () noexcept
 		}
 
 		// check linking status
-		nStatus == GL::GLTrue ? m_gStates += SLProgram::IsLinked :
+		nStatus == GL::TRUE ? m_gStates += SLProgram::IsLinked :
 								m_gStates -= SLProgram::IsLinked;
 
 		return m_gStates.hasBit (SLProgram::IsLinked);
@@ -350,7 +351,7 @@ bool SLProgram::loadFromBinary (string const& gFile)
 
 		m_gShaderTypes.clear ();
 
-		if (nStatus == GL::GLFalse)
+		if (nStatus == GL::FALSE)
 		{
 			m_uShaderCount = 0;
 			m_gStates	  -= SLProgram::IsLinked;
@@ -415,10 +416,10 @@ uint SLProgram::binaryFormat () noexcept
 			IDeviceContext::current ()->version () < 3 ?
 						glProgramParameteri    (id (),
 												GL::IsProgramBinaryRetrievable,
-												GL::GLTrue) :
+												GL::TRUE) :
 						glProgramParameteriARB (id (),
 												GL::IsProgramBinaryRetrievable,
-												GL::GLTrue);
+												GL::TRUE);
 
 			m_gStates += SLProgram::BinaryAvailable;
 		}

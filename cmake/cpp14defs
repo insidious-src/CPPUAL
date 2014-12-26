@@ -48,4 +48,4 @@ else()
 endif()
 
 # use optimized instruction set
-add_definitions(-msse -msse2 -mavx)
+add_definitions(-msse -msse2 -msse3 -mavx)

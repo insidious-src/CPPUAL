@@ -34,10 +34,11 @@ namespace cppual { namespace Ui {
 class View
 {
 public:
-	typedef Input::IDisplayQueue::event_type event_type;
-	typedef Input::IDisplayQueue::Object     queue_type;
-	typedef CircularQueue<View*>             container;
-	typedef std::size_t	                     size_type;
+	typedef Input::IDisplayQueue::event_type     event_type;
+	typedef Input::IDisplayQueue::Object         queue_type;
+	typedef Memory::GenericPolicy<View*>         allocator_type;
+	typedef CircularQueue<View*, allocator_type> container;
+	typedef std::size_t	                         size_type;
 
 	typedef typename
 	container::iterator iterator;
@@ -58,10 +59,14 @@ public:
 
 	View (View&&) noexcept;
 	View (View const&) noexcept;
-	View (View* parent, Rect const& rect, u32 screen = 0);
 	View& operator = (View&&) noexcept;
 	View& operator = (View const&) noexcept;
 	~View ();
+
+	View (View*       parent,
+		  Rect const& rect,
+		  u32         screen    = 0,
+		  allocator_type const& = allocator_type ());
 
 	void destroy ();
 	void show ();
@@ -93,7 +98,7 @@ public:
 	{ return m_gStateFlags.hasBit (View::HasFocus); }
 
 	inline bool isHidden () const noexcept
-	{ return m_gStateFlags.hasBit (View::Valid) and m_pRenderable->isMapped (); }
+	{ return !m_gStateFlags.hasBit (View::Valid) or !m_pRenderable->isMapped (); }
 
 	inline Rect geometry () const noexcept
 	{ return m_gStateFlags.hasBit (View::Valid) ? m_pRenderable->geometry () : Rect (); }

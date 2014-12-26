@@ -23,7 +23,7 @@
 #define CPPUAL_GFX_VIRTUAL_SURFACE_H_
 #ifdef __cplusplus
 
-#include <cppual/platform/wm.h>
+#include <cppual/ui/wm.h>
 
 namespace cppual { namespace Ui {
 

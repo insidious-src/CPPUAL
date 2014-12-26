@@ -23,6 +23,7 @@
 #define CPPUAL_GFX_GL_TEXTURE_H_
 #ifdef __cplusplus
 
+#include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/glbase.h>
 
 using std::string;

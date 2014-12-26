@@ -29,22 +29,7 @@ namespace cppual { namespace Graphics { namespace GL {
 
 namespace { // optimize for internal unit usage
 
-Platform getCurrentGLArch () noexcept
-{
-//	static std::string const gVendor (std::move (Driver::glLabel (Driver::Vendor)));
-
-//	if      (gVendor == "Nvidia")   return Platform::Nvidia;
-//	else if (gVendor == "ATI")      return Platform::ATI;
-//	else if (gVendor == "AMD")      return Platform::AMD;
-//	else if (gVendor == "Intel")    return Platform::Intel;
-//	else if (gVendor == "Adapteva") return Platform::Adapteva;
-	return Platform::Generic;
-}
-
-struct Internal { static Platform currentArch; };
-Platform Internal::currentArch = getCurrentGLArch ();
-
-uint generateObject (ResourceType eType) noexcept
+inline uint generateObject (ResourceType eType) noexcept
 {
 	IDeviceContext* pContext = IDeviceContext::current ();
 	if (!pContext) return 0;
@@ -79,7 +64,7 @@ uint generateObject (ResourceType eType) noexcept
 	return uId;
 }
 
-uint generateShader (uint uType) noexcept
+inline uint generateShader (uint uType) noexcept
 {
 	IDeviceContext* pContext = IDeviceContext::current ();
 	if (!pContext) return 0;
@@ -89,11 +74,6 @@ uint generateShader (uint uType) noexcept
 }
 
 } // anonymous
-
-// ====================================================
-
-Platform currentPlatform () noexcept
-{ return Internal::currentArch; }
 
 // ====================================================
 

@@ -23,33 +23,33 @@
 
 namespace cppual { namespace Graphics {
 
-UniformMatrix<2>& UniformMatrix<2>::transpose () noexcept
+Matrix2& Matrix2::transpose () noexcept
 {
-	std::swap (m_matrix[1], m_matrix[2]);
+	std::swap ((*this)[1], (*this)[2]);
 	return *this;
 }
 
 // =========================================================
 
-UniformMatrix<3>& UniformMatrix<3>::transpose () noexcept
+Matrix3& Matrix3::transpose () noexcept
 {
-	std::swap (m_matrix[1],  m_matrix[3]);
-	std::swap (m_matrix[2],  m_matrix[6]);
-	std::swap (m_matrix[5],  m_matrix[7]);
+	std::swap ((*this)[1], (*this)[3]);
+	std::swap ((*this)[2], (*this)[6]);
+	std::swap ((*this)[5], (*this)[7]);
 
 	return *this;
 }
 
 // =========================================================
 
-UniformMatrix<4>& UniformMatrix<4>::transpose () noexcept
+Matrix4& Matrix4::transpose () noexcept
 {
-	std::swap (m_matrix[1],  m_matrix[4]);
-	std::swap (m_matrix[2],  m_matrix[8]);
-	std::swap (m_matrix[3],  m_matrix[12]);
-	std::swap (m_matrix[6],  m_matrix[9]);
-	std::swap (m_matrix[7],  m_matrix[13]);
-	std::swap (m_matrix[11], m_matrix[14]);
+	std::swap ((*this)[ 1], (*this)[ 4]);
+	std::swap ((*this)[ 2], (*this)[ 8]);
+	std::swap ((*this)[ 3], (*this)[12]);
+	std::swap ((*this)[ 6], (*this)[ 9]);
+	std::swap ((*this)[ 7], (*this)[13]);
+	std::swap ((*this)[11], (*this)[14]);
 
 	return *this;
 }

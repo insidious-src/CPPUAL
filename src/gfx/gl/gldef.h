@@ -40,6 +40,14 @@ enum
 	// verticies
 	Quads                   = GL_QUADS,
 
+	// modes
+	Projection              = GL_PROJECTION,
+	ModelView               = GL_MODELVIEW,
+
+	// shader
+	FlatShader              = GL_FLAT,
+	SmoothShader            = GL_SMOOTH,
+
 	// operations
 	IsProgramBinaryRetrievable = GL_PROGRAM_BINARY_RETRIEVABLE_HINT,
 	NumProgramBinaryFormats	= GL_NUM_PROGRAM_BINARY_FORMATS,
@@ -86,8 +94,8 @@ enum
 	Vendor					= GL_VENDOR,
 	Version					= GL_VERSION,
 	Extensions				= GL_EXTENSIONS,
-	GLTrue					= GL_TRUE,
-	GLFalse					= GL_FALSE
+	TRUE					= GL_TRUE,
+	FALSE					= GL_FALSE
 };
 
 } } } // namespace GL

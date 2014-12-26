@@ -23,6 +23,7 @@
 #define CPPUAL_GFX_GL_QUERY_H_
 #ifdef __cplusplus
 
+#include <cppual/types.h>
 #include <cppual/gfx/gl/glbase.h>
 
 namespace cppual { namespace Graphics { namespace GL {

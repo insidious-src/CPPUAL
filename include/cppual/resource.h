@@ -29,6 +29,7 @@ using std::atomic_size_t;
 
 namespace cppual {
 
+template <typename> class Disposable { };
 class PrivateDisposable { };
 
 enum class ResourceType : unsigned char
@@ -51,10 +52,6 @@ enum class ResourceType : unsigned char
 	Context
 };
 
-template <typename>
-struct Disposable
-{ };
-
 // =========================================================
 
 template <class Controller, class ID, class DisposableType = PrivateDisposable>
@@ -73,7 +70,7 @@ public:
 	constexpr ResourceType resType () const noexcept { return m_eResType; }
 	constexpr bool         isValid () const noexcept { return m_id; }
 
-	inline static std::size_t count () noexcept
+	static std::size_t count () noexcept
 	{ return sm_uObjCount.load (std::memory_order_consume); }
 
 	constexpr Resource (Controller pCon, value_type id, ResourceType eType) noexcept
@@ -82,15 +79,15 @@ public:
 	  m_eResType (eType)
 	{ }
 
+	template <class Controller_, class ID_>
+	friend constexpr bool operator == (Resource<Controller_, ID_, DisposableType> const&,
+									   Resource<Controller_, ID_, DisposableType> const&);
+
 private:
 	static atomic_size_t sm_uObjCount;
 	controller            m_pCon;
 	value_type            m_id;
 	ResourceType          m_eResType;
-
-	template <class Controller_, class ID_>
-	friend constexpr bool operator == (Resource<Controller_, ID_, DisposableType> const&,
-									   Resource<Controller_, ID_, DisposableType> const&);
 };
 
 // =========================================================
@@ -106,12 +103,16 @@ public:
 	Resource (Resource const&) = delete;
 	Resource& operator = (Resource const&) = delete;
 
-	constexpr value_type   id () const noexcept { return m_id; }
+	constexpr value_type   id      () const noexcept { return m_id;       }
 	constexpr ResourceType resType () const noexcept { return m_eResType; }
-	constexpr bool         isValid () const noexcept { return m_id; }
+	constexpr bool         isValid () const noexcept { return m_id;       }
 
 	inline static std::size_t count () noexcept
 	{ return sm_uObjCount.load (std::memory_order_consume); }
+
+	template <class ID_>
+	friend constexpr bool operator == (Resource<void, ID_, DisposableType> const&,
+									   Resource<void, ID_, DisposableType> const&);
 
 private:
 	static atomic_size_t sm_uObjCount;
@@ -125,10 +126,6 @@ protected:
 private:
 	value_type   m_id;
 	ResourceType m_eResType;
-
-	template <class ID_>
-	friend constexpr bool operator == (Resource<void, ID_, DisposableType> const&,
-									   Resource<void, ID_, DisposableType> const&);
 };
 
 // =========================================================

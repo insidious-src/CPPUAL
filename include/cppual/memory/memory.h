@@ -67,7 +67,7 @@ inline std::size_t alignAdjust (cvoid* pAddr, std::size_t const uAlign) noexcept
 inline void* nextAlignedAddr (cvoid* pAddr, std::size_t const uAlign) noexcept
 {
 	return reinterpret_cast<void*>
-			((reinterpret_cast<uptr> (pAddr) + (uAlign - 1)) & ~(uAlign - 1));
+			((reinterpret_cast<cuptr> (pAddr) + (uAlign - 1)) & ~(uAlign - 1));
 }
 
 inline std::size_t alignAdjustmentHeader (cvoid*      addr,

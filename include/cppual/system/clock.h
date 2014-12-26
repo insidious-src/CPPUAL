@@ -24,36 +24,27 @@
 #ifdef __cplusplus
 
 #include <chrono>
-#include <cppual/decl.h>
-#include <cppual/noncopyable.h>
 
 namespace cppual { namespace Clock {
 
-using std::chrono::duration;
-using std::chrono::duration_cast;
-
-// basic typedefs
-typedef duration<int, std::ratio<3600>> hours;
-typedef duration<int, std::ratio<60>>	minutes;
-
 template <class TClock = std::chrono::high_resolution_clock>
-class Timer final : public NonCopyable
+class Timer
 {
 public:
 	typedef typename TClock::time_point time_point;
 
-	inline Timer () noexcept : m_gEpoch (TClock::now ()) { }
-	inline void	start () noexcept { m_gEpoch = TClock::now (); }
+	Timer () noexcept : m_gEpoch (TClock::now ()) { }
+	void start () noexcept { m_gEpoch = TClock::now (); }
 
 	template <typename T>
-	inline T elapsed () const noexcept
-	{ return duration_cast<T> (TClock::now () - m_gEpoch); }
+	T elapsed () const noexcept
+	{ return std::chrono::duration_cast<T> (TClock::now () - m_gEpoch); }
 
 private:
 	time_point m_gEpoch;
 };
 
-} } // namespace System
+} } // namespace Clock
 
 #endif // __cplusplus
 #endif // CPPUAL_SYSTEM_CLOCK_H_

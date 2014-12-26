@@ -179,21 +179,6 @@
 #   define DEBUG_MODE
 #endif // DEBUG
 
-// standart integral return values
-enum
-{
-	ResultPartial =  2,
-	ResultSuccess =  1,
-	ResultAlready =  0,
-	ErrorFailed   = -1,
-	ErrorInvalid  = -2,
-	ErrorDenied   = -3,
-	ErrorNoRes    = -4,
-	ErrorNoAccess = -5,
-	ErrorTerm     = -6,
-	ErrorUnknown  = -7
-};
-
 #ifdef __cplusplus
 
 #if __cplusplus < 201103L or (defined (_MSC_VER) and _MSC_VER < 1700)

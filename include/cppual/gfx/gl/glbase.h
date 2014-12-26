@@ -23,7 +23,7 @@
 #define CPPUAL_GFX_GL_BASE_H_
 #ifdef __cplusplus
 
-#include <cppual/gfx/draw.h>
+#include <cppual/decl.h>
 #include <cppual/resource.h>
 
 namespace cppual { namespace Graphics { namespace GL {
@@ -39,31 +39,17 @@ class VertexArray;
 
 // ====================================================
 
-enum class Platform : unsigned char
-{
-	Generic,
-	Adapteva,
-	Nvidia,
-	ATI,
-	AMD,
-	Intel
-};
-
-Platform currentPlatform () noexcept;
-
-// ====================================================
-
 class Object : public Resource < void, uint >
 {
 public:
 	typedef std::ptrdiff_t ptrdiff;
 	typedef std::size_t	   size_type;
 
-	Object () noexcept = default;
+	constexpr Object () noexcept = default;
 	Object (ResourceType type) noexcept;
 	Object (uint shader_type) noexcept;
 
-	inline ~Object () noexcept
+	~Object () noexcept
 	{ dispose (); }
 
 private:

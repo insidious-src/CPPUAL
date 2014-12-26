@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <atomic>
 #include <iostream>
 #include <EGL/egl.h>
 #include <cppual/gfx/gl/egl.h>
@@ -27,21 +26,14 @@
 
 #define EGL_API_BITS EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT | EGL_OPENGL_BIT
 
-using std::atomic_size_t;
-
 namespace cppual { namespace Graphics { namespace GL {
 
 namespace { namespace EGL { // optimize for internal unit usage
 
-struct Versions
+inline GFXVersion& version () noexcept
 {
-	GFXVersion eglVersion;
-};
-
-Versions& versions () noexcept
-{
-	static Versions eglVersions { { 0, 0 } };
-	return eglVersions;
+	static GFXVersion eglVersion { 0, 0 };
+	return eglVersion;
 }
 
 // ====================================================
@@ -55,7 +47,8 @@ enum ErrorType
 	Destroy
 };
 
-template <ErrorType> void error ();
+template <ErrorType>
+void error ();
 
 template <>
 inline void error <Initialize> ()
@@ -139,8 +132,8 @@ inline void error <Create> ()
 inline void initialize (void* dsp)
 {
 	if (!eglInitialize (dsp,
-						&EGL::versions ().eglVersion.major,
-						&EGL::versions ().eglVersion.minor))
+						&EGL::version ().major,
+						&EGL::version ().minor))
 		error<Initialize> ();
 }
 
@@ -388,8 +381,8 @@ point2i Surface::size () const noexcept
 
 void Surface::flush ()
 {
-	eglSwapBuffers (m_pConf->display (), m_pHandle);
 	if (m_pConf->format ().flags.hasBit (PixelFlag::VBlank)) eglWaitGL ();
+	eglSwapBuffers (m_pConf->display (), m_pHandle);
 }
 
 void Surface::dispose () noexcept
@@ -440,7 +433,7 @@ Context& Context::operator = (Context const&)
 
 GFXVersion Context::platformVersion () noexcept
 {
-	return EGL::versions ().eglVersion;
+	return EGL::version ();
 }
 
 IResource::controller Context::defaultDisplay () noexcept

@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <vector>
+#include <cppual/noncopyable.h>
 #include <cppual/gfx/matrix.h>
 #include <cppual/gfx/gl/glbase.h>
 
@@ -31,10 +32,10 @@ namespace cppual { namespace Graphics { namespace GL {
 
 struct BatchConfig
 {
-	unsigned         uRenderType;
-	int              iPriority;
-	unsigned         uTextureId;
-	UniformMatrix<4> transformMatrix; //initialized as identity matrix
+	uint    uRenderType;
+	int     iPriority;
+	uint    uTextureId;
+	Matrix4 transformMatrix; //initialized as identity matrix
 
 	BatchConfig (unsigned uRenderTypeIn, int iPriorityIn, unsigned uTextureIdIn)
 	: uRenderType (uRenderTypeIn),
@@ -70,14 +71,14 @@ struct GuiVertex
 class Batch final : NonCopyable
 {
 public:
-	Batch (unsigned uMaxNumVertices);
+	Batch (uint uMaxNumVertices);
 	~Batch ();
 
 	Batch* fullest (Batch*);
 	int    priority () const;
 	bool   empty () const;
 	bool   isBatchConfig (BatchConfig const&) const;
-	bool   isEnoughRoom (unsigned uNumVertices) const;
+	bool   isEnoughRoom (uint uNumVertices) const;
 
 	void add (std::vector<GuiVertex> const& vVertices, BatchConfig const&);
 	void add (std::vector<GuiVertex> const& vVertices);
@@ -87,10 +88,10 @@ private:
 	void clean ();
 
 private:
-	unsigned	m_uMaxNumVertices;
-	unsigned	m_uNumUsedVertices;
-	unsigned	m_vao; //only used in OpenGL v3.x +
-	unsigned	m_vbo;
+	uint        m_uMaxNumVertices;
+	uint        m_uNumUsedVertices;
+	uint        m_vao; //only used in OpenGL v3.x +
+	uint        m_vbo;
 	BatchConfig m_config;
 	GuiVertex   m_lastVertex;
 };

@@ -19,9 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
 #include <unordered_map>
-#include <cppual/platform/manager.h>
+#include <cppual/ui/manager.h>
 #include <cppual/ui/vsurface.h>
 #include <cppual/ui/view.h>
 
@@ -98,8 +97,8 @@ void View::registerEvents ()
 
 // =========================================================
 
-View::View (View* pParentObj, Rect const& gRect, u32 nScreen)
-: m_gChildrenList (),
+View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type const& gAtor)
+: m_gChildrenList (10, gAtor),
   m_gMinSize { 0, 0 },
   m_gMaxSize { 0, 0 },
   m_pRenderable (Internal::createRenderable (pParentObj, gRect, nScreen)),
@@ -260,15 +259,14 @@ void View::destroy ()
 
 void View::show ()
 {
-	if (!m_gStateFlags.hasBit (View::Valid) or m_pRenderable->isMapped ()) return;
+	if (!isValid ()) return;
 	m_pRenderable->map ();
 	m_pRenderable->connection ()->flush ();
 }
 
 void View::hide ()
 {
-	if (!m_gStateFlags.hasBit (View::Valid) or !m_pRenderable->isMapped ())
-		return;
+	if (!isValid ()) return;
 	m_pRenderable->unmap ();
 	m_pRenderable->connection ()->flush ();
 }

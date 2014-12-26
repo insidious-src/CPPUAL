@@ -23,7 +23,7 @@
 #define CPPUAL_DEVICES_DEFAULT_EVENTS_H
 #ifdef __cplusplus
 
-#include <cppual/platform/events.h>
+#include <cppual/ui/events.h>
 
 namespace cppual { namespace Ui {
 

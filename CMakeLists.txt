@@ -151,33 +151,22 @@ add_library(cppual-input SHARED
 	include/cppual/input/joysticks/joy_wheel.h
 	)
 
-# graphical user interface - platform dependent interface classes
-add_library(cppual-platform SHARED
-	src/platform/manager.cpp
-	include/cppual/platform/manager.h
-	src/platform/display.cpp
-	include/cppual/platform/display.h
-	src/platform/events.cpp
-	include/cppual/platform/events.h
-	include/cppual/platform/wm.h
-	)
-
 # graphical user interface - platform Xorg
-add_library(cppual-xorg MODULE
-	src/platform/xorg/xmain.cpp
-	src/platform/xorg/xbackend.cpp
-	src/platform/xorg/xbackend.h
-	src/platform/xorg/xsurface.cpp
-	src/platform/xorg/xsurface.h
-	src/platform/xorg/xinput.cpp
-	src/platform/xorg/xinput.h
+add_library(cppual-ui-xorg MODULE
+	src/ui/platform/xorg/xmain.cpp
+	src/ui/platform/xorg/xbackend.cpp
+	src/ui/platform/xorg/xbackend.h
+	src/ui/platform/xorg/xsurface.cpp
+	src/ui/platform/xorg/xsurface.h
+	src/ui/platform/xorg/xinput.cpp
+	src/ui/platform/xorg/xinput.h
 	)
 
 # graphical user interface - platform Wayland
-add_library(cppual-wayland MODULE
-	src/platform/wayland/wlbackend.cpp
-	src/platform/wayland/wlsurface.cpp
-	src/platform/wayland/wlinput.cpp
+add_library(cppual-ui-wayland MODULE
+	src/ui/platform/wayland/wlbackend.cpp
+	src/ui/platform/wayland/wlsurface.cpp
+	src/ui/platform/wayland/wlinput.cpp
 	)
 
 # graphics drawing library
@@ -317,7 +306,13 @@ add_library(cppual-audio-openal MODULE
 
 # graphical user interface
 add_library(cppual-ui SHARED
-
+	src/ui/manager.cpp
+	include/cppual/ui/manager.h
+	src/ui/display.cpp
+	include/cppual/ui/display.h
+	src/ui/events.cpp
+	include/cppual/ui/events.h
+	include/cppual/ui/wm.h
 	src/ui/vsurface.cpp
 	include/cppual/ui/vsurface.h
 	src/ui/animation.cpp
@@ -371,19 +366,18 @@ add_library(cppual-ui-dialogs MODULE
 
 target_link_libraries(cppual-core dl)
 target_link_libraries(cppual-compute cppual-core pthread OpenCL)
-target_link_libraries(cppual-platform cppual-core)
 #target_link_libraries(cppual-input)
 target_link_libraries(cppual-gfx freetype)
 target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW GL)
-target_link_libraries(cppual-xorg xcb-icccm)
-target_link_libraries(cppual-wayland wayland-client wayland-cursor)
 target_link_libraries(cppual-video-vaapi va)
 target_link_libraries(cppual-video-gl cppual-gl GLEW GL)
 target_link_libraries(cppual-video-compute cppual-compute)
 target_link_libraries(cppual-audio cppual-compute sndfile)
 target_link_libraries(cppual-audio-openal openal)
 target_link_libraries(cppual-gl cppual-gfx EGL GLEW GL)
-target_link_libraries(cppual-ui cppual-platform)
+target_link_libraries(cppual-ui-xorg xcb-icccm)
+target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
+target_link_libraries(cppual-ui cppual-core)
 target_link_libraries(cppual-ui-views cppual-ui)
 target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
 
