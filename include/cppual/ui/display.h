@@ -24,8 +24,8 @@
 #ifdef __cplusplus
 
 #include <memory>
-#include <cppual/signal.h>
 #include <cppual/resource.h>
+#include <cppual/noncopyable.h>
 #include <cppual/gfx/dsp_details.h>
 
 using std::shared_ptr;
@@ -43,9 +43,8 @@ typedef weak_ptr  <IDisplay> weak_display;
 
 struct IDisplay : NonCopyable
 {
-	typedef Signal<void(IDisplay*)> signal_type;
-	typedef Connection              value_type;
-	typedef shared_display          pointer;
+	typedef Connection     value_type;
+	typedef shared_display pointer;
 
 	virtual string name () const = 0;
 	virtual int    screenCount () const = 0;

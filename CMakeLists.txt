@@ -211,7 +211,7 @@ add_library(cppual-gl SHARED
 	)
 
 # OpenGL/ES library
-add_library(cppual-gfx-drawables MODULE
+add_library(cppual-gfx-drawables SHARED
 	include/cppual/gfx/drawable/shape.h
 	src/gfx/drawable/image.cpp
 	include/cppual/gfx/drawable/image.h

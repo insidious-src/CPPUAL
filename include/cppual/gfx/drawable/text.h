@@ -42,11 +42,11 @@ public:
 	Label2D& operator = (Label2D&&) noexcept;
 	void draw (Transform2D const&);
 
-	DeviceType type () const noexcept { return DeviceType::EGL; }
-	string     text () const noexcept { return m_gText; }
+	DeviceType type  () const noexcept { return DeviceType::EGL; }
+	string     text  () const noexcept { return m_gText; }
 	Styles     style () const noexcept { return m_gStyle; }
 	void       setStyle (Styles gStyle) noexcept { m_gStyle = gStyle; }
-	void       setText (string const& gText) noexcept { m_gText = gText; }
+	void       setText  (string const& gText) noexcept { m_gText = gText; }
 
 private:
 	string m_gText;
@@ -67,11 +67,11 @@ public:
 	Label3D& operator = (Label3D&&) noexcept;
 	void draw (Transform3D const&);
 
-	DeviceType type () const noexcept { return DeviceType::EGL; }
-	string     text () const noexcept { return m_gText; }
+	DeviceType type  () const noexcept { return DeviceType::EGL; }
+	string     text  () const noexcept { return m_gText; }
 	Styles     style () const noexcept { return m_gStyle; }
 	void       setStyle (Styles gStyle) noexcept { m_gStyle = gStyle; }
-	void       setText (string const& gText) noexcept { m_gText = gText; }
+	void       setText  (string const& gText) noexcept { m_gText = gText; }
 
 private:
 	string m_gText;

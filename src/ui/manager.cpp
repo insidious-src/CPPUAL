@@ -30,8 +30,8 @@ namespace { namespace Internal { // optimize for internal unit usage
 inline cchar* server () noexcept
 {
 #	if defined OS_GNU_LINUX or defined OS_BSD
-	return Process::running ("X") or Process::running ("Xorg.bin") ? "libcppual-xorg" :
-																	 "libcppual-wayland";
+	return Process::running ("X") or Process::running ("Xorg.bin") ? "libcppual-ui-xorg" :
+																	 "libcppual-ui-wayland";
 #	elif defined OS_WINDOWS
 	return "libcppual-win";
 #	endif

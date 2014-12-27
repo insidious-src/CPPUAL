@@ -80,8 +80,8 @@ public:
 	inline    Config& operator = (Config const&) noexcept = default;
 
 	constexpr controller  display () const noexcept { return m_pDisplay; }
-	constexpr format_type format  () const noexcept { return m_gFormat; }
-	constexpr operator    void*   () const noexcept { return m_pCfg; }
+	constexpr format_type format  () const noexcept { return m_gFormat;  }
+	constexpr operator    void*   () const noexcept { return m_pCfg;     }
 
 	constexpr explicit operator safe_bool () const noexcept
 	{ return m_pCfg ? &Config::m_pCfg : nullptr; }
@@ -153,7 +153,7 @@ public:
 		OpenGLES
 	};
 
-	static bool bind (API);
+	static bool bind  (API);
 	static API  bound ();
 
 	Context () = delete;
@@ -175,13 +175,13 @@ public:
 	void finish () noexcept;
 	void release () noexcept;
 
-	const_pointer readable   () const noexcept { return m_pReadTarget; }
-	pointer       writable   () const noexcept { return m_pWriteTarget; }
-	GFXVersion    version    () const noexcept { return m_gVersion; }
-	DeviceType    type       () const noexcept { return DeviceType::EGL; }
-	value_type    handle     () const noexcept { return m_pGC; }
+	const_pointer readable   () const noexcept { return m_pReadTarget;       }
+	pointer       writable   () const noexcept { return m_pWriteTarget;      }
+	GFXVersion    version    () const noexcept { return m_gVersion;          }
+	DeviceType    type       () const noexcept { return DeviceType::EGL;     }
+	value_type    handle     () const noexcept { return m_pGC;               }
 	controller    connection () const noexcept { return m_pConf->display (); }
-	format_type   format     () const noexcept { return m_pConf->format (); }
+	format_type   format     () const noexcept { return m_pConf->format ();  }
 
 	static constexpr GFXVersion defaultVersion () noexcept
 	{ return { 3, 0 }; }
