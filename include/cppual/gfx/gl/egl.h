@@ -50,7 +50,7 @@ class Config
 public:
 	typedef void*                           pointer;
 	typedef int32                           int_type;
-	typedef pointer Config::*               safe_bool;
+	typedef pointer     Config::*           safe_bool;
 	typedef typename IResource::controller  controller;
 	typedef typename IResource::format_type format_type;
 
@@ -161,6 +161,7 @@ public:
 	Context& operator = (Context&&) noexcept;
 	Context& operator = (Context const&);
 	Context (Context&&) noexcept = default;
+	~Context () noexcept;
 
 	Context (Config     const& config,
 			 GFXVersion const& version = defaultVersion (),
@@ -188,19 +189,6 @@ public:
 
 	Config config () const noexcept
 	{ return *m_pConf; }
-
-	~Context () noexcept
-	{ if (m_pGC) destroyGC (); }
-
-private:
-	void destroyGC () noexcept;
-	void dispose () noexcept;
-
-	bool usable (reference gWrite, const_reference gRead) noexcept
-	{
-		return gWrite.connection () == m_pConf->display () and
-				gRead.connection () == m_pConf->display ();
-	}
 
 private:
 	conf_pointer  m_pConf;

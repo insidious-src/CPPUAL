@@ -45,6 +45,8 @@ inline shared_renderable createRenderable (View* pParentObj, Rect const& gRect, 
 
 } } // anonymous namespace Internal
 
+// =========================================================
+
 void View::registerEvents ()
 {
 	connect (queue_type::events ().mouseMove, [](event_type::MouseMoveData const& data)
@@ -430,5 +432,7 @@ void View::refresh ()
 		m_pRenderable->connection ()->flush ();
 	}
 }
+
+// =========================================================
 
 } } // namespace Ui

@@ -51,12 +51,6 @@ enum class ColorType : unsigned char
 	StaticGrey
 };
 
-enum class ColorMask : bool
-{
-	RGBA,
-	ColorIndex
-};
-
 // =========================================================
 
 struct RGBColor

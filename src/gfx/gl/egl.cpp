@@ -149,7 +149,7 @@ constexpr uint api (Context::API eAPI) noexcept
 
 // ====================================================
 
-void* createBuffer (Config const& gConf, IResource::value_type uWndHandle)
+inline void* createBuffer (Config const& gConf, IResource::value_type uWndHandle)
 {
 //	constexpr cint32 nSurfaceAttribs[]
 //	{
@@ -200,9 +200,9 @@ void* createBuffer (Config const& gConf, IResource::value_type uWndHandle)
 	//										 nullptr);
 }
 
-EGLContext createGC (Config const& gConf, GFXVersion const& version, void* pShared)
+inline EGLContext createGC (Config const& gConf, GFXVersion const& version, void* pShared)
 {
-	cint32 egl_context_attribs[]
+	cint32 nContextAttribs[]
 	{
 		EGL_CONTEXT_CLIENT_VERSION, version.major,
 		EGL_NONE
@@ -211,7 +211,7 @@ EGLContext createGC (Config const& gConf, GFXVersion const& version, void* pShar
 	EGLContext pContext = eglCreateContext (gConf.display (),
 											gConf,
 											pShared,
-											egl_context_attribs);
+											nContextAttribs);
 
 	if (!pContext) error<Create> ();
 	return pContext;
@@ -279,8 +279,7 @@ PixelFormat Config::toFormat () const
 		static_cast<u8> (nAttribs[Stencil]),
 		(nAttribs[SurfaceType] & EGL_WINDOW_BIT ? PixelFlag::Drawable : 0) |
 				PixelFlag::Accelerated,
-		ColorType::TrueType,
-		nAttribs[Alpha] ? ColorMask::RGBA : ColorMask::ColorIndex
+		ColorType::TrueType
 	};
 }
 
@@ -354,8 +353,16 @@ Surface::Surface (Surface const& gObj)
   m_pHandle ()
 { }
 
-Surface& Surface::operator = (Surface&&) noexcept
+Surface& Surface::operator = (Surface&& gObj) noexcept
 {
+	if (this == &gObj) return *this;
+	if (m_pHandle) eglDestroySurface (m_pConf->display (), m_pHandle);
+
+	m_pConf        = gObj.m_pConf;
+	m_pHandle      = gObj.m_pHandle;
+	gObj.m_pConf   = nullptr;
+	gObj.m_pHandle = nullptr;
+
 	return *this;
 }
 
@@ -414,7 +421,13 @@ Context::Context (Context const& gObj)
 
 Context& Context::operator = (Context&& gObj) noexcept
 {
-	if (m_pGC) destroyGC ();
+	if (this == &gObj) return *this;
+
+	if (m_pGC)
+	{
+		release ();
+		eglDestroyContext (m_pConf->display (), m_pGC);
+	}
 
 	m_pWriteTarget = gObj.m_pWriteTarget;
 	m_pReadTarget  = gObj.m_pReadTarget;
@@ -422,13 +435,25 @@ Context& Context::operator = (Context&& gObj) noexcept
 	m_pConf        = gObj.m_pConf;
 	m_pGC          = gObj.m_pGC;
 
-	gObj.dispose ();
+	gObj.m_gVersion     = GFXVersion ();
+	gObj.m_pGC          = nullptr;
+	gObj.m_pConf        = nullptr;
+	gObj.m_pWriteTarget = nullptr;
+	gObj.m_pReadTarget  = nullptr;
+
 	return *this;
 }
 
 Context& Context::operator = (Context const&)
 {
 	return *this;
+}
+
+Context::~Context () noexcept
+{
+	if (!m_pGC) return;
+	release ();
+	eglDestroyContext (m_pConf->display (), m_pGC);
 }
 
 GFXVersion Context::platformVersion () noexcept
@@ -443,8 +468,6 @@ IResource::controller Context::defaultDisplay () noexcept
 
 bool Context::use (reference gWrite, const_reference gRead) noexcept
 {
-	if (!usable (gWrite, gRead)) return false;
-
 	if (!eglMakeCurrent (m_pConf->display (), gWrite.handle ().get<void*> (),
 						 gRead.handle ().get<void*> (), m_pGC))
 		EGL::error<EGL::MakeCurrent> ();
@@ -485,22 +508,6 @@ void Context::release () noexcept
 
 	acquire (nullptr);
 }
-
-void Context::destroyGC () noexcept
-{
-	release ();
-	eglDestroyContext (m_pConf->display (), m_pGC);
-}
-
-void Context::dispose () noexcept
-{
-	m_gVersion     = GFXVersion ();
-	m_pGC          = nullptr;
-	m_pConf        = nullptr;
-	m_pWriteTarget = nullptr;
-	m_pReadTarget  = nullptr;
-}
-
 
 bool Context::bind (API eAPI)
 {

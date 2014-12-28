@@ -27,12 +27,6 @@
 
 namespace cppual { namespace Ui {
 
-/**
- * @class VirtualSurface
- * @brief surface/user-space sub-surface redirects
- * pixel manipulation to the parent surface
- */
-
 class ProxyRenderable final : public IRenderable
 {
 public:
@@ -86,8 +80,8 @@ public:
 
 private:
 	shared_renderable m_pParent;
-	Rect           m_gRect;
-	bool           m_bIsVisible;
+	Rect              m_gRect;
+	bool              m_bIsVisible;
 };
 
 } } // namespace Ui

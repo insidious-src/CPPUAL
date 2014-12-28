@@ -80,7 +80,6 @@ struct PixelFormat final
 	u8		   depth, stencil;
 	PixelFlags flags;
 	ColorType  colorType;
-	ColorMask  mask;
 
 	constexpr u8 bits () const noexcept
 	{ return u8 (red + green + blue + alpha); }
@@ -96,8 +95,7 @@ struct PixelFormat final
 			0,
 			0,
 			PixelFlag::Drawable | PixelFlag::Accelerated,
-			ColorType::TrueType,
-			ColorMask::RGBA
+			ColorType::TrueType
 		};
 	}
 
@@ -113,8 +111,7 @@ struct PixelFormat final
 			0,
 			PixelFlag::Drawable | PixelFlag::DoubleBuffer |
 			PixelFlag::VBlank   | PixelFlag::Accelerated,
-			ColorType::Direct,
-			ColorMask::RGBA
+			ColorType::Direct
 		};
 	}
 };

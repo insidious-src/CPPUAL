@@ -25,9 +25,8 @@
 
 #include <cppual/gfx/coord.h>
 #include <cppual/circular_queue.h>
+#include <cppual/ui/vsurface.h>
 #include <cppual/ui/default_events.h>
-
-using std::atomic_size_t;
 
 namespace cppual { namespace Ui {
 
@@ -146,6 +145,78 @@ private:
 	iterator          m_gItFromParent;
 	View*             m_pParentObj;
 	StateFlags        m_gStateFlags;
+};
+
+class Widget
+{
+public:
+	typedef Memory::GenericPolicy<Widget*>         allocator_type;
+	typedef CircularQueue<Widget*, allocator_type> container_type;
+	typedef std::size_t	                           size_type;
+
+	void destroy ();
+	void show ();
+	void hide ();
+	bool setParent (View* parent, point2i pos = point2i ());
+	void setGeometry (Rect const&);
+	void setMinimumSize (point2u);
+	void setMaximumSize (point2u);
+	void move (point2i);
+	void refresh ();
+	void enable ();
+	void disable ();
+	void setFocus ();
+	void killFocus ();
+
+	Widget (Widget*     parent,
+			Rect const& rect,
+			allocator_type const& = allocator_type ());
+
+	point2u minimumSize () const noexcept { return m_gMinSize; }
+	point2u maximumSize () const noexcept { return m_gMaxSize; }
+
+	bool isEnabled () const noexcept
+	{ return m_gStateFlags.hasBit (Widget::Enabled); }
+
+	bool hasFocus () const noexcept
+	{ return m_gStateFlags.hasBit (Widget::HasFocus); }
+
+	bool isHidden () const noexcept
+	{ return !m_gBuffer.isMapped (); }
+
+	Rect geometry () const noexcept
+	{ return m_gBuffer.geometry (); }
+
+protected:
+	virtual void onDestroy () { }
+	virtual void onShow (bool) { }
+	virtual void onPaint (Rect const&) { }
+	virtual void onEnable (bool) { }
+	virtual void onSize (point2u) { }
+	virtual void onMove (point2i) { }
+	virtual void onBeginSizeMove (Rect const&) { }
+	virtual void onEndSizeMove (Rect const&) { }
+	virtual void onMinMaxSize (point2u) { }
+	virtual void onFocus (bool) { }
+	virtual void onParentSize (point2u) { }
+
+private:
+	enum StateFlag
+	{
+		HasFocus = 1 << 1,
+		Enabled  = 1 << 2
+	};
+
+	typedef BitSet<StateFlag> StateFlags;
+
+	void paint (Rect const&);
+
+private:
+	ProxyRenderable m_gBuffer;
+	container_type  m_gChildren;
+	Widget*         m_pParent;
+	point2u         m_gMinSize, m_gMaxSize;
+	StateFlags      m_gStateFlags;
 };
 
 } } // namespace Ui
