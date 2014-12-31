@@ -123,7 +123,6 @@ private:
 	u16       m_uPlatformId;
 	Type      m_eType;
 	uint_type m_uId, m_uNumUnits;
-
 };
 
 template <typename CharT, typename Traits>

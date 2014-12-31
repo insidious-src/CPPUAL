@@ -29,6 +29,10 @@ void AbstractButton::setLabel (string const& gText)
 	if (isValid () and isHidden ()) refresh ();
 }
 
+AbstractButton::~AbstractButton () noexcept
+{
+}
+
 // =========================================================
 
 bool PushButton::create (View*, string const&)

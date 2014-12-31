@@ -230,7 +230,7 @@ void SerialQueue::schedule (call_type&& gCallable)
 		if (!m_uNumAssigned) return;
 
 		// schedule task
-		m_gTaskQueue.push_back (gCallable);
+		m_gTaskQueue.push_back (std::forward<call_type> (gCallable));
 		m_eState = SerialQueue::Running;
 	}
 

@@ -69,6 +69,10 @@ FrameView& FrameView::operator = (FrameView const& gObj) noexcept
 	return *this;
 }
 
+FrameView::~FrameView () noexcept
+{
+}
+
 void FrameView::stretch ()
 {
 	renderable ().lock ().get ()->setMaximized (true);

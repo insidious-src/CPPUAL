@@ -33,6 +33,7 @@ class AbstractButton : public SkinnableView
 {
 public:
 	void setLabel (string const&);
+	~AbstractButton () noexcept;
 
 	inline string getLabel () const noexcept
 	{ return m_gLabel; }

@@ -23,6 +23,7 @@
 #define CPPUAL_GFX_GL_BASE_H_
 #ifdef __cplusplus
 
+#include <cstddef>
 #include <cppual/decl.h>
 #include <cppual/resource.h>
 
@@ -45,7 +46,7 @@ public:
 	typedef std::ptrdiff_t ptrdiff;
 	typedef std::size_t	   size_type;
 
-	constexpr Object () noexcept = default;
+	inline Object () noexcept = default;
 	Object (ResourceType type) noexcept;
 	Object (uint shader_type) noexcept;
 

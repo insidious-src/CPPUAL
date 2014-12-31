@@ -82,6 +82,7 @@ public:
 	FrameView (FrameView const&) noexcept;
 	FrameView& operator = (FrameView&&) noexcept;
 	FrameView& operator = (FrameView const&) noexcept;
+	~FrameView () noexcept;
 
 	void stretch ();
 	void unstretch ();

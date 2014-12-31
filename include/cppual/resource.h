@@ -23,10 +23,6 @@
 #define CPPUAL_RESOURCE_H_
 #ifdef __cplusplus
 
-#include <atomic>
-
-using std::atomic_size_t;
-
 namespace cppual {
 
 template <typename> class Disposable { };
@@ -70,9 +66,6 @@ public:
 	constexpr ResourceType resType () const noexcept { return m_eResType; }
 	constexpr bool         isValid () const noexcept { return m_id; }
 
-	static std::size_t count () noexcept
-	{ return sm_uObjCount.load (std::memory_order_consume); }
-
 	constexpr Resource (Controller pCon, value_type id, ResourceType eType) noexcept
 	: m_pCon (pCon),
 	  m_id (id),
@@ -84,10 +77,9 @@ public:
 									   Resource<Controller_, ID_, DisposableType> const&);
 
 private:
-	static atomic_size_t sm_uObjCount;
-	controller            m_pCon;
-	value_type            m_id;
-	ResourceType          m_eResType;
+	controller   m_pCon;
+	value_type   m_id;
+	ResourceType m_eResType;
 };
 
 // =========================================================
@@ -107,15 +99,9 @@ public:
 	constexpr ResourceType resType () const noexcept { return m_eResType; }
 	constexpr bool         isValid () const noexcept { return m_id;       }
 
-	inline static std::size_t count () noexcept
-	{ return sm_uObjCount.load (std::memory_order_consume); }
-
 	template <class ID_>
 	friend constexpr bool operator == (Resource<void, ID_, DisposableType> const&,
 									   Resource<void, ID_, DisposableType> const&);
-
-private:
-	static atomic_size_t sm_uObjCount;
 
 protected:
 	constexpr Resource (value_type id, ResourceType eType) noexcept
