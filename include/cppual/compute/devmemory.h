@@ -25,7 +25,7 @@
 
 #include <cppual/types.h>
 #include <cppual/resource.h>
-#include <cppual/memory/memory.h>
+#include <cppual/memory/mop.h>
 
 namespace cppual { namespace Compute {
 

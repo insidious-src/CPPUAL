@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/noncopyable.h>
-#include <cppual/memory/memory.h>
+#include <cppual/memory/mop.h>
 #include <cppual/memory/allocator.h>
 
 namespace cppual { namespace Memory {

@@ -37,8 +37,8 @@ add_library(cppual-core SHARED
 	include/cppual/decl.h
 	include/cppual/types.h
 	include/cppual/noncopyable.h
-	src/memory/memory.cpp
-	include/cppual/memory/memory.h
+	src/memory/collector.cpp
+	include/cppual/memory/collector.h
 	include/cppual/memory/allocator.h
 	include/cppual/memory/static.h
 	include/cppual/memory/mop.h

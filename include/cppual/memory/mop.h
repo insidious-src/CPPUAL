@@ -24,111 +24,58 @@
 #ifdef __cplusplus
 
 #include <cstddef>
-#include <cppual/decl.h>
+#include <cppual/types.h>
 
 namespace cppual { namespace Memory {
 
-// Memory operations for processors with either pre-increment only
-// or pre-increment + post-increment instruction set.
-// Manual increment/decrement is NOT supported.
-
-/****************************** byte operations ******************************/
-
-inline void* directCopy (void* pDest, cvoid* pSrc, std::size_t uSize) noexcept
+template <typename T>
+constexpr std::size_t distance (T* const p1, T* const p2) noexcept
 {
-	if (!pDest or !pSrc or !uSize) return nullptr;
-
-	byte* pDest8 = static_cast<byte*> (pDest);
-	byte* pSrc8  = static_cast<byte*> (pSrc);
-
-	// for pre-increment/decrement only
-	--pDest8;
-	--pSrc8;
-
-	do *++pDest8 = *++pSrc8;
-	while (--uSize);
-	return pDest;
+	return p1 >= p2 ?
+				std::size_t (reinterpret_cast<uptr> (p1) - reinterpret_cast<uptr> (p2)) :
+				std::size_t (reinterpret_cast<uptr> (p2) - reinterpret_cast<uptr> (p1));
 }
-
-inline void* directSafeCopy (void* pDest, cvoid* pSrc, std::size_t uSize) noexcept
-{
-	if (!pDest or !pSrc or !uSize) return nullptr;
-
-	byte* pDest8 = static_cast<byte*> (pDest);
-	byte* pSrc8  = static_cast<byte*> (pSrc);
-
-	// for pre-increment/decrement only
-	--pDest8;
-	--pSrc8;
-
-	// origin overlap check
-	if (static_cast<std::size_t> (pDest8 - pSrc8) < uSize) pSrc8 += uSize;
-
-	do *++pDest8 = *++pSrc8;
-	while (--uSize);
-	return pDest;
-}
-
-inline void directZero (void* pSrc, std::size_t uSize) noexcept
-{
-	if (!pSrc or !uSize) return;
-	byte* pSrc8 = static_cast<byte*> (pSrc);
-
-	// for pre-increment/decrement only
-	--pSrc8;
-	do *++pSrc8 = 0;
-	while (--uSize);
-}
-
-// =========================================================
 
 template <typename T>
-inline T* arrayCopy (T* pDest, const T* pSrc, std::size_t uElemNum) noexcept
-{
-	if (!pDest or !pSrc or !uElemNum) return nullptr;
+constexpr T* address (T* const p, std::size_t shift) noexcept
+{ return reinterpret_cast<T*> (reinterpret_cast<uptr> (p) + shift); }
 
-	do
+constexpr std::size_t alignedSize (std::size_t const n,
+								   std::size_t const align = alignof (uptr)) noexcept
+{ return (n + (align - 1)) & ~(align - 1); }
+
+inline std::size_t alignAdjust (cvoid* pAddr, std::size_t const uAlign) noexcept
+{
+	std::size_t uAdjust  = uAlign - (reinterpret_cast<uptr> (pAddr) & (uAlign - 1));
+	return      uAdjust == uAlign ? 0 : uAdjust;
+}
+
+inline void* nextAlignedAddr (cvoid* pAddr, std::size_t const uAlign) noexcept
+{
+	return reinterpret_cast<void*>
+			((reinterpret_cast<cuptr> (pAddr) + (uAlign - 1)) & ~(uAlign - 1));
+}
+
+inline std::size_t alignAdjustmentHeader (cvoid*      addr,
+										  std::size_t align,
+										  std::size_t header_size) noexcept
+{
+	std::size_t uAdjust = align - (reinterpret_cast<uptr> (addr) & (align - 1));
+
+	// already aligned
+	if (uAdjust == align) uAdjust = 0;
+
+	if (uAdjust < header_size)
 	{
-		// for pre-increment/decrement only
-		--uElemNum;
-		*(pDest + (sizeof (T) * uElemNum)) = *(pSrc + (sizeof (T) * uElemNum));
+		header_size -= uAdjust;
+
+		// increase adjustment to fit header
+		uAdjust += align * (header_size / align);
+		if (header_size % align > 0) uAdjust += align;
 	}
-	while (uElemNum);
 
-	return pDest;
+	return uAdjust;
 }
-
-template <typename T>
-inline T* safeArrayCopy (T* pDest, const T* pSrc, std::size_t uElemNum) noexcept
-{
-	if (!pDest or !pSrc or !uElemNum) return nullptr;
-	const std::size_t uSize	= sizeof (T) * uElemNum;
-
-	// origin overlap check
-	if (static_cast<std::size_t> (pDest - pSrc) < uSize)
-		pSrc += uSize;
-
-	do
-	{
-		// for pre-increment/decrement only
-		--uElemNum;
-		*(pDest + (sizeof (T) * uElemNum)) = *(pSrc + (sizeof (T) * uElemNum));
-	}
-	while (uElemNum);
-
-	return pDest;
-}
-
-template <typename T>
-inline void arrayZero (T* pSrc, std::size_t uElemNum) noexcept
-{
-	if (!pSrc or !uElemNum) return;
-
-	do *(pSrc += sizeof (T)) = 0;
-	while (--uElemNum);
-}
-
-/****************************** bit operations ******************************/
 
 } } // namespace Memory
 

@@ -25,7 +25,7 @@
 
 #include <cppual/gfx/draw.h>
 #include <cppual/mstring.h>
-#include <cppual/memory/memory.h>
+#include <cppual/memory/mop.h>
 #include <cppual/ui/manager.h>
 
 using cppual::Platform::IService;

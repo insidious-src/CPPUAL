@@ -20,7 +20,7 @@
  */
 
 #include <cppual/memory/stack.h>
-#include <cppual/memory/memory.h>
+#include <cppual/memory/mop.h>
 
 using std::string;
 

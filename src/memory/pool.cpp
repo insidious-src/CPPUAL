@@ -21,7 +21,7 @@
 
 #include <cassert>
 #include <cppual/memory/pool.h>
-#include <cppual/memory/memory.h>
+#include <cppual/memory/mop.h>
 
 using namespace std;
 

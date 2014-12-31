@@ -19,36 +19,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_CL_MEMORY_H_
-#define CPPUAL_CL_MEMORY_H_
+#ifndef CPPUAL_MEMORY_MODEL_H_
+#define CPPUAL_MEMORY_MODEL_H_
 #ifdef __cplusplus
 
-#include <cppual/memory/mop.h>
-#include <cppual/compute/context.h>
+#include <cstddef>
+#include <cppual/types.h>
 
-namespace cppual {
+namespace cppual { namespace Memory {
 
-//template <>
-//struct Disposable <Compute::Memory>
-//{
-//	inline static int32 reference (Disposable<Compute::Memory>* memory) noexcept
-//	{ return ::clRetainMemObject (static_cast<cl_mem> (memory)); }
+static_assert (sizeof (std::size_t) == sizeof (u8*),
+			   "size_t is not equal to the size of a pointer!");
 
-//	inline static void* operator new (std::size_t uSize,
-//									  void*       pMemory,
-//									  cl_context  pContext) noexcept
-//	{
-//		return ::clCreateBuffer (pContext, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
-//								 uSize, pMemory, nullptr);
-//	}
+static_assert (alignof (std::size_t) == alignof (u8*),
+			   "The alignment is wrong!");
 
-//	inline static void operator delete (void* memory) noexcept
-//	{ ::clReleaseMemObject (static_cast<cl_mem> (memory)); }
-//};
+// =========================================================
 
-namespace Compute {
+std::size_t size        (); // system memory size
+std::size_t maxSize     (); // largest available system memory block
+std::size_t workingSize (); // process' current memory usage
 
-} } // namespace Compute
+// =========================================================
+
+
+
+} } // namespace Memory
 
 #endif // __cplusplus
-#endif // CPPUAL_CL_MEMORY_H_
+#endif // CPPUAL_MEMORY_MODEL_H_

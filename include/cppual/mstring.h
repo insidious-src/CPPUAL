@@ -26,7 +26,7 @@
 #include <memory>
 #include <cstring>
 #include <cppual/meta.h>
-#include <cppual/memory/memory.h>
+#include <cppual/memory/mop.h>
 
 namespace cppual { namespace Text {
 

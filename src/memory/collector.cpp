@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/memory/memory.h>
+#include <cppual/memory/collector.h>
 
 #ifdef OS_STD_UNIX
 #	include <unistd.h>
@@ -94,13 +94,13 @@ std::size_t size ()
 
 	/* FreeBSD, Linux, OpenBSD, and Solaris. -------------------- */
 	return static_cast<std::size_t> (sysconf (_SC_PHYS_PAGES) *
-									 sysconf (_SC_PAGESIZE));
+									 sysconf (_SC_PAGESIZE  ));
 
 #elif defined (_SC_PHYS_PAGES) and defined (_SC_PAGE_SIZE)
 
 	/* Legacy. -------------------------------------------------- */
 	return static_cast<std::size_t> (sysconf (_SC_PHYS_PAGES) *
-									 sysconf (_SC_PAGE_SIZE));
+									 sysconf (_SC_PAGE_SIZE ));
 
 #elif defined(CTL_HW) and (defined(HW_PHYSMEM) or defined(HW_REALMEM))
 	/* DragonFly BSD, FreeBSD, NetBSD, OpenBSD, and OSX. -------- */
@@ -159,8 +159,8 @@ std::size_t workingSize ()
 #elif defined (OS_GNU_LINUX)
 
 	/* Linux ---------------------------------------------------- */
-	long rss = 0;
-	FILE* fp = nullptr;
+	long  rss = 0;
+	FILE* fp  = nullptr;
 
 	if (!(fp = ::fopen ("/proc/self/statm", "r"))) return 0;
 
@@ -170,7 +170,7 @@ std::size_t workingSize ()
 		return 0;		/* Can't read? */
 	}
 
-	fclose (fp);
+	::fclose (fp);
 	return static_cast<std::size_t> (rss * sysconf (_SC_PAGESIZE));
 
 #else
