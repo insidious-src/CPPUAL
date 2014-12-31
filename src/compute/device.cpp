@@ -58,7 +58,7 @@ inline Device::uint_type infou (Device::uint_type uNfo,
 								u16               uPlatform,
 								Device::uint_type uId)
 {
-	static Device::uint_type value;
+	Device::uint_type value;
 
 	if (::clGetDeviceInfo (CL::handle (uType, uPlatform, uId),
 						   uNfo, sizeof (Device::uint_type), &value, nullptr) != CL_SUCCESS)
@@ -72,7 +72,7 @@ inline Device::size_type infoul (Device::uint_type uNfo,
 								 u16               uPlatform,
 								 Device::uint_type uId)
 {
-	static Device::size_type value = 0;
+	Device::size_type value;
 
 	if (::clGetDeviceInfo (CL::handle (uType, uPlatform, uId),
 						   uNfo, sizeof (Device::size_type), &value, nullptr) != CL_SUCCESS)
@@ -84,14 +84,6 @@ inline Device::size_type infoul (Device::uint_type uNfo,
 } // anonymous
 
 // =========================================================
-
-Device::Device ()
-: m_uPlatformId (0),
-  m_eType (count (GPU) ? GPU : CPU),
-  m_uId (0),
-  m_uNumUnits (infou (CL::MaxUnits, m_eType, 0, 0))
-{
-}
 
 Device::Device (Device const& gObj) noexcept
 : m_uPlatformId (gObj.m_uPlatformId),
@@ -141,36 +133,31 @@ bool Device::available (cchar* feature)
 {
 	if (m_uNumUnits)
 	{
-		static cchar*      pBegin = nullptr;
-		static std::size_t uSize  = 0;
-		const  CL::device  dev    = CL::handle (m_eType, m_uPlatformId, m_uId);
+		static size_type  uSize = 0;
+		const  CL::device dev   = CL::handle (m_eType, m_uPlatformId, m_uId);
 
 		if (::clGetDeviceInfo (dev, CL_PLATFORM_EXTENSIONS,
-							   0, nullptr, &uSize) != CL_SUCCESS)
+							   0, nullptr, &uSize) != CL_SUCCESS or !uSize)
 			return false;
 
 		char text[uSize];
-		bool bFin = false;
 
 		if (::clGetDeviceInfo (dev, CL_PLATFORM_EXTENSIONS,
-							   uSize, &text[0], nullptr) != CL_SUCCESS)
+							   uSize, text, nullptr) != CL_SUCCESS)
 			return false;
 
 		text[--uSize] = 0;
 		text[--uSize] = 0;
 
-		for (cchar* pEnd = ::strchr (pBegin = text, ' '); !bFin;
+		for (cchar* pEnd = ::strchr (text, ' '), *pBegin = text; ;
 			 pEnd = ::strchr (pBegin = ++pEnd, ' '))
 		{
-			if (!pEnd)
+			if (!pEnd) return !::strcmp (pBegin, feature) ? true : false;
+			else
 			{
-				pEnd = text + uSize;
-				bFin = true;
+				text[pEnd - text] = 0;
+				if (!::strcmp (pBegin, feature)) return true;
 			}
-
-			text[pEnd - text] = 0;
-
-			if (!::strcmp (pBegin, feature)) return true;
 		}
 	}
 

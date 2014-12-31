@@ -23,8 +23,10 @@
 #define CPPUAL_PROCESS_THREAD_POOL
 #ifdef __cplusplus
 
+#include <functional>
 #include <shared_mutex>
 #include <condition_variable>
+#include <cppual/function.h>
 #include <cppual/circular_queue.h>
 #include <cppual/noncopyable.h>
 #include <cppual/object.h>
@@ -42,7 +44,8 @@ class SerialQueue : public cppual::ThreadObject
 {
 public:
 	typedef condition_variable_any   cv_type;
-	typedef function<void()>         call_type;
+//	typedef function<void()>         call_type;
+	typedef Function<void()>         call_type;
 	typedef fu16                     size_type;
 	typedef shared_timed_mutex       mutex_type;
 	typedef lock_guard<mutex_type>   write_lock;

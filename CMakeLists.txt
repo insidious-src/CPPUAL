@@ -19,7 +19,7 @@ include_directories(include ${FREETYPE_INCLUDE_DIRS})
 
 # process, modules, memory
 add_library(cppual-core SHARED
-	include/cppual/callable.h
+	include/cppual/function.h
 	include/cppual/delegate.h
 	include/cppual/flags.h
 	include/cppual/signal.h
@@ -377,7 +377,7 @@ target_link_libraries(cppual-audio-openal openal)
 target_link_libraries(cppual-gl cppual-gfx EGL GLEW GL)
 target_link_libraries(cppual-ui-xorg xcb-icccm)
 target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
-target_link_libraries(cppual-ui cppual-core)
+#target_link_libraries(cppual-ui cppual-core)
 target_link_libraries(cppual-ui-views cppual-ui)
 target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
 

@@ -24,22 +24,12 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
-#include <cppual/noncopyable.h>
 #include <cppual/compute/device.h>
 
 namespace cppual { namespace Compute { namespace Platform {
 
 class platform_exception : public std::bad_exception { };
 class bad_platform       : public platform_exception { };
-
-enum class Type : unsigned char
-{
-	Custom,
-	OpenCL,
-	CUDA,
-	DirectCompute,
-	Serial
-};
 
 enum class Info : unsigned char
 {
@@ -53,7 +43,6 @@ u16    count () noexcept;
 bool   available (cchar* feature, u16 id = 0);
 float  version (u16 id = 0);
 string info (Info, u16 id = 0);
-Type   backend (u16 id = 0) noexcept;
 
 } } } // namespace Platform
 

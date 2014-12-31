@@ -219,15 +219,13 @@ bool Platform::available (cchar* pFeature, u16 uId)
 {
 	if (internal ().platforms.size () <= uId) throw bad_platform ();
 
-	static std::size_t uSize  = 0;
-	static cchar*      pBegin = nullptr;
+	static std::size_t uSize = 0;
 
 	if (::clGetPlatformInfo (internal ().platforms[uId].handle, CL_PLATFORM_EXTENSIONS,
-						 0, nullptr, &uSize) != CL_SUCCESS)
+						 0, nullptr, &uSize) != CL_SUCCESS or !uSize)
 		return false;
 
 	char text[uSize];
-	bool bFin = false;
 
 	if (::clGetPlatformInfo (internal ().platforms[uId].handle, CL_PLATFORM_EXTENSIONS,
 						 uSize, &text[0], nullptr) != CL_SUCCESS)
@@ -236,18 +234,15 @@ bool Platform::available (cchar* pFeature, u16 uId)
 	text[--uSize] = 0;
 	text[--uSize] = 0;
 
-	for (cchar* pEnd = ::strchr (pBegin = text, ' '); !bFin;
+	for (cchar* pEnd = ::strchr (text, ' '), *pBegin = text; ;
 		 pEnd = ::strchr (pBegin = ++pEnd, ' '))
 	{
-		if (!pEnd)
+		if (!pEnd) return !::strcmp (pBegin, pFeature) ? true : false;
+		else
 		{
-			pEnd = text + uSize;
-			bFin = true;
+			text[pEnd - text] = 0;
+			if (!::strcmp (pBegin, pFeature)) return true;
 		}
-
-		text[pEnd - text] = 0;
-
-		if (!::strcmp (pBegin, pFeature)) return true;
 	}
 
 	return false;
@@ -277,11 +272,6 @@ string Platform::info (Info eType, u16 uId)
 {
 	if (internal ().platforms.size () <= uId) throw bad_platform ();
 	return std::move (Initializer::infostr (uId, infotype (eType)));
-}
-
-Platform::Type Platform::backend (u16) noexcept
-{
-	return Type::OpenCL;
 }
 
 } } // namespace Compute

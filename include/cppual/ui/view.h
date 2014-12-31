@@ -147,6 +147,8 @@ private:
 	StateFlags        m_gStateFlags;
 };
 
+// =========================================================
+
 class Widget
 {
 public:
@@ -161,7 +163,7 @@ public:
 	void setGeometry (Rect const&);
 	void setMinimumSize (point2u);
 	void setMaximumSize (point2u);
-	void move (point2i);
+	void move (point2u);
 	void refresh ();
 	void enable ();
 	void disable ();
@@ -193,7 +195,7 @@ protected:
 	virtual void onPaint (Rect const&) { }
 	virtual void onEnable (bool) { }
 	virtual void onSize (point2u) { }
-	virtual void onMove (point2i) { }
+	virtual void onMove (point2u) { }
 	virtual void onBeginSizeMove (Rect const&) { }
 	virtual void onEndSizeMove (Rect const&) { }
 	virtual void onMinMaxSize (point2u) { }
@@ -212,11 +214,11 @@ private:
 	void paint (Rect const&);
 
 private:
-	ProxyRenderable m_gBuffer;
-	container_type  m_gChildren;
-	Widget*         m_pParent;
-	point2u         m_gMinSize, m_gMaxSize;
-	StateFlags      m_gStateFlags;
+	VirtualBuffer  m_gBuffer;
+	container_type m_gChildren;
+	Widget*        m_pParent;
+	point2u        m_gMinSize, m_gMaxSize;
+	StateFlags     m_gStateFlags;
 };
 
 } } // namespace Ui

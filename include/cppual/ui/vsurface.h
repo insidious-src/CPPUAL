@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/ui/wm.h>
+#include <cppual/gfx/gl/texture.h>
 
 namespace cppual { namespace Ui {
 
@@ -82,6 +83,35 @@ private:
 	shared_renderable m_pParent;
 	Rect              m_gRect;
 	bool              m_bIsVisible;
+};
+
+// =========================================================
+
+class VirtualBuffer final
+{
+public:
+	VirtualBuffer ();
+	VirtualBuffer (VirtualBuffer&&) noexcept;
+	VirtualBuffer (VirtualBuffer const&) noexcept;
+	VirtualBuffer (VirtualBuffer& parent, Rect const& rect) noexcept;
+	VirtualBuffer& operator = (VirtualBuffer&&) noexcept;
+	VirtualBuffer& operator = (VirtualBuffer const&) noexcept;
+
+	void setGeometry (Rect const&) noexcept;
+	void setParent (VirtualBuffer& parent, point2i) noexcept;
+	void move (point2u) noexcept;
+	void map () noexcept;
+	void unmap () noexcept;
+
+	~VirtualBuffer () noexcept { unmap (); }
+	VirtualBuffer& parent   () const noexcept { return *m_pParent;    }
+	Rect           geometry () const noexcept { return  m_gRect;      }
+	bool           isMapped () const noexcept { return  m_bIsVisible; }
+
+private:
+	VirtualBuffer* m_pParent;
+	Rect           m_gRect;
+	bool           m_bIsVisible;
 };
 
 } } // namespace Ui

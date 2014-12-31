@@ -358,11 +358,11 @@ void View::setGeometry (Rect const& gRect)
 		// height
 		if (gNewRect.height () > m_gMinSize.y)
 		{
-			gNewRect.bottom = static_cast<short> (gNewRect.top + m_gMinSize.y);
+			gNewRect.bottom = static_cast<Rect::value_type> (gNewRect.top + m_gMinSize.y);
 		}
 		else if (m_gMaxSize != point2u () and gNewRect.height () > m_gMaxSize.y)
 		{
-			gNewRect.bottom = static_cast<short> (gNewRect.top + m_gMinSize.y);
+			gNewRect.bottom = static_cast<Rect::value_type> (gNewRect.top + m_gMinSize.y);
 		}
 
 		m_pRenderable->setGeometry (gNewRect);
@@ -434,5 +434,45 @@ void View::refresh ()
 }
 
 // =========================================================
+
+void Widget::move (point2u gPoint)
+{
+	m_gBuffer.move (gPoint);
+	onMove (gPoint);
+}
+
+void Widget::setFocus ()
+{
+	onFocus (true);
+
+	if (m_gChildren.size ())
+		for (Widget* pChild : m_gChildren) pChild->setFocus ();
+}
+
+void Widget::killFocus ()
+{
+	onFocus (false);
+
+	if (m_gChildren.size ())
+		for (Widget* pChild : m_gChildren) pChild->killFocus ();
+}
+
+void Widget::enable ()
+{
+	onEnable (true);
+	for (Widget* pChild : m_gChildren) pChild->enable ();
+}
+
+void Widget::disable ()
+{
+	onEnable (false);
+	for (Widget* pChild : m_gChildren) pChild->disable ();
+}
+
+void Widget::refresh ()
+{
+	onPaint (geometry ());
+	for (Widget* pChild : m_gChildren) pChild->refresh ();
+}
 
 } } // namespace Ui

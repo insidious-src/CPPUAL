@@ -97,12 +97,11 @@ public:
 	typedef Object<Device>::uint_type                 uint_type;
 	typedef std::size_t                               size_type;
 
-	Device (); // default device
-	Device (Device const&) noexcept;
-	Device (Type type, u16 platform = 0, uint_type id = 0);
-
 	static uint_type count (type_size type, u16 platform = 0);
-	bool   available (cchar* feature);
+	bool   available       (cchar* feature);
+
+	Device (Device const&) noexcept;
+	Device (Type type = count (GPU) ? GPU : CPU, u16 platform = 0, uint_type id = 0);
 
 	Partition part (uint_type);
 	string    info (Info);
