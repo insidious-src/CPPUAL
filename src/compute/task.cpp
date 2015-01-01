@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2014 Kurec
+ * Copyright (C) 2012 - 2015 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,20 +28,20 @@ using std::deque;
 
 namespace cppual { namespace Compute {
 
-namespace { // optimize for internal unit usage
+namespace { namespace Internal { // optimize for internal unit usage
 
-struct Internal
+struct ThreadPoolInitializer
 {
-	typedef atomic_uint_fast16_t  atomic_u16;
+	typedef atomic_uint_fast16_t    atomic_u16;
 	typedef SerialQueue::mutex_type mutex_type;
 	typedef SerialQueue::write_lock write_lock;
 	typedef SerialQueue::read_lock  read_lock;
 
-	~Internal ();
+	~ThreadPoolInitializer ();
 
-	inline Internal () noexcept
+	inline ThreadPoolInitializer () noexcept
 	: threadMutex (),
-	  threads (),
+	  threads     (),
 	  threadCount ()
 	{ }
 
@@ -49,9 +49,30 @@ struct Internal
 	deque<thread> threads;
 	atomic_u16    threadCount;
 
-} internal;
+};
 
-} // anonymous
+// =========================================================
+
+ThreadPoolInitializer::~ThreadPoolInitializer ()
+{
+	// block thread reservation until all threads exit
+	// and clear the container
+	read_lock gLock (threadMutex);
+
+	if (!threads.empty ())
+	{
+		for (thread& gThread : threads)
+			if (gThread.joinable ()) gThread.join ();
+	}
+}
+
+inline ThreadPoolInitializer& pool () noexcept
+{
+	static ThreadPoolInitializer thread_pool;
+	return thread_pool;
+}
+
+} } // anonymous namespace Internal
 
 // =========================================================
 
@@ -60,7 +81,7 @@ class Assigned final
 public:
 	inline Assigned (SerialQueue& gTasks) : m_queue (gTasks)
 	{
-		++internal.threadCount;
+		++Internal::pool ().threadCount;
 		SerialQueue::read_lock gLock (m_queue.m_gQueueMutex);
 		++m_queue.m_uNumAssigned;
 	}
@@ -73,7 +94,7 @@ public:
 			--m_queue.m_uNumAssigned;
 		}
 
-		--internal.threadCount;
+		--Internal::pool ().threadCount;
 		m_queue.m_gTaskCond.notify_all ();
 	}
 
@@ -165,40 +186,23 @@ void Worker::operator ()()
 
 ThreadPool::size_type ThreadPool::count ()
 {
-	return internal.threadCount.load ();
+	return Internal::pool ().threadCount.load ();
 }
 
-bool ThreadPool::reserve (SerialQueue& gTaskQueue,
-						  size_type    uAddThreads,
-						  bool         bDetached)
+bool ThreadPool::reserve (SerialQueue& gTaskQueue, size_type uAddThreads, bool bDetached)
 {
 	if (!uAddThreads) return false;
 
 	// add threads to the container and initialize them
-	write_lock gLock (internal.threadMutex);
+	write_lock gLock (Internal::pool ().threadMutex);
 
 	while (uAddThreads--)
 	{
-		internal.threads.emplace_back (thread (Worker (gTaskQueue)));
-		if (bDetached) internal.threads.back ().detach ();
+		Internal::pool ().threads.emplace_back (thread (Worker (gTaskQueue)));
+		if (bDetached) Internal::pool ().threads.back ().detach ();
 	}
 
 	return true;
-}
-
-// =========================================================
-
-Internal::~Internal ()
-{
-	// block thread reservation until all threads exit
-	// and clear the container
-	read_lock gLock (internal.threadMutex);
-
-	if (!internal.threads.empty ())
-	{
-		for (thread& gThread : internal.threads)
-			if (gThread.joinable ()) gThread.join ();
-	}
 }
 
 // =========================================================

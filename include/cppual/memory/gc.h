@@ -19,39 +19,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/gfx/matrix.h>
+#ifndef CPPUAL_MEMORY_MODEL_H_
+#define CPPUAL_MEMORY_MODEL_H_
+#ifdef __cplusplus
 
-namespace cppual { namespace Graphics {
+#include <cstddef>
+#include <cppual/types.h>
 
-Matrix2& Matrix2::transpose () noexcept
-{
-	std::swap ((*this)[1], (*this)[2]);
-	return *this;
-}
+namespace cppual { namespace Memory {
 
-// =========================================================
+static_assert (sizeof (std::size_t) == sizeof (u8*),
+			   "size_t is not equal to the size of a pointer!");
 
-Matrix3& Matrix3::transpose () noexcept
-{
-	std::swap ((*this)[1], (*this)[3]);
-	std::swap ((*this)[2], (*this)[6]);
-	std::swap ((*this)[5], (*this)[7]);
-
-	return *this;
-}
+static_assert (alignof (std::size_t) == alignof (u8*),
+			   "The alignment is wrong!");
 
 // =========================================================
 
-Matrix4& Matrix4::transpose () noexcept
-{
-	std::swap ((*this)[ 1], (*this)[ 4]);
-	std::swap ((*this)[ 2], (*this)[ 8]);
-	std::swap ((*this)[ 3], (*this)[12]);
-	std::swap ((*this)[ 6], (*this)[ 9]);
-	std::swap ((*this)[ 7], (*this)[13]);
-	std::swap ((*this)[11], (*this)[14]);
+std::size_t size        (); // system memory size
+std::size_t maxSize     (); // largest available system memory block
+std::size_t workingSize (); // process' current memory usage
 
-	return *this;
-}
+// =========================================================
 
-} } // namespace Graphics
+
+
+} } // namespace Memory
+
+#endif // __cplusplus
+#endif // CPPUAL_MEMORY_MODEL_H_

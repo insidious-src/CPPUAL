@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2014 Kurec
+ * Copyright (C) 2012 - 2015 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/memory/collector.h>
+#include <cppual/memory/gc.h>
 
 #ifdef OS_STD_UNIX
 #	include <unistd.h>

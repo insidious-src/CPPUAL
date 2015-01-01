@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2014 Kurec
+ * Copyright (C) 2012 - 2015 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,26 +35,29 @@ namespace { // optimize for internal unit usage
 
 struct Initializer
 {
-	typedef std::vector<CL::device, StackedPolicy <CL::device> > DeviceVector;
+	typedef StackedAllocator                       allocator_type;
+	typedef StackedPolicy<CL::device>              device_policy;
+	typedef std::vector<CL::device, device_policy> device_vector;
 
 	struct PlatformInfo
 	{
 		CL::platform  handle;
-		DeviceVector  devices;
+		device_vector devices;
 		CL::size_type cpu_count;
 		CL::size_type gpu_count;
 		CL::size_type accel_count;
 		CL::size_type custom_count;
 
 		PlatformInfo (StackedAllocator& gAtor)
-		: devices (StackedPolicy<CL::device> (gAtor))
+		: devices (device_policy (gAtor))
 		{ }
 	};
 
-	typedef std::vector<PlatformInfo, StackedPolicy<PlatformInfo> > PlatformVector;
+	typedef StackedPolicy<PlatformInfo>                platform_policy;
+	typedef std::vector<PlatformInfo, platform_policy> platform_vector;
 
-	StackedAllocator allocator;
-	PlatformVector   platforms;
+	allocator_type  allocator;
+	platform_vector platforms;
 
 	Initializer ();
 	static std::size_t size () noexcept;
@@ -77,7 +80,7 @@ inline Initializer& internal () noexcept
 
 Initializer::Initializer ()
 : allocator (size ()),
-  platforms (num  (), PlatformInfo (allocator), StackedPolicy<PlatformInfo> (allocator))
+  platforms (num  (), PlatformInfo (allocator), platform_policy (allocator))
 {
 	CL::platform handles[platforms.size ()];
 

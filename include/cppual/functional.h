@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2014 Kurec
+ * Copyright (C) 2012 - 2015 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include <cstring>
 #include <type_traits>
 #include <cppual/decl.h>
+#include <cppual/concepts.h>
 
 namespace cppual { namespace Internal {
 
@@ -135,9 +136,9 @@ public:
 	}
 
 	template <class DerivedClass, class ParentInvokerSig>
-	inline void bindStaticFunc (DerivedClass*    mPtrParent,
-								ParentInvokerSig mStaticFuncInvoker,
-								TStaticFunc      mFuncToBind) noexcept
+	inline void bindStaticFunc (ObjectType<DerivedClass>* mPtrParent,
+								ParentInvokerSig          mStaticFuncInvoker,
+								TStaticFunc               mFuncToBind) noexcept
 	{
 		static_assert (sizeof (AnyClass*) == sizeof (mFuncToBind),
 					   "Cannot use horrible_cast");

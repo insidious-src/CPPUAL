@@ -19,7 +19,7 @@ include_directories(include ${FREETYPE_INCLUDE_DIRS})
 
 # process, modules, memory
 add_library(cppual-core SHARED
-	include/cppual/function.h
+	include/cppual/functional.h
 	include/cppual/delegate.h
 	include/cppual/flags.h
 	include/cppual/signal.h
@@ -37,8 +37,8 @@ add_library(cppual-core SHARED
 	include/cppual/decl.h
 	include/cppual/types.h
 	include/cppual/noncopyable.h
-	src/memory/collector.cpp
-	include/cppual/memory/collector.h
+	src/memory/gc.cpp
+	include/cppual/memory/gc.h
 	include/cppual/memory/allocator.h
 	include/cppual/memory/static.h
 	include/cppual/memory/mop.h
@@ -90,6 +90,12 @@ add_library(cppual-compute SHARED
 	include/cppual/compute/pll_ops.h
 	src/compute/task.cpp
 	include/cppual/compute/task.h
+	)
+
+ # device compute (OpenGL interop)
+add_library(cppual-compute-gl SHARED
+	include/cppual/compute/gl_interop.h
+	src/compute/gl_interop.cpp
 	)
 
 #add_library(cppual-db SHARED
@@ -366,6 +372,7 @@ add_library(cppual-ui-dialogs MODULE
 
 target_link_libraries(cppual-core dl)
 target_link_libraries(cppual-compute cppual-core pthread OpenCL)
+target_link_libraries(cppual-compute-gl cppual-compute OpenCL GL)
 #target_link_libraries(cppual-input)
 target_link_libraries(cppual-gfx freetype)
 target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GL)

@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2014 Kurec
+ * Copyright (C) 2012 - 2015 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,32 +19,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_MEMORY_MODEL_H_
-#define CPPUAL_MEMORY_MODEL_H_
+#ifndef CPPUAL_CL_CONTEXT_GL_H_
+#define CPPUAL_CL_CONTEXT_GL_H_
 #ifdef __cplusplus
 
-#include <cstddef>
-#include <cppual/types.h>
+#include <cppual/gfx/gl/egl.h>
+#include <cppual/gfx/gl/texture.h>
+#include <cppual/gfx/gl/buffer.h>
+#include <cppual/compute/context.h>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace Compute {
 
-static_assert (sizeof (std::size_t) == sizeof (u8*),
-			   "size_t is not equal to the size of a pointer!");
-
-static_assert (alignof (std::size_t) == alignof (u8*),
-			   "The alignment is wrong!");
-
-// =========================================================
-
-std::size_t size        (); // system memory size
-std::size_t maxSize     (); // largest available system memory block
-std::size_t workingSize (); // process' current memory usage
-
-// =========================================================
-
-
-
-} } // namespace Memory
+} } // namespace CL
 
 #endif // __cplusplus
-#endif // CPPUAL_MEMORY_MODEL_H_
+#endif // CPPUAL_CL_CONTEXT_GL_H_

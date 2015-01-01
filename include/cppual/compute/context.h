@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2014 Kurec
+ * Copyright (C) 2012 - 2015 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@
 
 namespace cppual { namespace Compute {
 
-class ContextImpl;
 class DeviceGroup { };
 
 class VBlankOffload : public DeviceGroup
@@ -45,7 +44,7 @@ class GPU : public DeviceGroup
 class All : public DeviceGroup
 { };
 
-class Context final : public Object <Context>
+class Context : public Object <Context>
 {
 public:
 	Context (DeviceGroup&);
@@ -55,12 +54,11 @@ public:
 
 	bool set (DeviceGroup&);
 
-	inline DeviceGroup& devices () const noexcept
+	DeviceGroup& devices () const noexcept
 	{ return *m_gDevice; }
 
 private:
 	DeviceGroup* m_gDevice;
-	ContextImpl* m_pInterface;
 };
 
 } } // namespace CL
