@@ -23,29 +23,25 @@
 #define CPPUAL_SIGNAL_H_
 #ifdef __cplusplus
 
-#include <functional>
+#include <cppual/functional.h>
 #include <cppual/circular_queue.h>
-
-using std::placeholders::_1;
 
 namespace cppual {
 
 template <typename T,
-		  typename    = Memory::AllocatorPolicy<std::function<T> >,
-		  bool Atomic = false
+		  typename = Memory::AllocatorPolicy<Function<T> >
 		  >
 class Signal;
 
 template <typename T,
-		  typename    = Memory::AllocatorPolicy<std::function<T> >,
-		  bool Atomic = false
+		  typename = Memory::AllocatorPolicy<Function<T> >
 		  >
 class ScopedConnection;
 
 // =========================================================
 
 template <typename TRetType, typename... TArgs, typename Allocator>
-class Signal <TRetType(TArgs...), Allocator, false>
+class Signal <TRetType(TArgs...), Allocator>
 {
 public:
 	typedef typename Allocator::value_type            value_type;
@@ -56,34 +52,30 @@ public:
 	typedef CircularQueue<value_type, allocator_type> container;
 	typedef typename container::const_iterator        connection;
 
-	enum { default_size = 20 };
+	enum { default_size = 10 };
 
-	inline Signal () noexcept
+	static bool atomic () noexcept { return false; }
+	bool        empty  () const noexcept { return m_gSlots.empty (); }
+
+	// emit signal to connected slots
+	void operator () (TArgs... args)
+	{ for (reference slot : m_gSlots) slot (std::forward<TArgs> (args)...); }
+
+	Signal () noexcept
 	: m_gSlots (default_size)
 	{ }
 
-	inline Signal (allocator_type const& gAlloc) noexcept
+	Signal (allocator_type const& gAlloc) noexcept
 	: m_gSlots (default_size, gAlloc)
 	{ }
-
-	inline static bool atomic () noexcept { return false; }
-	inline bool        empty  () const noexcept { return m_gSlots.empty (); }
-
-
-	// emit signal to connected slots
-	inline void operator () (TArgs... args)
-	{
-		for (reference slot : m_gSlots)
-			if (slot != nullptr) slot (std::forward<TArgs> (args)...);
-	}
 
 	template <typename Call,
 			  typename TRetType_,
 			  typename... TArgs_,
 			  typename Allocator_
 			  >
-	friend typename Signal<TRetType_(TArgs_...), Allocator_, false>::connection
-	connect (Signal<TRetType_(TArgs_...), Allocator_, false>&,
+	friend typename Signal<TRetType_(TArgs_...), Allocator_>::connection
+	connect (Signal<TRetType_(TArgs_...), Allocator_>&,
 			 Call&&,
 			 bool);
 
@@ -92,8 +84,8 @@ public:
 			  typename... TArgs_,
 			  typename Allocator_
 			  >
-	friend typename Signal<TRetType_(TArgs_...), Allocator_, false>::connection
-	connect (Signal<TRetType_(TArgs_...), Allocator_, false>&,
+	friend typename Signal<TRetType_(TArgs_...), Allocator_>::connection
+	connect (Signal<TRetType_(TArgs_...), Allocator_>&,
 			 ObjectType<TClass>&,
 			 TRetType_ (TClass::*)(TArgs_...),
 			 bool);
@@ -104,8 +96,8 @@ public:
 			  typename Allocator_
 			  >
 	friend void
-	disconnect (Signal<TRetType_(TArgs_...), Allocator_, false>&,
-				typename Signal<TRetType_(TArgs_...), Allocator_, false>::connection&);
+	disconnect (Signal<TRetType_(TArgs_...), Allocator_>&,
+				typename Signal<TRetType_(TArgs_...), Allocator_>::connection&);
 
 private:
 	container m_gSlots;
@@ -118,8 +110,9 @@ template <typename Call,
 		  typename... TArgs,
 		  typename Allocator
 		  >
-typename Signal<TRetType(TArgs...), Allocator, false>::connection
-connect (Signal<TRetType(TArgs...), Allocator, false>& gSignal,
+inline
+typename Signal<TRetType(TArgs...), Allocator>::connection
+connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
 		 Call&& gFunc,
 		 bool bTop = false)
 {
@@ -138,19 +131,20 @@ template <typename TClass,
 		  typename... TArgs,
 		  typename Allocator
 		  >
-typename Signal<TRetType(TArgs...), Allocator, false>::connection
-connect (Signal<TRetType(TArgs...), Allocator, false>& gSignal,
+inline
+typename Signal<TRetType(TArgs...), Allocator>::connection
+connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
 		 ObjectType<TClass>& pObj,
 		 TRetType (TClass::* fn)(TArgs...),
 		 bool bTop = false)
 {
 	if (bTop)
 	{
-		gSignal.m_gSlots.push_front (std::bind (fn, &pObj, _1));
+		gSignal.m_gSlots.push_front (fn, &pObj);
 		return gSignal.m_gSlots.cbegin ();
 	}
 
-	gSignal.m_gSlots.push_back (std::bind (fn, &pObj, _1));
+	gSignal.m_gSlots.push_back (fn, &pObj);
 	return gSignal.m_gSlots.cend ();
 }
 
@@ -162,19 +156,19 @@ template <typename TRetType,
 		  >
 inline
 void
-disconnect (Signal<TRetType(TArgs...), Allocator, false>& gSignal,
-			typename Signal<TRetType(TArgs...), Allocator, false>::connection& gConn)
+disconnect (Signal<TRetType(TArgs...), Allocator>& gSignal,
+			typename Signal<TRetType(TArgs...), Allocator>::connection& gConn)
 { gSignal.m_gSlots.erase (gConn); }
 
 // =========================================================
 
-template <typename T, typename... TArgs, typename Allocator, bool Atomic>
-class ScopedConnection <T(TArgs...), Allocator, Atomic>
+template <typename T, typename... TArgs, typename Allocator>
+class ScopedConnection <T(TArgs...), Allocator>
 {
 public:
-	typedef Signal<T(TArgs...), Allocator, Atomic> signal_type;
-	typedef typename signal_type::connection       connection;
-	typedef typename signal_type::func_type        func_type;
+	typedef Signal<T(TArgs...), Allocator>   signal_type;
+	typedef typename signal_type::connection connection;
+	typedef typename signal_type::func_type  func_type;
 
 	ScopedConnection () = delete;
 	ScopedConnection (ScopedConnection&&) = default;

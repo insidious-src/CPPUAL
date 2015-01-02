@@ -24,4 +24,4 @@
 namespace cppual { namespace Compute {
 
 
-} } // namespace CL
+} } // namespace Compute

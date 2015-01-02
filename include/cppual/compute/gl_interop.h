@@ -30,7 +30,7 @@
 
 namespace cppual { namespace Compute {
 
-} } // namespace CL
+} } // namespace Compute
 
 #endif // __cplusplus
 #endif // CPPUAL_CL_CONTEXT_GL_H_

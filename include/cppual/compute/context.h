@@ -61,7 +61,7 @@ private:
 	DeviceGroup* m_gDevice;
 };
 
-} } // namespace CL
+} } // namespace Compute
 
 #endif // __cplusplus
 #endif // CPPUAL_CL_CONTEXT_H_

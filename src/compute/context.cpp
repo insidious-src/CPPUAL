@@ -29,4 +29,4 @@ Context::Context (DeviceGroup& gDevice)
 {
 }
 
-} } // namespace CL
+} } // namespace Compute
