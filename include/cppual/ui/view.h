@@ -44,11 +44,11 @@ public:
 
 	typedef typename
 	Signal<void(point2i)>
-	::connection mouse_move_conn;
+	::slot_type mouse_move_conn;
 
 	typedef typename
 	Signal<void(event_type::MouseButtonData const&)>
-	::connection mouse_btn_conn;
+	::slot_type mouse_btn_conn;
 
 	enum
 	{

@@ -20,7 +20,6 @@ include_directories(include ${FREETYPE_INCLUDE_DIRS})
 # process, modules, memory
 add_library(cppual-core SHARED
 	include/cppual/functional.h
-	include/cppual/delegate.h
 	include/cppual/flags.h
 	include/cppual/signal.h
 	include/cppual/object.h

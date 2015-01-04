@@ -23,7 +23,6 @@
 #define CPPUAL_CONCEPTS_H_
 #ifdef __cplusplus
 
-#include <type_traits>
 #include <cppual/meta.h>
 
 namespace cppual {
@@ -45,9 +44,15 @@ using FloatingPoint = typename
 std::enable_if<std::is_floating_point<T>::value, T>::type;
 
 template <typename T>
-using Callable = typename
+using FunctionType = typename
 std::enable_if<std::is_function<typename std::remove_pointer<T>::type>::value or
 std::is_member_function_pointer<T>::value, T>::type;
+
+template <typename T>
+using CallableType = typename
+std::enable_if<std::is_constructible
+<typename member_function_to_static<decltype(&std::decay<T>::type::operator())>::type, T>
+::value, T>::type;
 
 // ====================================================
 
@@ -100,7 +105,7 @@ using UnionType = typename
 std::enable_if<std::is_union<T>::value, T>::type;
 
 template <typename T>
-using NullablePointer = typename
+using NullPointer = typename
 std::enable_if<std::is_null_pointer<T>::value, T>::type;
 
 template <typename T>
@@ -110,11 +115,6 @@ std::enable_if<std::is_object<T>::value, T>::type;
 template <typename T>
 using ClassType = typename
 std::enable_if<std::is_class<T>::value, T>::type;
-
-template <typename T>
-using StructType = typename
-std::enable_if<std::is_object<T>::value and
-!std::is_class<T>::value, T>::type;
 
 template <typename T>
 using AbstractType = typename
@@ -280,12 +280,6 @@ std::enable_if<std::is_standard_layout<T>::value, T>::type;
 template <typename T>
 using Mergeable = typename
 std::enable_if<std::is_standard_layout<T>::value, T>::type;
-
-// ====================================================
-
-struct Buffer { };
-struct SequentialBuffer : Buffer { };
-struct ChainedBuffer    : Buffer { };
 
 } // cppual
 

@@ -36,10 +36,19 @@ template <> struct is_char_helper<char32> : public std::true_type  { };
 template <> struct is_char_helper<wchar>  : public std::true_type  { };
 
 template <typename T>
-struct is_char :
-		public std::integral_constant<bool, (is_char_helper<typename
-											 std::remove_cv<T>::type>::value)>
+struct is_char : std::integral_constant<bool, (is_char_helper<typename
+											   std::remove_cv<T>::type>::value)>
 { };
+
+// ====================================================
+
+template <typename T>
+struct member_function_to_static
+{ typedef void type; };
+
+template <typename T, typename Object, typename... Args>
+struct member_function_to_static <T(Object::*)(Args...)>
+{ typedef T(* type)(Args...); };
 
 } // cppual
 

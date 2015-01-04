@@ -31,7 +31,6 @@
 
 using std::atomic_size_t;
 using std::atomic_bool;
-using cppual::Memory::AllocatorType;
 
 namespace cppual {
 
@@ -54,7 +53,7 @@ public:
 	typedef T const*                              const_pointer;
 	typedef T&                                    reference;
 	typedef T const&                              const_reference;
-	typedef AllocatorType<Allocator>              allocator_type;
+	typedef Memory::AllocatorType<Allocator>      allocator_type;
 	typedef typename Allocator::size_type         size_type;
 	typedef typename Allocator::size_type const   const_size;
 	typedef typename Allocator::difference_type   difference_type;
@@ -66,10 +65,11 @@ public:
 	typedef std::pair<pointer, size_type>         array_range;
 	typedef std::pair<const_pointer, size_type>   const_array_range;
 
-	enum { default_size = 20 };
+	enum { default_size = 10 };
 	CircularQueue (CircularQueue&&) noexcept = default;
 	CircularQueue& operator = (CircularQueue const&);
 	void resize (size_type new_capacity);
+	void erase (const_iterator&);
 
 	constexpr const_pointer    data () const noexcept { return m_pArray; }
 	inline    iterator         begin () noexcept { return iterator (*this, 0); }
@@ -85,6 +85,8 @@ public:
 	inline    reference        front () { return m_pArray[m_uBeginPos];  }
 	inline    reference        back  () { return m_pArray[m_uEndPos]; }
 	constexpr allocator_type   get_allocator () const noexcept { return *this; }
+	inline    void             pop_front () { if (!empty ()) pop_front_priv (); }
+	inline    void             pop_back  () { if (!empty ()) pop_back_priv  (); }
 
 	CircularQueue& operator = (CircularQueue&& gObj)
 	{
@@ -110,6 +112,14 @@ public:
 	  m_uEndPos (),
 	  m_uCapacity (m_pArray ? uCapacity : size_type ())
 	{ if (uCapacity and !m_pArray) throw std::bad_array_length (); }
+
+	CircularQueue (allocator_type const& gAtor)
+	: allocator_type (gAtor),
+	  m_pArray (),
+	  m_uBeginPos (),
+	  m_uEndPos (),
+	  m_uCapacity ()
+	{ }
 
 	CircularQueue (CircularQueue const& gObj)
 	: allocator_type (gObj),
@@ -209,21 +219,6 @@ public:
 	inline reference at (size_type n)
 	{ return size () > n ? (*this)[n] : throw std::out_of_range ("index is out of range"); }
 
-	void pop_front ()
-	{
-		// ++front--
-		if (empty ()) return;
-		allocator_type::destroy (&m_pArray[m_uBeginPos]);
-		m_uBeginPos = normalize (++m_uBeginPos);
-	}
-
-	void pop_back ()
-	{
-		// --back++
-		if (empty ()) return;
-		allocator_type::destroy (&m_pArray[m_uEndPos = normalize (--m_uEndPos)]);
-	}
-
 	template <typename... Args>
 	void push_front (Args&&... args)
 	{
@@ -276,6 +271,19 @@ public:
 	}
 
 private:
+	void pop_front_priv ()
+	{
+		// ++front--
+		allocator_type::destroy (&m_pArray[m_uBeginPos]);
+		m_uBeginPos = normalize (++m_uBeginPos);
+	}
+
+	void pop_back_priv ()
+	{
+		// --back++
+		allocator_type::destroy (&m_pArray[m_uEndPos = normalize (--m_uEndPos)]);
+	}
+
 	size_type normalize (size_type uIdx) const noexcept
 	{ return uIdx % m_uCapacity; }
 
@@ -327,6 +335,19 @@ void CircularQueue<T, Allocator, Atomic>::resize (size_type uNewCapacity)
 	std::copy (cbegin (), const_iterator (*this, uNewSize), gObj.begin ());
 	gObj.m_uEndPos = uNewSize - 1;
 	swap (gObj);
+}
+
+template <typename T, typename Allocator, bool Atomic>
+void CircularQueue<T, Allocator, Atomic>::erase (const_iterator& gIt)
+{
+	if (empty () or gIt < cbegin () or cend () <= gIt)
+		throw std::out_of_range ("iterator is out of range");
+
+	auto pos = index_to_subscript (gIt.pos ());
+
+	if (pos == m_uBeginPos) pop_front_priv ();
+	else if (pos == index_to_subscript (size () - 1)) pop_back_priv ();
+	else allocator_type::destroy (&(*gIt));
 }
 
 template <typename T, typename Allocator, bool Atomic>
@@ -474,7 +495,7 @@ public:
 	typedef T&                                  reference;
 	typedef T const&                            const_reference;
 	typedef atomic_size_t                       atomic_size;
-	typedef AllocatorType<Allocator>            allocator_type;
+	typedef Memory::AllocatorType<Allocator>    allocator_type;
 	typedef typename Allocator::size_type       size_type;
 	typedef typename Allocator::size_type const const_size;
 	typedef typename Allocator::difference_type difference_type;

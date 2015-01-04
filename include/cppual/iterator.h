@@ -182,10 +182,15 @@ public:
 	constexpr buf_type& get () const noexcept
 	{ return *m_pBuf; }
 
+	constexpr size_type pos () const noexcept
+	{ return m_uPos; }
+
 private:
 	buf_type* m_pBuf;
 	size_type m_uPos;
 };
+
+// =========================================================
 
 template <typename circular_buffer_iterator_t>
 constexpr

@@ -113,7 +113,7 @@ private:
 class SkinnableView : public View
 {
 public:
-	typedef typename Signal<void(PaintEvent)>::connection skin_conn;
+	typedef typename Signal<void(PaintEvent)>::slot_type skin_conn;
 
 	SkinnableView ();
 	SkinnableView (SkinnableView&&);

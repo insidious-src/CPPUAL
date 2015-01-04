@@ -140,7 +140,7 @@ private:
 
 void Worker::operator ()()
 {
-	call_type gTask;
+	call_type run;
 	Assigned  gAssigned (m_queue);
 
 	while (true)
@@ -164,7 +164,7 @@ void Worker::operator ()()
 					 SerialQueue::Stopped == m_queue.m_eState))
 				break;
 
-			gTask = m_queue.m_gTaskQueue.front ();
+			run = m_queue.m_gTaskQueue.front ();
 			gLock.unlock ();
 
 			// RAII lock
@@ -174,11 +174,8 @@ void Worker::operator ()()
 			}
 		}
 
-		if (gTask != nullptr)
-		{
-			gTask (); // run the aquired task if valid
-			m_queue.m_gTaskCond.notify_all ();
-		}
+		run (); // run the aquired task if valid
+		m_queue.m_gTaskCond.notify_all ();
 	}
 }
 
