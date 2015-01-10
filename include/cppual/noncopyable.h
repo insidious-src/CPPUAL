@@ -28,9 +28,7 @@ namespace cppual {
 struct NonConstructible
 {
 	NonConstructible () = delete;
-	NonConstructible (NonConstructible&) = delete;
 	NonConstructible (NonConstructible const&) = delete;
-	NonConstructible& operator = (NonConstructible&) = delete;
 	NonConstructible& operator = (NonConstructible const&) = delete;
 };
 
@@ -65,7 +63,7 @@ struct NonCopyableVirtual
 	constexpr NonCopyableVirtual () = default;
 	NonCopyableVirtual (NonCopyableVirtual const&) = delete;
 	NonCopyableVirtual& operator = (NonCopyableVirtual const&) = delete;
-	inline virtual ~NonCopyableVirtual () { }
+	virtual ~NonCopyableVirtual () { }
 };
 
 // ====================================================
@@ -82,7 +80,7 @@ struct NonCopyConstructibleVirtual
 {
 	constexpr NonCopyConstructibleVirtual () = default;
 	NonCopyConstructibleVirtual (NonCopyConstructibleVirtual const&) = delete;
-	inline virtual ~NonCopyConstructibleVirtual () noexcept { }
+	virtual ~NonCopyConstructibleVirtual () noexcept { }
 };
 
 // ====================================================
@@ -99,7 +97,7 @@ struct NonCopyAssignableVirtual
 {
 	constexpr NonCopyAssignableVirtual () = default;
 	NonCopyAssignableVirtual& operator = (NonCopyAssignableVirtual const&) = delete;
-	inline virtual ~NonCopyAssignableVirtual () noexcept { }
+	virtual ~NonCopyAssignableVirtual () noexcept { }
 };
 
 } // cppual

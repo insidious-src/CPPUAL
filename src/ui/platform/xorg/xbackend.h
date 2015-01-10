@@ -23,7 +23,7 @@
 #define CPPUAL_PLATFORM_X_DISPLAY_H_
 #ifdef __cplusplus
 
-#include <cppual/ui/manager.h>
+#include <cppual/ui/display.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 

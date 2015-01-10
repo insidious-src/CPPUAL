@@ -41,7 +41,6 @@ public:
 	constexpr BitSet (std::nullptr_t) noexcept : m_flags () { }
 	inline    BitSet& operator = (BitSet const&) noexcept = default;
 
-	inline void clear () noexcept { m_flags = value_type (); }
 	inline void switchBit (T eFlag) noexcept { m_flags ^= eFlag; }
 
 	constexpr operator value_type () const noexcept
@@ -85,9 +84,6 @@ public:
 	: m_flags (flags)
 	{ }
 
-private:
-	value_type m_flags;
-
 	template <typename U>
 	friend
 	constexpr bool operator == (BitSet<U> const&, U const) noexcept;
@@ -100,6 +96,9 @@ private:
 	template <typename U>
 	friend
 	constexpr bool operator == (BitSet<U> const&, BitSet<U> const&) noexcept;
+
+private:
+	value_type m_flags;
 };
 
 // =========================================================
@@ -132,44 +131,44 @@ constexpr bool operator != (BitSet<T> const& lh, BitSet<T> const& rh) noexcept
 
 // =========================================================
 
-template <typename T>
-constexpr bool operator > (T const& e1, T const& e2) noexcept
-{
-	typedef typename std::underlying_type<T>::type value_type;
-	return static_cast<value_type> (e1) > static_cast<value_type> (e2);
-}
+//template <typename T>
+//constexpr bool operator > (T const& e1, T const& e2) noexcept
+//{
+//	typedef typename std::underlying_type<T>::type value_type;
+//	return static_cast<value_type> (e1) > static_cast<value_type> (e2);
+//}
 
-template <typename T>
-constexpr bool operator >= (T const& e1, T const& e2) noexcept
-{
-	typedef typename std::underlying_type<T>::type value_type;
-	return static_cast<value_type> (e1) >= static_cast<value_type> (e2);
-}
+//template <typename T>
+//constexpr bool operator >= (T const& e1, T const& e2) noexcept
+//{
+//	typedef typename std::underlying_type<T>::type value_type;
+//	return static_cast<value_type> (e1) >= static_cast<value_type> (e2);
+//}
 
-template <typename T>
-constexpr bool operator < (T const& e1, T const& e2) noexcept
-{
-	return !(e1 >= e2);
-}
+//template <typename T>
+//constexpr bool operator < (T const& e1, T const& e2) noexcept
+//{
+//	return !(e1 >= e2);
+//}
 
-template <typename T>
-constexpr bool operator <= (T const& e1, T const& e2) noexcept
-{
-	return !(e1 > e2);
-}
+//template <typename T>
+//constexpr bool operator <= (T const& e1, T const& e2) noexcept
+//{
+//	return !(e1 > e2);
+//}
 
-template <typename T>
-constexpr bool operator == (T const& e1, T const& e2) noexcept
-{
-	typedef typename std::underlying_type<T>::type value_type;
-	return static_cast<value_type> (e1) == static_cast<value_type> (e2);
-}
+//template <typename T>
+//constexpr bool operator == (T const& e1, T const& e2) noexcept
+//{
+//	typedef typename std::underlying_type<T>::type value_type;
+//	return static_cast<value_type> (e1) == static_cast<value_type> (e2);
+//}
 
-template <typename T>
-constexpr bool operator != (T const& e1, T const& e2) noexcept
-{
-	return !(e1 == e2);
-}
+//template <typename T>
+//constexpr bool operator != (T const& e1, T const& e2) noexcept
+//{
+//	return !(e1 == e2);
+//}
 
 } // cppual
 

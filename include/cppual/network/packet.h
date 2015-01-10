@@ -40,7 +40,7 @@ class Packet
 {
 public:
 	typedef std::size_t size_type;
-	typedef bool (Packet::* BoolType)(size_type);
+	typedef bool (Packet::* safe_bool)(size_type);
 
 	bool operator == (Packet const&) const = delete;
 	bool operator != (Packet const&) const = delete;
@@ -93,7 +93,7 @@ public:
 	inline bool isEndOfPacket () const noexcept
 	{ return m_uPos >= m_gData.size (); }
 
-	inline operator BoolType () const noexcept
+	inline operator safe_bool () const noexcept
 	{ return m_bIsValid ? &Packet::canExchange : nullptr; }
 
 	inline void flush () noexcept

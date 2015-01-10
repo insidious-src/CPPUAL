@@ -30,16 +30,9 @@ namespace cppual { namespace Input {
 
 struct Keyboard;
 
-template <typename>
-class Event;
-
-template <typename>
-class Queue;
-
 // =========================================================
 
-template <>
-class Event <Keyboard>
+class KeyEvent
 {
 public:
 	typedef u8  size_type;
@@ -59,11 +52,11 @@ public:
 		mask_type mask;
 	};
 
-	inline Event () noexcept = default;
+	inline KeyEvent () noexcept = default;
 	constexpr Data const& data  () const noexcept { return m_gData;  }
 	constexpr Type        state () const noexcept { return m_eState; }
 
-	constexpr Event (size_type uId, key_type uKey, mask_type uMask, Type eType) noexcept
+	constexpr KeyEvent (size_type uId, key_type uKey, mask_type uMask, Type eType) noexcept
 	: m_gData { uId, uKey, uMask },
 	  m_eState (eType)
 	{ }
@@ -75,33 +68,32 @@ private:
 
 // =========================================================
 
-struct KeyPressEvent : public Event <Keyboard>
+struct KeyPressEvent : public KeyEvent
 {
 	inline KeyPressEvent () noexcept = default;
 
 	constexpr KeyPressEvent (size_type uId, key_type uKey, mask_type uMask) noexcept
-	: Event (uId, uKey, uMask, Press)
+	: KeyEvent (uId, uKey, uMask, Press)
 	{ }
 };
 
 // =========================================================
 
-struct KeyReleaseEvent : public Event <Keyboard>
+struct KeyReleaseEvent : public KeyEvent
 {
 	inline KeyReleaseEvent () noexcept = default;
 
 	constexpr KeyReleaseEvent (size_type uId, key_type uKey, mask_type uMask) noexcept
-	: Event (uId, uKey, uMask, Release)
+	: KeyEvent (uId, uKey, uMask, Release)
 	{ }
 };
 
 // =========================================================
 
-template <>
-class Queue <Keyboard> : NonConstructible
+class KeyQueue : NonConstructible
 {
 public:
-	typedef Event<Keyboard> event_type;
+	typedef KeyEvent event_type;
 
 	static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
@@ -110,7 +102,7 @@ public:
 
 struct Keyboard
 {
-	typedef Queue<Keyboard> queue_type;
+	typedef KeyQueue queue_type;
 
 	enum
 	{

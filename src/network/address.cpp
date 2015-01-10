@@ -26,11 +26,6 @@ using std::string;
 
 namespace cppual { namespace Network {
 
-cu8 Address::v4_mapped_prefix[12] =
-{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
-
-// ====================================================
-
 Address::Address (string const&) noexcept
 {
 }

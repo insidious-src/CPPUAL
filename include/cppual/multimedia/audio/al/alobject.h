@@ -24,14 +24,13 @@
 #ifdef __cplusplus
 
 #include <atomic>
-#include <cppual/object.h>
 #include <cppual/multimedia/audio/spatial.h>
 
 using std::atomic_uint;
 
 namespace cppual { namespace Audio { namespace AL {
 
-class AudioObject : public ThreadObject
+class AudioObject
 {
 public:
 	AudioObject (ObjectType type) noexcept;

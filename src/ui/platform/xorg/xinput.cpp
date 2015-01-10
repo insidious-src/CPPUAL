@@ -21,14 +21,16 @@
 
 #include <iostream>
 #include <cppual/ui/default_events.h>
+#include <cppual/input/pointer.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
 #include "xinput.h"
 
 using std::string;
+using namespace cppual::Input;
 
-namespace cppual { namespace Input {
+namespace cppual { namespace Ui {
 
 namespace {
 
@@ -164,14 +166,13 @@ private:
 // ====================================================
 
 XQueue::XQueue () noexcept
-: m_pXCBHandle (IDisplay::hasValidInstance () ?
-					IDisplay::instance ()->native ().get<xcb_connection_t> () : nullptr)
+: IDisplayQueue (IDisplay::hasValidInstance () ? IDisplay::instance ()->native () : nullptr)
 { }
 
 bool XQueue::setRenderableEvents (Ui::IRenderable& pRenderable,
 								  mask_type        gFlags) noexcept
 {
-	if (pRenderable.connection ()->native ().get<xcb_connection_t> () != m_pXCBHandle)
+	if (pRenderable.connection ()->native () != display ())
 		return false;
 
 	u32 uMask = XCB_EVENT_MASK_NO_EVENT;
@@ -198,7 +199,7 @@ bool XQueue::setRenderableEvents (Ui::IRenderable& pRenderable,
 															  XCB_EVENT_MASK_PROPERTY_CHANGE;
 	}
 
-	xcb_change_window_attributes (m_pXCBHandle,
+	xcb_change_window_attributes (display ().get<xcb_connection_t> (),
 								  pRenderable.id ().get<u32> (),
 								  XCB_CW_EVENT_MASK,
 								  &uMask);
@@ -207,8 +208,8 @@ bool XQueue::setRenderableEvents (Ui::IRenderable& pRenderable,
 
 bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 {
-	XcbEvent pEv (bWait ? xcb_wait_for_event (m_pXCBHandle) :
-						  xcb_poll_for_event (m_pXCBHandle));
+	XcbEvent pEv (bWait ? xcb_wait_for_event (display ().get<xcb_connection_t> ()) :
+						  xcb_poll_for_event (display ().get<xcb_connection_t> ()));
 
 	if (!pEv) return false;
 
@@ -251,17 +252,17 @@ bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 		  pEv.get<XcbEvent::mouse_move_type> ()->event_y });
 		break;
 	case XcbEvent::KeyPress:
-		gEvent = Ui::KeyPressEvent (pEv.get<XcbEvent::key_press_type> ()->detail);
+		gEvent = Ui::KeyPressEvent ({ pEv.get<XcbEvent::key_press_type> ()->detail });
 		break;
 	case XcbEvent::KeyRelease:
-		gEvent = Ui::KeyReleaseEvent (pEv.get<XcbEvent::key_release_type> ()->detail);
+		gEvent = Ui::KeyReleaseEvent ({ pEv.get<XcbEvent::key_release_type> ()->detail });
 		break;
 	case XcbEvent::KeyMapNotify:
-		gEvent = Ui::KeysMappedEvent (pEv.get<XcbEvent::keymap_notify_type> ()->keys[0]/*,
+		gEvent = Ui::KeysMappedEvent ({ pEv.get<XcbEvent::keymap_notify_type> ()->keys[0]/*,
 				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[1],
 				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[2],
 				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[3],
-				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[4]*/);
+				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[4]*/ });
 #		ifdef DEBUG_MODE
 		std::cout << "keys map event\n";
 #		endif

@@ -23,26 +23,19 @@
 #define CPPUAL_PLATFORM_X_INPUT_H_
 #ifdef __cplusplus
 
-#include <cppual/ui/manager.h>
+#include <cppual/ui/events.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
 #include <xcb/xinput.h>
 
-namespace cppual { namespace Input {
+namespace cppual { namespace Ui {
 
-class DECL_EXPORT XQueue final : public IDisplayQueue
+struct DECL_EXPORT XQueue final : public IDisplayQueue
 {
-public:
 	XQueue () noexcept;
 	bool setRenderableEvents (Ui::IRenderable&, mask_type) noexcept;
-	bool pop_front (event_type&, bool wait) noexcept;
-
-	inline bool isValid () const noexcept
-	{ return m_pXCBHandle != nullptr; }
-
-private:
-	xcb_connection_t* const m_pXCBHandle;
+	bool pop_front           (event_type&, bool wait) noexcept;
 };
 
 } } // namespace Input

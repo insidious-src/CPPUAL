@@ -33,8 +33,8 @@ namespace cppual { namespace Ui {
 class View
 {
 public:
-	typedef Input::IDisplayQueue::event_type     event_type;
-	typedef Input::IDisplayQueue::Object         queue_type;
+	typedef Event                                event_type;
+	typedef EventQueue                           queue_type;
 	typedef Memory::GenericPolicy<View*>         allocator_type;
 	typedef CircularQueue<View*, allocator_type> container;
 	typedef std::size_t	                         size_type;

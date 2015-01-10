@@ -19,18 +19,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/multimedia/audio/sound.h>
-#include <cppual/types.h>
-#include <sndfile.h>
+
+
 #include <string>
 #include <locale>
+#include <sndfile.h>
+#include <cppual/types.h>
+#include <cppual/multimedia/audio/sound.h>
 
 using std::string;
 
 namespace cppual { namespace Audio {
 
-SoundData::SoundData (SoundData&& gObj) noexcept
-: m_pSndDesc (gObj.m_pSndDesc),
+Sound::Sound (Sound&& gObj) noexcept
+: m_gBuffer (gObj.m_gBuffer),
+  m_pSndDesc (gObj.m_pSndDesc),
   m_nSampleCount (gObj.m_nSampleCount),
   m_nSampleRate (gObj.m_nSampleRate),
   m_nChannelCount (gObj.m_nChannelCount),
@@ -41,18 +44,18 @@ SoundData::SoundData (SoundData&& gObj) noexcept
 	gObj.m_gFlags       = 0;
 }
 
-SoundData& SoundData::operator = (SoundData&& gObj) noexcept
+Sound& Sound::operator = (Sound&& gObj) noexcept
 {
 	if (this == &gObj) return *this;
 	return *this;
 }
 
-SoundData::~SoundData () noexcept
+Sound::~Sound () noexcept
 {
 	if (m_pSndDesc) sf_close (static_cast<SNDFILE*> (m_pSndDesc));
 }
 
-int SoundData::openReadOnly (string const& gFile) noexcept
+int Sound::openReadOnly (string const& gFile) noexcept
 {
 	close ();
 
@@ -71,8 +74,8 @@ int SoundData::openReadOnly (string const& gFile) noexcept
 		m_nSampleCount  = gInfo.frames;
 		m_nSampleRate   = gInfo.samplerate;
 
-		if (gInfo.seekable) m_gFlags += SoundData::Seekable;
-		m_gFlags += SoundData::Read;
+		if (gInfo.seekable) m_gFlags += Sound::Read | Sound::Seekable;
+		else m_gFlags += Sound::Read;
 
 		// using format to save an int copy
 		if (!(gInfo.format = onOpen ()))
@@ -87,23 +90,23 @@ int SoundData::openReadOnly (string const& gFile) noexcept
 	return false;
 }
 
-int SoundData::openReadOnly (cvoid*, size_type) noexcept
+int Sound::openReadOnly (cvoid*, size_type) noexcept
 {
 	close ();
-	m_gFlags = SoundData::Read;
+	m_gFlags = Sound::Read;
 	return false;
 }
 
-int SoundData::openWritable (string const&, int, int) noexcept
+int Sound::openWritable (string const&, int, int) noexcept
 {
 	close ();
-	m_gFlags = SoundData::Read | SoundData::Write;
+	m_gFlags = Sound::Read | Sound::Write;
 
 	onOpen ();
 	return false;
 }
 
-bool SoundData::save (string const& gFileName) noexcept
+bool Sound::save (string const& gFileName) noexcept
 {
 	if (m_pSndDesc)
 	{
@@ -114,7 +117,7 @@ bool SoundData::save (string const& gFileName) noexcept
 	return false;
 }
 
-void SoundData::close () noexcept
+void Sound::close () noexcept
 {
 	if (m_pSndDesc)
 	{
@@ -122,18 +125,18 @@ void SoundData::close () noexcept
 		sf_close (static_cast<SNDFILE*> (m_pSndDesc));
 
 		m_nSampleCount = m_nSampleRate = m_nChannelCount = 0;
-		m_gFlags.clear ();
+		m_gFlags = 0;
 	}
 }
 
-void SoundData::seek (seconds) noexcept
+void Sound::seek (std::chrono::seconds) noexcept
 {
-	if (m_gFlags.hasBit (SoundData::Seekable))
+	if (m_gFlags.hasBit (Sound::Seekable))
 	{
 	}
 }
 
-string SoundData::attribute (SoundAttrib::Value eType) const noexcept
+string Sound::attribute (Attribute eType) const noexcept
 {
 	return sf_get_string (static_cast<SNDFILE*> (m_pSndDesc), eType);
 }

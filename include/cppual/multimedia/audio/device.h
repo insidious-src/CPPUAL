@@ -23,11 +23,10 @@
 #define CPPUAL_AUDIO_DEVICE_H_
 #ifdef __cplusplus
 
+#include <cppual/noncopyable.h>
+#include <cppual/compute/context.h>
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/multimedia/audio/spatial.h>
-#include <cppual/compute/context.h>
-
-using namespace std::string_literals;
 
 namespace cppual { namespace Audio {
 

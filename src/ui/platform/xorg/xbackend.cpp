@@ -32,8 +32,8 @@ namespace { namespace Xcb { // optimize for unit internal usage
 
 inline Connection x11_connection (cchar* pName) noexcept
 {
-	static thread_local Connection pDisplay    = nullptr;
-	static thread_local cchar*     pCachedName = "";
+	static Connection pDisplay    = nullptr;
+	static cchar*     pCachedName = "";
 
 	return pDisplay and pName == pCachedName ?
 				pDisplay : pDisplay = XOpenDisplay (pCachedName = pName);

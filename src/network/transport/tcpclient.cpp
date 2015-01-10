@@ -50,13 +50,13 @@ bool TcpClient::connect (TcpStream& gStream, Address const& server, u16 port) no
 	gAddr.sin_family = AF_INET;
 	gAddr.sin_port   = htons (port);
 
-	if (resolveHostName (server.toString ().c_str (), &gAddr.sin_addr) != 0)
+	if (resolveHostName (server.toString ().c_str (), &gAddr.sin_addr))
 	{
 		::inet_pton (PF_INET, server.toString ().c_str (), &gAddr.sin_addr);
 	}
 
 	if (gStream.isValid ())
-		::connect (gStream.getId (),
+		::connect (gStream.id (),
 				   reinterpret_cast<sockaddr*> (&gAddr),
 				   sizeof (sockaddr_in));
 	return true;

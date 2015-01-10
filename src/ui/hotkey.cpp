@@ -39,7 +39,7 @@ void HotKey::setKeyCode (value_type const gCode) noexcept
 void HotKey::onKeyPress (u8 nKey) noexcept
 {
 	if (!m_bIsTriggered.load (std::memory_order_consume) and
-			!m_gKeyCode.mod and m_gKeyCode.key == nKey)
+			m_gKeyCode.key == nKey)
 	{
 		m_bIsTriggered.store (true, std::memory_order_relaxed);
 		signalTriggered ();
@@ -49,7 +49,7 @@ void HotKey::onKeyPress (u8 nKey) noexcept
 void HotKey::onKeyRelease (u8 nKey) noexcept
 {
 	if (m_bIsTriggered.load (std::memory_order_consume) and
-			!m_gKeyCode.mod and m_gKeyCode.key == nKey)
+			m_gKeyCode.key == nKey)
 	{
 		m_bIsTriggered.store (false, std::memory_order_relaxed);
 		signalReleased ();
@@ -60,7 +60,7 @@ void HotKey::onKeyNotify (value_type const gCode) noexcept
 {
 	if (m_bIsTriggered.load (std::memory_order_consume))
 	{
-		if (m_gKeyCode.key == gCode.key and m_gKeyCode.mod == gCode.mod)
+		if (m_gKeyCode.key == gCode.key)
 		{
 			m_bIsTriggered.store (true, std::memory_order_relaxed);
 			signalTriggered ();
@@ -68,7 +68,7 @@ void HotKey::onKeyNotify (value_type const gCode) noexcept
 	}
 	else
 	{
-		if (m_gKeyCode.key == gCode.key and m_gKeyCode.mod == gCode.mod)
+		if (m_gKeyCode.key == gCode.key)
 		{
 			m_bIsTriggered.store (false, std::memory_order_relaxed);
 			signalReleased ();

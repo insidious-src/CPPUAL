@@ -67,7 +67,7 @@ public:
 
 	void  setPlayingSpeed (float value) noexcept;
 	float playingSpeed () const noexcept;
-	void  setPlayingOffset (seconds value) noexcept;
+	void  setPlayingOffset (std::chrono::seconds value) noexcept;
 	int   playingOffset () noexcept;
 	void  setSampleOffset (float value) noexcept;
 	void  setByteOffset (float value) noexcept;

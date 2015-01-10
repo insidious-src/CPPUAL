@@ -37,7 +37,7 @@ class SoundSource;
 
 // ====================================================
 
-class SoundBuffer : public AudioObject, public SoundData
+class SoundBuffer : public AudioObject, public Sound
 {
 public:
 	typedef vector<SoundSource*>        vector_type;

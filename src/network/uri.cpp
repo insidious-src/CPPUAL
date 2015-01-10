@@ -25,12 +25,4 @@ using std::string;
 
 namespace cppual { namespace Network {
 
-void Uri::swap (Uri& gObj) noexcept
-{
-	m_gUri.swap (gObj.m_gUri);
-	std::swap_ranges (&m_uProtEnd, &m_uQueryEnd, &gObj.m_uProtEnd);
-}
-
-
-
 } } // namespace Network

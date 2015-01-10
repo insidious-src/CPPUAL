@@ -43,7 +43,7 @@ bool TcpListener::accept (TcpStream&) noexcept
 	sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
 	socklen_t   uLen  = sizeof (sockaddr_in);
 
-	replaceFromId (::accept (getId (),
+	replaceFromId (::accept (id (),
 							reinterpret_cast<sockaddr*> (&gAddr),
 							&uLen));
 	return true;
@@ -54,8 +54,8 @@ bool TcpListener::listen (u16 uPort) noexcept
 	if (!isValid () or m_bIsListening) return false;
 
 	sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
-	gAddr.sin_family = PF_INET;
-	gAddr.sin_port   = htons (uPort);
+	gAddr.sin_family  = PF_INET;
+	gAddr.sin_port    = htons (uPort);
 
 	if (m_gAddr.toString ().size ())
 		::inet_pton (PF_INET, m_gAddr.toString ().c_str (), &gAddr.sin_addr);
@@ -63,10 +63,10 @@ bool TcpListener::listen (u16 uPort) noexcept
 		gAddr.sin_addr.s_addr = INADDR_ANY;
 
 	int optval = 1;
-	::setsockopt (getId (), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
+	::setsockopt (id (), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
 
-	if (::bind (getId (), (sockaddr*) &gAddr, sizeof (gAddr)) > -1 or
-			::listen (getId (), 0) > -1)
+	if (::bind (id (), (sockaddr*) &gAddr, sizeof (gAddr)) > -1 or
+			::listen (id (), 0) > -1)
 		return m_bIsListening;
 
 	m_uPort = uPort;

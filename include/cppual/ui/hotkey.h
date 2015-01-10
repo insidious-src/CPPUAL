@@ -38,7 +38,7 @@ namespace cppual { namespace Ui {
 class HotKey
 {
 public:
-	typedef Input::Event<View>::KeyData value_type;
+	typedef Event::KeyData value_type;
 
 	HotKey () noexcept;
 	HotKey (value_type const) noexcept;

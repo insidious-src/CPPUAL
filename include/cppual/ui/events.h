@@ -28,9 +28,6 @@
 #include <cppual/flags.h>
 #include <cppual/circular_queue.h>
 #include <cppual/signal.h>
-#include <cppual/input/keyboard.h>
-#include <cppual/input/pointer.h>
-#include <cppual/input/joystick.h>
 #include <cppual/ui/wm.h>
 
 using std::atomic;
@@ -39,13 +36,8 @@ using std::shared_ptr;
 
 namespace cppual { namespace Ui {
 
-class View;
-
-} } // namespace Ui
-
-namespace cppual { namespace Input {
-
-struct  IDisplayQueue;
+class   View;
+class   IDisplayQueue;
 typedef shared_ptr<IDisplayQueue> shared_queue;
 
 struct SystemMessage final
@@ -60,19 +52,17 @@ struct SystemMessage final
 
 // =========================================================
 
-template <>
-class Event <Ui::View>
+class Event
 {
 public:
-	typedef Joystick::Axis axis_type;
-	typedef std::size_t	   size_type;
+	typedef std::size_t size_type;
 
 	enum Type
 	{
 		Null          = 0,
 		KeyPressed    = 1 <<  0,
 		KeyReleased   = 1 <<  1,
-		KeyMap     = 1 <<  2,
+		KeyMap        = 1 <<  2,
 		ButtonDown    = 1 <<  3,
 		ButtonUp      = 1 <<  4,
 		PointerMove   = 1 <<  5,
@@ -92,27 +82,16 @@ public:
 
 	enum
 	{
-		Key		  = KeyPressed  | KeyReleased   | KeyMap,
-		Pointer	  = ButtonDown  | ButtonUp      | PointerMove | Scroll,
-		Touch	  = TouchPress  | TouchRelease  | TouchMove,
+		Key       = KeyPressed | KeyReleased  | KeyMap,
+		Pointer	  = ButtonDown | ButtonUp     | PointerMove | Scroll,
+		Touch	  = TouchPress | TouchRelease | TouchMove,
 		Window    = Paint | Focus   | Size   | Move   | Visibility | Property,
 		AllEvents = Key   | Pointer | Touch  | Window | SystemMessage
 	};
 
-	enum KeyMod
-	{
-		Alt     = 1 << 0,
-		Control = 1 << 1,
-		Shift   = 1 << 2,
-		System  = 1 << 3
-	};
-
-	typedef BitSet<KeyMod> KeyMods;
-
 	struct KeyData
 	{
-		u8      key;
-		KeyMods mod;
+		u8 key;
 	};
 
 	struct MouseButtonData
@@ -186,7 +165,6 @@ public:
 
 	union Data
 	{
-		u8              key;
 		KeyData         keyCode;
 		MouseButtonData mouseButton;
 		MouseMoveData   mouseMove;
@@ -221,10 +199,10 @@ protected:
 
 struct EventSignals final : NonCopyable
 {
-	typedef Event<Ui::View> event_type;
+	typedef Event event_type;
 
-	Signal<void(u8)>                                 keyPress;
-	Signal<void(u8)>                                 keyRelease;
+	Signal<void(event_type::KeyData)>                keyPress;
+	Signal<void(event_type::KeyData)>                keyRelease;
 	Signal<void(event_type::KeyData)>                keyNotify;
 	Signal<void(event_type::MouseButtonData const&)> mousePress;
 	Signal<void(event_type::MouseButtonData const&)> mouseRelease;
@@ -247,24 +225,32 @@ struct EventSignals final : NonCopyable
 
 // =========================================================
 
-struct IDisplayQueue : public NonCopyableVirtual
+class IDisplayQueue : public NonCopyableVirtual
 {
-	typedef BitSet<Event<Ui::View>::Type> mask_type;
-	typedef Event<Ui::View>               event_type;
-	typedef Queue<Ui::View>               Object;
+public:
+	typedef BitSet<Event::Type> mask_type;
+	typedef Event               event_type;
 
 	virtual bool pop_front (event_type&, bool wait) noexcept = 0;
-	virtual bool isValid () const noexcept = 0;
-	virtual bool setRenderableEvents (Ui::IRenderable&, mask_type) noexcept = 0;
+	virtual bool setRenderableEvents (IRenderable&, mask_type) noexcept = 0;
 
 	static IDisplayQueue* instance ();
 	static bool           hasValidInstance () noexcept;
+
+	Connection display () const noexcept { return m_display; }
+	bool       isValid () const noexcept { return m_display; }
+
+	constexpr IDisplayQueue (Connection display) noexcept
+	: m_display (display)
+	{ }
+
+private:
+	Connection m_display;
 };
 
 // =========================================================
 
-template <>
-class Queue <Ui::View> : public NonCopyable
+class EventQueue : public NonCopyable
 {
 public:
 	typedef IDisplayQueue::event_type event_type;
@@ -273,26 +259,26 @@ public:
 	typedef std::size_t               size_type;
 	typedef atomic<mask_type>         atomic_mask;
 
-	Queue () noexcept;
-	Queue (mask_type accept_events) noexcept;
+	EventQueue () noexcept;
+	EventQueue (mask_type accept_events) noexcept;
 	static EventSignals& events () noexcept;
 
 	bool pop_front (event_type& next_event, bool wait) noexcept;
 	int  poll (bool wait = true) noexcept;
 
-	inline mask_type accepted () const noexcept
+	mask_type accepted () const noexcept
 	{ return m_gAcceptedEvents.load (); }
 
-	inline void push_back (event_type const& gEvent) noexcept
+	void push_back (event_type const& gEvent) noexcept
 	{ m_gEventQueue.push_back (gEvent); }
 
-	inline void accept (mask_type gEvents) noexcept
+	void accept (mask_type gEvents) noexcept
 	{ m_gAcceptedEvents = gEvents; }
 
-	inline void quit () noexcept
+	void quit () noexcept
 	{ m_bPoll = false; }
 
-	inline bool isPolling () const noexcept
+	bool isPolling () const noexcept
 	{ return m_bPoll.load (); }
 
 private:

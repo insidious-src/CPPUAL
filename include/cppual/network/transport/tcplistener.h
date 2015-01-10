@@ -28,11 +28,6 @@
 
 namespace cppual { namespace Network {
 
-struct TcpClient
-{
-	static bool connect (TcpStream&, Address const&, u16 port) noexcept;
-};
-
 class TcpListener final : public TransportSocket
 {
 public:
@@ -42,7 +37,7 @@ public:
 	bool accept (TcpStream&) noexcept;
 	bool listen (u16 port) noexcept;
 
-	inline bool isListening () const noexcept
+	bool isListening () const noexcept
 	{ return m_bIsListening; }
 
 private:

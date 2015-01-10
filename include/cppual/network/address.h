@@ -34,7 +34,8 @@ namespace cppual { namespace Network {
 class Address final
 {
 private:
-	static cu8 v4_mapped_prefix[12];
+	static constexpr cu8 v4_mapped_prefix[12] =
+	{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
 
 public:
 	Address () noexcept = default;

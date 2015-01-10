@@ -24,9 +24,8 @@
 #ifdef __cplusplus
 
 #include <string>
-#include <cppual/mstring.h>
+#include <cppual/network/uri_parts.h>
 
-using cppual::Text::FastString;
 using std::basic_string;
 using std::u16string;
 using std::u32string;
@@ -42,7 +41,6 @@ public:
 	typedef value_type const*           const_pointer;
 	typedef std::size_t                 size_type;
 	typedef string                      string_type;
-	typedef FastString<value_type>      fstring_type;
 	typedef string_type::const_iterator iterator;
 	typedef string_type::const_iterator const_iterator;
 
@@ -53,7 +51,6 @@ public:
 
 	bool isValid () const;
 	bool isAbsolute () const;
-	void swap (Uri&) noexcept;
 
 	inline const_iterator begin () const noexcept
 	{ return m_gUri.begin (); }
@@ -103,8 +100,11 @@ public:
 	inline u32string toU32string () const
 	{ return u32string (); }
 
-	inline fstring_type toFastString () const
-	{ return fstring_type (nullptr); }
+	void swap (Uri& gObj) noexcept
+	{
+		m_gUri.swap (gObj.m_gUri);
+		std::swap_ranges (&m_uProtEnd, &m_uQueryEnd, &gObj.m_uProtEnd);
+	}
 
 private:
 	string_type m_gUri;

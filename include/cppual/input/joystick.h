@@ -34,16 +34,9 @@ namespace cppual { namespace Input {
 
 struct Joystick;
 
-template <typename>
-class Event;
-
-template <typename>
-class Queue;
-
 // =========================================================
 
-template <>
-class Event <Joystick>
+class JoystickEvent
 {
 public:
 	typedef std::size_t size_type;
@@ -96,11 +89,10 @@ private:
 
 // =========================================================
 
-template <>
-class Queue <Joystick> : NonConstructible
+class JoystickQueue : NonConstructible
 {
 public:
-	typedef Event<Joystick> event_type;
+	typedef JoystickEvent event_type;
 
 	static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };

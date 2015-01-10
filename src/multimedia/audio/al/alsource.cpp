@@ -274,9 +274,9 @@ float SoundSource::playingSpeed () const noexcept
 	return fValue;
 }
 
-void SoundSource::setPlayingOffset (seconds nValue) noexcept
+void SoundSource::setPlayingOffset (std::chrono::seconds nValue) noexcept
 {
-	if (id ()) alSourcei (id (), AL::SecOffset, nValue.count ());
+	if (id ()) alSourcei (id (), AL::SecOffset, static_cast<int> (nValue.count ()));
 }
 
 int SoundSource::playingOffset () noexcept

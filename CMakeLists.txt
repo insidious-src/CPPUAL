@@ -128,6 +128,7 @@ add_library(cppual-network SHARED
 	include/cppual/network/packet.h
 	src/network/uri.cpp
 	include/cppual/network/uri.h
+	include/cppual/network/uri_parts.h
 	src/network/transport/socket.cpp
 	include/cppual/network/transport/socket.h
 	src/network/transport/tcp.cpp

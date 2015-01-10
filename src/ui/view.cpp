@@ -134,11 +134,11 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 			}
 		}
 
-		Input::IDisplayQueue::instance ()->
+		IDisplayQueue::instance ()->
 				setRenderableEvents (*m_pRenderable,
-									 Input::IDisplayQueue::event_type::Key     |
-									 Input::IDisplayQueue::event_type::Pointer |
-									 Input::IDisplayQueue::event_type::Window);
+									 event_type::Key     |
+									 event_type::Pointer |
+									 event_type::Window);
 	}
 
 	if (pParentObj)

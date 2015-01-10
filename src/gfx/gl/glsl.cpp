@@ -349,7 +349,7 @@ bool SLProgram::loadFromBinary (string const& gFile)
 					glGetProgramiv    (id (), GL::LinkStatus, &nStatus) :
 					glGetProgramivARB (id (), GL::LinkStatus, &nStatus);
 
-		m_gShaderTypes.clear ();
+		m_gShaderTypes = 0;
 
 		if (nStatus == GL::FALSE)
 		{

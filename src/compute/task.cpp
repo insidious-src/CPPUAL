@@ -19,12 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/compute/task.h>
-#include <atomic>
 #include <deque>
+#include <atomic>
+#include <thread>
+#include <cppual/compute/task.h>
 
 using std::atomic_uint_fast16_t;
 using std::deque;
+using std::thread;
 
 namespace cppual { namespace Compute {
 

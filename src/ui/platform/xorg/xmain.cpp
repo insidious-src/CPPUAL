@@ -23,11 +23,10 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-#include "xbackend.h"
 #include "xinput.h"
 #include "xsurface.h"
+#include "xbackend.h"
 
-using cppual::Input::XQueue;
 using namespace cppual::Ui;
 
 namespace cppual { namespace Platform {
@@ -35,23 +34,23 @@ namespace cppual { namespace Platform {
 struct XPlatform final : public IService
 {
 	shared_queue      createQueueObject ();
-	shared_renderable createRenderable (Rect const&, u32, IDisplay*);
-	shared_display    connectDisplay (cchar*);
+	shared_renderable createRenderable  (Rect const&, u32, IDisplay*);
+	shared_display    connectDisplay    (cchar*);
 };
 
 shared_display XPlatform::connectDisplay (cchar* pDeviceName)
 {
-	return std::move (shared_display (new XDisplay (pDeviceName)));
+	return shared_display (new XDisplay (pDeviceName));
 }
 
 shared_queue XPlatform::createQueueObject ()
 {
-	return std::move (shared_queue (new XQueue));
+	return shared_queue (new XQueue);
 }
 
-shared_renderable XPlatform::createRenderable (Rect const&  gRect,
-											   u32          nScreen,
-											   IDisplay* pDisplay)
+shared_renderable XPlatform::createRenderable (Rect const& gRect,
+											   u32         nScreen,
+											   IDisplay*   pDisplay)
 {
 	return shared_renderable (new XRenderable (gRect, nScreen, pDisplay));
 }

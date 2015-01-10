@@ -38,7 +38,7 @@ bool Keyboard::isConnected () noexcept
 	return true;
 }
 
-bool Keyboard::queue_type::pop_front (event_type&, bool) noexcept
+bool KeyQueue::pop_front (event_type&, bool) noexcept
 {
 	return false;
 }

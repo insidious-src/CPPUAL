@@ -63,12 +63,12 @@ public:
 	};
 
 	inline ~TransportSocket () noexcept { close (); }
-	inline socket_id  getId () const noexcept { return m_nId; }
-	inline SocketType getType () const noexcept { return m_eProtocol; }
+	inline socket_id  id () const noexcept { return m_nId; }
+	inline SocketType type () const noexcept { return m_eProtocol; }
 	inline bool       isValid () const noexcept { return m_nId != sm_nInvalid; }
 	inline bool       isBlocking () const noexcept { return m_bIsBlocking; }
 
-	inline static socket_id nullSocket () noexcept
+	static socket_id nullSocket () noexcept
 	{ return sm_nInvalid; }
 
 protected:

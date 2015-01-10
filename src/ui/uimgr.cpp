@@ -22,15 +22,13 @@
 #include <cppual/ui/uimgr.h>
 #include <cppual/ui/skins/default.h>
 
-using cppual::Input::IDisplayQueue;
-
 namespace cppual { namespace Ui { namespace UiManager {
 
 bool setSkin (ISkin* pSkin) noexcept
 {
 	if (!pSkin) return false;
 
-	IDisplayQueue::Object::events ().winPaint (PaintEvent (nullptr, Rect ()).data ().paint);
+	EventQueue::events ().winPaint (PaintEvent (nullptr, Rect ()).data ().paint);
 	return true;
 }
 

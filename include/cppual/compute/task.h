@@ -28,7 +28,6 @@
 #include <cppual/functional.h>
 #include <cppual/circular_queue.h>
 #include <cppual/noncopyable.h>
-#include <cppual/object.h>
 #include <cppual/types.h>
 
 using std::shared_lock;
@@ -38,7 +37,7 @@ using std::shared_timed_mutex;
 
 namespace cppual { namespace Compute {
 
-class SerialQueue : public cppual::ThreadObject
+class SerialQueue
 {
 public:
 	typedef condition_variable_any   cv_type;

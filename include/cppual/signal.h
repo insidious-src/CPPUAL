@@ -68,7 +68,8 @@ public:
 		for (auto i = 0; i < size; ++i)
 		{
 			if (m_gSlots[i] != nullptr)
-				collection.emplace_back (m_gSlots[i] (std::forward<Args> (args)...));
+				collection.emplace_back
+						(std::move (m_gSlots[i] (std::forward<Args> (args)...)));
 		}
 
 		return std::move (collection);
@@ -168,8 +169,8 @@ public:
 			  >
 	friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
 	connect (Signal<TRetType_(TArgs_...), Allocator_>&,
-			 ClassType<TClass>&,
 			 TRetType_ (TClass::*)(TArgs_...),
+			 ClassType<TClass>&,
 			 bool);
 
 	template <typename TClass,
@@ -216,8 +217,8 @@ template <typename TClass,
 inline
 typename Signal<TRetType(TArgs...), Allocator>::slot_type
 connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
-		 ClassType<TClass>& pObj,
 		 TRetType (TClass::* fn)(TArgs...),
+		 ClassType<TClass>& pObj,
 		 bool bTop = false)
 {
 	if (bTop)

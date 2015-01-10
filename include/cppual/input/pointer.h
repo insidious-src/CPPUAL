@@ -32,14 +32,7 @@ namespace cppual { namespace Input {
 struct Touch;
 struct Pointer;
 
-template <typename>
-class Event;
-
-template <typename>
-class Queue;
-
-template <>
-class Event <Pointer>
+class PointerEvent
 {
 public:
 	typedef u16 size_type;
@@ -85,8 +78,7 @@ private:
 // =========================================================
 
 // specialized for touch gestures
-template <>
-class Event <Touch>
+class TouchEvent
 {
 public:
 	typedef u16 size_type;
@@ -109,22 +101,20 @@ private:
 
 // =========================================================
 
-template <>
-class Queue <Pointer> : NonConstructible
+class PointerQueue : NonConstructible
 {
 public:
-	typedef Event<Pointer> event_type;
+	typedef PointerEvent event_type;
 
 	static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
 
 // =========================================================
 
-template <>
-class Queue <Touch> : NonConstructible
+class TouchQueue : NonConstructible
 {
 public:
-	typedef Event<Touch> event_type;
+	typedef TouchEvent event_type;
 
 	static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
@@ -133,7 +123,7 @@ public:
 
 struct Pointer
 {
-	typedef Queue<Pointer> queue_type;
+	typedef PointerQueue queue_type;
 
 	enum
 	{

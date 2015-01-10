@@ -31,7 +31,7 @@
 
 using std::string;
 using cppual::Process::Module;
-using cppual::Input::shared_queue;
+using cppual::Ui::shared_queue;
 using cppual::Ui::shared_display;
 using cppual::Ui::weak_display;
 using cppual::Ui::shared_renderable;

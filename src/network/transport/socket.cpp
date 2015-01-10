@@ -93,8 +93,8 @@ socket_id TransportSocket::create (SocketType eProt) noexcept
 
 void TransportSocket::replaceFromId (socket_id nId) noexcept
 {
-	if (nId == nullSocket ()) return;
-	close ();
+	if (nId   == nullSocket ()) return;
+	if (m_nId != nullSocket ()) ::close (m_nId);
 	m_nId = nId;
 }
 

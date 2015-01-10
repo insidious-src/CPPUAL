@@ -23,7 +23,7 @@
 
 namespace cppual { namespace Input {
 
-bool Pointer::queue_type::pop_front (event_type&, bool) noexcept
+bool PointerQueue::pop_front (event_type&, bool) noexcept
 {
 	return false;
 }

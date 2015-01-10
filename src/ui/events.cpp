@@ -25,14 +25,20 @@
 using std::string;
 using cppual::Platform::IService;
 
-namespace cppual { namespace Input {
+namespace cppual { namespace Ui {
 
 namespace { namespace Internal { // optimize for internal unit usage
 
 inline shared_queue& queue () noexcept
 {
-	static shared_queue platform_queue (nullptr);
+	static shared_queue platform_queue;
 	return platform_queue;
+}
+
+inline EventSignals& events () noexcept
+{
+	static EventSignals event_signals;
+	return event_signals;
 }
 
 void attachQueue ()
@@ -45,63 +51,63 @@ void attachQueue ()
 
 // =========================================================
 
-void IDisplayQueue::event_type::operator () () noexcept
+void Event::operator () () noexcept
 {
 	switch (type ())
 	{
 	case KeyPressed:
-		IDisplayQueue::Object::events ().keyPress (data ().key);
+		Internal::events ().keyPress (data ().keyCode);
 		break;
 	case KeyReleased:
-		IDisplayQueue::Object::events ().keyRelease (data ().key);
+		Internal::events ().keyRelease (data ().keyCode);
 		break;
 	case KeyMap:
-		IDisplayQueue::Object::events ().keyNotify (data ().keyCode);
+		Internal::events ().keyNotify (data ().keyCode);
 		break;
 	case ButtonDown:
-		IDisplayQueue::Object::events ().mousePress (data ().mouseButton);
+		Internal::events ().mousePress (data ().mouseButton);
 		break;
 	case ButtonUp:
-		IDisplayQueue::Object::events ().mouseRelease (data ().mouseButton);
+		Internal::events ().mouseRelease (data ().mouseButton);
 		break;
 	case PointerMove:
-		IDisplayQueue::Object::events ().mouseMove (data ().mouseMove);
+		Internal::events ().mouseMove (data ().mouseMove);
 		break;
 	case Scroll:
-		IDisplayQueue::Object::events ().scroll (data ().scroll);
+		Internal::events ().scroll (data ().scroll);
 		break;
 	case TouchPress:
-		IDisplayQueue::Object::events ().touchPress (data ().touch);
+		Internal::events ().touchPress (data ().touch);
 		break;
 	case TouchRelease:
-		IDisplayQueue::Object::events ().touchRelease (data ().touch);
+		Internal::events ().touchRelease (data ().touch);
 		break;
 	case TouchMove:
-		IDisplayQueue::Object::events ().touchMove (data ().touch);
+		Internal::events ().touchMove (data ().touch);
 		break;
 	case SystemMessage:
-		IDisplayQueue::Object::events ().sysMessage (data ().message);
+		Internal::events ().sysMessage (data ().message);
 		break;
 	case Paint:
-		IDisplayQueue::Object::events ().winPaint (data ().paint);
+		Internal::events ().winPaint (data ().paint);
 		break;
 	case Size:
-		IDisplayQueue::Object::events ().winSize (data ().size);
+		Internal::events ().winSize (data ().size);
 		break;
 	case Move:
-		IDisplayQueue::Object::events ().winMove (data ().move);
+		Internal::events ().winMove (data ().move);
 		break;
 	case Focus:
-		IDisplayQueue::Object::events ().winFocus (data ().state);
+		Internal::events ().winFocus (data ().state);
 		break;
 	case Step:
-		IDisplayQueue::Object::events ().winStep (data ().state);
+		Internal::events ().winStep (data ().state);
 		break;
 	case Visibility:
-		IDisplayQueue::Object::events ().winVisible (data ().visibility);
+		Internal::events ().winVisible (data ().visibility);
 		break;
 	case Property:
-		IDisplayQueue::Object::events ().winProperty (data ().property);
+		Internal::events ().winProperty (data ().property);
 		break;
 	case Null:
 		std::cout << "null event\n";
@@ -149,19 +155,24 @@ EventSignals::EventSignals () noexcept
 
 // =========================================================
 
-IDisplayQueue::Object::Queue () noexcept
+EventQueue::EventQueue () noexcept
 : m_gEventQueue (25),
   m_gAcceptedEvents (event_type::AllEvents),
   m_bPoll ()
 { }
 
-IDisplayQueue::Object::Queue (mask_type nEvents) noexcept
+EventQueue::EventQueue (mask_type nEvents) noexcept
 : m_gEventQueue (25),
   m_gAcceptedEvents (nEvents),
   m_bPoll ()
 { }
 
-bool IDisplayQueue::Object::pop_front (event_type& gEvent, bool bWait) noexcept
+EventSignals& EventQueue::events () noexcept
+{
+	return Internal::events ();
+}
+
+bool EventQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 {
 	if (!m_gEventQueue.empty ())
 	{
@@ -174,7 +185,7 @@ bool IDisplayQueue::Object::pop_front (event_type& gEvent, bool bWait) noexcept
 	return gEvent.type () != event_type::Null;
 }
 
-int IDisplayQueue::Object::poll (bool bWait) noexcept
+int EventQueue::poll (bool bWait) noexcept
 {
 	event_type gEvent (event_type::Null);
 	m_bPoll.store (bWait);
@@ -194,12 +205,6 @@ int IDisplayQueue::Object::poll (bool bWait) noexcept
 	while (m_bPoll.load (std::memory_order_relaxed));
 
 	return 0;
-}
-
-EventSignals& IDisplayQueue::Object::events () noexcept
-{
-	static EventSignals event_signals;
-	return event_signals;
 }
 
 } } // namespace Input

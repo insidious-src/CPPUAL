@@ -29,9 +29,6 @@
 
 namespace cppual { namespace Network {
 
-struct TcpClient;
-class  TcpListener;
-
 class TcpStream final : public TransportSocket
 {
 public:
@@ -40,13 +37,13 @@ public:
 
 	TcpStream& operator << (Packet const&) noexcept; // send
 	TcpStream& operator >> (Packet&) noexcept;       // receive
-	TcpStream () noexcept;
+	TcpStream  () noexcept;
 	~TcpStream () noexcept;
 
 	void disconnect () noexcept;
 
-	inline Address getPeerIp () const noexcept { return m_gPeerAddr; }
-	inline u16     getPeerPort () const noexcept { return m_nPeerPort; }
+	Address getPeerIp   () const noexcept { return m_gPeerAddr; }
+	u16     getPeerPort () const noexcept { return m_nPeerPort; }
 
 private:
 	Address m_gPeerAddr;
@@ -55,8 +52,6 @@ private:
 
 	TcpStream (TcpStream&& stream) noexcept;
 	TcpStream (Address const& address, u16 port) noexcept;
-	friend struct TcpClient;
-	friend class  TcpListener;
 };
 
 } } // namespace Network

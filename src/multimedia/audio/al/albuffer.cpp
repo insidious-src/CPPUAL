@@ -136,7 +136,7 @@ SoundBuffer::SoundBuffer (SoundBuffer&& gObj) noexcept
 
 SoundBuffer::SoundBuffer (SoundBuffer const& gObj) noexcept
 : AudioObject (gObj),
-  SoundData (),
+  Sound (),
   m_gSources (),
   m_pContext (Instance::current ())
 { }
