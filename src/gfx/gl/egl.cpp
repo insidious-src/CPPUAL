@@ -24,8 +24,6 @@
 #include <cppual/gfx/gl/egl.h>
 #include "gldef.h"
 
-#define EGL_API_BITS EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT | EGL_OPENGL_BIT
-
 namespace cppual { namespace Graphics { namespace GL {
 
 namespace { namespace EGL { // optimize for internal unit usage
@@ -139,70 +137,86 @@ inline void initialize (void* dsp)
 
 // ====================================================
 
-constexpr uint api (Context::API eAPI) noexcept
+constexpr uint api (API eAPI) noexcept
 {
-	return eAPI == Context::API::OpenGL ?
+	return eAPI == API::OpenGL ?
 				EGL_OPENGL_API :
-				eAPI == Context::API::OpenGLES ?
-					EGL_OPENGL_ES_API : EGL_NONE;
+				eAPI == API::OpenGLES ?
+					EGL_OPENGL_ES_API :	EGL_NONE;
+}
+
+constexpr int32 api_bits (API eAPI) noexcept
+{
+	return eAPI == API::OpenGL ?
+				EGL_OPENGL_BIT :
+				eAPI == API::OpenGLES ?
+					EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT : EGL_NONE;
 }
 
 // ====================================================
 
-inline void* createBuffer (Config const& gConf, IResource::value_type uWndHandle)
+inline void* createSurface (Config const& gConf, IResource::value_type uWndHandle, bool bDouble)
 {
-//	constexpr cint32 nSurfaceAttribs[]
+	cint32 nSurfaceAttribs[]
+	{
+		EGL_RENDER_BUFFER, bDouble ? EGL_BACK_BUFFER : EGL_SINGLE_BUFFER,
+		EGL_NONE
+	};
+
+	EGLSurface pSurface = eglCreateWindowSurface (gConf.display (),
+												  gConf,
+												  uWndHandle,
+												  nSurfaceAttribs);
+
+	if (!pSurface) error<Create> ();
+	return pSurface;
+}
+
+inline void* createPBuffer (Config const& gConf, point2u gSize)
+{
+
+	cint32 nPBufferAttribs[] =
+	{
+		EGL_WIDTH,          static_cast<int32> (gSize.x),
+		EGL_HEIGHT,         static_cast<int32> (gSize.y),
+		EGL_COLORSPACE,     EGL_COLORSPACE_sRGB,
+		EGL_ALPHA_FORMAT,   EGL_ALPHA_FORMAT_NONPRE,
+		EGL_TEXTURE_FORMAT, EGL_TEXTURE_RGBA,
+		EGL_TEXTURE_TARGET, EGL_TEXTURE_2D,
+		EGL_NONE
+	};
+
+
+	EGLSurface m_pPixelBuffer = eglCreatePbufferSurface (gConf.display (),
+														 gConf,
+														 nPBufferAttribs);
+
+	if (!m_pPixelBuffer) error<Create> ();
+	return m_pPixelBuffer;
+}
+
+inline void* createPixmap (Config const& gConf)
+{
+
+//	cint32 nSurfaceAttribs[]
 //	{
 //		EGL_COLORSPACE,   EGL_COLORSPACE_sRGB,
 //		EGL_ALPHA_FORMAT, EGL_ALPHA_FORMAT_NONPRE,
 //		EGL_NONE
 //	};
 
-	constexpr cint32 egl_surface_attribs[]
-	{
-		EGL_RENDER_BUFFER, EGL_BACK_BUFFER,
-		EGL_NONE
-	};
 
-//	cint32 nPBufferAttribs[] =
-//	{
-//		//EGL_WIDTH,          1,
-//		//EGL_HEIGHT,         1,
-//		EGL_COLORSPACE,     EGL_COLORSPACE_sRGB,
-//		EGL_ALPHA_FORMAT,   EGL_ALPHA_FORMAT_NONPRE,
-//		EGL_TEXTURE_FORMAT, EGL_TEXTURE_RGBA,
-//		EGL_TEXTURE_TARGET, EGL_TEXTURE_2D,
-//		EGL_NONE
-//	};
+	EGLSurface m_pSurface = eglCreatePixmapSurface (gConf.display (),
+													gConf,
+													0,
+													nullptr);
 
-	EGLSurface pSurface = eglCreateWindowSurface (gConf.display (),
-												  gConf,
-												  uWndHandle,
-												  egl_surface_attribs);
-
-	if (!pSurface) error<Create> ();
-	return pSurface;
-
-//	if (!pTarget) return false;
-//	}
-
-//	if (getFormat ().flags.hasBit (PixelFlag::DoubleBuffer))
-//	{
-//		m_pPixelBuffer = eglCreatePbufferSurface (m_pTarget->getDisplay ().lock ()->getEGLHandle (),
-//												  pConfig,
-//												  nPBufferAttribs);
-//		if (!m_pPixelBuffer) return false;
-//	}
-
-	//	m_pSurface = eglCreatePixmapSurface (m_pTarget->getDisplay ().lock ()->getEGLHandle (),
-	//										 pConfig,
-	//										 0,
-	//										 nullptr);
+	if (!m_pSurface) error<Create> ();
+	return m_pSurface;
 }
 
 inline EGLContext createGC (Config const&     gConf,
 							GFXVersion const& version,
-							Context::API      eAPI,
 							void*             pShared)
 {
 	cint32 nContextAttribs[]
@@ -211,7 +225,9 @@ inline EGLContext createGC (Config const&     gConf,
 		EGL_NONE
 	};
 
-	Context::bind (eAPI);
+	eglBindAPI (EGL::api (gConf.api ())) ?
+					true : throw bad_parameter ("the specified worthless API "
+												"is NOT supported by the EGL implementation");
 
 	EGLContext pContext = eglCreateContext (gConf.display (),
 											gConf,
@@ -226,15 +242,13 @@ inline EGLContext createGC (Config const&     gConf,
 
 // ====================================================
 
-Config::Config (controller dsp, PixelFormat const& gFormat)
-: m_pDisplay (eglGetDisplay (dsp.get<EGLNativeDisplayType> ()))
+Config::Config (controller dsp, format_type gFormat, API eAPI)
+: m_pDisplay (eglGetDisplay (dsp.get<EGLNativeDisplayType> ())),
+  m_pCfg (),
+  m_gFormat (),
+  m_eAPI (eAPI)
 {
-	if (!m_pDisplay)
-	{
-		m_pCfg    = pointer ();
-		m_gFormat = PixelFormat ();
-		return;
-	}
+	if (!m_pDisplay) throw std::logic_error ("invalid display");
 
 	int32 nNumConfigs = 0;
 
@@ -246,9 +260,10 @@ Config::Config (controller dsp, PixelFormat const& gFormat)
 		EGL_ALPHA_SIZE,      gFormat.alpha,
 		EGL_DEPTH_SIZE,      gFormat.depth,
 		EGL_STENCIL_SIZE,    gFormat.stencil,
-		EGL_SURFACE_TYPE,    gFormat.flags.hasBit (PixelFlag::Drawable) ? EGL_WINDOW_BIT :
-																		  EGL_PBUFFER_BIT,
-		EGL_RENDERABLE_TYPE, EGL_API_BITS,
+		EGL_SURFACE_TYPE,    gFormat.flags.hasBit (PixelFlag::Drawable) ?
+					EGL_WINDOW_BIT : 0 | gFormat.flags.hasBit (PixelFlag::Bitmap) ?
+						EGL_PBUFFER_BIT : 0,
+		EGL_RENDERABLE_TYPE, EGL::api_bits (eAPI),
 		EGL_NONE
 	};
 
@@ -264,7 +279,7 @@ PixelFormat Config::toFormat () const
 {
 	if (!m_pDisplay or !m_pCfg) return PixelFormat ();
 
-	static int nAttribs[Count];
+	int nAttribs[Count];
 
 	eglGetConfigAttrib (m_pDisplay, m_pCfg, EGL_RED_SIZE, &nAttribs[Red]);
 	eglGetConfigAttrib (m_pDisplay, m_pCfg, EGL_GREEN_SIZE, &nAttribs[Green]);
@@ -282,8 +297,8 @@ PixelFormat Config::toFormat () const
 		static_cast<u8> (nAttribs[Alpha]),
 		static_cast<u8> (nAttribs[Depth]),
 		static_cast<u8> (nAttribs[Stencil]),
-		(nAttribs[SurfaceType] & EGL_WINDOW_BIT ? PixelFlag::Drawable : 0) |
-				PixelFlag::Accelerated,
+		(nAttribs[SurfaceType] & EGL_WINDOW_BIT) ? PixelFlag::Drawable : 0 |
+				(nAttribs[SurfaceType] & EGL_PBUFFER_BIT) ? PixelFlag::Bitmap : 0,
 		ColorType::TRUE
 	};
 }
@@ -348,14 +363,36 @@ void Config::print ()
 
 // ====================================================
 
-Surface::Surface (Config const& gConf, value_type uElem)
-: m_pConf (&gConf),
-  m_pHandle  (EGL::createBuffer (gConf, uElem))
+Surface::Surface (Config const& gConf, value_type uElem, bool bDouble)
+: m_pConf   (&gConf),
+  m_pHandle (EGL::createSurface (gConf, uElem, bDouble)),
+  m_pOwner  (m_pHandle ? uElem : nullptr),
+  m_eType   (bDouble ? Type::DoubleBuffer : Type::Drawable)
+{ }
+
+Surface::Surface (Config const& gConf, point2u gSize)
+: m_pConf   (&gConf),
+  m_pHandle (EGL::createPBuffer (gConf, gSize)),
+  m_pOwner  (),
+  m_eType   (Type::PBuffer)
+{ }
+
+Surface::Surface (Config const& gConf)
+: m_pConf   (&gConf),
+  m_pHandle (EGL::createPixmap (gConf)),
+  m_pOwner  (),
+  m_eType   (Type::Pixmap)
 { }
 
 Surface::Surface (Surface const& gObj)
-: m_pConf (gObj.m_pConf),
-  m_pHandle ()
+: m_pConf   (gObj.m_pConf),
+  m_pHandle (gObj.m_eType == Type::Pixmap ?
+				 EGL::createPixmap (*m_pConf) : gObj.m_eType == Type::PBuffer ?
+					 EGL::createPBuffer (*m_pConf, gObj.size ()) :
+					 EGL::createSurface (*m_pConf, gObj.m_pOwner,
+										 gObj.m_eType == Type::DoubleBuffer)),
+  m_pOwner  (m_pHandle ? gObj.m_pOwner : nullptr),
+  m_eType   (gObj.m_eType)
 { }
 
 Surface& Surface::operator = (Surface&& gObj) noexcept
@@ -365,58 +402,59 @@ Surface& Surface::operator = (Surface&& gObj) noexcept
 
 	m_pConf        = gObj.m_pConf;
 	m_pHandle      = gObj.m_pHandle;
+	m_pOwner       = gObj.m_pOwner;
 	gObj.m_pConf   = nullptr;
 	gObj.m_pHandle = nullptr;
+	gObj.m_pOwner  = nullptr;
 
 	return *this;
 }
 
-Surface::~Surface ()
+Surface::~Surface () noexcept
 {
 	if (m_pHandle) eglDestroySurface (m_pConf->display (), m_pHandle);
 }
 
-point2i Surface::size () const noexcept
+point2u Surface::size () const noexcept
 {
-	static EGLint size[2];
+	if (!m_pHandle) return point2u ();
 
-	if (!m_pHandle) return point2i ();
+	EGLint size[2];
 
 	if (eglQuerySurface (m_pConf->display (), m_pHandle, EGL_WIDTH, &size[0]) == EGL_FALSE)
-		return point2i ();
+		return point2u ();
 
 	if (eglQuerySurface (m_pConf->display (), m_pHandle, EGL_HEIGHT, &size[1]) == EGL_FALSE)
-		return point2i ();
+		return point2u ();
 
-	return point2i { static_cast<int16> (size[0]), static_cast<int16> (size[1]) };
+	return { static_cast<u16> (size[0]), static_cast<u16> (size[1]) };
 }
 
 void Surface::flush ()
 {
-	if (!m_pConf->format ().flags.hasBit (PixelFlag::DoubleBuffer)) eglWaitGL ();
-	eglSwapBuffers (m_pConf->display (), m_pHandle);
+	if (m_eType == Type::DoubleBuffer)
+		eglSwapBuffers (m_pConf->display (), m_pHandle);
+	else
+		glFlush ();
 }
 
-void Surface::dispose () noexcept
+void Surface::scale (point2u gSize)
 {
-	m_pHandle = pointer ();
-	m_pConf   = conf_pointer ();
+	if (!m_pHandle or !eglDestroySurface (m_pConf->display (), m_pHandle))
+		return;
+
+	m_pHandle = m_eType == Type::PBuffer ?
+					EGL::createPBuffer (*m_pConf, gSize) :
+					EGL::createSurface (*m_pConf, m_pOwner, m_eType == Type::DoubleBuffer);
 }
 
 // ====================================================
 
-inline Context::API getAPI () noexcept
-{
-	Context::API eAPI = Context::bound ();
-	return eAPI == Context::API::Unbound ? Context::API::OpenGL : eAPI;
-}
-
 Context::Context (Config const&     gConf,
 				  GFXVersion const& gVersion,
-				  API               eAPI,
 				  Context*          pShared)
 : m_pConf (&gConf),
-  m_pGC (EGL::createGC (gConf, gVersion, eAPI, pShared ? pShared->m_pGC : nullptr)),
+  m_pGC (EGL::createGC (gConf, gVersion, pShared ? pShared->m_pGC : nullptr)),
   m_pWriteTarget (),
   m_pReadTarget (),
   m_gVersion (m_pGC ? gVersion : GFXVersion ())
@@ -424,7 +462,7 @@ Context::Context (Config const&     gConf,
 
 Context::Context (Context const& gObj)
 : m_pConf (gObj.m_pConf),
-  m_pGC (EGL::createGC (*m_pConf, gObj.m_gVersion, getAPI (), nullptr)),
+  m_pGC (EGL::createGC (*m_pConf, gObj.m_gVersion, nullptr)),
   m_pWriteTarget (),
   m_pReadTarget (),
   m_gVersion (m_pGC ? gObj.m_gVersion : GFXVersion ())
@@ -476,7 +514,7 @@ bool Context::use (reference gWrite, const_reference gRead) noexcept
 {
 	if (!eglMakeCurrent (m_pConf->display (),
 						 gWrite.handle ().get<void*> (),
-						 gRead.handle  ().get<void*> (), m_pGC))
+						 gRead .handle ().get<void*> (), m_pGC))
 		EGL::error<EGL::MakeCurrent> ();
 
 	m_pReadTarget  = &gRead;
@@ -516,14 +554,7 @@ void Context::release () noexcept
 	acquire (nullptr);
 }
 
-bool Context::bind (API eAPI)
-{
-	return eglBindAPI (EGL::api (eAPI)) ?
-				true : throw bad_parameter ("the specified client API "
-											"is NOT supported by the EGL implementation");
-}
-
-Context::API Context::bound ()
+API Context::bound ()
 {
 	switch (eglQueryAPI ())
 	{

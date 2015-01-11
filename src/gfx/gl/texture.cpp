@@ -33,7 +33,7 @@ using std::ifstream;
 
 namespace cppual { namespace Graphics { namespace GL {
 
-namespace { // optimize for unit internal usage
+namespace { // optimize for internal unit usage
 
 struct GLStates final
 {

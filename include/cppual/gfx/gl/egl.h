@@ -31,6 +31,13 @@ class Config;
 class Surface;
 class Context;
 
+enum class API
+{
+	Unbound = 0,
+	OpenGL,
+	OpenGLES
+};
+
 struct bad_match       : public std::logic_error { using std::logic_error::logic_error; };
 struct bad_display     : public std::logic_error { using std::logic_error::logic_error; };
 struct bad_surface     : public std::logic_error { using std::logic_error::logic_error; };
@@ -69,11 +76,12 @@ public:
 	int_type id () const;
 	void     print ();
 
-	Config (controller display = defaultDisplay (),
-			format_type const& = format_type::default2D ());
+	Config (controller  display  = defaultDisplay (),
+			format_type format   = format_type::default2D (),
+			API         renderer = API::OpenGL);
 
 	constexpr Config () noexcept
-	: m_pDisplay (), m_pCfg (), m_gFormat ()
+	: m_pDisplay (), m_pCfg (), m_gFormat (), m_eAPI ()
 	{ }
 
 	constexpr Config (Config const&) noexcept = default;
@@ -81,6 +89,7 @@ public:
 
 	constexpr controller  display () const noexcept { return m_pDisplay; }
 	constexpr format_type format  () const noexcept { return m_gFormat;  }
+	constexpr API         api     () const noexcept { return m_eAPI;     }
 	constexpr operator    void*   () const noexcept { return m_pCfg;     }
 
 	constexpr explicit operator safe_bool () const noexcept
@@ -99,6 +108,7 @@ private:
 	pointer     m_pDisplay;
 	pointer     m_pCfg;
 	PixelFormat m_gFormat;
+	API         m_eAPI;
 };
 
 // ====================================================
@@ -111,35 +121,51 @@ constexpr bool operator != (Config const& lh, Config const& rh) noexcept
 
 // ====================================================
 
-class Surface : public IPixelBuffer
+class Surface : public IPixelSurface
 {
 public:
 	typedef Config const* conf_pointer;
 	typedef Config        conf_type;
 	typedef void*         pointer;
 
-	Surface () = delete;
+	enum class Type
+	{
+		Drawable,
+		DoubleBuffer,
+		Pixmap,
+		PBuffer,
+	};
+
 	Surface (Surface const&);
 	Surface (Surface&&) noexcept = default;
-	Surface (Config const&, value_type window);
 	Surface& operator = (Surface&&) noexcept;
-	~Surface ();
+	~Surface () noexcept;
 
-	point2i size  () const noexcept;
+	/// create drawable surface
+	Surface (Config const&, value_type window, bool double_buffer);
+
+	/// create pbuffer
+	Surface (Config const&, point2u size);
+
+	/// create off-screen pixmap
+	Surface (Config const&);
+
+	point2u size  () const noexcept;
+	void    scale (point2u size);
 	void    flush ();
 
-	DeviceType  type       () const noexcept { return DeviceType::EGL; }
-	value_type  handle     () const noexcept { return m_pHandle; }
-	int         colormap   () const noexcept { return int (); }
+	DeviceType  type       () const noexcept { return DeviceType::EGL;     }
+	value_type  handle     () const noexcept { return m_pHandle;           }
+	int         colormap   () const noexcept { return int ();              }
 	controller  connection () const noexcept { return m_pConf->display (); }
 	format_type format     () const noexcept { return m_pConf->format  (); }
-	conf_type   config     () const noexcept { return *m_pConf; }
+	conf_type   config     () const noexcept { return *m_pConf;            }
 
 private:
 	conf_pointer m_pConf;
 	pointer      m_pHandle;
-
-	void dispose () noexcept;
+	value_type   m_pOwner;
+	Type         m_eType;
 };
 
 // ====================================================
@@ -149,15 +175,7 @@ class Context : public IDeviceContext
 public:
 	typedef Config const* conf_pointer;
 
-	enum class API
-	{
-		Unbound = 0,
-		OpenGL,
-		OpenGLES
-	};
-
-	static bool bind  (API);
-	static API  bound ();
+	static API bound ();
 
 	Context () = delete;
 	Context (Context const&);
@@ -168,7 +186,6 @@ public:
 
 	Context (Config     const& config,
 			 GFXVersion const& version = defaultVersion (),
-			 API               api     = API::OpenGL,
 			 Context*          shared  = nullptr);
 
 	static GFXVersion platformVersion () noexcept;
@@ -205,13 +222,13 @@ private:
 
 template <typename CharT, typename Traits>
 std::basic_ostream<CharT, Traits>&
-operator << (std::basic_ostream<CharT, Traits>& os, Context::API api)
+operator << (std::basic_ostream<CharT, Traits>& os, API api)
 {
 	switch (api)
 	{
-	case Context::API::OpenGL:
+	case API::OpenGL:
 		return os << "OpenGL";
-	case Context::API::OpenGLES:
+	case API::OpenGLES:
 		return os << "OpenGLES";
 	default:
 		return os << "none";

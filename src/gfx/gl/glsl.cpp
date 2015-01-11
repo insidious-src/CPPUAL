@@ -33,7 +33,7 @@ using std::string;
 
 namespace cppual { namespace Graphics { namespace GL {
 
-namespace { // optimize for unit internal usage
+namespace { // optimize for internal unit usage
 
 string syncReadFile (string const& gFilePath, ios_base::openmode eMode = ios_base::in)
 {

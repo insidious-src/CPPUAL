@@ -36,12 +36,8 @@ struct PixelFlag final
 	enum Type
 	{
 		Drawable	 = 1 << 0, // applied in surface buffer
-		Bitmap		 = 1 << 1, // applied in pixelmap buffer
-		Accelerated  = 1 << 2, // is stored on the GPU
-		Palette		 = 1 << 3,
-		DoubleBuffer = 1 << 4, // front and back buffers
-		VBlank       = 1 << 5, // make double-buffer swappable or a single one flippable
-		Stereo		 = 1 << 6  // applied in quadriple stereo buffer
+		Bitmap		 = 1 << 1, // applied in pixmap buffer
+		Palette		 = 1 << 3
 	};
 };
 
@@ -65,12 +61,12 @@ enum class PolygonFace : unsigned char
 
 struct  GFXVersion;
 struct  IDeviceContext;
-struct  IPixelBuffer;
+struct  IPixelSurface;
 typedef BitSet<PixelFlag::Type>         PixelFlags;
 typedef std::shared_ptr<IDeviceContext> shared_context;
-typedef std::shared_ptr<IPixelBuffer>   shared_buffer;
+typedef std::shared_ptr<IPixelSurface>   shared_buffer;
 typedef std::weak_ptr  <IDeviceContext> weak_context;
-typedef std::weak_ptr  <IPixelBuffer>   weak_buffer;
+typedef std::weak_ptr  <IPixelSurface>   weak_buffer;
 
 /****************************** Common Classes ******************************/
 
@@ -84,7 +80,7 @@ struct PixelFormat final
 	constexpr u8 bits () const noexcept
 	{ return u8 (red + green + blue + alpha); }
 
-	constexpr static const PixelFormat default2D () noexcept
+	constexpr static PixelFormat default2D () noexcept
 	{
 		return
 		{
@@ -94,12 +90,12 @@ struct PixelFormat final
 			0,
 			0,
 			0,
-			PixelFlag::Drawable | PixelFlag::Accelerated,
+			PixelFlag::Drawable | PixelFlag::Bitmap,
 			ColorType::TRUE
 		};
 	}
 
-	constexpr static const PixelFormat default3D () noexcept
+	constexpr static PixelFormat default3D () noexcept
 	{
 		return
 		{
@@ -109,8 +105,7 @@ struct PixelFormat final
 			8,
 			24,
 			0,
-			PixelFlag::Drawable | PixelFlag::DoubleBuffer |
-			PixelFlag::VBlank   | PixelFlag::Accelerated,
+			PixelFlag::Drawable | PixelFlag::Bitmap,
 			ColorType::Direct
 		};
 	}
@@ -185,9 +180,10 @@ struct IResource
 // =========================================================
 
 // Surface
-struct IPixelBuffer : public IResource
+struct IPixelSurface : public IResource
 {
-	virtual point2i size () const = 0;
+	virtual point2u size () const = 0;
+	virtual void    scale (point2u size) = 0;
 	virtual int     colormap () const = 0;
 };
 
@@ -196,10 +192,10 @@ struct IPixelBuffer : public IResource
 // Device
 struct IDeviceContext : public IResource
 {
-	typedef IPixelBuffer*       pointer;
-	typedef IPixelBuffer const* const_pointer;
-	typedef IPixelBuffer&       reference;
-	typedef IPixelBuffer const& const_reference;
+	typedef IPixelSurface*       pointer;
+	typedef IPixelSurface const* const_pointer;
+	typedef IPixelSurface&       reference;
+	typedef IPixelSurface const& const_reference;
 
 	virtual pointer       writable () const = 0;
 	virtual const_pointer readable () const = 0;

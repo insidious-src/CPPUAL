@@ -26,7 +26,7 @@
 
 namespace cppual { namespace Graphics {
 
-namespace { namespace FreeType { // optimize for unit internal usage
+namespace { namespace FreeType { // optimize for internal unit usage
 
 typedef FT_Library   font_library;
 typedef FT_Face      font_face;
