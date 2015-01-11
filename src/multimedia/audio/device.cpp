@@ -24,7 +24,7 @@
 
 namespace cppual { namespace Audio {
 
-namespace { namespace Internal { // optimize for unit internal usage
+namespace { namespace Internal { // optimize for internal unit usage
 
 
 

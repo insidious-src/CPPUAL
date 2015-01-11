@@ -36,7 +36,7 @@ public:
 	Timer () noexcept : m_gEpoch (TClock::now ()) { }
 	void start () noexcept { m_gEpoch = TClock::now (); }
 
-	template <typename T>
+	template <typename T = std::chrono::milliseconds>
 	T elapsed () const noexcept
 	{ return std::chrono::duration_cast<T> (TClock::now () - m_gEpoch); }
 

@@ -34,14 +34,15 @@ class BitSet
 public:
 	static_assert (std::is_enum<T>::value, "T is not an enumeration!");
 
+	typedef T                                      enum_type;
+	typedef u16                                    size_type;
 	typedef typename std::underlying_type<T>::type value_type;
-	typedef u16      size_type;
 
 	constexpr BitSet () noexcept = default;
 	constexpr BitSet (std::nullptr_t) noexcept : m_flags () { }
 	inline    BitSet& operator = (BitSet const&) noexcept = default;
 
-	inline void switchBit (T eFlag) noexcept { m_flags ^= eFlag; }
+	inline void switchBit (enum_type const eFlag) noexcept { m_flags ^= eFlag; }
 
 	constexpr operator value_type () const noexcept
 	{ return m_flags; }
@@ -49,7 +50,7 @@ public:
 	constexpr static size_type max_size () noexcept
 	{ return std::integral_constant<size_type, sizeof (value_type) * 8>::value; }
 
-	constexpr bool hasBit (T const eFlag) const noexcept
+	constexpr bool hasBit (enum_type const eFlag) const noexcept
 	{ return (m_flags & eFlag) == eFlag; }
 
 	constexpr bool hasBits (value_type const flags) const noexcept
@@ -58,25 +59,25 @@ public:
 	constexpr bool hasBits (BitSet const& gObj) const noexcept
 	{ return (m_flags & gObj.m_flags) == gObj.m_flags; }
 
-	inline BitSet& operator += (T const eFlag) noexcept
+	inline BitSet& operator += (enum_type const eFlag) noexcept
 	{ m_flags |= eFlag; return *this; }
 
 	inline BitSet& operator += (value_type const flags) noexcept
 	{ m_flags |= flags; return *this; }
 
-	inline BitSet& operator -= (T const eFlag) noexcept
+	inline BitSet& operator -= (enum_type const eFlag) noexcept
 	{ m_flags &= static_cast<value_type> (~eFlag); return *this; }
 
 	inline BitSet& operator -= (value_type const flags) noexcept
 	{ m_flags &= ~flags; return *this; }
 
-	inline BitSet& operator = (T const eFlag) noexcept
+	inline BitSet& operator = (enum_type const eFlag) noexcept
 	{ m_flags = eFlag; return *this; }
 
 	inline BitSet& operator = (value_type const nFlags) noexcept
 	{ m_flags = nFlags; return *this; }
 
-	constexpr BitSet (T eFlag) noexcept
+	constexpr BitSet (enum_type const eFlag) noexcept
 	: m_flags (eFlag)
 	{ }
 

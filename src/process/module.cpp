@@ -31,7 +31,7 @@
 
 using std::string;
 
-namespace { // optimize for unit internal usage
+namespace { // optimize for internal unit usage
 
 constexpr const char* shared_ext () noexcept
 {

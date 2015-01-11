@@ -28,7 +28,7 @@
 
 namespace cppual { namespace Ui {
 
-namespace { namespace Xcb { // optimize for unit internal usage
+namespace { namespace Xcb { // optimize for internal unit usage
 
 inline Connection x11_connection (cchar* pName) noexcept
 {
