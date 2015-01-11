@@ -80,7 +80,7 @@ inline void error <MakeCurrent> ()
 	case EGL_BAD_MATCH:
 		throw bad_match ("draw or read are NOT compatible with the context");
 	case EGL_BAD_ACCESS:
-		throw bad_access ("context is current to some other thread");
+		throw bad_access ("the context is already current to some other thread");
 	case EGL_BAD_NATIVE_WINDOW:
 		throw bad_window ("the window underlying either draw or read is no longer valid");
 	case EGL_BAD_CURRENT_SURFACE:
@@ -141,9 +141,9 @@ inline void initialize (void* dsp)
 
 constexpr uint api (Context::API eAPI) noexcept
 {
-	return eAPI == Context::OpenGL ?
+	return eAPI == Context::API::OpenGL ?
 				EGL_OPENGL_API :
-				eAPI == Context::OpenGLES ?
+				eAPI == Context::API::OpenGLES ?
 					EGL_OPENGL_ES_API : EGL_NONE;
 }
 
@@ -200,13 +200,18 @@ inline void* createBuffer (Config const& gConf, IResource::value_type uWndHandle
 	//										 nullptr);
 }
 
-inline EGLContext createGC (Config const& gConf, GFXVersion const& version, void* pShared)
+inline EGLContext createGC (Config const&     gConf,
+							GFXVersion const& version,
+							Context::API      eAPI,
+							void*             pShared)
 {
 	cint32 nContextAttribs[]
 	{
 		EGL_CONTEXT_CLIENT_VERSION, version.major,
 		EGL_NONE
 	};
+
+	Context::bind (eAPI);
 
 	EGLContext pContext = eglCreateContext (gConf.display (),
 											gConf,
@@ -279,7 +284,7 @@ PixelFormat Config::toFormat () const
 		static_cast<u8> (nAttribs[Stencil]),
 		(nAttribs[SurfaceType] & EGL_WINDOW_BIT ? PixelFlag::Drawable : 0) |
 				PixelFlag::Accelerated,
-		ColorType::TrueType
+		ColorType::TRUE
 	};
 }
 
@@ -388,7 +393,7 @@ point2i Surface::size () const noexcept
 
 void Surface::flush ()
 {
-	if (m_pConf->format ().flags.hasBit (PixelFlag::VBlank)) eglWaitGL ();
+	if (!m_pConf->format ().flags.hasBit (PixelFlag::DoubleBuffer)) eglWaitGL ();
 	eglSwapBuffers (m_pConf->display (), m_pHandle);
 }
 
@@ -400,11 +405,18 @@ void Surface::dispose () noexcept
 
 // ====================================================
 
+inline Context::API getAPI () noexcept
+{
+	Context::API eAPI = Context::bound ();
+	return eAPI == Context::API::Unbound ? Context::API::OpenGL : eAPI;
+}
+
 Context::Context (Config const&     gConf,
 				  GFXVersion const& gVersion,
+				  API               eAPI,
 				  Context*          pShared)
 : m_pConf (&gConf),
-  m_pGC (EGL::createGC (gConf, gVersion, pShared ? pShared->m_pGC : nullptr)),
+  m_pGC (EGL::createGC (gConf, gVersion, eAPI, pShared ? pShared->m_pGC : nullptr)),
   m_pWriteTarget (),
   m_pReadTarget (),
   m_gVersion (m_pGC ? gVersion : GFXVersion ())
@@ -412,8 +424,7 @@ Context::Context (Config const&     gConf,
 
 Context::Context (Context const& gObj)
 : m_pConf (gObj.m_pConf),
-  m_pGC (EGL::createGC (Config (controller (), gObj.m_pConf->format ()),
-						gObj.m_gVersion, nullptr)),
+  m_pGC (EGL::createGC (*m_pConf, gObj.m_gVersion, getAPI (), nullptr)),
   m_pWriteTarget (),
   m_pReadTarget (),
   m_gVersion (m_pGC ? gObj.m_gVersion : GFXVersion ())
@@ -461,15 +472,11 @@ GFXVersion Context::platformVersion () noexcept
 	return EGL::version ();
 }
 
-IResource::controller Context::defaultDisplay () noexcept
-{
-	return EGL_DEFAULT_DISPLAY;
-}
-
 bool Context::use (reference gWrite, const_reference gRead) noexcept
 {
-	if (!eglMakeCurrent (m_pConf->display (), gWrite.handle ().get<void*> (),
-						 gRead.handle ().get<void*> (), m_pGC))
+	if (!eglMakeCurrent (m_pConf->display (),
+						 gWrite.handle ().get<void*> (),
+						 gRead.handle  ().get<void*> (), m_pGC))
 		EGL::error<EGL::MakeCurrent> ();
 
 	m_pReadTarget  = &gRead;
@@ -521,11 +528,11 @@ Context::API Context::bound ()
 	switch (eglQueryAPI ())
 	{
 	case EGL_OPENGL_ES_API:
-		return OpenGLES;
+		return API::OpenGLES;
 	case EGL_OPENGL_API:
-		return OpenGL;
+		return API::OpenGL;
 	default:
-		return Unbound;
+		return API::Unbound;
 	}
 }
 

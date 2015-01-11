@@ -188,7 +188,8 @@ bool EventQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 int EventQueue::poll (bool bWait) noexcept
 {
 	event_type gEvent (event_type::Null);
-	m_bPoll.store (bWait);
+
+	m_bPoll = bWait;
 
 	do // event polling
 	{
@@ -196,11 +197,8 @@ int EventQueue::poll (bool bWait) noexcept
 				!m_gAcceptedEvents.load (std::memory_order_relaxed).hasBit (gEvent.type ()))
 			continue;
 
+		// signal event
 		gEvent ();
-
-		if (gEvent.type () == event_type::SystemMessage and
-				gEvent.data ().message == SystemMessage::Quit)
-			return 0;
 	}
 	while (m_bPoll.load (std::memory_order_relaxed));
 

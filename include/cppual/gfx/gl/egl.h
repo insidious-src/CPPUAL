@@ -69,7 +69,7 @@ public:
 	int_type id () const;
 	void     print ();
 
-	Config (controller display,
+	Config (controller display = defaultDisplay (),
 			format_type const& = format_type::default2D ());
 
 	constexpr Config () noexcept
@@ -85,6 +85,9 @@ public:
 
 	constexpr explicit operator safe_bool () const noexcept
 	{ return m_pCfg ? &Config::m_pCfg : nullptr; }
+
+	constexpr static controller defaultDisplay  () noexcept
+	{ return nullptr; }
 
 	friend
 	constexpr bool operator == (Config const& lh, Config const& rh) noexcept;
@@ -146,7 +149,7 @@ class Context : public IDeviceContext
 public:
 	typedef Config const* conf_pointer;
 
-	enum API
+	enum class API
 	{
 		Unbound = 0,
 		OpenGL,
@@ -165,10 +168,10 @@ public:
 
 	Context (Config     const& config,
 			 GFXVersion const& version = defaultVersion (),
+			 API               api     = API::OpenGL,
 			 Context*          shared  = nullptr);
 
 	static GFXVersion platformVersion () noexcept;
-	static controller defaultDisplay  () noexcept;
 
 	bool use (reference, const_reference) noexcept;
 	bool use () noexcept;
@@ -206,9 +209,9 @@ operator << (std::basic_ostream<CharT, Traits>& os, Context::API api)
 {
 	switch (api)
 	{
-	case Context::OpenGL:
+	case Context::API::OpenGL:
 		return os << "OpenGL";
-	case Context::OpenGLES:
+	case Context::API::OpenGLES:
 		return os << "OpenGLES";
 	default:
 		return os << "none";

@@ -95,7 +95,7 @@ struct PixelFormat final
 			0,
 			0,
 			PixelFlag::Drawable | PixelFlag::Accelerated,
-			ColorType::TrueType
+			ColorType::TRUE
 		};
 	}
 

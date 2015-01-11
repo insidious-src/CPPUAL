@@ -23,24 +23,24 @@
 
 namespace cppual { namespace Graphics {
 
-namespace {
+namespace { namespace Internal {
 
-struct Internal { static thread_local IDeviceContext* current; };
-thread_local IDeviceContext* Internal::current = nullptr;
+inline IDeviceContext*& current () noexcept
+{
+	static thread_local IDeviceContext* current_dc;
+	return current_dc;
+}
 
-} // anonymous namespace
+} } // anonymous namespace Internal
 
 IDeviceContext* IDeviceContext::current () noexcept
 {
-	return Internal::current;
+	return Internal::current ();
 }
 
 void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
 {
-	if (Internal::current and pContext and Internal::current->type () != pContext->type ())
-		Internal::current->release ();
-
-	Internal::current = pContext;
+	if (Internal::current () != pContext) Internal::current () = pContext;
 }
 
 } } // namespace Graphics
