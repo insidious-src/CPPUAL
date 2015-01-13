@@ -23,6 +23,7 @@
 #define CPPUAL_GFX_EGL_SURFACE_H_
 #ifdef __cplusplus
 
+#include <bitset>
 #include <cppual/gfx/draw.h>
 
 namespace cppual { namespace Graphics { namespace GL {
@@ -73,7 +74,18 @@ public:
 		Count
 	};
 
-	int_type id () const;
+	enum Feature
+	{
+		SyncControl         = 1 << 0,
+		ConfiglessContext   = 1 << 1,
+		SurfacelessContext  = 1 << 2,
+		CreateRobustContext = 1 << 3,
+		WindowFixedSize     = 1 << 4
+	};
+
+	typedef BitSet<Feature> Features;
+
+	int_type id    () const;
 	void     print ();
 
 	Config (controller  display  = defaultDisplay (),
@@ -81,16 +93,17 @@ public:
 			API         renderer = API::OpenGL);
 
 	constexpr Config () noexcept
-	: m_pDisplay (), m_pCfg (), m_gFormat (), m_eAPI ()
+	: m_pDisplay (), m_pCfg (), m_gFormat (), m_eFeatures (), m_eAPI ()
 	{ }
 
 	constexpr Config (Config const&) noexcept = default;
 	inline    Config& operator = (Config const&) noexcept = default;
 
-	constexpr controller  display () const noexcept { return m_pDisplay; }
-	constexpr format_type format  () const noexcept { return m_gFormat;  }
-	constexpr API         api     () const noexcept { return m_eAPI;     }
-	constexpr operator    void*   () const noexcept { return m_pCfg;     }
+	constexpr controller  display  () const noexcept { return m_pDisplay;  }
+	constexpr Features    features () const noexcept { return m_eFeatures; }
+	constexpr format_type format   () const noexcept { return m_gFormat;   }
+	constexpr API         api      () const noexcept { return m_eAPI;      }
+	constexpr operator    void*    () const noexcept { return m_pCfg;      }
 
 	constexpr explicit operator safe_bool () const noexcept
 	{ return m_pCfg ? &Config::m_pCfg : nullptr; }
@@ -108,6 +121,7 @@ private:
 	pointer     m_pDisplay;
 	pointer     m_pCfg;
 	PixelFormat m_gFormat;
+	Features    m_eFeatures;
 	API         m_eAPI;
 };
 
@@ -128,43 +142,28 @@ public:
 	typedef Config        conf_type;
 	typedef void*         pointer;
 
-	enum class Type
-	{
-		Drawable,
-		DoubleBuffer,
-		Pixmap,
-		PBuffer,
-	};
-
 	Surface (Surface const&);
 	Surface (Surface&&) noexcept = default;
+	Surface (Config const&, point2u size, Type type, value_type owner = value_type ());
 	Surface& operator = (Surface&&) noexcept;
 	~Surface () noexcept;
 
-	/// create drawable surface
-	Surface (Config const&, value_type window, bool double_buffer);
+	void scale (point2u size);
+	void flush ();
 
-	/// create pbuffer
-	Surface (Config const&, point2u size);
-
-	/// create off-screen pixmap
-	Surface (Config const&);
-
-	point2u size  () const noexcept;
-	void    scale (point2u size);
-	void    flush ();
-
-	DeviceType  type       () const noexcept { return DeviceType::EGL;     }
+	DeviceType  device     () const noexcept { return DeviceType::EGL;     }
 	value_type  handle     () const noexcept { return m_pHandle;           }
-	int         colormap   () const noexcept { return int ();              }
 	controller  connection () const noexcept { return m_pConf->display (); }
 	format_type format     () const noexcept { return m_pConf->format  (); }
 	conf_type   config     () const noexcept { return *m_pConf;            }
+	Type        type       () const noexcept { return m_eType;             }
+	point2u     size       () const noexcept { return m_uSize;             }
 
 private:
 	conf_pointer m_pConf;
 	pointer      m_pHandle;
 	value_type   m_pOwner;
+	point2u      m_uSize;
 	Type         m_eType;
 };
 
@@ -175,9 +174,6 @@ class Context : public IDeviceContext
 public:
 	typedef Config const* conf_pointer;
 
-	static API bound ();
-
-	Context () = delete;
 	Context (Context const&);
 	Context& operator = (Context&&) noexcept;
 	Context& operator = (Context const&);
@@ -189,20 +185,22 @@ public:
 			 Context*          shared  = nullptr);
 
 	static GFXVersion platformVersion () noexcept;
+	static API        bound () noexcept;
 
-	bool use (reference, const_reference) noexcept;
-	bool use () noexcept;
-	void flush () noexcept;
-	void finish () noexcept;
+	bool use     (pointer, const_pointer) noexcept;
+	bool assign  () noexcept;
+	void scale   (point2u size);
+	void flush   () noexcept;
+	void finish  () noexcept;
 	void release () noexcept;
 
 	const_pointer readable   () const noexcept { return m_pReadTarget;       }
-	pointer       writable   () const noexcept { return m_pWriteTarget;      }
-	GFXVersion    version    () const noexcept { return m_gVersion;          }
-	DeviceType    type       () const noexcept { return DeviceType::EGL;     }
+	pointer       drawable   () const noexcept { return m_pDrawTarget;       }
+	GFXVersion    version    () const noexcept { return { m_nVersion, 0 };   }
+	DeviceType    device     () const noexcept { return DeviceType::EGL;     }
 	value_type    handle     () const noexcept { return m_pGC;               }
 	controller    connection () const noexcept { return m_pConf->display (); }
-	format_type   format     () const noexcept { return m_pConf->format ();  }
+	format_type   format     () const noexcept { return m_pConf->format  (); }
 
 	static constexpr GFXVersion defaultVersion () noexcept
 	{ return { 3, 0 }; }
@@ -213,9 +211,9 @@ public:
 private:
 	conf_pointer  m_pConf;
 	void*         m_pGC;
-	pointer       m_pWriteTarget;
+	pointer       m_pDrawTarget;
 	const_pointer m_pReadTarget;
-	GFXVersion    m_gVersion;
+	int           m_nVersion;
 };
 
 // ====================================================
