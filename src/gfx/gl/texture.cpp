@@ -93,7 +93,7 @@ bool Texture::loadTexture2D (string const&      gFilePath,
 							 PixelFormat const& gFormat,
 							 bool               bGenMipMaps)
 {
-	if (!id () or m_gStates.hasBit (Texture::IsLoaded)) return false;
+	if (!id () or m_gStates.test (Texture::IsLoaded)) return false;
 	ifstream gFile (gFilePath, ios_base::binary);
 	uint	 uFormat;
 
@@ -132,7 +132,7 @@ bool Texture::loadTexture2D (cvoid*             pPixels,
 							 PixelFormat const& gFormat,
 							 bool               bGenMipMaps)
 {
-	if (!id () or m_gStates.hasBit (Texture::IsLoaded) or
+	if (!id () or m_gStates.test (Texture::IsLoaded) or
 			!pPixels or !gSize.x or !gSize.y)
 		return false;
 
@@ -176,7 +176,7 @@ void Texture::setParameter (uint uName, int nParam) noexcept
 
 void Texture::bind (uint uTexId) noexcept
 {
-	if (m_gStates.hasBit (Texture::IsLoaded))
+	if (m_gStates.test (Texture::IsLoaded))
 	{
 		glActiveTexture (GL_TEXTURE0 + uTexId);
 		glBindTexture (GL::Texture2D, id ());
@@ -222,7 +222,7 @@ void Texture::setFiltering (MagFilter eMag, MinFilter eMin) noexcept
 
 void Texture::release () noexcept
 {
-	if (m_gStates.hasBit (Texture::IsLoaded))
+	if (m_gStates.test (Texture::IsLoaded))
 	{
 		if (m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
 		m_uSampleId = 0;

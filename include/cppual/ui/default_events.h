@@ -80,20 +80,6 @@ struct SizeEvent : public Event
 
 // =========================================================
 
-struct MoveEvent : public Event
-{
-	inline MoveEvent () noexcept = default;
-
-	inline MoveEvent (Graphics::Element elem, point2i pos) noexcept
-	: Event (Event::Move)
-	{
-		m_gData.move.element = elem;
-		m_gData.move.pos     = pos;
-	}
-};
-
-// =========================================================
-
 struct FocusEvent : public Event
 {
 	inline FocusEvent () noexcept = default;

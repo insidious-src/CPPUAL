@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <cppual/ui/manager.h>
-#include <cppual/process/proc_model.h>
 
 namespace cppual { namespace Platform {
 
@@ -30,8 +29,7 @@ namespace { namespace Internal { // optimize for internal unit usage
 inline cchar* server () noexcept
 {
 #	if defined OS_GNU_LINUX or defined OS_BSD
-	return Process::running ("X") or Process::running ("Xorg.bin") ? "libcppual-ui-xorg" :
-																	 "libcppual-ui-wayland";
+	return getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" : "libcppual-ui-xorg";
 #	elif defined OS_WINDOWS
 	return "libcppual-win";
 #	endif
@@ -68,7 +66,7 @@ inline Module& module () noexcept
 
 // ====================================================
 
-IService* IService::instance ()
+Factory* Factory::instance ()
 {
 	if (Internal::instance () == nullptr)
 	{
@@ -81,12 +79,12 @@ IService* IService::instance ()
 	return Internal::instance ().get ();
 }
 
-Module& IService::module ()
+Module& Factory::module ()
 {
 	return Internal::module ();
 }
 
-bool IService::hasValidInstance () noexcept
+bool Factory::hasValidInstance () noexcept
 {
 	return Internal::instance () != nullptr;
 }

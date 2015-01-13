@@ -99,10 +99,10 @@ public:
 	Shader::Type  type   () const noexcept { return m_eType;   }
 
 	bool isLoaded () const noexcept
-	{ return m_gStates.hasBit (Shader::IsLoaded); }
+	{ return m_gStates.test (Shader::IsLoaded); }
 
 	bool isCompiled () const noexcept
-	{ return m_gStates.hasBit (Shader::IsCompiled); }
+	{ return m_gStates.test (Shader::IsCompiled); }
 
 	bool load (string const& gString, LoadFrom const eMode = LoadFrom::File)
 	{
@@ -233,7 +233,7 @@ public:
 	{ return m_uShaderCount; }
 
 	bool isLinked () const noexcept
-	{ return m_gStates.hasBit (SLProgram::IsLinked); }
+	{ return m_gStates.test (SLProgram::IsLinked); }
 
 	int attribute (string const& gName)
 	{ return m_gAttribLocList[gName]; }
@@ -242,19 +242,19 @@ public:
 	{ return m_gUniformLocList[gName]; }
 
 	bool hasFragmentShader () const noexcept
-	{ return m_gShaderTypes.hasBit (Shader::Fragment); }
+	{ return m_gShaderTypes.test (Shader::Fragment); }
 
 	bool hasVertexShader () const noexcept
-	{ return m_gShaderTypes.hasBit (Shader::Vertex); }
+	{ return m_gShaderTypes.test (Shader::Vertex); }
 
 	bool hasComputeShader () const noexcept
-	{ return m_gShaderTypes.hasBit (Shader::Compute); }
+	{ return m_gShaderTypes.test (Shader::Compute); }
 
 	bool hasTessControlShader () const noexcept
-	{ return m_gShaderTypes.hasBit (Shader::TessControl); }
+	{ return m_gShaderTypes.test (Shader::TessControl); }
 
 	bool hasTessEvaluationShader () const noexcept
-	{ return m_gShaderTypes.hasBit (Shader::TessEvaluation); }
+	{ return m_gShaderTypes.test (Shader::TessEvaluation); }
 
 private:
 	map_type      m_gAttribLocList, m_gUniformLocList;

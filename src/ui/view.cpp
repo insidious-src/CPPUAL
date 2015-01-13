@@ -40,7 +40,7 @@ inline shared_renderable createRenderable (View* pParentObj, Rect const& gRect, 
 {
 	return pParentObj ? shared_renderable (new ProxyRenderable (pParentObj->renderable ().lock (),
 																gRect)) :
-						Platform::IService::instance ()->createRenderable (gRect, nScreen);
+						Platform::Factory::instance ()->createRenderable (gRect, nScreen);
 }
 
 } } // anonymous namespace Internal
@@ -217,7 +217,7 @@ View& View::operator = (View const& gObj) noexcept
 
 View::~View ()
 {
-	if (m_gStateFlags.hasBit (View::Valid)) destroyResources ();
+	if (m_gStateFlags.test (View::Valid)) destroyResources ();
 }
 
 void View::destroyChildren ()
@@ -254,7 +254,7 @@ void View::invalidate () noexcept
 
 void View::destroy ()
 {
-	if (!m_gStateFlags.hasBit (View::Valid)) return;
+	if (!m_gStateFlags.test (View::Valid)) return;
 	destroyResources ();
 	invalidate ();
 }
@@ -275,7 +275,7 @@ void View::hide ()
 
 void View::setMinimumSize (point2u gSize)
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 	{
 		m_pRenderable->setMimimumSize (gSize);
 		m_gMinSize = gSize;
@@ -284,7 +284,7 @@ void View::setMinimumSize (point2u gSize)
 
 void View::setMaximumSize (point2u gSize)
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 	{
 		m_pRenderable->setMaximumSize (gSize);
 		m_gMinSize = gSize;
@@ -293,7 +293,7 @@ void View::setMaximumSize (point2u gSize)
 
 bool View::setParent (View* pParentObj, point2i gPos)
 {
-	if (!m_gStateFlags.hasBit (View::Valid) or m_pParentObj == pParentObj)
+	if (!m_gStateFlags.test (View::Valid) or m_pParentObj == pParentObj)
 		return false;
 
 	if (pParentObj)
@@ -310,7 +310,7 @@ bool View::setParent (View* pParentObj, point2i gPos)
 	else
 	{
 		// recreate using physical surface
-		m_pRenderable = Platform::IService::instance ()->
+		m_pRenderable = Platform::Factory::instance ()->
 						createRenderable (m_pRenderable->geometry (),
 										  m_pRenderable->screen (),
 										  m_pRenderable->connection ());
@@ -341,7 +341,7 @@ void View::size (point2u gSize)
 
 void View::setGeometry (Rect const& gRect)
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 	{
 		Rect gNewRect (gRect);
 
@@ -371,7 +371,7 @@ void View::setGeometry (Rect const& gRect)
 
 void View::move (point2i gPoint)
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 	{
 		m_pRenderable->move (gPoint);
 		onMove (gPoint);
@@ -392,7 +392,7 @@ void View::mouseReleased (event_type::MouseButtonData const&)
 
 void View::setFocus ()
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 	{
 		//if (m_gChildrenList.size ())
 			//for (pointer pChild : m_gChildrenList) pChild->setFocus ();
@@ -404,7 +404,7 @@ void View::setFocus ()
 
 void View::killFocus ()
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 	{
 		for (View* pChild : m_gChildrenList) pChild->killFocus ();
 		onFocus (false);
@@ -413,19 +413,19 @@ void View::killFocus ()
 
 void View::enable ()
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 		for (View* pChild : m_gChildrenList) pChild->enable ();
 }
 
 void View::disable ()
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 		for (View* pChild : m_gChildrenList) pChild->disable ();
 }
 
 void View::refresh ()
 {
-	if (m_gStateFlags.hasBit (View::Valid))
+	if (m_gStateFlags.test (View::Valid))
 	{
 		onPaint (geometry ());
 		for (View* pChild : m_gChildrenList) pChild->refresh ();

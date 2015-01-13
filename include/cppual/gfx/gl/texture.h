@@ -81,10 +81,10 @@ public:
 	uint         sampleId     () const noexcept { return m_uSampleId; }
 
 	bool isLoaded () const noexcept
-	{ return m_gStates.hasBit (Texture::IsLoaded); }
+	{ return m_gStates.test (Texture::IsLoaded); }
 
 	bool hasMipMaps () const noexcept
-	{ return m_gStates.hasBit (Texture::HasMipMaps); }
+	{ return m_gStates.test (Texture::HasMipMaps); }
 
 private:
 	enum    Flag { IsLoaded = 1 << 0, HasMipMaps = 1 << 1 };

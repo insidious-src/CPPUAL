@@ -28,7 +28,7 @@
 #include <cppual/memory/mop.h>
 #include <cppual/ui/manager.h>
 
-using cppual::Platform::IService;
+using cppual::Platform::Factory;
 using cppual::Memory::AllocatorPolicy;
 using cppual::Memory::Allocator;
 using std::string;

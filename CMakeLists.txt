@@ -384,7 +384,7 @@ target_link_libraries(cppual-audio-openal openal)
 target_link_libraries(cppual-gl cppual-gfx EGL GLEW GL)
 target_link_libraries(cppual-ui-xorg xcb-icccm)
 target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
-#target_link_libraries(cppual-ui cppual-core)
+target_link_libraries(cppual-ui cppual-gfx)
 target_link_libraries(cppual-ui-views cppual-ui)
 target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
 

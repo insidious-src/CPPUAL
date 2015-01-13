@@ -152,11 +152,11 @@ FrameView::FrameView (View*       pParent,
 {
 	if (isValid ())
 	{
-		if (gFlags.hasBit (FrameView::Close)) m_gCloseBtn.create (this, string ());
-		if (gFlags.hasBit (FrameView::Minimize)) m_gMinBtn.create (this, string ());
-		if (gFlags.hasBit (FrameView::Maximize)) m_gMaxBtn.create (this, string ());
-		if (gFlags.hasBit (FrameView::Help)) m_gHelpBtn.create (this, string ());
-		if (gFlags.hasBit (FrameView::Icon) and pIcon) setIcon (pIcon);
+		if (gFlags.test (FrameView::Close)) m_gCloseBtn.create (this, string ());
+		if (gFlags.test (FrameView::Minimize)) m_gMinBtn.create (this, string ());
+		if (gFlags.test (FrameView::Maximize)) m_gMaxBtn.create (this, string ());
+		if (gFlags.test (FrameView::Help)) m_gHelpBtn.create (this, string ());
+		if (gFlags.test (FrameView::Icon) and pIcon) setIcon (pIcon);
 		m_gTitle = std::forward<string> (gLabel);
 
 		if (m_gSysMenu.create ({ m_gIconRect.left, m_gIconRect.top }))
@@ -229,7 +229,7 @@ void FrameView::onMouseRightUp (point2i)
 
 void FrameView::onMouseMove (point2i)
 {
-	if (!m_gMouseStates.hasBit (FrameView::MouseLeftDown)) return;
+	if (!m_gMouseStates.test (FrameView::MouseLeftDown)) return;
 
 	switch (m_gHoldingEdges)
 	{

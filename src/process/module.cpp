@@ -53,7 +53,7 @@ Module::Module (cchar*        pPath,
 				ResolvePolicy eResolve,
 				Flags         gFlags) noexcept
 : m_pHandle (),
-  m_gLibPath (gFlags.hasBit (AddExt) ? std::move (string (pPath) += shared_ext ()) : pPath),
+  m_gLibPath (gFlags.test (AddExt) ? std::move (string (pPath) += shared_ext ()) : pPath),
   m_eResolve (eResolve)
 {
 	if (bAttach) attach ();

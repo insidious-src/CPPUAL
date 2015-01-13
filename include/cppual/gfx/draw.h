@@ -35,9 +35,9 @@ struct PixelFlag final
 {
 	enum Type
 	{
-		Drawable	 = 1 << 0, // applied in surface buffer
-		Bitmap		 = 1 << 1, // applied in pixmap buffer
-		Palette		 = 1 << 3
+		Drawable = 1 << 0, // support surface buffer
+		Bitmap   = 1 << 1, // support pixmap buffer
+		Palette  = 1 << 2  // support off-screen buffer
 	};
 };
 
@@ -171,10 +171,10 @@ struct IResource
 	virtual ~IResource () { }
 
 	virtual controller  connection () const = 0;
-	virtual format_type format () const = 0;
-	virtual value_type  handle () const = 0;
-	virtual DeviceType  type () const = 0;
-	virtual void        flush () = 0;
+	virtual format_type format     () const = 0;
+	virtual value_type  handle     () const = 0;
+	virtual DeviceType  device     () const = 0;
+	virtual void        flush      () = 0;
 };
 
 // =========================================================
@@ -182,9 +182,17 @@ struct IResource
 // Surface
 struct IPixelSurface : public IResource
 {
-	virtual point2u size () const = 0;
+	enum class Type : unsigned char
+	{
+		Drawable,
+		DoubleBuffer,
+		BackBuffer,
+		Pixmap
+	};
+
+	virtual point2u size  () const = 0;
+	virtual Type    type  () const = 0;
 	virtual void    scale (point2u size) = 0;
-	virtual int     colormap () const = 0;
 };
 
 // =========================================================
@@ -194,16 +202,15 @@ struct IDeviceContext : public IResource
 {
 	typedef IPixelSurface*       pointer;
 	typedef IPixelSurface const* const_pointer;
-	typedef IPixelSurface&       reference;
-	typedef IPixelSurface const& const_reference;
 
-	virtual pointer       writable () const = 0;
+	virtual pointer       drawable () const = 0;
 	virtual const_pointer readable () const = 0;
-	virtual GFXVersion    version () const = 0;
-	virtual bool          use (reference, const_reference) = 0;
-	virtual bool          use () = 0;
-	virtual void          finish () = 0;
-	virtual void          release () = 0;
+	virtual GFXVersion    version  () const = 0;
+	virtual bool          assign   () = 0;
+	virtual bool          use      (pointer, const_pointer) = 0;
+	virtual void          scale    (point2u) = 0;
+	virtual void          finish   () = 0;
+	virtual void          release  () = 0;
 
 	static IDeviceContext* current () noexcept;
 	static void            acquire (IDeviceContext*) noexcept;

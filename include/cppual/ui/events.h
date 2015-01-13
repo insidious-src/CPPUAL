@@ -75,9 +75,8 @@ public:
 		Focus         = 1 << 12,
 		Step          = 1 << 13,
 		Size          = 1 << 14,
-		Move          = 1 << 15,
-		Visibility    = 1 << 16,
-		Property      = 1 << 17
+		Visibility    = 1 << 15,
+		Property      = 1 << 16
 	};
 
 	enum
@@ -85,8 +84,8 @@ public:
 		Key       = KeyPressed | KeyReleased  | KeyMap,
 		Pointer	  = ButtonDown | ButtonUp     | PointerMove | Scroll,
 		Touch	  = TouchPress | TouchRelease | TouchMove,
-		Window    = Paint | Focus   | Size   | Move   | Visibility | Property,
-		AllEvents = Key   | Pointer | Touch  | Window | SystemMessage
+		Window    = Paint | Focus   | Size    | Visibility | Property,
+		AllEvents = Key   | Pointer | Touch   | Window     | SystemMessage
 	};
 
 	struct KeyData
@@ -124,12 +123,6 @@ public:
 	{
 		Graphics::Element element;
 		point2u           size;
-	};
-
-	struct MoveData
-	{
-		Graphics::Element element;
-		point2i           pos;
 	};
 
 	struct SizeMoveData
@@ -173,7 +166,6 @@ public:
 		int32           message;
 		PaintData       paint;
 		SizeData        size;
-		MoveData        move;
 		VisibilityData  visibility;
 		StateData       state;
 		PropertyData    property;
@@ -213,7 +205,6 @@ struct EventSignals final : NonCopyable
 	Signal<void(event_type::TouchData const&)>       touchMove;
 	Signal<void(int32)>                              sysMessage;
 	Signal<void(event_type::PaintData const&)>       winPaint;
-	Signal<void(event_type::MoveData const&)>        winMove;
 	Signal<void(event_type::SizeData const&)>        winSize;
 	Signal<void(event_type::StateData const&)>       winFocus;
 	Signal<void(event_type::StateData const&)>       winStep;

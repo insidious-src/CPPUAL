@@ -88,19 +88,19 @@ public:
 	inline point2u         maximumSize () const noexcept { return m_gMaxSize; }
 
 	inline bool isValid () const noexcept
-	{ return m_gStateFlags.hasBit (View::Valid); }
+	{ return m_gStateFlags.test (View::Valid); }
 
 	inline bool isEnabled () const noexcept
-	{ return m_gStateFlags.hasBit (View::Enabled); }
+	{ return m_gStateFlags.test (View::Enabled); }
 
 	inline bool hasFocus () const noexcept
-	{ return m_gStateFlags.hasBit (View::HasFocus); }
+	{ return m_gStateFlags.test (View::HasFocus); }
 
 	inline bool isHidden () const noexcept
-	{ return !m_gStateFlags.hasBit (View::Valid) or !m_pRenderable->isMapped (); }
+	{ return !m_gStateFlags.test (View::Valid) or !m_pRenderable->isMapped (); }
 
 	inline Rect geometry () const noexcept
-	{ return m_gStateFlags.hasBit (View::Valid) ? m_pRenderable->geometry () : Rect (); }
+	{ return m_gStateFlags.test (View::Valid) ? m_pRenderable->geometry () : Rect (); }
 
 	inline View () noexcept
 	: View (nullptr, Rect (0, 0, DefaultWidth, DefaultHeight))
@@ -178,10 +178,10 @@ public:
 	point2u maximumSize () const noexcept { return m_gMaxSize; }
 
 	bool isEnabled () const noexcept
-	{ return m_gStateFlags.hasBit (Widget::Enabled); }
+	{ return m_gStateFlags.test (Widget::Enabled); }
 
 	bool hasFocus () const noexcept
-	{ return m_gStateFlags.hasBit (Widget::HasFocus); }
+	{ return m_gStateFlags.test (Widget::HasFocus); }
 
 	bool isHidden () const noexcept
 	{ return !m_gBuffer.isMapped (); }

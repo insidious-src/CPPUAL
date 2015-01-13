@@ -131,7 +131,7 @@ void Sound::close () noexcept
 
 void Sound::seek (std::chrono::seconds) noexcept
 {
-	if (m_gFlags.hasBit (Sound::Seekable))
+	if (m_gFlags.test (Sound::Seekable))
 	{
 	}
 }

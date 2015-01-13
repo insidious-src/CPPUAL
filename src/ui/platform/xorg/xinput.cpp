@@ -180,23 +180,20 @@ bool XQueue::setRenderableEvents (Ui::IRenderable& pRenderable,
 	if (gFlags)
 	{
 		// the order of all events must be exact
-		if (gFlags.hasBit (event_type::KeyPressed))  uMask |= XCB_EVENT_MASK_KEY_PRESS;
-		if (gFlags.hasBit (event_type::KeyReleased)) uMask |= XCB_EVENT_MASK_KEY_RELEASE;
-		if (gFlags.hasBit (event_type::ButtonDown))  uMask |= XCB_EVENT_MASK_BUTTON_PRESS;
-		if (gFlags.hasBit (event_type::ButtonUp))    uMask |= XCB_EVENT_MASK_BUTTON_RELEASE;
-		if (gFlags.hasBit (event_type::Step))        uMask |= XCB_EVENT_MASK_ENTER_WINDOW |
+		if (gFlags.test (event_type::KeyPressed))  uMask |= XCB_EVENT_MASK_KEY_PRESS;
+		if (gFlags.test (event_type::KeyReleased)) uMask |= XCB_EVENT_MASK_KEY_RELEASE;
+		if (gFlags.test (event_type::ButtonDown))  uMask |= XCB_EVENT_MASK_BUTTON_PRESS;
+		if (gFlags.test (event_type::ButtonUp))    uMask |= XCB_EVENT_MASK_BUTTON_RELEASE;
+		if (gFlags.test (event_type::Step))        uMask |= XCB_EVENT_MASK_ENTER_WINDOW |
 															  XCB_EVENT_MASK_LEAVE_WINDOW;
-		if (gFlags.hasBit (event_type::PointerMove)) uMask |= XCB_EVENT_MASK_POINTER_MOTION;
-		if (gFlags.hasBit (event_type::KeyMap))      uMask |= XCB_EVENT_MASK_KEYMAP_STATE;
-		if (gFlags.hasBit (event_type::Paint))       uMask |= XCB_EVENT_MASK_EXPOSURE;
-		if (gFlags.hasBit (event_type::Visibility))  uMask |= XCB_EVENT_MASK_VISIBILITY_CHANGE;
-		if (gFlags.hasBit (event_type::Size))        uMask |= XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+		if (gFlags.test (event_type::PointerMove)) uMask |= XCB_EVENT_MASK_POINTER_MOTION;
+		if (gFlags.test (event_type::KeyMap))      uMask |= XCB_EVENT_MASK_KEYMAP_STATE;
+		if (gFlags.test (event_type::Paint))       uMask |= XCB_EVENT_MASK_EXPOSURE;
+		if (gFlags.test (event_type::Visibility))  uMask |= XCB_EVENT_MASK_VISIBILITY_CHANGE;
+		if (gFlags.test (event_type::Size))        uMask |= XCB_EVENT_MASK_STRUCTURE_NOTIFY |
 															  XCB_EVENT_MASK_RESIZE_REDIRECT;
-		if (gFlags.hasBit (event_type::Focus))       uMask |= XCB_EVENT_MASK_FOCUS_CHANGE;
-		if (gFlags.hasBit (event_type::Property) or
-				gFlags.hasBit (event_type::Move))    uMask |= XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
-															  XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
-															  XCB_EVENT_MASK_PROPERTY_CHANGE;
+		if (gFlags.test (event_type::Focus))       uMask |= XCB_EVENT_MASK_FOCUS_CHANGE;
+		if (gFlags.test (event_type::Property))    uMask |= XCB_EVENT_MASK_PROPERTY_CHANGE;
 	}
 
 	xcb_change_window_attributes (display ().get<xcb_connection_t> (),

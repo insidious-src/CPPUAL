@@ -27,14 +27,14 @@
 
 namespace cppual { namespace Clock {
 
-template <class TClock = std::chrono::high_resolution_clock>
+template <class TClock = std::chrono::steady_clock>
 class Timer
 {
 public:
 	typedef typename TClock::time_point time_point;
 
 	Timer () noexcept : m_gEpoch (TClock::now ()) { }
-	void start () noexcept { m_gEpoch = TClock::now (); }
+	void reset () noexcept { m_gEpoch = TClock::now (); }
 
 	template <typename T = std::chrono::milliseconds>
 	T elapsed () const noexcept

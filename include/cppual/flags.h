@@ -42,21 +42,23 @@ public:
 	constexpr BitSet (std::nullptr_t) noexcept : m_flags () { }
 	inline    BitSet& operator = (BitSet const&) noexcept = default;
 
-	inline void switchBit (enum_type const eFlag) noexcept { m_flags ^= eFlag; }
+	void flip  (enum_type const eFlag) noexcept { m_flags ^= eFlag; }
+	void flip  () noexcept { m_flags ^= m_flags;       }
+	void reset () noexcept { m_flags  = value_type (); }
 
 	constexpr operator value_type () const noexcept
 	{ return m_flags; }
 
-	constexpr static size_type max_size () noexcept
+	constexpr static size_type size () noexcept
 	{ return std::integral_constant<size_type, sizeof (value_type) * 8>::value; }
 
-	constexpr bool hasBit (enum_type const eFlag) const noexcept
+	constexpr bool test (enum_type const eFlag) const noexcept
 	{ return (m_flags & eFlag) == eFlag; }
 
-	constexpr bool hasBits (value_type const flags) const noexcept
+	constexpr bool test (value_type const flags) const noexcept
 	{ return (m_flags & flags) == flags; }
 
-	constexpr bool hasBits (BitSet const& gObj) const noexcept
+	constexpr bool test (BitSet const& gObj) const noexcept
 	{ return (m_flags & gObj.m_flags) == gObj.m_flags; }
 
 	inline BitSet& operator += (enum_type const eFlag) noexcept

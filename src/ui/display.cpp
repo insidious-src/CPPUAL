@@ -24,7 +24,7 @@
 
 using std::string;
 using std::shared_ptr;
-using cppual::Platform::IService;
+using cppual::Platform::Factory;
 
 namespace cppual { namespace Ui {
 
@@ -47,7 +47,7 @@ inline Initializer& backend () noexcept
 
 IDisplay* IDisplay::instance ()
 {
-	if (Internal::backend ().instance == nullptr) set (std::getenv ("DISPLAY"));
+	if (Internal::backend ().instance == nullptr) set (nullptr);
 	return Internal::backend ().instance.get ();
 }
 
@@ -60,9 +60,9 @@ bool IDisplay::set (cchar* pDevName)
 {
 	static bool bConnected = false;
 
-	if (IService::hasValidInstance ())
+	if (Factory::hasValidInstance ())
 	{
-		Internal::backend ().instance = IService::instance ()->connectDisplay (pDevName);
+		Internal::backend ().instance = Factory::instance ()->connectDisplay (pDevName);
 
 		if (Internal::backend ().instance != nullptr and !Internal::backend ().instance->native ())
 			Internal::backend ().instance.reset ();
@@ -78,8 +78,8 @@ IDisplay::pointer IDisplay::connect (cchar* pDevName)
 			Internal::backend ().instance->name () == pDevName)
 		return Internal::backend ().instance;
 
-	return IService::hasValidInstance () ?
-				std::move (IService::instance ()->connectDisplay (pDevName)) :
+	return Factory::hasValidInstance () ?
+				std::move (Factory::instance ()->connectDisplay (pDevName)) :
 				IDisplay::pointer ();
 }
 

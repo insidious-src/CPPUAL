@@ -45,10 +45,10 @@ using cppual::Graphics::DeviceType;
 
 namespace cppual { namespace Platform {
 
-struct  IService;
-typedef shared_ptr<IService> shared_manager;
+struct  Factory;
+typedef shared_ptr<Factory> shared_manager;
 
-struct IService : public NonCopyableVirtual
+struct Factory : public NonCopyableVirtual
 {
 	typedef shared_renderable const& shared_reference;
 
@@ -59,9 +59,9 @@ struct IService : public NonCopyableVirtual
 	virtual shared_display connectDisplay (cchar* name = nullptr) = 0;
 	virtual shared_queue   createQueueObject () = 0;
 
-	static IService* instance ();
-	static Module&   module ();
-	static bool      hasValidInstance () noexcept;
+	static Factory* instance ();
+	static Module&  module ();
+	static bool     hasValidInstance () noexcept;
 };
 
 } } // namespace Platform

@@ -214,8 +214,8 @@ bool Shader::loadFromMemory (string const& gSource)
 
 bool Shader::compile () noexcept
 {
-	if (m_gStates.hasBit (Shader::IsCompiled)) return true;
-	else if (!m_gStates.hasBit (Shader::IsLoaded)) return false;
+	if (m_gStates.test (Shader::IsCompiled)) return true;
+	else if (!m_gStates.test (Shader::IsLoaded)) return false;
 
 	int	nStatus;
 
@@ -229,7 +229,7 @@ bool Shader::compile () noexcept
 	nStatus == GL::TRUE ? m_gStates += Shader::IsCompiled :
 										 m_gStates -= Shader::IsCompiled;
 
-	return m_gStates.hasBit (Shader::IsCompiled);
+	return m_gStates.test (Shader::IsCompiled);
 }
 
 SLProgram::SLProgram () noexcept
@@ -252,7 +252,7 @@ SLProgram::SLProgram (string const& gBinaryName) noexcept
 
 bool SLProgram::link () noexcept
 {
-	if (id () and !m_gStates.hasBit (SLProgram::IsLinked) and m_uShaderCount >= 2)
+	if (id () and !m_gStates.test (SLProgram::IsLinked) and m_uShaderCount >= 2)
 	{
 		int nStatus;
 
@@ -272,7 +272,7 @@ bool SLProgram::link () noexcept
 		nStatus == GL::TRUE ? m_gStates += SLProgram::IsLinked :
 								m_gStates -= SLProgram::IsLinked;
 
-		return m_gStates.hasBit (SLProgram::IsLinked);
+		return m_gStates.test (SLProgram::IsLinked);
 	}
 
 	return false;
@@ -320,12 +320,12 @@ int SLProgram::addUniform (string const& gName)
 
 void SLProgram::use () noexcept
 {
-	if (m_gStates.hasBit (SLProgram::IsLinked)) glUseProgram (id ());
+	if (m_gStates.test (SLProgram::IsLinked)) glUseProgram (id ());
 }
 
 void SLProgram::disable () noexcept
 {
-	if (m_gStates.hasBit (SLProgram::IsLinked)) glUseProgram (0);
+	if (m_gStates.test (SLProgram::IsLinked)) glUseProgram (0);
 }
 
 bool SLProgram::loadFromBinary (string const& gFile)
@@ -377,7 +377,7 @@ bool SLProgram::loadFromBinary (string const& gFile)
 		{
 			glGetShaderiv (uAttached[--nCount], GL::SpecifiedShaderType, &nType);
 
-			if (!m_gShaderTypes.hasBit (getShaderType (nType)))
+			if (!m_gShaderTypes.test (getShaderType (nType)))
 				m_gShaderTypes += getShaderType (nType);
 		}
 
@@ -391,7 +391,7 @@ void* SLProgram::binary () noexcept
 {
 	void* pBinary = nullptr;
 
-	if (m_gStates.hasBit (SLProgram::IsLinked))
+	if (m_gStates.test (SLProgram::IsLinked))
 	{
 		int nBuffSize;
 
@@ -409,9 +409,9 @@ uint SLProgram::binaryFormat () noexcept
 {
 	uint uFormat = 0;
 
-	if (m_gStates.hasBit (SLProgram::IsLinked))
+	if (m_gStates.test (SLProgram::IsLinked))
 	{
-		if (!m_gStates.hasBit (SLProgram::BinaryAvailable))
+		if (!m_gStates.test (SLProgram::BinaryAvailable))
 		{
 			IDeviceContext::current ()->version () < 3 ?
 						glProgramParameteri    (id (),
@@ -432,7 +432,7 @@ uint SLProgram::binaryFormat () noexcept
 
 bool SLProgram::attach (Shader const& gShader)
 {
-	if (!id () or m_gShaderTypes.hasBit (gShader.type ()))
+	if (!id () or m_gShaderTypes.test (gShader.type ()))
 		return false;
 
 	IDeviceContext::current ()->version () < 3 ?
@@ -446,7 +446,7 @@ bool SLProgram::attach (Shader const& gShader)
 
 bool SLProgram::detach (Shader const& gShader)
 {
-	if (!m_gShaderTypes.hasBit (gShader.type ()) or !isAttached (gShader))
+	if (!m_gShaderTypes.test (gShader.type ()) or !isAttached (gShader))
 		return false;
 
 	IDeviceContext::current ()->version () < 3 ?

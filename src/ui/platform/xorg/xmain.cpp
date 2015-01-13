@@ -31,7 +31,7 @@ using namespace cppual::Ui;
 
 namespace cppual { namespace Platform {
 
-struct XPlatform final : public IService
+struct XPlatform final : public Factory
 {
 	shared_queue      createQueueObject ();
 	shared_renderable createRenderable  (Rect const&, u32, IDisplay*);
@@ -40,7 +40,7 @@ struct XPlatform final : public IService
 
 shared_display XPlatform::connectDisplay (cchar* pDeviceName)
 {
-	return shared_display (new XDisplay (pDeviceName));
+	return shared_display (new XDisplay (pDeviceName? pDeviceName : getenv ("DISPLAY")));
 }
 
 shared_queue XPlatform::createQueueObject ()

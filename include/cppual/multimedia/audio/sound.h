@@ -117,13 +117,13 @@ public:
 	bool          isAvailable  () const noexcept { return m_pSndDesc != nullptr; }
 
 	bool isSeekable () const noexcept
-	{ return m_gFlags.hasBit (Sound::Seekable); }
+	{ return m_gFlags.test (Sound::Seekable); }
 
 	bool isReadable () const noexcept
-	{ return m_gFlags.hasBit (Sound::Read); }
+	{ return m_gFlags.test (Sound::Read); }
 
 	bool isWritable () const noexcept
-	{ return m_gFlags.hasBit (Sound::Write); }
+	{ return m_gFlags.test (Sound::Write); }
 
 	Sound () noexcept
 	: m_gBuffer (),

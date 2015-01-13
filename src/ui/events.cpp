@@ -23,7 +23,7 @@
 #include <cppual/ui/manager.h>
 
 using std::string;
-using cppual::Platform::IService;
+using cppual::Platform::Factory;
 
 namespace cppual { namespace Ui {
 
@@ -43,8 +43,8 @@ inline EventSignals& events () noexcept
 
 void attachQueue ()
 {
-	if (!IService::hasValidInstance ()) return;
-	Internal::queue () = IService::instance ()->createQueueObject ();
+	if (!Factory::hasValidInstance ()) return;
+	Internal::queue () = Factory::instance ()->createQueueObject ();
 }
 
 } } // anonymous namespace Internal
@@ -94,9 +94,6 @@ void Event::operator () () noexcept
 	case Size:
 		Internal::events ().winSize (data ().size);
 		break;
-	case Move:
-		Internal::events ().winMove (data ().move);
-		break;
 	case Focus:
 		Internal::events ().winFocus (data ().state);
 		break;
@@ -145,7 +142,6 @@ EventSignals::EventSignals () noexcept
   touchMove (),
   sysMessage (),
   winPaint (),
-  winMove (),
   winSize (),
   winFocus (),
   winStep (),
@@ -194,7 +190,7 @@ int EventQueue::poll (bool bWait) noexcept
 	do // event polling
 	{
 		if (!pop_front (gEvent, bWait) or
-				!m_gAcceptedEvents.load (std::memory_order_relaxed).hasBit (gEvent.type ()))
+				!m_gAcceptedEvents.load (std::memory_order_relaxed).test (gEvent.type ()))
 			continue;
 
 		// signal event

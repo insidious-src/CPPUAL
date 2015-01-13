@@ -118,11 +118,11 @@ struct Rect final
 
 	inline Rect () noexcept = default;
 
-	constexpr Rect (int16 x, int16 y, u16 width, u16 height) noexcept
+	constexpr Rect (value_type x, value_type y, u16 width, u16 height) noexcept
 	: left (x),
 	  top  (y),
-	  right  (static_cast<int16> (x + width)),
-	  bottom (static_cast<int16> (y + height))
+	  right  (static_cast<value_type> (x + width)),
+	  bottom (static_cast<value_type> (y + height))
 	{ }
 
 	constexpr u16 width () const noexcept
@@ -130,6 +130,9 @@ struct Rect final
 
 	constexpr u16 height () const noexcept
 	{ return static_cast<u16> (bottom - top); }
+
+	constexpr point2u size () const noexcept
+	{ return { width (), height () }; }
 
 	inline void setWidth (u16 uWidth) noexcept
 	{ right = static_cast<value_type> (left + uWidth); }
