@@ -129,6 +129,7 @@ private:
 class Icon final
 {
 public:
+	Icon () { }
 	Icon (string const&) { }
 	bool load (string const&) { return false; }
 };

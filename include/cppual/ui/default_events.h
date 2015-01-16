@@ -29,23 +29,20 @@ namespace cppual { namespace Ui {
 
 struct MessageEvent : public Event
 {
-	inline MessageEvent () noexcept = default;
-
 	inline MessageEvent (int nMsg) noexcept
 	: Event (Event::SystemMessage)
-	{ m_gData.message = nMsg; }
+	{
+		m_gData.message = nMsg;
+	}
 };
 
 // =========================================================
 
 struct VisibilityEvent : public Event
 {
-	inline VisibilityEvent () noexcept = default;
-
-	inline VisibilityEvent (Graphics::Element elem, bool bVis) noexcept
-	: Event (Event::Visibility)
+	inline VisibilityEvent (window_type wnd, bool bVis) noexcept
+	: Event (Event::Visibility, wnd)
 	{
-		m_gData.visibility.element = elem;
 		m_gData.visibility.visible = bVis;
 	}
 };
@@ -54,13 +51,10 @@ struct VisibilityEvent : public Event
 
 struct PaintEvent : public Event
 {
-	inline PaintEvent () noexcept = default;
-
-	inline PaintEvent (Graphics::Element elem, Rect gRect) noexcept
-	: Event (Event::Paint)
+	inline PaintEvent (window_type wnd, Rect gRect) noexcept
+	: Event (Event::Paint, wnd)
 	{
-		m_gData.paint.element = elem;
-		m_gData.paint.region  = gRect;
+		m_gData.paint.region = gRect;
 	}
 };
 
@@ -68,13 +62,10 @@ struct PaintEvent : public Event
 
 struct SizeEvent : public Event
 {
-	inline SizeEvent () noexcept = default;
-
-	inline SizeEvent (Graphics::Element elem, point2u size) noexcept
-	: Event (Event::Size)
+	inline SizeEvent (window_type wnd, point2u size) noexcept
+	: Event (Event::Size, wnd)
 	{
-		m_gData.size.element = elem;
-		m_gData.size.size    = size;
+		m_gData.size.size = size;
 	}
 };
 
@@ -82,13 +73,10 @@ struct SizeEvent : public Event
 
 struct FocusEvent : public Event
 {
-	inline FocusEvent () noexcept = default;
-
-	inline FocusEvent (Graphics::Element elem, bool in) noexcept
-	: Event (Event::Focus)
+	inline FocusEvent (window_type wnd, bool in) noexcept
+	: Event (Event::Focus, wnd)
 	{
-		m_gData.state.element = elem;
-		m_gData.state.in      = in;
+		m_gData.state.in = in;
 	}
 };
 
@@ -96,13 +84,10 @@ struct FocusEvent : public Event
 
 struct StepEvent : public Event
 {
-	inline StepEvent () noexcept = default;
-
-	inline StepEvent (Graphics::Element elem, bool in) noexcept
-	: Event (Event::Step)
+	inline StepEvent (window_type wnd, bool in) noexcept
+	: Event (Event::Step, wnd)
 	{
-		m_gData.state.element = elem;
-		m_gData.state.in      = in;
+		m_gData.state.in = in;
 	}
 };
 
@@ -110,14 +95,11 @@ struct StepEvent : public Event
 
 struct PropertyEvent : public Event
 {
-	inline PropertyEvent () noexcept = default;
-
-	inline PropertyEvent (Graphics::Element elem, u32 prop, int32 value) noexcept
-	: Event (Event::Property)
+	inline PropertyEvent (window_type wnd, u32 prop, int32 value) noexcept
+	: Event (Event::Property, wnd)
 	{
-		m_gData.property.element = elem;
-		m_gData.property.prop    = prop;
-		m_gData.property.value   = value;
+		m_gData.property.prop  = prop;
+		m_gData.property.value = value;
 	}
 };
 
@@ -125,34 +107,21 @@ struct PropertyEvent : public Event
 
 struct KeyPressEvent : public Event
 {
-	inline KeyPressEvent () noexcept = default;
-
-	inline KeyPressEvent (KeyData nKey) noexcept
-	: Event (Event::KeyPressed)
-	{ m_gData.keyCode = nKey; }
+	inline KeyPressEvent (window_type wnd, KeyData nKey) noexcept
+	: Event (Event::KeyPressed, wnd)
+	{
+		m_gData.keyCode = nKey;
+	}
 };
 
 // =========================================================
 
 struct KeyReleaseEvent : public Event
 {
-	inline KeyReleaseEvent () noexcept = default;
-
-	inline KeyReleaseEvent (KeyData nKey) noexcept
-	: Event (Event::KeyReleased)
-	{ m_gData.keyCode = nKey; }
-};
-
-// =========================================================
-
-struct KeysMappedEvent : public Event
-{
-	inline KeysMappedEvent () noexcept = default;
-
-	inline KeysMappedEvent (KeyData nMap) noexcept
-	: Event (Event::KeyMap)
+	inline KeyReleaseEvent (window_type wnd, KeyData nKey) noexcept
+	: Event (Event::KeyReleased, wnd)
 	{
-		m_gData.keyCode = nMap;
+		m_gData.keyCode = nKey;
 	}
 };
 
@@ -160,16 +129,11 @@ struct KeysMappedEvent : public Event
 
 struct MousePressEvent : public Event
 {
-	inline MousePressEvent () noexcept = default;
-
-	inline MousePressEvent (Graphics::Element elem,
-							u8                nBtn,
-							point2i           gPos) noexcept
-	: Event (Event::ButtonDown)
+	inline MousePressEvent (window_type wnd, u8 nBtn, point2i gPos) noexcept
+	: Event (Event::ButtonDown, wnd)
 	{
-		m_gData.mouseButton.element = elem;
-		m_gData.mouseButton.button  = nBtn;
-		m_gData.mouseButton.pos     = gPos;
+		m_gData.mouseButton.button = nBtn;
+		m_gData.mouseButton.pos    = gPos;
 	}
 };
 
@@ -177,14 +141,9 @@ struct MousePressEvent : public Event
 
 struct MouseReleaseEvent : public Event
 {
-	inline MouseReleaseEvent () noexcept = default;
-
-	inline MouseReleaseEvent (Graphics::Element elem,
-							  u8                nBtn,
-							  point2i           gPos) noexcept
-	: Event (Event::ButtonUp)
+	inline MouseReleaseEvent (window_type wnd, u8 nBtn, point2i gPos) noexcept
+	: Event (Event::ButtonUp, wnd)
 	{
-		m_gData.mouseButton.element = elem;
 		m_gData.mouseButton.button  = nBtn;
 		m_gData.mouseButton.pos     = gPos;
 	}
@@ -194,14 +153,10 @@ struct MouseReleaseEvent : public Event
 
 struct MouseMoveEvent : public Event
 {
-	inline MouseMoveEvent () noexcept = default;
-
-	inline MouseMoveEvent (Graphics::Element elem,
-						   point2i           gPos) noexcept
-	: Event (Event::PointerMove)
+	inline MouseMoveEvent (window_type wnd, point2i gPos) noexcept
+	: Event (Event::PointerMove, wnd)
 	{
-		m_gData.mouseButton.element = elem;
-		m_gData.mouseButton.pos     = gPos;
+		m_gData.mouseButton.pos = gPos;
 	}
 };
 
@@ -209,16 +164,11 @@ struct MouseMoveEvent : public Event
 
 struct ScrollEvent : public Event
 {
-	inline ScrollEvent () noexcept = default;
-
-	inline ScrollEvent (Graphics::Element elem,
-						int32             nDelta,
-						point2i           gPos) noexcept
-	: Event (Event::Scroll)
+	inline ScrollEvent (window_type wnd, int32 nDelta, point2i gPos) noexcept
+	: Event (Event::Scroll, wnd)
 	{
-		m_gData.mouseButton.element = elem;
-		m_gData.scroll.delta        = nDelta;
-		m_gData.scroll.pos          = gPos;
+		m_gData.scroll.delta = nDelta;
+		m_gData.scroll.pos   = gPos;
 	}
 };
 
@@ -226,8 +176,6 @@ struct ScrollEvent : public Event
 
 struct TouchPressEvent : public Event
 {
-	inline TouchPressEvent () noexcept = default;
-
 	inline TouchPressEvent (int32 pid, point2i gPos) noexcept
 	: Event (Event::TouchPress)
 	{
@@ -240,8 +188,6 @@ struct TouchPressEvent : public Event
 
 struct TouchReleaseEvent : public Event
 {
-	inline TouchReleaseEvent () noexcept = default;
-
 	inline TouchReleaseEvent (int32 pid, point2i gPos) noexcept
 	: Event (Event::TouchRelease)
 	{
@@ -254,8 +200,6 @@ struct TouchReleaseEvent : public Event
 
 struct TouchMovedEvent : public Event
 {
-	inline TouchMovedEvent () noexcept = default;
-
 	inline TouchMovedEvent (int32 pid, point2i gPos) noexcept
 	: Event (Event::TouchMove)
 	{

@@ -23,6 +23,7 @@
 #define CPPUAL_UI_WINDOW_H_
 #ifdef __cplusplus
 
+#include <chrono>
 #include <cppual/gfx/drawable/image.h>
 #include <cppual/ui/frame.h>
 
@@ -77,6 +78,103 @@ private:
 	FrameView   m_gFrame;
 	image_type* m_pIcon;
 	bool        m_bIsFullScreen;
+};
+
+// =========================================================
+
+class WindowAdapter : NonCopyableVirtual
+{
+public:
+	typedef Event                                  event_type;
+	typedef EventQueue                             queue_type;
+	typedef Memory::GenericPolicy<Widget*>         allocator_type;
+	typedef CircularQueue<Widget*, allocator_type> container;
+	typedef std::size_t	                           size_type;
+
+	typedef typename
+	container::iterator iterator;
+
+	typedef typename
+	Signal<void(event_type::window_type, event_type::MouseMoveData)>
+	::slot_type
+	move_slot;
+
+	typedef typename
+	Signal<void(event_type::window_type, event_type::MouseButtonData)>
+	::slot_type
+	btn_slot;
+
+
+	enum
+	{
+		DefaultWidth  = 1024,
+		DefaultHeight = 768
+	};
+
+	WindowAdapter (WindowAdapter&&);
+	WindowAdapter& operator = (WindowAdapter&&);
+
+	WindowAdapter (Widget&     main_widget,
+				   WindowFlags flags  = WindowHints,
+				   Icon const& icon   = Icon (),
+				   u32         screen = 0);
+
+	bool setIcon (Icon const&);
+	void restore ();
+
+	void close ()
+	{ if (m_pPlatformWnd) m_pPlatformWnd.reset (); }
+
+	void flash (std::chrono::seconds sec)
+	{ if (m_pPlatformWnd) m_pPlatformWnd->flash (sec); }
+
+	void goFullscreen ()
+	{ if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (true); }
+
+	void exitFullscreen ()
+	{ if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (false); }
+
+	void showInTaskbar (bool state)
+	{ if (m_pPlatformWnd) m_pPlatformWnd->setVisibleInTaskbar (state); }
+
+	void showInPager (bool state)
+	{ if (m_pPlatformWnd) m_pPlatformWnd->setVisibleInPager (state); }
+
+	void minimize ()
+	{ if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }
+
+	void maximize ()
+	{ if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }
+
+
+private:
+	virtual bool onClose        () { return true; }
+	virtual void onMinimize     () { }
+	virtual void onMaximize     () { }
+	virtual void onHelp         () { }
+	virtual void onPointerMove  (event_type::MouseMoveData) { }
+	virtual void onMousePress   (event_type::MouseButtonData) { }
+	virtual void onMouseRelease (event_type::MouseButtonData) { }
+	virtual void onKeyPress     (event_type::KeyData) { }
+	virtual void onKeyRelease   (event_type::KeyData) { }
+
+	virtual void onSize         (event_type::SizeData);
+	virtual void onPaint        (event_type::PaintData) { }
+	virtual void onFocus        (bool) { }
+	virtual void onShow         (bool) { }
+
+	static void registerEvents ();
+
+private:
+	shared_window m_pPlatformWnd;
+	Widget*       m_pMainWidget;
+	Icon          m_pIcon;
+};
+
+class Wnd : public WindowAdapter
+{
+public:
+private:
 };
 
 } } // namespace Ui

@@ -34,7 +34,7 @@ namespace cppual { namespace Platform {
 struct XPlatform final : public Factory
 {
 	shared_queue      createQueueObject ();
-	shared_renderable createRenderable  (Rect const&, u32, IDisplay*);
+	shared_window createWindow  (Rect const&, u32, IDisplay*);
 	shared_display    connectDisplay    (cchar*);
 };
 
@@ -48,11 +48,11 @@ shared_queue XPlatform::createQueueObject ()
 	return shared_queue (new XQueue);
 }
 
-shared_renderable XPlatform::createRenderable (Rect const& gRect,
+shared_window XPlatform::createWindow (Rect const& gRect,
 											   u32         nScreen,
 											   IDisplay*   pDisplay)
 {
-	return shared_renderable (new XRenderable (gRect, nScreen, pDisplay));
+	return shared_window (new XWindow (gRect, nScreen, pDisplay));
 }
 
 } } // namespace Platform

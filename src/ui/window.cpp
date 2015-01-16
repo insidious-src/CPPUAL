@@ -19,146 +19,144 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unordered_map>
 #include <cppual/ui/window.h>
 
 namespace cppual { namespace Ui {
 
-Window::Window ()
+namespace { namespace Internal {
+
+typedef std::unordered_map<uptr, WindowAdapter*> map_type;
+
+inline map_type& map ()
 {
+	static map_type views_map (5);
+	return views_map;
 }
 
-Window::Window (Window&& gObj)
-: View (gObj)
-{
-}
+} } // anonymous namespace Internal
 
-Window::Window (Window const& gObj)
-: View (gObj)
-{
-}
+// =========================================================
 
-Window& Window::operator = (Window&& gObj)
+void WindowAdapter::registerEvents ()
 {
-	if (this == &gObj) return *this;
-	return *this;
-}
-
-Window& Window::operator = (Window const& gObj)
-{
-	if (this == &gObj) return *this;
-	return *this;
-}
-
-Window::~Window ()
-{
-	if (isValid ())
+	connect (event_type::registers ().mouseMove,
+			 [](event_type::window_type wnd, event_type::MouseMoveData data)
 	{
-		onClose ();
-		m_gFrame.destroy ();
-	}
+		Internal::map ()[wnd]->onPointerMove (data);
+	});
+
+	connect (event_type::registers ().mousePress,
+			 [](event_type::window_type wnd, event_type::MouseButtonData data)
+	{
+		Internal::map ()[wnd]->onMousePress (data);
+	});
+
+	connect (event_type::registers ().mouseRelease,
+			 [](event_type::window_type wnd, event_type::MouseButtonData data)
+	{
+		Internal::map ()[wnd]->onMouseRelease (data);
+	});
+
+	connect (event_type::registers ().winPaint,
+			 [](event_type::window_type wnd, event_type::PaintData data)
+	{
+		Internal::map ()[wnd]->onPaint (data);
+	});
+
+	connect (event_type::registers ().winFocus,
+			 [](event_type::window_type wnd, event_type::StateData data)
+	{
+		Internal::map ()[wnd]->onFocus (data.in);
+	});
+
+	connect (event_type::registers ().winSize,
+			 [](event_type::window_type wnd, event_type::SizeData data)
+	{
+		Internal::map ()[wnd]->onSize (data);
+	});
+
+	connect (event_type::registers ().winVisible,
+			 [](event_type::window_type wnd, event_type::VisibilityData data)
+	{
+		Internal::map ()[wnd]->onShow (data.visible);
+	});
 }
 
-Window::Window (View*       pParent,
-				Rect const& gRect,
-				string&&    gTitle,
-				image_type* pIcon,
-				u32         nScreen)
-: View (&m_gFrame, gRect, nScreen),
-  m_gFrame (pParent, gRect, std::forward<string> (gTitle), pIcon)
+// =========================================================
+
+WindowAdapter::WindowAdapter (Widget&     widget,
+							  WindowFlags flags,
+							  Icon const& icon,
+							  u32         screen)
+: m_pPlatformWnd (Platform::Factory::instance ()->createWindow (widget.geometry (), screen)),
+  m_pMainWidget  (&widget),
+  m_pIcon        (icon)
 {
-	if (isValid () and m_gFrame.isValid ())
+	if (!m_pPlatformWnd) throw std::bad_alloc ();
+
+	uptr key = m_pPlatformWnd->id ();
+
+	if (!Internal::map ().emplace (std::make_pair (key, this)).second)
 	{
-		m_gFrame.attach (this);
-		m_pIcon = m_gFrame.icon ();
+		m_pPlatformWnd.reset ();
+		throw std::logic_error ("failed to register WindowAdapter events");
 	}
+
+	IDisplayQueue::instance ()->
+			setWindowEvents (*m_pPlatformWnd,
+							 event_type::Key     |
+							 event_type::Pointer |
+							 event_type::Window);
+
+	m_pPlatformWnd->setFlags (flags);
+	m_pPlatformWnd->setTitle (widget.name ());
 }
 
-bool Window::setIcon (image_type* pIcon)
+bool WindowAdapter::setIcon (Icon const& gIcon)
 {
-	if (isValid ())
-	{
-		m_pIcon = pIcon;
-		m_gFrame.setIcon (pIcon);
-		refresh ();
-	}
-
+	m_pIcon = gIcon;
 	return false;
 }
 
-void Window::setTitle (string const& gTitle)
+void WindowAdapter::restore ()
 {
-	if (isValid ())
+	if (m_pPlatformWnd)
 	{
-		if (m_gFrame.isValid ()) m_gFrame.setLabel (gTitle);
-		renderable ().lock ().get ()->setTitle (gTitle);
+		if (m_pPlatformWnd->isMaximized ()) m_pPlatformWnd->setMaximized (false);
+		if (m_pPlatformWnd->isMinimized ()) m_pPlatformWnd->setMinimized (false);
 	}
 }
 
-void Window::restore ()
+void WindowAdapter::onSize (event_type::SizeData gData)
 {
-	if (m_gFrame.attached () == this)
+	m_pMainWidget->setSize (gData.size);
+}
+
+WindowAdapter::WindowAdapter (WindowAdapter&& gObj)
+: m_pPlatformWnd (gObj.m_pPlatformWnd),
+  m_pMainWidget  (gObj.m_pMainWidget),
+  m_pIcon        (gObj.m_pIcon)
+{
+	gObj.m_pPlatformWnd = nullptr;
+	gObj.m_pMainWidget  = nullptr;
+	gObj.m_pIcon        = Icon ();
+}
+
+WindowAdapter& WindowAdapter::operator = (WindowAdapter&& gObj)
+{
+	if (this != &gObj)
 	{
-		if (m_gFrame.isHidden ()) m_gFrame.show ();
-		else if (m_gFrame.isStretched ()) m_gFrame.unstretch ();
+		m_pPlatformWnd = gObj.m_pPlatformWnd;
+		m_pMainWidget  = gObj.m_pMainWidget;
+		m_pIcon        = gObj.m_pIcon;
+
+		gObj.m_pPlatformWnd = nullptr;
+		gObj.m_pMainWidget  = nullptr;
+		gObj.m_pIcon        = Icon ();
 	}
-	else if (isHidden ()) show ();
-}
 
-void Window::minimize ()
-{
-	if (!isMinimized ())
-	{
-		m_gFrame.hide ();
-		onMinimize ();
-	}
-}
-
-void Window::maximize ()
-{
-	if (!isMaximized ())
-	{
-		m_gFrame.stretch ();
-		onMaximize ();
-	}
-}
-
-void Window::close ()
-{
-	if (isValid () and onClose ())
-	{
-		m_gFrame.destroy ();
-		destroy ();
-	}
-}
-
-void Window::goFullscreen ()
-{
-	if (isValid () and !m_bIsFullScreen)
-	{
-		m_gFrame.detach ();
-		renderable ().lock ().get ()->setFullscreen (true);
-		m_bIsFullScreen = true;
-	}
-}
-
-void Window::exitFullscreen ()
-{
-	if (m_bIsFullScreen)
-	{
-		m_gFrame.attach (this);
-		renderable ().lock ().get ()->setFullscreen (false);
-		m_bIsFullScreen = false;
-	}
-}
-
-void Window::flash (ushort)
-{
-	if (isValid ()) renderable ().lock ().get ()->flash ();
-}
-
-void Window::showInTaskbar (bool bShow)
-{
-	if (isValid ()) renderable ().lock ().get ()->setVisibleInTaskbar (bShow);
+	return *this;
 }
 
 } } // namespace Ui

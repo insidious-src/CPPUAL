@@ -34,7 +34,7 @@ namespace cppual { namespace Ui {
 struct DECL_EXPORT XQueue final : public IDisplayQueue
 {
 	XQueue () noexcept;
-	bool setRenderableEvents (Ui::IRenderable&, mask_type) noexcept;
+	bool setWindowEvents (Ui::IWindow&, mask_type) noexcept;
 	bool pop_front           (event_type&, bool wait) noexcept;
 };
 

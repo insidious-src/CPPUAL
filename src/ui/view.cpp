@@ -36,11 +36,11 @@ inline map_type& map ()
 	return views_map;
 }
 
-inline shared_renderable createRenderable (View* pParentObj, Rect const& gRect, u32 nScreen)
+inline shared_window createRenderable (View* pParentObj, Rect const& gRect, u32 nScreen)
 {
-	return pParentObj ? shared_renderable (new ProxyRenderable (pParentObj->renderable ().lock (),
-																gRect)) :
-						Platform::Factory::instance ()->createRenderable (gRect, nScreen);
+	return pParentObj ? shared_window (new ProxyRenderable (pParentObj->renderable ().lock (),
+															gRect)) :
+						Platform::Factory::instance ()->createWindow (gRect, nScreen);
 }
 
 } } // anonymous namespace Internal
@@ -49,47 +49,55 @@ inline shared_renderable createRenderable (View* pParentObj, Rect const& gRect, 
 
 void View::registerEvents ()
 {
-	connect (queue_type::events ().mouseMove, [](event_type::MouseMoveData const& data)
+	connect (event_type::registers ().mouseMove,
+			 [](event_type::window_type wnd, event_type::MouseMoveData data)
 	{
-		Internal::map ()[data.element]->mouseMoved (data.pos);
+		Internal::map ()[wnd]->mouseMoved (data.pos);
 	});
 
-	connect (queue_type::events ().mousePress, [](event_type::MouseButtonData const& data)
+	connect (event_type::registers ().mousePress,
+			 [](event_type::window_type wnd, event_type::MouseButtonData data)
 	{
-		Internal::map ()[data.element]->mousePressed (data);
+		Internal::map ()[wnd]->mousePressed (data);
 	});
 
-	connect (queue_type::events ().mouseRelease, [](event_type::MouseButtonData const& data)
+	connect (event_type::registers ().mouseRelease,
+			 [](event_type::window_type wnd, event_type::MouseButtonData data)
 	{
-		Internal::map ()[data.element]->mouseReleased (data);
+		Internal::map ()[wnd]->mouseReleased (data);
 	});
 
-	connect (queue_type::events ().winPaint, [](event_type::PaintData const& data)
+	connect (event_type::registers ().winPaint,
+			 [](event_type::window_type wnd, event_type::PaintData data)
 	{
-		Internal::map ()[data.element]->paint (data.region);
+		Internal::map ()[wnd]->paint (data.region);
 	});
 
-	connect (queue_type::events ().winFocus, [](event_type::StateData const& data)
+	connect (event_type::registers ().winFocus,
+			 [](event_type::window_type wnd, event_type::StateData data)
 	{
-		Internal::map ()[data.element]->onFocus (data.in);
+		Internal::map ()[wnd]->onFocus (data.in);
 	});
 
-	connect (queue_type::events ().winSize, [](event_type::SizeData const& data)
+	connect (event_type::registers ().winSize,
+			 [](event_type::window_type wnd, event_type::SizeData data)
 	{
-		Internal::map ()[data.element]->size (data.size);
+		Internal::map ()[wnd]->size (data.size);
 	});
 
-	connect (queue_type::events ().winVisible, [](event_type::VisibilityData const& data)
+	connect (event_type::registers ().winVisible,
+			 [](event_type::window_type wnd, event_type::VisibilityData data)
 	{
-		Internal::map ()[data.element]->onShow (data.visible);
+		Internal::map ()[wnd]->onShow (data.visible);
 	});
 
-	connect (queue_type::events ().winProperty, [](event_type::PropertyData const& data)
+	connect (event_type::registers ().winProperty,
+			 [](event_type::window_type wnd, event_type::PropertyData data)
 	{
 		switch (data.prop)
 		{
 		case 0:
-			Internal::map ()[data.element]->onMinMaxSize (point2u ());
+			Internal::map ()[wnd]->onMinMaxSize (point2u ());
 			break;
 		default:
 			break;
@@ -135,7 +143,7 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 		}
 
 		IDisplayQueue::instance ()->
-				setRenderableEvents (*m_pRenderable,
+				setWindowEvents (*m_pRenderable,
 									 event_type::Key     |
 									 event_type::Pointer |
 									 event_type::Window);
@@ -277,7 +285,7 @@ void View::setMinimumSize (point2u gSize)
 {
 	if (m_gStateFlags.test (View::Valid))
 	{
-		m_pRenderable->setMimimumSize (gSize);
+		//m_pRenderable->setMimimumSize (gSize);
 		m_gMinSize = gSize;
 	}
 }
@@ -286,7 +294,7 @@ void View::setMaximumSize (point2u gSize)
 {
 	if (m_gStateFlags.test (View::Valid))
 	{
-		m_pRenderable->setMaximumSize (gSize);
+		//m_pRenderable->setMaximumSize (gSize);
 		m_gMinSize = gSize;
 	}
 }
@@ -311,7 +319,7 @@ bool View::setParent (View* pParentObj, point2i gPos)
 	{
 		// recreate using physical surface
 		m_pRenderable = Platform::Factory::instance ()->
-						createRenderable (m_pRenderable->geometry (),
+						createWindow (m_pRenderable->geometry (),
 										  m_pRenderable->screen (),
 										  m_pRenderable->connection ());
 		if (m_pRenderable == nullptr) return false;

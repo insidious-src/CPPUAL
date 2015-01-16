@@ -91,11 +91,13 @@ void FrameView::attach (View* pView)
 	{
 		if (m_pTarget and m_pTarget->isValid ())
 		{
-			m_pTarget->renderable ().lock ().get ()->setWMFrame (false);
+			m_pTarget->renderable_unsafe ()->setFlags
+					(m_pTarget->renderable_unsafe ()->flags () += WindowFlag::Frame);
 		}
 		else
 		{
-			m_pTarget->renderable ().lock ().get ()->setWMFrame (true);
+			m_pTarget->renderable_unsafe ()->setFlags
+					(m_pTarget->renderable_unsafe ()->flags () -= WindowFlag::Frame);
 		}
 	}
 
@@ -108,7 +110,8 @@ void FrameView::detach ()
 
 	if (!isUsingInternalCompositor ())
 	{
-		m_pTarget->renderable ().lock ().get ()->setWMFrame (false);
+		m_pTarget->renderable_unsafe ()->setFlags
+				(m_pTarget->renderable_unsafe ()->flags () -= Frame);
 	}
 	else
 	{
@@ -125,7 +128,7 @@ void FrameView::setLabel (string const&)
 {
 }
 
-void FrameView::setFlags (FrameFlags)
+void FrameView::setFlags (WindowFlags)
 {
 }
 
@@ -133,7 +136,7 @@ FrameView::FrameView (View*       pParent,
 					  Rect const& gTargetRect,
 					  string&&    gLabel,
 					  image_type* pIcon,
-					  FrameFlags  gFlags)
+					  WindowFlags gFlags)
 : SkinnableView (pParent, calcFrameSize (gTargetRect)),
   m_gCloseBtn (),
   m_gMaxBtn (),
@@ -152,11 +155,11 @@ FrameView::FrameView (View*       pParent,
 {
 	if (isValid ())
 	{
-		if (gFlags.test (FrameView::Close)) m_gCloseBtn.create (this, string ());
-		if (gFlags.test (FrameView::Minimize)) m_gMinBtn.create (this, string ());
-		if (gFlags.test (FrameView::Maximize)) m_gMaxBtn.create (this, string ());
-		if (gFlags.test (FrameView::Help)) m_gHelpBtn.create (this, string ());
-		if (gFlags.test (FrameView::Icon) and pIcon) setIcon (pIcon);
+		if (gFlags.test (Close)) m_gCloseBtn.create (this, string ());
+		m_gMinBtn.create (this, string ());
+		if (gFlags.test (Maximize)) m_gMaxBtn.create (this, string ());
+		if (gFlags.test (Help)) m_gHelpBtn.create (this, string ());
+		if (pIcon) setIcon (pIcon);
 		m_gTitle = std::forward<string> (gLabel);
 
 		if (m_gSysMenu.create ({ m_gIconRect.left, m_gIconRect.top }))

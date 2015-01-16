@@ -35,12 +35,6 @@ inline shared_queue& queue () noexcept
 	return platform_queue;
 }
 
-inline EventSignals& events () noexcept
-{
-	static EventSignals event_signals;
-	return event_signals;
-}
-
 void attachQueue ()
 {
 	if (!Factory::hasValidInstance ()) return;
@@ -56,55 +50,52 @@ void Event::operator () () noexcept
 	switch (type ())
 	{
 	case KeyPressed:
-		Internal::events ().keyPress (data ().keyCode);
+		registers ().keyPress (window (), data ().keyCode);
 		break;
 	case KeyReleased:
-		Internal::events ().keyRelease (data ().keyCode);
-		break;
-	case KeyMap:
-		Internal::events ().keyNotify (data ().keyCode);
+		registers ().keyRelease (window (), data ().keyCode);
 		break;
 	case ButtonDown:
-		Internal::events ().mousePress (data ().mouseButton);
+		registers ().mousePress (window (), data ().mouseButton);
 		break;
 	case ButtonUp:
-		Internal::events ().mouseRelease (data ().mouseButton);
+		registers ().mouseRelease (window (), data ().mouseButton);
 		break;
 	case PointerMove:
-		Internal::events ().mouseMove (data ().mouseMove);
+		registers ().mouseMove (window (), data ().mouseMove);
 		break;
 	case Scroll:
-		Internal::events ().scroll (data ().scroll);
+		registers ().scroll (window (), data ().scroll);
 		break;
 	case TouchPress:
-		Internal::events ().touchPress (data ().touch);
+		registers ().touchPress (window (), data ().touch);
 		break;
 	case TouchRelease:
-		Internal::events ().touchRelease (data ().touch);
+		registers ().touchRelease (window (), data ().touch);
 		break;
 	case TouchMove:
-		Internal::events ().touchMove (data ().touch);
+		registers ().touchMove (window (), data ().touch);
 		break;
 	case SystemMessage:
-		Internal::events ().sysMessage (data ().message);
+		registers ().sysMessage (window (), data ().message);
 		break;
 	case Paint:
-		Internal::events ().winPaint (data ().paint);
+		registers ().winPaint (window (), data ().paint);
 		break;
 	case Size:
-		Internal::events ().winSize (data ().size);
+		registers ().winSize (window (), data ().size);
 		break;
 	case Focus:
-		Internal::events ().winFocus (data ().state);
+		registers ().winFocus (window (), data ().state);
 		break;
 	case Step:
-		Internal::events ().winStep (data ().state);
+		registers ().winStep (window (), data ().state);
 		break;
 	case Visibility:
-		Internal::events ().winVisible (data ().visibility);
+		registers ().winVisible (window (), data ().visibility);
 		break;
 	case Property:
-		Internal::events ().winProperty (data ().property);
+		registers ().winProperty (window (), data ().property);
 		break;
 	case Null:
 		std::cout << "null event\n";
@@ -129,28 +120,6 @@ bool IDisplayQueue::hasValidInstance () noexcept
 
 // =========================================================
 
-EventSignals::EventSignals () noexcept
-: keyPress (),
-  keyRelease (),
-  keyNotify (),
-  mousePress (),
-  mouseRelease (),
-  mouseMove (),
-  scroll (),
-  touchPress (),
-  touchRelease (),
-  touchMove (),
-  sysMessage (),
-  winPaint (),
-  winSize (),
-  winFocus (),
-  winStep (),
-  winProperty (),
-  winVisible ()
-{ }
-
-// =========================================================
-
 EventQueue::EventQueue () noexcept
 : m_gEventQueue (25),
   m_gAcceptedEvents (event_type::AllEvents),
@@ -162,11 +131,6 @@ EventQueue::EventQueue (mask_type nEvents) noexcept
   m_gAcceptedEvents (nEvents),
   m_bPoll ()
 { }
-
-EventSignals& EventQueue::events () noexcept
-{
-	return Internal::events ();
-}
 
 bool EventQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 {

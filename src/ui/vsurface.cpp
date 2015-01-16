@@ -23,8 +23,8 @@
 
 namespace cppual { namespace Ui {
 
-ProxyRenderable::ProxyRenderable (shared_renderable const& pParent, Rect const& gRect) noexcept
-: IRenderable (pParent != nullptr ? pParent->connection () : nullptr,
+ProxyRenderable::ProxyRenderable (shared_window const& pParent, Rect const& gRect) noexcept
+: IWindow (pParent != nullptr ? pParent->connection () : nullptr,
 			pParent != nullptr ? pParent->id () : Element (nullptr),
 			ResourceType::Surface),
   m_pParent (pParent),
@@ -33,7 +33,7 @@ ProxyRenderable::ProxyRenderable (shared_renderable const& pParent, Rect const& 
 {
 }
 
-ProxyRenderable::ProxyRenderable (IRenderable*) noexcept
+ProxyRenderable::ProxyRenderable (IWindow*) noexcept
 {
 }
 
@@ -41,7 +41,7 @@ ProxyRenderable::ProxyRenderable (ProxyRenderable const&) noexcept
 {
 }
 
-ProxyRenderable& ProxyRenderable::operator = (IRenderable*) noexcept
+ProxyRenderable& ProxyRenderable::operator = (IWindow*) noexcept
 {
 	return *this;
 }
@@ -56,7 +56,7 @@ void ProxyRenderable::setGeometry (Rect const&) noexcept
 {
 }
 
-void ProxyRenderable::setParent (shared_renderable const&, point2i) noexcept
+void ProxyRenderable::setParent (shared_window const&, point2i) noexcept
 {
 }
 

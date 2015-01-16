@@ -169,7 +169,7 @@ XQueue::XQueue () noexcept
 : IDisplayQueue (IDisplay::hasValidInstance () ? IDisplay::instance ()->native () : nullptr)
 { }
 
-bool XQueue::setRenderableEvents (Ui::IRenderable& pRenderable,
+bool XQueue::setWindowEvents (Ui::IWindow& pRenderable,
 								  mask_type        gFlags) noexcept
 {
 	if (pRenderable.connection ()->native () != display ())
@@ -177,23 +177,40 @@ bool XQueue::setRenderableEvents (Ui::IRenderable& pRenderable,
 
 	u32 uMask = XCB_EVENT_MASK_NO_EVENT;
 
+//	XCB_EVENT_MASK_EXPOSURE
+//			| XCB_EVENT_MASK_STRUCTURE_NOTIFY
+//			| XCB_EVENT_MASK_KEY_PRESS
+//			| XCB_EVENT_MASK_KEY_RELEASE
+//			| XCB_EVENT_MASK_BUTTON_PRESS
+//			| XCB_EVENT_MASK_BUTTON_RELEASE
+//			| XCB_EVENT_MASK_BUTTON_MOTION
+//			| XCB_EVENT_MASK_ENTER_WINDOW
+//			| XCB_EVENT_MASK_LEAVE_WINDOW
+//			| XCB_EVENT_MASK_PROPERTY_CHANGE
+//			| XCB_EVENT_MASK_FOCUS_CHANGE;
+
 	if (gFlags)
 	{
 		// the order of all events must be exact
+		if (gFlags.test (event_type::Size))        uMask |= XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+															XCB_EVENT_MASK_RESIZE_REDIRECT;
+		if (gFlags.test (event_type::Paint))       uMask |= XCB_EVENT_MASK_EXPOSURE;
 		if (gFlags.test (event_type::KeyPressed))  uMask |= XCB_EVENT_MASK_KEY_PRESS;
 		if (gFlags.test (event_type::KeyReleased)) uMask |= XCB_EVENT_MASK_KEY_RELEASE;
 		if (gFlags.test (event_type::ButtonDown))  uMask |= XCB_EVENT_MASK_BUTTON_PRESS;
 		if (gFlags.test (event_type::ButtonUp))    uMask |= XCB_EVENT_MASK_BUTTON_RELEASE;
+		if (gFlags.test (event_type::PointerMove)) uMask |= XCB_EVENT_MASK_POINTER_MOTION;
 		if (gFlags.test (event_type::Step))        uMask |= XCB_EVENT_MASK_ENTER_WINDOW |
 															  XCB_EVENT_MASK_LEAVE_WINDOW;
-		if (gFlags.test (event_type::PointerMove)) uMask |= XCB_EVENT_MASK_POINTER_MOTION;
-		if (gFlags.test (event_type::KeyMap))      uMask |= XCB_EVENT_MASK_KEYMAP_STATE;
-		if (gFlags.test (event_type::Paint))       uMask |= XCB_EVENT_MASK_EXPOSURE;
+//		if (gFlags.test (event_type::PointerMove)) uMask |= XCB_EVENT_MASK_POINTER_MOTION;
+//		if (gFlags.test (event_type::KeyMap))      uMask |= XCB_EVENT_MASK_KEYMAP_STATE;
+//		if (gFlags.test (event_type::Paint))       uMask |= XCB_EVENT_MASK_EXPOSURE;
 		if (gFlags.test (event_type::Visibility))  uMask |= XCB_EVENT_MASK_VISIBILITY_CHANGE;
-		if (gFlags.test (event_type::Size))        uMask |= XCB_EVENT_MASK_STRUCTURE_NOTIFY |
-															  XCB_EVENT_MASK_RESIZE_REDIRECT;
-		if (gFlags.test (event_type::Focus))       uMask |= XCB_EVENT_MASK_FOCUS_CHANGE;
+//		if (gFlags.test (event_type::Size))        uMask |= XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+//															XCB_EVENT_MASK_RESIZE_REDIRECT;
+//		if (gFlags.test (event_type::Focus))       uMask |= XCB_EVENT_MASK_FOCUS_CHANGE;
 		if (gFlags.test (event_type::Property))    uMask |= XCB_EVENT_MASK_PROPERTY_CHANGE;
+		if (gFlags.test (event_type::Focus))       uMask |= XCB_EVENT_MASK_FOCUS_CHANGE;
 	}
 
 	xcb_change_window_attributes (display ().get<xcb_connection_t> (),
@@ -249,20 +266,12 @@ bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 		  pEv.get<XcbEvent::mouse_move_type> ()->event_y });
 		break;
 	case XcbEvent::KeyPress:
-		gEvent = Ui::KeyPressEvent ({ pEv.get<XcbEvent::key_press_type> ()->detail });
+		gEvent = Ui::KeyPressEvent (pEv.get<XcbEvent::key_press_type> ()->event,
+		{ pEv.get<XcbEvent::key_press_type> ()->detail });
 		break;
 	case XcbEvent::KeyRelease:
-		gEvent = Ui::KeyReleaseEvent ({ pEv.get<XcbEvent::key_release_type> ()->detail });
-		break;
-	case XcbEvent::KeyMapNotify:
-		gEvent = Ui::KeysMappedEvent ({ pEv.get<XcbEvent::keymap_notify_type> ()->keys[0]/*,
-				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[1],
-				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[2],
-				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[3],
-				reinterpret_cast<xcb_keymap_notify*> (pEv)->keys[4]*/ });
-#		ifdef DEBUG_MODE
-		std::cout << "keys map event\n";
-#		endif
+		gEvent = Ui::KeyReleaseEvent (pEv.get<XcbEvent::key_press_type> ()->event,
+		{ pEv.get<XcbEvent::key_release_type> ()->detail });
 		break;
 	case XcbEvent::Expose:
 		gEvent = Ui::PaintEvent (pEv.get<XcbEvent::expose_type> ()->window,

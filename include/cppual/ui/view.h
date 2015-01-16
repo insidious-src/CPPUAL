@@ -43,11 +43,11 @@ public:
 	container::iterator iterator;
 
 	typedef typename
-	Signal<void(point2i)>
+	Signal<void(event_type::window_type, event_type::MouseMoveData)>
 	::slot_type mouse_move_conn;
 
 	typedef typename
-	Signal<void(event_type::MouseButtonData const&)>
+	Signal<void(event_type::window_type, event_type::MouseButtonData)>
 	::slot_type mouse_btn_conn;
 
 	enum
@@ -82,8 +82,8 @@ public:
 	void setFocus ();
 	void killFocus ();
 
-	inline weak_renderable renderable () const noexcept { return m_pRenderable; }
-	inline IRenderable*    renderable_unsafe () const noexcept { return m_pRenderable.get (); }
+	inline weak_window renderable () const noexcept { return m_pRenderable; }
+	inline IWindow*    renderable_unsafe () const noexcept { return m_pRenderable.get (); }
 	inline point2u         minimumSize () const noexcept { return m_gMinSize; }
 	inline point2u         maximumSize () const noexcept { return m_gMaxSize; }
 
@@ -141,7 +141,7 @@ private:
 private:
 	container         m_gChildrenList;
 	point2u           m_gMinSize, m_gMaxSize;
-	shared_renderable m_pRenderable;
+	shared_window m_pRenderable;
 	iterator          m_gItFromParent;
 	View*             m_pParentObj;
 	StateFlags        m_gStateFlags;
@@ -161,6 +161,7 @@ public:
 	void hide ();
 	bool setParent (View* parent, point2i pos = point2i ());
 	void setGeometry (Rect const&);
+	void setSize (point2u);
 	void setMinimumSize (point2u);
 	void setMaximumSize (point2u);
 	void move (point2u);
@@ -188,6 +189,9 @@ public:
 
 	Rect geometry () const noexcept
 	{ return m_gBuffer.geometry (); }
+
+	string name () const noexcept
+	{ return m_gName; }
 
 protected:
 	virtual void onDestroy () { }
@@ -217,6 +221,7 @@ private:
 	VirtualBuffer  m_gBuffer;
 	container_type m_gChildren;
 	Widget*        m_pParent;
+	string         m_gName;
 	point2u        m_gMinSize, m_gMaxSize;
 	StateFlags     m_gStateFlags;
 };

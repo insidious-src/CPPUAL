@@ -28,14 +28,14 @@
 
 namespace cppual { namespace Ui {
 
-class ProxyRenderable final : public IRenderable
+class ProxyRenderable final : public IWindow
 {
 public:
 	ProxyRenderable () = delete;
-	ProxyRenderable (IRenderable*) noexcept;
+	ProxyRenderable (IWindow*) noexcept;
 	ProxyRenderable (ProxyRenderable const&) noexcept;
-	ProxyRenderable (shared_renderable const& parent, Rect const& rect) noexcept;
-	ProxyRenderable& operator = (IRenderable*) noexcept;
+	ProxyRenderable (shared_window const& parent, Rect const& rect) noexcept;
+	ProxyRenderable& operator = (IWindow*) noexcept;
 	ProxyRenderable& operator = (ProxyRenderable const&) noexcept;
 
 	string title () const noexcept { return string (); }
@@ -54,21 +54,22 @@ public:
 	bool   isVisibleInTaskbar () noexcept { return false; }
 	void   setVisibleInPager (bool) noexcept { }
 	bool   isVisibleInPager () noexcept { return false; }
-	void   setWMFrame (bool) noexcept { }
 	void   setMimimumSize (point2u) noexcept { }
 	void   setMaximumSize (point2u) noexcept { }
-	void   flash () noexcept { }
-	Rect   workArea () noexcept { return Rect (); }
+	void   flash (std::chrono::seconds) noexcept { }
 	void   setGeometry (Rect const&) noexcept;
-	void   setParent (shared_renderable const&, point2i) noexcept;
+	void   setParent (shared_window const&, point2i) noexcept;
 	void   move (point2i) noexcept;
 	void   map () noexcept;
 	void   unmap () noexcept;
 
+	WindowFlags flags () const { return WindowFlags (); }
+	void        setFlags (WindowFlags) { }
+
 	inline ~ProxyRenderable () noexcept { unmap (); }
-	inline weak_renderable parent () const noexcept { return m_pParent; }
-	inline Rect            geometry () const noexcept { return m_gRect; }
-	inline bool            isMapped () const noexcept { return m_bIsVisible; }
+	inline weak_window parent   () const noexcept { return m_pParent; }
+	inline Rect        geometry () const noexcept { return m_gRect; }
+	inline bool        isMapped () const noexcept { return m_bIsVisible; }
 
 	inline u32 screen () const noexcept
 	{ return m_pParent != nullptr ? m_pParent->screen () : 0; }
@@ -80,7 +81,7 @@ public:
 	{ if (m_pParent != nullptr) m_pParent->lower (); }
 
 private:
-	shared_renderable m_pParent;
+	shared_window m_pParent;
 	Rect              m_gRect;
 	bool              m_bIsVisible;
 };

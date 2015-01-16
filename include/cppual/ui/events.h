@@ -56,32 +56,32 @@ class Event
 {
 public:
 	typedef std::size_t size_type;
+	typedef Element     window_type;
 
 	enum Type
 	{
 		Null          = 0,
 		KeyPressed    = 1 <<  0,
 		KeyReleased   = 1 <<  1,
-		KeyMap        = 1 <<  2,
-		ButtonDown    = 1 <<  3,
-		ButtonUp      = 1 <<  4,
-		PointerMove   = 1 <<  5,
-		Scroll        = 1 <<  6,
-		TouchPress    = 1 <<  7,
-		TouchRelease  = 1 <<  8,
-		TouchMove     = 1 <<  9,
-		SystemMessage = 1 << 10,
-		Paint         = 1 << 11,
-		Focus         = 1 << 12,
-		Step          = 1 << 13,
-		Size          = 1 << 14,
-		Visibility    = 1 << 15,
-		Property      = 1 << 16
+		ButtonDown    = 1 <<  2,
+		ButtonUp      = 1 <<  3,
+		PointerMove   = 1 <<  4,
+		Scroll        = 1 <<  5,
+		TouchPress    = 1 <<  6,
+		TouchRelease  = 1 <<  7,
+		TouchMove     = 1 <<  8,
+		SystemMessage = 1 <<  9,
+		Paint         = 1 << 10,
+		Focus         = 1 << 11,
+		Step          = 1 << 12,
+		Size          = 1 << 13,
+		Visibility    = 1 << 14,
+		Property      = 1 << 15
 	};
 
 	enum
 	{
-		Key       = KeyPressed | KeyReleased  | KeyMap,
+		Key       = KeyPressed | KeyReleased,
 		Pointer	  = ButtonDown | ButtonUp     | PointerMove | Scroll,
 		Touch	  = TouchPress | TouchRelease | TouchMove,
 		Window    = Paint | Focus   | Size    | Visibility | Property,
@@ -95,22 +95,19 @@ public:
 
 	struct MouseButtonData
 	{
-		Graphics::Element element;
-		point2i           pos;
-		u8                button;
+		point2i pos;
+		u8      button;
 	};
 
 	struct MouseMoveData
 	{
-		Graphics::Element element;
-		point2i           pos;
+		point2i pos;
 	};
 
 	struct ScrollData
 	{
-		Graphics::Element element;
-		point2i           pos;
-		int32             delta;
+		point2i pos;
+		int32   delta;
 	};
 
 	struct TouchData
@@ -121,39 +118,28 @@ public:
 
 	struct SizeData
 	{
-		Graphics::Element element;
-		point2u           size;
-	};
-
-	struct SizeMoveData
-	{
-		Graphics::Element element;
-		Rect              rect;
+		point2u size;
 	};
 
 	struct PaintData
 	{
-		Graphics::Element element;
-		Rect              region;
+		Rect region;
 	};
 
 	struct StateData
 	{
-		Graphics::Element element;
-		bool              in;
+		bool in;
 	};
 
 	struct VisibilityData
 	{
-		Graphics::Element element;
-		bool              visible;
+		bool visible;
 	};
 
 	struct PropertyData
 	{
-		Graphics::Element element;
-		u32               prop;
-		int32             value;
+		u32   prop;
+		int32 value;
 	};
 
 	union Data
@@ -171,47 +157,49 @@ public:
 		PropertyData    property;
 	};
 
+	struct Signals final : NonCopyable
+	{
+		Signal<void(window_type, KeyData)>         keyPress;
+		Signal<void(window_type, KeyData)>         keyRelease;
+		Signal<void(window_type, MouseButtonData)> mousePress;
+		Signal<void(window_type, MouseButtonData)> mouseRelease;
+		Signal<void(window_type, MouseMoveData)>   mouseMove;
+		Signal<void(window_type, ScrollData)>      scroll;
+		Signal<void(window_type, TouchData)>       touchPress;
+		Signal<void(window_type, TouchData)>       touchRelease;
+		Signal<void(window_type, TouchData)>       touchMove;
+		Signal<void(window_type, int32)>           sysMessage;
+		Signal<void(window_type, PaintData)>       winPaint;
+		Signal<void(window_type, SizeData)>        winSize;
+		Signal<void(window_type, StateData)>       winFocus;
+		Signal<void(window_type, StateData)>       winStep;
+		Signal<void(window_type, PropertyData)>    winProperty;
+		Signal<void(window_type, VisibilityData)>  winVisible;
+	};
+
 	void operator () () noexcept;
 
 	inline    Event () noexcept = default;
-	constexpr Data const& data () const noexcept { return m_gData; }
-	constexpr Event::Type type () const noexcept { return m_eType; }
+	constexpr Data const& data   () const noexcept { return m_gData; }
+	constexpr Event::Type type   () const noexcept { return m_eType; }
+	constexpr Element     window () const noexcept { return m_window; }
 
-	constexpr Event (Type eType) noexcept
-	: m_gData (),
-	  m_eType (eType)
+	inline static Signals& registers ()
+	{
+		static Signals event_signals;
+		return event_signals;
+	}
+
+	constexpr Event (Type type, Element window = Element ()) noexcept
+	: m_window (window),
+	  m_gData  (),
+	  m_eType  (type)
 	{ }
 
 protected:
-	Data m_gData;
-	Type m_eType;
-};
-
-// =========================================================
-
-struct EventSignals final : NonCopyable
-{
-	typedef Event event_type;
-
-	Signal<void(event_type::KeyData)>                keyPress;
-	Signal<void(event_type::KeyData)>                keyRelease;
-	Signal<void(event_type::KeyData)>                keyNotify;
-	Signal<void(event_type::MouseButtonData const&)> mousePress;
-	Signal<void(event_type::MouseButtonData const&)> mouseRelease;
-	Signal<void(event_type::MouseMoveData const&)>   mouseMove;
-	Signal<void(event_type::ScrollData const&)>      scroll;
-	Signal<void(event_type::TouchData const&)>       touchPress;
-	Signal<void(event_type::TouchData const&)>       touchRelease;
-	Signal<void(event_type::TouchData const&)>       touchMove;
-	Signal<void(int32)>                              sysMessage;
-	Signal<void(event_type::PaintData const&)>       winPaint;
-	Signal<void(event_type::SizeData const&)>        winSize;
-	Signal<void(event_type::StateData const&)>       winFocus;
-	Signal<void(event_type::StateData const&)>       winStep;
-	Signal<void(event_type::PropertyData const&)>    winProperty;
-	Signal<void(event_type::VisibilityData const&)>  winVisible;
-
-	EventSignals () noexcept;
+	window_type m_window;
+	Data        m_gData;
+	Type        m_eType;
 };
 
 // =========================================================
@@ -223,7 +211,7 @@ public:
 	typedef Event               event_type;
 
 	virtual bool pop_front (event_type&, bool wait) noexcept = 0;
-	virtual bool setRenderableEvents (IRenderable&, mask_type) noexcept = 0;
+	virtual bool setWindowEvents (IWindow&, mask_type) noexcept = 0;
 
 	static IDisplayQueue* instance ();
 	static bool           hasValidInstance () noexcept;
@@ -252,7 +240,6 @@ public:
 
 	EventQueue () noexcept;
 	EventQueue (mask_type accept_events) noexcept;
-	static EventSignals& events () noexcept;
 
 	bool pop_front (event_type& next_event, bool wait) noexcept;
 	int  poll (bool wait = true) noexcept;

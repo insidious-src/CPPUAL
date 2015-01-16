@@ -28,7 +28,7 @@ bool setSkin (ISkin* pSkin) noexcept
 {
 	if (!pSkin) return false;
 
-	EventQueue::events ().winPaint (PaintEvent (nullptr, Rect ()).data ().paint);
+	Event::registers ().winPaint (Element (), PaintEvent (nullptr, Rect ()).data ().paint);
 	return true;
 }
 

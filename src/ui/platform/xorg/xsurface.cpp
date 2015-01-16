@@ -26,11 +26,34 @@
 
 namespace cppual { namespace Ui {
 
+namespace { namespace Xcb { // optimize for internal unit usage
+
+struct Window
+{
+	typedef Element    value_type;
+	typedef Connection pointer;
+
+	inline static Rect geometry (pointer display, value_type id)
+	{
+		typedef std::auto_ptr<xcb_get_geometry_reply_t> geo_ptr;
+
+		geo_ptr pReply (xcb_get_geometry_reply (display.get<xcb_connection_t> (),
+												xcb_get_geometry (display.
+																  get<xcb_connection_t> (),
+																  id.get<u32> ()),
+												nullptr));
+
+		return Rect (pReply->x, pReply->y, pReply->width, pReply->height);
+	}
+};
+
+} } // anonymous namespace Xcb
+
 enum
 {
-	Move   = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-	Resize = Move | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-	Stack  = XCB_CONFIG_WINDOW_STACK_MODE
+	XcbMove   = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+	XcbResize = XcbMove | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+	XcbStack  = XCB_CONFIG_WINDOW_STACK_MODE
 };
 
 xcb_screen_t* screenHandle (Connection pDsp, u32& nScreen) noexcept
@@ -48,11 +71,11 @@ xcb_screen_t* screenHandle (Connection pDsp, u32& nScreen) noexcept
 
 // =========================================================
 
-XRenderable::XRenderable (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
-: IRenderable (pDisplay,
-			   xcb_generate_id (pDisplay->native ().get<xcb_connection_t> ()),
-			   ResourceType::Surface),
-  m_uScreen ()
+XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
+: IWindow (pDisplay,
+		   xcb_generate_id (pDisplay->native ().get<xcb_connection_t> ()),
+		   ResourceType::Surface),
+  m_eFlags (WindowHints)
 {
 	if (isValid ())
 	{
@@ -72,25 +95,15 @@ XRenderable::XRenderable (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) no
 						   pScreen->root_visual,
 						   0,
 						   nullptr);
-
-		m_uScreen = nScreen;
 	}
 }
 
-Rect XRenderable::geometry () const
+Rect XWindow::geometry () const
 {
-	typedef std::auto_ptr<xcb_get_geometry_reply_t> geo_ptr;
-
-	geo_ptr pReply (xcb_get_geometry_reply (connection ()->native ().get<xcb_connection_t> (),
-											xcb_get_geometry (connection ()->native ().
-															  get<xcb_connection_t> (),
-															  id ().get<u32> ()),
-											nullptr));
-
-	return Rect (pReply->x, pReply->y, pReply->width, pReply->height);
+	return Xcb::Window::geometry (connection ()->native (), id ());
 }
 
-void XRenderable::setGeometry (Rect const& gRect)
+void XWindow::setGeometry (Rect const& gRect)
 {
 	cu32 uRect[4] =
 	{
@@ -102,64 +115,68 @@ void XRenderable::setGeometry (Rect const& gRect)
 
 	xcb_configure_window (connection ()->native ().get<xcb_connection_t> (),
 						  id ().get<u32> (),
-						  Resize, uRect);
+						  XcbResize, uRect);
 }
 
-void XRenderable::raise ()
+void XWindow::raise ()
 {
 	static constexpr cu32 uMode[] = { XCB_STACK_MODE_ABOVE };
 
 	xcb_configure_window (connection ()->native ().get<xcb_connection_t> (),
 						  id ().get<u32> (),
-						  Stack,
+						  XcbStack,
 						  uMode);
 }
 
-void XRenderable::lower ()
+void XWindow::lower ()
 {
 	static constexpr cu32 uMode[] = { XCB_STACK_MODE_BELOW };
 
 	xcb_configure_window (connection ()->native ().get<xcb_connection_t> (),
 						  id ().get<u32> (),
-						  Stack, uMode);
+						  XcbStack, uMode);
 }
 
-//void XRenderable::setParent (shared_renderable const& pParent, point2i gPos)
-//{
-//	static u32 dump;
+void XWindow::setParent (shared_window const& pParent, point2i gPos)
+{
+	static u32 dump;
 
-//	xcb_reparent_window (connection ()->native ().get<xcb_connection_t> (),
-//						 id ().get<u32> (),
-//						 pParent != nullptr ?
-//										pParent->id ().get<u32> () :
-//										screenHandle (connection ()->native ().
-//													  get<xcb_connection_t> (),
-//													  dump)->root,
-//						 gPos.x, gPos.y);
-//}
+	xcb_reparent_window (connection ()->native ().get<xcb_connection_t> (),
+						 id ().get<u32> (),
+						 pParent != nullptr ?
+										pParent->id ().get<u32> () :
+										screenHandle (connection ()->native ().
+													  get<xcb_connection_t> (),
+													  dump)->root,
+						 gPos.x, gPos.y);
+}
 
-void XRenderable::move (point2i gPos)
+void XWindow::move (point2i gPos)
 {
 	cu32 uPoint[2] = { static_cast<u32> (gPos.x), static_cast<u32> (gPos.y) };
 
 	xcb_configure_window (connection ()->native ().get<xcb_connection_t> (),
 						  id ().get<u32> (),
-						  Move, uPoint);
+						  XcbMove, uPoint);
 }
 
-void XRenderable::map ()
+void XWindow::map ()
 {
 	xcb_map_window (connection ()->native ().get<xcb_connection_t> (),
 					id ().get<u32> ());
 }
 
-void XRenderable::unmap ()
+void XWindow::unmap ()
 {
 	xcb_unmap_window (connection ()->native ().get<xcb_connection_t> (),
 					  id ().get<u32> ());
 }
 
-bool XRenderable::isMapped () const
+void XWindow::setFlags (WindowFlags) noexcept
+{
+}
+
+bool XWindow::isMapped () const
 {
 	typedef std::auto_ptr<xcb_get_window_attributes_reply_t> attrib_ptr;
 
@@ -174,7 +191,7 @@ bool XRenderable::isMapped () const
 
 // =========================================================
 
-string XRenderable::title () const noexcept
+string XWindow::title () const noexcept
 {
 //	xcb_get_property_reply_t* pReply =
 //			xcb_get_property_reply (connection ()->id ().x_handle,
@@ -188,7 +205,7 @@ string XRenderable::title () const noexcept
 	return string ();
 }
 
-void XRenderable::setTitle (string const& gTitle) noexcept
+void XWindow::setTitle (string const& gTitle) noexcept
 {
 	// set the title of the windowqdw
 	 xcb_change_property (connection ()->native ().get<xcb_connection_t> (),
@@ -198,106 +215,71 @@ void XRenderable::setTitle (string const& gTitle) noexcept
 						  static_cast<u32> (gTitle.length ()), gTitle.c_str ());
 }
 
-void XRenderable::setShaded (bool) noexcept
+void XWindow::setShaded (bool) noexcept
 {
 }
 
-bool XRenderable::isShaded () noexcept
-{
-	return false;
-}
-
-void XRenderable::setModal (bool) noexcept
-{
-}
-
-bool XRenderable::isModal () noexcept
+bool XWindow::isShaded () noexcept
 {
 	return false;
 }
 
-void XRenderable::setFullscreen (bool) noexcept
+void XWindow::setModal (bool) noexcept
 {
 }
 
-bool XRenderable::isFullscreen () noexcept
-{
-	return false;
-}
-
-void XRenderable::setMaximized (bool) noexcept
-{
-}
-
-bool XRenderable::isMaximized () noexcept
+bool XWindow::isModal () noexcept
 {
 	return false;
 }
 
-void XRenderable::setMinimized (bool) noexcept
+void XWindow::setFullscreen (bool) noexcept
 {
 }
 
-bool XRenderable::isMinimized () noexcept
+bool XWindow::isFullscreen () noexcept
 {
 	return false;
 }
 
-void XRenderable::setVisibleInTaskbar (bool) noexcept
+void XWindow::setMaximized (bool) noexcept
 {
 }
 
-bool XRenderable::isVisibleInTaskbar () noexcept
+bool XWindow::isMaximized () noexcept
+{
+	return false;
+}
+
+void XWindow::setMinimized (bool) noexcept
+{
+}
+
+bool XWindow::isMinimized () noexcept
+{
+	return false;
+}
+
+void XWindow::setVisibleInTaskbar (bool) noexcept
+{
+}
+
+bool XWindow::isVisibleInTaskbar () noexcept
 {
 	return true;
 }
 
-void XRenderable::setVisibleInPager (bool) noexcept
+void XWindow::setVisibleInPager (bool) noexcept
 {
 }
 
-bool XRenderable::isVisibleInPager () noexcept
+bool XWindow::isVisibleInPager () noexcept
 {
 	return true;
 }
 
-void XRenderable::setWMFrame (bool) noexcept
+void XWindow::flash (std::chrono::seconds) noexcept
 {
-}
-
-void XRenderable::setMimimumSize (point2u /*gSize*/) noexcept
-{
-	xcb_get_property_cookie_t cookie =
-			xcb_icccm_get_wm_hints_unchecked (connection ()->native ().get<xcb_connection_t> (),
-											  id ().get<u32> ());
-
-	xcb_icccm_wm_hints_t hints;
-	xcb_icccm_get_wm_hints_reply (connection ()->native ().get<xcb_connection_t> (),
-								  cookie, &hints, nullptr);
-
-	//xcb_icccm_size_hints_set_min_size (&hints, gSize.x, gSize.y);
-}
-
-void XRenderable::setMaximumSize (point2u /*gSize*/) noexcept
-{
-	xcb_get_property_cookie_t cookie =
-			xcb_icccm_get_wm_hints_unchecked (connection ()->native ().get<xcb_connection_t> (),
-											  id ().get<u32> ());
-
-	xcb_icccm_wm_hints_t hints;
-	xcb_icccm_get_wm_hints_reply (connection ()->native ().get<xcb_connection_t> (),
-								  cookie, &hints, nullptr);
-
-	//xcb_icccm_size_hints_set_max_size (&hints, gSize.x, gSize.y);
-}
-
-void XRenderable::flash () noexcept
-{
-}
-
-Rect XRenderable::workArea () noexcept
-{
-	return Rect ();
 }
 
 } } //Ui

@@ -31,11 +31,11 @@ using cppual::Graphics::PixelFormat;
 
 namespace cppual { namespace Ui {
 
-class WlSurface final : public IRenderable
+class WlSurface final : public IWindow
 {
 public:
 	WlSurface () = delete;
-	WlSurface (Rect const&, IRenderable*, u32, PixelFormat const&) noexcept;
+	WlSurface (Rect const&, IWindow*, u32, PixelFormat const&) noexcept;
 	~WlSurface () noexcept;
 
 	bool isMapped () const noexcept;
@@ -51,7 +51,7 @@ public:
 	Element   handle () const noexcept { return m_pViewHandle; }
 	PixelFormat  format () const noexcept { return m_gFormat; }
 	PixelMap*    pixelMap () noexcept { return nullptr; }
-	weak_renderable parent () const noexcept { return m_pParent; }
+	weak_window parent () const noexcept { return m_pParent; }
 	Rect         geometry () const noexcept { return m_gRect; }
 	u32          screen () const noexcept { return 0; }
 
@@ -79,7 +79,7 @@ public:
 
 private:
 	PixelFormat       m_gFormat;
-	shared_renderable m_pParent;
+	shared_window m_pParent;
 	Rect              m_gRect;
 	IDisplay*      m_pDisplay;
 	wl_surface*       m_pViewHandle;
@@ -89,7 +89,7 @@ private:
 // ====================================================
 
 WlSurface::WlSurface (Rect const&        gRect,
-					  IRenderable*       pParent,
+					  IWindow*       pParent,
 					  u32                nScreen,
 					  PixelFormat const& gFormat) noexcept
 : m_gFormat (gFormat),

@@ -30,11 +30,11 @@
 
 namespace cppual { namespace Ui {
 
-class XRenderable final : public IRenderable
+class XWindow final : public IWindow
 {
 public:
-	XRenderable () = delete;
-	XRenderable (Rect const& rect, u32 screen, IDisplay* display) noexcept;
+	XWindow () = delete;
+	XWindow (Rect const& rect, u32 screen, IDisplay* display) noexcept;
 
 	string title () const noexcept;
 	void   setTitle (string const&) noexcept;
@@ -52,29 +52,25 @@ public:
 	bool   isVisibleInTaskbar () noexcept;
 	void   setVisibleInPager (bool) noexcept;
 	bool   isVisibleInPager () noexcept;
-	void   setWMFrame (bool) noexcept;
-	void   setMimimumSize (point2u) noexcept;
-	void   setMaximumSize (point2u) noexcept;
-	void   flash () noexcept;
-	Rect   workArea () noexcept;
+	void   flash (std::chrono::seconds) noexcept;
 	Rect   geometry () const;
 	bool   isMapped () const;
-	//void   setParent (const_reference, point2i);
+	void   setParent (const_reference, point2i);
 	void   setGeometry (Rect const&);
-	void   setMinSize ();
-	void   setMaxSize ();
 	void   raise ();
 	void   lower ();
 	void   move (point2i);
 	void   map ();
 	void   unmap ();
 
-	weak_renderable parent () const noexcept { return shared_renderable (); }
-	u32             screen () const noexcept { return m_uScreen; }
-	void            setParent (const_reference, point2i) { }
+	WindowFlags flags () const noexcept { return m_eFlags; }
+	void        setFlags (WindowFlags) noexcept;
+
+	weak_window parent () const noexcept { return shared_window (); }
+	u32         screen () const noexcept { return 0; }
 
 private:
-	u32 m_uScreen;
+	WindowFlags m_eFlags;
 };
 
 } } // namespace Ui

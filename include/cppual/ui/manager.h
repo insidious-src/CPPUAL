@@ -34,11 +34,11 @@ using cppual::Process::Module;
 using cppual::Ui::shared_queue;
 using cppual::Ui::shared_display;
 using cppual::Ui::weak_display;
-using cppual::Ui::shared_renderable;
+using cppual::Ui::shared_window;
 using cppual::Graphics::shared_buffer;
 using cppual::Graphics::shared_context;
 using cppual::Ui::IDisplay;
-using cppual::Ui::IRenderable;
+using cppual::Ui::IWindow;
 using cppual::Graphics::GFXVersion;
 using cppual::Graphics::PixelFormat;
 using cppual::Graphics::DeviceType;
@@ -50,9 +50,9 @@ typedef shared_ptr<Factory> shared_manager;
 
 struct Factory : public NonCopyableVirtual
 {
-	typedef shared_renderable const& shared_reference;
+	typedef shared_window const& shared_reference;
 
-	virtual shared_renderable createRenderable (Rect const& rect,
+	virtual shared_window createWindow (Rect const& rect,
 												u32 screen = 0,
 												IDisplay* display = IDisplay::instance ()) = 0;
 

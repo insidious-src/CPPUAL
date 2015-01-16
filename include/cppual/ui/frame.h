@@ -41,20 +41,6 @@ class FrameView : public SkinnableView
 public:
 	typedef Graphics::Image image_type;
 
-	enum Flag
-	{
-		Resizable   = 1 << 0,
-		Thin        = 1 << 1,
-		Icon        = 1 << 2,
-		Help        = 1 << 3,
-		Minimize    = 1 << 4,
-		Maximize    = 1 << 5,
-		Close       = 1 << 6,
-		WindowFlags = Resizable | Icon | Minimize | Maximize | Close,
-		DialogFlags = Resizable | Maximize | Close,
-		ToolFlags   = Thin | Close
-	};
-
 	enum Edge
 	{
 		Left        = 1 << 0,
@@ -74,7 +60,6 @@ public:
 	};
 
 	typedef BitSet<FrameView::MouseState> MouseStates;
-	typedef BitSet<FrameView::Flag>       FrameFlags;
 	typedef BitSet<FrameView::Edge>       Edges;
 
 	FrameView () noexcept;
@@ -90,18 +75,18 @@ public:
 	void detach ();
 	void setIcon (image_type*);
 	void setLabel (string const&);
-	void setFlags (FrameFlags);
+	void setFlags (WindowFlags);
 
 	FrameView (View*       parent,
 			   Rect const& target_rect,
 			   string&&    title,
 			   image_type* icon,
-			   FrameFlags  flags = WindowFlags);
+			   WindowFlags flags = WindowHints);
 
 	inline image_type* icon () const noexcept { return m_pIcon; }
 	inline View*	   attached () const noexcept { return m_pTarget; }
 	inline PopupMenu*  menu () noexcept { return &m_gSysMenu; }
-	inline FrameFlags  flags () const noexcept { return m_gFrameFlags; }
+	inline WindowFlags flags () const noexcept { return m_gFrameFlags; }
 	inline Visibility  visibility () const noexcept { return m_eVisibility; }
 
 	inline bool isStretched () const noexcept
@@ -122,7 +107,7 @@ private:
 	Rect        m_gFrameBtnsRect;
 	image_type* m_pIcon;
 	View*       m_pTarget;
-	FrameFlags  m_gFrameFlags;
+	WindowFlags m_gFrameFlags;
 	MouseStates m_gMouseStates;
 	Edges       m_gHoldingEdges;
 	Visibility  m_eVisibility;

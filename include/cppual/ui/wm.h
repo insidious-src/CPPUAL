@@ -23,7 +23,9 @@
 #define CPPUAL_UI_VIEW_MANAGER_H_
 #ifdef __cplusplus
 
+#include <chrono>
 #include <memory>
+#include <cppual/flags.h>
 #include <cppual/resource.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/gfx/dsp_details.h>
@@ -37,52 +39,64 @@ using cppual::Graphics::Connection;
 
 namespace cppual { namespace Ui {
 
+enum WindowFlag
+{
+	Frame       = 1 << 0,
+	ThinFrame   = 1 << 0 | 1 << 1,
+	Resizable   = 1 << 2,
+	Close       = 1 << 4,
+	Maximize    = 1 << 5,
+	Help        = 1 << 6,
+	Transparent = 1 << 7,
+	WindowHints = Resizable | Maximize | Close,
+	ToolHints   = ThinFrame | Close
+};
+
 struct  IViewManager;
-struct  IRenderable;
-typedef shared_ptr<IRenderable> shared_renderable;
-typedef weak_ptr  <IRenderable>   weak_renderable;
+struct  IWindow;
+typedef shared_ptr<IWindow> shared_window;
+typedef weak_ptr<IWindow>   weak_window;
+typedef BitSet<WindowFlag>  WindowFlags;
 
 // ====================================================
 
-struct IRenderable : public Resource < IDisplay*, Element >
+struct IWindow : public Resource < IDisplay*, Element >
 {
 	using Resource<IDisplay*, Element>::Resource;
 
-	typedef shared_renderable const& const_reference;
-	typedef std::size_t              size_type;
+	typedef shared_window const& const_reference;
+	typedef std::size_t          size_type;
 
-	virtual weak_renderable parent () const = 0;
-	virtual string          title () const = 0;
-	virtual void            setTitle (string const&) = 0;
-	virtual void            setShaded (bool) = 0;
-	virtual bool            isShaded () = 0;
-	virtual void            setModal (bool) = 0;
-	virtual bool            isModal () = 0;
-	virtual void            setFullscreen (bool) = 0;
-	virtual bool            isFullscreen () = 0;
-	virtual void            setMaximized (bool) = 0;
-	virtual bool            isMaximized () = 0;
-	virtual void            setMinimized (bool) = 0;
-	virtual bool            isMinimized () = 0;
-	virtual void            setVisibleInTaskbar (bool) = 0;
-	virtual bool            isVisibleInTaskbar () = 0;
-	virtual void            setVisibleInPager (bool) = 0;
-	virtual bool            isVisibleInPager () = 0;
-	virtual void            setWMFrame (bool) = 0;
-	virtual void            setMimimumSize (point2u) = 0;
-	virtual void            setMaximumSize (point2u) = 0;
-	virtual void            flash () = 0;
-	virtual Rect            workArea () = 0;
-	virtual Rect		    geometry () const = 0;
-	virtual u32			    screen () const = 0;
-	virtual bool            isMapped () const = 0;
-	virtual void		    setParent (const_reference, point2i pos) = 0;
-	virtual void		    setGeometry (Rect const&) = 0;
-	virtual void		    raise () = 0;
-	virtual void            lower () = 0;
-	virtual void            move (point2i) = 0;
-	virtual void		    map () = 0;
-	virtual void		    unmap () = 0;
+	virtual weak_window parent () const = 0;
+	virtual WindowFlags flags () const = 0;
+	virtual string      title () const = 0;
+	virtual void        setTitle (string const&) = 0;
+	virtual void        setShaded (bool) = 0;
+	virtual bool        isShaded () = 0;
+	virtual void        setModal (bool) = 0;
+	virtual bool        isModal () = 0;
+	virtual void        setFullscreen (bool) = 0;
+	virtual bool        isFullscreen () = 0;
+	virtual void        setMaximized (bool) = 0;
+	virtual bool        isMaximized () = 0;
+	virtual void        setMinimized (bool) = 0;
+	virtual bool        isMinimized () = 0;
+	virtual void        setVisibleInTaskbar (bool) = 0;
+	virtual bool        isVisibleInTaskbar () = 0;
+	virtual void        setVisibleInPager (bool) = 0;
+	virtual bool        isVisibleInPager () = 0;
+	virtual void        setFlags (WindowFlags) = 0;
+	virtual void        flash (std::chrono::seconds) = 0;
+	virtual Rect        geometry () const = 0;
+	virtual u32         screen () const = 0;
+	virtual bool        isMapped () const = 0;
+	virtual void		setParent (const_reference, point2i pos) = 0;
+	virtual void		setGeometry (Rect const&) = 0;
+	virtual void		raise () = 0;
+	virtual void        lower () = 0;
+	virtual void        move (point2i) = 0;
+	virtual void		map () = 0;
+	virtual void		unmap () = 0;
 };
 
 } } // namespace Ui
