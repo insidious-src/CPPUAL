@@ -82,7 +82,7 @@ private:
 
 // =========================================================
 
-class WindowAdapter : NonCopyableVirtual
+class WindowAdapter : public NonCopyableVirtual
 {
 public:
 	typedef Event                                  event_type;

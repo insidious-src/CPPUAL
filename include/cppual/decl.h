@@ -203,12 +203,15 @@
 #	define TXT(quote) quote
 #endif
 
-// casts
-#ifdef DEBUG_MODE
-#	define pointer_cast dynamic_cast
-#else
-#	define pointer_cast static_cast
-#endif
+template <typename T, typename U>
+inline U pointer_cast (T value)
+{
+#	ifdef DEBUG_MODE
+	return dynamic_cast<U> (value);
+#	else
+	return static_cast<U>  (value);
+#	endif
+}
 
 
 namespace cppual
