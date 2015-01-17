@@ -77,10 +77,11 @@ public:
 	enum Feature
 	{
 		SyncControl         = 1 << 0,
-		ConfiglessContext   = 1 << 1,
-		SurfacelessContext  = 1 << 2,
-		CreateRobustContext = 1 << 3,
-		WindowFixedSize     = 1 << 4
+		ContextAttributesExt = 1 << 1,
+		ConfiglessContext   = 1 << 2,
+		SurfacelessContext  = 1 << 3,
+		CreateRobustContext = 1 << 4,
+		WindowFixedSize     = 1 << 5
 	};
 
 	typedef BitSet<Feature> Features;
@@ -148,8 +149,9 @@ public:
 	Surface& operator = (Surface&&) noexcept;
 	~Surface () noexcept;
 
-	void scale (point2u size);
-	void flush ();
+	point2u size  () const noexcept;
+	void    scale (point2u size);
+	void    flush ();
 
 	DeviceType  device     () const noexcept { return DeviceType::EGL;     }
 	value_type  handle     () const noexcept { return m_pHandle;           }
@@ -157,13 +159,12 @@ public:
 	format_type format     () const noexcept { return m_pConf->format  (); }
 	conf_type   config     () const noexcept { return *m_pConf;            }
 	Type        type       () const noexcept { return m_eType;             }
-	point2u     size       () const noexcept { return m_uSize;             }
+
 
 private:
 	conf_pointer m_pConf;
 	pointer      m_pHandle;
 	value_type   m_pOwner;
-	point2u      m_uSize;
 	Type         m_eType;
 };
 
@@ -196,7 +197,7 @@ public:
 
 	const_pointer readable   () const noexcept { return m_pReadTarget;       }
 	pointer       drawable   () const noexcept { return m_pDrawTarget;       }
-	GFXVersion    version    () const noexcept { return { m_nVersion, 0 };   }
+	GFXVersion    version    () const noexcept { return m_nVersion;          }
 	DeviceType    device     () const noexcept { return DeviceType::EGL;     }
 	value_type    handle     () const noexcept { return m_pGC;               }
 	controller    connection () const noexcept { return m_pConf->display (); }
@@ -213,7 +214,7 @@ private:
 	void*         m_pGC;
 	pointer       m_pDrawTarget;
 	const_pointer m_pReadTarget;
-	int           m_nVersion;
+	GFXVersion    m_nVersion;
 };
 
 // ====================================================
