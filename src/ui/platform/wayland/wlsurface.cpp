@@ -26,7 +26,6 @@
 
 #include <wayland-client-protocol.h>
 
-using cppual::Graphics::PixelMap;
 using cppual::Graphics::PixelFormat;
 
 namespace cppual { namespace Ui {
@@ -47,13 +46,15 @@ public:
 	void map () noexcept;
 	void unmap () noexcept;
 
-	IDisplay*    display () const noexcept { return m_pDisplay; }
-	Element   handle () const noexcept { return m_pViewHandle; }
-	PixelFormat  format () const noexcept { return m_gFormat; }
-	PixelMap*    pixelMap () noexcept { return nullptr; }
+	IDisplay*   display () const noexcept { return m_pDisplay; }
+	Element     handle () const noexcept { return m_pViewHandle; }
+	PixelFormat format () const noexcept { return m_gFormat; }
 	weak_window parent () const noexcept { return m_pParent; }
-	Rect         geometry () const noexcept { return m_gRect; }
-	u32          screen () const noexcept { return 0; }
+	Rect        geometry () const noexcept { return m_gRect; }
+	u32         screen () const noexcept { return 0; }
+
+	WindowFlags flags () const { return WindowFlags (); }
+	void setFlags (WindowFlags) { }
 
 	string title () const { return string (); }
 	void setTitle (string const&) { }
@@ -71,11 +72,7 @@ public:
 	bool isVisibleInTaskbar () { return false; }
 	void setVisibleInPager (bool) { }
 	bool isVisibleInPager () { return false; }
-	void setWMFrame (bool) { }
-	void setMimimumSize (point2u) { }
-	void setMaximumSize (point2u) { }
-	void flash () { }
-	Rect workArea () { return Rect (); }
+	void flash (std::chrono::seconds) { }
 
 private:
 	PixelFormat       m_gFormat;

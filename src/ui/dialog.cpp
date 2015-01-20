@@ -37,9 +37,9 @@ Dialog& Dialog::operator = (Dialog const& gObj) noexcept
 
 void Dialog::showModal (Ui::Window* pOwner) noexcept
 {
-	if (isValid ())
+	if (valid ())
 	{
-		if (pOwner and pOwner->isValid ())
+		if (pOwner and pOwner->valid ())
 		{
 			m_pOwnerWnd = pOwner;
 			pOwner->disable ();

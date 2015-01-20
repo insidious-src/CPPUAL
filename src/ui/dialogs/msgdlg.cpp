@@ -44,7 +44,7 @@ Dialog::Result showQuestion (string&& gTitle,
 {
 	MessageBox gQuestionBox (nullptr, Rect (), std::forward<string> (gTitle), nullptr);
 
-	if (gQuestionBox.isValid ())
+	if (gQuestionBox.valid ())
 	{
 		gQuestionBox.showInTaskbar (false);
 		gQuestionBox.showModal (pOwner);
@@ -61,7 +61,7 @@ void showMessage (string&&    gTitle,
 {
 	MessageBox gMessageBox (nullptr, Rect (), std::forward<string> (gTitle), nullptr);
 
-	if (gMessageBox.isValid ())
+	if (gMessageBox.valid ())
 	{
 		gMessageBox.showInTaskbar (false);
 		gMessageBox.showModal (pOwner);

@@ -39,7 +39,7 @@ class bad_partition_count : public device_exception   { };
 
 // =========================================================
 
-class Device final
+class Device
 {
 public:
 	enum Type
@@ -78,7 +78,7 @@ public:
 		Version
 	};
 
-	class Partition final : public Object <Partition>
+	class Partition : public Object <Partition>
 	{
 	public:
 		Partition () = delete;

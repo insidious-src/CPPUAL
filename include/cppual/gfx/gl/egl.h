@@ -58,7 +58,7 @@ class Config
 public:
 	typedef void*                           pointer;
 	typedef int32                           int_type;
-	typedef pointer     Config::*           safe_bool;
+	typedef pointer  Config::*              safe_bool;
 	typedef typename IResource::controller  controller;
 	typedef typename IResource::format_type format_type;
 
@@ -76,12 +76,12 @@ public:
 
 	enum Feature
 	{
-		SyncControl         = 1 << 0,
+		SyncControl          = 1 << 0,
 		ContextAttributesExt = 1 << 1,
-		ConfiglessContext   = 1 << 2,
-		SurfacelessContext  = 1 << 3,
-		CreateRobustContext = 1 << 4,
-		WindowFixedSize     = 1 << 5
+		ConfiglessContext    = 1 << 2,
+		SurfacelessContext   = 1 << 3,
+		CreateRobustContext  = 1 << 4,
+		ScalableSurface      = 1 << 5
 	};
 
 	typedef BitSet<Feature> Features;
@@ -140,7 +140,7 @@ class Surface : public IPixelSurface
 {
 public:
 	typedef Config const* conf_pointer;
-	typedef Config        conf_type;
+	typedef Config const& conf_reference;
 	typedef void*         pointer;
 
 	Surface (Surface const&);
@@ -153,13 +153,12 @@ public:
 	void    scale (point2u size);
 	void    flush ();
 
-	DeviceType  device     () const noexcept { return DeviceType::EGL;     }
-	value_type  handle     () const noexcept { return m_pHandle;           }
-	controller  connection () const noexcept { return m_pConf->display (); }
-	format_type format     () const noexcept { return m_pConf->format  (); }
-	conf_type   config     () const noexcept { return *m_pConf;            }
-	Type        type       () const noexcept { return m_eType;             }
-
+	conf_reference config     () const noexcept { return *m_pConf;             }
+	DeviceType     device     () const noexcept { return  DeviceType::EGL;     }
+	value_type     handle     () const noexcept { return  m_pHandle;           }
+	controller     connection () const noexcept { return  m_pConf->display (); }
+	format_type    format     () const noexcept { return  m_pConf->format  (); }
+	Type           type       () const noexcept { return  m_eType;             }
 
 private:
 	conf_pointer m_pConf;
@@ -174,6 +173,7 @@ class Context : public IDeviceContext
 {
 public:
 	typedef Config const* conf_pointer;
+	typedef Config const& conf_reference;
 
 	Context (Context const&);
 	Context& operator = (Context&&) noexcept;
@@ -190,30 +190,28 @@ public:
 
 	bool use     (pointer, const_pointer) noexcept;
 	bool assign  () noexcept;
-	void scale   (point2u size);
 	void flush   () noexcept;
 	void finish  () noexcept;
 	void release () noexcept;
 
-	const_pointer readable   () const noexcept { return m_pReadTarget;       }
-	pointer       drawable   () const noexcept { return m_pDrawTarget;       }
-	GFXVersion    version    () const noexcept { return m_nVersion;          }
-	DeviceType    device     () const noexcept { return DeviceType::EGL;     }
-	value_type    handle     () const noexcept { return m_pGC;               }
-	controller    connection () const noexcept { return m_pConf->display (); }
-	format_type   format     () const noexcept { return m_pConf->format  (); }
+	conf_reference config     () const noexcept { return *m_pConf;             }
+	const_pointer  readable   () const noexcept { return  m_pReadTarget;       }
+	pointer        drawable   () const noexcept { return  m_pDrawTarget;       }
+	GFXVersion     version    () const noexcept { return  m_nVersion;          }
+	DeviceType     device     () const noexcept { return  DeviceType::EGL;     }
+	value_type     handle     () const noexcept { return  m_pGC;               }
+	controller     connection () const noexcept { return  m_pConf->display (); }
+	format_type    format     () const noexcept { return  m_pConf->format  (); }
 
 	static constexpr GFXVersion defaultVersion () noexcept
 	{ return { 3, 0 }; }
-
-	Config config () const noexcept
-	{ return *m_pConf; }
 
 private:
 	conf_pointer  m_pConf;
 	void*         m_pGC;
 	pointer       m_pDrawTarget;
 	const_pointer m_pReadTarget;
+	Context*      m_pShared;
 	GFXVersion    m_nVersion;
 };
 

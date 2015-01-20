@@ -87,7 +87,7 @@ public:
 	inline point2u         minimumSize () const noexcept { return m_gMinSize; }
 	inline point2u         maximumSize () const noexcept { return m_gMaxSize; }
 
-	inline bool isValid () const noexcept
+	inline bool valid () const noexcept
 	{ return m_gStateFlags.test (View::Valid); }
 
 	inline bool isEnabled () const noexcept

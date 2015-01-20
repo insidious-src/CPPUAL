@@ -114,7 +114,7 @@ private:
 
 // =========================================================
 
-extern "C" struct ModuleParams
+struct Plugin
 {
 	cchar* name;
 	cchar* provides;
@@ -125,28 +125,28 @@ extern "C" struct ModuleParams
 
 template <typename Iterface,
 		  typename Allocator =
-		  std::allocator<std::pair<const string, std::pair<Module, ModuleParams> > >
+		  std::allocator<std::pair<const string, std::pair<Module, Plugin> > >
 		  >
-class ModuleManager
+class PluginManager
 {
 public:
-	typedef typename Allocator::size_type   size_type;
-	typedef typename Allocator::value_type  pair_type;
-	typedef string                          key_type;
-	typedef string const                    const_key;
-	typedef std::hash<key_type>             hash_type;
-	typedef std::equal_to<key_type>         equal_type;
-	typedef std::pair<Module, ModuleParams> value_type;
-	typedef Iterface                        iface_type;
-	typedef Allocator                       allocator_type;
+	typedef typename Allocator::size_type  size_type;
+	typedef typename Allocator::value_type pair_type;
+	typedef string                         key_type;
+	typedef string const                   const_key;
+	typedef std::hash<key_type>            hash_type;
+	typedef std::equal_to<key_type>        equal_type;
+	typedef std::pair<Module, Plugin>      value_type;
+	typedef Iterface                       iface_type;
+	typedef Allocator                      allocator_type;
 
 	typedef unordered_map
 	<key_type, value_type, hash_type, equal_type, allocator_type> map_type;
 
-	ModuleManager () = default;
-	ModuleManager (const_key& modules_dir, allocator_type& = allocator_type ());
-	ModuleManager (ModuleManager&&);
-	ModuleManager& operator = (ModuleManager&&);
+	PluginManager () = default;
+	PluginManager (const_key& modules_dir, allocator_type& = allocator_type ());
+	PluginManager (PluginManager&&);
+	PluginManager& operator = (PluginManager&&);
 
 	bool load (const_key& modules_dir);
 	bool load_module (const_key& path);
@@ -165,8 +165,8 @@ public:
 	int version (const_key& module_name) const noexcept
 	{ return m_gModuleMap[module_name].second.version; }
 
-	iface_type* interface (const_key& module_name) const noexcept
-	{ return static_cast<iface_type*> (m_gModuleMap[module_name].second.iface); }
+	iface_type* construct (const_key& plugin_name) const noexcept
+	{ return static_cast<iface_type*> (m_gModuleMap[plugin_name].second.iface); }
 
 private:
 	mutable map_type m_gModuleMap;

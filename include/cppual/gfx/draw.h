@@ -23,11 +23,14 @@
 #define CPPUAL_GFX_DRAW_H_
 #ifdef __cplusplus
 
+#include <string>
 #include <cppual/flags.h>
 #include <cppual/gfx/color.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/circular_queue.h>
 #include <cppual/gfx/dsp_details.h>
+
+using std::string;
 
 namespace cppual { namespace Graphics {
 
@@ -68,7 +71,14 @@ typedef std::shared_ptr<IPixelSurface>   shared_buffer;
 typedef std::weak_ptr  <IDeviceContext> weak_context;
 typedef std::weak_ptr  <IPixelSurface>   weak_buffer;
 
-/****************************** Common Classes ******************************/
+// =========================================================
+
+struct GFXVersion
+{
+	int major, minor;
+};
+
+// =========================================================
 
 struct PixelFormat final
 {
@@ -114,7 +124,7 @@ struct PixelFormat final
 // =========================================================
 
 // memory buffer
-class PixelMap
+class VirtualBuffer
 {
 public:
 	typedef CircularQueue<RGBColor> vector_type;
@@ -122,15 +132,14 @@ public:
 	typedef RGBColor                value_type;
 
 	inline PixelFormat	format () const noexcept { return m_gFormat; }
-	inline vector_type& data () noexcept { return m_gPixels; }
+	inline vector_type& data   ()       noexcept { return m_gPixels; }
 
-	inline PixelMap () noexcept
+	inline VirtualBuffer () noexcept
 	: m_gFormat (PixelFormat::default2D ()),
 	  m_gPixels ()
 	{ }
 
-	PixelMap (point2i     gSize,
-			  PixelFormat const& gFormat = PixelFormat::default2D ())
+	VirtualBuffer (point2i gSize, PixelFormat const& gFormat = PixelFormat::default2D ())
 	: m_gFormat (gFormat),
 	  m_gPixels (size_type (gSize.x * gSize.y))
 	{ }
@@ -145,11 +154,8 @@ private:
 class Transform2D
 {
 public:
-	inline    Transform2D () noexcept = default;
-	constexpr int16 x () const noexcept { return m_gRect.left; }
-	constexpr int16 y () const noexcept { return m_gRect.top; }
-	constexpr u16   width () const noexcept { return m_gRect.width (); }
-	constexpr u16   height () const noexcept { return m_gRect.height (); }
+	Transform2D () noexcept = default;
+	constexpr Rect geometry () const noexcept { return m_gRect; }
 
 private:
 	Rect m_gRect;
@@ -208,14 +214,13 @@ struct IDeviceContext : public IResource
 	virtual GFXVersion    version  () const = 0;
 	virtual bool          assign   () = 0;
 	virtual bool          use      (pointer, const_pointer) = 0;
-	virtual void          scale    (point2u) = 0;
 	virtual void          finish   () = 0;
 	virtual void          release  () = 0;
 
 	static IDeviceContext* current () noexcept;
 	static void            acquire (IDeviceContext*) noexcept;
 
-	inline bool active () const noexcept
+	bool active () const noexcept
 	{ return this == current (); }
 };
 
@@ -223,76 +228,72 @@ struct IDeviceContext : public IResource
 
 struct IDrawable2D
 {
-	virtual DeviceType type () const noexcept = 0;
+	virtual DeviceType type () const noexcept    = 0;
 	virtual void       draw (Transform2D const&) = 0;
 
-	inline virtual ~IDrawable2D () { }
+	virtual ~IDrawable2D () { }
 };
 
 // =========================================================
 
 struct IDrawable3D
 {
-	virtual DeviceType type () const noexcept = 0;
+	virtual DeviceType type () const noexcept    = 0;
 	virtual void       draw (Transform3D const&) = 0;
 
-	inline virtual ~IDrawable3D () { }
+	virtual ~IDrawable3D () { }
 };
 
 // =========================================================
 
 struct ITransformable2D
 {
-	inline virtual ~ITransformable2D () { }
+	virtual ~ITransformable2D () { }
 };
 
 // =========================================================
 
 struct ITransformable3D
 {
-	inline virtual ~ITransformable3D () { }
+	virtual ~ITransformable3D () { }
 };
 
 // ====================================================
 
-struct GFXVersion
+struct DrawableFactory
 {
-	int major, minor;
-
-	constexpr int egl () const noexcept
-	{ return major; }
+	static IDrawable2D* create2D (string const& name);
+	static IDrawable3D* create3D (string const& name);
+	static bool         load     (string const& module_path);
 };
 
-inline bool operator ! (GFXVersion const& gObj) noexcept
+// ====================================================
+
+inline bool operator  ! (GFXVersion const& gObj) noexcept
 { return !gObj.major and !gObj.minor; }
 
-inline bool operator < (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
+inline bool operator  < (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
 { return (gObj1.major < gObj2.major or gObj1.minor < gObj2.minor); }
 
-inline bool operator > (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
+inline bool operator  > (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
 { return (gObj1.major > gObj2.major or gObj1.minor > gObj2.minor); }
 
-inline bool operator < (GFXVersion const& gObj1, int uMajor) noexcept
-{ return gObj1.major < uMajor; }
+inline bool operator  < (GFXVersion const& gObj1, int uMajor) noexcept
+{ return gObj1.major  < uMajor; }
 
-inline bool operator > (GFXVersion const& gObj1, int uMajor) noexcept
-{ return gObj1.major > uMajor; }
+inline bool operator  > (GFXVersion const& gObj1, int uMajor) noexcept
+{ return gObj1.major  > uMajor; }
 
-inline bool operator == (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
+inline bool operator  == (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
 { return (gObj1.major == gObj2.major and gObj1.minor == gObj2.minor); }
 
-inline bool operator != (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
+inline bool operator  != (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
 { return (gObj1.major != gObj2.major or gObj1.minor != gObj2.minor); }
 
 template <typename CharT, typename Traits>
 std::basic_ostream<CharT, Traits>&
 operator << (std::basic_ostream<CharT, Traits>& os, GFXVersion const& u)
 { return os << u.major << "." << u.minor; }
-
-// =========================================================
-
-static_assert (std::is_pod<PixelFormat>::value, "PixelFormat must be a POD");
-static_assert (std::is_pod<GFXVersion>::value, "GFXVersion must be a POD");
 
 } } // namespace Graphics
 

@@ -24,7 +24,7 @@
 
 namespace cppual {
 
-int32 reference (Disposable<Compute::ParallelQueue>* pObj) noexcept
+int32 reference (Disposable<Compute::DeviceQueue>* pObj) noexcept
 { return ::clRetainCommandQueue (reinterpret_cast<cl_command_queue> (pObj)); }
 
 int32 reference (Disposable<Compute::Sampler>* pObj) noexcept
@@ -48,10 +48,10 @@ void* Disposable<Compute::Context>::operator new (std::size_t) noexcept
 void Disposable<Compute::Context>::operator delete (void* pObj) noexcept
 { ::clReleaseContext (static_cast<cl_context> (pObj)); }
 
-void* Disposable<Compute::ParallelQueue>::operator new (std::size_t) noexcept
+void* Disposable<Compute::DeviceQueue>::operator new (std::size_t) noexcept
 { return ::clCreateCommandQueue (nullptr, nullptr, 0, nullptr); }
 
-void Disposable<Compute::ParallelQueue>::operator delete (void* queue) noexcept
+void Disposable<Compute::DeviceQueue>::operator delete (void* queue) noexcept
 {  ::clReleaseCommandQueue (reinterpret_cast<cl_command_queue> (queue)); }
 
 void* Disposable<Compute::Sampler>::operator new (std::size_t) noexcept

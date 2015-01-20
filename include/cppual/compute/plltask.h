@@ -29,17 +29,17 @@
 
 namespace cppual { namespace Compute {
 
-class ParallelQueue : public Object <ParallelQueue>
+class DeviceQueue : public Object <DeviceQueue>
 {
 public:
-	ParallelQueue ();
-	ParallelQueue (Context const&);
-	ParallelQueue (ParallelQueue&&);
-	ParallelQueue& operator = (ParallelQueue&&);
+	DeviceQueue ();
+	DeviceQueue (Context const&);
+	DeviceQueue (DeviceQueue&&);
+	DeviceQueue& operator = (DeviceQueue&&);
 };
 
 template <typename T>
-class ParallelTask final : ParallelQueue
+class DeviceTask : private DeviceQueue
 {
 };
 

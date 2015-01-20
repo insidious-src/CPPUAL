@@ -32,16 +32,17 @@ class Timer
 {
 public:
 	typedef typename TClock::time_point time_point;
+	typedef TClock                      clock_type;
 
-	Timer () noexcept : m_gEpoch (TClock::now ()) { }
-	void reset () noexcept { m_gEpoch = TClock::now (); }
+	Timer () noexcept : m_epoch (clock_type::now ()) { }
+	void reset () noexcept { m_epoch = clock_type::now (); }
 
 	template <typename T = std::chrono::milliseconds>
 	T elapsed () const noexcept
-	{ return std::chrono::duration_cast<T> (TClock::now () - m_gEpoch); }
+	{ return std::chrono::duration_cast<T> (clock_type::now () - m_epoch); }
 
 private:
-	time_point m_gEpoch;
+	time_point m_epoch;
 };
 
 } } // namespace Clock

@@ -35,7 +35,7 @@ public:
 
 	inline    Connection () noexcept = default;
 	constexpr Connection (pointer display) noexcept : m_handle (display) { }
-	constexpr Connection (std::nullptr_t)  noexcept : m_handle ()        { }
+	constexpr Connection (std::nullptr_t ) noexcept : m_handle ()        { }
 
 	constexpr operator pointer () const noexcept
 	{ return m_handle; }

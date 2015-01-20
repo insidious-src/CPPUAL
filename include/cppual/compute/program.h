@@ -37,7 +37,7 @@ public:
 	Program (Program&&);
 	Program& operator = (Program&&);
 
-	void bind (ParallelQueue const& queue);
+	void bind (DeviceQueue const& queue);
 	bool build ();
 
 	static Program* current () noexcept;

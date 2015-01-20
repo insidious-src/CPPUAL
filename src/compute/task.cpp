@@ -35,9 +35,9 @@ namespace { namespace Internal { // optimize for internal unit usage
 struct ThreadPoolInitializer
 {
 	typedef atomic_uint_fast16_t    atomic_u16;
-	typedef SerialQueue::mutex_type mutex_type;
-	typedef SerialQueue::write_lock write_lock;
-	typedef SerialQueue::read_lock  read_lock;
+	typedef HostQueue::mutex_type mutex_type;
+	typedef HostQueue::write_lock write_lock;
+	typedef HostQueue::read_lock  read_lock;
 
 	~ThreadPoolInitializer ();
 
@@ -81,10 +81,10 @@ inline ThreadPoolInitializer& pool () noexcept
 class Assigned final
 {
 public:
-	inline Assigned (SerialQueue& gTasks) : m_queue (gTasks)
+	inline Assigned (HostQueue& gTasks) : m_queue (gTasks)
 	{
 		++Internal::pool ().threadCount;
-		SerialQueue::read_lock gLock (m_queue.m_gQueueMutex);
+		HostQueue::read_lock gLock (m_queue.m_gQueueMutex);
 		++m_queue.m_uNumAssigned;
 	}
 
@@ -92,7 +92,7 @@ public:
 	{
 		// RAII lock
 		{
-			SerialQueue::read_lock gLock (m_queue.m_gQueueMutex);
+			HostQueue::read_lock gLock (m_queue.m_gQueueMutex);
 			--m_queue.m_uNumAssigned;
 		}
 
@@ -101,7 +101,7 @@ public:
 	}
 
 private:
-	SerialQueue& m_queue;
+	HostQueue& m_queue;
 };
 
 // =========================================================
@@ -109,14 +109,14 @@ private:
 class Pending final
 {
 public:
-	inline Pending (SerialQueue& gTasks) : m_queue (gTasks)
+	inline Pending (HostQueue& gTasks) : m_queue (gTasks)
 	{ ++m_queue.m_uNumPending; }
 
 	inline ~Pending ()
 	{ --m_queue.m_uNumPending; }
 
 private:
-	SerialQueue& m_queue;
+	HostQueue& m_queue;
 };
 
 // =========================================================
@@ -124,18 +124,18 @@ private:
 class Worker final
 {
 public:
-	typedef SerialQueue::call_type  call_type;
-	typedef SerialQueue::read_lock  read_lock;
-	typedef SerialQueue::write_lock write_lock;
+	typedef HostQueue::call_type  call_type;
+	typedef HostQueue::read_lock  read_lock;
+	typedef HostQueue::write_lock write_lock;
 
-	constexpr Worker (SerialQueue& s)
+	constexpr Worker (HostQueue& s)
 	: m_queue (s)
 	{ }
 
 	void operator ()();
 
 private:
-	SerialQueue& m_queue;
+	HostQueue& m_queue;
 };
 
 // =========================================================
@@ -154,16 +154,16 @@ void Worker::operator ()()
 
 			m_queue.m_gSchedCond.wait (gLock, [&]
 			{
-				return SerialQueue::Running < m_queue.m_eState or
+				return HostQueue::Running < m_queue.m_eState or
 						!m_queue.m_gTaskQueue.empty ();
 			});
 
 			// process a task if there is one scheduled,
 			// otherwise return if the execution state
 			// requires it
-			if (SerialQueue::Interrupted == m_queue.m_eState or
+			if (HostQueue::Interrupted == m_queue.m_eState or
 					(m_queue.m_gTaskQueue.empty () and
-					 SerialQueue::Stopped == m_queue.m_eState))
+					 HostQueue::Stopped == m_queue.m_eState))
 				break;
 
 			run = m_queue.m_gTaskQueue.front ();
@@ -188,7 +188,7 @@ ThreadPool::size_type ThreadPool::count ()
 	return Internal::pool ().threadCount.load ();
 }
 
-bool ThreadPool::reserve (SerialQueue& gTaskQueue, size_type uAddThreads, bool bDetached)
+bool ThreadPool::reserve (HostQueue& gTaskQueue, size_type uAddThreads, bool bDetached)
 {
 	if (!uAddThreads) return false;
 
@@ -206,26 +206,26 @@ bool ThreadPool::reserve (SerialQueue& gTaskQueue, size_type uAddThreads, bool b
 
 // =========================================================
 
-SerialQueue::SerialQueue (SerialQueue const&)
+HostQueue::HostQueue (HostQueue const&)
 {
 }
 
-SerialQueue::SerialQueue (SerialQueue&&)
+HostQueue::HostQueue (HostQueue&&)
 {
 
 }
 
-SerialQueue& SerialQueue::operator = (SerialQueue&&)
-{
-	return *this;
-}
-
-SerialQueue& SerialQueue::operator = (SerialQueue const&)
+HostQueue& HostQueue::operator = (HostQueue&&)
 {
 	return *this;
 }
 
-void SerialQueue::schedule (call_type&& gCallable)
+HostQueue& HostQueue::operator = (HostQueue const&)
+{
+	return *this;
+}
+
+void HostQueue::schedule (call_type&& gCallable)
 {
 	// RAII lock
 	{
@@ -234,21 +234,21 @@ void SerialQueue::schedule (call_type&& gCallable)
 
 		// schedule task
 		m_gTaskQueue.push_back (std::forward<call_type> (gCallable));
-		m_eState = SerialQueue::Running;
+		m_eState = HostQueue::Running;
 	}
 
 	// wake a thread to receive the task
 	m_gSchedCond.notify_one ();
 }
 
-void SerialQueue::quit (bool bInterrupt) noexcept
+void HostQueue::quit (bool bInterrupt) noexcept
 {
 	// RAII lock
 	{
 		read_lock gLock (m_gQueueMutex);
 
-		if (m_eState != SerialQueue::Running) return;
-		m_eState = bInterrupt ? SerialQueue::Interrupted : SerialQueue::Stopped;
+		if (m_eState != HostQueue::Running) return;
+		m_eState = bInterrupt ? HostQueue::Interrupted : HostQueue::Stopped;
 	}
 
 	// wake all threads to check the execution state
@@ -256,27 +256,27 @@ void SerialQueue::quit (bool bInterrupt) noexcept
 	m_gTaskCond.notify_all ();
 }
 
-void SerialQueue::whenAnyFinish ()
+void HostQueue::whenAnyFinish ()
 {
 	read_lock gLock (m_gQueueMutex);
 
-	if (m_eState == SerialQueue::Running or m_uNumAssigned > m_uNumPending)
+	if (m_eState == HostQueue::Running or m_uNumAssigned > m_uNumPending)
 		m_gTaskCond.wait (gLock);
 }
 
-void SerialQueue::whenAllFinish ()
+void HostQueue::whenAllFinish ()
 {
 	read_lock gLock (m_gQueueMutex);
 
 	m_gTaskCond.wait (gLock, [&]
 	{
-		return m_eState == SerialQueue::Interrupted or
-			   m_eState == SerialQueue::Initial     or
+		return m_eState == HostQueue::Interrupted or
+			   m_eState == HostQueue::Initial     or
 			   m_gTaskQueue.empty ();
 	});
 }
 
-void SerialQueue::whenAllExit ()
+void HostQueue::whenAllExit ()
 {
 	read_lock gLock (m_gQueueMutex);
 

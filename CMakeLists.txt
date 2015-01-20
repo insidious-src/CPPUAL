@@ -372,10 +372,10 @@ add_library(cppual-ui-dialogs MODULE
 
 target_link_libraries(cppual-core dl)
 target_link_libraries(cppual-compute cppual-core pthread OpenCL)
-target_link_libraries(cppual-compute-gl cppual-compute OpenCL GL)
+target_link_libraries(cppual-compute-gl cppual-compute OpenCL GLEW GL)
 #target_link_libraries(cppual-input)
-target_link_libraries(cppual-gfx freetype)
-target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GL)
+target_link_libraries(cppual-gfx cppual-core freetype)
+target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW GL)
 target_link_libraries(cppual-video-vaapi va)
 target_link_libraries(cppual-video-gl cppual-gl GLEW GL)
 target_link_libraries(cppual-video-compute cppual-compute)

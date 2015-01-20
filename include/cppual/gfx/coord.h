@@ -125,6 +125,13 @@ struct Rect final
 	  bottom (static_cast<value_type> (y + height))
 	{ }
 
+	constexpr Rect (point2u size) noexcept
+	: left (),
+	  top  (),
+	  right  (static_cast<value_type> (size.x)),
+	  bottom (static_cast<value_type> (size.y))
+	{ }
+
 	constexpr u16 width () const noexcept
 	{ return static_cast<u16> (right - left); }
 

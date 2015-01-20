@@ -37,7 +37,7 @@ using std::shared_timed_mutex;
 
 namespace cppual { namespace Compute {
 
-class SerialQueue
+class HostQueue
 {
 public:
 	typedef condition_variable_any   cv_type;
@@ -56,12 +56,12 @@ public:
 		Interrupted,
 	};
 
-	SerialQueue (SerialQueue&&);
-	SerialQueue (SerialQueue const&);
-	SerialQueue& operator = (SerialQueue&&);
-	SerialQueue& operator = (SerialQueue const&);
+	HostQueue (HostQueue&&);
+	HostQueue (HostQueue const&);
+	HostQueue& operator = (HostQueue&&);
+	HostQueue& operator = (HostQueue const&);
 
-	SerialQueue () noexcept
+	HostQueue () noexcept
 	: m_gQueueMutex  (),
 	  m_gTaskQueue   (),
 	  m_eState       (),
@@ -84,7 +84,7 @@ public:
 		return m_uNumAssigned;
 	}
 
-	~SerialQueue ()
+	~HostQueue ()
 	{
 		quit (true);
 		whenAllExit ();
@@ -131,30 +131,30 @@ private:
 
 struct ThreadPool final : NonConstructible
 {
-	typedef SerialQueue::mutex_type mutex_type;
-	typedef SerialQueue::write_lock write_lock;
-	typedef SerialQueue::read_lock  read_lock;
-	typedef SerialQueue::size_type  size_type;
+	typedef HostQueue::mutex_type mutex_type;
+	typedef HostQueue::write_lock write_lock;
+	typedef HostQueue::read_lock  read_lock;
+	typedef HostQueue::size_type  size_type;
 
 	static size_type count (); // count running threads
 
-	static bool reserve (SerialQueue& task_queue,
-						 size_type    assign_num_threads = 1,
-						 bool         detach_threads     = false);
+	static bool reserve (HostQueue& task_queue,
+						 size_type  assign_num_threads = 1,
+						 bool       detach_threads     = false);
 };
 
 // =========================================================
 
-// continuation task
+// continuation host task
 template <typename T>
-class SerialTask : private SerialQueue
+class HostTask : private HostQueue
 {
 public:
-	SerialTask ()
+	HostTask ()
 	{ ThreadPool::reserve (*this); }
 
 	bool ready () const
-	{ return state () == SerialQueue::Running and empty () and pending (); }
+	{ return state () == HostQueue::Running and empty () and pending (); }
 
 	void when_any () { whenAnyFinish (); }
 	void when_all () { whenAllFinish (); }
@@ -163,7 +163,7 @@ public:
 
 	bool reuse ()
 	{
-		if (state () > SerialQueue::Running and !assigned ())
+		if (state () > HostQueue::Running and !assigned ())
 			return ThreadPool::reserve (*this);
 		return false;
 	}
@@ -182,15 +182,15 @@ public:
 	}
 
 	template <class X, typename... Args>
-	SerialTask (T (X::* fn)(Args...), X* obj, Args&&... args)
+	HostTask (T (X::* fn)(Args...), X* obj, Args&&... args)
 	{ then (fn, obj, std::forward<Args> (args)...); }
 
 	template <typename Callable, typename... Args>
-	SerialTask (Callable&& fn, Args&&... args)
+	HostTask (Callable&& fn, Args&&... args)
 	{ then (std::forward<Callable> (fn), std::forward<Args> (args)...); }
 
 	template <class X, typename... Args>
-	SerialTask& then (T (X::* fn)(Args...), X* obj, Args&&... args)
+	HostTask& then (T (X::* fn)(Args...), X* obj, Args&&... args)
 	{
 		schedule ([fn, obj, args..., this]
 		{
@@ -200,7 +200,7 @@ public:
 	}
 
 	template <typename Callable, typename... Args>
-	SerialTask& then (Callable&& fn, Args&&... args)
+	HostTask& then (Callable&& fn, Args&&... args)
 	{
 		schedule ([fn, args..., this]
 		{

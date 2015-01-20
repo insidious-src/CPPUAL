@@ -179,7 +179,7 @@ View::View (View const& gObj) noexcept
 		gObj.m_pRenderable->geometry (),
 		gObj.m_pRenderable->screen ())
 {
-	if (gObj.isValid ())
+	if (gObj.valid ())
 	{
 		if (!gObj.isEnabled ()) disable ();
 		if (!gObj.isHidden  ()) show ();
@@ -209,7 +209,7 @@ View& View::operator = (View const& gObj) noexcept
 {
 	if (this == &gObj) return *this;
 
-	if (gObj.isValid ())
+	if (gObj.valid ())
 	{
 //		if (createView (gObj.m_pParentObj,
 //						gObj.m_pRenderable->geometry (),
@@ -269,14 +269,14 @@ void View::destroy ()
 
 void View::show ()
 {
-	if (!isValid ()) return;
+	if (!valid ()) return;
 	m_pRenderable->map ();
 	m_pRenderable->connection ()->flush ();
 }
 
 void View::hide ()
 {
-	if (!isValid ()) return;
+	if (!valid ()) return;
 	m_pRenderable->unmap ();
 	m_pRenderable->connection ()->flush ();
 }

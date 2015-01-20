@@ -67,7 +67,7 @@ SkinnableView& SkinnableView::operator = (SkinnableView const& gObj)
 void SkinnableView::setSkin (ISkin* pNewSkin) noexcept
 {
 	m_pSkin = pNewSkin;
-	if (isValid ()) refresh ();
+	if (valid ()) refresh ();
 }
 
 void SkinnableView::onCreate ()

@@ -19,19 +19,39 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/ui/manager.h>
+#include <cppual/gfx/draw.h>
+#include <cppual/process/module.h>
 
 namespace cppual { namespace Graphics {
 
 namespace { namespace Internal {
 
-inline IDeviceContext*& current () noexcept
+typedef Process::PluginManager<IDrawable2D> manager2d_type;
+typedef Process::PluginManager<IDrawable3D> manager3d_type;
+typedef IDeviceContext                      context_type;
+typedef IDeviceContext*                     context_pointer;
+
+inline context_pointer& current () noexcept
 {
-	static thread_local IDeviceContext* current_dc;
+	static thread_local context_pointer current_dc;
 	return current_dc;
 }
 
+inline manager2d_type& manager2D () noexcept
+{
+	static manager2d_type drawable_mgr;
+	return drawable_mgr;
+}
+
+inline manager3d_type& manager3D () noexcept
+{
+	static manager3d_type drawable_mgr;
+	return drawable_mgr;
+}
+
 } } // anonymous namespace Internal
+
+// ====================================================
 
 IDeviceContext* IDeviceContext::current () noexcept
 {
@@ -41,6 +61,18 @@ IDeviceContext* IDeviceContext::current () noexcept
 void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
 {
 	if (Internal::current () != pContext) Internal::current () = pContext;
+}
+
+// ====================================================
+
+IDrawable2D* DrawableFactory::create2D (string const& gName)
+{
+	return Internal::manager2D ().construct (gName);
+}
+
+IDrawable3D* DrawableFactory::create3D (string const& gName)
+{
+	return Internal::manager3D ().construct (gName);
 }
 
 } } // namespace Graphics

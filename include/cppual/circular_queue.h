@@ -66,10 +66,10 @@ public:
 	typedef std::pair<const_pointer, size_type>   const_array_range;
 
 	enum { default_size = 10 };
-	CircularQueue (CircularQueue&&) noexcept = default;
 	CircularQueue& operator = (CircularQueue const&);
-	void resize (size_type new_capacity);
-	void erase (const_iterator&);
+	CircularQueue (CircularQueue&&) noexcept = default;
+	void resize   (size_type new_capacity);
+	void erase    (const_iterator&);
 
 	constexpr const_pointer    data () const noexcept { return m_pArray; }
 	inline    iterator         begin () noexcept { return iterator (*this, 0); }
@@ -107,26 +107,26 @@ public:
 	CircularQueue (size_type uCapacity         = default_size,
 				   allocator_type const& gAtor = allocator_type ())
 	: allocator_type (gAtor),
-	  m_pArray (allocator_type::allocate (uCapacity)),
-	  m_uBeginPos (),
-	  m_uEndPos (),
-	  m_uCapacity (m_pArray ? uCapacity : size_type ())
-	{ if (uCapacity and !m_pArray) throw std::bad_array_length (); }
+	  m_pArray       (allocator_type::allocate (uCapacity)),
+	  m_uBeginPos    (),
+	  m_uEndPos      (),
+	  m_uCapacity    (m_pArray ? uCapacity : size_type ())
+	{ if (!uCapacity) throw std::bad_array_length (); }
 
 	CircularQueue (allocator_type const& gAtor)
 	: allocator_type (gAtor),
-	  m_pArray (),
-	  m_uBeginPos (),
-	  m_uEndPos (),
-	  m_uCapacity ()
+	  m_pArray       (),
+	  m_uBeginPos    (),
+	  m_uEndPos      (),
+	  m_uCapacity    ()
 	{ }
 
 	CircularQueue (CircularQueue const& gObj)
 	: allocator_type (gObj),
-	  m_pArray    (!gObj.empty () ? allocator_type::allocate (gObj.size ()) : pointer ()),
-	  m_uBeginPos (),
-	  m_uEndPos  (m_pArray ? gObj.size () - 1 : m_uBeginPos),
-	  m_uCapacity (m_pArray ? m_uEndPos   + 1 : m_uBeginPos)
+	  m_pArray       (!gObj.empty () ? allocator_type::allocate (gObj.size ()) : pointer ()),
+	  m_uBeginPos    (),
+	  m_uEndPos      (m_pArray ? gObj.size () - 1 : m_uBeginPos),
+	  m_uCapacity    (m_pArray ? m_uEndPos   + 1 : m_uBeginPos)
 	{
 		if (!gObj.empty () and !m_pArray) throw std::bad_array_length ();
 		std::copy (gObj.cbegin (), gObj.cend (), begin ());
@@ -136,10 +136,10 @@ public:
 	CircularQueue (IteratorType<Iterator> gBegin, IteratorType<Iterator> gEnd,
 				   allocator_type const&  gAtor = allocator_type ())
 	: allocator_type (gAtor),
-	  m_pArray    (allocator_type::allocate (diff (gEnd, gBegin) + 1)),
-	  m_uBeginPos (0),
-	  m_uEndPos  (m_pArray ? diff (gEnd, gBegin) : 0),
-	  m_uCapacity (m_pArray ? m_uEndPos + 1 : 0)
+	  m_pArray       (allocator_type::allocate (diff (gEnd, gBegin) + 1)),
+	  m_uBeginPos    (),
+	  m_uEndPos      (m_pArray ? diff (gEnd, gBegin) : 0),
+	  m_uCapacity    (m_pArray ? m_uEndPos + 1 : 0)
 	{ m_pArray ? std::copy (gBegin, gEnd, begin ()) : throw std::bad_array_length (); }
 
 	constexpr const_reverse_iterator crbegin () const
@@ -523,8 +523,9 @@ public:
 	template <typename Functor>
 	bool consume_one (Functor& fn)
 	{
-		T element;
-		bool success = pop_front (element);
+		value_type element;
+		bool       success = pop_front (element);
+
 		if (success) fn (element);
 		return success;
 	}
@@ -532,8 +533,9 @@ public:
 	template <typename Functor>
 	bool consume_one (Functor const& fn)
 	{
-		T element;
-		bool success = pop_front (element);
+		value_type element;
+		bool       success = pop_front (element);
+
 		if (success) fn (element);
 		return success;
 	}
@@ -542,9 +544,8 @@ public:
 	size_type consume_all (Functor& fn)
 	{
 		size_type element_count = 0;
-		T element;
 
-		while (pop_front (element)) { fn (element); ++element_count; }
+		for (value_type element; pop_front (element); ++element_count) fn (element);
 		return element_count;
 	}
 
@@ -552,9 +553,8 @@ public:
 	size_type consume_all (Functor const& fn)
 	{
 		size_type element_count = 0;
-		T element;
 
-		while (pop_front (element)) { fn (element); ++element_count; }
+		for (value_type element; pop_front (element); ++element_count) fn (element);
 		return element_count;
 	}
 

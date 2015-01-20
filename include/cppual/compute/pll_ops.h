@@ -29,12 +29,12 @@
 namespace cppual { namespace Compute {
 
 template <typename T>
-void sort (T begin, T end, ParallelQueue& queue)
+void sort (T begin, T end, DeviceQueue& queue)
 {
 }
 
 template <typename T>
-void copy (T begin, T end, T dst, ParallelQueue& queue)
+void copy (T begin, T end, T dst, DeviceQueue& queue)
 {
 }
 

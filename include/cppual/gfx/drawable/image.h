@@ -38,8 +38,8 @@ namespace cppual { namespace Graphics {
 class Image : public IDrawable2D, public ITransformable2D
 {
 public:
-	virtual PixelMap* getPixelMap () noexcept = 0;
-	virtual bool	  isLoaded () const noexcept = 0;
+	virtual VirtualBuffer* map () noexcept = 0;
+	virtual bool	       isLoaded () const noexcept = 0;
 };
 
 // =========================================================
@@ -75,13 +75,13 @@ public:
 	inline void setMask (RGBColor gMask) noexcept
 	{ m_gColorMask = gMask; }
 
-	inline PixelMap* getPixelMap () noexcept
+	inline VirtualBuffer* map () noexcept
 	{ return &m_gPixBuffer; }
 
 private:
-	PixelMap       m_gPixBuffer;
-	RGBColor       m_gColorMask;
-	cbool          m_bIsLoaded;
+	VirtualBuffer m_gPixBuffer;
+	RGBColor      m_gColorMask;
+	cbool         m_bIsLoaded;
 
 	bool parseImage (string const&);
 };
@@ -103,7 +103,7 @@ public:
 	inline DeviceType type () const noexcept
 	{ return DeviceType::EGL; }
 
-	inline PixelMap* getPixelMap () noexcept
+	inline VirtualBuffer* map () noexcept
 	{ return &m_gPixBuffer; }
 
 	inline bool isLoaded () const noexcept
@@ -118,8 +118,8 @@ public:
 	{ }
 
 private:
-	PixelMap       m_gPixBuffer;
-	cbool          m_bIsLoaded;
+	VirtualBuffer m_gPixBuffer;
+	cbool         m_bIsLoaded;
 
 	bool parseImage (string const&);
 };

@@ -179,7 +179,7 @@ public:
 
 	void operator () () noexcept;
 
-	inline    Event () noexcept = default;
+	Event () noexcept = default;
 	constexpr Data const& data   () const noexcept { return m_gData; }
 	constexpr Event::Type type   () const noexcept { return m_eType; }
 	constexpr Element     window () const noexcept { return m_window; }
@@ -242,16 +242,16 @@ public:
 	EventQueue (mask_type accept_events) noexcept;
 
 	bool pop_front (event_type& next_event, bool wait) noexcept;
-	int  poll (bool wait = true) noexcept;
+	int  poll      (bool wait = true) noexcept;
 
 	mask_type accepted () const noexcept
 	{ return m_gAcceptedEvents.load (); }
 
-	void push_back (event_type const& gEvent) noexcept
-	{ m_gEventQueue.push_back (gEvent); }
+	void push_back (event_type const& event) noexcept
+	{ m_gEventQueue.push_back (event); }
 
-	void accept (mask_type gEvents) noexcept
-	{ m_gAcceptedEvents = gEvents; }
+	void accept (mask_type events) noexcept
+	{ m_gAcceptedEvents = events; }
 
 	void quit () noexcept
 	{ m_bPoll = false; }

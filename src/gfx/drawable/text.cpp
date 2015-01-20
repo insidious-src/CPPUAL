@@ -76,7 +76,7 @@ void Label2D::draw (Transform2D const& transform)
 	for (std::size_t i = 0; i < m_gText.length (); ++i)
 	{
 		//glTexCoord2f (glyph->tex_x1, glyph->tex_y1);
-		glVertex2i (transform.x (), transform.y ());
+		glVertex2i (transform.geometry ().left, transform.geometry ().top);
 		//glTexCoord2f (glyph->tex_x1, glyph->tex_y1 + _tex_line_height);
 		//glVertex2i (transform.x (), transform.y () + font ().lineHeight);
 		//glTexCoord2f (glyph->tex_x2, glyph->tex_y1 + _tex_line_height);

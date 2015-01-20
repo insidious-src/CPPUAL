@@ -19,20 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <array>
 #include <cstring>
 #include <iostream>
 #include <algorithm>
 #include <cppual/gfx/gl/egl.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include "gldef.h"
-
-#if !defined (EGL_FIXED_SIZE_ANGLE)
-#define EGL_FIXED_SIZE_ANGLE 0x3201
-#endif
-
-using std::array;
+#include <GL/gl.h>
 
 namespace cppual { namespace Graphics { namespace GL {
 
@@ -45,28 +38,32 @@ typedef EGLNativeDisplayType native_display ;
 
 enum
 {
-	Width             = EGL_WIDTH,
-	Height            = EGL_HEIGHT,
-	Extensions        = EGL_EXTENSIONS,
-	GLAPI             = EGL_OPENGL_API,
-	GLESAPI           = EGL_OPENGL_ES_API,
-	GLBit             = EGL_OPENGL_BIT,
-	GLESBit           = EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT,
-	ContextVersion    = EGL_CONTEXT_CLIENT_VERSION,
-	BadDisplay        = EGL_BAD_DISPLAY,
-	BadContext        = EGL_BAD_CONTEXT,
-	BadSurface        = EGL_BAD_SURFACE,
-	BadCurrentSurface = EGL_BAD_CURRENT_SURFACE,
-	BadNativeWindow   = EGL_BAD_NATIVE_WINDOW,
-	BadConfig         = EGL_BAD_CONFIG,
-	BadAttribute      = EGL_BAD_ATTRIBUTE,
-	NoMatch           = EGL_BAD_MATCH,
-	NoAccess          = EGL_BAD_ACCESS,
-	NoAlloc           = EGL_BAD_ALLOC,
-	NotInitialized    = EGL_NOT_INITIALIZED,
-	ContextLost       = EGL_CONTEXT_LOST,
-	ANGLEFixedSize    = EGL_FIXED_SIZE_ANGLE,
-	NONE              = EGL_NONE,
+	Width               = EGL_WIDTH,
+	Height              = EGL_HEIGHT,
+	Extensions          = EGL_EXTENSIONS,
+	GLID                = EGL_OPENGL_API,
+	GLESID              = EGL_OPENGL_ES_API,
+	GLBit               = EGL_OPENGL_BIT,
+	GLESBit             = EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT,
+	BasicContextVersion = EGL_CONTEXT_CLIENT_VERSION,
+	ContextMajorVersion = EGL_CONTEXT_MAJOR_VERSION_KHR,
+	ContextMinorVersion = EGL_CONTEXT_MINOR_VERSION_KHR,
+	BadDisplay          = EGL_BAD_DISPLAY,
+	BadContext          = EGL_BAD_CONTEXT,
+	BadSurface          = EGL_BAD_SURFACE,
+	BadCurrentSurface   = EGL_BAD_CURRENT_SURFACE,
+	BadNativeWindow     = EGL_BAD_NATIVE_WINDOW,
+	BadConfig           = EGL_BAD_CONFIG,
+	BadAttribute        = EGL_BAD_ATTRIBUTE,
+	NoMatch             = EGL_BAD_MATCH,
+	NoAccess            = EGL_BAD_ACCESS,
+	NoAlloc             = EGL_BAD_ALLOC,
+	NotInitialized      = EGL_NOT_INITIALIZED,
+	ContextLost         = EGL_CONTEXT_LOST,
+	ANGLEFixedSize      = 0x3201/*EGL_FIXED_SIZE_ANGLE*/,
+	NONE                = EGL_NONE,
+	TRUE                = EGL_TRUE,
+	FALSE               = EGL_TRUE,
 };
 
 enum ErrorType
@@ -184,8 +181,8 @@ inline void initialize (display_pointer dsp)
 
 constexpr uint api (API eAPI) noexcept
 {
-	return eAPI == API::OpenGL ? GLAPI :
-								 eAPI == API::OpenGLES ? GLESAPI : NONE;
+	return eAPI == API::OpenGL ? GLID :
+								 eAPI == API::OpenGLES ? GLESID : NONE;
 }
 
 constexpr int32 api_bits (API eAPI) noexcept
@@ -214,10 +211,8 @@ inline Config::Features convertExtensions (display_pointer dsp)
 		switch (const_hash (extension))
 		{
 		case const_hash ("EGL_KHR_surfaceless_context"):
-		case const_hash ("EGL_MESA_surfaceless_context"):
 			eFeatures += Config::SurfacelessContext;
 			break;
-		case const_hash ("EGL_KHR_configless_context"):
 		case const_hash ("EGL_MESA_configless_context"):
 			eFeatures += Config::ConfiglessContext;
 			break;
@@ -228,10 +223,11 @@ inline Config::Features convertExtensions (display_pointer dsp)
 			eFeatures += Config::CreateRobustContext;
 			break;
 		case const_hash ("EGL_ANGLE_window_fixed_size"):
-			eFeatures += Config::WindowFixedSize;
+			eFeatures += Config::ScalableSurface;
 			break;
 		case const_hash ("EGL_KHR_create_context"):
 			eFeatures += Config::ContextAttributesExt;
+			break;
 			break;
 		}
 	}
@@ -244,18 +240,16 @@ inline surface_pointer createDrawable (Config const&         gConf,
 									   IResource::value_type uWndHandle,
 									   bool                  bDouble)
 {
-	std::cout << eglQueryString (gConf.display (), EGL::Extensions) << std::endl;
+	int32 nSurfaceAttribs[9];
 
-	array<int32, 9> nSurfaceAttribs
-	{
-		EGL_RENDER_BUFFER, bDouble ? EGL_BACK_BUFFER : EGL_SINGLE_BUFFER,
-		EGL::NONE
-	};
+	nSurfaceAttribs[0] = EGL_RENDER_BUFFER;
+	nSurfaceAttribs[1] = bDouble ? EGL_BACK_BUFFER : EGL_SINGLE_BUFFER;
+	nSurfaceAttribs[2] = EGL::NONE;
 
-	if (gConf.features ().test (Config::WindowFixedSize))
+	if (gConf.features ().test (Config::ScalableSurface))
 	{
 		nSurfaceAttribs[2] = EGL::ANGLEFixedSize;
-		nSurfaceAttribs[3] = GL::TRUE;
+		nSurfaceAttribs[3] = EGL::TRUE;
 		nSurfaceAttribs[4] = EGL::Width;
 		nSurfaceAttribs[5] = gSize.x;
 		nSurfaceAttribs[6] = EGL::Height;
@@ -263,10 +257,10 @@ inline surface_pointer createDrawable (Config const&         gConf,
 		nSurfaceAttribs[8] = EGL::NONE;
 	}
 
-	EGLSurface pSurface = eglCreateWindowSurface (gConf.display (),
-												  gConf,
-												  uWndHandle,
-												  &nSurfaceAttribs[0]);
+	surface_pointer pSurface = eglCreateWindowSurface (gConf.display (),
+													   gConf,
+													   uWndHandle,
+													   &nSurfaceAttribs[0]);
 
 	if (!pSurface) error<Create> ();
 	return pSurface;
@@ -274,7 +268,6 @@ inline surface_pointer createDrawable (Config const&         gConf,
 
 inline surface_pointer createPBuffer (Config const& gConf, point2u gSize)
 {
-
 	cint32 nPBufferAttribs[] =
 	{
 		EGL::Width,         static_cast<int32> (gSize.x),
@@ -286,9 +279,9 @@ inline surface_pointer createPBuffer (Config const& gConf, point2u gSize)
 		EGL::NONE
 	};
 
-	EGLSurface m_pPixelBuffer = eglCreatePbufferSurface (gConf.display (),
-														 gConf,
-														 nPBufferAttribs);
+	surface_pointer m_pPixelBuffer = eglCreatePbufferSurface (gConf.display (),
+															  gConf,
+															  nPBufferAttribs);
 
 	if (!m_pPixelBuffer) error<Create> ();
 	return m_pPixelBuffer;
@@ -296,10 +289,10 @@ inline surface_pointer createPBuffer (Config const& gConf, point2u gSize)
 
 inline surface_pointer createPixmap (Config const& gConf)
 {
-	EGLSurface m_pSurface = eglCreatePixmapSurface (gConf.display (),
-													gConf,
-													0,
-													nullptr);
+	surface_pointer m_pSurface = eglCreatePixmapSurface (gConf.display (),
+														 gConf,
+														 0,
+														 nullptr);
 
 	if (!m_pSurface) error<Create> ();
 	return m_pSurface;
@@ -323,24 +316,21 @@ inline surface_pointer createSurface (Config const&       gConf,
 
 inline context_pointer createGC (Config const& gConf, GFXVersion version, void* pShared)
 {
-	array<int32, 5> nContextAttribs;
+	int32 nContextAttribs[5];
 
 	if (gConf.features ().test (Config::ContextAttributesExt))
 	{
-		nContextAttribs =
-		{
-			EGL_CONTEXT_MAJOR_VERSION_KHR, version.major,
-			EGL_CONTEXT_MINOR_VERSION_KHR, version.minor,
-			NONE
-		};
+		nContextAttribs[0] = EGL::ContextMajorVersion;
+		nContextAttribs[1] = version.major;
+		nContextAttribs[2] = EGL::ContextMinorVersion;
+		nContextAttribs[3] = version.minor;
+		nContextAttribs[4] = EGL::NONE;
 	}
 	else
 	{
-		nContextAttribs =
-		{
-			ContextVersion, version.major,
-			NONE
-		};
+		nContextAttribs[0] = EGL::BasicContextVersion;
+		nContextAttribs[1] = version.major;
+		nContextAttribs[2] = EGL::NONE;
 	}
 
 	eglBindAPI (EGL::api (gConf.api ())) ?
@@ -360,10 +350,10 @@ inline point2u getSize (Config const& config, Surface::pointer surface) noexcept
 {
 	EGLint size[2];
 
-	if (eglQuerySurface (config.display (), surface, EGL::Width, &size[0]) == GL::FALSE)
+	if (eglQuerySurface (config.display (), surface, EGL::Width, &size[0]) == EGL::FALSE)
 		return point2u ();
 
-	if (eglQuerySurface (config.display (), surface, EGL::Height, &size[1]) == GL::FALSE)
+	if (eglQuerySurface (config.display (), surface, EGL::Height, &size[1]) == EGL::FALSE)
 		return point2u ();
 
 	return { static_cast<u16> (size[0]), static_cast<u16> (size[1]) };
@@ -402,11 +392,13 @@ Config::Config (controller dsp, format_type gFormat, API eAPI)
 
 	EGL::initialize (m_pDisplay);
 
-	eglGetConfigs (m_pDisplay, &m_pCfg, 1, &nNumConfigs);
+	eglGetConfigs   (m_pDisplay, &m_pCfg, 1, &nNumConfigs);
 	eglChooseConfig (m_pDisplay, nConfigAttribs, &m_pCfg, 1, &nNumConfigs);
 
 	m_eFeatures = EGL::convertExtensions (m_pDisplay);
 	m_gFormat   = toFormat ();
+
+	std::cout << eglQueryString (display (), EGL::Extensions) << std::endl;
 }
 
 PixelFormat Config::toFormat () const
@@ -514,7 +506,7 @@ Surface::Surface (Surface const& gObj)
 Surface& Surface::operator = (Surface&& gObj) noexcept
 {
 	if (this == &gObj) return *this;
-	if (m_pHandle) eglDestroySurface (m_pConf->display (), m_pHandle);
+	if (m_pHandle) eglDestroySurface (config ().display (), m_pHandle);
 
 	m_pConf        = gObj.m_pConf;
 	m_pHandle      = gObj.m_pHandle;
@@ -529,28 +521,28 @@ Surface& Surface::operator = (Surface&& gObj) noexcept
 
 Surface::~Surface () noexcept
 {
-	if (m_pHandle) eglDestroySurface (m_pConf->display (), m_pHandle);
+	if (m_pHandle) eglDestroySurface (config ().display (), m_pHandle);
 }
 
 void Surface::flush ()
 {
 	if (m_eType == Type::DoubleBuffer)
-		eglSwapBuffers (m_pConf->display (), m_pHandle);
+		eglSwapBuffers (config ().display (), m_pHandle);
 	else
 		glFlush ();
 }
 
 point2u Surface::size () const noexcept
 {
-	return EGL::getSize (*m_pConf, m_pHandle);
+	return EGL::getSize (config (), m_pHandle);
 }
 
 void Surface::scale (point2u gSize)
 {
-	if (!m_pConf->features ().test (Config::WindowFixedSize))
+	if (!m_pConf->features ().test (Config::ScalableSurface))
 	{
-		eglDestroySurface (m_pConf->display (), m_pHandle);
-		m_pHandle = EGL::createSurface (*m_pConf, gSize, m_eType, m_pOwner);
+		eglDestroySurface (config ().display (), m_pHandle);
+		m_pHandle = EGL::createSurface (config (), gSize, m_eType, m_pOwner);
 	}
 }
 
@@ -561,14 +553,16 @@ Context::Context (Config const& gConf, GFXVersion const& gVersion, Context* pSha
   m_pGC          (EGL::createGC (gConf, gVersion, pShared ? pShared->m_pGC : nullptr)),
   m_pDrawTarget  (),
   m_pReadTarget  (),
+  m_pShared      (pShared),
   m_nVersion     (m_pGC ? gVersion : GFXVersion ())
 { }
 
 Context::Context (Context const& gObj)
 : m_pConf        (gObj.m_pConf),
-  m_pGC          (EGL::createGC (*m_pConf, gObj.m_nVersion, nullptr)),
+  m_pGC          (EGL::createGC (*m_pConf, gObj.m_nVersion, gObj.m_pShared)),
   m_pDrawTarget  (),
   m_pReadTarget  (),
+  m_pShared      (gObj.m_pShared),
   m_nVersion     (m_pGC ? gObj.m_nVersion : GFXVersion ())
 { }
 
@@ -579,26 +573,44 @@ Context& Context::operator = (Context&& gObj) noexcept
 	if (m_pGC)
 	{
 		release ();
-		eglDestroyContext (m_pConf->display (), m_pGC);
+		eglDestroyContext (config ().display (), m_pGC);
 	}
 
 	m_pDrawTarget = gObj.m_pDrawTarget;
 	m_pReadTarget = gObj.m_pReadTarget;
 	m_nVersion    = gObj.m_nVersion;
 	m_pConf       = gObj.m_pConf;
+	m_pShared     = gObj.m_pShared;
 	m_pGC         = gObj.m_pGC;
 
 	gObj.m_nVersion    = GFXVersion ();
 	gObj.m_pGC         = nullptr;
 	gObj.m_pConf       = nullptr;
+	gObj.m_pShared     = nullptr;
 	gObj.m_pDrawTarget = nullptr;
 	gObj.m_pReadTarget = nullptr;
 
 	return *this;
 }
 
-Context& Context::operator = (Context const&)
+Context& Context::operator = (Context const& gObj)
 {
+	if (this == &gObj) return *this;
+
+	if (m_pGC)
+	{
+		release ();
+		eglDestroyContext (config ().display (), m_pGC);
+	}
+
+	m_pGC = gObj.m_pGC ? EGL::createGC (gObj.config (), gObj.m_nVersion, gObj.m_pShared) :
+						 nullptr;
+
+	m_pReadTarget = m_pDrawTarget = nullptr;
+	m_nVersion    = gObj.m_nVersion;
+	m_pShared     = gObj.m_pShared;
+	m_pConf       = gObj.m_pConf;
+
 	return *this;
 }
 
@@ -606,7 +618,7 @@ Context::~Context () noexcept
 {
 	if (!m_pGC) return;
 	release ();
-	eglDestroyContext (m_pConf->display (), m_pGC);
+	eglDestroyContext (config ().display (), m_pGC);
 }
 
 GFXVersion Context::platformVersion () noexcept
@@ -616,8 +628,8 @@ GFXVersion Context::platformVersion () noexcept
 
 bool Context::use (pointer pDraw, const_pointer pRead) noexcept
 {
-	if ((pDraw and pDraw->device () != DeviceType::EGL) or
-		(pRead and pRead->device () != DeviceType::EGL))
+	if ((( pDraw and !pRead) or (pDraw and pDraw->device () != DeviceType::EGL)) or
+		((!pDraw and  pRead) or (pRead and pRead->device () != DeviceType::EGL)))
 		return false;
 
 	m_pDrawTarget = pDraw;
@@ -632,7 +644,7 @@ bool Context::assign () noexcept
 	if (!m_pDrawTarget and !m_pConf->features ().test (Config::SurfacelessContext))
 		return false;
 
-	if (!eglMakeCurrent (m_pConf->display (),
+	if (!eglMakeCurrent (config ().display (),
 						 m_pDrawTarget != nullptr ?
 						 m_pDrawTarget->handle ().get<EGL::surface_pointer> () : nullptr,
 						 m_pReadTarget != nullptr ?
@@ -646,25 +658,10 @@ bool Context::assign () noexcept
 
 void Context::release () noexcept
 {
-	if (!active () or !eglMakeCurrent (m_pConf->display (), nullptr, nullptr, nullptr))
+	if (!active () or !eglMakeCurrent (config ().display (), nullptr, nullptr, nullptr))
 		return;
 
 	acquire (nullptr);
-}
-
-void Context::scale (point2u size)
-{
-	if (m_pDrawTarget)
-	{
-		if (active ())
-		{
-			eglMakeCurrent (m_pConf->display (), nullptr, nullptr, nullptr);
-			m_pDrawTarget->scale (size);
-			assign ();
-		}
-		else
-			m_pDrawTarget->scale (size);
-	}
 }
 
 void Context::flush () noexcept
@@ -681,9 +678,9 @@ API Context::bound () noexcept
 {
 	switch (eglQueryAPI ())
 	{
-	case EGL::GLESAPI:
+	case EGL::GLESID:
 		return API::OpenGLES;
-	case EGL::GLAPI:
+	case EGL::GLID:
 		return API::OpenGL;
 	default:
 		return API::Unbound;

@@ -85,11 +85,11 @@ void FrameView::unstretch ()
 
 void FrameView::attach (View* pView)
 {
-	if (!pView or !pView->isValid ()) return;
+	if (!pView or !pView->valid ()) return;
 
 	if (!isUsingInternalCompositor ())
 	{
-		if (m_pTarget and m_pTarget->isValid ())
+		if (m_pTarget and m_pTarget->valid ())
 		{
 			m_pTarget->renderable_unsafe ()->setFlags
 					(m_pTarget->renderable_unsafe ()->flags () += WindowFlag::Frame);
@@ -153,7 +153,7 @@ FrameView::FrameView (View*       pParent,
   m_gHoldingEdges (),
   m_eVisibility ()
 {
-	if (isValid ())
+	if (valid ())
 	{
 		if (gFlags.test (Close)) m_gCloseBtn.create (this, string ());
 		m_gMinBtn.create (this, string ());

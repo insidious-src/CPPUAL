@@ -34,12 +34,12 @@ class IAnimation : public NonCopyAssignable
 {
 public:
 	static  float defaultSpeed;
-	virtual float speed () const = 0;
+	virtual float speed    () const = 0;
 	virtual void  setSpeed (float speed) = 0;
-	virtual void  play (int repeat_num = 0) = 0;
-	virtual void  cancel () = 0;
-	virtual void  pause () = 0;
-	virtual void  resume () = 0;
+	virtual void  play     (int repeat_num = 0) = 0;
+	virtual void  cancel   () = 0;
+	virtual void  pause    () = 0;
+	virtual void  resume   () = 0;
 };
 
 class AnimationBase : public IAnimation
@@ -55,7 +55,7 @@ public:
 	{ if (!m_bIsPlaying.load ()) m_fSpeed = fSpeed; }
 
 protected:
-	IWindow*   m_pObject;
+	IWindow*    m_pObject;
 	float       m_fSpeed;
 	atomic_bool m_bIsPlaying;
 };
@@ -63,32 +63,32 @@ protected:
 class Motion final : public AnimationBase
 {
 public:
-	void play (int);
-	void pause ();
+	void play   (int);
+	void pause  ();
 	void resume ();
 };
 
 class Fade final : public AnimationBase
 {
 public:
-	void play (int);
-	void pause ();
+	void play   (int);
+	void pause  ();
 	void resume ();
 };
 
 class Rotation final : public AnimationBase
 {
 public:
-	void play (int);
-	void pause ();
+	void play   (int);
+	void pause  ();
 	void resume ();
 };
 
 class Pulse final : public AnimationBase
 {
 public:
-	void play (int);
-	void pause ();
+	void play   (int);
+	void pause  ();
 	void resume ();
 };
 

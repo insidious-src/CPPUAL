@@ -30,8 +30,8 @@ namespace cppual { namespace Compute {
 
 class Device;
 class Context;
-class SerialQueue;
-class ParallelQueue;
+class HostQueue;
+class DeviceQueue;
 class MemoryRegion;
 class Sampler;
 class Program;
@@ -80,7 +80,7 @@ private:
 
 } // Compute
 
-int32 reference (Disposable<Compute::ParallelQueue>* pObj) noexcept;
+int32 reference (Disposable<Compute::DeviceQueue>* pObj) noexcept;
 int32 reference (Disposable<Compute::Sampler>* pObj) noexcept;
 int32 reference (Disposable<Compute::Program>* pObj) noexcept;
 int32 reference (Disposable<Compute::Kernel>* pObj) noexcept;
@@ -95,7 +95,7 @@ struct Disposable <Compute::Context>
 };
 
 template <>
-struct Disposable <Compute::ParallelQueue>
+struct Disposable <Compute::DeviceQueue>
 {
 	static void* operator new (std::size_t) noexcept;
 	static void  operator delete (void*) noexcept;

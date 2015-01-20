@@ -26,7 +26,7 @@ namespace cppual { namespace Ui {
 void AbstractButton::setLabel (string const& gText)
 {
 	m_gLabel = gText;
-	if (isValid () and isHidden ()) refresh ();
+	if (valid () and isHidden ()) refresh ();
 }
 
 AbstractButton::~AbstractButton () noexcept
