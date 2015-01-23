@@ -31,6 +31,7 @@ namespace cppual { namespace Graphics { namespace GL {
 
 namespace { namespace EGL { // optimize for internal unit usage
 
+typedef EGLint               value_type;
 typedef EGLDisplay           display_pointer;
 typedef EGLSurface           surface_pointer;
 typedef EGLContext           context_pointer;
@@ -185,7 +186,7 @@ constexpr uint api (API eAPI) noexcept
 								 eAPI == API::OpenGLES ? GLESID : NONE;
 }
 
-constexpr int32 api_bits (API eAPI) noexcept
+constexpr value_type api_bits (API eAPI) noexcept
 {
 	return eAPI == API::OpenGL ? GLBit :
 								 eAPI == API::OpenGLES ? GLESBit : NONE;
@@ -240,11 +241,10 @@ inline surface_pointer createDrawable (Config const&         gConf,
 									   IResource::value_type uWndHandle,
 									   bool                  bDouble)
 {
-	int32 nSurfaceAttribs[9];
+	value_type nSurfaceAttribs[9];
 
 	nSurfaceAttribs[0] = EGL_RENDER_BUFFER;
 	nSurfaceAttribs[1] = bDouble ? EGL_BACK_BUFFER : EGL_SINGLE_BUFFER;
-	nSurfaceAttribs[2] = EGL::NONE;
 
 	if (gConf.features ().test (Config::ScalableSurface))
 	{
@@ -256,6 +256,8 @@ inline surface_pointer createDrawable (Config const&         gConf,
 		nSurfaceAttribs[7] = gSize.y;
 		nSurfaceAttribs[8] = EGL::NONE;
 	}
+	else
+		nSurfaceAttribs[2] = EGL::NONE;
 
 	surface_pointer pSurface = eglCreateWindowSurface (gConf.display (),
 													   gConf,
@@ -268,10 +270,10 @@ inline surface_pointer createDrawable (Config const&         gConf,
 
 inline surface_pointer createPBuffer (Config const& gConf, point2u gSize)
 {
-	cint32 nPBufferAttribs[] =
+	value_type const nPBufferAttribs[] =
 	{
-		EGL::Width,         static_cast<int32> (gSize.x),
-		EGL::Height,        static_cast<int32> (gSize.y),
+		EGL::Width,         static_cast<value_type> (gSize.x),
+		EGL::Height,        static_cast<value_type> (gSize.y),
 		EGL_COLORSPACE,     EGL_COLORSPACE_sRGB,
 		EGL_ALPHA_FORMAT,   EGL_ALPHA_FORMAT_NONPRE,
 		EGL_TEXTURE_FORMAT, EGL_TEXTURE_RGBA,
@@ -308,7 +310,7 @@ inline surface_pointer createSurface (Config const&       gConf,
 	case Surface::Type::BackBuffer:
 		return EGL::createPBuffer (gConf, size);
 	case Surface::Type::Pixmap:
-		return EGL::createPixmap  (gConf);
+		return EGL::createPixmap (gConf);
 	default:
 		return EGL::createDrawable (gConf, size, owner, type == Surface::Type::DoubleBuffer);
 	}
@@ -316,7 +318,7 @@ inline surface_pointer createSurface (Config const&       gConf,
 
 inline context_pointer createGC (Config const& gConf, GFXVersion version, void* pShared)
 {
-	int32 nContextAttribs[5];
+	value_type nContextAttribs[5];
 
 	if (gConf.features ().test (Config::ContextAttributesExt))
 	{
@@ -348,7 +350,7 @@ inline context_pointer createGC (Config const& gConf, GFXVersion version, void* 
 
 inline point2u getSize (Config const& config, Surface::pointer surface) noexcept
 {
-	EGLint size[2];
+	value_type size[2];
 
 	if (eglQuerySurface (config.display (), surface, EGL::Width, &size[0]) == EGL::FALSE)
 		return point2u ();
@@ -372,9 +374,9 @@ Config::Config (controller dsp, format_type gFormat, API eAPI)
 {
 	if (!m_pDisplay) throw std::logic_error ("invalid display");
 
-	int32 nNumConfigs = 0;
+	EGL::value_type nNumConfigs = 0;
 
-	cint32 nConfigAttribs[]
+	EGL::value_type const nConfigAttribs[]
 	{
 		EGL_RED_SIZE,        gFormat.red,
 		EGL_GREEN_SIZE,      gFormat.green,
