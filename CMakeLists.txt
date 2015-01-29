@@ -1,15 +1,16 @@
 project("C++ UAL")
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.9)
 
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
 
-include(FindX11               REQUIRED)
-include(FindOpenGL            REQUIRED)
-include(cmake/FindOpenAL      REQUIRED)
+find_package(X11      REQUIRED)
+find_package(GLEW     REQUIRED)
+find_package(OpenGL   REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(OpenAL   REQUIRED)
+
 include(cmake/FindOpenCL      REQUIRED)
-include(cmake/FindGLEW        REQUIRED)
-include(cmake/FindFreetype    REQUIRED)
 include(cmake/CompilerOptions REQUIRED)
 include(cmake/ToolChain       REQUIRED)
 
