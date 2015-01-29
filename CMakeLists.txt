@@ -1,18 +1,20 @@
 project("C++ UAL")
 cmake_minimum_required(VERSION 2.9)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
 
 find_package(X11      REQUIRED)
+#find_package(EGL      REQUIRED)
 find_package(GLEW     REQUIRED)
 find_package(OpenGL   REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(OpenCL   REQUIRED)
 find_package(OpenAL   REQUIRED)
 
-include(cmake/FindOpenCL      REQUIRED)
-include(cmake/CompilerOptions REQUIRED)
-include(cmake/ToolChain       REQUIRED)
+include(cmake/CompilerOptions.cmake REQUIRED)
+include(cmake/ToolChain.cmake       REQUIRED)
 
 include_directories(
 	include
@@ -21,6 +23,7 @@ include_directories(
 	${GLEW_INCLUDE_DIR}
 	${OpenCL_INCLUDE_DIR}
 	)
+
 
 ### compile libraries
 
