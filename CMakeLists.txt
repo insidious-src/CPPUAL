@@ -13,8 +13,8 @@ find_package(Freetype REQUIRED)
 find_package(OpenCL   REQUIRED)
 find_package(OpenAL   REQUIRED)
 
-include(cmake/CompilerOptions.cmake REQUIRED)
-include(cmake/ToolChain.cmake       REQUIRED)
+include(cmake/CompilerConfig.cmake  REQUIRED)
+include(cmake/ToolChainConfig.cmake REQUIRED)
 
 include_directories(
 	include
