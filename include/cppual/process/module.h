@@ -40,7 +40,7 @@ namespace cppual { namespace Process {
 class Module final : public NonCopyable
 {
 public:
-    typedef int (STDCALL * function_type)();
+	typedef int (* function_type)();
 
 	enum Flag
 	{
@@ -55,7 +55,7 @@ public:
 		Unresolved  // don't resolve any object or function references
 	};
 
-    typedef BitSet<Module::Flag> Flags;
+	typedef BitSet<Module::Flag> Flags;
 
 	Module () = default;
 	Module (Module&&) = default;
@@ -89,24 +89,24 @@ public:
 	template <typename TRet, typename... TArgs>
 	bool get (cchar* pName, TRet(*& fn)(TArgs...)) const
 	{
-        typedef TRet (* Func)(TArgs...);
-        function_type func = function (pName);
-        return fn = reinterpret_cast<Func> (func);
+		typedef TRet (* Func)(TArgs...);
+		function_type func = function (pName);
+		return fn = reinterpret_cast<Func> (func);
 	}
 
 	template <typename TRet, typename... TArgs>
 	TRet call (cchar* pName, TArgs&&... args) const
 	{
-        typedef TRet (* Func)(TArgs...);
-        function_type func = function (pName);
+		typedef TRet (* Func)(TArgs...);
+		function_type func = function (pName);
 
-        if (!func) std::bad_function_call ();
-        return (*reinterpret_cast<Func> (func))(std::forward<TArgs> (args)...);
+		if (!func) std::bad_function_call ();
+		return (*reinterpret_cast<Func> (func))(std::forward<TArgs> (args)...);
 	}
 
 private:
-    void*         address  (cchar* name) const noexcept;
-    function_type function (cchar* name) const noexcept;
+	void*         address  (cchar* name) const noexcept;
+	function_type function (cchar* name) const noexcept;
 
 private:
 	void*		  m_pHandle;

@@ -74,7 +74,7 @@ SharedObject::SharedObject (string const& gName, Mode eMode, State eState)
 : m_gName (gName),
   m_eMode (eMode),
   m_eState (eState),
-  m_nId (/*shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u)*/)
+  m_nId (shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u))
 { }
 
 SharedObject::~SharedObject () noexcept
@@ -89,7 +89,7 @@ bool SharedObject::truncate (size_type) noexcept
 	return false;
 }
 
-SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool /*bWritable*/)
+SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
 : m_gObject (gObj),
   m_pRegion (),
   m_uSize (gObj.isValid () ? uSize : 0)

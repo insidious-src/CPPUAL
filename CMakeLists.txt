@@ -4,58 +4,22 @@ cmake_minimum_required(VERSION 3.0)
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
 
-include(FindX11            REQUIRED)
-include(cmake/FindOpenAL   REQUIRED)
-include(FindOpenGL         REQUIRED)
-include(cmake/FindOpenCL   REQUIRED)
-include(cmake/FindGLEW     REQUIRED)
-include(cmake/FindFreetype REQUIRED)
-include(cmake/cpp14defs    REQUIRED)
+include(FindX11               REQUIRED)
+include(FindOpenGL            REQUIRED)
+include(cmake/FindOpenAL      REQUIRED)
+include(cmake/FindOpenCL      REQUIRED)
+include(cmake/FindGLEW        REQUIRED)
+include(cmake/FindFreetype    REQUIRED)
+include(cmake/CompilerOptions REQUIRED)
+include(cmake/ToolChain       REQUIRED)
 
 include_directories(
-    include
-    ${FREETYPE_INCLUDE_DIRS}
-    ${OPENAL_INCLUDE_DIR}
-    ${GLEW_INCLUDE_DIR}
-    ${OpenCL_INCLUDE_DIR}
-    )
-
-
-### compiler
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(TOOL_CHAIN_DIR "C:/Qt/Tools/mingw491_32/bin")
-    set(TOOL_CXX "g++.exe")
-    set(TOOL_C "gcc.exe")
-    set(TOOL_RC "windres.exe")
-    set(TOOL_NM "nm.exe")
-    set(TOOL_OBJCOPY "objcopy.exe")
-    set(TOOL_OBJDUMP "objdump.exe")
-    set(TOOL_RANLIB "ranlib.exe")
-    set(TOOL_STRIP "strip.exe")
-    set(TOOL_LINK "ld.exe")
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(TOOL_CHAIN_DIR "/usr/bin")
-    set(TOOL_CXX "g++")
-    set(TOOL_C "gcc")
-    set(TOOL_RC "rc")
-    set(TOOL_NM "nm")
-    set(TOOL_OBJCOPY "objcopy")
-    set(TOOL_OBJDUMP "objdump")
-    set(TOOL_RANLIB "ranlib")
-    set(TOOL_STRIP "strip")
-    set(TOOL_LINK "ld")
-endif()
-
-set(CMAKE_CXX_COMPILER "${TOOL_CHAIN_DIR}/${TOOL_CXX}")
-set(CMAKE_C_COMPILER "${TOOL_CHAIN_DIR}/${TOOL_C}")
-set(CMAKE_RC_COMPILER "${TOOL_CHAIN_DIR}/${TOOL_RC}")
-set(CMAKE_NM "${TOOL_CHAIN_DIR}/${TOOL_NM}")
-set(CMAKE_OBJCOPY "${TOOL_CHAIN_DIR}/${TOOL_OBJCOPY}")
-set(CMAKE_OBJDUMP "${TOOL_CHAIN_DIR}/${TOOL_OBJDUMP}")
-set(CMAKE_RANLIB "${TOOL_CHAIN_DIR}/${TOOL_RANLIB}")
-set(CMAKE_STRIP "${TOOL_CHAIN_DIR}/${TOOL_STRIP}")
-set(CMAKE_LINKER "${TOOL_CHAIN_DIR}/${TOOL_LINK}")
+	include
+	${FREETYPE_INCLUDE_DIRS}
+	${OPENAL_INCLUDE_DIR}
+	${GLEW_INCLUDE_DIR}
+	${OpenCL_INCLUDE_DIR}
+	)
 
 ### compile libraries
 
@@ -334,7 +298,7 @@ add_library(cppual-audio SHARED
 
 # audio backend OpenAL
 add_library(cppual-audio-openal MODULE
-        src/multimedia/audio/al/aldef.h
+		src/multimedia/audio/al/aldef.h
 	src/multimedia/audio/al/alobject.cpp
 	include/cppual/multimedia/audio/al/alobject.h
 	src/multimedia/audio/al/aldevice.cpp
@@ -414,16 +378,16 @@ add_library(cppual-ui-dialogs MODULE
 ### link targets
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(cppual-core psapi)
+	target_link_libraries(cppual-core psapi)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(cppual-core dl)
-    target_link_libraries(cppual-ui-xorg xcb-icccm)
-    target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
+	target_link_libraries(cppual-core dl)
+	target_link_libraries(cppual-ui-xorg xcb-icccm)
+	target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
 endif()
 
 target_link_libraries(cppual-compute cppual-core pthread ${OpenCL_LIBRARY})
 target_link_libraries(cppual-compute-gl cppual-compute ${OpenCL_LIBRARY} ${GLEW_LIBRARY} ${GL_LIBRARY})
-target_link_libraries(cppual-gfx cppual-core freetype)
+target_link_libraries(cppual-gfx cppual-core ${FREETYPE_LIBRARY})
 target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx ${GLEW_LIBRARY} ${GL_LIBRARY})
 target_link_libraries(cppual-video-vaapi va)
 target_link_libraries(cppual-video-gl cppual-gl ${GLEW_LIBRARY} ${GL_LIBRARY})
