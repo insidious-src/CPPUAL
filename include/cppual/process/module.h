@@ -40,6 +40,8 @@ namespace cppual { namespace Process {
 class Module final : public NonCopyable
 {
 public:
+    typedef int (STDCALL * function_type)();
+
 	enum Flag
 	{
 		AbsolutePath = 1 << 1, // explicitly provide full path
@@ -53,8 +55,7 @@ public:
 		Unresolved  // don't resolve any object or function references
 	};
 
-	typedef BitSet<Module::Flag> Flags;
-	typedef Signal<void()>       signal_type;
+    typedef BitSet<Module::Flag> Flags;
 
 	Module () = default;
 	Module (Module&&) = default;
@@ -88,28 +89,29 @@ public:
 	template <typename TRet, typename... TArgs>
 	bool get (cchar* pName, TRet(*& fn)(TArgs...)) const
 	{
-		typedef TRet (* Func)(TArgs...);
-		static thread_local union { void* object; Func func; } convert1;
-		convert1.object = address (pName);
-		return fn = convert1.func;
+        typedef TRet (* Func)(TArgs...);
+        function_type func = function (pName);
+        return fn = reinterpret_cast<Func> (func);
 	}
 
 	template <typename TRet, typename... TArgs>
 	TRet call (cchar* pName, TArgs&&... args) const
 	{
-		typedef TRet (* Func)(TArgs...);
-		static thread_local union { void* object; Func func; } convert2;
-		convert2.object = address (pName);
-		if (!convert2.func) std::bad_function_call ();
-		return (*convert2.func)(std::forward<TArgs> (args)...);
+        typedef TRet (* Func)(TArgs...);
+        function_type func = function (pName);
+
+        if (!func) std::bad_function_call ();
+        return (*reinterpret_cast<Func> (func))(std::forward<TArgs> (args)...);
 	}
+
+private:
+    void*         address  (cchar* name) const noexcept;
+    function_type function (cchar* name) const noexcept;
 
 private:
 	void*		  m_pHandle;
 	string const  m_gLibPath;
 	ResolvePolicy m_eResolve;
-
-	void* address (cchar* name) const noexcept;
 };
 
 // =========================================================

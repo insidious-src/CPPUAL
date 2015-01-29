@@ -1,19 +1,61 @@
 project("C++ UAL")
+cmake_minimum_required(VERSION 3.0)
+
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
 
-cmake_minimum_required(VERSION 3.0)
+include(FindX11            REQUIRED)
+include(cmake/FindOpenAL   REQUIRED)
+include(FindOpenGL         REQUIRED)
+include(cmake/FindOpenCL   REQUIRED)
+include(cmake/FindGLEW     REQUIRED)
+include(cmake/FindFreetype REQUIRED)
+include(cmake/cpp14defs    REQUIRED)
 
-find_package(X11      REQUIRED)
-find_package(OpenAL   REQUIRED)
-find_package(OpenGL   REQUIRED)
-find_package(GLEW     REQUIRED)
-find_package(Freetype REQUIRED)
+include_directories(
+    include
+    ${FREETYPE_INCLUDE_DIRS}
+    ${OPENAL_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIR}
+    ${OpenCL_INCLUDE_DIR}
+    )
 
-include(cmake/cpp14defs)
-aux_source_directory(. SRC_LIST)
-include_directories(include ${FREETYPE_INCLUDE_DIRS})
 
+### compiler
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(TOOL_CHAIN_DIR "C:/Qt/Tools/mingw491_32/bin")
+    set(TOOL_CXX "g++.exe")
+    set(TOOL_C "gcc.exe")
+    set(TOOL_RC "windres.exe")
+    set(TOOL_NM "nm.exe")
+    set(TOOL_OBJCOPY "objcopy.exe")
+    set(TOOL_OBJDUMP "objdump.exe")
+    set(TOOL_RANLIB "ranlib.exe")
+    set(TOOL_STRIP "strip.exe")
+    set(TOOL_LINK "ld.exe")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(TOOL_CHAIN_DIR "/usr/bin")
+    set(TOOL_CXX "g++")
+    set(TOOL_C "gcc")
+    set(TOOL_RC "rc")
+    set(TOOL_NM "nm")
+    set(TOOL_OBJCOPY "objcopy")
+    set(TOOL_OBJDUMP "objdump")
+    set(TOOL_RANLIB "ranlib")
+    set(TOOL_STRIP "strip")
+    set(TOOL_LINK "ld")
+endif()
+
+set(CMAKE_CXX_COMPILER "${TOOL_CHAIN_DIR}/${TOOL_CXX}")
+set(CMAKE_C_COMPILER "${TOOL_CHAIN_DIR}/${TOOL_C}")
+set(CMAKE_RC_COMPILER "${TOOL_CHAIN_DIR}/${TOOL_RC}")
+set(CMAKE_NM "${TOOL_CHAIN_DIR}/${TOOL_NM}")
+set(CMAKE_OBJCOPY "${TOOL_CHAIN_DIR}/${TOOL_OBJCOPY}")
+set(CMAKE_OBJDUMP "${TOOL_CHAIN_DIR}/${TOOL_OBJDUMP}")
+set(CMAKE_RANLIB "${TOOL_CHAIN_DIR}/${TOOL_RANLIB}")
+set(CMAKE_STRIP "${TOOL_CHAIN_DIR}/${TOOL_STRIP}")
+set(CMAKE_LINKER "${TOOL_CHAIN_DIR}/${TOOL_LINK}")
 
 ### compile libraries
 
@@ -267,7 +309,7 @@ add_library(cppual-video SHARED
 	src/multimedia/video/vequalizer.cpp
 	include/cppual/multimedia/video/vequalizer.h)
 
-# audio library (OpenAL, TrueAudio)
+# audio library (OpenAL, TrueAudio, Compute)
 add_library(cppual-audio SHARED
 	src/multimedia/audio/sound.cpp
 	include/cppual/multimedia/audio/sound.h
@@ -292,6 +334,7 @@ add_library(cppual-audio SHARED
 
 # audio backend OpenAL
 add_library(cppual-audio-openal MODULE
+        src/multimedia/audio/al/aldef.h
 	src/multimedia/audio/al/alobject.cpp
 	include/cppual/multimedia/audio/al/alobject.h
 	src/multimedia/audio/al/aldevice.cpp
@@ -370,35 +413,24 @@ add_library(cppual-ui-dialogs MODULE
 
 ### link targets
 
-target_link_libraries(cppual-core dl)
-target_link_libraries(cppual-compute cppual-core pthread OpenCL)
-target_link_libraries(cppual-compute-gl cppual-compute OpenCL GLEW GL)
-#target_link_libraries(cppual-input)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_link_libraries(cppual-core psapi)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    target_link_libraries(cppual-core dl)
+    target_link_libraries(cppual-ui-xorg xcb-icccm)
+    target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
+endif()
+
+target_link_libraries(cppual-compute cppual-core pthread ${OpenCL_LIBRARY})
+target_link_libraries(cppual-compute-gl cppual-compute ${OpenCL_LIBRARY} ${GLEW_LIBRARY} ${GL_LIBRARY})
 target_link_libraries(cppual-gfx cppual-core freetype)
-target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW GL)
+target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx ${GLEW_LIBRARY} ${GL_LIBRARY})
 target_link_libraries(cppual-video-vaapi va)
-target_link_libraries(cppual-video-gl cppual-gl GLEW GL)
+target_link_libraries(cppual-video-gl cppual-gl ${GLEW_LIBRARY} ${GL_LIBRARY})
 target_link_libraries(cppual-video-compute cppual-compute)
 target_link_libraries(cppual-audio cppual-compute sndfile)
-target_link_libraries(cppual-audio-openal openal)
-target_link_libraries(cppual-gl cppual-gfx EGL GLEW GL)
-target_link_libraries(cppual-ui-xorg xcb-icccm)
-target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
+target_link_libraries(cppual-audio-openal ${OPENAL_LIBRARY})
+target_link_libraries(cppual-gl cppual-gfx EGL ${GLEW_LIBRARY} ${GL_LIBRARY})
 target_link_libraries(cppual-ui cppual-gfx)
 target_link_libraries(cppual-ui-views cppual-ui)
 target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
-
-
-### parse files
-
-file(
-	GLOB_RECURSE
-	SRC_FILES
-	${CMAKE_SOURCE_DIR}/src/*
-	)
-
-file(
-	GLOB_RECURSE
-	INCLUDE_FILES
-	${CMAKE_SOURCE_DIR}/include/*
-	)

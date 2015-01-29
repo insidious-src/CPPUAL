@@ -40,11 +40,16 @@ process_handle ThisProcess::handle () noexcept
 
 process_handle create (cchar* path, char* args[])
 {
-	process_handle id = 0;
-
 #	ifdef OS_STD_POSIX
+    process_handle id = 0;
 	posix_spawn (&id, path, nullptr, nullptr, args, nullptr);
-	return id;
+    return id;
+#	elif defined OS_WINDOWS
+    PROCESS_INFORMATION info;
+    if (!CreateProcessA (path, *args, nullptr, nullptr, true,
+                         0, nullptr, nullptr, nullptr, &info))
+        return process_handle ();
+    return info.hProcess;
 #	endif
 }
 
@@ -55,7 +60,7 @@ int terminate (process_handle hProc)
 
 #	ifdef OS_STD_POSIX
 	kill (hProc, SIGKILL);
-#	elif defined (OS_WINDOWS)
+#	elif defined OS_WINDOWS
 	TerminateProcess (hProc, 0U);
 #	endif
 
@@ -67,15 +72,19 @@ bool running (cchar* gName) noexcept
 #	ifdef OS_STD_POSIX
 	char command[32];
 	std::sprintf (command, "pgrep %s > /dev/null", gName);
-	return 0 == std::system (command);
-#	endif
+    return 0 == std::system (command);
+#   elif defined OS_WINDOWS
+    return gName;
+#   endif
 }
 
 process_handle clone ()
 {
 #	ifdef OS_STD_POSIX
 	return ::fork ();
-#	endif
+#   elif defined OS_WINDOWS
+    return 0;
+#   endif
 }
 
 } } // namespace Process

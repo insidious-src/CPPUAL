@@ -48,6 +48,8 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
+#ifdef OS_STD_UNIX
+
 inline int flags1 (State eState) noexcept
 {
 	switch (eState)
@@ -66,16 +68,20 @@ constexpr int flags (Mode eMode) noexcept
 	return eMode == Mode::Create ? O_CREAT : 0;
 }
 
+#endif
+
 SharedObject::SharedObject (string const& gName, Mode eMode, State eState)
 : m_gName (gName),
   m_eMode (eMode),
   m_eState (eState),
-  m_nId (shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u))
+  m_nId (/*shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u)*/)
 { }
 
 SharedObject::~SharedObject () noexcept
 {
+#   ifdef OS_STD_UNIX
 	if (m_nId != -1) shm_unlink (m_gName.c_str ());
+#   endif
 }
 
 bool SharedObject::truncate (size_type) noexcept
@@ -83,7 +89,7 @@ bool SharedObject::truncate (size_type) noexcept
 	return false;
 }
 
-SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
+SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool /*bWritable*/)
 : m_gObject (gObj),
   m_pRegion (),
   m_uSize (gObj.isValid () ? uSize : 0)
@@ -92,15 +98,19 @@ SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
 	{
 		if (gObj.mode () != Mode::Open) gObj.truncate (uSize);
 
+#       ifdef OS_STD_UNIX
 		m_pRegion = mmap (nullptr, uSize,
 						  bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
 						  MAP_SHARED, gObj.id (), 0);
+#       endif
 	}
 }
 
 SharedRegion::~SharedRegion () noexcept
 {
+#   ifdef OS_STD_UNIX
 	if (m_pRegion) munmap (m_pRegion, m_uSize);
+#   endif
 }
 
 } } // namespace Memory

@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 include(CheckCXXSourceCompiles)
 
-string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
-
 macro(CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
    set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
@@ -27,7 +25,7 @@ macro(CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
    set(CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 endmacro(CHECK_CXX_COMPILER_FLAG)
 
-set(CMAKE_CXX_FLAGS "-pipe -march=x86-64 -mtune=native -Wall -Wextra -pedantic -Wno-vla-extension -Wpointer-arith -Wcast-align -Wwrite-strings -Wredundant-decls -Winline -Wuninitialized -Wconversion -fshort-enums")
+set(CMAKE_CXX_FLAGS "-pipe -march=x86-64 -mtune=native -Wall -Wextra -pedantic -Wpointer-arith -Wcast-align -Wwrite-strings -Wredundant-decls -Winline -Wuninitialized -Wconversion -fshort-enums")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fmessage-length=0 -fno-rtti -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -fmessage-length=0 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")

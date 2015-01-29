@@ -56,7 +56,7 @@ Module::Module (cchar*        pPath,
   m_gLibPath (gFlags.test (AddExt) ? std::move (string (pPath) += shared_ext ()) : pPath),
   m_eResolve (eResolve)
 {
-	if (bAttach) attach ();
+    if (bAttach) attach ();
 }
 
 bool Module::attach () noexcept
@@ -92,11 +92,11 @@ bool Module::attach () noexcept
 	case ResolvePolicy::Unresolved:
 		nLibMode |= DONT_RESOLVE_DLL_REFERENCES;
 		break;
+    default:
+        break;
 	}
 
-	nLibMode |= SearchPolicy::Default ?
-						LOAD_LIBRARY_SEARCH_DEFAULT_DIRS :
-						LOAD_WITH_ALTERED_SEARCH_PATH;
+    nLibMode |= LOAD_LIBRARY_SEARCH_DEFAULT_DIRS;
 
 	m_pHandle = LoadLibraryEx (m_gLibPath.data (), nullptr, nLibMode);
 	if (!m_pHandle) std::cerr << GetLastError () << std::endl;
@@ -116,7 +116,7 @@ void Module::detach () noexcept
 
 #	elif defined (OS_WINDOWS)
 
-	if (!FreeLibrary (m_pHandle)) std::cerr << GetLastError () << std::endl;;
+    if (!FreeLibrary (static_cast<HMODULE> (m_pHandle))) std::cerr << GetLastError () << std::endl;;
 
 #	endif
 
@@ -133,9 +133,28 @@ void* Module::address (cchar* pName) const noexcept
 
 #	elif defined (OS_WINDOWS)
 
-	void* pAddr = GetProcAddress (m_pHandle, pName);
-	if (!pAddr) std::cerr << GetLastError () << std::endl;
-	return pAddr;
+    union { function_type func; void* obj; } convert;
+    convert.func = GetProcAddress (static_cast<HMODULE> (m_pHandle), pName);
+    if (!convert.func) std::cerr << "error: " << GetLastError () << "\naddress not found!\n";
+    return convert.obj;
+
+#	endif
+}
+
+Module::function_type Module::function (cchar* pName) const noexcept
+{
+#	ifdef OS_STD_POSIX
+
+    union { void* obj; function_type func; } convert;
+    convert.obj = dlsym (m_pHandle, pName);
+    if (!convert.obj) std::cerr << dlerror () << std::endl;
+    return convert.func;
+
+#	elif defined (OS_WINDOWS)
+
+    function_type func = GetProcAddress (static_cast<HMODULE> (m_pHandle), pName);
+    if (!func) std::cerr << "error: " << GetLastError () << "\nfunction not found!\n";
+    return func;
 
 #	endif
 }

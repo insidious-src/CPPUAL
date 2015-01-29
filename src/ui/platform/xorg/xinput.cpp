@@ -137,25 +137,25 @@ public:
 		MouseWheelDown = 5
 	};
 
-	constexpr operator pointer () const noexcept
+	operator pointer () const noexcept
 	{ return m_handle; }
 
-	constexpr pointer operator -> () const noexcept
+	pointer operator -> () const noexcept
 	{ return m_handle; }
 
 	template <typename T>
-	constexpr T* get () const noexcept
+	T* get () const noexcept
 	{ return reinterpret_cast<T*> (m_handle); }
 
-	constexpr uint type () const noexcept
+	uint type () const noexcept
 	{ return m_handle->response_type & ~0x80; }
 
-	void release ()
+	~XcbEvent () noexcept
 	{ ::free (m_handle); }
 
-	inline    XcbEvent ()               noexcept = default;
-	constexpr XcbEvent (pointer pDpy)   noexcept : m_handle (pDpy) { }
-	constexpr XcbEvent (std::nullptr_t) noexcept : m_handle ()     { }
+	XcbEvent ()               noexcept = default;
+	XcbEvent (pointer pDpy)   noexcept : m_handle (pDpy) { }
+	XcbEvent (std::nullptr_t) noexcept : m_handle ()     { }
 
 private:
 	pointer m_handle;
@@ -169,8 +169,7 @@ XQueue::XQueue () noexcept
 : IDisplayQueue (IDisplay::hasValidInstance () ? IDisplay::instance ()->native () : nullptr)
 { }
 
-bool XQueue::setWindowEvents (Ui::IWindow& pRenderable,
-								  mask_type        gFlags) noexcept
+bool XQueue::setWindowEvents (IWindow& pRenderable, mask_type gFlags) noexcept
 {
 	if (pRenderable.connection ()->native () != display ())
 		return false;
@@ -396,7 +395,6 @@ bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 		break;
 	}
 
-	pEv.release ();
 	return true;
 }
 
