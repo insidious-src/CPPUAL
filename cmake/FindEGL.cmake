@@ -73,20 +73,14 @@ if(NOT WIN32)
 
 	set(EGL_DEFINITIONS ${PKG_EGL_CFLAGS_OTHER})
 
-	find_path(EGL_INCLUDE_DIR
-		NAMES
-			egl.h
+		find_path(EGL_INCLUDE_DIR EGL/egl.h
 		HINTS
 			${PKG_EGL_INCLUDE_DIRS}
 		PATH_SUFFIXES
 			EGL
 	)
-	find_library(EGL_LIBRARY
-		NAMES
-			EGL
-		HINTS
-			${PKG_EGL_LIBRARY_DIRS}
-	)
+
+	find_library(EGL_LIBRARY NAMES EGL HINTS ${PKG_EGL_LIBRARY_DIRS})
 
 	# NB: We do *not* use the version information from pkg-config, as that
 	#     is the implementation version (eg: the Mesa version)
@@ -128,14 +122,14 @@ if(NOT WIN32)
 			EGL_VERSION
 	)
 
-	if(EGL_FOUND AND NOT TARGET EGL::EGL)
-		add_library(EGL::EGL UNKNOWN IMPORTED)
-		set_target_properties(EGL::EGL PROPERTIES
+	if(EGL_FOUND AND NOT TARGET EGL::Library)
+		add_library(EGL::Library SHARED IMPORTED)
+		set_target_properties(EGL::Library PROPERTIES
 			IMPORTED_LOCATION "${EGL_LIBRARY}"
 			INTERFACE_COMPILE_OPTIONS "${EGL_DEFINITIONS}"
 			INTERFACE_INCLUDE_DIRECTORIES "${EGL_INCLUDE_DIR}"
 		)
-	endif()
+	endif(EGL_FOUND AND NOT TARGET EGL::Library)
 
 	mark_as_advanced(EGL_LIBRARY EGL_INCLUDE_DIR)
 
@@ -145,8 +139,33 @@ if(NOT WIN32)
 	set(EGL_VERSION_STRING ${EGL_VERSION})
 
 else()
-	message(STATUS "FindEGL.cmake cannot find EGL on Windows systems. Try finding WGL instead.")
-	set(EGL_FOUND FALSE)
+	find_path(EGL_INCLUDE_DIR EGL/egl.h
+		PATHS ${CMAKE_SOURCE_DIR}
+		PATH_SUFFIXES external/include
+		)
+
+	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+		find_library(EGL_LIBRARY EGL
+			PATHS ${CMAKE_SOURCE_DIR}
+			PATH_SUFFIXES external/bin/x86
+			)
+	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		find_library(EGL_LIBRARY EGL
+			PATHS ${CMAKE_SOURCE_DIR}
+			PATH_SUFFIXES external/bin/x86_64
+			)
+	endif()
+
+		message(STATUS "Windows EGL implementation is NOT reliable. Try finding WGL instead.")
+		set(EGL_FOUND TRUE)
+
+	if(EGL_FOUND AND NOT TARGET EGL::Library)
+		add_library(EGL::Library SHARED IMPORTED)
+		set_target_properties(EGL::Library PROPERTIES
+			IMPORTED_LOCATION "${EGL_LIBRARY}"
+			INTERFACE_INCLUDE_DIRECTORIES "${EGL_INCLUDE_DIR}"
+		)
+	endif(EGL_FOUND AND NOT TARGET EGL::Library)
 endif()
 
 include(FeatureSummary)

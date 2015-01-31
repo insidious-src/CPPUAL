@@ -42,7 +42,7 @@ public:
 	Label2D& operator = (Label2D&&) noexcept;
 	void draw (Transform2D const&);
 
-	DeviceType type  () const noexcept { return DeviceType::EGL; }
+	DeviceType type  () const noexcept { return DeviceType::GL; }
 	string     text  () const noexcept { return m_gText; }
 	Styles     style () const noexcept { return m_gStyle; }
 	void       setStyle (Styles gStyle) noexcept { m_gStyle = gStyle; }
@@ -67,7 +67,7 @@ public:
 	Label3D& operator = (Label3D&&) noexcept;
 	void draw (Transform3D const&);
 
-	DeviceType type  () const noexcept { return DeviceType::EGL; }
+	DeviceType type  () const noexcept { return DeviceType::GL; }
 	string     text  () const noexcept { return m_gText; }
 	Styles     style () const noexcept { return m_gStyle; }
 	void       setStyle (Styles gStyle) noexcept { m_gStyle = gStyle; }

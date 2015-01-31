@@ -35,7 +35,7 @@ public:
 	void setCaption (string const&);
 	void setDescription (string const&);
 	void setTaskIcon (Image*);
-	void setProgress (u8);
+	void setProgress (int);
 };
 
 } } // namespace Ui

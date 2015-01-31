@@ -73,8 +73,10 @@ constexpr int flags (Mode eMode) noexcept
 SharedObject::SharedObject (string const& gName, Mode eMode, State eState)
 : m_gName (gName),
   m_eMode (eMode),
-  m_eState (eState),
-  m_nId (shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u))
+  m_eState (eState)
+#ifdef OS_STD_UNIX
+  , m_nId (shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u))
+#endif
 { }
 
 SharedObject::~SharedObject () noexcept
@@ -102,6 +104,8 @@ SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
 		m_pRegion = mmap (nullptr, uSize,
 						  bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
 						  MAP_SHARED, gObj.id (), 0);
+#       elif defined OS_WINDOWS
+        bWritable = bWritable;
 #       endif
 	}
 }

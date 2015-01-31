@@ -70,7 +70,7 @@ public:
 	inline bool		isLoaded () const noexcept { return m_bIsLoaded; }
 
 	inline DeviceType type () const noexcept
-	{ return DeviceType::EGL; }
+	{ return DeviceType::GL; }
 
 	inline void setMask (RGBColor gMask) noexcept
 	{ m_gColorMask = gMask; }
@@ -101,7 +101,7 @@ public:
 	void draw (Transform2D const& info);
 
 	inline DeviceType type () const noexcept
-	{ return DeviceType::EGL; }
+	{ return DeviceType::GL; }
 
 	inline VirtualBuffer* map () noexcept
 	{ return &m_gPixBuffer; }

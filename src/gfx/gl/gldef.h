@@ -88,7 +88,6 @@ enum
 	RGB						= GL_RGB,
 	Luminance				= GL_LUMINANCE,
 
-
 	// primary
 	Renderer				= GL_RENDERER,
 	Vendor					= GL_VENDOR,

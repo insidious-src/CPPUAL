@@ -159,6 +159,12 @@
 #
 #endif // DECL_EXPORT and DECL_IMPORT and DECL_HIDDEN
 
+#ifdef OS_WINDOWS
+#	define DLCALL STDCALL
+#else
+#	define DLCALL
+#endif
+
 #ifndef TRANSPARENT_UNION
 #
 #	ifdef __GNUC__

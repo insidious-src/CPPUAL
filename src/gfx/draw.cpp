@@ -60,7 +60,15 @@ IDeviceContext* IDeviceContext::current () noexcept
 
 void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
 {
-	if (Internal::current () != pContext) Internal::current () = pContext;
+    if (Internal::current () != pContext)
+    {
+        if (Internal::current () and
+                pContext         and
+                Internal::current ()->device () != pContext->device ())
+            Internal::current ()->release ();
+
+        Internal::current () = pContext;
+    }
 }
 
 // ====================================================

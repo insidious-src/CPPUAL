@@ -26,8 +26,17 @@
 
 namespace cppual { namespace Ui {
 
-class FileDialog final : public Dialog
+class BrowserDialog final : public Dialog
 {
+public:
+	enum Flag
+	{
+		Directory,
+		MultiSelect,
+	};
+
+	void setDirectoryDialog (bool);
+	void setMultiSelect     (bool);
 };
 
 } } // namespace Ui

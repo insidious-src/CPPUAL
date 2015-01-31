@@ -40,7 +40,7 @@ namespace cppual { namespace Process {
 class Module final : public NonCopyable
 {
 public:
-	typedef int (* function_type)();
+	typedef int (DLCALL * function_type)();
 
 	enum Flag
 	{

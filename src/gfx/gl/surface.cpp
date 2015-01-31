@@ -19,13 +19,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cppual/gfx/gl/surface.h>
 #include <cstring>
 #include <iostream>
 #include <algorithm>
-#include <cppual/gfx/gl/egl.h>
 #include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 namespace cppual { namespace Graphics { namespace GL {
 
@@ -37,6 +36,13 @@ typedef EGLSurface           surface_pointer;
 typedef EGLContext           context_pointer;
 typedef EGLNativeDisplayType native_display ;
 
+enum class API
+{
+    Unbound = 0,
+    OpenGL,
+    OpenGLES
+};
+
 enum
 {
 	Width               = EGL_WIDTH,
@@ -47,8 +53,9 @@ enum
 	GLBit               = EGL_OPENGL_BIT,
 	GLESBit             = EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT,
 	BasicContextVersion = EGL_CONTEXT_CLIENT_VERSION,
-	ContextMajorVersion = EGL_CONTEXT_MAJOR_VERSION_KHR,
-	ContextMinorVersion = EGL_CONTEXT_MINOR_VERSION_KHR,
+    ContextMajorVersion = 0x3098, /*EGL_CONTEXT_MAJOR_VERSION_KHR*/
+    ContextMinorVersion = 0x30FB, /*EGL_CONTEXT_MINOR_VERSION_KHR*/
+    ContextProfile      = 0x30FD, /*EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR*/
 	BadDisplay          = EGL_BAD_DISPLAY,
 	BadContext          = EGL_BAD_CONTEXT,
 	BadSurface          = EGL_BAD_SURFACE,
@@ -63,8 +70,8 @@ enum
 	ContextLost         = EGL_CONTEXT_LOST,
 	ANGLEFixedSize      = 0x3201/*EGL_FIXED_SIZE_ANGLE*/,
 	NONE                = EGL_NONE,
-	TRUE                = EGL_TRUE,
-	FALSE               = EGL_TRUE,
+    IntTrue             = EGL_TRUE,
+    IntFalse            = EGL_FALSE
 };
 
 enum ErrorType
@@ -249,7 +256,7 @@ inline surface_pointer createDrawable (Config const&         gConf,
 	if (gConf.features ().test (Config::ScalableSurface))
 	{
 		nSurfaceAttribs[2] = EGL::ANGLEFixedSize;
-		nSurfaceAttribs[3] = EGL::TRUE;
+        nSurfaceAttribs[3] = EGL::IntTrue;
 		nSurfaceAttribs[4] = EGL::Width;
 		nSurfaceAttribs[5] = gSize.x;
 		nSurfaceAttribs[6] = EGL::Height;
@@ -261,7 +268,7 @@ inline surface_pointer createDrawable (Config const&         gConf,
 
 	surface_pointer pSurface = eglCreateWindowSurface (gConf.display (),
 													   gConf,
-													   uWndHandle,
+                                                       uWndHandle.get<EGLNativeWindowType> (),
 													   &nSurfaceAttribs[0]);
 
 	if (!pSurface) error<Create> ();
@@ -335,7 +342,7 @@ inline context_pointer createGC (Config const& gConf, GFXVersion version, void* 
 		nContextAttribs[2] = EGL::NONE;
 	}
 
-	eglBindAPI (EGL::api (gConf.api ())) ?
+    eglBindAPI (EGL::api (API::OpenGL)) ?
 					true : throw bad_parameter ("the specified worthless API "
 												"is NOT supported by the EGL implementation");
 
@@ -352,10 +359,10 @@ inline point2u getSize (Config const& config, Surface::pointer surface) noexcept
 {
 	value_type size[2];
 
-	if (eglQuerySurface (config.display (), surface, EGL::Width, &size[0]) == EGL::FALSE)
+    if (eglQuerySurface (config.display (), surface, EGL::Width, &size[0]) == EGL::IntFalse)
 		return point2u ();
 
-	if (eglQuerySurface (config.display (), surface, EGL::Height, &size[1]) == EGL::FALSE)
+    if (eglQuerySurface (config.display (), surface, EGL::Height, &size[1]) == EGL::IntFalse)
 		return point2u ();
 
 	return { static_cast<u16> (size[0]), static_cast<u16> (size[1]) };
@@ -365,12 +372,11 @@ inline point2u getSize (Config const& config, Surface::pointer surface) noexcept
 
 // ====================================================
 
-Config::Config (controller dsp, format_type gFormat, API eAPI)
+Config::Config (controller dsp, format_type gFormat)
 : m_pDisplay  (eglGetDisplay (dsp.get<EGL::native_display> ())),
   m_pCfg      (),
   m_gFormat   (),
-  m_eFeatures (),
-  m_eAPI      (eAPI)
+  m_eFeatures ()
 {
 	if (!m_pDisplay) throw std::logic_error ("invalid display");
 
@@ -388,11 +394,11 @@ Config::Config (controller dsp, format_type gFormat, API eAPI)
 					EGL_WINDOW_BIT : 0 | gFormat.flags.test (PixelFlag::Palette) ?
 						EGL_PBUFFER_BIT : 0 | gFormat.flags.test (PixelFlag::Bitmap) ?
 							EGL_PIXMAP_BIT : 0,
-		EGL_RENDERABLE_TYPE, EGL::api_bits (eAPI),
+        EGL_RENDERABLE_TYPE, EGL::api_bits (EGL::API::OpenGL),
 		EGL::NONE
 	};
 
-	EGL::initialize (m_pDisplay);
+    EGL::initialize (m_pDisplay);
 
 	eglGetConfigs   (m_pDisplay, &m_pCfg, 1, &nNumConfigs);
 	eglChooseConfig (m_pDisplay, nConfigAttribs, &m_pCfg, 1, &nNumConfigs);
@@ -407,7 +413,7 @@ PixelFormat Config::toFormat () const
 {
 	if (!m_pDisplay or !m_pCfg) return PixelFormat ();
 
-	int nAttribs[Count];
+    int nAttribs[AttribCount];
 
 	eglGetConfigAttrib (m_pDisplay, m_pCfg, EGL_RED_SIZE, &nAttribs[Red]);
 	eglGetConfigAttrib (m_pDisplay, m_pCfg, EGL_GREEN_SIZE, &nAttribs[Green]);
@@ -427,7 +433,7 @@ PixelFormat Config::toFormat () const
 		static_cast<u8> (nAttribs[Stencil]),
 		(nAttribs[SurfaceType] & EGL_WINDOW_BIT) ? PixelFlag::Drawable : 0 |
 				(nAttribs[SurfaceType] & EGL_PBUFFER_BIT) ? PixelFlag::Bitmap : 0,
-		ColorType::TRUE
+        ColorType::TrueType
 	};
 }
 
@@ -630,8 +636,8 @@ GFXVersion Context::platformVersion () noexcept
 
 bool Context::use (pointer pDraw, const_pointer pRead) noexcept
 {
-	if ((( pDraw and !pRead) or (pDraw and pDraw->device () != DeviceType::EGL)) or
-		((!pDraw and  pRead) or (pRead and pRead->device () != DeviceType::EGL)))
+    if ((( pDraw and !pRead) or (pDraw and pDraw->device () != DeviceType::GL)) or
+        ((!pDraw and  pRead) or (pRead and pRead->device () != DeviceType::GL)))
 		return false;
 
 	m_pDrawTarget = pDraw;
@@ -674,19 +680,6 @@ void Context::flush () noexcept
 void Context::finish () noexcept
 {
 	if (active ()) eglWaitGL ();
-}
-
-API Context::bound () noexcept
-{
-	switch (eglQueryAPI ())
-	{
-	case EGL::GLESID:
-		return API::OpenGLES;
-	case EGL::GLID:
-		return API::OpenGL;
-	default:
-		return API::Unbound;
-	}
 }
 
 } } } // namespace EGL

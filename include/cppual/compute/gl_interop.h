@@ -23,7 +23,7 @@
 #define CPPUAL_CL_CONTEXT_GL_H_
 #ifdef __cplusplus
 
-#include <cppual/gfx/gl/egl.h>
+#include <cppual/gfx/gl/surface.h>
 #include <cppual/gfx/gl/texture.h>
 #include <cppual/gfx/gl/buffer.h>
 #include <cppual/compute/context.h>

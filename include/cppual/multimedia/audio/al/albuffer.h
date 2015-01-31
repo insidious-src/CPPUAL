@@ -62,7 +62,7 @@ public:
 
 private:
 	vector_type m_gSources;
-	Instance*    m_pContext;
+    Instance*   m_pContext;
 
 	int onOpen () noexcept;
 };

@@ -23,7 +23,6 @@
 #define CPPUAL_GFX_EGL_SURFACE_H_
 #ifdef __cplusplus
 
-#include <bitset>
 #include <cppual/gfx/draw.h>
 
 namespace cppual { namespace Graphics { namespace GL {
@@ -31,13 +30,6 @@ namespace cppual { namespace Graphics { namespace GL {
 class Config;
 class Surface;
 class Context;
-
-enum class API
-{
-	Unbound = 0,
-	OpenGL,
-	OpenGLES
-};
 
 struct bad_match       : public std::logic_error { using std::logic_error::logic_error; };
 struct bad_display     : public std::logic_error { using std::logic_error::logic_error; };
@@ -64,14 +56,14 @@ public:
 
 	enum
 	{
-		Red = 0,
+        Red,
 		Green,
 		Blue,
 		Alpha,
 		Depth,
 		Stencil,
 		SurfaceType,
-		Count
+        AttribCount
 	};
 
 	enum Feature
@@ -89,22 +81,21 @@ public:
 	int_type id    () const;
 	void     print ();
 
-	Config (controller  display  = defaultDisplay (),
-			format_type format   = format_type::default2D (),
-			API         renderer = API::OpenGL);
+    Config (controller  display = defaultDisplay (),
+            format_type format  = format_type::default2D ());
 
 	constexpr Config () noexcept
-	: m_pDisplay (), m_pCfg (), m_gFormat (), m_eFeatures (), m_eAPI ()
+    : m_pDisplay (), m_pCfg (), m_gFormat (), m_eFeatures ()
 	{ }
 
 	constexpr Config (Config const&) noexcept = default;
 	inline    Config& operator = (Config const&) noexcept = default;
 
-	constexpr controller  display  () const noexcept { return m_pDisplay;  }
-	constexpr Features    features () const noexcept { return m_eFeatures; }
-	constexpr format_type format   () const noexcept { return m_gFormat;   }
-	constexpr API         api      () const noexcept { return m_eAPI;      }
-	constexpr operator    void*    () const noexcept { return m_pCfg;      }
+    constexpr controller  display  ()   const noexcept { return m_pDisplay;  }
+    constexpr Features    features ()   const noexcept { return m_eFeatures; }
+    constexpr format_type format   ()   const noexcept { return m_gFormat;   }
+    constexpr void*       operator ()() const noexcept { return m_pCfg;      }
+    constexpr operator    void*    ()   const noexcept { return m_pCfg;      }
 
 	constexpr explicit operator safe_bool () const noexcept
 	{ return m_pCfg ? &Config::m_pCfg : nullptr; }
@@ -121,9 +112,8 @@ private:
 private:
 	pointer     m_pDisplay;
 	pointer     m_pCfg;
-	PixelFormat m_gFormat;
-	Features    m_eFeatures;
-	API         m_eAPI;
+    format_type m_gFormat;
+    Features    m_eFeatures;
 };
 
 // ====================================================
@@ -154,7 +144,7 @@ public:
 	void    flush ();
 
 	conf_reference config     () const noexcept { return *m_pConf;             }
-	DeviceType     device     () const noexcept { return  DeviceType::EGL;     }
+    DeviceType     device     () const noexcept { return  DeviceType::GL;      }
 	value_type     handle     () const noexcept { return  m_pHandle;           }
 	controller     connection () const noexcept { return  m_pConf->display (); }
 	format_type    format     () const noexcept { return  m_pConf->format  (); }
@@ -185,8 +175,7 @@ public:
 			 GFXVersion const& version = defaultVersion (),
 			 Context*          shared  = nullptr);
 
-	static GFXVersion platformVersion () noexcept;
-	static API        bound () noexcept;
+    static GFXVersion platformVersion () noexcept;
 
 	bool use     (pointer, const_pointer) noexcept;
 	bool assign  () noexcept;
@@ -198,13 +187,13 @@ public:
 	const_pointer  readable   () const noexcept { return  m_pReadTarget;       }
 	pointer        drawable   () const noexcept { return  m_pDrawTarget;       }
 	GFXVersion     version    () const noexcept { return  m_nVersion;          }
-	DeviceType     device     () const noexcept { return  DeviceType::EGL;     }
+    DeviceType     device     () const noexcept { return  DeviceType::GL;      }
 	value_type     handle     () const noexcept { return  m_pGC;               }
 	controller     connection () const noexcept { return  m_pConf->display (); }
 	format_type    format     () const noexcept { return  m_pConf->format  (); }
 
 	static constexpr GFXVersion defaultVersion () noexcept
-	{ return { 3, 0 }; }
+    { return GFXVersion { 3, 0 }; }
 
 private:
 	conf_pointer  m_pConf;
@@ -214,23 +203,6 @@ private:
 	Context*      m_pShared;
 	GFXVersion    m_nVersion;
 };
-
-// ====================================================
-
-template <typename CharT, typename Traits>
-std::basic_ostream<CharT, Traits>&
-operator << (std::basic_ostream<CharT, Traits>& os, API api)
-{
-	switch (api)
-	{
-	case API::OpenGL:
-		return os << "OpenGL";
-	case API::OpenGLES:
-		return os << "OpenGLES";
-	default:
-		return os << "none";
-	}
-}
 
 } } } // namespace EGL
 

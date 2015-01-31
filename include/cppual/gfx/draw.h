@@ -48,7 +48,7 @@ enum class DeviceType : unsigned char
 {
 	Custom,
 	Native,
-	EGL,
+	GL,
 	Direct3D,
 	Direct2D,
 	Metal,
@@ -101,7 +101,7 @@ struct PixelFormat final
 			0,
 			0,
 			PixelFlag::Drawable | PixelFlag::Bitmap,
-			ColorType::TRUE
+            ColorType::TrueType
 		};
 	}
 

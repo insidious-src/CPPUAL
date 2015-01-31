@@ -9,17 +9,22 @@ find_package(X11      REQUIRED)
 find_package(EGL      REQUIRED)
 find_package(GLEW     REQUIRED)
 find_package(OpenGL   REQUIRED)
-find_package(Freetype REQUIRED)
 find_package(OpenCL   REQUIRED)
 find_package(OpenAL   REQUIRED)
+find_package(SndFile  REQUIRED)
+find_package(Freetype REQUIRED)
 
 include(cmake/CompilerConfig.cmake  REQUIRED)
 include(cmake/ToolChainConfig.cmake REQUIRED)
-include_directories(include)
 
-if(EGL_VERSION VERSION_LESS 1.4)
-	message(FATAL_ERROR "EGL version 1.4 required")
-endif()
+include_directories(include
+	OpenCL::Library
+	GLEW::Library
+	${GL_INCLUDE_DIR}
+	Freetype::Library
+	SndFile::Library
+	EGL::Library
+	OpenAL::Library)
 
 
 ### compile libraries
@@ -164,6 +169,8 @@ add_library(cppual-input SHARED
 	include/cppual/input/joysticks/joy_wheel.h
 	)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
 # graphical user interface - platform Xorg
 add_library(cppual-ui-xorg MODULE
 	src/ui/platform/xorg/xmain.cpp
@@ -181,6 +188,15 @@ add_library(cppual-ui-wayland MODULE
 	src/ui/platform/wayland/wlsurface.cpp
 	src/ui/platform/wayland/wlinput.cpp
 	)
+
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+# graphical user interface - platform Windows
+add_library(cppual-ui-win MODULE
+	src/ui/platform/winapi/gl/wglsurface.cpp
+	src/ui/platform/winapi/wbackend.cpp
+	)
+endif()
 
 # graphics drawing library
 add_library(cppual-gfx SHARED
@@ -203,8 +219,8 @@ add_library(cppual-gl SHARED
 	include/cppual/gfx/gl/glbase.h
 	src/gfx/gl/runtime.cpp
 	include/cppual/gfx/gl/runtime.h
-	src/gfx/gl/egl.cpp
-	include/cppual/gfx/gl/egl.h
+		src/gfx/gl/surface.cpp
+		include/cppual/gfx/gl/surface.h
 	src/gfx/gl/glsl.cpp
 	include/cppual/gfx/gl/glsl.h
 	src/gfx/gl/texture.cpp
@@ -252,17 +268,21 @@ add_library(cppual-video-vaapi MODULE
 	src/multimedia/video/backend/vaapi.cpp
 )
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
 # Xorg video backend
 add_library(cppual-video-xorg MODULE
 	src/multimedia/video/backend/xvideo.cpp
 )
+
+endif()
 
 # OpenGL video backend
 add_library(cppual-video-gl MODULE
 	src/multimedia/video/backend/vgl.cpp
 )
 
-# OpenGL video backend
+# compute video backend
 add_library(cppual-video-compute MODULE
 	src/multimedia/video/backend/compute_video.cpp
 )
@@ -376,38 +396,24 @@ add_library(cppual-ui-dialogs MODULE
 	)
 
 
-### include target directories
-
-target_include_directories(cppual-compute PRIVATE ${OPENCL_INCLUDE_DIRS})
-target_include_directories(cppual-compute-gl PRIVATE ${OPENCL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIR} ${GL_INCLUDE_DIR})
-target_include_directories(cppual-gfx PUBLIC ${FREETYPE_INCLUDE_DIRS})
-target_include_directories(cppual-gfx-drawables PRIVATE ${GLEW_INCLUDE_DIR} ${GL_INCLUDE_DIR})
-target_include_directories(cppual-video-gl PRIVATE ${GLEW_INCLUDE_DIR} ${GL_INCLUDE_DIR})
-target_include_directories(cppual-audio-openal PRIVATE ${OPENAL_INCLUDE_DIR})
-target_include_directories(cppual-gl PRIVATE ${EGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${GL_INCLUDE_DIR})
-
-
 ### link targets
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	target_link_libraries(cppual-core psapi)
-	target_link_libraries(cppual-ui-win user32)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-	target_link_libraries(cppual-core dl)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	target_link_libraries(cppual-ui-xorg xcb-icccm)
 	target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	target_link_libraries(cppual-core psapi)
 endif()
 
-target_link_libraries(cppual-compute cppual-core pthread ${OPENCL_LIBRARIES})
-target_link_libraries(cppual-compute-gl cppual-compute ${OPENCL_LIBRARIES} ${GLEW_LIBRARY} ${GL_LIBRARY})
-target_link_libraries(cppual-gfx cppual-core ${FREETYPE_LIBRARY})
-target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx ${GLEW_LIBRARY} ${GL_LIBRARY})
-target_link_libraries(cppual-video-vaapi va)
-target_link_libraries(cppual-video-gl cppual-gl ${GLEW_LIBRARY} ${GL_LIBRARY})
+target_link_libraries(cppual-compute cppual-core OpenCL::Library)
+target_link_libraries(cppual-compute-gl cppual-compute OpenCL::Library GLEW::Library ${GL_LIBRARY})
+target_link_libraries(cppual-gfx cppual-core Freetype::Library)
+target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library ${GL_LIBRARY})
+target_link_libraries(cppual-video-gl cppual-gl GLEW::Library ${GL_LIBRARY})
 target_link_libraries(cppual-video-compute cppual-compute)
-target_link_libraries(cppual-audio cppual-compute sndfile)
-target_link_libraries(cppual-audio-openal ${OPENAL_LIBRARY})
-target_link_libraries(cppual-gl cppual-gfx ${EGL_LIBRARY} ${GLEW_LIBRARY} ${GL_LIBRARY})
+target_link_libraries(cppual-audio cppual-compute SndFile::Library)
+target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
+target_link_libraries(cppual-gl cppual-gfx ${EGL_LIBRARY} GLEW::Library ${GL_LIBRARY})
 target_link_libraries(cppual-ui cppual-gfx)
 target_link_libraries(cppual-ui-views cppual-ui)
 target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
