@@ -35,8 +35,7 @@ public:
 	XDisplay () = delete;
 	XDisplay (cchar*) noexcept;
 	~XDisplay ();
-	void flush () noexcept;
-	int  screenCount () const noexcept;
+	uint screenCount () const noexcept;
 
 	string name () const { return m_gName; }
 

@@ -34,11 +34,10 @@ namespace cppual { namespace Network {
 class Address final
 {
 private:
-	static constexpr cu8 v4_mapped_prefix[12] =
-	{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
+    static cu16 v4_mapped_prefix[12];
 
 public:
-	Address () noexcept = default;
+    Address () noexcept = default;
 	Address (string const&) noexcept;
 	Address (u8 byte1, u8 byte2, u8 byte3, u8 byte4) noexcept;
 	string toString () const noexcept;
@@ -47,13 +46,13 @@ public:
 	static Address localAddress  () noexcept;
 	static Address publicAddress () noexcept;
 
-	inline bool isV4 () const noexcept
-	{ return memcmp (&m_uBytes[0], &v4_mapped_prefix[0], 12) == 0; }
+    bool isV4 () const noexcept
+    { return std::memcmp (&m_uBytes[0], &v4_mapped_prefix[0], 12) == 0; }
 
-	inline bool isMulticast () const noexcept
+    bool isMulticast () const noexcept
 	{ return isV4 () ? m_uBytes[12] == 224 : m_uBytes[0] == 0xff; }
 
-	inline bool isLoopback () const noexcept
+    bool isLoopback () const noexcept
 	{
 		if (isV4 ())
 			return m_uBytes[12] == 127;
@@ -68,7 +67,7 @@ public:
 					(m_uBytes[14] == 0) and (m_uBytes[15] == 1));
 	}
 
-	inline bool isBroadcast () const noexcept
+    bool isBroadcast () const noexcept
 	{
 		return isV4 () and
 				m_uBytes[12] == 0xff and m_uBytes[13] == 0xff and

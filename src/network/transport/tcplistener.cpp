@@ -25,6 +25,9 @@
 //#	include <netinet/in.h>
 //#	include <netdb.h>
 #	include <arpa/inet.h>
+#elif defined OS_WINDOWS
+#   include <windows.h>
+#   define socklen_t int
 #endif
 
 namespace cppual { namespace Network {
@@ -40,7 +43,7 @@ bool TcpListener::accept (TcpStream&) noexcept
 {
 	if (!isValid () or m_bIsListening) return false;
 
-	sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
+    sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
 	socklen_t   uLen  = sizeof (sockaddr_in);
 
 	replaceFromId (::accept (id (),
@@ -53,6 +56,7 @@ bool TcpListener::listen (u16 uPort) noexcept
 {
 	if (!isValid () or m_bIsListening) return false;
 
+#   ifdef OS_STD_UNIX
 	sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
 	gAddr.sin_family  = PF_INET;
 	gAddr.sin_port    = htons (uPort);
@@ -70,6 +74,7 @@ bool TcpListener::listen (u16 uPort) noexcept
 		return m_bIsListening;
 
 	m_uPort = uPort;
+#   endif
 	return m_bIsListening = true;
 }
 

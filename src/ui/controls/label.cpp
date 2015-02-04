@@ -21,19 +21,19 @@
 
 #include <cppual/ui/controls/label.h>
 
-using cppual::Text::string;
+using std::string;
 
 namespace cppual { namespace Ui {
 
 bool Label::create (View*       pParent,
+                    string const& gText,
 					Rect const&   gRect,
-					string const& gText,
 					TextFormat)
 {
-	if (pParent and !pParent->isValid ()) pParent = nullptr;
+    if (pParent and !pParent->valid ()) pParent = nullptr;
 
 	if (createView (pParent, gRect, pParent ?
-					  pParent->surface ()->getScreen () :
+                      pParent->renderable_unsafe ()->screen () :
 					  0))
 	{
 		m_gText = gText;

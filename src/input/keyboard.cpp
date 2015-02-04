@@ -21,6 +21,9 @@
 
 #include <cppual/input/keyboard.h>
 
+#ifdef   OS_WINDOWS
+#include <windows.h>
+
 namespace cppual { namespace Input {
 
 bool Keyboard::isKeyPressed (int)
@@ -44,3 +47,5 @@ bool KeyQueue::pop_front (event_type&, bool) noexcept
 }
 
 } } // namespace Input
+
+#endif // OS_WINDOWS

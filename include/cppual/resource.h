@@ -26,7 +26,6 @@
 namespace cppual {
 
 template <typename> class Disposable { };
-class PrivateDisposable { };
 
 enum class ResourceType : unsigned char
 {
@@ -39,6 +38,7 @@ enum class ResourceType : unsigned char
 	Shader,
 	Program,
 	Query,
+    Window,
 	Surface,
 	Buffer,
 	Pixmap,
@@ -50,31 +50,37 @@ enum class ResourceType : unsigned char
 
 // =========================================================
 
-template <class Controller, class ID, class DisposableType = PrivateDisposable>
-class Resource : public DisposableType
+template <class Controller, class ID>
+class Resource
 {
 public:
 	typedef ID         value_type;
 	typedef Controller controller;
 
-	constexpr Resource () noexcept = default;
 	Resource (Resource const&) = delete;
 	Resource& operator = (Resource const&) = delete;
+    ~Resource () { }
 
-	constexpr controller   connection () const noexcept { return m_pCon; }
-	constexpr value_type   id () const noexcept { return m_id; }
-	constexpr ResourceType resType () const noexcept { return m_eResType; }
-	constexpr bool         isValid () const noexcept { return m_id; }
+    controller   connection () const noexcept { return m_pCon; }
+    value_type   id         () const noexcept { return m_id; }
+    ResourceType resType    () const noexcept { return m_eResType; }
+    bool         valid      () const noexcept { return m_id; }
 
-	constexpr Resource (Controller pCon, value_type id, ResourceType eType) noexcept
-	: m_pCon (pCon),
-	  m_id (id),
+    Resource () noexcept
+    : m_pCon     (),
+      m_id       (),
+      m_eResType ()
+    { }
+
+    Resource (Controller pCon, value_type id, ResourceType eType) noexcept
+    : m_pCon     (pCon),
+      m_id       (id),
 	  m_eResType (eType)
 	{ }
 
 	template <class Controller_, class ID_>
-	friend constexpr bool operator == (Resource<Controller_, ID_, DisposableType> const&,
-									   Resource<Controller_, ID_, DisposableType> const&);
+    friend constexpr bool operator == (Resource<Controller_, ID_> const&,
+                                       Resource<Controller_, ID_> const&);
 
 private:
 	controller   m_pCon;
@@ -84,30 +90,34 @@ private:
 
 // =========================================================
 
-template <class ID, class DisposableType>
-class Resource < void, ID, DisposableType > : public DisposableType
+template <class ID>
+class Resource < void, ID>
 {
 public:
 	typedef ID   value_type;
 	typedef void controller;
 
-	constexpr Resource () noexcept = default;
 	Resource (Resource const&) = delete;
 	Resource& operator = (Resource const&) = delete;
+    ~Resource () { }
 
-	constexpr value_type   id      () const noexcept { return m_id;       }
-	constexpr ResourceType resType () const noexcept { return m_eResType; }
-	constexpr bool         isValid () const noexcept { return m_id;       }
+    value_type   id      () const noexcept { return m_id;       }
+    ResourceType resType () const noexcept { return m_eResType; }
+    bool         valid   () const noexcept { return m_id;       }
 
-	template <class ID_>
-	friend constexpr bool operator == (Resource<void, ID_, DisposableType> const&,
-									   Resource<void, ID_, DisposableType> const&);
+    Resource () noexcept
+    : m_id       (),
+      m_eResType ()
+    { }
 
-protected:
-	constexpr Resource (value_type id, ResourceType eType) noexcept
-	: m_id (id),
+    Resource (value_type id, ResourceType eType) noexcept
+    : m_id       (id),
 	  m_eResType (eType)
 	{ }
+
+    template <class ID_>
+    friend constexpr bool operator == (Resource<void, ID_> const&,
+                                       Resource<void, ID_> const&);
 
 private:
 	value_type   m_id;
@@ -117,13 +127,13 @@ private:
 // =========================================================
 
 template <class ID, class DisposableType>
-constexpr bool operator == (Resource<void, ID, DisposableType> const& gObj1,
-							Resource<void, ID, DisposableType> const& gObj2)
+constexpr bool operator == (Resource<void, ID> const& gObj1,
+                            Resource<void, ID> const& gObj2)
 { return gObj1.m_id == gObj2.m_id and gObj1.m_eResType == gObj2.m_eResType; }
 
 template <class ID, class DisposableType>
-constexpr bool operator != (Resource<void, ID, DisposableType> const& gObj1,
-							Resource<void, ID, DisposableType> const& gObj2)
+constexpr bool operator != (Resource<void, ID> const& gObj1,
+                            Resource<void, ID> const& gObj2)
 { return !(gObj1 == gObj2); }
 
 template <class Controller, class ID>

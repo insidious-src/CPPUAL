@@ -32,7 +32,12 @@ Dialog& Dialog::operator = (Dialog&& gObj) noexcept
 Dialog& Dialog::operator = (Dialog const& gObj) noexcept
 {
 	if (this == &gObj) return *this;
-	return *this;
+    return *this;
+}
+
+Dialog::Result Dialog::getResult() noexcept
+{
+    return Dialog::Close;
 }
 
 void Dialog::showModal (Ui::Window* pOwner) noexcept

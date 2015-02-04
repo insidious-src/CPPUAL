@@ -19,12 +19,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sstream>
 #include <cppual/network/address.h>
+#include <sstream>
 
 using std::string;
 
 namespace cppual { namespace Network {
+
+cu16 Address::v4_mapped_prefix[12] =
+{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
 
 Address::Address (string const&) noexcept
 {

@@ -23,6 +23,7 @@
 #define CPPUAL_UI_VIEW_MANAGER_H_
 #ifdef __cplusplus
 
+#include <thread>
 #include <chrono>
 #include <memory>
 #include <cppual/flags.h>
@@ -31,6 +32,7 @@
 #include <cppual/gfx/dsp_details.h>
 #include <cppual/ui/display.h>
 
+using std::thread;
 using std::string;
 using std::shared_ptr;
 using std::weak_ptr;
@@ -52,16 +54,16 @@ enum WindowFlag
 	ToolHints   = ThinFrame | Close
 };
 
-struct  IViewManager;
-struct  IWindow;
+class   IWindow;
 typedef shared_ptr<IWindow> shared_window;
 typedef weak_ptr<IWindow>   weak_window;
 typedef BitSet<WindowFlag>  WindowFlags;
 
 // ====================================================
 
-struct IWindow : public Resource < IDisplay*, Element >
+class IWindow : public Resource < IDisplay*, Element >
 {
+public:
 	using Resource<IDisplay*, Element>::Resource;
 
 	typedef shared_window const& const_reference;
@@ -97,6 +99,12 @@ struct IWindow : public Resource < IDisplay*, Element >
 	virtual void        move (point2i) = 0;
 	virtual void		map () = 0;
 	virtual void		unmap () = 0;
+
+	thread::id thread_id () const noexcept
+	{ return m_thread; }
+
+private:
+	thread::id m_thread;
 };
 
 } } // namespace Ui

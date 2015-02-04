@@ -25,12 +25,15 @@
 //#	include <netinet/in.h>
 #	include <netdb.h>
 #	include <arpa/inet.h>
+#elif defined OS_WINDOWS
+#   include <windows.h>
 #endif
 
 namespace cppual { namespace Network {
 
 bool resolveHostName (cchar* hostname, in_addr* addr) noexcept
 {
+#   ifdef OS_STD_UNIX
 	addrinfo* res;
 
 	if (::getaddrinfo (hostname, nullptr, nullptr, &res) == 0)
@@ -39,6 +42,7 @@ bool resolveHostName (cchar* hostname, in_addr* addr) noexcept
 		::freeaddrinfo (res);
 		return true;
 	}
+#   endif
 
 	return false;
 }
@@ -52,7 +56,9 @@ bool TcpClient::connect (TcpStream& gStream, Address const& server, u16 port) no
 
 	if (resolveHostName (server.toString ().c_str (), &gAddr.sin_addr))
 	{
+#       ifdef OS_STD_UNIX
 		::inet_pton (PF_INET, server.toString ().c_str (), &gAddr.sin_addr);
+#       endif
 	}
 
 	if (gStream.isValid ())

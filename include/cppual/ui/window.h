@@ -52,21 +52,21 @@ public:
 	void maximize ();
 	void close ();
 
-	Window (View*       parent,
-			Rect const& rect,
-			string&&    title,
-			image_type* icon   = nullptr,
-			u32         screen = 0);
+    Window (View*         parent,
+            Rect   const& rect,
+            string const& title,
+            image_type*   icon   = nullptr,
+            u32           screen = 0);
 
-	inline FrameView*  frame () noexcept { return &m_gFrame; }
+    inline FrameView*  frame () noexcept { return m_gFrame; }
 	inline image_type* icon () const noexcept { return m_pIcon; }
 	inline bool        isFullscreen () const noexcept { return m_bIsFullScreen; }
 
 	inline bool isMinimized () const noexcept
-	{ return m_gFrame.attached () == this and m_gFrame.isHidden (); }
+    { return m_gFrame->attached () == this and m_gFrame->isHidden (); }
 
 	inline bool isMaximized () const noexcept
-	{ return m_gFrame.attached () == this and m_gFrame.isStretched (); }
+    { return m_gFrame->attached () == this and m_gFrame->isStretched (); }
 
 protected:
 	virtual bool onClose () { return true; }
@@ -75,7 +75,7 @@ protected:
 	virtual void onHelp () { }
 
 private:
-	FrameView   m_gFrame;
+    FrameView*  m_gFrame;
 	image_type* m_pIcon;
 	bool        m_bIsFullScreen;
 };

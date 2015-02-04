@@ -20,7 +20,7 @@
  */
 
 #include <iostream>
-#include <cppual/ui/default_events.h>
+#include <cppual/ui/events.h>
 #include <cppual/input/pointer.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
@@ -34,9 +34,11 @@ namespace cppual { namespace Ui {
 
 namespace {
 
-typedef xcb_button_t  xcb_button;
-typedef xcb_keycode_t xcb_keycode;
-typedef xcb_keysym_t  xcb_keysym;
+typedef xcb_button_t     xcb_button;
+typedef xcb_keycode_t    xcb_keycode;
+typedef xcb_keysym_t     xcb_keysym;
+typedef xcb_connection_t display_type;
+typedef xcb_window_t     handle_type;
 
 // ====================================================
 
@@ -73,6 +75,8 @@ inline u8 button (xcb_button uId) noexcept
 class XcbEvent final
 {
 public:
+	typedef Event                       event_type;
+	typedef Event::window_type          window_type;
 	typedef xcb_generic_event_t         value_type;
 	typedef xcb_generic_event_t*        pointer;
 	typedef xcb_button_press_event_t    btn_press_type;
@@ -157,6 +161,136 @@ public:
 	XcbEvent (pointer pDpy)   noexcept : m_handle (pDpy) { }
 	XcbEvent (std::nullptr_t) noexcept : m_handle ()     { }
 
+	window_type window () const noexcept
+	{
+		switch (type ())
+		{
+		case XcbEvent::MousePress:
+			return get<XcbEvent::btn_press_type> ()->event;
+		case XcbEvent::MouseRelease:
+			return get<XcbEvent::btn_release_type> ()->event;
+		case XcbEvent::MouseMove:
+			return get<XcbEvent::mouse_move_type> ()->event;
+		case XcbEvent::KeyPress:
+			return get<XcbEvent::key_press_type> ()->event;
+		case XcbEvent::KeyRelease:
+			return get<XcbEvent::key_release_type> ()->event;
+		case XcbEvent::Expose:
+			return get<XcbEvent::expose_type> ()->window;
+		case XcbEvent::Enter:
+			return get<XcbEvent::enter_type> ()->event;
+		case XcbEvent::Leave:
+			return get<XcbEvent::leave_type> ()->event;
+		case XcbEvent::FocusIn:
+			return get<XcbEvent::focus_in_type> ()->event;
+		case XcbEvent::FocusOut:
+			return get<XcbEvent::focus_out_type> ()->event;
+		case XcbEvent::Size:
+			return get<XcbEvent::resize_type> ()->window;
+		case XcbEvent::Property:
+			return get<XcbEvent::property_type> ()->window;
+		case XcbEvent::Map:
+			return get<XcbEvent::map_type> ()->window;
+		case XcbEvent::Unmap:
+			return get<XcbEvent::unmap_type> ()->window;
+		default:
+			return m_handle->pad;
+		}
+	}
+
+	static xcb_generic_event_t toNativeEvent (event_type const&)
+	{
+		return xcb_generic_event_t ();
+	}
+
+	event_type toEvent () const noexcept
+	{
+		switch (type ())
+		{
+		case XcbEvent::MousePress:
+			switch (get<XcbEvent::btn_press_type> ()->detail)
+			{
+			case XcbEvent::MouseWheelUp:
+				return Ui::ScrollEvent (get<XcbEvent::btn_press_type> ()->event,
+										1, { get<XcbEvent::btn_press_type> ()->event_x,
+											 get<XcbEvent::btn_press_type> ()->event_y });
+			case XcbEvent::MouseWheelDown:
+				return Ui::ScrollEvent (get<XcbEvent::btn_press_type> ()->event,
+										-1, { get<XcbEvent::btn_press_type> ()->event_x,
+											  get<XcbEvent::btn_press_type> ()->event_y });
+			default:
+				return Ui::MousePressEvent (get<XcbEvent::btn_press_type> ()->event,
+											button (get<XcbEvent::btn_press_type> ()->detail),
+				{ get<XcbEvent::btn_press_type> ()->event_x,
+				  get<XcbEvent::btn_press_type> ()->event_y });
+			}
+			break;
+		case XcbEvent::MouseRelease:
+			if (get<XcbEvent::btn_release_type> ()->detail == XcbEvent::MouseWheelUp or
+				get<XcbEvent::btn_release_type> ()->detail == XcbEvent::MouseWheelDown)
+
+			return Ui::MouseReleaseEvent (get<XcbEvent::btn_release_type> ()->event,
+										  button (get<XcbEvent::btn_release_type> ()->detail),
+			{ get<XcbEvent::btn_release_type> ()->event_x,
+			  get<XcbEvent::btn_release_type> ()->event_y });
+		case XcbEvent::MouseMove:
+			return Ui::MouseMoveEvent (get<XcbEvent::mouse_move_type> ()->event,
+			{ get<XcbEvent::mouse_move_type> ()->event_x,
+			  get<XcbEvent::mouse_move_type> ()->event_y });
+		case XcbEvent::KeyPress:
+			return Ui::KeyPressEvent (get<XcbEvent::key_press_type> ()->event,
+			{ get<XcbEvent::key_press_type> ()->detail });
+		case XcbEvent::KeyRelease:
+			return Ui::KeyReleaseEvent (get<XcbEvent::key_release_type> ()->event,
+			{ get<XcbEvent::key_release_type> ()->detail });
+		case XcbEvent::Expose:
+			return Ui::PaintEvent (get<XcbEvent::expose_type> ()->window,
+									 Rect (static_cast<int16> (get<XcbEvent::expose_type> ()->x),
+										   static_cast<int16> (get<XcbEvent::expose_type> ()->y),
+										   get<XcbEvent::expose_type> ()->width,
+										   get<XcbEvent::expose_type> ()->height));
+			break;
+		case XcbEvent::Enter:
+			return Ui::StepEvent (get<XcbEvent::enter_type> ()->event, true);
+		case XcbEvent::Leave:
+			return Ui::StepEvent (get<XcbEvent::leave_type> ()->event, false);
+		case XcbEvent::FocusIn:
+			return Ui::FocusEvent (get<XcbEvent::focus_in_type> ()->event, true);
+		case XcbEvent::FocusOut:
+			return Ui::FocusEvent (get<XcbEvent::focus_out_type> ()->event, false);
+		case XcbEvent::Size:
+			return Ui::SizeEvent (get<XcbEvent::resize_type> ()->window,
+			{ get<XcbEvent::resize_type> ()->width,
+			  get<XcbEvent::resize_type> ()->height });
+		case XcbEvent::Property:
+			return Ui::PropertyEvent (get<XcbEvent::property_type> ()->window,
+									  get<XcbEvent::property_type> ()->atom,
+									  get<XcbEvent::property_type> ()->state);
+		case XcbEvent::Map:
+			return Ui::VisibilityEvent (get<XcbEvent::map_type> ()->window, true);
+		case XcbEvent::Unmap:
+			return Ui::VisibilityEvent (get<XcbEvent::unmap_type> ()->window, false);
+		case XcbEvent::Destroy:
+			return event_type (event_type::Null);
+		case XcbEvent::GraphicsExposure:
+			return event_type (event_type::Null);
+		case XcbEvent::NoExposure:
+			return event_type (event_type::Null);
+		case XcbEvent::ChangeParent:
+			return event_type (event_type::Null);
+		case XcbEvent::Mapping:
+			return event_type (event_type::Null);
+		case XcbEvent::Configure:
+			return event_type (event_type::Null);
+		case XcbEvent::GetKbCtrl:
+			return event_type (event_type::Null);
+		case XcbEvent::ChangeKbCtrl:
+			return event_type (event_type::Null);
+		default:
+			return event_type (event_type::Null);
+		}
+	}
+
 private:
 	pointer m_handle;
 };
@@ -169,7 +303,7 @@ XQueue::XQueue () noexcept
 : IDisplayQueue (IDisplay::hasValidInstance () ? IDisplay::instance ()->native () : nullptr)
 { }
 
-bool XQueue::setWindowEvents (IWindow& pRenderable, mask_type gFlags) noexcept
+bool XQueue::set_window_events (IWindow const& pRenderable, mask_type gFlags) noexcept
 {
 	if (pRenderable.connection ()->native () != display ())
 		return false;
@@ -221,181 +355,52 @@ bool XQueue::setWindowEvents (IWindow& pRenderable, mask_type gFlags) noexcept
 
 bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 {
-	XcbEvent pEv (bWait ? xcb_wait_for_event (display ().get<xcb_connection_t> ()) :
-						  xcb_poll_for_event (display ().get<xcb_connection_t> ()));
+	XcbEvent pEv (bWait ? xcb_wait_for_event (display ().get<display_type> ()) :
+						  xcb_poll_for_event (display ().get<display_type> ()));
 
 	if (!pEv) return false;
+	gEvent = pEv.toEvent ();
+	return true;
+}
 
-	switch (pEv.type ())
+int XQueue::poll (IWindow const& window, bool wait, atomic_bool& poll)
+{
+	while (poll.load (std::memory_order_relaxed))
 	{
-	case XcbEvent::MousePress:
-		switch (pEv.get<XcbEvent::btn_press_type> ()->detail)
-		{
-		case XcbEvent::MouseWheelUp:
-			gEvent = Ui::ScrollEvent (pEv.get<XcbEvent::btn_press_type> ()->event,
-									  1, { pEv.get<XcbEvent::btn_press_type> ()->event_x,
-										   pEv.get<XcbEvent::btn_press_type> ()->event_y });
-			break;
-		case XcbEvent::MouseWheelDown:
-			gEvent = Ui::ScrollEvent (pEv.get<XcbEvent::btn_press_type> ()->event,
-									  -1, { pEv.get<XcbEvent::btn_press_type> ()->event_x,
-											pEv.get<XcbEvent::btn_press_type> ()->event_y });
-			break;
-		default:
-			gEvent = Ui::MousePressEvent (pEv.get<XcbEvent::btn_press_type> ()->event,
-										  button (pEv.get<XcbEvent::btn_press_type> ()->detail),
-			{ pEv.get<XcbEvent::btn_press_type> ()->event_x,
-			  pEv.get<XcbEvent::btn_press_type> ()->event_y });
-			break;
-		}
-		break;
-	case XcbEvent::MouseRelease:
-		if (pEv.get<XcbEvent::btn_release_type> ()->detail == XcbEvent::MouseWheelUp or
-				pEv.get<XcbEvent::btn_release_type> ()->detail == XcbEvent::MouseWheelDown)
-			break;
+		XcbEvent pEv (wait ? xcb_wait_for_event (display ().get<display_type> ()) :
+							 xcb_poll_for_event (display ().get<display_type> ()));
 
-		gEvent = Ui::MouseReleaseEvent (pEv.get<XcbEvent::btn_release_type> ()->event,
-										button (pEv.get<XcbEvent::btn_release_type> ()->detail),
-		{ pEv.get<XcbEvent::btn_release_type> ()->event_x,
-		  pEv.get<XcbEvent::btn_release_type> ()->event_y });
-		break;
-	case XcbEvent::MouseMove:
-		gEvent = Ui::MouseMoveEvent (pEv.get<XcbEvent::mouse_move_type> ()->event,
-		{ pEv.get<XcbEvent::mouse_move_type> ()->event_x,
-		  pEv.get<XcbEvent::mouse_move_type> ()->event_y });
-		break;
-	case XcbEvent::KeyPress:
-		gEvent = Ui::KeyPressEvent (pEv.get<XcbEvent::key_press_type> ()->event,
-		{ pEv.get<XcbEvent::key_press_type> ()->detail });
-		break;
-	case XcbEvent::KeyRelease:
-		gEvent = Ui::KeyReleaseEvent (pEv.get<XcbEvent::key_press_type> ()->event,
-		{ pEv.get<XcbEvent::key_release_type> ()->detail });
-		break;
-	case XcbEvent::Expose:
-		gEvent = Ui::PaintEvent (pEv.get<XcbEvent::expose_type> ()->window,
-								 Rect (static_cast<int16> (pEv.get<XcbEvent::expose_type> ()->x),
-									   static_cast<int16> (pEv.get<XcbEvent::expose_type> ()->y),
-									   pEv.get<XcbEvent::expose_type> ()->width,
-									   pEv.get<XcbEvent::expose_type> ()->height));
-#		ifdef DEBUG_MODE
-		std::cout << "paint event\n";
-#		endif
-		break;
-	case XcbEvent::Enter:
-		gEvent = Ui::StepEvent (pEv.get<XcbEvent::enter_type> ()->event, true);
-#		ifdef DEBUG_MODE
-		std::cout << "enter event\n";
-#		endif
-		break;
-	case XcbEvent::Leave:
-		gEvent = Ui::StepEvent (pEv.get<XcbEvent::leave_type> ()->event, false);
-#		ifdef DEBUG_MODE
-		std::cout << "leave event\n";
-#		endif
-		break;
-	case XcbEvent::FocusIn:
-		gEvent = Ui::FocusEvent (pEv.get<XcbEvent::focus_in_type> ()->event, true);
-#		ifdef DEBUG_MODE
-		std::cout << "focus event\n";
-#		endif
-		break;
-	case XcbEvent::FocusOut:
-		gEvent = Ui::FocusEvent (pEv.get<XcbEvent::focus_out_type> ()->event, false);
-#		ifdef DEBUG_MODE
-		std::cout << "kill focus event\n";
-#		endif
-		break;
-	case XcbEvent::Size:
-		gEvent = Ui::SizeEvent (pEv.get<XcbEvent::resize_type> ()->window,
-		{ pEv.get<XcbEvent::resize_type> ()->width,
-		  pEv.get<XcbEvent::resize_type> ()->height });
-#		ifdef DEBUG_MODE
-		std::cout << "resize event\n";
-#		endif
-		break;
-	case XcbEvent::Property:
-		gEvent = Ui::PropertyEvent (pEv.get<XcbEvent::property_type> ()->window,
-									pEv.get<XcbEvent::property_type> ()->atom,
-									pEv.get<XcbEvent::property_type> ()->state);
-#		ifdef DEBUG_MODE
-		std::cout << "property event\n";
-#		endif
-		break;
-//	case Visiblility:
-//		gEvent = Ui::VisibilityEvent (pEv.get<xcb_visibility_notify_event_t> ()->window,
-//									  pEv.get<xcb_visibility_notify_event_t> ()->state);
-//		std::cout << "visibility event\n";
-//		break;
-	case XcbEvent::Map:
-		gEvent = Ui::VisibilityEvent (pEv.get<XcbEvent::map_type> ()->window, true);
-#		ifdef DEBUG_MODE
-		std::cout << "show event\n";
-#		endif
-		break;
-	case XcbEvent::Unmap:
-		gEvent = Ui::VisibilityEvent (pEv.get<XcbEvent::unmap_type> ()->window, false);
-#		ifdef DEBUG_MODE
-		std::cout << "hide event\n";
-#		endif
-		break;
-	case XcbEvent::Destroy:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "destroy event\n";
-#		endif
-		break;
-	case XcbEvent::GraphicsExposure:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "expose all event\n";
-#		endif
-		break;
-	case XcbEvent::NoExposure:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "mask event\n";
-#		endif
-		break;
-	case XcbEvent::ChangeParent:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "set parent event\n";
-#		endif
-		break;
-	case XcbEvent::Mapping:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "mapping event\n";
-#		endif
-		break;
-	case XcbEvent::Configure:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "configure event\n";
-#		endif
-		break;
-	case XcbEvent::GetKbCtrl:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "get keyboard control event\n";
-#		endif
-		break;
-	case XcbEvent::ChangeKbCtrl:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "change keyboard control event\n";
-#		endif
-		break;
-	default:
-		gEvent = event_type (event_type::Null);
-#		ifdef DEBUG_MODE
-		std::cout << "unhandled event " << pEv.type () << std::endl;
-#		endif
-		break;
+		if (!pEv or pEv.window () != window.id ()) continue;
+		pEv.toEvent ()();
 	}
 
-	return true;
+	return 0;
+}
+
+void XQueue::send (event_type const& event)
+{
+	XcbEvent::value_type send_event = XcbEvent::toNativeEvent (event);
+
+	xcb_send_event (display ().get<display_type> (),
+					false,
+					event.window ().get<handle_type> (),
+					send_event.response_type,
+					reinterpret_cast<cchar*> (&send_event));
+
+	xcb_flush (display ().get<display_type> ());
+}
+
+void XQueue::post (event_type const& event)
+{
+	XcbEvent::value_type post_event = XcbEvent::toNativeEvent (event);
+
+	xcb_send_event (display ().get<display_type> (),
+					false,
+					event.window ().get<handle_type> (),
+					post_event.response_type,
+					reinterpret_cast<cchar*> (&post_event));
+
+	xcb_flush (display ().get<display_type> ());
 }
 
 } } // namespace Input

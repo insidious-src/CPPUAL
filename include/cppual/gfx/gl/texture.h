@@ -75,10 +75,10 @@ public:
 						PixelFormat const& format     = PixelFormat (),
 						bool               gen_mipmap = false);
 
-	MinFilter getMinFilter () const noexcept { return m_eMin; }
-	MagFilter getMagFilter () const noexcept { return m_eMag; }
-	PixelFormat  format       () const noexcept { return m_gFormat; }
-	uint         sampleId     () const noexcept { return m_uSampleId; }
+	MinFilter   minFilter () const noexcept { return m_eMin; }
+	MagFilter   magFilter () const noexcept { return m_eMag; }
+	PixelFormat format    () const noexcept { return m_gFormat; }
+	uint        sample    () const noexcept { return m_uSampleId; }
 
 	bool isLoaded () const noexcept
 	{ return m_gStates.test (Texture::IsLoaded); }

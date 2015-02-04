@@ -35,17 +35,16 @@ public:
 	WlBackend () = delete;
 	WlBackend (cchar*) noexcept;
 	~WlBackend () noexcept;
-	void flush () noexcept;
 
 	Connection native () const noexcept { return m_pDisplay; }
 	string     name () const { return string (); }
 	Connection gl () const noexcept { return m_pEGLDisplay; }
-	int        screenCount () const noexcept { return m_nScreenCount; }
+	uint       screenCount () const noexcept { return m_nScreenCount; }
 
 private:
 	wl_display* m_pDisplay;
 	void*       m_pEGLDisplay;
-	int         m_nScreenCount;
+	uint        m_nScreenCount;
 };
 
 // ====================================================
@@ -59,11 +58,6 @@ WlBackend::WlBackend (cchar* pName) noexcept
 WlBackend::~WlBackend () noexcept
 {
 	if (m_pDisplay) wl_display_disconnect (m_pDisplay);
-}
-
-void WlBackend::flush () noexcept
-{
-	if (m_pDisplay) wl_display_flush (m_pDisplay);
 }
 
 } } // namespace Graphics

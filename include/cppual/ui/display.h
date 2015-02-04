@@ -35,34 +35,34 @@ using cppual::Graphics::Connection;
 
 namespace cppual { namespace Ui {
 
-struct  IDisplay;
+class   IDisplay;
 typedef shared_ptr<IDisplay> shared_display;
 typedef weak_ptr  <IDisplay> weak_display;
 
 // ====================================================
 
-struct IDisplay : NonCopyable
+class IDisplay : public NonCopyableVirtual
 {
+public:
 	typedef Connection     value_type;
 	typedef shared_display pointer;
 
-	virtual string name () const = 0;
-	virtual int    screenCount () const = 0;
-	virtual void   flush () = 0;
+	virtual string name        () const = 0;
+	virtual uint   screenCount () const = 0;
 
-	static  IDisplay* instance ();
+	static  IDisplay* instance         ();
 	static  bool      hasValidInstance () noexcept;
-	static  bool      set (cchar*);
-	static  pointer   connect (cchar*);
+	static  bool      set              (cchar*);
+	static  pointer   connect          (cchar*);
 
-	constexpr value_type native () const noexcept { return m_native; }
-	constexpr value_type gl     () const noexcept { return m_gl;     }
+	value_type native () const noexcept { return m_native; }
+	value_type gl     () const noexcept { return m_gl;     }
 
-	constexpr IDisplay () noexcept
+	IDisplay () noexcept
 	: m_native (), m_gl ()
 	{ }
 
-	constexpr IDisplay (value_type native, value_type gl) noexcept
+	IDisplay (value_type native, value_type gl) noexcept
 	: m_native (native), m_gl (gl)
 	{ }
 

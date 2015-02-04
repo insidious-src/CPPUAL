@@ -19,40 +19,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_GFX_GL_BASE_H_
-#define CPPUAL_GFX_GL_BASE_H_
-#ifdef __cplusplus
+#include <cppual/ui/manager.h>
 
-#include <cstddef>
-#include <cppual/decl.h>
-#include <cppual/resource.h>
+using std::string;
+using cppual::Platform::Factory;
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace Ui {
 
-class BufferObject;
-class Shader;
-class SLProgram;
-class Query;
-class Texture;
-class FrameBuffer;
-class VertexBuffer;
-class VertexArray;
+namespace { namespace Internal { // optimize for internal unit usage
 
-// ====================================================
-
-class Object : public Resource < void, uint >
+inline shared_queue& queue () noexcept
 {
-public:
-	typedef std::ptrdiff_t ptrdiff;
-	typedef std::size_t	   size_type;
+	static shared_queue platform_queue;
+	return platform_queue;
+}
 
-	Object () noexcept = default;
-	Object (ResourceType type);
-	Object (uint  shader_type);
-    ~Object () noexcept;
-};
+void attachQueue ()
+{
+	if (!Factory::hasValidInstance ()) return;
+	Internal::queue () = Factory::instance ()->createQueueObject ();
+}
 
-} } } // namespace GL
+} } // anonymous namespace Internal
 
-#endif // __cplusplus
-#endif // CPPUAL_GFX_GL_BASE_H_
+// =========================================================
+
+IDisplayQueue* IDisplayQueue::instance ()
+{
+	if (Internal::queue () == nullptr) Internal::attachQueue ();
+	return Internal::queue ().get ();
+}
+
+bool IDisplayQueue::hasValidInstance () noexcept
+{
+	return Internal::queue () != nullptr;
+}
+
+} } // namespace Input

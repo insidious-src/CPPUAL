@@ -19,14 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <experimental/optional>
 #include <cppual/process/module.h>
+#include <iostream>
 
 #ifdef OS_STD_POSIX
 #	include <dlfcn.h>
 #elif defined (OS_WINDOWS)
-#	include <Windows.h>
+#   define WIN32_LEAN_AND_MEAN
+#	include <windows.h>
 #endif
 
 using std::string;

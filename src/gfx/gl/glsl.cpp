@@ -460,7 +460,7 @@ bool SLProgram::detach (Shader const& gShader)
 
 bool SLProgram::isAttached (Shader const& gShader)
 {
-	if (!id () or !m_uShaderCount or !gShader.isValid ()) return false;
+	if (!id () or !m_uShaderCount or !gShader.valid ()) return false;
 
 	uint uAttached[5];
 	uint uCount = m_uShaderCount;

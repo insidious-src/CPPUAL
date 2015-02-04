@@ -65,9 +65,9 @@ void WindowAdapter::registerEvents ()
 	});
 
 	connect (event_type::registers ().winFocus,
-			 [](event_type::window_type wnd, event_type::StateData data)
+             [](event_type::window_type wnd, bool state)
 	{
-		Internal::map ()[wnd]->onFocus (data.in);
+        Internal::map ()[wnd]->onFocus (state);
 	});
 
 	connect (event_type::registers ().winSize,
@@ -77,9 +77,9 @@ void WindowAdapter::registerEvents ()
 	});
 
 	connect (event_type::registers ().winVisible,
-			 [](event_type::window_type wnd, event_type::VisibilityData data)
+             [](event_type::window_type wnd, bool state)
 	{
-		Internal::map ()[wnd]->onShow (data.visible);
+        Internal::map ()[wnd]->onShow (state);
 	});
 }
 
@@ -104,7 +104,7 @@ WindowAdapter::WindowAdapter (Widget&     widget,
 	}
 
 	IDisplayQueue::instance ()->
-			setWindowEvents (*m_pPlatformWnd,
+			set_window_events (*m_pPlatformWnd,
 							 event_type::Key     |
 							 event_type::Pointer |
 							 event_type::Window);
@@ -156,7 +156,24 @@ WindowAdapter& WindowAdapter::operator = (WindowAdapter&& gObj)
 		gObj.m_pIcon        = Icon ();
 	}
 
-	return *this;
+    return *this;
+}
+
+// =========================================================
+
+Window::Window (View*, Rect const&, string const&, Window::image_type*, u32)
+{
+
+}
+
+Window::~Window ()
+{
+
+}
+
+void Window::showInTaskbar (bool)
+{
+
 }
 
 } } // namespace Ui

@@ -26,7 +26,7 @@
 #include <atomic>
 #include <iostream>
 #include <functional>
-#include <cppual/ui/default_events.h>
+#include <cppual/ui/events.h>
 
 using std::function;
 using std::atomic_bool;

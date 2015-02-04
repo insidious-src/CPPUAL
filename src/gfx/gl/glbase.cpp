@@ -23,16 +23,20 @@
 
 #include <cppual/gfx/gl/glbase.h>
 #include <cppual/gfx/gl/runtime.h>
+#include <cppual/gfx/gl/surface.h>
 #include "gldef.h"
 
 namespace cppual { namespace Graphics { namespace GL {
 
 namespace { // optimize for internal unit usage
 
-inline uint generateObject (ResourceType eType) noexcept
+inline uint generateObject (ResourceType eType)
 {
 	IDeviceContext* pContext = IDeviceContext::current ();
-	if (!pContext) return 0;
+
+	if (!pContext or pContext->device () != DeviceType::GL)
+		throw bad_context ("NO GL context bound to thread");
+
 	uint uId;
 
 	switch (eType)
@@ -64,10 +68,12 @@ inline uint generateObject (ResourceType eType) noexcept
 	return uId;
 }
 
-inline uint generateShader (uint uType) noexcept
+inline uint generateShader (uint uType)
 {
 	IDeviceContext* pContext = IDeviceContext::current ();
-	if (!pContext) return 0;
+
+	if (!pContext or pContext->device () != DeviceType::GL)
+		throw bad_context ("NO GL context bound to thread");
 
 	return pContext->version () < 3 ?
 				glCreateShader (uType) : glCreateShaderObjectARB (uType);
@@ -77,15 +83,15 @@ inline uint generateShader (uint uType) noexcept
 
 // ====================================================
 
-Object::Object (ResourceType eType) noexcept
+Object::Object (ResourceType eType)
 : Resource (generateObject (eType), eType)
 { }
 
-Object::Object (uint uShaderType) noexcept
+Object::Object (uint uShaderType)
 : Resource (generateShader (uShaderType), ResourceType::Shader)
 { }
 
-void Object::dispose () noexcept
+Object::~Object () noexcept
 {
 	uint uId = id ();
 

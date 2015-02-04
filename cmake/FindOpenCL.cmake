@@ -12,24 +12,16 @@ if(APPLE)
 else(APPLE)
 	if(WIN32)
 
-		find_path(OPENCL_INCLUDE_DIRS CL/cl.h)
-		find_path(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp)
+                find_path(OPENCL_INCLUDE_DIRS CL/cl.h PATHS "$ENV{AMDAPPSDKROOT}/include")
+                find_path(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp PATHS "$ENV{AMDAPPSDKROOT}/include")
 
 		# The AMD SDK currently installs both x86 and x86_64 libraries
 		# This is only a hack to find out architecture
-		if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-			set(OPENCL_LIB_DIR "$ENV{AMDAPPSDKROOT}/lib/x86")
-			find_library(OPENCL_LIBRARY OpenCL PATHS $ENV{windir}/SysWOW64)
-		elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(OPENCL_LIB_DIR "$ENV{AMDAPPSDKROOT}/lib/x86_64")
+                if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+                        find_library(OPENCL_LIBRARY OpenCL)
+                elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 			find_library(OPENCL_LIBRARY OpenCL)
 		endif()
-
-		get_filename_component(_OPENCL_INC_CAND ${OPENCL_LIB_DIR}/../../include ABSOLUTE)
-
-		# On Win32 search relative to the library
-		find_path(OPENCL_INCLUDE_DIRS CL/cl.h PATHS "${_OPENCL_INC_CAND}" ENV OpenCL_INCPATH)
-		find_path(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp PATHS "${_OPENCL_INC_CAND}" ENV OpenCL_INCPATH)
 
 	else(WIN32)
 
@@ -38,18 +30,15 @@ else(APPLE)
 			PATHS ENV LD_LIBRARY_PATH ENV OpenCL_LIBPATH
 			)
 
-		get_filename_component(OPENCL_LIB_DIR ${OPENCL_LIBRARY} PATH)
-		get_filename_component(_OPENCL_INC_CAND ${OPENCL_LIB_DIR}/../../include ABSOLUTE)
-
 		# The AMD SDK currently does not place its headers
 		# in /usr/include, therefore also search relative
 		# to the library
 		find_path(OPENCL_INCLUDE_DIRS CL/cl.h
-			PATHS ${_OPENCL_INC_CAND} "/usr/local/cuda/include" "/opt/AMDAPP/include" ENV OpenCL_INCPATH
+                        PATHS "/usr/local/cuda/include" "/opt/AMDAPP/include" ENV OpenCL_INCPATH
 			)
 
 		find_path(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp
-			PATHS ${_OPENCL_INC_CAND} "/usr/local/cuda/include" "/opt/AMDAPP/include" ENV OpenCL_INCPATH
+                        PATHS "/usr/local/cuda/include" "/opt/AMDAPP/include" ENV OpenCL_INCPATH
 			)
 
 	endif(WIN32)
@@ -66,7 +55,7 @@ if(_OPENCL_CPP_INCLUDE_DIRS)
 endif(_OPENCL_CPP_INCLUDE_DIRS)
 
 if(OPENCL_FOUND AND NOT TARGET OpenCL::Library)
-	add_library(OpenCL::Library SHARED IMPORTED)
+        add_library(OpenCL::Library UNKNOWN IMPORTED)
 	set_target_properties(OpenCL::Library PROPERTIES
 		IMPORTED_LOCATION "${OPENCL_LIBRARY}"
 		INTERFACE_INCLUDE_DIRECTORIES "${OPENCL_INCLUDE_DIRS}"

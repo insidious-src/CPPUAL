@@ -33,9 +33,9 @@ namespace cppual { namespace Platform {
 
 struct XPlatform final : public Factory
 {
-	shared_queue      createQueueObject ();
-	shared_window createWindow  (Rect const&, u32, IDisplay*);
-	shared_display    connectDisplay    (cchar*);
+	shared_queue   createQueueObject ();
+	shared_window  createWindow  (Rect const&, u32, IDisplay*);
+	shared_display connectDisplay    (cchar*);
 };
 
 shared_display XPlatform::connectDisplay (cchar* pDeviceName)

@@ -24,10 +24,11 @@
 #ifdef __cplusplus
 
 #include <string>
+#include <vector>
+#include <memory>
 #include <cppual/flags.h>
 #include <cppual/gfx/color.h>
 #include <cppual/gfx/coord.h>
-#include <cppual/circular_queue.h>
 #include <cppual/gfx/dsp_details.h>
 
 using std::string;
@@ -127,12 +128,13 @@ struct PixelFormat final
 class VirtualBuffer
 {
 public:
-	typedef CircularQueue<RGBColor> vector_type;
-	typedef std::size_t		        size_type;
-	typedef RGBColor                value_type;
+    typedef std::vector<RGBColor> vector_type;
+    typedef PixelFormat           format_type;
+    typedef std::size_t		      size_type;
+    typedef RGBColor              value_type;
 
-	inline PixelFormat	format () const noexcept { return m_gFormat; }
-	inline vector_type& data   ()       noexcept { return m_gPixels; }
+    inline format_type	format () const noexcept { return m_gFormat; }
+    inline vector_type& data   ()       noexcept { return m_gPixels; }
 
 	inline VirtualBuffer () noexcept
 	: m_gFormat (PixelFormat::default2D ()),

@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/process/module.h>
-#include <cppual/ui/events.h>
+#include <cppual/ui/queue.h>
 #include <cppual/gfx/draw.h>
 #include <cppual/ui/display.h>
 #include <cppual/ui/wm.h>

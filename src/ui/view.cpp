@@ -74,9 +74,9 @@ void View::registerEvents ()
 	});
 
 	connect (event_type::registers ().winFocus,
-			 [](event_type::window_type wnd, event_type::StateData data)
+             [](event_type::window_type wnd, bool state)
 	{
-		Internal::map ()[wnd]->onFocus (data.in);
+        Internal::map ()[wnd]->onFocus (state);
 	});
 
 	connect (event_type::registers ().winSize,
@@ -86,9 +86,9 @@ void View::registerEvents ()
 	});
 
 	connect (event_type::registers ().winVisible,
-			 [](event_type::window_type wnd, event_type::VisibilityData data)
+             [](event_type::window_type wnd, bool state)
 	{
-		Internal::map ()[wnd]->onShow (data.visible);
+        Internal::map ()[wnd]->onShow (state);
 	});
 
 	connect (event_type::registers ().winProperty,
@@ -115,7 +115,7 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
   m_pParentObj (),
   m_gStateFlags ()
 {
-	if (m_pRenderable == nullptr or !m_pRenderable->isValid ())
+	if (m_pRenderable == nullptr or !m_pRenderable->valid ())
 	{
 		m_pRenderable.reset ();
 		throw std::logic_error ("failed to create renderable");
@@ -143,7 +143,7 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 		}
 
 		IDisplayQueue::instance ()->
-				setWindowEvents (*m_pRenderable,
+				set_window_events (*m_pRenderable,
 									 event_type::Key     |
 									 event_type::Pointer |
 									 event_type::Window);
@@ -270,15 +270,13 @@ void View::destroy ()
 void View::show ()
 {
 	if (!valid ()) return;
-	m_pRenderable->map ();
-	m_pRenderable->connection ()->flush ();
+    m_pRenderable->map ();
 }
 
 void View::hide ()
 {
 	if (!valid ()) return;
-	m_pRenderable->unmap ();
-	m_pRenderable->connection ()->flush ();
+    m_pRenderable->unmap ();
 }
 
 void View::setMinimumSize (point2u gSize)
@@ -404,8 +402,7 @@ void View::setFocus ()
 	{
 		//if (m_gChildrenList.size ())
 			//for (pointer pChild : m_gChildrenList) pChild->setFocus ();
-		m_pRenderable->raise ();
-		m_pRenderable->connection ()->flush ();
+        m_pRenderable->raise ();
 		onFocus (true);
 	}
 }
@@ -436,12 +433,16 @@ void View::refresh ()
 	if (m_gStateFlags.test (View::Valid))
 	{
 		onPaint (geometry ());
-		for (View* pChild : m_gChildrenList) pChild->refresh ();
-		m_pRenderable->connection ()->flush ();
+        for (View* pChild : m_gChildrenList) pChild->refresh ();
 	}
 }
 
 // =========================================================
+
+void Widget::setSize(point2u)
+{
+
+}
 
 void Widget::move (point2u gPoint)
 {

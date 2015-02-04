@@ -71,13 +71,13 @@ public:
 	constexpr T get () const noexcept
 	{ return static_cast<T> (reinterpret_cast<pointer> (m_handle)); }
 
-	Element (pointer pBuffer) noexcept
-	: m_handle (reinterpret_cast<value_type> (pBuffer))
+    Element (pointer p) noexcept
+    : m_handle (reinterpret_cast<value_type> (p))
 	{ }
 
-	constexpr Element (value_type uBuffer) noexcept
-	: m_handle (uBuffer)
-	{ }
+    constexpr Element (value_type val) noexcept
+    : m_handle (val)
+    { }
 
 	constexpr Element (std::nullptr_t) noexcept
 	: m_handle ()

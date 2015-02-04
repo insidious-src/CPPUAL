@@ -28,6 +28,9 @@
 
 namespace cppual { namespace Ui {
 
+typedef ::xcb_connection_t display_type;
+typedef ::Display          legacy_type;
+
 namespace { namespace Xcb { // optimize for internal unit usage
 
 inline Connection x11_connection (cchar* pName) noexcept
@@ -41,7 +44,7 @@ inline Connection x11_connection (cchar* pName) noexcept
 
 inline Connection get_connection (cchar* pName) noexcept
 {
-	return XGetXCBConnection (x11_connection (pName).get<Display> ());
+	return XGetXCBConnection (x11_connection (pName).get<legacy_type> ());
 }
 
 } } // anonymous namespace Xcb
@@ -53,9 +56,9 @@ XDisplay::XDisplay (cchar* pName) noexcept
 	if (!native ()) return;
 
 	// take ownership of the event queue
-	XSetEventQueueOwner (gl ().get<Display> (), XCBOwnsEventQueue);
+	XSetEventQueueOwner (gl ().get<legacy_type> (), XCBOwnsEventQueue);
 
-	if (xcb_connection_has_error (native ().get<xcb_connection_t> ()))
+	if (xcb_connection_has_error (native ().get<display_type> ()))
 	{
 		std::cout << "error when connecting to display: "
 				  << pName << std::endl;
@@ -64,17 +67,13 @@ XDisplay::XDisplay (cchar* pName) noexcept
 
 XDisplay::~XDisplay ()
 {
-	if (native ()) XCloseDisplay (gl ().get<Display> ());
+	if (native ()) XCloseDisplay (gl ().get<legacy_type> ());
 }
 
-void XDisplay::flush () noexcept
+uint XDisplay::screenCount () const noexcept
 {
-	xcb_flush (native ().get<xcb_connection_t> ());
-}
-
-int XDisplay::screenCount () const noexcept
-{
-	return xcb_setup_roots_length (xcb_get_setup (native ().get<xcb_connection_t> ()));
+	return static_cast<uint>
+			(xcb_setup_roots_length (xcb_get_setup (native ().get<display_type> ())));
 }
 
 } } // namespace Ui

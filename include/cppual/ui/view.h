@@ -26,15 +26,14 @@
 #include <cppual/gfx/coord.h>
 #include <cppual/circular_queue.h>
 #include <cppual/ui/vsurface.h>
-#include <cppual/ui/default_events.h>
+#include <cppual/ui/events.h>
 
 namespace cppual { namespace Ui {
 
 class View
 {
 public:
-	typedef Event                                event_type;
-	typedef EventQueue                           queue_type;
+    typedef Event                                event_type;
 	typedef Memory::GenericPolicy<View*>         allocator_type;
 	typedef CircularQueue<View*, allocator_type> container;
 	typedef std::size_t	                         size_type;
@@ -84,8 +83,8 @@ public:
 
 	inline weak_window renderable () const noexcept { return m_pRenderable; }
 	inline IWindow*    renderable_unsafe () const noexcept { return m_pRenderable.get (); }
-	inline point2u         minimumSize () const noexcept { return m_gMinSize; }
-	inline point2u         maximumSize () const noexcept { return m_gMaxSize; }
+    inline point2u     minimumSize () const noexcept { return m_gMinSize; }
+    inline point2u     maximumSize () const noexcept { return m_gMaxSize; }
 
 	inline bool valid () const noexcept
 	{ return m_gStateFlags.test (View::Valid); }

@@ -42,6 +42,28 @@ struct GLStates final
 
 bool GLStates::hasDirectAccess = false;
 
+constexpr int convertMagFilter (Texture::MagFilter eMag) noexcept
+{
+	return eMag == Texture::MagFilter::Bilinear ? GL::Linear : GL::Nearest;
+}
+
+inline int convertMinFilter (Texture::MinFilter eMin) noexcept
+{
+	switch (eMin)
+	{
+	case Texture::MinFilter::Bilinear:
+		return GL::Linear;
+	case Texture::MinFilter::NearestMipMap:
+		return GL::NearestMipMapNearest;
+	case Texture::MinFilter::BilinearMipMap:
+		return GL::LinearMipMapNearest;
+	case Texture::MinFilter::TrilinearMipMap:
+		return GL::LinearMipMapLinear;
+	default:
+		return GL::Nearest;
+	}
+}
+
 } // anonymous namespace
 
 // ====================================================
@@ -118,6 +140,7 @@ bool Texture::loadTexture2D (string const&      gFilePath,
 				  gFile.rdbuf ());
 
 	gFile.close ();
+
 	if (bGenMipMaps) glGenerateMipmap (GL::Texture2D);
 	glGenSamplers (1, &m_uSampleId);
 
@@ -188,32 +211,8 @@ void Texture::setFiltering (MagFilter eMag, MinFilter eMin) noexcept
 {
 	if (m_uSampleId)
 	{
-		int nMag, nMin;
-
-		if (eMag == MagFilter::Bilinear) nMag = GL::Linear;
-		else nMag = GL::Nearest;
-
-		switch (eMin)
-		{
-		case MinFilter::Bilinear:
-			nMin = GL::Linear;
-			break;
-		case MinFilter::NearestMipMap:
-			nMin = GL::NearestMipMapNearest;
-			break;
-		case MinFilter::BilinearMipMap:
-			nMin = GL::LinearMipMapNearest;
-			break;
-		case MinFilter::TrilinearMipMap:
-			nMin = GL::LinearMipMapLinear;
-			break;
-		default:
-			nMin = GL::Nearest;
-			break;
-		}
-
-		glSamplerParameteri (m_uSampleId, GL::Tex2DMinFilter, nMin);
-		glSamplerParameteri (m_uSampleId, GL::Tex2DMagFilter, nMag);
+		glSamplerParameteri (m_uSampleId, GL::Tex2DMinFilter, convertMinFilter (eMin));
+		glSamplerParameteri (m_uSampleId, GL::Tex2DMagFilter, convertMagFilter (eMag));
 
 		m_eMin = eMin;
 		m_eMag = eMag;

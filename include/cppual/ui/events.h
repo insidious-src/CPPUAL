@@ -19,26 +19,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_DEVICES_EVENT_H
-#define CPPUAL_DEVICES_EVENT_H
+#ifndef CPPUAL_UI_EVENTS_H
+#define CPPUAL_UI_EVENTS_H
 #ifdef __cplusplus
 
-#include <atomic>
-#include <memory>
+#include <iostream>
 #include <cppual/flags.h>
-#include <cppual/circular_queue.h>
 #include <cppual/signal.h>
-#include <cppual/ui/wm.h>
+#include <cppual/gfx/coord.h>
+#include <cppual/gfx/dsp_details.h>
 
 using std::atomic;
 using std::atomic_bool;
 using std::shared_ptr;
 
 namespace cppual { namespace Ui {
-
-class   View;
-class   IDisplayQueue;
-typedef shared_ptr<IDisplayQueue> shared_queue;
 
 struct SystemMessage final
 {
@@ -55,8 +50,9 @@ struct SystemMessage final
 class Event
 {
 public:
-	typedef std::size_t size_type;
-	typedef Element     window_type;
+
+    typedef Graphics::Element window_type;
+    typedef std::size_t       size_type;
 
 	enum Type
 	{
@@ -124,17 +120,7 @@ public:
 	struct PaintData
 	{
 		Rect region;
-	};
-
-	struct StateData
-	{
-		bool in;
-	};
-
-	struct VisibilityData
-	{
-		bool visible;
-	};
+    };
 
 	struct PropertyData
 	{
@@ -151,9 +137,8 @@ public:
 		TouchData       touch;
 		int32           message;
 		PaintData       paint;
-		SizeData        size;
-		VisibilityData  visibility;
-		StateData       state;
+        SizeData        size;
+        bool            state;
 		PropertyData    property;
 	};
 
@@ -171,30 +156,85 @@ public:
 		Signal<void(window_type, int32)>           sysMessage;
 		Signal<void(window_type, PaintData)>       winPaint;
 		Signal<void(window_type, SizeData)>        winSize;
-		Signal<void(window_type, StateData)>       winFocus;
-		Signal<void(window_type, StateData)>       winStep;
+        Signal<void(window_type, bool)>            winFocus;
+        Signal<void(window_type, bool)>            winStep;
 		Signal<void(window_type, PropertyData)>    winProperty;
-		Signal<void(window_type, VisibilityData)>  winVisible;
+        Signal<void(window_type, bool)>            winVisible;
 	};
-
-	void operator () () noexcept;
 
 	Event () noexcept = default;
 	constexpr Data const& data   () const noexcept { return m_gData; }
 	constexpr Event::Type type   () const noexcept { return m_eType; }
-	constexpr Element     window () const noexcept { return m_window; }
+    constexpr window_type window () const noexcept { return m_window; }
 
-	inline static Signals& registers ()
+    static Signals& registers ()
 	{
 		static Signals event_signals;
 		return event_signals;
 	}
 
-	constexpr Event (Type type, Element window = Element ()) noexcept
+    constexpr Event (Type type, window_type window = window_type ()) noexcept
 	: m_window (window),
 	  m_gData  (),
 	  m_eType  (type)
 	{ }
+
+    inline void operator () () noexcept
+    {
+        switch (type ())
+        {
+        case KeyPressed:
+            registers ().keyPress (window (), data ().keyCode);
+            break;
+        case KeyReleased:
+            registers ().keyRelease (window (), data ().keyCode);
+            break;
+        case ButtonDown:
+            registers ().mousePress (window (), data ().mouseButton);
+            break;
+        case ButtonUp:
+            registers ().mouseRelease (window (), data ().mouseButton);
+            break;
+        case PointerMove:
+            registers ().mouseMove (window (), data ().mouseMove);
+            break;
+        case Scroll:
+            registers ().scroll (window (), data ().scroll);
+            break;
+        case TouchPress:
+            registers ().touchPress (window (), data ().touch);
+            break;
+        case TouchRelease:
+            registers ().touchRelease (window (), data ().touch);
+            break;
+        case TouchMove:
+            registers ().touchMove (window (), data ().touch);
+            break;
+        case SystemMessage:
+            registers ().sysMessage (window (), data ().message);
+            break;
+        case Paint:
+            registers ().winPaint (window (), data ().paint);
+            break;
+        case Size:
+            registers ().winSize (window (), data ().size);
+            break;
+        case Focus:
+            registers ().winFocus (window (), data ().state);
+            break;
+        case Step:
+            registers ().winStep (window (), data ().state);
+            break;
+        case Visibility:
+            registers ().winVisible (window (), data ().state);
+            break;
+        case Property:
+            registers ().winProperty (window (), data ().property);
+            break;
+        default:
+            std::cerr << "unknown event\n";
+        }
+    }
 
 protected:
 	window_type m_window;
@@ -204,68 +244,188 @@ protected:
 
 // =========================================================
 
-class IDisplayQueue : public NonCopyableVirtual
+struct MessageEvent : public Event
 {
-public:
-	typedef BitSet<Event::Type> mask_type;
-	typedef Event               event_type;
-
-	virtual bool pop_front (event_type&, bool wait) noexcept = 0;
-	virtual bool setWindowEvents (IWindow&, mask_type) noexcept = 0;
-
-	static IDisplayQueue* instance ();
-	static bool           hasValidInstance () noexcept;
-
-	Connection display () const noexcept { return m_display; }
-	bool       isValid () const noexcept { return m_display; }
-
-	constexpr IDisplayQueue (Connection display) noexcept
-	: m_display (display)
-	{ }
-
-private:
-	Connection m_display;
+    MessageEvent (int nMsg) noexcept
+    : Event (Event::SystemMessage)
+    {
+        m_gData.message = nMsg;
+    }
 };
 
 // =========================================================
 
-class EventQueue : public NonCopyable
+struct VisibilityEvent : public Event
 {
-public:
-	typedef IDisplayQueue::event_type event_type;
-	typedef IDisplayQueue::mask_type  mask_type;
-	typedef CircularQueue<event_type> queue_type;
-	typedef std::size_t               size_type;
-	typedef atomic<mask_type>         atomic_mask;
+    VisibilityEvent (window_type wnd, bool bVis) noexcept
+    : Event (Event::Visibility, wnd)
+    {
+        m_gData.state = bVis;
+    }
+};
 
-	EventQueue () noexcept;
-	EventQueue (mask_type accept_events) noexcept;
+// =========================================================
 
-	bool pop_front (event_type& next_event, bool wait) noexcept;
-	int  poll      (bool wait = true) noexcept;
+struct PaintEvent : public Event
+{
+    PaintEvent (window_type wnd, Rect gRect) noexcept
+    : Event (Event::Paint, wnd)
+    {
+        m_gData.paint.region = gRect;
+    }
+};
 
-	mask_type accepted () const noexcept
-	{ return m_gAcceptedEvents.load (); }
+// =========================================================
 
-	void push_back (event_type const& event) noexcept
-	{ m_gEventQueue.push_back (event); }
+struct SizeEvent : public Event
+{
+    SizeEvent (window_type wnd, point2u size) noexcept
+    : Event (Event::Size, wnd)
+    {
+        m_gData.size.size = size;
+    }
+};
 
-	void accept (mask_type events) noexcept
-	{ m_gAcceptedEvents = events; }
+// =========================================================
 
-	void quit () noexcept
-	{ m_bPoll = false; }
+struct FocusEvent : public Event
+{
+    FocusEvent (window_type wnd, bool in) noexcept
+    : Event (Event::Focus, wnd)
+    {
+        m_gData.state = in;
+    }
+};
 
-	bool isPolling () const noexcept
-	{ return m_bPoll.load (); }
+// =========================================================
 
-private:
-	queue_type  m_gEventQueue;
-	atomic_mask m_gAcceptedEvents;
-	atomic_bool m_bPoll;
+struct StepEvent : public Event
+{
+    StepEvent (window_type wnd, bool in) noexcept
+    : Event (Event::Step, wnd)
+    {
+        m_gData.state = in;
+    }
+};
+
+// =========================================================
+
+struct PropertyEvent : public Event
+{
+    PropertyEvent (window_type wnd, u32 prop, int32 value) noexcept
+    : Event (Event::Property, wnd)
+    {
+        m_gData.property.prop  = prop;
+        m_gData.property.value = value;
+    }
+};
+
+// =========================================================
+
+struct KeyPressEvent : public Event
+{
+    KeyPressEvent (window_type wnd, u8 nKey) noexcept
+    : Event (Event::KeyPressed, wnd)
+    {
+        m_gData.keyCode.key = nKey;
+    }
+};
+
+// =========================================================
+
+struct KeyReleaseEvent : public Event
+{
+    KeyReleaseEvent (window_type wnd, u8 nKey) noexcept
+    : Event (Event::KeyReleased, wnd)
+    {
+        m_gData.keyCode.key = nKey;
+    }
+};
+
+// =========================================================
+
+struct MousePressEvent : public Event
+{
+    MousePressEvent (window_type wnd, u8 nBtn, point2i gPos) noexcept
+    : Event (Event::ButtonDown, wnd)
+    {
+        m_gData.mouseButton.button = nBtn;
+        m_gData.mouseButton.pos    = gPos;
+    }
+};
+
+// =========================================================
+
+struct MouseReleaseEvent : public Event
+{
+    MouseReleaseEvent (window_type wnd, u8 nBtn, point2i gPos) noexcept
+    : Event (Event::ButtonUp, wnd)
+    {
+        m_gData.mouseButton.button  = nBtn;
+        m_gData.mouseButton.pos     = gPos;
+    }
+};
+
+// =========================================================
+
+struct MouseMoveEvent : public Event
+{
+    MouseMoveEvent (window_type wnd, point2i gPos) noexcept
+    : Event (Event::PointerMove, wnd)
+    {
+        m_gData.mouseButton.pos = gPos;
+    }
+};
+
+// =========================================================
+
+struct ScrollEvent : public Event
+{
+    ScrollEvent (window_type wnd, int32 nDelta, point2i gPos) noexcept
+    : Event (Event::Scroll, wnd)
+    {
+        m_gData.scroll.delta = nDelta;
+        m_gData.scroll.pos   = gPos;
+    }
+};
+
+// =========================================================
+
+struct TouchPressEvent : public Event
+{
+    TouchPressEvent (int32 pid, point2i gPos) noexcept
+    : Event (Event::TouchPress)
+    {
+        m_gData.touch.pid = pid;
+        m_gData.touch.pos = gPos;
+    }
+};
+
+// =========================================================
+
+struct TouchReleaseEvent : public Event
+{
+    TouchReleaseEvent (int32 pid, point2i gPos) noexcept
+    : Event (Event::TouchRelease)
+    {
+        m_gData.touch.pid = pid;
+        m_gData.touch.pos = gPos;
+    }
+};
+
+// =========================================================
+
+struct TouchMovedEvent : public Event
+{
+    TouchMovedEvent (int32 pid, point2i gPos) noexcept
+    : Event (Event::TouchMove)
+    {
+        m_gData.touch.pid = pid;
+        m_gData.touch.pos = gPos;
+    }
 };
 
 } } // namespace Input
 
 #endif // __cplusplus
-#endif // CPPUAL_DEVICES_EVENT_H
+#endif // CPPUAL_UI_EVENTS_H

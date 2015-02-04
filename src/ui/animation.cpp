@@ -29,7 +29,7 @@ float IAnimation::defaultSpeed = 1.0;
 
 void Motion::play (int nRepeat)
 {
-	if (!m_bIsPlaying.load () and m_pObject and m_pObject->isValid ())
+	if (!m_bIsPlaying.load () and m_pObject and m_pObject->valid ())
 	{
 		m_bIsPlaying.store (true);
 
@@ -54,7 +54,7 @@ void Motion::resume ()
 
 void Fade::play (int)
 {
-	if (!m_bIsPlaying and m_pObject and m_pObject->isValid ())
+	if (!m_bIsPlaying and m_pObject and m_pObject->valid ())
 	{
 	}
 }
@@ -72,7 +72,7 @@ void Fade::resume ()
 void Rotation::play (int)
 {
 	if (!m_bIsPlaying.load (std::memory_order_consume) and
-			m_pObject and m_pObject->isValid ())
+			m_pObject and m_pObject->valid ())
 	{
 	}
 }
@@ -90,7 +90,7 @@ void Rotation::resume ()
 void Pulse::play (int)
 {
 	if (!m_bIsPlaying.load (std::memory_order_consume) and
-			m_pObject and m_pObject->isValid ())
+			m_pObject and m_pObject->valid ())
 	{
 	}
 }

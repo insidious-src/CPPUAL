@@ -5,26 +5,32 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
 
-find_package(X11      REQUIRED)
-find_package(EGL      REQUIRED)
-find_package(GLEW     REQUIRED)
-find_package(OpenGL   REQUIRED)
-find_package(OpenCL   REQUIRED)
-find_package(OpenAL   REQUIRED)
-find_package(SndFile  REQUIRED)
-find_package(Freetype REQUIRED)
-
 include(cmake/CompilerConfig.cmake  REQUIRED)
 include(cmake/ToolChainConfig.cmake REQUIRED)
 
+find_package(DL       REQUIRED) ## dynamic loading of libraries
+find_package(WM       REQUIRED) ## platform window manager
+find_package(OpenCL   REQUIRED) ## primary compute/graphics library
+find_package(Sockets  REQUIRED) ## network interface & interprocess
+find_package(EGL      REQUIRED) ## cross-platform GL/ES surface & context
+find_package(GLEW     REQUIRED) ## will be dropped at some point
+find_package(OpenGL   REQUIRED) ## will be dropped at some point
+find_package(OpenAL   REQUIRED) ## will be dropped at some point
+find_package(SndFile  REQUIRED) ## will be dropped at some point
+find_package(Freetype REQUIRED) ## will be dropped at some point
+
 include_directories(include
+	DL::Library
 	OpenCL::Library
+	Sockets::Library
+	WM::Library
+	EGL::Library
 	GLEW::Library
-	${GL_INCLUDE_DIR}
+	OpenGL::Library
 	Freetype::Library
 	SndFile::Library
-	EGL::Library
-	OpenAL::Library)
+	OpenAL::Library
+	)
 
 
 ### compile libraries
@@ -193,8 +199,13 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 # graphical user interface - platform Windows
 add_library(cppual-ui-win MODULE
-	src/ui/platform/winapi/gl/wglsurface.cpp
-	src/ui/platform/winapi/wbackend.cpp
+	src/ui/platform/winapi/w32window.cpp
+	src/ui/platform/winapi/w32window.h
+	src/ui/platform/winapi/w32backend.cpp
+	src/ui/platform/winapi/w32backend.h
+	src/ui/platform/winapi/w32input.cpp
+	src/ui/platform/winapi/w32input.h
+	src/ui/platform/winapi/w32main.cpp
 	)
 endif()
 
@@ -219,8 +230,8 @@ add_library(cppual-gl SHARED
 	include/cppual/gfx/gl/glbase.h
 	src/gfx/gl/runtime.cpp
 	include/cppual/gfx/gl/runtime.h
-		src/gfx/gl/surface.cpp
-		include/cppual/gfx/gl/surface.h
+	src/gfx/gl/surface.cpp
+	include/cppual/gfx/gl/surface.h
 	src/gfx/gl/glsl.cpp
 	include/cppual/gfx/gl/glsl.h
 	src/gfx/gl/texture.cpp
@@ -263,12 +274,12 @@ add_library(cppual-multimedia SHARED
 	src/multimedia/media_sync.cpp
 	include/cppual/multimedia/media_sync.h)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
 # video acceleration api backend
 add_library(cppual-video-vaapi MODULE
 	src/multimedia/video/backend/vaapi.cpp
 )
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 # Xorg video backend
 add_library(cppual-video-xorg MODULE
@@ -319,7 +330,7 @@ add_library(cppual-audio SHARED
 
 # audio backend OpenAL
 add_library(cppual-audio-openal MODULE
-		src/multimedia/audio/al/aldef.h
+	src/multimedia/audio/al/aldef.h
 	src/multimedia/audio/al/alobject.cpp
 	include/cppual/multimedia/audio/al/alobject.h
 	src/multimedia/audio/al/aldevice.cpp
@@ -344,14 +355,16 @@ add_library(cppual-ui SHARED
 	include/cppual/ui/manager.h
 	src/ui/display.cpp
 	include/cppual/ui/display.h
-	src/ui/events.cpp
+	src/ui/queue.cpp
+	include/cppual/ui/queue.h
 	include/cppual/ui/events.h
 	include/cppual/ui/wm.h
+	src/ui/window.cpp
+	include/cppual/ui/window.h
 	src/ui/vsurface.cpp
 	include/cppual/ui/vsurface.h
 	src/ui/animation.cpp
 	include/cppual/ui/animation.h
-	include/cppual/ui/default_events.h
 	src/ui/composite.cpp
 	include/cppual/ui/composite.h
 	src/ui/uimgr.cpp
@@ -374,10 +387,10 @@ add_library(cppual-ui SHARED
 add_library(cppual-ui-views SHARED
 	src/ui/frame.cpp
 	include/cppual/ui/frame.h
-	src/ui/window.cpp
-	include/cppual/ui/window.h
 	src/ui/dialog.cpp
 	include/cppual/ui/dialog.h
+	#src/ui/controls/label.cpp
+	#include/cppual/ui/controls/label.h
 	src/ui/controls/button.cpp
 	include/cppual/ui/controls/button.h
 	src/ui/controls/popup.cpp
@@ -399,21 +412,23 @@ add_library(cppual-ui-dialogs MODULE
 ### link targets
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-	target_link_libraries(cppual-ui-xorg xcb-icccm)
-	target_link_libraries(cppual-ui-wayland wayland-client wayland-cursor)
+		target_link_libraries(cppual-ui-xorg WM::LegacyLibrary)
+		target_link_libraries(cppual-ui-wayland WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	target_link_libraries(cppual-core psapi)
+		target_link_libraries(cppual-ui-win WM::Library)
 endif()
 
+target_link_libraries(cppual-core DL::Library)
 target_link_libraries(cppual-compute cppual-core OpenCL::Library)
-target_link_libraries(cppual-compute-gl cppual-compute OpenCL::Library GLEW::Library ${GL_LIBRARY})
+target_link_libraries(cppual-compute-gl cppual-compute OpenCL::Library GLEW::Library OpenGL::Library)
 target_link_libraries(cppual-gfx cppual-core Freetype::Library)
-target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library ${GL_LIBRARY})
-target_link_libraries(cppual-video-gl cppual-gl GLEW::Library ${GL_LIBRARY})
+target_link_libraries(cppual-network Sockets::Library)
+target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)
+target_link_libraries(cppual-video-gl cppual-gl GLEW::Library OpenGL::Library)
 target_link_libraries(cppual-video-compute cppual-compute)
 target_link_libraries(cppual-audio cppual-compute SndFile::Library)
 target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
-target_link_libraries(cppual-gl cppual-gfx ${EGL_LIBRARY} GLEW::Library ${GL_LIBRARY})
+target_link_libraries(cppual-gl cppual-gfx EGL::Library GLEW::Library OpenGL::Library)
 target_link_libraries(cppual-ui cppual-gfx)
 target_link_libraries(cppual-ui-views cppual-ui)
 target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)

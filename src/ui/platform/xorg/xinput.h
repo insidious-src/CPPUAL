@@ -23,7 +23,7 @@
 #define CPPUAL_PLATFORM_X_INPUT_H_
 #ifdef __cplusplus
 
-#include <cppual/ui/events.h>
+#include <cppual/ui/queue.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
@@ -33,9 +33,14 @@ namespace cppual { namespace Ui {
 
 struct DECL_EXPORT XQueue final : public IDisplayQueue
 {
+	typedef IDisplayQueue::event_type event_type;
+
 	XQueue () noexcept;
-	bool setWindowEvents (Ui::IWindow&, mask_type) noexcept;
-	bool pop_front           (event_type&, bool wait) noexcept;
+	bool set_window_events (IWindow const&, mask_type) noexcept;
+	bool pop_front         (event_type&, bool) noexcept;
+	int  poll              (IWindow const&, bool, std::atomic_bool&);
+	void send              (event_type const&);
+	void post              (event_type const&);
 };
 
 } } // namespace Input

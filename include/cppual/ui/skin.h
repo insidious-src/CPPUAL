@@ -26,7 +26,6 @@
 #include <cppual/gfx/drawable/image.h>
 #include <cppual/gfx/font.h>
 #include <cppual/ui/view.h>
-#include <cppual/ui/default_events.h>
 
 using std::string;
 using cppual::Graphics::RGBColor;

@@ -65,7 +65,7 @@ public:
 	inline ~TransportSocket () noexcept { close (); }
 	inline socket_id  id () const noexcept { return m_nId; }
 	inline SocketType type () const noexcept { return m_eProtocol; }
-	inline bool       isValid () const noexcept { return m_nId != sm_nInvalid; }
+    inline bool       isValid () const noexcept { return m_nId != nullSocket (); }
 	inline bool       isBlocking () const noexcept { return m_bIsBlocking; }
 
 	static socket_id nullSocket () noexcept

@@ -29,7 +29,7 @@ namespace cppual { namespace Ui {
 
 class MessageBox final : public Dialog
 {
-	Label m_gMessage;
+    //Label m_gMessage;
 
 	void onInit ();
 	void onEnd ();
@@ -70,12 +70,12 @@ void showMessage (string&&    gTitle,
 
 void MessageBox::onInit ()
 {
-	m_gMessage.create (this,
-					   "",
-					   Rect (100, 100,
-							 static_cast<u16> (geometry ().width  () - 20u),
-							 static_cast<u16> (geometry ().height () - 20u))
-					   );
+//	m_gMessage.create (this,
+//					   "",
+//					   Rect (100, 100,
+//							 static_cast<u16> (geometry ().width  () - 20u),
+//							 static_cast<u16> (geometry ().height () - 20u))
+//					   );
 }
 
 void MessageBox::onEnd ()
