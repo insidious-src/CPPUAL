@@ -1,6 +1,9 @@
 # C++ Unified Abstraction Library #
 
+
 ## Latest Supported Standard: C++14 ##
+## Future Standard: D ##
+
 
 ### Core: ###
 - cross-platform process management and interprocess communication
