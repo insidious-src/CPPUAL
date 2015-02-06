@@ -50,6 +50,7 @@
 - equalizer and filters
 - multi-screen support
 - desktop recording
+- passive timeline with speed adjustment
 
 ### System: ###
 - query hardware and os information
