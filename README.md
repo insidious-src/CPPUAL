@@ -23,7 +23,7 @@
 - cross-platform font texture generator
 - color management and post-processing
 
-User Interface:
+### User Interface: ###
 - display management
 - window adaptor for platform window management
 - completely independant widgets implemented as functional structures (can be used everywhere from 3D environments to desktop)
@@ -34,7 +34,7 @@ User Interface:
 - codecs backend manager
 - audio/video synchronization and manipulation
 
-Audio:
+### Audio: ###
 - audio backend using compute library
 - audio file loader (format decoder, quality convertion and manipulation)
 - listener functions
