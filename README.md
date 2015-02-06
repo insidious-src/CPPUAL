@@ -1,19 +1,19 @@
-C++ Unified Abstraction Library
+# C++ Unified Abstraction Library #
 
-Latest Supported Standard: C++14
+## Latest Supported Standard: C++14 ##
 
-Core:
+### Core: ###
 - cross-platform process management and interprocess communication
 - unified runtime allocator management
 
-Compute:
+### Compute: ###
 - use concurrency as host implementation
 - unified out-of-order tasks and continuation tasks
 - use OpenCL as a SINGLE SOURCE backend (SPIR is required to implement the C++ interpreter)
 - behaviour based device scheduling and context manipulation
 - branched device tasks
 
-Graphics:
+### Graphics: ###
 - unified surface management using EGL
 - gfx algorithms based on compute library
 - abstract draw objects
@@ -30,7 +30,7 @@ User Interface:
 - abstract controls (draw objects can be changed on the fly)
 - skin engine (native, html/css, xml & custom)
 
-Multimedia:
+### Multimedia: ###
 - codecs backend manager
 - audio/video synchronization and manipulation
 
@@ -44,13 +44,13 @@ Audio:
 - advanced player
 - equalizer and filters
 
-Video:
+### Video: ###
 - video backend using compute library
 - equalizer and filters
 - multi-screen support
 - desktop recording
 
-System:
+### System: ###
 - query hardware and os information
 - timer
 - calendar
