@@ -51,7 +51,7 @@
 - multi-screen support
 - desktop recording
 
-### Utilities: ###
+### Utility: ###
 - passive timeline with speed adjustment
 
 ### System: ###
