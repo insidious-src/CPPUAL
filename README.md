@@ -2,7 +2,6 @@
 
 
 ## Latest Supported Standard: C++14 ##
-## Future Standard: D ##
 
 
 ### Core: ###
