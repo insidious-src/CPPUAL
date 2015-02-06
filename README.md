@@ -1,6 +1,5 @@
 # C++ Unified Abstraction Library #
 
-
 ### Latest Supported Standard: C++14 ###
 
 
