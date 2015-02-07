@@ -53,6 +53,11 @@
 
 ### Utility ###
 - passive timeline with speed adjustment
+- fast string and rope
+- signals
+- reactive functional types
+- simd types
+- resource management
 
 ### System ###
 - query hardware and os information
