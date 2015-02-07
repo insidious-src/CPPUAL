@@ -3,7 +3,7 @@
 **Latest Supported Standard: C++14**
 
 ### Why reinvent the wheel and replace the standard library and Qt? ###
-- The whole idea of the library is to implement everything as a host and compute devices for parallelism, deprecating OpenGL and DirectX completely.
+- The whole idea of the library is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, OVD and OpenAL completely.
 
 
 ### Core ###
