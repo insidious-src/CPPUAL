@@ -2,16 +2,19 @@
 
 **Latest Supported Standard: C++14**
 
+### Why reinvent the wheel and replace the standard library and Qt? ###
+- The whole idea of the library is to implement everything as a host and compute devices for parallelism, deprecating OpenGL and DirectX completely.
+
 
 ### Core ###
 - cross-platform process management and interprocess communication
-- unified runtime allocator management
+- unified runtime allocator management for the host and all devices
 
 ### Compute ###
 - use concurrency as host implementation
 - unified out-of-order tasks and continuation tasks
 - use OpenCL as a SINGLE SOURCE backend (SPIR is required to implement the C++ interpreter)
-- behaviour based device scheduling and context manipulation
+- behaviour-based device scheduling and context manipulation
 - branched device tasks
 
 ### Graphics ###
@@ -53,7 +56,7 @@
 
 ### Utility ###
 - passive timeline with speed adjustment
-- fast string and rope
+- fast string
 - circular queue + atomic
 - signals
 - reactive functional types
