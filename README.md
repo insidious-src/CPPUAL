@@ -14,7 +14,7 @@
 - behaviour based device scheduling and context manipulation
 - branched device tasks
 
-### Graphics: ###
+### Graphics ###
 - unified surface management using EGL
 - gfx algorithms based on compute library
 - abstract draw objects
