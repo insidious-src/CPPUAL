@@ -54,6 +54,7 @@
 ### Utility ###
 - passive timeline with speed adjustment
 - fast string and rope
+- circular queue + atomic
 - signals
 - reactive functional types
 - simd types
