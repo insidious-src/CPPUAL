@@ -13,6 +13,7 @@
 ### Core ###
 - cross-platform process management and interprocess communication
 - unified runtime allocator management for the host and all devices
+- specialized host & shared allocators
 
 ### Compute ###
 - use concurrency as host implementation
