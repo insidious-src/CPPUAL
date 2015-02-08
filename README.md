@@ -83,6 +83,8 @@ So the real question is: Why would you want to have all these libraries when Ope
 
 ### Goals ###
 - drop freetype
-- drop opengl $ glew
+- drop opengl, directx, glew
 - drop openal
 - drop sndfile
+- transparent filesystem managament
+- prepare the library for universal memory (memristors)
