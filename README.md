@@ -15,7 +15,7 @@ So the real question is: Why would you want to have all these libraries when Ope
 
 ### Compute ###
 - use concurrency as host implementation
-- unified out-of-order and continuation tasks
+- host/device out-of-order and continuation tasks
 - use OpenCL as a SINGLE SOURCE backend (SPIR is required to implement the C++ interpreter)
 - behaviour-based device scheduling and context manipulation
 - branched device tasks
