@@ -37,7 +37,7 @@
 
 ### Network ###
 - implementation of the C++17 network library
-- simplified packed exchange
+- simplified packet exchange
 - advanced protocol interface
 - http, https, ftp protocols
 
