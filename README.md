@@ -56,6 +56,7 @@
 - audio backend using compute library
 - audio file loader (format decoder, quality convertion and manipulation)
 - listener functions
+- recorder
 - sound source
 - dynamic circular buffer
 - emitter
