@@ -3,7 +3,7 @@
 **Latest Supported Standard: C++14**
 
 ### Why reinvent the wheel and replace the standard library and Qt? ###
-- The whole idea of the library is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, VDPAU, TrueAudio and OpenAL completely.
+- The whole idea of the library is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, VDPAU, OVD, TrueAudio and OpenAL completely.
 
 So the real question is: Why would you want to have all these libraries when OpenCL is pushing hard and you can program it pretty much like a regular CPU? It's just a matter of time until OpenCL turns into a all-in-one standard.
 
