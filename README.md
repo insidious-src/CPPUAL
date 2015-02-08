@@ -88,4 +88,5 @@
 - drop sndfile
 - transparent filesystem managament
 - prepare the library for universal memory (memristors)
+- interprocess compute runtime to balance device resources in the whole system
 - implement everything in D Language
