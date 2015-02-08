@@ -25,7 +25,6 @@
 
 #include <cppual/process/module.h>
 #include <cppual/ui/queue.h>
-#include <cppual/gfx/draw.h>
 #include <cppual/ui/display.h>
 #include <cppual/ui/wm.h>
 
@@ -35,13 +34,7 @@ using cppual::Ui::shared_queue;
 using cppual::Ui::shared_display;
 using cppual::Ui::weak_display;
 using cppual::Ui::shared_window;
-using cppual::Graphics::shared_buffer;
-using cppual::Graphics::shared_context;
 using cppual::Ui::IDisplay;
-using cppual::Ui::IWindow;
-using cppual::Graphics::GFXVersion;
-using cppual::Graphics::PixelFormat;
-using cppual::Graphics::DeviceType;
 
 namespace cppual { namespace Platform {
 
@@ -53,14 +46,14 @@ struct Factory : public NonCopyableVirtual
 	typedef shared_window const& shared_reference;
 
 	virtual shared_window createWindow (Rect const& rect,
-												u32 screen = 0,
-												IDisplay* display = IDisplay::instance ()) = 0;
+										u32 screen = 0,
+										IDisplay* display = IDisplay::instance ()) = 0;
 
 	virtual shared_display connectDisplay (cchar* name = nullptr) = 0;
 	virtual shared_queue   createQueueObject () = 0;
 
 	static Factory* instance ();
-	static Module&  module ();
+	static Module&  module   ();
 	static bool     hasValidInstance () noexcept;
 };
 

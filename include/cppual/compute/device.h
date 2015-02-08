@@ -52,15 +52,24 @@ public:
 
 	enum class DevType
 	{
-		CPU, // serial processing
-		GPU, // shader and parallel processing
-		PPU, // dedicated parallel processing
-		DSP, // digital signal processing (audio)
-		BSD, // bit stream decoder (video)
-		VCE, // codec encoder (video)
-		SPU, // multiple specialized processing cores
-		Custom
+		CPU    = 1 << 0, // serial processing
+		GPU    = 1 << 1, // shader and parallel processing
+		PPU    = 1 << 2, // dedicated parallel processing (generic processing)
+		DSP    = 1 << 3, // digital signal processing (audio)
+		BSD    = 1 << 4, // bit stream decoder (video)
+		VCE    = 1 << 5, // codec engine (video)
+		SPU    = 1 << 6, // multiple specialized processing cores
+		Custom = 1 << 7
 	};
+
+	enum Attribute
+	{
+		Specialized, // specialized processing
+		Extended,    // supports OpenCL 2.0
+		Native       // supoorts execution of native functions
+	};
+
+	typedef BitSet<DevType> AvailableTypes;
 
 	enum
 	{
@@ -78,7 +87,7 @@ public:
 		Version
 	};
 
-	class Partition : public Object <Partition>
+	class Partition : public Object <Device>
 	{
 	public:
 		Partition () = delete;
@@ -145,17 +154,6 @@ operator << (std::basic_ostream<CharT, Traits>& os, Device::Type u)
 }
 
 }
-
-// =========================================================
-
-int32 reference (Disposable<Compute::Device::Partition>*) noexcept;
-
-template <>
-struct Disposable <Compute::Device::Partition>
-{
-	static void* operator new (std::size_t) noexcept;
-	static void  operator delete (void*) noexcept;
-};
 
 } // Compute
 

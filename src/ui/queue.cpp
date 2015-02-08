@@ -28,16 +28,10 @@ namespace cppual { namespace Ui {
 
 namespace { namespace Internal { // optimize for internal unit usage
 
-inline shared_queue& queue () noexcept
+inline const shared_queue& queue ()
 {
-	static shared_queue platform_queue;
+	static const shared_queue platform_queue (Factory::instance ()->createQueueObject ());
 	return platform_queue;
-}
-
-void attachQueue ()
-{
-	if (!Factory::hasValidInstance ()) return;
-	Internal::queue () = Factory::instance ()->createQueueObject ();
 }
 
 } } // anonymous namespace Internal
@@ -46,7 +40,6 @@ void attachQueue ()
 
 IDisplayQueue* IDisplayQueue::instance ()
 {
-	if (Internal::queue () == nullptr) Internal::attachQueue ();
 	return Internal::queue ().get ();
 }
 

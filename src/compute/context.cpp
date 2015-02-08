@@ -24,7 +24,7 @@
 namespace cppual { namespace Compute {
 
 Context::Context (DeviceGroup& gDevice)
-: Object (new Disposable<Compute::Context>),
+: Object (),
   m_gDevice (&gDevice)
 {
 }

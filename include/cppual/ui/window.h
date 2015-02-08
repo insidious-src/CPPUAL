@@ -26,6 +26,9 @@
 #include <chrono>
 #include <cppual/gfx/drawable/image.h>
 #include <cppual/ui/frame.h>
+#include <cppual/ui/view.h>
+
+using cppual::Graphics::Icon;
 
 namespace cppual { namespace Ui {
 
@@ -52,21 +55,21 @@ public:
 	void maximize ();
 	void close ();
 
-    Window (View*         parent,
-            Rect   const& rect,
-            string const& title,
-            image_type*   icon   = nullptr,
-            u32           screen = 0);
+	Window (View*         parent,
+			Rect   const& rect,
+			string const& title,
+			image_type*   icon   = nullptr,
+			u32           screen = 0);
 
-    inline FrameView*  frame () noexcept { return m_gFrame; }
+	inline FrameView*  frame () noexcept { return m_gFrame; }
 	inline image_type* icon () const noexcept { return m_pIcon; }
 	inline bool        isFullscreen () const noexcept { return m_bIsFullScreen; }
 
 	inline bool isMinimized () const noexcept
-    { return m_gFrame->attached () == this and m_gFrame->isHidden (); }
+	{ return m_gFrame->attached () == this and m_gFrame->isHidden (); }
 
 	inline bool isMaximized () const noexcept
-    { return m_gFrame->attached () == this and m_gFrame->isStretched (); }
+	{ return m_gFrame->attached () == this and m_gFrame->isStretched (); }
 
 protected:
 	virtual bool onClose () { return true; }
@@ -75,7 +78,7 @@ protected:
 	virtual void onHelp () { }
 
 private:
-    FrameView*  m_gFrame;
+	FrameView*  m_gFrame;
 	image_type* m_pIcon;
 	bool        m_bIsFullScreen;
 };
@@ -86,7 +89,6 @@ class WindowAdapter : public NonCopyableVirtual
 {
 public:
 	typedef Event                                  event_type;
-	typedef EventQueue                             queue_type;
 	typedef Memory::GenericPolicy<Widget*>         allocator_type;
 	typedef CircularQueue<Widget*, allocator_type> container;
 	typedef std::size_t	                           size_type;
@@ -95,7 +97,7 @@ public:
 	container::iterator iterator;
 
 	typedef typename
-	Signal<void(event_type::window_type, event_type::MouseMoveData)>
+	Signal<void(event_type::window_type, point2u)>
 	::slot_type
 	move_slot;
 
@@ -103,7 +105,6 @@ public:
 	Signal<void(event_type::window_type, event_type::MouseButtonData)>
 	::slot_type
 	btn_slot;
-
 
 	enum
 	{
@@ -152,13 +153,13 @@ private:
 	virtual void onMinimize     () { }
 	virtual void onMaximize     () { }
 	virtual void onHelp         () { }
-	virtual void onPointerMove  (event_type::MouseMoveData) { }
+	virtual void onPointerMove  (point2u) { }
 	virtual void onMousePress   (event_type::MouseButtonData) { }
 	virtual void onMouseRelease (event_type::MouseButtonData) { }
 	virtual void onKeyPress     (event_type::KeyData) { }
 	virtual void onKeyRelease   (event_type::KeyData) { }
 
-	virtual void onSize         (event_type::SizeData);
+	virtual void onSize         (point2u);
 	virtual void onPaint        (event_type::PaintData) { }
 	virtual void onFocus        (bool) { }
 	virtual void onShow         (bool) { }

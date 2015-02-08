@@ -38,9 +38,9 @@ typedef EGLNativeDisplayType native_display ;
 
 enum class API
 {
-    Unbound = 0,
-    OpenGL,
-    OpenGLES
+	Unbound = 0,
+	OpenGL,
+	OpenGLES
 };
 
 enum
@@ -53,9 +53,9 @@ enum
 	GLBit               = EGL_OPENGL_BIT,
 	GLESBit             = EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT,
 	BasicContextVersion = EGL_CONTEXT_CLIENT_VERSION,
-    ContextMajorVersion = 0x3098, /*EGL_CONTEXT_MAJOR_VERSION_KHR*/
-    ContextMinorVersion = 0x30FB, /*EGL_CONTEXT_MINOR_VERSION_KHR*/
-    ContextProfile      = 0x30FD, /*EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR*/
+	ContextMajorVersion = 0x3098, /*EGL_CONTEXT_MAJOR_VERSION_KHR*/
+	ContextMinorVersion = 0x30FB, /*EGL_CONTEXT_MINOR_VERSION_KHR*/
+	ContextProfile      = 0x30FD, /*EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR*/
 	BadDisplay          = EGL_BAD_DISPLAY,
 	BadContext          = EGL_BAD_CONTEXT,
 	BadSurface          = EGL_BAD_SURFACE,
@@ -70,8 +70,8 @@ enum
 	ContextLost         = EGL_CONTEXT_LOST,
 	ANGLEFixedSize      = 0x3201/*EGL_FIXED_SIZE_ANGLE*/,
 	NONE                = EGL_NONE,
-    IntTrue             = EGL_TRUE,
-    IntFalse            = EGL_FALSE
+	IntTrue             = EGL_TRUE,
+	IntFalse            = EGL_FALSE
 };
 
 enum ErrorType
@@ -256,7 +256,7 @@ inline surface_pointer createDrawable (Config const&         gConf,
 	if (gConf.features ().test (Config::ScalableSurface))
 	{
 		nSurfaceAttribs[2] = EGL::ANGLEFixedSize;
-        nSurfaceAttribs[3] = EGL::IntTrue;
+		nSurfaceAttribs[3] = EGL::IntTrue;
 		nSurfaceAttribs[4] = EGL::Width;
 		nSurfaceAttribs[5] = gSize.x;
 		nSurfaceAttribs[6] = EGL::Height;
@@ -268,7 +268,7 @@ inline surface_pointer createDrawable (Config const&         gConf,
 
 	surface_pointer pSurface = eglCreateWindowSurface (gConf.display (),
 													   gConf,
-                                                       uWndHandle.get<EGLNativeWindowType> (),
+													   uWndHandle.get<EGLNativeWindowType> (),
 													   &nSurfaceAttribs[0]);
 
 	if (!pSurface) error<Create> ();
@@ -342,7 +342,7 @@ inline context_pointer createGC (Config const& gConf, GFXVersion version, void* 
 		nContextAttribs[2] = EGL::NONE;
 	}
 
-    eglBindAPI (EGL::api (API::OpenGL)) ?
+	eglBindAPI (EGL::api (API::OpenGL)) ?
 					true : throw bad_parameter ("the specified worthless API "
 												"is NOT supported by the EGL implementation");
 
@@ -359,10 +359,10 @@ inline point2u getSize (Config const& config, Surface::pointer surface) noexcept
 {
 	value_type size[2];
 
-    if (eglQuerySurface (config.display (), surface, EGL::Width, &size[0]) == EGL::IntFalse)
+	if (eglQuerySurface (config.display (), surface, EGL::Width, &size[0]) == EGL::IntFalse)
 		return point2u ();
 
-    if (eglQuerySurface (config.display (), surface, EGL::Height, &size[1]) == EGL::IntFalse)
+	if (eglQuerySurface (config.display (), surface, EGL::Height, &size[1]) == EGL::IntFalse)
 		return point2u ();
 
 	return { static_cast<u16> (size[0]), static_cast<u16> (size[1]) };
@@ -394,11 +394,11 @@ Config::Config (controller dsp, format_type gFormat)
 					EGL_WINDOW_BIT : 0 | gFormat.flags.test (PixelFlag::Palette) ?
 						EGL_PBUFFER_BIT : 0 | gFormat.flags.test (PixelFlag::Bitmap) ?
 							EGL_PIXMAP_BIT : 0,
-        EGL_RENDERABLE_TYPE, EGL::api_bits (EGL::API::OpenGL),
+		EGL_RENDERABLE_TYPE, EGL::api_bits (EGL::API::OpenGL),
 		EGL::NONE
 	};
 
-    EGL::initialize (m_pDisplay);
+	EGL::initialize (m_pDisplay);
 
 	eglGetConfigs   (m_pDisplay, &m_pCfg, 1, &nNumConfigs);
 	eglChooseConfig (m_pDisplay, nConfigAttribs, &m_pCfg, 1, &nNumConfigs);
@@ -413,7 +413,7 @@ PixelFormat Config::toFormat () const
 {
 	if (!m_pDisplay or !m_pCfg) return PixelFormat ();
 
-    int nAttribs[AttribCount];
+	int nAttribs[AttribCount];
 
 	eglGetConfigAttrib (m_pDisplay, m_pCfg, EGL_RED_SIZE, &nAttribs[Red]);
 	eglGetConfigAttrib (m_pDisplay, m_pCfg, EGL_GREEN_SIZE, &nAttribs[Green]);
@@ -433,7 +433,7 @@ PixelFormat Config::toFormat () const
 		static_cast<u8> (nAttribs[Stencil]),
 		(nAttribs[SurfaceType] & EGL_WINDOW_BIT) ? PixelFlag::Drawable : 0 |
 				(nAttribs[SurfaceType] & EGL_PBUFFER_BIT) ? PixelFlag::Bitmap : 0,
-        ColorType::TrueType
+		ColorType::TrueType
 	};
 }
 
@@ -504,25 +504,25 @@ Surface::Surface (Config const& gConf, point2u size, Type type, value_type owner
   m_eType   (type)
 { }
 
-Surface::Surface (Surface const& gObj)
-: m_pConf   (gObj.m_pConf),
-  m_pHandle (EGL::createSurface (*m_pConf, gObj.size (), gObj.m_eType, gObj.m_pOwner)),
-  m_pOwner  (m_pHandle ? gObj.m_pOwner : nullptr),
-  m_eType   (gObj.m_eType)
+Surface::Surface (Surface const& obj)
+: m_pConf   (obj.m_pConf),
+  m_pHandle (EGL::createSurface (*m_pConf, obj.size (), obj.m_eType, obj.m_pOwner)),
+  m_pOwner  (m_pHandle ? obj.m_pOwner : nullptr),
+  m_eType   (obj.m_eType)
 { }
 
-Surface& Surface::operator = (Surface&& gObj) noexcept
+Surface& Surface::operator = (Surface&& obj) noexcept
 {
-	if (this == &gObj) return *this;
+	if (this == &obj) return *this;
 	if (m_pHandle) eglDestroySurface (config ().display (), m_pHandle);
 
-	m_pConf        = gObj.m_pConf;
-	m_pHandle      = gObj.m_pHandle;
-	m_pOwner       = gObj.m_pOwner;
+	m_pConf        = obj.m_pConf;
+	m_pHandle      = obj.m_pHandle;
+	m_pOwner       = obj.m_pOwner;
 
-	gObj.m_pConf   = nullptr;
-	gObj.m_pHandle = nullptr;
-	gObj.m_pOwner  = nullptr;
+	obj.m_pConf   = nullptr;
+	obj.m_pHandle = nullptr;
+	obj.m_pOwner  = nullptr;
 
 	return *this;
 }
@@ -556,27 +556,27 @@ void Surface::scale (point2u gSize)
 
 // ====================================================
 
-Context::Context (Config const& gConf, GFXVersion const& gVersion, Context* pShared)
-: m_pConf        (&gConf),
-  m_pGC          (EGL::createGC (gConf, gVersion, pShared ? pShared->m_pGC : nullptr)),
+Context::Context (Config const& conf, GFXVersion const& version, Context* shared)
+: m_pConf        (&conf),
+  m_pGC          (EGL::createGC (conf, version, shared ? shared->m_pGC : nullptr)),
   m_pDrawTarget  (),
   m_pReadTarget  (),
-  m_pShared      (pShared),
-  m_nVersion     (m_pGC ? gVersion : GFXVersion ())
+  m_pShared      (shared),
+  m_nVersion     (m_pGC ? version : GFXVersion ())
 { }
 
-Context::Context (Context const& gObj)
-: m_pConf        (gObj.m_pConf),
-  m_pGC          (EGL::createGC (*m_pConf, gObj.m_nVersion, gObj.m_pShared)),
+Context::Context (Context const& obj)
+: m_pConf        (obj.m_pConf),
+  m_pGC          (EGL::createGC (*m_pConf, obj.m_nVersion, obj.m_pShared)),
   m_pDrawTarget  (),
   m_pReadTarget  (),
-  m_pShared      (gObj.m_pShared),
-  m_nVersion     (m_pGC ? gObj.m_nVersion : GFXVersion ())
+  m_pShared      (obj.m_pShared),
+  m_nVersion     (m_pGC ? obj.m_nVersion : GFXVersion ())
 { }
 
-Context& Context::operator = (Context&& gObj) noexcept
+Context& Context::operator = (Context&& obj) noexcept
 {
-	if (this == &gObj) return *this;
+	if (this == &obj) return *this;
 
 	if (m_pGC)
 	{
@@ -584,26 +584,26 @@ Context& Context::operator = (Context&& gObj) noexcept
 		eglDestroyContext (config ().display (), m_pGC);
 	}
 
-	m_pDrawTarget = gObj.m_pDrawTarget;
-	m_pReadTarget = gObj.m_pReadTarget;
-	m_nVersion    = gObj.m_nVersion;
-	m_pConf       = gObj.m_pConf;
-	m_pShared     = gObj.m_pShared;
-	m_pGC         = gObj.m_pGC;
+	m_pDrawTarget = obj.m_pDrawTarget;
+	m_pReadTarget = obj.m_pReadTarget;
+	m_nVersion    = obj.m_nVersion;
+	m_pConf       = obj.m_pConf;
+	m_pShared     = obj.m_pShared;
+	m_pGC         = obj.m_pGC;
 
-	gObj.m_nVersion    = GFXVersion ();
-	gObj.m_pGC         = nullptr;
-	gObj.m_pConf       = nullptr;
-	gObj.m_pShared     = nullptr;
-	gObj.m_pDrawTarget = nullptr;
-	gObj.m_pReadTarget = nullptr;
+	obj.m_nVersion    = GFXVersion ();
+	obj.m_pGC         = nullptr;
+	obj.m_pConf       = nullptr;
+	obj.m_pShared     = nullptr;
+	obj.m_pDrawTarget = nullptr;
+	obj.m_pReadTarget = nullptr;
 
 	return *this;
 }
 
-Context& Context::operator = (Context const& gObj)
+Context& Context::operator = (Context const& obj)
 {
-	if (this == &gObj) return *this;
+	if (this == &obj) return *this;
 
 	if (m_pGC)
 	{
@@ -611,13 +611,13 @@ Context& Context::operator = (Context const& gObj)
 		eglDestroyContext (config ().display (), m_pGC);
 	}
 
-	m_pGC = gObj.m_pGC ? EGL::createGC (gObj.config (), gObj.m_nVersion, gObj.m_pShared) :
+	m_pGC = obj.m_pGC ? EGL::createGC (obj.config (), obj.m_nVersion, obj.m_pShared) :
 						 nullptr;
 
 	m_pReadTarget = m_pDrawTarget = nullptr;
-	m_nVersion    = gObj.m_nVersion;
-	m_pShared     = gObj.m_pShared;
-	m_pConf       = gObj.m_pConf;
+	m_nVersion    = obj.m_nVersion;
+	m_pShared     = obj.m_pShared;
+	m_pConf       = obj.m_pConf;
 
 	return *this;
 }
@@ -636,8 +636,8 @@ GFXVersion Context::platformVersion () noexcept
 
 bool Context::use (pointer pDraw, const_pointer pRead) noexcept
 {
-    if ((( pDraw and !pRead) or (pDraw and pDraw->device () != DeviceType::GL)) or
-        ((!pDraw and  pRead) or (pRead and pRead->device () != DeviceType::GL)))
+	if ((( pDraw and !pRead) or (pDraw and pDraw->device () != DeviceType::GL)) or
+		((!pDraw and  pRead) or (pRead and pRead->device () != DeviceType::GL)))
 		return false;
 
 	m_pDrawTarget = pDraw;

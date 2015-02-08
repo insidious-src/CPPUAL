@@ -23,15 +23,14 @@
 #define CPPUAL_GFX_DRAWABLE_IMAGE_H_
 #ifdef __cplusplus
 
+#include <string>
 #include <cppual/gfx/draw.h>
-#include <cppual/mstring.h>
-#include <cppual/memory/mop.h>
-#include <cppual/ui/manager.h>
+#include <cppual/memory/allocator.h>
 
-using cppual::Platform::Factory;
+using std::string;
 using cppual::Memory::AllocatorPolicy;
 using cppual::Memory::Allocator;
-using std::string;
+
 
 namespace cppual { namespace Graphics {
 
@@ -46,7 +45,7 @@ public:
 
 /**
  * @class CRasterImage
- * @brief Raster image parser for jpg, png, bmp, tga, gif and ico
+ * @brief Raster image parser for jpg, png, bmp, tga, gif
  */
 
 class RasterImage final : public Image, private Memory::GenericPolicy<RasterImage>
@@ -57,7 +56,7 @@ public:
 	void draw (Transform2D const& info);
 
 	inline RasterImage (string const&      gPath,
-						Allocator&        pAtor,
+						Allocator&         pAtor,
 						PixelFormat const& gFomat = PixelFormat (),
 						RGBColor           gMask  = RGBColor ())
 	: AllocatorPolicy (pAtor),
@@ -110,7 +109,7 @@ public:
 	{ return m_bIsLoaded; }
 
 	inline VectorImage (string const&      gPath,
-						Allocator&        pAtor,
+						Allocator&         pAtor,
 						PixelFormat const& gFomat = PixelFormat ())
 	: AllocatorPolicy (pAtor),
 	  m_gPixBuffer ({ 0, 0 }, gFomat),

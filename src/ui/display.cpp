@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#include <string>
 #include <cppual/ui/manager.h>
 
 using std::string;
@@ -30,14 +30,9 @@ namespace cppual { namespace Ui {
 
 namespace {  namespace Internal { // optimize for internal unit usage
 
-struct Initializer
+inline shared_display& backend () noexcept
 {
-	shared_display instance;
-};
-
-inline Initializer& backend () noexcept
-{
-	static Initializer back;
+	static shared_display back;
 	return back;
 }
 
@@ -47,13 +42,13 @@ inline Initializer& backend () noexcept
 
 IDisplay* IDisplay::instance ()
 {
-	if (Internal::backend ().instance == nullptr) set (nullptr);
-	return Internal::backend ().instance.get ();
+	if (Internal::backend () == nullptr) set (nullptr);
+	return Internal::backend ().get ();
 }
 
 bool IDisplay::hasValidInstance () noexcept
 {
-	return Internal::backend ().instance != nullptr;
+	return Internal::backend () != nullptr;
 }
 
 bool IDisplay::set (cchar* pDevName)
@@ -62,21 +57,21 @@ bool IDisplay::set (cchar* pDevName)
 
 	if (Factory::hasValidInstance ())
 	{
-		Internal::backend ().instance = Factory::instance ()->connectDisplay (pDevName);
+		Internal::backend () = Factory::instance ()->connectDisplay (pDevName);
 
-		if (Internal::backend ().instance != nullptr and !Internal::backend ().instance->native ())
-			Internal::backend ().instance.reset ();
+		if (Internal::backend () != nullptr and !Internal::backend ()->native ())
+			Internal::backend ().reset ();
 	}
 
-	if (!bConnected and Internal::backend ().instance != nullptr) return (bConnected = true);
-	return Internal::backend ().instance != nullptr;
+	if (!bConnected and Internal::backend () != nullptr) return (bConnected = true);
+	return Internal::backend () != nullptr;
 }
 
 IDisplay::pointer IDisplay::connect (cchar* pDevName)
 {
-	if (Internal::backend ().instance != nullptr and
-			Internal::backend ().instance->name () == pDevName)
-		return Internal::backend ().instance;
+	if (Internal::backend () != nullptr and
+			Internal::backend ()->name () == pDevName)
+		return Internal::backend ();
 
 	return Factory::hasValidInstance () ?
 				std::move (Factory::instance ()->connectDisplay (pDevName)) :

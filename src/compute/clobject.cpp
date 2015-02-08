@@ -22,60 +22,167 @@
 #include <cppual/compute/platform.h>
 #include "cldef.h"
 
-namespace cppual {
+namespace cppual { namespace Compute {
 
-int32 reference (Disposable<Compute::DeviceQueue>* pObj) noexcept
-{ return ::clRetainCommandQueue (reinterpret_cast<cl_command_queue> (pObj)); }
+template <>
+Object<Device>::~Object () noexcept
+{
+    if (m_object != nullptr) ::clReleaseDevice (m_object.get<CL::device_type> ());
+}
 
-int32 reference (Disposable<Compute::Sampler>* pObj) noexcept
-{ return ::clRetainSampler (reinterpret_cast<cl_sampler> (pObj)); }
+template <>
+Object<Context>::~Object () noexcept
+{
+    if (m_object != nullptr) ::clReleaseContext (m_object.get<CL::context_type> ());
+}
 
-int32 reference (Disposable<Compute::Program>* pObj) noexcept
-{ return ::clRetainProgram (reinterpret_cast<cl_program> (pObj)); }
+template <>
+Object<Kernel>::~Object () noexcept
+{
+    if (m_object != nullptr) ::clReleaseKernel (m_object.get<CL::kernel_type> ());
+}
 
-int32 reference (Disposable<Compute::Kernel>* pObj) noexcept
-{ return ::clRetainKernel (reinterpret_cast<cl_kernel> (pObj)); }
+template <>
+Object<Program>::~Object () noexcept
+{
+    if (m_object != nullptr) ::clReleaseProgram (m_object.get<CL::program_type> ());
+}
 
-int32 reference (Disposable<Compute::Event>* pObj) noexcept
-{ return ::clRetainEvent (reinterpret_cast<cl_event> (pObj)); }
+template <>
+Object<DeviceQueue>::~Object () noexcept
+{
+    if (m_object != nullptr) ::clReleaseCommandQueue (m_object.get<CL::queue_type> ());
+}
 
-int32 reference (Disposable<Compute::Context>* pObj) noexcept
-{ return ::clRetainContext (reinterpret_cast<cl_context> (pObj)); }
+template <>
+Object<MemoryRegion>::~Object () noexcept
+{
+    if (m_object != nullptr) ::clReleaseMemObject (m_object.get<CL::memory_type> ());
+}
 
-void* Disposable<Compute::Context>::operator new (std::size_t) noexcept
-{ return ::clCreateContext (nullptr, 0, nullptr, nullptr, nullptr, nullptr); }
+template <>
+Object<Event>::~Object () noexcept
+{
+    if (m_object != nullptr) ::clReleaseEvent (m_object.get<cl_event> ());
+}
 
-void Disposable<Compute::Context>::operator delete (void* pObj) noexcept
-{ ::clReleaseContext (static_cast<cl_context> (pObj)); }
+template <>
+Object<Device>::Object (Object const& rhs) noexcept
+: m_object (rhs.m_object)
+{
+    if (m_object != nullptr) ::clRetainDevice (m_object.get<CL::device_type> ());
+}
 
-void* Disposable<Compute::DeviceQueue>::operator new (std::size_t) noexcept
-{ return ::clCreateCommandQueue (nullptr, nullptr, 0, nullptr); }
+template <>
+Object<Context>::Object (Object const& rhs) noexcept
+: m_object (rhs.m_object)
+{
+    if (m_object != nullptr) ::clRetainContext (m_object.get<CL::context_type> ());
+}
 
-void Disposable<Compute::DeviceQueue>::operator delete (void* queue) noexcept
-{  ::clReleaseCommandQueue (reinterpret_cast<cl_command_queue> (queue)); }
+template <>
+Object<Kernel>::Object (Object const& rhs) noexcept
+: m_object (rhs.m_object)
+{
+    if (m_object != nullptr) ::clRetainKernel (m_object.get<CL::kernel_type> ());
+}
 
-void* Disposable<Compute::Sampler>::operator new (std::size_t) noexcept
-{ return ::clCreateSampler (nullptr, 0, 0, 0, nullptr); }
+template <>
+Object<Program>::Object (Object const& rhs) noexcept
+: m_object (rhs.m_object)
+{
+    if (m_object != nullptr) ::clRetainProgram (m_object.get<CL::program_type> ());
+}
 
-void Disposable<Compute::Sampler>::operator delete (void* sampler) noexcept
-{ ::clReleaseSampler (reinterpret_cast<cl_sampler> (sampler)); }
+template <>
+Object<DeviceQueue>::Object (Object const& rhs) noexcept
+: m_object (rhs.m_object)
+{
+    if (m_object != nullptr) ::clRetainCommandQueue (m_object.get<CL::queue_type> ());
+}
 
-void* Disposable<Compute::Program>::operator new (std::size_t) noexcept
-{ return ::clCreateProgramWithSource (nullptr, 0, nullptr, nullptr, nullptr); }
+template <>
+Object<Event>::Object (Object const& rhs) noexcept
+: m_object (rhs.m_object)
+{
+    if (m_object != nullptr) ::clRetainEvent (m_object.get<CL::event_type> ());
+}
 
-void Disposable<Compute::Program>::operator delete (void* program) noexcept
-{ ::clReleaseProgram (reinterpret_cast<cl_program> (program)); }
+template <>
+Object<MemoryRegion>::Object (Object const& rhs) noexcept
+: m_object (rhs.m_object)
+{
+    if (m_object != nullptr) ::clRetainMemObject (m_object.get<CL::memory_type> ());
+}
 
-void* Disposable<Compute::Kernel>::operator new (std::size_t) noexcept
-{ return ::clCreateKernel (nullptr, nullptr, nullptr); }
+template <>
+Object<Device>& Object<Device>::operator = (Object const& rhs) noexcept
+{
+    if (this == &rhs) return *this;
+    if (m_object != nullptr) ::clReleaseDevice (m_object.get<CL::device_type> ());
+    m_object = rhs.m_object;
+    if (m_object != nullptr) ::clRetainDevice  (m_object.get<CL::device_type> ());
+    return *this;
+}
 
-void Disposable<Compute::Kernel>::operator delete (void* kernel) noexcept
-{ ::clReleaseKernel (reinterpret_cast<cl_kernel> (kernel)); }
+template <>
+Object<Context>& Object<Context>::operator = (Object const& rhs) noexcept
+{
+    if (this == &rhs) return *this;
+    if (m_object != nullptr) ::clReleaseContext (m_object.get<CL::context_type> ());
+    m_object = rhs.m_object;
+    if (m_object != nullptr) ::clRetainContext  (m_object.get<CL::context_type> ());
+    return *this;
+}
 
-void* Disposable<Compute::Event>::operator new (std::size_t) noexcept
-{ return ::clCreateUserEvent (nullptr, nullptr); }
+template <>
+Object<Kernel>& Object<Kernel>::operator = (Object const& rhs) noexcept
+{
+    if (this == &rhs) return *this;
+    if (m_object != nullptr) ::clReleaseKernel (m_object.get<CL::kernel_type> ());
+    m_object = rhs.m_object;
+    if (m_object != nullptr) ::clRetainKernel  (m_object.get<CL::kernel_type> ());
+    return *this;
+}
 
-void Disposable<Compute::Event>::operator delete (void* event) noexcept
-{ ::clReleaseEvent (reinterpret_cast<cl_event> (event)); }
+template <>
+Object<Program>& Object<Program>::operator = (Object const& rhs) noexcept
+{
+    if (this == &rhs) return *this;
+    if (m_object != nullptr) ::clReleaseProgram (m_object.get<CL::program_type> ());
+    m_object = rhs.m_object;
+    if (m_object != nullptr) ::clRetainProgram  (m_object.get<CL::program_type> ());
+    return *this;
+}
 
-} // cppual
+template <>
+Object<DeviceQueue>& Object<DeviceQueue>::operator = (Object const& rhs) noexcept
+{
+    if (this == &rhs) return *this;
+    if (m_object != nullptr) ::clReleaseCommandQueue (m_object.get<CL::queue_type> ());
+    m_object = rhs.m_object;
+    if (m_object != nullptr) ::clRetainCommandQueue  (m_object.get<CL::queue_type> ());
+    return *this;
+}
+
+template <>
+Object<Event>& Object<Event>::operator = (Object const& rhs) noexcept
+{
+    if (this == &rhs) return *this;
+    if (m_object != nullptr) ::clReleaseEvent (m_object.get<CL::event_type> ());
+    m_object = rhs.m_object;
+    if (m_object != nullptr) ::clRetainEvent  (m_object.get<CL::event_type> ());
+    return *this;
+}
+
+template <>
+Object<MemoryRegion>& Object<MemoryRegion>::operator = (Object const& rhs) noexcept
+{
+    if (this == &rhs) return *this;
+    if (m_object != nullptr) ::clReleaseMemObject (m_object.get<CL::memory_type> ());
+    m_object = rhs.m_object;
+    if (m_object != nullptr) ::clRetainMemObject  (m_object.get<CL::memory_type> ());
+    return *this;
+}
+
+} } // namespace Compute

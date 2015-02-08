@@ -104,7 +104,7 @@ public:
 	{ return m_thread; }
 
 private:
-	thread::id m_thread;
+	thread::id m_thread { std::this_thread::get_id () };
 };
 
 } } // namespace Ui

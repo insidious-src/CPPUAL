@@ -21,6 +21,7 @@
 
 #include <unordered_map>
 #include <cppual/ui/window.h>
+#include <cppual/ui/manager.h>
 
 namespace cppual { namespace Ui {
 
@@ -41,9 +42,9 @@ inline map_type& map ()
 void WindowAdapter::registerEvents ()
 {
 	connect (event_type::registers ().mouseMove,
-			 [](event_type::window_type wnd, event_type::MouseMoveData data)
+			 [](event_type::window_type wnd, point2u pos)
 	{
-		Internal::map ()[wnd]->onPointerMove (data);
+		Internal::map ()[wnd]->onPointerMove (pos);
 	});
 
 	connect (event_type::registers ().mousePress,
@@ -65,21 +66,21 @@ void WindowAdapter::registerEvents ()
 	});
 
 	connect (event_type::registers ().winFocus,
-             [](event_type::window_type wnd, bool state)
+			 [](event_type::window_type wnd, bool state)
 	{
-        Internal::map ()[wnd]->onFocus (state);
+		Internal::map ()[wnd]->onFocus (state);
 	});
 
 	connect (event_type::registers ().winSize,
-			 [](event_type::window_type wnd, event_type::SizeData data)
+			 [](event_type::window_type wnd, point2u size)
 	{
-		Internal::map ()[wnd]->onSize (data);
+		Internal::map ()[wnd]->onSize (size);
 	});
 
 	connect (event_type::registers ().winVisible,
-             [](event_type::window_type wnd, bool state)
+			 [](event_type::window_type wnd, bool state)
 	{
-        Internal::map ()[wnd]->onShow (state);
+		Internal::map ()[wnd]->onShow (state);
 	});
 }
 
@@ -128,9 +129,9 @@ void WindowAdapter::restore ()
 	}
 }
 
-void WindowAdapter::onSize (event_type::SizeData gData)
+void WindowAdapter::onSize (point2u gSize)
 {
-	m_pMainWidget->setSize (gData.size);
+	m_pMainWidget->setSize (gSize);
 }
 
 WindowAdapter::WindowAdapter (WindowAdapter&& gObj)
@@ -156,7 +157,7 @@ WindowAdapter& WindowAdapter::operator = (WindowAdapter&& gObj)
 		gObj.m_pIcon        = Icon ();
 	}
 
-    return *this;
+	return *this;
 }
 
 // =========================================================

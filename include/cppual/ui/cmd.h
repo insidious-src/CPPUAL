@@ -23,7 +23,8 @@
 #define CPPUAL_UI_ACTION_H_
 #ifdef __cplusplus
 
-#include <cppual/mstring.h>
+#include <string>
+#include <cppual/signal.h>
 #include <cppual/gfx/drawable/image.h>
 
 using std::string;

@@ -53,6 +53,13 @@ struct Point2 final
 {
 	T x, y;
 	static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
+
+	Point2 () noexcept = default;
+
+	template <typename U>
+	constexpr Point2 (U x_, U y_) noexcept
+	: x (T (x_)), y (T (y_))
+	{ }
 };
 
 template <typename T>

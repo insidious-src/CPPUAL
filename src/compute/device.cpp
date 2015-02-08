@@ -113,7 +113,7 @@ string Device::info (Info eInfo)
 
 	if (m_uNumUnits)
 	{
-		CL::device dev = CL::handle (m_eType, m_uPlatformId, m_uId);
+		CL::device_type dev = CL::handle (m_eType, m_uPlatformId, m_uId);
 
 		if (::clGetDeviceInfo (dev, infotype (eInfo), 0, nullptr, &n) != CL_SUCCESS)
 			return string ();
@@ -134,7 +134,7 @@ bool Device::available (cchar* feature)
 	if (m_uNumUnits)
 	{
 		static size_type  uSize = 0;
-		const  CL::device dev   = CL::handle (m_eType, m_uPlatformId, m_uId);
+		const  CL::device_type dev   = CL::handle (m_eType, m_uPlatformId, m_uId);
 
 		if (::clGetDeviceInfo (dev, CL_PLATFORM_EXTENSIONS,
 							   0, nullptr, &uSize) != CL_SUCCESS or !uSize)
@@ -242,13 +242,5 @@ Device::Partition& Device::Partition::operator = (Device::Partition const& gObj)
 }
 
 }
-
-// =========================================================
-
-int32 reference (Disposable<Compute::Device::Partition>* pObj) noexcept
-{ return ::clRetainDevice (reinterpret_cast<cl_device_id> (pObj)); }
-
-void Disposable<Compute::Device::Partition>::operator delete (void* device) noexcept
-{ ::clReleaseDevice (reinterpret_cast<cl_device_id> (device)); }
 
 } // Compute

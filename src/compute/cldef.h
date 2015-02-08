@@ -42,13 +42,19 @@ enum
 	LocalMemSize  = CL_DEVICE_LOCAL_MEM_SIZE
 };
 
-typedef cl_uint        size_type;
-typedef cl_int         int_type;
-typedef cl_device_id   device;
-typedef cl_platform_id platform;
-typedef u8             type_size;
+typedef cl_uint          size_type;
+typedef cl_int           int_type;
+typedef cl_device_id     device_type;
+typedef cl_platform_id   platform_type;
+typedef cl_event         event_type;
+typedef cl_kernel        kernel_type;
+typedef cl_program       program_type;
+typedef cl_context       context_type;
+typedef cl_mem           memory_type;
+typedef cl_command_queue queue_type;
+typedef u8               type_size;
 
-device handle (type_size type, u16 platform, size_type id);
+device_type handle (type_size type, u16 platform_type, size_type id);
 
 } } } // namespace CL
 

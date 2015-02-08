@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
 #include <cppual/ui/events.h>
 #include <cppual/input/pointer.h>
 
@@ -72,7 +71,19 @@ inline u8 button (xcb_button uId) noexcept
 
 // ====================================================
 
-class XcbEvent final
+struct XcbEvent final : public xcb_generic_event_t
+{
+	constexpr XcbEvent () noexcept
+	: xcb_generic_event_t ()
+	{ }
+
+	constexpr uint type () const noexcept
+	{ return response_type & ~0x80; }
+};
+
+// ====================================================
+
+class EventPtr final
 {
 public:
 	typedef Event                       event_type;
@@ -154,137 +165,238 @@ public:
 	uint type () const noexcept
 	{ return m_handle->response_type & ~0x80; }
 
-	~XcbEvent () noexcept
+	~EventPtr () noexcept
 	{ ::free (m_handle); }
 
-	XcbEvent ()               noexcept = default;
-	XcbEvent (pointer pDpy)   noexcept : m_handle (pDpy) { }
-	XcbEvent (std::nullptr_t) noexcept : m_handle ()     { }
+	EventPtr ()               noexcept = default;
+	EventPtr (pointer pDpy)   noexcept : m_handle (pDpy) { }
+	EventPtr (std::nullptr_t) noexcept : m_handle ()     { }
 
-	window_type window () const noexcept
+	inline static XcbEvent toXcbEvent (event_type const&)
+	{
+		return XcbEvent ();
+	}
+
+	inline handle_type window () const noexcept
 	{
 		switch (type ())
 		{
-		case XcbEvent::MousePress:
-			return get<XcbEvent::btn_press_type> ()->event;
-		case XcbEvent::MouseRelease:
-			return get<XcbEvent::btn_release_type> ()->event;
-		case XcbEvent::MouseMove:
-			return get<XcbEvent::mouse_move_type> ()->event;
-		case XcbEvent::KeyPress:
-			return get<XcbEvent::key_press_type> ()->event;
-		case XcbEvent::KeyRelease:
-			return get<XcbEvent::key_release_type> ()->event;
-		case XcbEvent::Expose:
-			return get<XcbEvent::expose_type> ()->window;
-		case XcbEvent::Enter:
-			return get<XcbEvent::enter_type> ()->event;
-		case XcbEvent::Leave:
-			return get<XcbEvent::leave_type> ()->event;
-		case XcbEvent::FocusIn:
-			return get<XcbEvent::focus_in_type> ()->event;
-		case XcbEvent::FocusOut:
-			return get<XcbEvent::focus_out_type> ()->event;
-		case XcbEvent::Size:
-			return get<XcbEvent::resize_type> ()->window;
-		case XcbEvent::Property:
-			return get<XcbEvent::property_type> ()->window;
-		case XcbEvent::Map:
-			return get<XcbEvent::map_type> ()->window;
-		case XcbEvent::Unmap:
-			return get<XcbEvent::unmap_type> ()->window;
+		case MousePress:
+			return get<btn_press_type> ()->event;
+		case MouseRelease:
+			return get<btn_release_type> ()->event;
+		case MouseMove:
+			return get<mouse_move_type> ()->event;
+		case KeyPress:
+			return get<key_press_type> ()->event;
+		case KeyRelease:
+			return get<key_release_type> ()->event;
+		case Expose:
+			return get<expose_type> ()->window;
+		case Enter:
+			return get<enter_type> ()->event;
+		case Leave:
+			return get<leave_type> ()->event;
+		case FocusIn:
+			return get<focus_in_type> ()->event;
+		case FocusOut:
+			return get<focus_out_type> ()->event;
+		case Size:
+			return get<resize_type> ()->window;
+		case Property:
+			return get<property_type> ()->window;
+		case Map:
+			return get<map_type> ()->window;
+		case Unmap:
+			return get<unmap_type> ()->window;
 		default:
-			return m_handle->pad;
+			return 0;
 		}
 	}
 
-	static xcb_generic_event_t toNativeEvent (event_type const&)
-	{
-		return xcb_generic_event_t ();
-	}
-
-	event_type toEvent () const noexcept
+	inline void operator ()() const
 	{
 		switch (type ())
 		{
-		case XcbEvent::MousePress:
-			switch (get<XcbEvent::btn_press_type> ()->detail)
+		case MousePress:
+			switch (get<btn_press_type> ()->detail)
 			{
-			case XcbEvent::MouseWheelUp:
-				return Ui::ScrollEvent (get<XcbEvent::btn_press_type> ()->event,
-										1, { get<XcbEvent::btn_press_type> ()->event_x,
-											 get<XcbEvent::btn_press_type> ()->event_y });
-			case XcbEvent::MouseWheelDown:
-				return Ui::ScrollEvent (get<XcbEvent::btn_press_type> ()->event,
-										-1, { get<XcbEvent::btn_press_type> ()->event_x,
-											  get<XcbEvent::btn_press_type> ()->event_y });
+			case MouseWheelUp:
+				event_type::registers ().scroll (get<btn_press_type> ()->event,
+				{{ get<btn_press_type> ()->event_x, get<btn_press_type> ()->event_y }, 1 });
+				break;
+			case MouseWheelDown:
+				event_type::registers ().scroll (get<btn_press_type> ()->event,
+				{{ get<btn_press_type> ()->event_x, get<btn_press_type> ()->event_y }, -1 });
+				break;
 			default:
-				return Ui::MousePressEvent (get<XcbEvent::btn_press_type> ()->event,
-											button (get<XcbEvent::btn_press_type> ()->detail),
-				{ get<XcbEvent::btn_press_type> ()->event_x,
-				  get<XcbEvent::btn_press_type> ()->event_y });
+				event_type::registers ().mousePress (get<btn_press_type> ()->event,
+				{{ get<btn_press_type> ()->event_x, get<btn_press_type> ()->event_y },
+				 button (get<btn_press_type> ()->detail) });
+				break;
 			}
 			break;
-		case XcbEvent::MouseRelease:
-			if (get<XcbEvent::btn_release_type> ()->detail == XcbEvent::MouseWheelUp or
-				get<XcbEvent::btn_release_type> ()->detail == XcbEvent::MouseWheelDown)
-
-			return Ui::MouseReleaseEvent (get<XcbEvent::btn_release_type> ()->event,
-										  button (get<XcbEvent::btn_release_type> ()->detail),
-			{ get<XcbEvent::btn_release_type> ()->event_x,
-			  get<XcbEvent::btn_release_type> ()->event_y });
-		case XcbEvent::MouseMove:
-			return Ui::MouseMoveEvent (get<XcbEvent::mouse_move_type> ()->event,
-			{ get<XcbEvent::mouse_move_type> ()->event_x,
-			  get<XcbEvent::mouse_move_type> ()->event_y });
-		case XcbEvent::KeyPress:
-			return Ui::KeyPressEvent (get<XcbEvent::key_press_type> ()->event,
-			{ get<XcbEvent::key_press_type> ()->detail });
-		case XcbEvent::KeyRelease:
-			return Ui::KeyReleaseEvent (get<XcbEvent::key_release_type> ()->event,
-			{ get<XcbEvent::key_release_type> ()->detail });
-		case XcbEvent::Expose:
-			return Ui::PaintEvent (get<XcbEvent::expose_type> ()->window,
-									 Rect (static_cast<int16> (get<XcbEvent::expose_type> ()->x),
-										   static_cast<int16> (get<XcbEvent::expose_type> ()->y),
-										   get<XcbEvent::expose_type> ()->width,
-										   get<XcbEvent::expose_type> ()->height));
+		case MouseRelease:
+			switch (get<btn_release_type> ()->detail)
+			{
+			case MouseWheelUp:
+			case MouseWheelDown:
+				break;
+			default:
+				event_type::registers ().mouseRelease (get<btn_release_type> ()->event,
+				{{ get<btn_release_type> ()->event_x, get<btn_release_type> ()->event_y },
+				 button (get<btn_release_type> ()->detail) });
+				break;
+			}
 			break;
-		case XcbEvent::Enter:
-			return Ui::StepEvent (get<XcbEvent::enter_type> ()->event, true);
-		case XcbEvent::Leave:
-			return Ui::StepEvent (get<XcbEvent::leave_type> ()->event, false);
-		case XcbEvent::FocusIn:
-			return Ui::FocusEvent (get<XcbEvent::focus_in_type> ()->event, true);
-		case XcbEvent::FocusOut:
-			return Ui::FocusEvent (get<XcbEvent::focus_out_type> ()->event, false);
-		case XcbEvent::Size:
-			return Ui::SizeEvent (get<XcbEvent::resize_type> ()->window,
-			{ get<XcbEvent::resize_type> ()->width,
-			  get<XcbEvent::resize_type> ()->height });
-		case XcbEvent::Property:
-			return Ui::PropertyEvent (get<XcbEvent::property_type> ()->window,
-									  get<XcbEvent::property_type> ()->atom,
-									  get<XcbEvent::property_type> ()->state);
-		case XcbEvent::Map:
-			return Ui::VisibilityEvent (get<XcbEvent::map_type> ()->window, true);
-		case XcbEvent::Unmap:
-			return Ui::VisibilityEvent (get<XcbEvent::unmap_type> ()->window, false);
-		case XcbEvent::Destroy:
+		case MouseMove:
+			event_type::registers ().mouseMove (get<mouse_move_type> ()->event,
+			{ get<mouse_move_type> ()->event_x, get<mouse_move_type> ()->event_y });
+			break;
+		case KeyPress:
+			event_type::registers ().keyPress (get<key_press_type> ()->event,
+			{ get<key_press_type> ()->detail });
+			break;
+		case KeyRelease:
+			event_type::registers ().keyPress (get<key_release_type> ()->event,
+			{ get<key_release_type> ()->detail });
+			break;
+		case Expose:
+			event_type::registers ().winPaint (get<expose_type> ()->window,
+			{ Rect (static_cast<int16> (get<expose_type> ()->x),
+			  static_cast<int16> (get<expose_type> ()->y),
+			  get<expose_type> ()->width,
+			  get<expose_type> ()->height) });
+			break;
+		case Enter:
+			event_type::registers ().winStep (get<enter_type> ()->event, true);
+			break;
+		case Leave:
+			event_type::registers ().winStep (get<leave_type> ()->event, false);
+			break;
+		case FocusIn:
+			event_type::registers ().winFocus (get<focus_in_type> ()->event, true);
+			break;
+		case FocusOut:
+			event_type::registers ().winFocus (get<focus_out_type> ()->event, false);
+			break;
+		case Size:
+			event_type::registers ().winSize (get<resize_type> ()->window,
+			{ get<resize_type> ()->width, get<resize_type> ()->height });
+			break;
+		case Property:
+			event_type::registers ().winProperty (get<property_type> ()->window,
+			{ get<property_type> ()->atom, get<property_type> ()->state });
+			break;
+		case Map:
+			event_type::registers ().winVisible (get<map_type> ()->window, true);
+
+		case Unmap:
+			event_type::registers ().winVisible (get<unmap_type> ()->window, false);
+			break;
+		case Destroy:
+			break;
+		case GraphicsExposure:
+			break;
+		case NoExposure:
+			break;
+		case ChangeParent:
+			break;
+		case Mapping:
+			break;
+		case Configure:
+			break;
+		case GetKbCtrl:
+			break;
+		case ChangeKbCtrl:
+			break;
+		default:
+			break;
+		}
+	}
+
+	inline event_type toEvent () const noexcept
+	{
+		switch (type ())
+		{
+		case MousePress:
+			switch (get<btn_press_type> ()->detail)
+			{
+			case MouseWheelUp:
+				return Ui::ScrollEvent (get<btn_press_type> ()->event,
+										1, { get<btn_press_type> ()->event_x,
+											 get<btn_press_type> ()->event_y });
+			case MouseWheelDown:
+				return Ui::ScrollEvent (get<btn_press_type> ()->event,
+										-1, { get<btn_press_type> ()->event_x,
+											  get<btn_press_type> ()->event_y });
+			default:
+				return Ui::MousePressEvent (get<btn_press_type> ()->event,
+											button (get<btn_press_type> ()->detail),
+				{ get<btn_press_type> ()->event_x,
+				  get<btn_press_type> ()->event_y });
+			}
+			break;
+		case MouseRelease:
+			if (get<btn_release_type> ()->detail == MouseWheelUp or
+				get<btn_release_type> ()->detail == MouseWheelDown)
+
+			return Ui::MouseReleaseEvent (get<btn_release_type> ()->event,
+										  button (get<btn_release_type> ()->detail),
+			{ get<btn_release_type> ()->event_x,
+			  get<btn_release_type> ()->event_y });
+		case MouseMove:
+			return Ui::PointerMoveEvent (get<mouse_move_type> ()->event,
+			{ get<mouse_move_type> ()->event_x,
+			  get<mouse_move_type> ()->event_y });
+		case KeyPress:
+			return Ui::KeyPressEvent (get<key_press_type> ()->event,
+			{ get<key_press_type> ()->detail });
+		case KeyRelease:
+			return Ui::KeyReleaseEvent (get<key_release_type> ()->event,
+			{ get<key_release_type> ()->detail });
+		case Expose:
+			return Ui::PaintEvent (get<expose_type> ()->window,
+									 Rect (static_cast<int16> (get<expose_type> ()->x),
+										   static_cast<int16> (get<expose_type> ()->y),
+										   get<expose_type> ()->width,
+										   get<expose_type> ()->height));
+			break;
+		case Enter:
+			return Ui::StepEvent (get<enter_type> ()->event, true);
+		case Leave:
+			return Ui::StepEvent (get<leave_type> ()->event, false);
+		case FocusIn:
+			return Ui::FocusEvent (get<focus_in_type> ()->event, true);
+		case FocusOut:
+			return Ui::FocusEvent (get<focus_out_type> ()->event, false);
+		case Size:
+			return Ui::SizeEvent (get<resize_type> ()->window,
+			{ get<resize_type> ()->width,
+			  get<resize_type> ()->height });
+		case Property:
+			return Ui::PropertyEvent (get<property_type> ()->window,
+									  get<property_type> ()->atom,
+									  get<property_type> ()->state);
+		case Map:
+			return Ui::VisibilityEvent (get<map_type> ()->window, true);
+		case Unmap:
+			return Ui::VisibilityEvent (get<unmap_type> ()->window, false);
+		case Destroy:
 			return event_type (event_type::Null);
-		case XcbEvent::GraphicsExposure:
+		case GraphicsExposure:
 			return event_type (event_type::Null);
-		case XcbEvent::NoExposure:
+		case NoExposure:
 			return event_type (event_type::Null);
-		case XcbEvent::ChangeParent:
+		case ChangeParent:
 			return event_type (event_type::Null);
-		case XcbEvent::Mapping:
+		case Mapping:
 			return event_type (event_type::Null);
-		case XcbEvent::Configure:
+		case Configure:
 			return event_type (event_type::Null);
-		case XcbEvent::GetKbCtrl:
+		case GetKbCtrl:
 			return event_type (event_type::Null);
-		case XcbEvent::ChangeKbCtrl:
+		case ChangeKbCtrl:
 			return event_type (event_type::Null);
 		default:
 			return event_type (event_type::Null);
@@ -299,13 +411,13 @@ private:
 
 // ====================================================
 
-XQueue::XQueue () noexcept
-: IDisplayQueue (IDisplay::hasValidInstance () ? IDisplay::instance ()->native () : nullptr)
+XQueue::XQueue ()
+: IDisplayQueue (IDisplay::instance ()->native ())
 { }
 
-bool XQueue::set_window_events (IWindow const& pRenderable, mask_type gFlags) noexcept
+bool XQueue::set_window_events (IWindow const& window, mask_type gFlags) noexcept
 {
-	if (pRenderable.connection ()->native () != display ())
+	if (window.connection ()->native () != display ())
 		return false;
 
 	u32 uMask = XCB_EVENT_MASK_NO_EVENT;
@@ -346,16 +458,18 @@ bool XQueue::set_window_events (IWindow const& pRenderable, mask_type gFlags) no
 		if (gFlags.test (event_type::Focus))       uMask |= XCB_EVENT_MASK_FOCUS_CHANGE;
 	}
 
-	xcb_change_window_attributes (display ().get<xcb_connection_t> (),
-								  pRenderable.id ().get<u32> (),
+	xcb_change_window_attributes (display   ().get<display_type> (),
+								  window.id ().get<handle_type>  (),
 								  XCB_CW_EVENT_MASK,
 								  &uMask);
+
+	xcb_flush (display ().get<display_type> ());
 	return true;
 }
 
 bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 {
-	XcbEvent pEv (bWait ? xcb_wait_for_event (display ().get<display_type> ()) :
+	EventPtr pEv (bWait ? xcb_wait_for_event (display ().get<display_type> ()) :
 						  xcb_poll_for_event (display ().get<display_type> ()));
 
 	if (!pEv) return false;
@@ -363,15 +477,16 @@ bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 	return true;
 }
 
-int XQueue::poll (IWindow const& window, bool wait, atomic_bool& poll)
+int XQueue::poll (window_type const& window, atomic_bool& poll)
 {
 	while (poll.load (std::memory_order_relaxed))
 	{
-		XcbEvent pEv (wait ? xcb_wait_for_event (display ().get<display_type> ()) :
-							 xcb_poll_for_event (display ().get<display_type> ()));
+		EventPtr event (xcb_wait_for_event (display ().get<display_type> ()));
 
-		if (!pEv or pEv.window () != window.id ()) continue;
-		pEv.toEvent ()();
+		if (!event or event.window () != window.id ().get<handle_type> ())
+			continue;
+
+		event ();
 	}
 
 	return 0;
@@ -379,12 +494,12 @@ int XQueue::poll (IWindow const& window, bool wait, atomic_bool& poll)
 
 void XQueue::send (event_type const& event)
 {
-	XcbEvent::value_type send_event = XcbEvent::toNativeEvent (event);
+	XcbEvent send_event = EventPtr::toXcbEvent (event);
 
 	xcb_send_event (display ().get<display_type> (),
 					false,
 					event.window ().get<handle_type> (),
-					send_event.response_type,
+					send_event.type (),
 					reinterpret_cast<cchar*> (&send_event));
 
 	xcb_flush (display ().get<display_type> ());
@@ -392,12 +507,12 @@ void XQueue::send (event_type const& event)
 
 void XQueue::post (event_type const& event)
 {
-	XcbEvent::value_type post_event = XcbEvent::toNativeEvent (event);
+	XcbEvent post_event = EventPtr::toXcbEvent (event);
 
 	xcb_send_event (display ().get<display_type> (),
 					false,
 					event.window ().get<handle_type> (),
-					post_event.response_type,
+					post_event.type (),
 					reinterpret_cast<cchar*> (&post_event));
 
 	xcb_flush (display ().get<display_type> ());

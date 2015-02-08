@@ -23,113 +23,90 @@
 #define CPPUAL_CL_OBJECT_H_
 #ifdef __cplusplus
 
+#include <type_traits>
 #include <cppual/types.h>
-#include <cppual/resource.h>
 
 namespace cppual { namespace Compute {
 
 class Device;
 class Context;
-class HostQueue;
 class DeviceQueue;
 class MemoryRegion;
-class Sampler;
 class Program;
 class Kernel;
 class Event;
+
+// =========================================================
+
+class Handle
+{
+public:
+    typedef void* pointer;
+
+    inline    Handle () noexcept = default;
+    constexpr Handle (pointer handle) noexcept : m_handle (handle) { }
+    constexpr Handle (std::nullptr_t) noexcept : m_handle ()       { }
+
+    constexpr operator pointer () const noexcept
+    { return m_handle; }
+
+    template <typename T>
+    constexpr typename std::remove_pointer<T>::type* get () const noexcept
+    { return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
+
+    friend
+    constexpr bool operator == (Handle const&, Handle const&) noexcept;
+
+    friend
+    constexpr bool operator == (Handle const&, std::nullptr_t) noexcept;
+
+private:
+    pointer m_handle;
+};
+
+constexpr bool operator == (Handle const& conn1, Handle const& conn2) noexcept
+{ return conn1.m_handle == conn2.m_handle; }
+
+constexpr bool operator == (Handle const& conn1, std::nullptr_t) noexcept
+{ return conn1.m_handle == nullptr; }
+
+constexpr bool operator != (Handle const& conn1, Handle const& conn2) noexcept
+{ return !(conn1 == conn2); }
+
+constexpr bool operator != (Handle const& conn1, std::nullptr_t) noexcept
+{ return !(conn1 == nullptr); }
+
+// =========================================================
 
 template <class T>
 class Object
 {
 public:
-	typedef Disposable<T>  value_type;
-	typedef Disposable<T>* pointer;
-	typedef u32            uint_type;
-	typedef int32          int_type;
+    typedef Handle pointer;
+    typedef u32    uint_type;
+    typedef int32  int_type;
 
 	Object (Object&&) noexcept = default;
+    Object (Object const& rhs) noexcept;
 	Object& operator = (Object&&) = default;
 
-	constexpr Object () noexcept : m_object () { }
-	inline   ~Object () noexcept { if (m_object != nullptr) delete m_object; }
-	inline    pointer handle () const noexcept { return m_object; }
+    Object& operator = (Object const& rhs) noexcept;
+    ~Object () noexcept;
 
-	inline Object (Object<T> const& rhs) noexcept
-	: m_object (rhs.m_object)
-	{ if (m_object != nullptr) reference (m_object); }
-
-	inline Object& operator = (Object<T> const& rhs) noexcept
-	{
-		if (this == &rhs) return *this;
-		if (m_object != nullptr) delete m_object;
-		m_object = rhs.m_object;
-		if (m_object != nullptr) reference (m_object);
-		return *this;
-	}
+    inline Object () noexcept : m_object () { }
+    inline pointer handle () const noexcept { return m_object; }
 
 	inline pointer  operator ()() const noexcept { return m_object; }
-	inline pointer& operator ()() noexcept { return m_object; }
+    inline pointer& operator ()() noexcept { return m_object; }
 
-protected:
-	constexpr Object (pointer obj) noexcept : m_object (obj)
-	{ }
+    inline Object (pointer obj) noexcept : m_object (obj)
+    { }
 
 private:
 	pointer m_object;
 };
 
-} // Compute
-
-int32 reference (Disposable<Compute::DeviceQueue>* pObj) noexcept;
-int32 reference (Disposable<Compute::Sampler>* pObj) noexcept;
-int32 reference (Disposable<Compute::Program>* pObj) noexcept;
-int32 reference (Disposable<Compute::Kernel>* pObj) noexcept;
-int32 reference (Disposable<Compute::Event>* pObj) noexcept;
-int32 reference (Disposable<Compute::Context>* pObj) noexcept;
-
-template <>
-struct Disposable <Compute::Context>
-{
-	static void* operator new (std::size_t) noexcept;
-	static void  operator delete (void*) noexcept;
-};
-
-template <>
-struct Disposable <Compute::DeviceQueue>
-{
-	static void* operator new (std::size_t) noexcept;
-	static void  operator delete (void*) noexcept;
-};
-
-template <>
-struct Disposable <Compute::Sampler>
-{
-	static void* operator new (std::size_t) noexcept;
-	static void  operator delete (void*) noexcept;
-};
-
-template <>
-struct Disposable <Compute::Program>
-{
-	static void* operator new (std::size_t) noexcept;
-	static void  operator delete (void*) noexcept;
-};
-
-template <>
-struct Disposable <Compute::Kernel>
-{
-	static void* operator new (std::size_t) noexcept;
-	static void  operator delete (void*) noexcept;
-};
-
-template <>
-struct Disposable <Compute::Event>
-{
-	static void* operator new (std::size_t) noexcept;
-	static void  operator delete (void*) noexcept;
-};
-
-} // cppual
+} } // Compute
 
 #endif // __cplusplus
 #endif // CPPUAL_CL_OBJECT_H_

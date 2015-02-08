@@ -23,11 +23,11 @@
 #define CPPUAL_PROCESS_THREAD_POOL
 #ifdef __cplusplus
 
+#include <deque>
 #include <shared_mutex>
 #include <condition_variable>
 #include <cppual/functional.h>
 #include <cppual/circular_queue.h>
-#include <cppual/noncopyable.h>
 #include <cppual/types.h>
 
 using std::shared_lock;
@@ -50,10 +50,9 @@ public:
 
 	enum State
 	{
-		Initial = 0,
-		Running,
-		Stopped,
-		Interrupted,
+		Interrupted = -1,
+		Inactive,
+		Running
 	};
 
 	HostQueue (HostQueue&&);
@@ -62,27 +61,19 @@ public:
 	HostQueue& operator = (HostQueue const&);
 
 	HostQueue () noexcept
-	: m_gQueueMutex  (),
-	  m_gTaskQueue   (),
-	  m_eState       (),
-	  m_uNumPending  (),
-	  m_uNumAssigned (),
-	  m_gSchedCond   (),
-	  m_gTaskCond    ()
+	: m_gQueueMutex   (),
+	  m_gTaskQueue    (),
+	  m_uNumAssigned  (),
+	  m_uNumCompleted (),
+	  m_gTaskCond     ()
 	{ }
 
-	void schedule (call_type&&);
+	bool schedule (call_type const&);
 	void quit     (bool interrupt = false) noexcept;
 
 	void whenAnyFinish ();
 	void whenAllFinish ();
 	void whenAllExit   ();
-
-	size_type assigned () const noexcept
-	{
-		read_lock gLock (m_gQueueMutex);
-		return m_uNumAssigned;
-	}
 
 	~HostQueue ()
 	{
@@ -90,10 +81,10 @@ public:
 		whenAllExit ();
 	}
 
-	size_type pending () const
+	size_type assigned () const
 	{
 		read_lock gLock (m_gQueueMutex);
-		return m_uNumPending;
+		return m_uNumAssigned;
 	}
 
 	State state () const
@@ -115,58 +106,54 @@ public:
 		m_gTaskQueue.clear ();
 	}
 
-	friend class Assigned;
-	friend class Pending;
+	friend class Assign;
 	friend class Worker;
 
 private:
 	mutable mutex_type m_gQueueMutex;
 	queue_type         m_gTaskQueue;
-	State              m_eState;
-	u16                m_uNumPending, m_uNumAssigned;
-	cv_type            m_gSchedCond,  m_gTaskCond;
+	State              m_eState { HostQueue::Inactive };
+	size_type          m_uNumAssigned;
+	size_type          m_uNumCompleted;
+	cv_type            m_gTaskCond;
 };
 
 // =========================================================
 
-struct ThreadPool final : NonConstructible
+namespace ThreadPool
 {
 	typedef HostQueue::mutex_type mutex_type;
 	typedef HostQueue::write_lock write_lock;
 	typedef HostQueue::read_lock  read_lock;
 	typedef HostQueue::size_type  size_type;
 
-	static size_type count (); // count running threads
-
-	static bool reserve (HostQueue& task_queue,
-						 size_type  assign_num_threads = 1,
-						 bool       detach_threads     = false);
-};
+	bool reserve (HostQueue& task_queue,
+				  size_type  assign_num_threads = 1,
+				  bool       detach_threads     = false);
+}
 
 // =========================================================
 
-// continuation host task
+// host continuation task
 template <typename T>
 class HostTask : private HostQueue
 {
 public:
+	static_assert (!std::is_void<T>::value, "T = void ... use std::async instead");
+
+	void when_any () { whenAnyFinish (); }
+	void when_all () { whenAllFinish (); }
+	void finish   () { quit (false);     }
+	bool valid    () const noexcept { return !assigned (); }
+
 	HostTask ()
 	{ ThreadPool::reserve (*this); }
 
 	bool ready () const
-	{ return state () == HostQueue::Running and empty () and pending (); }
+	{ return state () == HostQueue::Running and empty (); }
 
-	void when_any () { whenAnyFinish (); }
-	void when_all () { whenAllFinish (); }
-	void finish   () { quit (false); }
-	bool valid    () const noexcept { return assigned (); }
-
-	bool reuse ()
-	{
-		if (state () > HostQueue::Running and !assigned ())
-			return ThreadPool::reserve (*this);
-		return false;
-	}
+	void reuse ()
+	{ if (!valid ()) return ThreadPool::reserve (*this); }
 
 	inline bool get (T& value)
 	{
@@ -182,8 +169,12 @@ public:
 	}
 
 	template <class X, typename... Args>
-	HostTask (T (X::* fn)(Args...), X* obj, Args&&... args)
+	HostTask (T (X::* fn)(Args...), X* obj, Args... args)
 	{ then (fn, obj, std::forward<Args> (args)...); }
+
+	template <typename... Args>
+	HostTask (T (fn)(Args...), Args&&... args)
+	{ then (fn, std::forward<Args> (args)...); }
 
 	template <typename Callable, typename... Args>
 	HostTask (Callable&& fn, Args&&... args)
@@ -192,20 +183,31 @@ public:
 	template <class X, typename... Args>
 	HostTask& then (T (X::* fn)(Args...), X* obj, Args&&... args)
 	{
-		schedule ([fn, obj, args..., this]
+		schedule (call_type ([=]
 		{
 			m_value = std::move ((obj->*fn)(std::forward<Args> (args)...));
-		});
+		}));
 		return *this;
 	}
 
-	template <typename Callable, typename... Args>
-	HostTask& then (Callable&& fn, Args&&... args)
+	template <typename... Args>
+	HostTask& then (T (fn)(Args...), Args&&... args)
 	{
-		schedule ([fn, args..., this]
+		schedule (call_type ([=]
 		{
 			m_value = std::move (fn (std::forward<Args> (args)...));
-		});
+		}));
+		return *this;
+	}
+
+	template <typename U, typename... Args>
+	HostTask& then (U&& closure, Args&&... args)
+	{
+		schedule (call_type ([=]
+		{
+			m_value = std::move
+					  (closure.U::operator () (std::forward<Args> (args)...));
+		}));
 		return *this;
 	}
 

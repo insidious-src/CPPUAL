@@ -36,12 +36,12 @@ namespace { // optimize for internal unit usage
 struct Initializer
 {
 	typedef StackedAllocator                       allocator_type;
-	typedef StackedPolicy<CL::device>              device_policy;
-	typedef std::vector<CL::device, device_policy> device_vector;
+	typedef StackedPolicy<CL::device_type>              device_policy;
+	typedef std::vector<CL::device_type, device_policy> device_vector;
 
 	struct PlatformInfo
 	{
-		CL::platform  handle;
+		CL::platform_type  handle;
 		device_vector devices;
 		CL::size_type cpu_count;
 		CL::size_type gpu_count;
@@ -82,7 +82,7 @@ Initializer::Initializer ()
 : allocator (size ()),
   platforms (num  (), PlatformInfo (allocator), platform_policy (allocator))
 {
-	CL::platform handles[platforms.size ()];
+	CL::platform_type handles[platforms.size ()];
 
 	::clGetPlatformIDs (static_cast<CL::size_type> (platforms.size ()),
 						handles, nullptr);
@@ -125,13 +125,13 @@ inline std::size_t Initializer::size () noexcept
 	static CL::size_type n = num ();
 	static std::size_t   size = n * sizeof (PlatformInfo);
 
-	CL::platform handles[n];
+	CL::platform_type handles[n];
 	::clGetPlatformIDs (n, handles, nullptr);
 
 	for (CL::size_type i = 0, x; i < n; ++i)
 	{
 		::clGetDeviceIDs (handles[i], CL::AllDevices, 0, nullptr, &x);
-		size += sizeof (CL::device) * x;
+		size += sizeof (CL::device_type) * x;
 	}
 
 	return size;
@@ -163,7 +163,7 @@ constexpr CL::size_type infotype (Platform::Info eType) noexcept
 
 // =========================================================
 
-CL::device CL::handle (type_size eType, u16 uPfId, size_type uDevId)
+CL::device_type CL::handle (type_size eType, u16 uPfId, size_type uDevId)
 {
 	switch (eType)
 	{

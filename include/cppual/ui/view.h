@@ -33,7 +33,7 @@ namespace cppual { namespace Ui {
 class View
 {
 public:
-    typedef Event                                event_type;
+	typedef Event                                event_type;
 	typedef Memory::GenericPolicy<View*>         allocator_type;
 	typedef CircularQueue<View*, allocator_type> container;
 	typedef std::size_t	                         size_type;
@@ -42,7 +42,7 @@ public:
 	container::iterator iterator;
 
 	typedef typename
-	Signal<void(event_type::window_type, event_type::MouseMoveData)>
+	Signal<void(event_type::window_type, point2u)>
 	::slot_type mouse_move_conn;
 
 	typedef typename
@@ -51,8 +51,8 @@ public:
 
 	enum
 	{
-		DefaultWidth  = 1024,
-		DefaultHeight = 768
+		DefaultWidth  = 800,
+		DefaultHeight = 600
 	};
 
 	View (View&&) noexcept;
@@ -83,8 +83,8 @@ public:
 
 	inline weak_window renderable () const noexcept { return m_pRenderable; }
 	inline IWindow*    renderable_unsafe () const noexcept { return m_pRenderable.get (); }
-    inline point2u     minimumSize () const noexcept { return m_gMinSize; }
-    inline point2u     maximumSize () const noexcept { return m_gMaxSize; }
+	inline point2u     minimumSize () const noexcept { return m_gMinSize; }
+	inline point2u     maximumSize () const noexcept { return m_gMaxSize; }
 
 	inline bool valid () const noexcept
 	{ return m_gStateFlags.test (View::Valid); }
@@ -130,7 +130,7 @@ private:
 
 	void paint (Rect const&);
 	void size (point2u);
-	void mouseMoved (point2i);
+	void mouseMoved (point2u);
 	void mousePressed (event_type::MouseButtonData const&);
 	void mouseReleased (event_type::MouseButtonData const&);
 	void destroyResources ();
@@ -201,7 +201,6 @@ protected:
 	virtual void onMove (point2u) { }
 	virtual void onBeginSizeMove (Rect const&) { }
 	virtual void onEndSizeMove (Rect const&) { }
-	virtual void onMinMaxSize (point2u) { }
 	virtual void onFocus (bool) { }
 	virtual void onParentSize (point2u) { }
 

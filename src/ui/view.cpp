@@ -50,9 +50,9 @@ inline shared_window createRenderable (View* pParentObj, Rect const& gRect, u32 
 void View::registerEvents ()
 {
 	connect (event_type::registers ().mouseMove,
-			 [](event_type::window_type wnd, event_type::MouseMoveData data)
+			 [](event_type::window_type wnd, point2u pos)
 	{
-		Internal::map ()[wnd]->mouseMoved (data.pos);
+		Internal::map ()[wnd]->mouseMoved (pos);
 	});
 
 	connect (event_type::registers ().mousePress,
@@ -74,21 +74,21 @@ void View::registerEvents ()
 	});
 
 	connect (event_type::registers ().winFocus,
-             [](event_type::window_type wnd, bool state)
+			 [](event_type::window_type wnd, bool state)
 	{
-        Internal::map ()[wnd]->onFocus (state);
+		Internal::map ()[wnd]->onFocus (state);
 	});
 
 	connect (event_type::registers ().winSize,
-			 [](event_type::window_type wnd, event_type::SizeData data)
+			 [](event_type::window_type wnd, point2u size)
 	{
-		Internal::map ()[wnd]->size (data.size);
+		Internal::map ()[wnd]->size (size);
 	});
 
 	connect (event_type::registers ().winVisible,
-             [](event_type::window_type wnd, bool state)
+			 [](event_type::window_type wnd, bool state)
 	{
-        Internal::map ()[wnd]->onShow (state);
+		Internal::map ()[wnd]->onShow (state);
 	});
 
 	connect (event_type::registers ().winProperty,
@@ -270,13 +270,13 @@ void View::destroy ()
 void View::show ()
 {
 	if (!valid ()) return;
-    m_pRenderable->map ();
+	m_pRenderable->map ();
 }
 
 void View::hide ()
 {
 	if (!valid ()) return;
-    m_pRenderable->unmap ();
+	m_pRenderable->unmap ();
 }
 
 void View::setMinimumSize (point2u gSize)
@@ -384,7 +384,7 @@ void View::move (point2i gPoint)
 	}
 }
 
-void View::mouseMoved (point2i)
+void View::mouseMoved (point2u)
 {
 }
 
@@ -402,7 +402,7 @@ void View::setFocus ()
 	{
 		//if (m_gChildrenList.size ())
 			//for (pointer pChild : m_gChildrenList) pChild->setFocus ();
-        m_pRenderable->raise ();
+		m_pRenderable->raise ();
 		onFocus (true);
 	}
 }
@@ -433,7 +433,7 @@ void View::refresh ()
 	if (m_gStateFlags.test (View::Valid))
 	{
 		onPaint (geometry ());
-        for (View* pChild : m_gChildrenList) pChild->refresh ();
+		for (View* pChild : m_gChildrenList) pChild->refresh ();
 	}
 }
 

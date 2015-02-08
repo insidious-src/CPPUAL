@@ -53,6 +53,7 @@ add_library(cppual-core SHARED
 	include/cppual/circular_queue.h
 	include/cppual/decl.h
 	include/cppual/types.h
+        include/cppual/timeline.h
 	include/cppual/noncopyable.h
 	src/memory/gc.cpp
 	include/cppual/memory/gc.h
@@ -412,10 +413,10 @@ add_library(cppual-ui-dialogs MODULE
 ### link targets
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-		target_link_libraries(cppual-ui-xorg WM::LegacyLibrary)
-		target_link_libraries(cppual-ui-wayland WM::Library)
+    target_link_libraries(cppual-ui-xorg WM::LegacyLibrary)
+    target_link_libraries(cppual-ui-wayland WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		target_link_libraries(cppual-ui-win WM::Library)
+    target_link_libraries(cppual-ui-win WM::Library)
 endif()
 
 target_link_libraries(cppual-core DL::Library)

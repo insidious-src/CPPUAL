@@ -20,7 +20,45 @@
  */
 
 #include <cppual/compute/program.h>
+#include "cldef.h"
 
 namespace cppual { namespace Compute {
+
+namespace {
+
+inline Program::pointer createProgramFromSource (Context const& context, vector<string> const& source)
+{
+	if (!source.empty ())
+	{
+		vector<string>::size_type sizes[source.size ()];
+
+		for (vector<string>::size_type i = 0; i < source.size (); ++i)
+			sizes[i] = source[i].size ();
+
+		auto sources = source.front ().c_str ();
+
+		return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
+											static_cast<uint> (source.size ()),
+											&sources,
+											sizes,
+											nullptr);
+	}
+
+	return nullptr;
+}
+
+} // anonymous namespace
+
+// =========================================================
+
+Program::Program (Context const&, string const&)
+: Object ()
+{
+}
+
+Program::Program (Context const& context, vector<string> const& source)
+: Object (createProgramFromSource (context, source))
+{
+}
 
 } } // namespace Compute

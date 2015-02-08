@@ -56,14 +56,14 @@ public:
 
 	enum
 	{
-        Red,
+		Red,
 		Green,
 		Blue,
 		Alpha,
 		Depth,
 		Stencil,
 		SurfaceType,
-        AttribCount
+		AttribCount
 	};
 
 	enum Feature
@@ -81,21 +81,21 @@ public:
 	int_type id    () const;
 	void     print ();
 
-    Config (controller  display = defaultDisplay (),
-            format_type format  = format_type::default2D ());
+	Config (controller  display = defaultDisplay (),
+			format_type format  = format_type::default2D ());
 
 	constexpr Config () noexcept
-    : m_pDisplay (), m_pCfg (), m_gFormat (), m_eFeatures ()
+	: m_pDisplay (), m_pCfg (), m_gFormat (), m_eFeatures ()
 	{ }
 
 	constexpr Config (Config const&) noexcept = default;
 	inline    Config& operator = (Config const&) noexcept = default;
 
-    constexpr controller  display  ()   const noexcept { return m_pDisplay;  }
-    constexpr Features    features ()   const noexcept { return m_eFeatures; }
-    constexpr format_type format   ()   const noexcept { return m_gFormat;   }
-    constexpr void*       operator ()() const noexcept { return m_pCfg;      }
-    constexpr operator    void*    ()   const noexcept { return m_pCfg;      }
+	constexpr controller  display  ()   const noexcept { return m_pDisplay;  }
+	constexpr Features    features ()   const noexcept { return m_eFeatures; }
+	constexpr format_type format   ()   const noexcept { return m_gFormat;   }
+	constexpr void*       operator ()() const noexcept { return m_pCfg;      }
+	constexpr operator    void*    ()   const noexcept { return m_pCfg;      }
 
 	constexpr explicit operator safe_bool () const noexcept
 	{ return m_pCfg ? &Config::m_pCfg : nullptr; }
@@ -112,8 +112,8 @@ private:
 private:
 	pointer     m_pDisplay;
 	pointer     m_pCfg;
-    format_type m_gFormat;
-    Features    m_eFeatures;
+	format_type m_gFormat;
+	Features    m_eFeatures;
 };
 
 // ====================================================
@@ -144,7 +144,7 @@ public:
 	void    flush ();
 
 	conf_reference config     () const noexcept { return *m_pConf;             }
-    DeviceType     device     () const noexcept { return  DeviceType::GL;      }
+	DeviceType     device     () const noexcept { return  DeviceType::GL;      }
 	value_type     handle     () const noexcept { return  m_pHandle;           }
 	controller     connection () const noexcept { return  m_pConf->display (); }
 	format_type    format     () const noexcept { return  m_pConf->format  (); }
@@ -175,7 +175,7 @@ public:
 			 GFXVersion const& version = defaultVersion (),
 			 Context*          shared  = nullptr);
 
-    static GFXVersion platformVersion () noexcept;
+	static GFXVersion platformVersion () noexcept;
 
 	bool use     (pointer, const_pointer) noexcept;
 	bool assign  () noexcept;
@@ -187,13 +187,13 @@ public:
 	const_pointer  readable   () const noexcept { return  m_pReadTarget;       }
 	pointer        drawable   () const noexcept { return  m_pDrawTarget;       }
 	GFXVersion     version    () const noexcept { return  m_nVersion;          }
-    DeviceType     device     () const noexcept { return  DeviceType::GL;      }
+	DeviceType     device     () const noexcept { return  DeviceType::GL;      }
 	value_type     handle     () const noexcept { return  m_pGC;               }
 	controller     connection () const noexcept { return  m_pConf->display (); }
 	format_type    format     () const noexcept { return  m_pConf->format  (); }
 
 	static constexpr GFXVersion defaultVersion () noexcept
-    { return GFXVersion { 3, 0 }; }
+	{ return GFXVersion { 3, 0 }; }
 
 private:
 	conf_pointer  m_pConf;

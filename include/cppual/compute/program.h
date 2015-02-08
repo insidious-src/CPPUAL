@@ -23,21 +23,28 @@
 #define CPPUAL_COMPUTE_INSTANCE_H_
 #ifdef __cplusplus
 
+#include <vector>
 #include <cppual/types.h>
 #include <cppual/resource.h>
 #include <cppual/noncopyable.h>
 #include <cppual/compute/plltask.h>
 
+using std::vector;
+
 namespace cppual { namespace Compute {
 
-class Program final : public Object <Program>
+class Program : public Object <Program>
 {
 public:
-	Program ();
-	Program (Program&&);
-	Program& operator = (Program&&);
+    Program ();
+    Program (Context const&, string const& binary_path);
+    Program (Context const&, vector<string> const& source);
+    Program (Program&&);
+    Program (Program const&);
+    Program& operator = (Program&&);
+    Program& operator = (Program const&);
 
-	void bind (DeviceQueue const& queue);
+    void bind  (DeviceQueue const& queue);
 	bool build ();
 
 	static Program* current () noexcept;
