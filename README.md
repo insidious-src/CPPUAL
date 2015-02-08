@@ -20,6 +20,16 @@ So the real question is: Why would you want to have all these libraries when Ope
 - behaviour-based device scheduling and context manipulation
 - branched device tasks
 
+### Input ###
+- specialized raw input queues
+- integrated security
+
+### Network ###
+- implementation of the C++17 network library
+- simplified packed exchange
+- advanced protocol interface
+- http, https, ftp protocols
+
 ### Graphics ###
 - unified surface management using EGL
 - gfx algorithms based on compute library
