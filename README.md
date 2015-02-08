@@ -1,6 +1,6 @@
 # C++ Unified Abstraction Library #
 
-**Latest Supported Standard: C++14**
+**Latest Supported Language Standard: C++14**
 
 ### Why reinvent the wheel and replace the standard library and Qt? ###
 - the whole idea of the library is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, VDPAU, OVD, XVideo, TrueAudio and OpenAL completely.
