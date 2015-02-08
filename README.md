@@ -24,6 +24,15 @@
 ### Input ###
 - specialized raw input queues
 - integrated security
+- all types of keyboards
+- all types of mice
+- generic controller interface & support
+- wheel controller
+- Xbox 360/One controller
+- Playstation 1/2/4 controller
+- Steam controller
+- extended button layouts
+- touch surfaces
 
 ### Network ###
 - implementation of the C++17 network library
