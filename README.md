@@ -80,3 +80,9 @@ So the real question is: Why would you want to have all these libraries when Ope
 - query hardware and os information
 - timer
 - calendar
+
+### Goals ###
+- drop freetype
+- drop opengl $ glew
+- drop openal
+- drop sndfile
