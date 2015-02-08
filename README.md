@@ -69,7 +69,7 @@ So the real question is: Why would you want to have all these libraries when Ope
 
 ### Utility ###
 - passive timeline with speed adjustment
-- fast string
+- fast COW string
 - circular queue + atomic
 - signals
 - reactive functional types
