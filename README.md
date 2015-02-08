@@ -56,7 +56,7 @@ So the real question is: Why would you want to have all these libraries when Ope
 - audio file loader (format decoder, quality convertion and manipulation)
 - listener functions
 - sound source
-- circular buffer object
+- dynamic circular buffer
 - emitter
 - advanced player
 - equalizer and filters
