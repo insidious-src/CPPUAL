@@ -81,7 +81,7 @@ So the real question is: Why would you want to have all these libraries when Ope
 - timer
 - calendar
 
-### Goals ###
+### Longterm Goals ###
 - drop freetype
 - drop opengl, directx, glew
 - drop openal
