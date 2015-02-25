@@ -28,44 +28,40 @@
 #include "w32window.h"
 #include "w32backend.h"
 
-using namespace cppual::Ui;
+namespace cppual { namespace Ui { namespace Platform {
 
-namespace cppual { namespace Platform {
-
-struct Win32Platform final : public Factory
+struct Win32Factory final : Factory
 {
-    shared_queue   createQueueObject ();
-    shared_display connectDisplay    (cchar*);
-    shared_window  createWindow      (Rect const&, u32, IDisplay*);
+    shared_queue   createQueueInstance ();
+    shared_display connectDisplay      (cchar*);
+    shared_window  createWindow        (Rect const&, u32, IDisplay*);
 };
 
-shared_display Win32Platform::connectDisplay (cchar*)
+shared_display Win32Factory::connectDisplay (cchar*)
 {
     return shared_display (new Win32Display);
 }
 
-shared_queue Win32Platform::createQueueObject ()
+shared_queue Win32Factory::createQueueInstance ()
 {
     return shared_queue (new Win32Queue);
 }
 
-shared_window Win32Platform::createWindow (Rect const& gRect,
-                                           u32         nScreen,
-                                           IDisplay*   pDisplay)
+shared_window Win32Factory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
 {
     return shared_window (new Win32Window (gRect, nScreen, pDisplay));
 }
 
-} } // namespace Platform
+} } } // namespace Platform
 
 // =========================================================
 
-using cppual::Platform::Win32Platform;
-using cppual::Platform::shared_manager;
+using cppual::Ui::Platform::Win32Factory;
+using cppual::Ui::Platform::shared_manager;
 
 extern "C" int module_main (shared_manager& instance)
 {
-    instance.reset (new Win32Platform);
+    instance.reset (new Win32Factory);
     return instance == nullptr;
 }
 

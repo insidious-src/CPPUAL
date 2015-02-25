@@ -24,12 +24,11 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
-#include <cppual/resource.h>
-#include <cppual/memory/mop.h>
+#include <cppual/memory/allocator.h>
 
 namespace cppual { namespace Compute {
 
-class Allocator final : public Memory::IAllocator
+class Allocator final : public Memory::Allocator
 {
 public:
 	Allocator () = delete;

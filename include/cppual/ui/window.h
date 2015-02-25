@@ -126,8 +126,8 @@ public:
 	void close ()
 	{ if (m_pPlatformWnd) m_pPlatformWnd.reset (); }
 
-	void flash (std::chrono::seconds sec)
-	{ if (m_pPlatformWnd) m_pPlatformWnd->flash (sec); }
+    void flash (uint count = 1)
+    { if (m_pPlatformWnd) m_pPlatformWnd->flash (count); }
 
 	void goFullscreen ()
 	{ if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (true); }

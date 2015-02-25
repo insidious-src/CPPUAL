@@ -89,7 +89,7 @@ bool Module::attach () noexcept
 	case ResolvePolicy::Static:
 		nLibMode |= LOAD_LIBRARY_AS_DATAFILE;
 		break;
-	case ResolvePolicy::Unresolved:
+	case ResolvePolicy::Lazy:
 		nLibMode |= DONT_RESOLVE_DLL_REFERENCES;
 		break;
     default:
@@ -123,7 +123,7 @@ void Module::detach () noexcept
 	m_pHandle = nullptr;
 }
 
-void* Module::address (cchar* pName) const noexcept
+void* Module::get_address (cchar* pName) const noexcept
 {
 #	ifdef OS_STD_POSIX
 
@@ -141,7 +141,7 @@ void* Module::address (cchar* pName) const noexcept
 #	endif
 }
 
-Module::function_type Module::function (cchar* pName) const noexcept
+Module::function_type Module::get_function (cchar* pName) const noexcept
 {
 #	ifdef OS_STD_POSIX
 

@@ -37,8 +37,8 @@ class Program : public Object <Program>
 {
 public:
     Program ();
-    Program (Context const&, string const& binary_path);
-    Program (Context const&, vector<string> const& source);
+    Program (Behaviour const&, string const& binary_path);
+    Program (Behaviour const&, vector<string> const& source);
     Program (Program&&);
     Program (Program const&);
     Program& operator = (Program&&);

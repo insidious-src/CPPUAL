@@ -88,7 +88,7 @@ public:
 	virtual void        setVisibleInPager (bool) = 0;
 	virtual bool        isVisibleInPager () = 0;
 	virtual void        setFlags (WindowFlags) = 0;
-	virtual void        flash (std::chrono::seconds) = 0;
+    virtual void        flash (uint count = 1) = 0;
 	virtual Rect        geometry () const = 0;
 	virtual u32         screen () const = 0;
 	virtual bool        isMapped () const = 0;

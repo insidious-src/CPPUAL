@@ -23,6 +23,7 @@
 #define CPPUAL_GFX_EGL_SURFACE_H_
 #ifdef __cplusplus
 
+#include <mutex>
 #include <cppual/gfx/draw.h>
 
 namespace cppual { namespace Graphics { namespace GL {
@@ -202,6 +203,37 @@ private:
 	const_pointer m_pReadTarget;
 	Context*      m_pShared;
 	GFXVersion    m_nVersion;
+};
+
+// ====================================================
+
+class ContextMutex
+{
+public:
+	ContextMutex (Context& context) noexcept
+	: m_context (context)
+	{ }
+
+	void lock ()
+	{
+		m_mutex.lock ();
+		m_context.assign ();
+	}
+
+	bool try_lock ()
+	{
+		return m_mutex.try_lock () ? m_context.assign (), true : false;
+	}
+
+	void unlock ()
+	{
+		m_context.release ();
+		m_mutex.unlock ();
+	}
+
+private:
+	std::mutex m_mutex;
+	Context&   m_context;
 };
 
 } } } // namespace EGL

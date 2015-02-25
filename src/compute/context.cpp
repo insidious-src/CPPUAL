@@ -23,7 +23,7 @@
 
 namespace cppual { namespace Compute {
 
-Context::Context (DeviceGroup& gDevice)
+Behaviour::Behaviour (DeviceGroup& gDevice)
 : Object (),
   m_gDevice (&gDevice)
 {

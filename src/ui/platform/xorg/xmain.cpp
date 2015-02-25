@@ -27,44 +27,40 @@
 #include "xsurface.h"
 #include "xbackend.h"
 
-using namespace cppual::Ui;
+namespace cppual { namespace Ui { namespace Platform {
 
-namespace cppual { namespace Platform {
-
-struct XPlatform final : public Factory
+struct XFactory final : Factory
 {
-	shared_queue   createQueueObject ();
-	shared_display connectDisplay    (cchar*);
-	shared_window  createWindow      (Rect const&, u32, IDisplay*);
+	shared_queue   createQueueInstance ();
+	shared_display connectDisplay      (cchar*);
+	shared_window  createWindow        (Rect const&, u32, IDisplay*);
 };
 
-shared_display XPlatform::connectDisplay (cchar* pDeviceName)
+shared_display XFactory::connectDisplay (cchar* pDeviceName)
 {
 	return shared_display (new XDisplay (pDeviceName? pDeviceName : getenv ("DISPLAY")));
 }
 
-shared_queue XPlatform::createQueueObject ()
+shared_queue XFactory::createQueueInstance ()
 {
 	return shared_queue (new XQueue);
 }
 
-shared_window XPlatform::createWindow (Rect const& gRect,
-											   u32         nScreen,
-											   IDisplay*   pDisplay)
+shared_window XFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
 {
 	return shared_window (new XWindow (gRect, nScreen, pDisplay));
 }
 
-} } // namespace Platform
+} } } // namespace Platform
 
 // =========================================================
 
-using cppual::Platform::XPlatform;
-using cppual::Platform::shared_manager;
+using cppual::Ui::Platform::XFactory;
+using cppual::Ui::Platform::shared_manager;
 
 extern "C" int module_main (shared_manager& instance)
 {
-	instance.reset (new XPlatform);
+	instance.reset (new XFactory);
 	return instance == nullptr;
 }
 

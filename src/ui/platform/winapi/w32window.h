@@ -50,7 +50,7 @@ public:
     bool   isVisibleInTaskbar () noexcept;
     void   setVisibleInPager (bool) noexcept;
     bool   isVisibleInPager () noexcept;
-    void   flash (std::chrono::seconds) noexcept;
+    void   flash (uint) noexcept;
     Rect   geometry () const;
     bool   isMapped () const;
     void   setParent (const_reference, point2i);

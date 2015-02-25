@@ -35,20 +35,20 @@ namespace { // optimize for internal unit usage
 
 struct Initializer
 {
-	typedef StackedAllocator                       allocator_type;
+    typedef StackedAllocator                            allocator_type;
 	typedef StackedPolicy<CL::device_type>              device_policy;
 	typedef std::vector<CL::device_type, device_policy> device_vector;
 
 	struct PlatformInfo
 	{
-		CL::platform_type  handle;
-		device_vector devices;
-		CL::size_type cpu_count;
-		CL::size_type gpu_count;
-		CL::size_type accel_count;
-		CL::size_type custom_count;
+        CL::platform_type handle;
+        device_vector     devices;
+        CL::size_type     cpu_count;
+        CL::size_type     gpu_count;
+        CL::size_type     accel_count;
+        CL::size_type     custom_count;
 
-		PlatformInfo (StackedAllocator& gAtor)
+        PlatformInfo (allocator_type& gAtor)
 		: devices (device_policy (gAtor))
 		{ }
 	};
@@ -190,7 +190,7 @@ CL::device_type CL::handle (type_size eType, u16 uPfId, size_type uDevId)
 
 Device::uint_type Device::count (type_size eType, u16 uId)
 {
-	if (internal ().platforms.size () <= uId) throw Platform::bad_platform ();
+    if (internal ().platforms.size () <= uId) throw bad_platform ();
 
 	switch (eType)
 	{

@@ -101,7 +101,7 @@ Win32Window::Win32Window (Rect const& gRect, u32, IDisplay* pDisplay)
 : IWindow (pDisplay,
            ::CreateWindowExA (0, WindowClass::registered ().name (), nullptr, WS_OVERLAPPEDWINDOW,
                               gRect.left, gRect.top, gRect.width (), gRect.height (),
-                              0, 0, WindowClass::registered ().instance(), 0),
+                              0, 0, WindowClass::registered ().instance (), 0),
            ResourceType::Window)
 {
 }
@@ -203,16 +203,24 @@ bool Win32Window::isVisibleInPager () noexcept
     return ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE) & WS_EX_TOOLWINDOW;
 }
 
-void Win32Window::flash (std::chrono::seconds) noexcept
+void Win32Window::flash (uint count) noexcept
 {
+    FLASHWINFO info;
 
+    info.hwnd      = id ().get<handle_type> ();
+    info.cbSize    = sizeof (FLASHWINFO);
+    info.uCount    = count;
+    info.dwFlags   = count ? FLASHW_ALL : FLASHW_ALL | FLASHW_TIMERNOFG;
+    info.dwTimeout = 0;
+
+    ::FlashWindowEx (&info);
 }
 
 Rect Win32Window::geometry () const
 {
     Win32Rect rect;
 
-    ::GetClientRect (id ().get<HWND> (), &rect);
+    ::GetClientRect (id ().get<handle_type> (), &rect);
 
     return Rect (rect.left, rect.top,
                  static_cast<u16> (rect.width  ()),
@@ -221,7 +229,7 @@ Rect Win32Window::geometry () const
 
 bool Win32Window::isMapped () const
 {
-    return ::IsWindowVisible (id ().get<HWND> ());
+    return ::IsWindowVisible (id ().get<handle_type> ());
 }
 
 void Win32Window::setParent (IWindow::const_reference pWnd, point2i gPos)
@@ -251,6 +259,7 @@ void Win32Window::lower ()
 void Win32Window::move (point2i gPos)
 {
     Win32Rect rect;
+
     ::GetClientRect (id ().get<handle_type> (), &rect);
     ::MoveWindow    (id ().get<handle_type> (), gPos.x, gPos.y, rect.width (), rect.height (), false);
 }

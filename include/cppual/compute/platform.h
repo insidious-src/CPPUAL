@@ -26,10 +26,12 @@
 #include <cppual/types.h>
 #include <cppual/compute/device.h>
 
-namespace cppual { namespace Compute { namespace Platform {
+namespace cppual { namespace Compute {
 
 class platform_exception : public std::bad_exception { };
 class bad_platform       : public platform_exception { };
+
+namespace Platform {
 
 enum class Info : unsigned char
 {

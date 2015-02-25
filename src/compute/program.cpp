@@ -26,7 +26,7 @@ namespace cppual { namespace Compute {
 
 namespace {
 
-inline Program::pointer createProgramFromSource (Context const& context, vector<string> const& source)
+inline Program::pointer createProgramFromSource (Behaviour const& context, vector<string> const& source)
 {
 	if (!source.empty ())
 	{
@@ -51,12 +51,12 @@ inline Program::pointer createProgramFromSource (Context const& context, vector<
 
 // =========================================================
 
-Program::Program (Context const&, string const&)
+Program::Program (Behaviour const&, string const&)
 : Object ()
 {
 }
 
-Program::Program (Context const& context, vector<string> const& source)
+Program::Program (Behaviour const& context, vector<string> const& source)
 : Object (createProgramFromSource (context, source))
 {
 }

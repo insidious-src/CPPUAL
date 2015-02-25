@@ -285,7 +285,7 @@ bool XWindow::isVisibleInPager () noexcept
 	return true;
 }
 
-void XWindow::flash (std::chrono::seconds) noexcept
+void XWindow::flash (uint) noexcept
 {
 }
 

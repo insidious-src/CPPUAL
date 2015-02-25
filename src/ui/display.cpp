@@ -24,7 +24,6 @@
 
 using std::string;
 using std::shared_ptr;
-using cppual::Platform::Factory;
 
 namespace cppual { namespace Ui {
 
@@ -55,9 +54,9 @@ bool IDisplay::set (cchar* pDevName)
 {
 	static bool bConnected = false;
 
-	if (Factory::hasValidInstance ())
+    if (Platform::Factory::hasValidInstance ())
 	{
-		Internal::backend () = Factory::instance ()->connectDisplay (pDevName);
+        Internal::backend () = Platform::Factory::instance ()->connectDisplay (pDevName);
 
 		if (Internal::backend () != nullptr and !Internal::backend ()->native ())
 			Internal::backend ().reset ();
@@ -73,8 +72,8 @@ IDisplay::pointer IDisplay::connect (cchar* pDevName)
 			Internal::backend ()->name () == pDevName)
 		return Internal::backend ();
 
-	return Factory::hasValidInstance () ?
-				std::move (Factory::instance ()->connectDisplay (pDevName)) :
+    return Platform::Factory::hasValidInstance () ?
+                std::move (Platform::Factory::instance ()->connectDisplay (pDevName)) :
 				IDisplay::pointer ();
 }
 

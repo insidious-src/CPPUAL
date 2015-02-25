@@ -56,7 +56,7 @@ public:
 	bool   isVisibleInPager () noexcept { return false; }
 	void   setMimimumSize (point2u) noexcept { }
 	void   setMaximumSize (point2u) noexcept { }
-	void   flash (std::chrono::seconds) noexcept { }
+    void   flash (uint) noexcept { }
 	void   setGeometry (Rect const&) noexcept;
 	void   setParent (shared_window const&, point2i) noexcept;
 	void   move (point2i) noexcept;

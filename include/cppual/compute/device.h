@@ -50,7 +50,7 @@ public:
 		Custom      = 1 << 4,
 	};
 
-	enum class DevType
+    enum class DevType : unsigned char
 	{
 		CPU    = 1 << 0, // serial processing
 		GPU    = 1 << 1, // shader and parallel processing

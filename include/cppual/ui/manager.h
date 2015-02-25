@@ -24,40 +24,34 @@
 #ifdef __cplusplus
 
 #include <cppual/process/module.h>
-#include <cppual/ui/queue.h>
 #include <cppual/ui/display.h>
+#include <cppual/ui/queue.h>
 #include <cppual/ui/wm.h>
 
 using std::string;
 using cppual::Process::Module;
-using cppual::Ui::shared_queue;
-using cppual::Ui::shared_display;
-using cppual::Ui::weak_display;
-using cppual::Ui::shared_window;
-using cppual::Ui::IDisplay;
 
-namespace cppual { namespace Platform {
-
-struct  Factory;
-typedef shared_ptr<Factory> shared_manager;
+namespace cppual { namespace Ui { namespace Platform {
 
 struct Factory : public NonCopyableVirtual
 {
-	typedef shared_window const& shared_reference;
-
 	virtual shared_window createWindow (Rect const& rect,
-										u32 screen = 0,
-										IDisplay* display = IDisplay::instance ()) = 0;
+                                        u32         screen  = 0,
+                                        IDisplay*   display = IDisplay::instance ()) = 0;
 
 	virtual shared_display connectDisplay (cchar* name = nullptr) = 0;
-	virtual shared_queue   createQueueObject () = 0;
+    virtual shared_queue   createQueueInstance () = 0;
 
 	static Factory* instance ();
 	static Module&  module   ();
 	static bool     hasValidInstance () noexcept;
 };
 
-} } // namespace Platform
+// =========================================================
+
+typedef shared_ptr<Factory> shared_manager;
+
+} } } // namespace Platform
 
 #endif // __cplusplus
 #endif // CPPUAL_PLATFORM_MANAGER_H_

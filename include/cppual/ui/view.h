@@ -138,12 +138,12 @@ private:
 	static void registerEvents ();
 
 private:
-	container         m_gChildrenList;
-	point2u           m_gMinSize, m_gMaxSize;
+    container     m_gChildrenList;
+    point2u       m_gMinSize, m_gMaxSize;
 	shared_window m_pRenderable;
-	iterator          m_gItFromParent;
-	View*             m_pParentObj;
-	StateFlags        m_gStateFlags;
+    iterator      m_gItFromParent;
+    View*         m_pParentObj;
+    StateFlags    m_gStateFlags;
 };
 
 // =========================================================

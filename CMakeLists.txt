@@ -85,10 +85,7 @@ add_library(cppual-core SHARED
 
  # device compute (OpenCL, CUDA, DirectCompute, GLCompute, Serial)
 add_library(cppual-compute SHARED
-	include/cppual/resource.h
-	include/cppual/compute/vector.h
-	include/cppual/compute/list.h
-	include/cppual/compute/circular.h
+        include/cppual/resource.h
 	src/compute/cldef.h
 	include/cppual/compute/platform.h
 	src/compute/opencl.cpp
@@ -98,11 +95,12 @@ add_library(cppual-compute SHARED
 	src/compute/program.cpp
 	include/cppual/compute/device.h
 	src/compute/device.cpp
-	include/cppual/compute/devmemory.h
+        include/cppual/compute/devmemory.h
+        src/compute/devmemory.cpp
+        include/cppual/compute/devsurface.h
+        src/compute/devsurface.cpp
 	include/cppual/compute/plltask.h
-	src/compute/plltask.cpp
-	src/compute/clmemory.cpp
-	include/cppual/compute/clmemory.h
+        src/compute/plltask.cpp
 	src/compute/context.cpp
 	include/cppual/compute/context.h
 	include/cppual/compute/pll_ops.h

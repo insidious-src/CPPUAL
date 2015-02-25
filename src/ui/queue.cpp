@@ -22,7 +22,6 @@
 #include <cppual/ui/manager.h>
 
 using std::string;
-using cppual::Platform::Factory;
 
 namespace cppual { namespace Ui {
 
@@ -30,7 +29,7 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 inline const shared_queue& queue ()
 {
-	static const shared_queue platform_queue (Factory::instance ()->createQueueObject ());
+    static const shared_queue platform_queue (Platform::Factory::instance ()->createQueueInstance ());
 	return platform_queue;
 }
 

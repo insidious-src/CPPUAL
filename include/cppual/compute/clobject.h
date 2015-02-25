@@ -29,8 +29,9 @@
 namespace cppual { namespace Compute {
 
 class Device;
-class Context;
+class Behaviour;
 class DeviceQueue;
+class DeviceSurface;
 class MemoryRegion;
 class Program;
 class Kernel;
@@ -88,18 +89,17 @@ public:
 
 	Object (Object&&) noexcept = default;
     Object (Object const& rhs) noexcept;
-	Object& operator = (Object&&) = default;
-
+    Object& operator = (Object&&) = default;
     Object& operator = (Object const& rhs) noexcept;
     ~Object () noexcept;
 
-    inline Object () noexcept : m_object () { }
-    inline pointer handle () const noexcept { return m_object; }
+    constexpr Object () noexcept : m_object () { }
+    constexpr pointer handle () const noexcept { return m_object; }
 
-	inline pointer  operator ()() const noexcept { return m_object; }
-    inline pointer& operator ()() noexcept { return m_object; }
+    constexpr pointer  operator ()() const noexcept { return m_object; }
+    inline    pointer& operator ()() noexcept { return m_object; }
 
-    inline Object (pointer obj) noexcept : m_object (obj)
+    constexpr Object (pointer obj) noexcept : m_object (obj)
     { }
 
 private:

@@ -33,7 +33,7 @@ class DeviceQueue : public Object <DeviceQueue>
 {
 public:
 	DeviceQueue ();
-	DeviceQueue (Context const&);
+	DeviceQueue (Behaviour const&);
 	DeviceQueue (DeviceQueue&&);
 	DeviceQueue& operator = (DeviceQueue&&);
 };

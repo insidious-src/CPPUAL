@@ -49,6 +49,7 @@ enum class DeviceType : unsigned char
 {
 	Custom,
 	Native,
+    Compute,
 	GL,
 	Direct3D,
 	Direct2D,

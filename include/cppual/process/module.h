@@ -52,7 +52,7 @@ public:
 	{
 		Static = 0, // use as data file or load as static library
 		Immediate,  // resolve everything ot load
-		Unresolved  // don't resolve any object or function references
+		Lazy  // don't resolve any object or function references
 	};
 
 	typedef BitSet<Module::Flag> Flags;
@@ -65,7 +65,7 @@ public:
 
 	Module (cchar*        path,
 			bool          attach = true,
-			ResolvePolicy policy = ResolvePolicy::Unresolved,
+			ResolvePolicy policy = ResolvePolicy::Lazy,
 			Flags         flags  = AddExt) noexcept;
 
 	string const& path () const noexcept { return m_gLibPath; }
@@ -74,23 +74,23 @@ public:
 	bool          is_attached () const noexcept { return m_pHandle; }
 
 	bool contains (string const& gName) const noexcept
-	{ return address (gName.c_str ()); }
+    { return get_address (gName.c_str ()); }
 
 	bool contains (cchar* pName) const noexcept
-	{ return address (pName); }
+    { return get_address (pName); }
 
 	~Module ()
 	{ if (m_eResolve != ResolvePolicy::Static) detach (); }
 
 	template <typename T>
 	T* get (cchar* pName) const noexcept
-	{ return static_cast<T*> (address (pName)); }
+    { return static_cast<T*> (get_address (pName)); }
 
 	template <typename TRet, typename... TArgs>
 	bool get (cchar* pName, TRet(*& fn)(TArgs...)) const
 	{
 		typedef TRet (* Func)(TArgs...);
-		function_type func = function (pName);
+        function_type func = get_function (pName);
 		return fn = reinterpret_cast<Func> (func);
 	}
 
@@ -98,15 +98,15 @@ public:
 	TRet call (cchar* pName, TArgs&&... args) const
 	{
 		typedef TRet (* Func)(TArgs...);
-		function_type func = function (pName);
+        function_type func = get_function (pName);
 
 		if (!func) std::bad_function_call ();
 		return (*reinterpret_cast<Func> (func))(std::forward<TArgs> (args)...);
 	}
 
 private:
-	void*         address  (cchar* name) const noexcept;
-	function_type function (cchar* name) const noexcept;
+    void*         get_address  (cchar* name) const noexcept;
+    function_type get_function (cchar* name) const noexcept;
 
 private:
 	void*		  m_pHandle;

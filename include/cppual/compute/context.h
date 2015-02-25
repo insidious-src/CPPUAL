@@ -44,13 +44,13 @@ class GPU : public DeviceGroup
 class All : public DeviceGroup
 { };
 
-class Context : public Object <Context>
+class Behaviour : public Object <Behaviour>
 {
 public:
-	Context (DeviceGroup&);
-	Context (Context&&) = default;
-	Context& operator = (Context&&) = default;
-	~Context ();
+    Behaviour (DeviceGroup&);
+    Behaviour (Behaviour&&) = default;
+    Behaviour& operator = (Behaviour&&) = default;
+    ~Behaviour ();
 
 	bool set (DeviceGroup&);
 

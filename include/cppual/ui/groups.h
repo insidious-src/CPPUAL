@@ -25,7 +25,7 @@
 #include <cppual/ui/widget.h>
 #include <cppual/ui/action.h>
 
-using cppual::Text::string;
+using std::string;
 
 namespace cppual { namespace Ui {
 

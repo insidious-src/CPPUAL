@@ -22,7 +22,7 @@
 #include <iostream>
 #include <cppual/ui/manager.h>
 
-namespace cppual { namespace Platform {
+namespace cppual { namespace Ui { namespace Platform {
 
 namespace { namespace Internal { // optimize for internal unit usage
 
@@ -37,11 +37,11 @@ inline cchar* server () noexcept
 
 struct Initializer
 {
-	Module         mod;
-	shared_manager mgr;
+    Module         mod;
+    shared_manager mgr;
 
 	inline Initializer () noexcept
-	: mod (server (), true, Module::ResolvePolicy::Unresolved),
+    : mod (server (), true, Module::ResolvePolicy::Lazy),
 	  mgr ()
 	{ }
 };
@@ -70,8 +70,8 @@ Factory* Factory::instance ()
 {
 	if (Internal::instance () == nullptr)
 	{
-		if (!Internal::module ().contains ("module_main") or
-				Internal::module ().call<int> ("module_main", Internal::instance ()) or
+        if (!Internal::module ().contains ("module_main") or
+                Internal::module   ().call<int> ("module_main", Internal::instance ()) or
 				Internal::instance () == nullptr)
 			throw std::bad_alloc ();
 	}
@@ -89,4 +89,4 @@ bool Factory::hasValidInstance () noexcept
 	return Internal::instance () != nullptr;
 }
 
-} } // namespace Platform
+} } } // namespace Platform

@@ -190,23 +190,23 @@ public:
 	}
 
 private:
-	template <typename Out, typename In>
-	union CastUnion { Out out; In in; };
-
 	template<class Out, class In>
 	constexpr Out direct_cast (In in) noexcept
 	{
-		static_assert (sizeof (In) == sizeof (CastUnion<Out, In>) and
+		typedef union { Out out; In in; } cast_union;
+
+		static_assert (sizeof (In) == sizeof (cast_union) and
 					   sizeof (In) == sizeof (Out),
 					   "cannot use direct_cast");
 
-		return CastUnion<Out, In> (in).out;
+		return cast_union (in).out;
 	}
 
 	template<class Out, class In>
 	constexpr Out unsafe_direct_cast (In in) noexcept
 	{
-		return CastUnion<Out, In> (in).out;
+		typedef union { Out out; In in; } cast_union;
+		return cast_union (in).out;
 	}
 
 private:

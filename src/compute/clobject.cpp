@@ -31,7 +31,7 @@ Object<Device>::~Object () noexcept
 }
 
 template <>
-Object<Context>::~Object () noexcept
+Object<Behaviour>::~Object () noexcept
 {
     if (m_object != nullptr) ::clReleaseContext (m_object.get<CL::context_type> ());
 }
@@ -74,7 +74,7 @@ Object<Device>::Object (Object const& rhs) noexcept
 }
 
 template <>
-Object<Context>::Object (Object const& rhs) noexcept
+Object<Behaviour>::Object (Object const& rhs) noexcept
 : m_object (rhs.m_object)
 {
     if (m_object != nullptr) ::clRetainContext (m_object.get<CL::context_type> ());
@@ -126,7 +126,7 @@ Object<Device>& Object<Device>::operator = (Object const& rhs) noexcept
 }
 
 template <>
-Object<Context>& Object<Context>::operator = (Object const& rhs) noexcept
+Object<Behaviour>& Object<Behaviour>::operator = (Object const& rhs) noexcept
 {
     if (this == &rhs) return *this;
     if (m_object != nullptr) ::clReleaseContext (m_object.get<CL::context_type> ());
