@@ -29,8 +29,8 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 inline const shared_queue& queue ()
 {
-    static const shared_queue platform_queue (Platform::Factory::instance ()->createQueueInstance ());
-	return platform_queue;
+	static const shared_queue instance (Platform::Factory::instance ()->createQueueInstance ());
+	return instance;
 }
 
 } } // anonymous namespace Internal

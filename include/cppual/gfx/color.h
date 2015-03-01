@@ -28,6 +28,16 @@
 
 namespace cppual { namespace Graphics {
 
+struct  RGBColor;
+struct  CMYKColor;
+struct  HSLColor;
+struct  YUVColor;
+struct  YCbCrColor;
+struct  YPbPrColor;
+typedef RGBColor Color;
+
+// =========================================================
+
 enum class ColorName : unsigned char
 {
 	White,
@@ -43,7 +53,7 @@ enum class ColorName : unsigned char
 
 enum class ColorType : unsigned char
 {
-    TrueType,
+	TrueType,
 	Direct,
 	Pseudo,
 	Static,
@@ -58,7 +68,7 @@ struct RGBColor
 
 inline bool operator == (RGBColor const& gObj1, RGBColor const& gObj2) noexcept
 {
-	return (gObj1.red	== gObj2.red and
+	return (gObj1.red	== gObj2.red   and
 			gObj1.green == gObj2.green and
 			gObj1.blue	== gObj2.blue);
 }
@@ -125,16 +135,6 @@ YCbCrColor RGBtoYCbCrColor (RGBColor const&) noexcept;
 YPbPrColor RGBtoYPbPrColor (RGBColor const&) noexcept;
 YCbCrColor RGBtoYCbCrColorHDTV (RGBColor const&) noexcept;
 YPbPrColor RGBtoYPbPrColorHDTV (RGBColor const&) noexcept;
-
-// =========================================================
-
-static_assert (std::is_pod<RGBColor>::value, "RGBColor must be a POD");
-static_assert (std::is_pod<CMYKColor>::value, "CMYKColor must be a POD");
-static_assert (std::is_pod<HSLColor>::value, "HSLColor must be a POD");
-static_assert (std::is_pod<YUVColor>::value, "YUVColor must be a POD");
-static_assert (std::is_pod<YCbCrColor>::value, "YCbCrColor must be a POD");
-static_assert (std::is_pod<YPbPrColor>::value, "YPbPrColor must be a POD");
-static_assert (std::is_pod<Gradient>::value, "Gradient must be a POD");
 
 } } // namespace Graphics
 

@@ -129,10 +129,10 @@ struct PixelFormat final
 class VirtualBuffer
 {
 public:
-    typedef std::vector<RGBColor> vector_type;
+    typedef std::vector<Color> vector_type;
     typedef PixelFormat           format_type;
     typedef std::size_t		      size_type;
-    typedef RGBColor              value_type;
+    typedef Color              value_type;
 
     inline format_type	format () const noexcept { return m_gFormat; }
     inline vector_type& data   ()       noexcept { return m_gPixels; }

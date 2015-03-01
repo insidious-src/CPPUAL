@@ -22,8 +22,8 @@
 #ifndef CPPUAL_UI_GROUPS_H_
 #define CPPUAL_UI_GROUPS_H_
 
-#include <cppual/ui/widget.h>
-#include <cppual/ui/action.h>
+#include <cppual/ui/view.h>
+#include <cppual/ui/cmd.h>
 
 using std::string;
 
@@ -46,7 +46,7 @@ public:
 	void setLabel (string const& text);
 	void addSeparator (int pos = -1);
 	bool addView (View*, int pos = -1);
-	bool addAction (ActionItem const&, int pos = -1);
+	bool addCommand (Command const&, int pos = -1);
 	bool moveItem (int pos, int new_pos);
 	bool removeItem (int pos);
 

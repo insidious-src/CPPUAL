@@ -24,17 +24,18 @@
 #ifdef __cplusplus
 
 #include <cppual/ui/dialog.h>
-
-using cppual::Text::string;
+#include <cppual/gfx/drawable/image.h>
 
 namespace cppual { namespace Ui {
 
 class TaskDialog final : public Dialog
 {
 public:
+	typedef Graphics::Image image_type;
+
 	void setCaption (string const&);
 	void setDescription (string const&);
-	void setTaskIcon (Image*);
+	void setTaskIcon (image_type*);
 	void setProgress (int);
 };
 

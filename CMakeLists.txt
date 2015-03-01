@@ -53,7 +53,7 @@ add_library(cppual-core SHARED
 	include/cppual/circular_queue.h
 	include/cppual/decl.h
 	include/cppual/types.h
-        include/cppual/timeline.h
+		include/cppual/timeline.h
 	include/cppual/noncopyable.h
 	src/memory/gc.cpp
 	include/cppual/memory/gc.h
@@ -85,7 +85,7 @@ add_library(cppual-core SHARED
 
  # device compute (OpenCL, CUDA, DirectCompute, GLCompute, Serial)
 add_library(cppual-compute SHARED
-        include/cppual/resource.h
+		include/cppual/resource.h
 	src/compute/cldef.h
 	include/cppual/compute/platform.h
 	src/compute/opencl.cpp
@@ -95,12 +95,12 @@ add_library(cppual-compute SHARED
 	src/compute/program.cpp
 	include/cppual/compute/device.h
 	src/compute/device.cpp
-        include/cppual/compute/devmemory.h
-        src/compute/devmemory.cpp
-        include/cppual/compute/devsurface.h
-        src/compute/devsurface.cpp
+		include/cppual/compute/devmemory.h
+		src/compute/devmemory.cpp
+		include/cppual/compute/devsurface.h
+		src/compute/devsurface.cpp
 	include/cppual/compute/plltask.h
-        src/compute/plltask.cpp
+		src/compute/plltask.cpp
 	src/compute/context.cpp
 	include/cppual/compute/context.h
 	include/cppual/compute/pll_ops.h
@@ -124,8 +124,6 @@ add_library(cppual-dom SHARED
 	include/cppual/dom/xml.h
 	include/cppual/dom/cmdline.h
 	include/cppual/dom/dom.h
-	include/cppual/dom/pdf.h
-	include/cppual/dom/doc.h
 	)
 
 # Document Object Model (xml, cmdargs, web)
@@ -366,8 +364,6 @@ add_library(cppual-ui SHARED
 	include/cppual/ui/animation.h
 	src/ui/composite.cpp
 	include/cppual/ui/composite.h
-	src/ui/uimgr.cpp
-	include/cppual/ui/uimgr.h
 	src/ui/view.cpp
 	include/cppual/ui/view.h
 	src/ui/skin.cpp
@@ -411,10 +407,10 @@ add_library(cppual-ui-dialogs MODULE
 ### link targets
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(cppual-ui-xorg WM::LegacyLibrary)
-    target_link_libraries(cppual-ui-wayland WM::Library)
+	target_link_libraries(cppual-ui-xorg WM::LegacyLibrary)
+	target_link_libraries(cppual-ui-wayland WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(cppual-ui-win WM::Library)
+	target_link_libraries(cppual-ui-win WM::Library)
 endif()
 
 target_link_libraries(cppual-core DL::Library)

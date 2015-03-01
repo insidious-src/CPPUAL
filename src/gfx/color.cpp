@@ -23,7 +23,7 @@
 
 namespace cppual { namespace Graphics {
 
-RGBColor getColorFromName (ColorName eName) noexcept
+Color getColorFromName (ColorName eName) noexcept
 {
 	switch (eName)
 	{
@@ -48,14 +48,14 @@ RGBColor getColorFromName (ColorName eName) noexcept
 	}
 }
 
-RGBColor getColorFromHexValue (u8) noexcept
+Color getColorFromHexValue (u8) noexcept
 {
-	return RGBColor ();
+	return Color ();
 }
 
 // =========================================================
 
-RGBColor CMYKtoRGBColor (const CMYKColor& gCMYK) noexcept
+Color CMYKtoRGBColor (const CMYKColor& gCMYK) noexcept
 {
 	return
 	{
@@ -65,7 +65,7 @@ RGBColor CMYKtoRGBColor (const CMYKColor& gCMYK) noexcept
 	};
 }
 
-RGBColor YUVtoRGBColor (const YUVColor& gYUV) noexcept
+Color YUVtoRGBColor (const YUVColor& gYUV) noexcept
 {
 	return
 	{
@@ -75,32 +75,32 @@ RGBColor YUVtoRGBColor (const YUVColor& gYUV) noexcept
 	};
 }
 
-RGBColor HSLtoRGBColor (const HSLColor&) noexcept
+Color HSLtoRGBColor (const HSLColor&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-RGBColor YCbCrtoRGBColor (const YCbCrColor&) noexcept
+Color YCbCrtoRGBColor (const YCbCrColor&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-RGBColor YPbPrtoRGBColor (const YPbPrColor&) noexcept
+Color YPbPrtoRGBColor (const YPbPrColor&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-RGBColor YCbCrtoRGBColorHDTV (const YCbCrColor&) noexcept
+Color YCbCrtoRGBColorHDTV (const YCbCrColor&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-RGBColor YPbPrtoRGBColorHDTV (const YPbPrColor&) noexcept
+Color YPbPrtoRGBColorHDTV (const YPbPrColor&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-CMYKColor RGBtoCMYKColor (const RGBColor& gRgb) noexcept
+CMYKColor RGBtoCMYKColor (const Color& gRgb) noexcept
 {
 	return
 	{
@@ -111,12 +111,12 @@ CMYKColor RGBtoCMYKColor (const RGBColor& gRgb) noexcept
 	};
 }
 
-HSLColor RGBtoHSLColor (const RGBColor&) noexcept
+HSLColor RGBtoHSLColor (const Color&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-YUVColor RGBtoYUVColor (const RGBColor& gRgb) noexcept
+YUVColor RGBtoYUVColor (const Color& gRgb) noexcept
 {
 	return
 	{
@@ -126,22 +126,22 @@ YUVColor RGBtoYUVColor (const RGBColor& gRgb) noexcept
 	};
 }
 
-YCbCrColor RGBtoYCbCrColor (const RGBColor&) noexcept
+YCbCrColor RGBtoYCbCrColor (const Color&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-YPbPrColor RGBtoYPbPrColor (const RGBColor&) noexcept
+YPbPrColor RGBtoYPbPrColor (const Color&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-YCbCrColor RGBtoYCbCrColorHDTV (const RGBColor&) noexcept
+YCbCrColor RGBtoYCbCrColorHDTV (const Color&) noexcept
 {
 	return { 0, 0, 0 };
 }
 
-YPbPrColor RGBtoYPbPrColorHDTV (const RGBColor&) noexcept
+YPbPrColor RGBtoYPbPrColorHDTV (const Color&) noexcept
 {
 	return { 0, 0, 0 };
 }

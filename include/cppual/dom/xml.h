@@ -30,12 +30,12 @@ using std::fstream;
 
 namespace cppual {
 
-class CXml final
+class Xml final
 {
 public:
 	typedef std::size_t	size_type;
 
-	inline CXml () = default;
+	inline Xml () = default;
 	string getAttrib (string const&, string const&);
 	bool   open (string const&);
 	bool   open (fstream const&);
@@ -45,21 +45,21 @@ public:
 	void   appendElement (string const&, string const&);
 	void   insertElement (string const&, string const&, bool = true);
 
-	inline ~CXml () { if (m_gFile.is_open ()) m_gFile.close (); }
+	inline ~Xml () { if (m_gFile.is_open ()) m_gFile.close (); }
 	inline void close () { if (m_gFile.is_open ()) m_gFile.close (); }
 	inline bool isOpen () const noexcept { return m_gFile.is_open (); }
 
-	inline CXml (fstream const& /*gStream*/, bool bIndent = true)
+	inline Xml (fstream const& /*gStream*/, bool bIndent = true)
 	: m_gFile (),
 	  m_bIndent (bIndent)
 	{ }
 
-	inline CXml (CXml const& gObj) noexcept
+	inline Xml (Xml const& gObj) noexcept
 	: m_gFile (), m_bIndent (gObj.m_bIndent)
 	{ }
 
 	inline
-	explicit CXml (string const& gFilePath, bool bIndent = true)
+	explicit Xml (string const& gFilePath, bool bIndent = true)
 	: m_gFile (gFilePath),
 	  m_bIndent (bIndent)
 	{ }

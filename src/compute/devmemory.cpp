@@ -19,19 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_FORMAT_DOC_H_
-#define CPPUAL_FORMAT_DOC_H_
-#if defined (_MSC_VER) and (_MSC_VER > 1000)
-#pragma once
-#endif
-#ifdef __cplusplus
+#include <cppual/compute/devmemory.h>
 
-namespace cppual
-{
+namespace cppual { namespace Compute {
 
 
 
-} // cppual
-
-#endif // __cplusplus
-#endif // CPPUAL_FORMAT_DOC_H_
+} } // namespace Compute

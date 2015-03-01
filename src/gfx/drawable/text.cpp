@@ -28,30 +28,24 @@
 namespace cppual { namespace Graphics {
 
 Label2D::Label2D ()
-: m_gText ()
+: m_pFont (), m_gText ()
 {
 }
 
-Label2D::Label2D (string const& gName, Font const& /*gFont*/)
-: Font (),
-  m_gText (gName)
-{
-}
-
-Label2D::Label2D (string&& gName, Font const& /*gFont*/) noexcept
-: Font (),
-  m_gText (std::move (gName))
+Label2D::Label2D (string const& gName, Font& gFont)
+: m_pFont (&gFont),
+  m_gText ( gName)
 {
 }
 
 Label2D::Label2D (Label2D const& gObj)
-: Font (),
+: m_pFont (gObj.m_pFont),
   m_gText (gObj.m_gText)
 {
 }
 
 Label2D::Label2D (Label2D&& gObj) noexcept
-: Font (),
+: m_pFont (gObj.m_pFont),
   m_gText (std::move (gObj.m_gText))
 {
 }

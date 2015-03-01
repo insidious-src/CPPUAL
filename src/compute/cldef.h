@@ -23,14 +23,24 @@
 #define CPPUAL_COMPUTE_CL_H_
 #ifdef __cplusplus
 
+#include <type_traits>
 #include <CL/cl.h>
 #include <cppual/types.h>
 
 namespace cppual { namespace Compute { namespace CL {
 
+enum DeviceType
+{
+	Default     = CL_DEVICE_TYPE_DEFAULT,
+	Any         = CL_DEVICE_TYPE_ALL,
+	CPU         = CL_DEVICE_TYPE_CPU,
+	GPU         = CL_DEVICE_TYPE_GPU,
+	Accelerator = CL_DEVICE_TYPE_ACCELERATOR,
+	Custom      = CL_DEVICE_TYPE_CUSTOM
+};
+
 enum
 {
-	AllDevices    = CL_DEVICE_TYPE_ALL,
 	MaxUnits      = CL_DEVICE_MAX_COMPUTE_UNITS,
 	MaxDimensions = CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
 	MaxGroupSize  = CL_DEVICE_MAX_WORK_GROUP_SIZE,
@@ -39,23 +49,23 @@ enum
 	CacheSize     = CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
 	CacheLineSize = CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
 	ConstMemSize  = CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
-    LocalMemSize  = CL_DEVICE_LOCAL_MEM_SIZE,
+	LocalMemSize  = CL_DEVICE_LOCAL_MEM_SIZE,
 
-    PlatformExtensions = CL_PLATFORM_EXTENSIONS,
-    DeviceExtensions   = CL_DEVICE_EXTENSIONS
+	PlatformExtensions = CL_PLATFORM_EXTENSIONS,
+	DeviceExtensions   = CL_DEVICE_EXTENSIONS
 };
 
-typedef cl_uint          size_type;
-typedef cl_int           int_type;
-typedef cl_device_id     device_type;
-typedef cl_platform_id   platform_type;
-typedef cl_event         event_type;
-typedef cl_kernel        kernel_type;
-typedef cl_program       program_type;
-typedef cl_context       context_type;
-typedef cl_mem           memory_type;
-typedef cl_command_queue queue_type;
-typedef u8               type_size;
+typedef cl_uint                                size_type;
+typedef cl_int                                 int_type;
+typedef cl_device_id                           device_type;
+typedef cl_platform_id                         platform_type;
+typedef cl_event                               event_type;
+typedef cl_kernel                              kernel_type;
+typedef cl_program                             program_type;
+typedef cl_context                             context_type;
+typedef cl_mem                                 memory_type;
+typedef cl_command_queue                       queue_type;
+typedef std::underlying_type<DeviceType>::type type_size;
 
 device_type handle (type_size type, u16 platform_type, size_type id);
 

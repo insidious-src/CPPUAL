@@ -50,7 +50,7 @@ public:
 		Custom      = 1 << 4,
 	};
 
-    enum class DevType : unsigned char
+	enum class DevType : unsigned char
 	{
 		CPU    = 1 << 0, // serial processing
 		GPU    = 1 << 1, // shader and parallel processing
@@ -106,7 +106,7 @@ public:
 	typedef Object<Device>::uint_type                 uint_type;
 	typedef std::size_t                               size_type;
 
-	static uint_type count (type_size type, u16 platform = 0);
+	static uint_type count (u16 platform = 0);
 	bool   available       (cchar* feature);
 
 	Device (Device const&) noexcept;

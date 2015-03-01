@@ -133,10 +133,6 @@ public:
 		while (m_uLength);
 	}
 
-private:
-	Buffer<T> m_gBuffer;
-	size_type m_uLength;
-
 	template <typename U, class TAtor>
 	friend void copyToString (FastString<U, TAtor>& copy_to,
 							  U const*              copy_from,
@@ -175,6 +171,10 @@ private:
 	template <typename U, class TAtor>
 	friend bool operator == (FastString<U, TAtor> const& obj1,
 							 U const*                    text2) noexcept;
+
+private:
+	Buffer<T> m_gBuffer;
+	size_type m_uLength;
 };
 
 template <typename T, class TAlloc>

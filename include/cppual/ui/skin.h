@@ -28,7 +28,7 @@
 #include <cppual/ui/view.h>
 
 using std::string;
-using cppual::Graphics::RGBColor;
+using cppual::Graphics::Color;
 
 namespace cppual { namespace Ui {
 
@@ -88,10 +88,13 @@ public:
 								  int         image_id) = 0;
 
 	virtual font_format  getFont  (SkinElement element, int font_id)  = 0;
-	virtual RGBColor     getColor (SkinElement element, int color_id) = 0;
+	virtual Color     getColor (SkinElement element, int color_id) = 0;
 	virtual int		     getValue (SkinElement element, int value_id) = 0;
 	virtual SkinType     getType () const = 0;
 	virtual bool	     reload () = 0;
+
+	static ISkin* getDefault () noexcept;
+	static bool   setDefault (ISkin* skin) noexcept;
 
 };
 

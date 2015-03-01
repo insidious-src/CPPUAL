@@ -40,22 +40,24 @@ class Line : public IDrawable2D
 public:
 	void draw (ISurface* target_surface, Transform2D const& transform_info);
 
-	inline RGBColor	 getColor () const noexcept { return m_gColor; }
-	inline uint		 getSize () const noexcept { return m_uSize; }
-	inline LineStyle getStyle () const noexcept { return m_eStyle; }
-	inline void		 setColor (RGBColor const& gColor) noexcept { m_gColor = gColor; }
-	inline void		 setSize (uint uSize) noexcept { m_uSize = uSize; }
-	inline void		 setStyle (LineStyle eStyle) noexcept { m_eStyle = eStyle; }
+	Color     getColor ()                 const noexcept { return m_gColor;   }
+	uint      getSize  ()                 const noexcept { return m_uSize;    }
+	LineStyle getStyle ()                 const noexcept { return m_eStyle;   }
+	void      setColor (Color const& gColor) noexcept { m_gColor = gColor; }
+	void      setSize  (uint uSize)             noexcept { m_uSize = uSize;   }
+	void      setStyle (LineStyle eStyle)       noexcept { m_eStyle = eStyle; }
 
-	inline Line (const RGBColor& gFillColor,
-				 uint            uLineSize = 1U,
-				 LineStyle       eStyle    = LineStyle::Solid) noexcept
-	: m_gColor (gFillColor), m_uSize (uLineSize), m_eStyle (eStyle) { }
+	Line (const Color& gFillColor,
+		  uint            uLineSize = 1U,
+		  LineStyle       eStyle    = LineStyle::Solid) noexcept
+	: m_gColor (gFillColor), m_uSize (uLineSize), m_eStyle (eStyle)
+	{ }
 
-	inline Line (Line const& gObj) noexcept
-	: m_gColor (gObj.m_gColor), m_uSize (gObj.m_uSize), m_eStyle (gObj.m_eStyle) { }
+	Line (Line const& gObj) noexcept
+	: m_gColor (gObj.m_gColor), m_uSize (gObj.m_uSize), m_eStyle (gObj.m_eStyle)
+	{ }
 
-	inline Line& operator = (Line const& gObj) noexcept
+	Line& operator = (Line const& gObj) noexcept
 	{
 		m_gColor = gObj.m_gColor;
 		m_uSize  = gObj.m_uSize;
@@ -64,7 +66,7 @@ public:
 	}
 
 private:
-	RGBColor  m_gColor;
+	Color  m_gColor;
 	uint	  m_uSize;
 	LineStyle m_eStyle;
 };

@@ -30,14 +30,14 @@ using std::fstream;
 
 namespace cppual {
 
-bool CXml::open (string const& gFilePath)
+bool Xml::open (string const& gFilePath)
 {
 	if (m_gFile.is_open ()) return false;
 	m_gFile.open (gFilePath);
 	return m_gFile.is_open ();
 }
 
-bool CXml::open (fstream const& /*gStream*/)
+bool Xml::open (fstream const& /*gStream*/)
 {
 	if (!m_gFile.is_open ())
 	{
@@ -46,7 +46,7 @@ bool CXml::open (fstream const& /*gStream*/)
 	return false;
 }
 
-string CXml::getAttrib (string const& /*gElem*/, string const& /*gAttrib*/)
+string Xml::getAttrib (string const& /*gElem*/, string const& /*gAttrib*/)
 {
 	if (m_gFile.is_open ())
 	{
@@ -55,7 +55,7 @@ string CXml::getAttrib (string const& /*gElem*/, string const& /*gAttrib*/)
 	return "";
 }
 
-void CXml::setAttrib (string const& /*gElem*/,
+void Xml::setAttrib (string const& /*gElem*/,
 					  string const& /*gAttrib*/,
 					  string const& /*gValue*/)
 {
@@ -64,7 +64,7 @@ void CXml::setAttrib (string const& /*gElem*/,
 	}
 }
 
-void CXml::addElement (string const& gElem)
+void Xml::addElement (string const& gElem)
 {
 	if (m_gFile.is_open ())
 	{
@@ -83,16 +83,16 @@ void CXml::addElement (string const& gElem)
 	}
 }
 
-void CXml::setElement (string const& /*gElem*/, string const& /*gValue*/)
+void Xml::setElement (string const& /*gElem*/, string const& /*gValue*/)
 {
 }
 
-void CXml::appendElement (string const& /*gParentElem*/, string const& /*gElem*/)
+void Xml::appendElement (string const& /*gParentElem*/, string const& /*gElem*/)
 {
 
 }
 
-void CXml::insertElement (string const& /*gTargetElem*/,
+void Xml::insertElement (string const& /*gTargetElem*/,
 						  string const& /*gElem*/,
 						  bool /*bAfter*/)
 {

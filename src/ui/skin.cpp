@@ -25,6 +25,21 @@ using std::placeholders::_1;
 
 namespace cppual { namespace Ui {
 
+bool ISkin::setDefault (ISkin* pSkin) noexcept
+{
+	if (!pSkin) return false;
+
+	Event::registers ().winPaint (Element (), PaintEvent (nullptr, Rect ()).data ().paint);
+	return true;
+}
+
+ISkin* ISkin::getDefault () noexcept
+{
+	return nullptr;
+}
+
+// =========================================================
+
 SkinEngine::SkinEngine (SkinnableView* pView) noexcept
 : m_pView (pView)
 {

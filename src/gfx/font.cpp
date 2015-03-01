@@ -34,11 +34,16 @@ typedef FT_GlyphSlot font_glyph;
 typedef FT_List      font_list;
 typedef FT_ListNode  font_listnode;
 
-inline font_library inst () noexcept
+inline font_library init () noexcept
 {
-	static font_library lib;
-	static int err = FT_Init_FreeType (&lib);
-	return err == 0 ? lib : nullptr;
+	font_library lib;
+	return FT_Init_FreeType (&lib) == 0 ? lib : nullptr;
+}
+
+inline font_library instance () noexcept
+{
+	static font_library lib = init ();
+	return lib;
 }
 
 } } // anonymous namespace FreeType
@@ -51,7 +56,7 @@ Font::Atlas::Atlas (string const& gName)
 {
 	FreeType::font_face tmp_handle;
 
-	if (FT_New_Face (FreeType::inst (), gName.c_str (), 0, &tmp_handle))
+	if (FT_New_Face (FreeType::instance (), gName.c_str (), 0, &tmp_handle))
 		std::cout << "Couldn't load font " << gName << std::endl;
 	else
 		m_pFace = tmp_handle;

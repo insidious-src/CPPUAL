@@ -58,20 +58,20 @@ public:
 	inline RasterImage (string const&      gPath,
 						Allocator&         pAtor,
 						PixelFormat const& gFomat = PixelFormat (),
-						RGBColor           gMask  = RGBColor ())
+						Color              gMask  = Color ())
 	: AllocatorPolicy (pAtor),
 	  m_gPixBuffer ({ 0, 0 }, gFomat),
 	  m_gColorMask (gMask),
 	  m_bIsLoaded (parseImage (gPath))
 	{ }
 
-	inline RGBColor mask () const noexcept { return m_gColorMask; }
+	inline Color mask () const noexcept { return m_gColorMask; }
 	inline bool		isLoaded () const noexcept { return m_bIsLoaded; }
 
 	inline DeviceType type () const noexcept
 	{ return DeviceType::GL; }
 
-	inline void setMask (RGBColor gMask) noexcept
+	inline void setMask (Color gMask) noexcept
 	{ m_gColorMask = gMask; }
 
 	inline VirtualBuffer* map () noexcept
@@ -79,7 +79,7 @@ public:
 
 private:
 	VirtualBuffer m_gPixBuffer;
-	RGBColor      m_gColorMask;
+	Color      m_gColorMask;
 	cbool         m_bIsLoaded;
 
 	bool parseImage (string const&);

@@ -30,10 +30,10 @@ namespace cppual { namespace Graphics {
 class Shape : public IDrawable2D, public ITransformable2D
 {
 public:
-	Shape (RGBColor const& fill_color) noexcept;
+	Shape (Color const& fill_color) noexcept;
 
 protected:
-	RGBColor m_gFillColor;
+	Color m_gFillColor;
 };
 
 } } // Graphics

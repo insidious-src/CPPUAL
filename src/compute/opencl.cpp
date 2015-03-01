@@ -31,24 +31,24 @@ using cppual::Memory::StackedPolicy;
 
 namespace cppual { namespace Compute {
 
-namespace { // optimize for internal unit usage
+namespace { namespace Internal { // optimize for internal unit usage
 
 struct Initializer
 {
-    typedef StackedAllocator                            allocator_type;
+	typedef StackedAllocator                            allocator_type;
 	typedef StackedPolicy<CL::device_type>              device_policy;
 	typedef std::vector<CL::device_type, device_policy> device_vector;
 
 	struct PlatformInfo
 	{
-        CL::platform_type handle;
-        device_vector     devices;
-        CL::size_type     cpu_count;
-        CL::size_type     gpu_count;
-        CL::size_type     accel_count;
-        CL::size_type     custom_count;
+		CL::platform_type handle;
+		device_vector     devices;
+		CL::size_type     cpu_count;
+		CL::size_type     gpu_count;
+		CL::size_type     accel_count;
+		CL::size_type     custom_count;
 
-        PlatformInfo (allocator_type& gAtor)
+		PlatformInfo (allocator_type& gAtor)
 		: devices (device_policy (gAtor))
 		{ }
 	};
@@ -60,91 +60,53 @@ struct Initializer
 	platform_vector platforms;
 
 	Initializer ();
-	static std::size_t size () noexcept;
-	static string      infostr (u16, CL::size_type) noexcept;
-
-	inline static CL::size_type num () noexcept
-	{
-		static CL::size_type n = 0;
-		if (!n) ::clGetPlatformIDs (0, nullptr, &n);
-		return n;
-	}
 
 };
 
-inline Initializer& internal () noexcept
+inline Initializer& get () noexcept
 {
 	static Initializer init;
 	return init;
 }
 
-Initializer::Initializer ()
-: allocator (size ()),
-  platforms (num  (), PlatformInfo (allocator), platform_policy (allocator))
+inline CL::size_type init_num_platforms () noexcept
 {
-	CL::platform_type handles[platforms.size ()];
-
-	::clGetPlatformIDs (static_cast<CL::size_type> (platforms.size ()),
-						handles, nullptr);
-
-	// generate information for each platform
-	for (CL::size_type i = 0, pos = 0; i < platforms.size (); ++i, pos = 0)
-	{
-		platforms[i].handle = handles[i];
-
-		::clGetDeviceIDs (handles[i], Device::CPU, 0, nullptr, &platforms[i].cpu_count);
-		::clGetDeviceIDs (handles[i], Device::GPU, 0, nullptr, &platforms[i].gpu_count);
-		::clGetDeviceIDs (handles[i], Device::Accelerator, 0, nullptr, &platforms[i].accel_count);
-		::clGetDeviceIDs (handles[i], Device::Custom, 0, nullptr, &platforms[i].custom_count);
-
-		platforms[i].devices.resize (platforms[i].cpu_count   +
-									 platforms[i].gpu_count   +
-									 platforms[i].accel_count +
-									 platforms[i].custom_count);
-
-		if (platforms[i].cpu_count)
-			::clGetDeviceIDs (handles[i], Device::CPU, platforms[i].cpu_count,
-							  &platforms[i].devices[pos], nullptr);
-
-		if (platforms[i].gpu_count)
-			::clGetDeviceIDs (handles[i], Device::GPU, platforms[i].gpu_count,
-							  &platforms[i].devices[pos += platforms[i].cpu_count], nullptr);
-
-		if (platforms[i].accel_count)
-			::clGetDeviceIDs (handles[i], Device::Accelerator, platforms[i].accel_count,
-							  &platforms[i].devices[pos += platforms[i].gpu_count], nullptr);
-
-		if (platforms[i].custom_count)
-			::clGetDeviceIDs (handles[i], Device::Custom, platforms[i].custom_count,
-							  &platforms[i].devices[pos += platforms[i].accel_count], nullptr);
-	}
+	CL::size_type n;
+	::clGetPlatformIDs (0, nullptr, &n);
+	return n;
 }
 
-inline std::size_t Initializer::size () noexcept
+inline CL::size_type get_num_platforms () noexcept
 {
-	static CL::size_type n = num ();
-	static std::size_t   size = n * sizeof (PlatformInfo);
+	static CL::size_type n = init_num_platforms ();
+	return n;
+}
+
+inline std::size_t size_of_platforms_data () noexcept
+{
+	CL::size_type n    = get_num_platforms ();
+	std::size_t   size = n * sizeof (Initializer::PlatformInfo);
 
 	CL::platform_type handles[n];
 	::clGetPlatformIDs (n, handles, nullptr);
 
 	for (CL::size_type i = 0, x; i < n; ++i)
 	{
-		::clGetDeviceIDs (handles[i], CL::AllDevices, 0, nullptr, &x);
+		::clGetDeviceIDs (handles[i], CL::Any, 0, nullptr, &x);
 		size += sizeof (CL::device_type) * x;
 	}
 
 	return size;
 }
 
-inline string Initializer::infostr (u16 id, CL::size_type info) noexcept
+inline string infostr (u16 id, CL::size_type info) noexcept
 {
 	static thread_local std::size_t n = 0;
 	static thread_local string      text;
 
-	::clGetPlatformInfo (internal ().platforms[id].handle, info, 0, nullptr, &n);
+	::clGetPlatformInfo (Internal::get ().platforms[id].handle, info, 0, nullptr, &n);
 	text.resize (n);
-	::clGetPlatformInfo (internal ().platforms[id].handle, info, n, &text[0], nullptr);
+	::clGetPlatformInfo (Internal::get ().platforms[id].handle, info, n, &text[0], nullptr);
 	text.resize (--n);
 
 	return std::move (text);
@@ -159,7 +121,51 @@ constexpr CL::size_type infotype (Platform::Info eType) noexcept
 							CL_PLATFORM_VERSION : 0;
 }
 
-} // anonymous
+Initializer::Initializer ()
+: allocator (size_of_platforms_data ()),
+  platforms (get_num_platforms (), PlatformInfo (allocator), platform_policy (allocator))
+{
+	CL::platform_type handles[platforms.size ()];
+
+	::clGetPlatformIDs (static_cast<CL::size_type> (platforms.size ()),
+						handles, nullptr);
+
+	// generate information for each platform
+	for (CL::size_type i = 0, pos = 0; i < platforms.size (); ++i, pos = 0)
+	{
+		platforms[i].handle = handles[i];
+
+		// get device count
+		::clGetDeviceIDs (handles[i], CL::CPU, 0, nullptr, &platforms[i].cpu_count);
+		::clGetDeviceIDs (handles[i], CL::GPU, 0, nullptr, &platforms[i].gpu_count);
+		::clGetDeviceIDs (handles[i], CL::Accelerator, 0, nullptr, &platforms[i].accel_count);
+		::clGetDeviceIDs (handles[i], CL::Custom, 0, nullptr, &platforms[i].custom_count);
+
+		platforms[i].devices.resize (platforms[i].cpu_count   +
+									 platforms[i].gpu_count   +
+									 platforms[i].accel_count +
+									 platforms[i].custom_count);
+
+		// place device handles
+		if (platforms[i].cpu_count)
+			::clGetDeviceIDs (handles[i], CL::CPU, platforms[i].cpu_count,
+							  &platforms[i].devices[pos], nullptr);
+
+		if (platforms[i].gpu_count)
+			::clGetDeviceIDs (handles[i], CL::GPU, platforms[i].gpu_count,
+							  &platforms[i].devices[pos += platforms[i].cpu_count], nullptr);
+
+		if (platforms[i].accel_count)
+			::clGetDeviceIDs (handles[i], CL::Accelerator, platforms[i].accel_count,
+							  &platforms[i].devices[pos += platforms[i].gpu_count], nullptr);
+
+		if (platforms[i].custom_count)
+			::clGetDeviceIDs (handles[i], CL::Custom, platforms[i].custom_count,
+							  &platforms[i].devices[pos += platforms[i].accel_count], nullptr);
+	}
+}
+
+} } // Internal anonymous namespace
 
 // =========================================================
 
@@ -167,19 +173,19 @@ CL::device_type CL::handle (type_size eType, u16 uPfId, size_type uDevId)
 {
 	switch (eType)
 	{
-	case Device::All: case Device::CPU:
-		return internal ().platforms[uPfId].devices[uDevId];
-	case Device::GPU:
-		return internal ().platforms[uPfId].devices[internal ().platforms[uPfId].cpu_count +
+	case CL::Any: case CL::CPU:
+		return Internal::get ().platforms[uPfId].devices[uDevId];
+	case CL::GPU:
+		return Internal::get ().platforms[uPfId].devices[Internal::get ().platforms[uPfId].cpu_count +
 			   uDevId];
-	case Device::Accelerator:
-		return internal ().platforms[uPfId].devices[internal ().platforms[uPfId].cpu_count +
-			   internal ().platforms[uPfId].gpu_count +
+	case CL::Accelerator:
+		return Internal::get ().platforms[uPfId].devices[Internal::get ().platforms[uPfId].cpu_count +
+			   Internal::get ().platforms[uPfId].gpu_count +
 			   uDevId];
-	case Device::Custom:
-		return internal ().platforms[uPfId].devices[internal ().platforms[uPfId].cpu_count +
-			   internal ().platforms[uPfId].gpu_count   +
-			   internal ().platforms[uPfId].accel_count +
+	case CL::Custom:
+		return Internal::get ().platforms[uPfId].devices[Internal::get ().platforms[uPfId].cpu_count +
+			   Internal::get ().platforms[uPfId].gpu_count   +
+			   Internal::get ().platforms[uPfId].accel_count +
 			   uDevId];
 	default:
 		return nullptr;
@@ -188,50 +194,33 @@ CL::device_type CL::handle (type_size eType, u16 uPfId, size_type uDevId)
 
 // =========================================================
 
-Device::uint_type Device::count (type_size eType, u16 uId)
+Device::uint_type Device::count (u16 uId)
 {
-    if (internal ().platforms.size () <= uId) throw bad_platform ();
-
-	switch (eType)
-	{
-	case Device::All:
-		return static_cast<uint_type> (internal ().platforms[uId].devices.size ());
-	case Device::CPU:
-		return internal ().platforms[uId].cpu_count;
-	case Device::GPU:
-		return internal ().platforms[uId].gpu_count;
-	case Device::Accelerator:
-		return internal ().platforms[uId].accel_count;
-	case Device::Custom:
-		return internal ().platforms[uId].custom_count;
-	case Device::Default:
-		return internal ().platforms[uId].devices.size () ? 1u : 0;
-	default:
-		return 0;
-	}
+	if (Internal::get ().platforms.size () <= uId) throw bad_platform ();
+	return static_cast<uint_type> (Internal::get ().platforms[uId].devices.size ());
 }
 
 // =========================================================
 
 u16 Platform::count () noexcept
 {
-	return static_cast<u16> (internal ().platforms.size ());
+	return static_cast<u16> (Internal::get ().platforms.size ());
 }
 
 bool Platform::available (cchar* pFeature, u16 uId)
 {
-	if (internal ().platforms.size () <= uId) throw bad_platform ();
+	if (Internal::get ().platforms.size () <= uId) throw bad_platform ();
 
 	static std::size_t uSize = 0;
 
-	if (::clGetPlatformInfo (internal ().platforms[uId].handle, CL_PLATFORM_EXTENSIONS,
-						 0, nullptr, &uSize) != CL_SUCCESS or !uSize)
+	if (::clGetPlatformInfo (Internal::get ().platforms[uId].handle, CL::PlatformExtensions,
+							 0, nullptr, &uSize) != CL_SUCCESS or !uSize)
 		return false;
 
 	char text[uSize];
 
-	if (::clGetPlatformInfo (internal ().platforms[uId].handle, CL_PLATFORM_EXTENSIONS,
-						 uSize, &text[0], nullptr) != CL_SUCCESS)
+	if (::clGetPlatformInfo (Internal::get ().platforms[uId].handle, CL::PlatformExtensions,
+							 uSize, &text[0], nullptr) != CL_SUCCESS)
 		return false;
 
 	text[--uSize] = 0;
@@ -253,18 +242,18 @@ bool Platform::available (cchar* pFeature, u16 uId)
 
 float Platform::version (u16 uId)
 {
-	if (internal ().platforms.size () <= uId) throw bad_platform ();
+	if (Internal::get ().platforms.size () <= uId) throw bad_platform ();
 
 	static std::size_t n = 0;
 
-	if (::clGetPlatformInfo (internal ().platforms[uId].handle, CL_PLATFORM_VERSION,
-						 0, nullptr, &n) != CL_SUCCESS)
+	if (::clGetPlatformInfo (Internal::get ().platforms[uId].handle, CL_PLATFORM_VERSION,
+							 0, nullptr, &n) != CL_SUCCESS)
 		return .0;
 
 	char text[n];
 
-	if (::clGetPlatformInfo (internal ().platforms[uId].handle, CL_PLATFORM_VERSION,
-						 n, &text[0], nullptr) != CL_SUCCESS)
+	if (::clGetPlatformInfo (Internal::get ().platforms[uId].handle, CL_PLATFORM_VERSION,
+							 n, &text[0], nullptr) != CL_SUCCESS)
 		return .0;
 
 	//return static_cast<float> (std::atof ());
@@ -273,8 +262,8 @@ float Platform::version (u16 uId)
 
 string Platform::info (Info eType, u16 uId)
 {
-	if (internal ().platforms.size () <= uId) throw bad_platform ();
-	return std::move (Initializer::infostr (uId, infotype (eType)));
+	if (Internal::get ().platforms.size () <= uId) throw bad_platform ();
+	return std::move (Internal::infostr (uId, Internal::infotype (eType)));
 }
 
 } } // namespace Compute
