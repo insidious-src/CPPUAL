@@ -5,7 +5,7 @@
 
 ### Why reinvent the wheel and replace parts of the standard library and Qt? ###
 - the whole idea is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, VDPAU, OVD, XVideo, TrueAudio and OpenAL completely.
-- behaviour-based device switching and events
+- behaviour-based device processing and explicit events
 
 **So the real question is:** Why would you want to have all these libraries when OpenCL is pushing hard and you can program it pretty much like a regular CPU? It's just a matter of time until OpenCL evolves and turns into a all-in-one standard.
 
