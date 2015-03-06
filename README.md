@@ -21,7 +21,7 @@
 - use concurrency as host implementation
 - host/device out-of-order and continuation tasks
 - use Vulkan as a SINGLE SOURCE backend (SPIR-V is required to implement the C++ interpreter)
-- behaviour-based device scheduling and context manipulation
+- behaviour-based device scheduling and manipulation
 - branched device tasks
 
 ### Input ###
