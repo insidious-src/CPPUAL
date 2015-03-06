@@ -2,6 +2,7 @@
 # C++ Unified Abstraction Library #
 
 **Latest Supported Language Standard: C++14**
+
 **Future Language Standards: C++17 or D Language**
 
 ### Why reinvent the wheel and replace parts of the standard library and Qt? ###
