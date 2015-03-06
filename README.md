@@ -16,6 +16,9 @@
 - cross-platform process management and interprocess communication
 - unified runtime allocator management for the host
 - specialized host & shared memory allocators
+- query hardware and os information
+- timer
+- calendar
 
 ### Compute ###
 - use concurrency as host implementation
@@ -90,11 +93,6 @@
 - reactive functional types
 - simd types
 - resource management
-
-### System ###
-- query hardware and os information
-- timer
-- calendar
 
 ### Longterm Goals ###
 - drop freetype
