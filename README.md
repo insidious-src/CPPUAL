@@ -17,8 +17,6 @@
 - unified runtime allocator management for the host
 - specialized host & shared memory allocators
 - query hardware and os information
-- timer
-- calendar
 
 ### Compute ###
 - use concurrency as host implementation
@@ -86,6 +84,8 @@
 - desktop recording
 
 ### Utility ###
+- timer
+- calendar
 - passive timeline with speed adjustment
 - fast COW string
 - circular queue + atomic
