@@ -3,7 +3,7 @@
 
 **Latest Supported Language Standard: C++14**
 
-### Why reinvent the wheel and replace the standard library and Qt? ###
+### Why reinvent the wheel and replace parts of the standard library and Qt? ###
 - the whole idea is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, VDPAU, OVD, XVideo, TrueAudio and OpenAL completely.
 - behaviour-based device switching and events
 
