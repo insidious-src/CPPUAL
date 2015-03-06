@@ -36,7 +36,7 @@ include_directories(include
 ### compile libraries
 
 # process, modules, memory
-add_library(cppual-core SHARED
+add_library(cppual-host SHARED
 	include/cppual/functional.h
 	include/cppual/flags.h
 	include/cppual/signal.h
@@ -53,7 +53,7 @@ add_library(cppual-core SHARED
 	include/cppual/circular_queue.h
 	include/cppual/decl.h
 	include/cppual/types.h
-        include/cppual/timeline.h
+	include/cppual/timeline.h
 	include/cppual/noncopyable.h
 	src/memory/gc.cpp
 	include/cppual/memory/gc.h
@@ -85,7 +85,7 @@ add_library(cppual-core SHARED
 
  # device compute (OpenCL, CUDA, DirectCompute, GLCompute, Serial)
 add_library(cppual-compute SHARED
-        include/cppual/resource.h
+	include/cppual/resource.h
 	src/compute/cldef.h
 	include/cppual/compute/platform.h
 	src/compute/opencl.cpp
@@ -95,12 +95,12 @@ add_library(cppual-compute SHARED
 	src/compute/program.cpp
 	include/cppual/compute/device.h
 	src/compute/device.cpp
-        include/cppual/compute/devmemory.h
-        src/compute/devmemory.cpp
-        include/cppual/compute/devsurface.h
-        src/compute/devsurface.cpp
+	include/cppual/compute/devmemory.h
+	src/compute/devmemory.cpp
+	include/cppual/compute/devsurface.h
+	src/compute/devsurface.cpp
 	include/cppual/compute/plltask.h
-        src/compute/plltask.cpp
+	src/compute/plltask.cpp
 	src/compute/context.cpp
 	include/cppual/compute/context.h
 	include/cppual/compute/pll_ops.h
@@ -413,10 +413,10 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	target_link_libraries(cppual-ui-win WM::Library)
 endif()
 
-target_link_libraries(cppual-core DL::Library)
-target_link_libraries(cppual-compute cppual-core OpenCL::Library)
+target_link_libraries(cppual-host DL::Library)
+target_link_libraries(cppual-compute cppual-host OpenCL::Library)
 target_link_libraries(cppual-compute-gl cppual-compute OpenCL::Library GLEW::Library OpenGL::Library)
-target_link_libraries(cppual-gfx cppual-core Freetype::Library)
+target_link_libraries(cppual-gfx cppual-host Freetype::Library)
 target_link_libraries(cppual-network Sockets::Library)
 target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)
 target_link_libraries(cppual-video-gl cppual-gl GLEW::Library OpenGL::Library)

@@ -74,7 +74,7 @@ class EventQueue : public NonCopyable
 {
 public:
 	typedef IDisplayQueue::event_type event_type;
-	typedef View const&               window_type;
+	typedef View                      window_type;
 
 	EventQueue () noexcept
 	: queue    (IDisplayQueue::instance ()),

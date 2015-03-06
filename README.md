@@ -9,6 +9,8 @@
 
 **So the real question is:** Why would you want to have all these libraries when OpenCL is pushing hard and you can program it pretty much like a regular CPU? It's just a matter of time until OpenCL evolves and turns into a all-in-one standard.
 
+**March 6th 2015:** Well,... it evolved into Vulkan
+
 
 ### Core ###
 - cross-platform process management and interprocess communication

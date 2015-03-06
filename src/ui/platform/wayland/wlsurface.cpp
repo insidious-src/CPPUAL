@@ -72,7 +72,7 @@ public:
 	bool isVisibleInTaskbar () { return false; }
 	void setVisibleInPager (bool) { }
 	bool isVisibleInPager () { return false; }
-	void flash (std::chrono::seconds) { }
+	void flash (uint) { }
 
 private:
 	PixelFormat       m_gFormat;

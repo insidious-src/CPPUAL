@@ -82,15 +82,27 @@ struct Win32Rect final : public rect_type
 {
     Win32Rect () noexcept = default;
 
-    Win32Rect (std::nullptr_t) noexcept
+    constexpr Win32Rect (std::nullptr_t) noexcept
     : rect_type ()
     { }
 
     constexpr uint width () const noexcept
     { return right - left; }
 
+    constexpr int16 left_unsafe () const noexcept
+    { return static_cast<int16> (left); }
+
+    constexpr int16 top_unsafe () const noexcept
+    { return static_cast<int16> (top); }
+
+    constexpr u16 width_unsafe () const noexcept
+    { return static_cast<u16> (right - left); }
+
     constexpr uint height () const noexcept
     { return bottom - top; }
+
+    constexpr u16 height_unsafe () const noexcept
+    { return static_cast<u16> (bottom - top); }
 };
 
 } // anonymous namespace
@@ -221,10 +233,8 @@ Rect Win32Window::geometry () const
     Win32Rect rect;
 
     ::GetClientRect (id ().get<handle_type> (), &rect);
-
-    return Rect (rect.left, rect.top,
-                 static_cast<u16> (rect.width  ()),
-                 static_cast<u16> (rect.height ()));
+    return Rect (rect.left_unsafe  (), rect.top_unsafe    (),
+                 rect.width_unsafe (), rect.height_unsafe ());
 }
 
 bool Win32Window::isMapped () const
@@ -232,7 +242,7 @@ bool Win32Window::isMapped () const
     return ::IsWindowVisible (id ().get<handle_type> ());
 }
 
-void Win32Window::setParent (IWindow::const_reference pWnd, point2i gPos)
+void Win32Window::setParent (const_reference pWnd, point2i gPos)
 {
     Win32Rect rect;
 
