@@ -12,13 +12,14 @@
 **March 6th 2015:** Well,... it evolved into Vulkan
 
 
-### Core ###
+### Host ###
 - cross-platform process management and interprocess communication
-- unified runtime allocator management for the host and all devices
-- specialized host & shared allocators
+- unified runtime allocator management for the host
+- specialized host & shared memory allocators
 
 ### Compute ###
 - use concurrency as host implementation
+- memory management following the host allocator pattern
 - host/device out-of-order and continuation tasks
 - use Vulkan as a SINGLE SOURCE backend (SPIR-V is required to implement the C++ interpreter)
 - behaviour-based device scheduling and manipulation
