@@ -20,7 +20,7 @@
 ### Compute ###
 - use concurrency as host implementation
 - host/device out-of-order and continuation tasks
-- use OpenCL as a SINGLE SOURCE backend (SPIR is required to implement the C++ interpreter)
+- use Vulkan as a SINGLE SOURCE backend (SPIR-V is required to implement the C++ interpreter)
 - behaviour-based device scheduling and context manipulation
 - branched device tasks
 
