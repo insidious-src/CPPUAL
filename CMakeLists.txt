@@ -10,9 +10,10 @@ include(cmake/ToolChainConfig.cmake REQUIRED)
 
 find_package(DL       REQUIRED) ## dynamic loading of libraries
 find_package(WM       REQUIRED) ## platform window manager
-find_package(OpenCL   REQUIRED) ## primary compute/graphics library
+find_package(OpenCL   REQUIRED) ## primary compute & graphics api
+#find_package(Vulkan   REQUIRED) ## primary compute & graphics api
 find_package(Sockets  REQUIRED) ## network interface & interprocess
-find_package(EGL      REQUIRED) ## cross-platform GL/ES surface & context
+find_package(EGL      REQUIRED) ## cross-platform Vulkan/GL/ES surface management
 find_package(GLEW     REQUIRED) ## will be dropped at some point
 find_package(OpenGL   REQUIRED) ## will be dropped at some point
 find_package(OpenAL   REQUIRED) ## will be dropped at some point
@@ -83,8 +84,9 @@ add_library(cppual-host SHARED
 	include/cppual/system/clock.h
 	)
 
- # device compute (OpenCL, CUDA, DirectCompute, GLCompute, Serial)
+ # device compute (OpenCL, Vulkan, Serial)
 add_library(cppual-compute SHARED
+	include/Vulkan/vk.h
 	include/cppual/resource.h
 	src/compute/cldef.h
 	include/cppual/compute/platform.h

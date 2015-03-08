@@ -151,7 +151,7 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 
 	if (pParentObj)
 	{
-		m_pRenderable->setParent (pParentObj->renderable ().lock (), { gRect.left, gRect.top });
+		m_pRenderable->setOwner (pParentObj->renderable ().lock ());
 		m_pParentObj = pParentObj;
 
 		pParentObj->m_gChildrenList.push_back (this);
@@ -297,7 +297,7 @@ void View::setMaximumSize (point2u gSize)
 	}
 }
 
-bool View::setParent (View* pParentObj, point2i gPos)
+bool View::setParent (View* pParentObj, point2i /*gPos*/)
 {
 	if (!m_gStateFlags.test (View::Valid) or m_pParentObj == pParentObj)
 		return false;
@@ -305,7 +305,7 @@ bool View::setParent (View* pParentObj, point2i gPos)
 	if (pParentObj)
 	{
 		if (m_pParentObj != nullptr) *m_gItFromParent = nullptr;
-		m_pRenderable->setParent (pParentObj->m_pRenderable, gPos);
+		m_pRenderable->setOwner (pParentObj->m_pRenderable);
 
 		pParentObj->m_gChildrenList.push_back (this);
 		//pParentObj->paint ();

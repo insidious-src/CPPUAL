@@ -133,16 +133,16 @@ bool Device::available (cchar* feature)
 {
 	if (m_uNumUnits)
 	{
-        static size_type       uSize = 0;
-        const  CL::device_type dev   = CL::handle (m_eType, m_uPlatformId, m_uId);
+		static size_type       uSize = 0;
+		const  CL::device_type dev   = CL::handle (m_eType, m_uPlatformId, m_uId);
 
-        if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
+		if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
 							   0, nullptr, &uSize) != CL_SUCCESS or !uSize)
 			return false;
 
 		char text[uSize];
 
-        if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
+		if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
 							   uSize, text, nullptr) != CL_SUCCESS)
 			return false;
 

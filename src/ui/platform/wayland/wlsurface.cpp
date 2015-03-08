@@ -38,7 +38,7 @@ public:
 	~WlSurface () noexcept;
 
 	bool isMapped () const noexcept;
-	void setParent (const_reference, point2i) noexcept;
+	void setOwner (const_pointer) noexcept;
 	void move (point2i) noexcept;
 	void setGeometry (Rect const&) noexcept;
 	void raise () noexcept;
@@ -49,7 +49,7 @@ public:
 	IDisplay*   display () const noexcept { return m_pDisplay; }
 	Element     handle () const noexcept { return m_pViewHandle; }
 	PixelFormat format () const noexcept { return m_gFormat; }
-	weak_window parent () const noexcept { return m_pParent; }
+	weak_window owner () const noexcept { return m_pParent; }
 	Rect        geometry () const noexcept { return m_gRect; }
 	u32         screen () const noexcept { return 0; }
 
@@ -86,15 +86,15 @@ private:
 // ====================================================
 
 WlSurface::WlSurface (Rect const&        gRect,
-					  IWindow*       pParent,
+					  IWindow*           pParent,
 					  u32                nScreen,
 					  PixelFormat const& gFormat) noexcept
-: m_gFormat (gFormat),
-  m_pParent (pParent),
-  m_gRect (gRect),
-  m_pDisplay (),
+: m_gFormat     (gFormat),
+  m_pParent     (pParent),
+  m_gRect       (gRect),
+  m_pDisplay    (),
   m_pViewHandle (),
-  m_uScreen (nScreen)
+  m_uScreen     (nScreen)
 {
 }
 
@@ -123,7 +123,7 @@ void WlSurface::unmap () noexcept
 {
 }
 
-void WlSurface::setParent (const_reference, point2i) noexcept
+void WlSurface::setOwner (const_pointer) noexcept
 {
 }
 

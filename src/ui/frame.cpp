@@ -155,7 +155,7 @@ FrameView::FrameView (View*       pParent,
 {
 	if (valid ())
 	{
-		if (gFlags.test (Close)) m_gCloseBtn.create (this, string ());
+		m_gCloseBtn.create (this, string ());
 		m_gMinBtn.create (this, string ());
 		if (gFlags.test (Maximize)) m_gMaxBtn.create (this, string ());
 		if (gFlags.test (Help)) m_gHelpBtn.create (this, string ());

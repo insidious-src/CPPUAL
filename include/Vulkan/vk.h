@@ -37,6 +37,7 @@ typedef _VK_INSTANCE* VK_INSTANCE;
 typedef _VK_DEVICE*   VK_DEVICE;
 typedef uint32_t      VK_PHYSICAL_GPU;
 typedef void*         VK_OBJECT;
+typedef VK_OBJECT     VK_GPU_MEMORY;
 typedef VK_OBJECT     VK_QUEUE;
 typedef VK_OBJECT     VK_CMD_BUFFER;
 typedef VK_OBJECT     VK_SHADER;
@@ -127,10 +128,6 @@ struct VK_MEMORY_ALLOC_INFO
 {
 };
 
-struct VK_GPU_MEMORY
-{
-};
-
 struct VK_RENDER_PASS_CREATE_INFO
 {
 };
@@ -199,8 +196,8 @@ void vkDestroyObject (VK_OBJECT);
 
 // memory management
 int vkGetObjectInfo    (VK_IMAGE, uint16_t type, size_t sizes, VK_IMAGE_MEMORY_REQUIREMENTS*);
-int vkAllocMemory      (VK_DEVICE, VK_MEMORY_ALLOC_INFO*, VK_GPU_MEMORY*);
-int vkBindObjectMemory (VK_IMAGE, uint32_t, VK_GPU_MEMORY, uint32_t);
+int vkAllocMemory      (VK_DEVICE, VK_MEMORY_ALLOC_INFO*, VK_OBJECT*);
+int vkBindObjectMemory (VK_IMAGE, uint32_t, VK_OBJECT, uint32_t);
 
 // pools
 int vkCreateDescriptorPool           (...);

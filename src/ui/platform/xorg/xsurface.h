@@ -55,22 +55,22 @@ public:
 	void   flash (uint) noexcept;
 	Rect   geometry () const;
 	bool   isMapped () const;
-	void   setParent (const_reference, point2i);
+	void   setOwner (const_pointer);
 	void   setGeometry (Rect const&);
 	void   raise ();
 	void   lower ();
 	void   move (point2i);
 	void   map ();
 	void   unmap ();
+	void   setFlags (WindowFlags) noexcept;
 
-	WindowFlags flags () const noexcept { return m_eFlags; }
-	void        setFlags (WindowFlags) noexcept;
-
-	weak_window parent () const noexcept { return shared_window (); }
-	u32         screen () const noexcept { return 0; }
+	WindowFlags flags  () const noexcept { return m_eFlags; }
+	weak_window owner  () const noexcept { return m_pOwner; }
+	u32         screen () const noexcept { return 0;        }
 
 private:
-	WindowFlags m_eFlags;
+	WindowFlags   m_eFlags;
+	shared_window m_pOwner;
 };
 
 } } // namespace Ui

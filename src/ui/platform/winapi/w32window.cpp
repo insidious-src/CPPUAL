@@ -105,6 +105,20 @@ struct Win32Rect final : public rect_type
     { return static_cast<u16> (bottom - top); }
 };
 
+inline long_t toWindowStyles (WindowFlags flags) noexcept
+{
+    long_t styles;
+
+    return styles;
+}
+
+inline long_t toExStyles (WindowFlags flags) noexcept
+{
+    long_t styles;
+
+    return styles;
+}
+
 } // anonymous namespace
 
 // ====================================================
@@ -147,13 +161,15 @@ bool Win32Window::isShaded () noexcept
     return false;
 }
 
-void Win32Window::setModal (bool) noexcept
+void Win32Window::setModal (bool bModal) noexcept
 {
+    if (!parent ().expired ())
+        ::EnableWindow (parent ().lock ().get<handle_type> (), bModal ? false : true);
 }
 
 bool Win32Window::isModal () noexcept
 {
-    return false;
+    return !parent ().expired () and !::IsWindowEnabled (parent ().lock ().get<handle_type> ());
 }
 
 void Win32Window::setFullscreen (bool) noexcept
@@ -185,6 +201,13 @@ void Win32Window::setMinimized (bool bMinimized) noexcept
 bool Win32Window::isMinimized () noexcept
 {
     return ::IsIconic (id ().get<handle_type> ());
+}
+
+void Win32Window::setFlags (WindowFlags flags) noexcept
+{
+    ::SetWindowLongA (id ().get<handle_type> (),
+                      GWL_EXSTYLE,
+                      toExStyles (flags));
 }
 
 void Win32Window::setVisibleInTaskbar (bool bVis) noexcept
@@ -282,11 +305,6 @@ void Win32Window::map ()
 void Win32Window::unmap ()
 {
     ::ShowWindowAsync (id ().get<handle_type> (), SW_HIDE);
-}
-
-void Win32Window::setFlags (WindowFlags) noexcept
-{
-
 }
 
 } } // Ui

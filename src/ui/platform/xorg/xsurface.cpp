@@ -78,7 +78,8 @@ XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
 : IWindow (pDisplay,
 		   xcb_generate_id (pDisplay->native ().get<display_type> ()),
 		   ResourceType::Surface),
-  m_eFlags (WindowHints)
+  m_eFlags (WindowHints),
+  m_pOwner ()
 {
 	if (valid ())
 	{
@@ -140,9 +141,10 @@ void XWindow::lower ()
 						  XcbStack, uMode);
 }
 
-void XWindow::setParent (shared_window const& pParent, point2i gPos)
+void XWindow::setOwner (shared_window const& pParent)
 {
 	static u32 dump;
+	Rect       rect = geometry ();
 
 	xcb_reparent_window (connection ()->native ().get<display_type> (),
 						 id ().get<handle_type> (),
@@ -151,7 +153,7 @@ void XWindow::setParent (shared_window const& pParent, point2i gPos)
 										screenHandle (connection ()->native ().
 													  get<display_type> (),
 													  dump)->root,
-						 gPos.x, gPos.y);
+						 rect.left, rect.top);
 }
 
 void XWindow::move (point2i gPos)

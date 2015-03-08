@@ -56,7 +56,7 @@ void ProxyRenderable::setGeometry (Rect const&) noexcept
 {
 }
 
-void ProxyRenderable::setParent (shared_window const&, point2i) noexcept
+void ProxyRenderable::setOwner (const_pointer) noexcept
 {
 }
 
