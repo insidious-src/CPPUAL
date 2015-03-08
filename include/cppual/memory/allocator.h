@@ -42,7 +42,7 @@ struct Allocator
 	virtual size_type count          () const { return 0; }
 	virtual void      clear          () { }
 	virtual bool      is_thread_safe () const noexcept { return false;  }
-	virtual bool      is_lock_free   () const noexcept { return true;   }
+    virtual bool      is_lock_free   () const noexcept { return false;  }
 	virtual bool      is_shared      () const noexcept { return false;  }
 
 	virtual size_type max_size () const

@@ -34,7 +34,7 @@ public:
 	ProxyRenderable () = delete;
 	ProxyRenderable (IWindow*) noexcept;
 	ProxyRenderable (ProxyRenderable const&) noexcept;
-	ProxyRenderable (shared_window const& parent, Rect const& rect) noexcept;
+	ProxyRenderable (shared_window const& owner, Rect const& rect) noexcept;
 	ProxyRenderable& operator = (IWindow*) noexcept;
 	ProxyRenderable& operator = (ProxyRenderable const&) noexcept;
 
@@ -56,9 +56,9 @@ public:
 	bool   isVisibleInPager () noexcept { return false; }
 	void   setMimimumSize (point2u) noexcept { }
 	void   setMaximumSize (point2u) noexcept { }
-    void   flash (uint) noexcept { }
+	void   flash (uint) noexcept { }
 	void   setGeometry (Rect const&) noexcept;
-	void   setParent (shared_window const&, point2i) noexcept;
+	void   setOwner (const_pointer) noexcept;
 	void   move (point2i) noexcept;
 	void   map () noexcept;
 	void   unmap () noexcept;
@@ -66,9 +66,9 @@ public:
 	WindowFlags flags () const { return WindowFlags (); }
 	void        setFlags (WindowFlags) { }
 
-	inline ~ProxyRenderable () noexcept { unmap (); }
-	inline weak_window parent   () const noexcept { return m_pParent; }
-	inline Rect        geometry () const noexcept { return m_gRect; }
+	inline ~ProxyRenderable     ()       noexcept { unmap ();            }
+	inline weak_window owner    () const noexcept { return m_pParent;    }
+	inline Rect        geometry () const noexcept { return m_gRect;      }
 	inline bool        isMapped () const noexcept { return m_bIsVisible; }
 
 	inline u32 screen () const noexcept
@@ -82,8 +82,8 @@ public:
 
 private:
 	shared_window m_pParent;
-	Rect              m_gRect;
-	bool              m_bIsVisible;
+	Rect          m_gRect;
+	bool          m_bIsVisible;
 };
 
 // =========================================================

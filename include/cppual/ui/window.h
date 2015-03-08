@@ -126,8 +126,8 @@ public:
 	void close ()
 	{ if (m_pPlatformWnd) m_pPlatformWnd.reset (); }
 
-    void flash (uint count = 1)
-    { if (m_pPlatformWnd) m_pPlatformWnd->flash (count); }
+	void flash (uint count = 1)
+	{ if (m_pPlatformWnd) m_pPlatformWnd->flash (count); }
 
 	void goFullscreen ()
 	{ if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (true); }
@@ -135,11 +135,8 @@ public:
 	void exitFullscreen ()
 	{ if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (false); }
 
-	void showInTaskbar (bool state)
-	{ if (m_pPlatformWnd) m_pPlatformWnd->setVisibleInTaskbar (state); }
-
-	void showInPager (bool state)
-	{ if (m_pPlatformWnd) m_pPlatformWnd->setVisibleInPager (state); }
+	void setFlags (WindowFlags state)
+	{ if (m_pPlatformWnd) m_pPlatformWnd->setFlags (state); }
 
 	void minimize ()
 	{ if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }

@@ -86,8 +86,7 @@ public:
 	}
 
 private:
-	time_point m_epoch;
-	time_point m_pause;
+	time_point m_epoch, m_pause;
 };
 
 } } // namespace Clock
