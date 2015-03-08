@@ -158,8 +158,8 @@ void vkDestroyDevice   (VK_DEVICE);
 void vkDestroyInstance (VK_INSTANCE);
 
 // gpu management
-int  vkEnumerateGpus (VK_INSTANCE, size_t, uint32_t*, uint32_t*);
-int  vkGetGpuInfo    (uint32_t, uint16_t type, size_t*, VK_SOME_GPU_INFO_STRUCTURE*);
+int  vkEnumerateGpus (VK_INSTANCE, size_t max_num, size_t* num, VK_PHYSICAL_GPU* gpus);
+int  vkGetGpuInfo    (uint32_t gpu_id, uint16_t type, size_t** sizes, VK_SOME_GPU_INFO_STRUCTURE** infos);
 
 // command execution
 int vkGetMultiGpuCompatibility (uint32_t, uint32_t, VK_GPU_COMPATIBILITY_INFO*);

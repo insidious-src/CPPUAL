@@ -163,13 +163,13 @@ bool Win32Window::isShaded () noexcept
 
 void Win32Window::setModal (bool bModal) noexcept
 {
-    if (!parent ().expired ())
-        ::EnableWindow (parent ().lock ().get<handle_type> (), bModal ? false : true);
+    if (!owner ().expired ())
+        ::EnableWindow (owner ().lock ()->id().get<handle_type> (), bModal ? false : true);
 }
 
 bool Win32Window::isModal () noexcept
 {
-    return !parent ().expired () and !::IsWindowEnabled (parent ().lock ().get<handle_type> ());
+    return !owner ().expired () and !::IsWindowEnabled (owner ().lock ()->id().get<handle_type> ());
 }
 
 void Win32Window::setFullscreen (bool) noexcept
@@ -265,13 +265,9 @@ bool Win32Window::isMapped () const
     return ::IsWindowVisible (id ().get<handle_type> ());
 }
 
-void Win32Window::setParent (const_reference pWnd, point2i gPos)
+void Win32Window::setOwner (const_pointer pWnd)
 {
-    Win32Rect rect;
-
-    ::SetParent     (id ().get<handle_type> (), pWnd == nullptr ? handle_type () : pWnd->id ().get<handle_type> ());
-    ::GetClientRect (id ().get<handle_type> (), &rect);
-    ::MoveWindow    (id ().get<handle_type> (), gPos.x, gPos.y, rect.width (), rect.height (), false);
+    ::SetParent (id ().get<handle_type> (), pWnd == nullptr ? handle_type () : pWnd->id ().get<handle_type> ());
 }
 
 void Win32Window::setGeometry (Rect const& rect)

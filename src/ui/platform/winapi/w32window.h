@@ -53,7 +53,7 @@ public:
     void   flash (uint) noexcept;
     Rect   geometry () const;
     bool   isMapped () const;
-    void   setParent (const_reference, point2i);
+    void   setOwner (const_pointer);
     void   setGeometry (Rect const&);
     void   raise ();
     void   lower ();
@@ -64,7 +64,7 @@ public:
     WindowFlags flags () const noexcept { return m_eFlags; }
     void        setFlags (WindowFlags) noexcept;
 
-    weak_window parent () const noexcept { return shared_window (); }
+    weak_window owner  () const noexcept { return shared_window (); }
     u32         screen () const noexcept { return 0; }
 
 private:
