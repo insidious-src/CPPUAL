@@ -31,6 +31,14 @@ extern "C" {
 #include <stdlib.h>
 #endif
 
+#if defined(_WIN32) || defined(__CYGWIN__)
+    #define VK_API_CALL     __stdcall
+    #define VK_CALLBACK     __stdcall
+#else
+    #define VK_API_CALL
+    #define VK_CALLBACK
+#endif
+
 struct  _VK_INSTANCE;
 struct  _VK_DEVICE;
 typedef _VK_INSTANCE* VK_INSTANCE;
@@ -152,75 +160,75 @@ struct VK_PIPELINE_BARRIER
 };
 
 // instance and device management
-bool vkCreateInstance  (VK_APPLICATION_INFO*, VK_ALLOC_CALLBACKS*, VK_INSTANCE*);
-int  vkCreateDevice    (uint32_t, VK_DEVICE_CREATE_INFO*, VK_DEVICE*);
-void vkDestroyDevice   (VK_DEVICE);
-void vkDestroyInstance (VK_INSTANCE);
+extern bool VK_API_CALL vkCreateInstance  (VK_APPLICATION_INFO*, VK_ALLOC_CALLBACKS*, VK_INSTANCE*);
+extern int  VK_API_CALL vkCreateDevice    (uint32_t, VK_DEVICE_CREATE_INFO*, VK_DEVICE*);
+extern void VK_API_CALL vkDestroyDevice   (VK_DEVICE);
+extern void VK_API_CALL vkDestroyInstance (VK_INSTANCE);
 
 // gpu management
-int  vkEnumerateGpus (VK_INSTANCE, size_t max_num, size_t* num, VK_PHYSICAL_GPU* gpus);
-int  vkGetGpuInfo    (uint32_t gpu_id, uint16_t type, size_t** sizes, VK_SOME_GPU_INFO_STRUCTURE** infos);
+extern int VK_API_CALL vkEnumerateGpus (VK_INSTANCE, size_t max_num, size_t* num, VK_PHYSICAL_GPU* gpus);
+extern int VK_API_CALL vkGetGpuInfo    (uint32_t gpu_id, uint16_t type, size_t** sizes, VK_SOME_GPU_INFO_STRUCTURE** infos);
 
 // command execution
-int vkGetMultiGpuCompatibility (uint32_t, uint32_t, VK_GPU_COMPATIBILITY_INFO*);
-int vkCreateCommandBuffer      (VK_DEVICE, VK_CMD_BUFFER_CREATE_INFO*, VK_CMD_BUFFER*);
-int vkBeginCommandBuffer       (VK_CMD_BUFFER, VK_CMD_BUFFER_BEGIN_INFO*);
-int vkEndCommandBuffer         (VK_CMD_BUFFER);
-int vkCmdEnqueue               (VK_CMD_BUFFER, ...);
+extern int VK_API_CALL vkGetMultiGpuCompatibility (uint32_t, uint32_t, VK_GPU_COMPATIBILITY_INFO*);
+extern int VK_API_CALL vkCreateCommandBuffer      (VK_DEVICE, VK_CMD_BUFFER_CREATE_INFO*, VK_CMD_BUFFER*);
+extern int VK_API_CALL vkBeginCommandBuffer       (VK_CMD_BUFFER, VK_CMD_BUFFER_BEGIN_INFO*);
+extern int VK_API_CALL vkEndCommandBuffer         (VK_CMD_BUFFER);
+extern int VK_API_CALL vkCmdEnqueue               (VK_CMD_BUFFER, ...);
 
 // shader exection
-int vkCreateShader (VK_DEVICE, VK_SHADER_CREATE_INFO*, VK_SHADER*);
+extern int VK_API_CALL vkCreateShader (VK_DEVICE, VK_SHADER_CREATE_INFO*, VK_SHADER*);
 
 // queue management
-int vkGetDeviceQueue          (VK_DEVICE, uint32_t, uint32_t, VK_QUEUE*);
-int vkQueueSubmit             (VK_QUEUE, size_t num, VK_CMD_BUFFER* buffers, VK_OBJECT fence);
-int vkQueueAddMemReference    (VK_QUEUE, VK_OBJECT mem);
-int vkQueueRemoveMemReference (VK_QUEUE, VK_OBJECT mem);
-int vkQueueSignalSemaphore    (VK_QUEUE, VK_OBJECT semaphore);
-int vkQueueWaitSemaphore      (VK_QUEUE, VK_OBJECT semaphore);
+extern int VK_API_CALL vkGetDeviceQueue          (VK_DEVICE, uint32_t, uint32_t, VK_QUEUE*);
+extern int VK_API_CALL vkQueueSubmit             (VK_QUEUE, size_t num, VK_CMD_BUFFER* buffers, VK_OBJECT fence);
+extern int VK_API_CALL vkQueueAddMemReference    (VK_QUEUE, VK_OBJECT mem);
+extern int VK_API_CALL vkQueueRemoveMemReference (VK_QUEUE, VK_OBJECT mem);
+extern int VK_API_CALL vkQueueSignalSemaphore    (VK_QUEUE, VK_OBJECT semaphore);
+extern int VK_API_CALL vkQueueWaitSemaphore      (VK_QUEUE, VK_OBJECT semaphore);
 
 // pipeline management
-int vkCreateGraphicsPipeline (VK_DEVICE, VK_GRAPHICS_PIPELINE_CREATE_INFO*, VK_PIPELINE*);
-int vkStorePipeline          (VK_PIPELINE, size_t* sizes, VK_OBJECT data);
-int vkLoadPipeline           (VK_DEVICE, size_t size, VK_OBJECT data, VK_PIPELINE*);
-int vkCmdPipelineBarrier     (VK_CMD_BUFFER, VK_PIPELINE_BARRIER*);
+extern int VK_API_CALL vkCreateGraphicsPipeline (VK_DEVICE, VK_GRAPHICS_PIPELINE_CREATE_INFO*, VK_PIPELINE*);
+extern int VK_API_CALL vkStorePipeline          (VK_PIPELINE, size_t* sizes, VK_OBJECT data);
+extern int VK_API_CALL vkLoadPipeline           (VK_DEVICE, size_t size, VK_OBJECT data, VK_PIPELINE*);
+extern int VK_API_CALL vkCmdPipelineBarrier     (VK_CMD_BUFFER, VK_PIPELINE_BARRIER*);
 
 // surface depth management
-int vkCreateDynamicViewportState (VK_DEVICE, VK_DYNAMIC_VP_STATE_CREATE_INFO*, VK_DYNAMIC_VP_STATE_OBJECT*);
-int vkCreateDynamicDepthStencilState (VK_DEVICE, VK_DYNAMIC_DS_STATE_CREATE_INFO*, VK_DYNAMIC_DS_STATE*);
+extern int VK_API_CALL vkCreateDynamicViewportState (VK_DEVICE, VK_DYNAMIC_VP_STATE_CREATE_INFO*, VK_DYNAMIC_VP_STATE_OBJECT*);
+extern int VK_API_CALL vkCreateDynamicDepthStencilState (VK_DEVICE, VK_DYNAMIC_DS_STATE_CREATE_INFO*, VK_DYNAMIC_DS_STATE*);
 
 // resource management
-int  vkCreateImage   (VK_DEVICE, VK_IMAGE_CREATE_INFO*, VK_IMAGE*);
-int  vkCreateBuffer  (VK_DEVICE, VK_BUFFER_CREATE_INFO*, VK_BUFFER*);
-void vkDestroyObject (VK_OBJECT);
+extern int  VK_API_CALL vkCreateImage   (VK_DEVICE, VK_IMAGE_CREATE_INFO*, VK_IMAGE*);
+extern int  VK_API_CALL vkCreateBuffer  (VK_DEVICE, VK_BUFFER_CREATE_INFO*, VK_BUFFER*);
+extern void VK_API_CALL vkDestroyObject (VK_OBJECT);
 
 // memory management
-int vkGetObjectInfo    (VK_IMAGE, uint16_t type, size_t sizes, VK_IMAGE_MEMORY_REQUIREMENTS*);
-int vkAllocMemory      (VK_DEVICE, VK_MEMORY_ALLOC_INFO*, VK_OBJECT*);
-int vkBindObjectMemory (VK_IMAGE, uint32_t, VK_OBJECT, uint32_t);
+extern int VK_API_CALL vkGetObjectInfo    (VK_IMAGE, uint16_t type, size_t sizes, VK_IMAGE_MEMORY_REQUIREMENTS*);
+extern int VK_API_CALL vkAllocMemory      (VK_DEVICE, VK_MEMORY_ALLOC_INFO*, VK_OBJECT*);
+extern int VK_API_CALL vkBindObjectMemory (VK_IMAGE, uint32_t, VK_OBJECT, uint32_t);
 
 // pools
-int vkCreateDescriptorPool           (...);
-int vkCreateDescriptorSetLayoutChain (...);
-int vkCreateDescriptorSetLayout      (...);
-int vkAllocDescriptorSets            (...);
+extern int VK_API_CALL vkCreateDescriptorPool           (...);
+extern int VK_API_CALL vkCreateDescriptorSetLayoutChain (...);
+extern int VK_API_CALL vkCreateDescriptorSetLayout      (...);
+extern int VK_API_CALL vkAllocDescriptorSets            (...);
 
 // render passes
-int vkCreateRenderPass      (VK_DEVICE, VK_RENDER_PASS_CREATE_INFO*, VK_RENDER_PASS*);
-int vkCmdBeginRenderPass    (VK_CMD_BUFFER, VK_RENDER_PASS_BEGIN*);
-int vkCmdBindPipeline       (VK_CMD_BUFFER, uint16_t type, VK_PIPELINE);
-int vkCmdBindDescriptorSets (VK_CMD_BUFFER, ...);
-int vkCmdDraw               (VK_CMD_BUFFER, uint32_t, uint32_t, uint32_t, uint32_t);
-int vkCmdEndRenderPass      (VK_CMD_BUFFER, VK_RENDER_PASS);
+extern int VK_API_CALL vkCreateRenderPass      (VK_DEVICE, VK_RENDER_PASS_CREATE_INFO*, VK_RENDER_PASS*);
+extern int VK_API_CALL vkCmdBeginRenderPass    (VK_CMD_BUFFER, VK_RENDER_PASS_BEGIN*);
+extern int VK_API_CALL vkCmdBindPipeline       (VK_CMD_BUFFER, uint16_t type, VK_PIPELINE);
+extern int VK_API_CALL vkCmdBindDescriptorSets (VK_CMD_BUFFER, ...);
+extern int VK_API_CALL vkCmdDraw               (VK_CMD_BUFFER, uint32_t, uint32_t, uint32_t, uint32_t);
+extern int VK_API_CALL vkCmdEndRenderPass      (VK_CMD_BUFFER, VK_RENDER_PASS);
 
 // events & synchronization
-int vkCreateEvent    (VK_DEVICE, VK_EVENT_CREATE_INFO*, VK_EVENT*);
-int vkSetEvent       (VK_EVENT, ...);
-int vkResetEvent     (VK_EVENT, ...);
-int vkGetEventStatus (VK_EVENT, ...);
-int vkCmdSetEvent    (VK_EVENT, ...);
-int vkCmdResetEvent  (VK_EVENT, ...);
-int vkCmdWaitEvents  (...);
+extern int VK_API_CALL vkCreateEvent    (VK_DEVICE, VK_EVENT_CREATE_INFO*, VK_EVENT*);
+extern int VK_API_CALL vkSetEvent       (VK_EVENT, ...);
+extern int VK_API_CALL vkResetEvent     (VK_EVENT, ...);
+extern int VK_API_CALL vkGetEventStatus (VK_EVENT, ...);
+extern int VK_API_CALL vkCmdSetEvent    (VK_EVENT, ...);
+extern int VK_API_CALL vkCmdResetEvent  (VK_EVENT, ...);
+extern int VK_API_CALL vkCmdWaitEvents  (...);
 
 #ifdef __cplusplus
 }
