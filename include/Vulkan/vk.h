@@ -23,20 +23,20 @@
 #define KHRONOS_VULKAN_H_
 
 #ifdef __cplusplus
-#include <cstdlib>
-#include <cstdint>
+#	include <cstdlib>
+#	include <cstdint>
 extern "C" {
 #else
-#include <stdint.h>
-#include <stdlib.h>
+#	include <stdint.h>
+#	include <stdlib.h>
 #endif
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-    #define VK_API_CALL     __stdcall
-    #define VK_CALLBACK     __stdcall
+#	define VK_API_CALL __stdcall
+#	define VK_CALLBACK __stdcall
 #else
-    #define VK_API_CALL
-    #define VK_CALLBACK
+#	define VK_API_CALL
+#	define VK_CALLBACK
 #endif
 
 struct  _VK_INSTANCE;
@@ -168,15 +168,15 @@ extern void VK_API_CALL vkDestroyInstance (VK_INSTANCE);
 // gpu management
 extern int VK_API_CALL vkEnumerateGpus (VK_INSTANCE, size_t max_num, size_t* num, VK_PHYSICAL_GPU* gpus);
 extern int VK_API_CALL vkGetGpuInfo    (uint32_t gpu_id, uint16_t type, size_t** sizes, VK_SOME_GPU_INFO_STRUCTURE** infos);
+extern int VK_API_CALL vkGetMultiGpuCompatibility (uint32_t, uint32_t, VK_GPU_COMPATIBILITY_INFO*);
 
 // command execution
-extern int VK_API_CALL vkGetMultiGpuCompatibility (uint32_t, uint32_t, VK_GPU_COMPATIBILITY_INFO*);
 extern int VK_API_CALL vkCreateCommandBuffer      (VK_DEVICE, VK_CMD_BUFFER_CREATE_INFO*, VK_CMD_BUFFER*);
 extern int VK_API_CALL vkBeginCommandBuffer       (VK_CMD_BUFFER, VK_CMD_BUFFER_BEGIN_INFO*);
 extern int VK_API_CALL vkEndCommandBuffer         (VK_CMD_BUFFER);
 extern int VK_API_CALL vkCmdEnqueue               (VK_CMD_BUFFER, ...);
 
-// shader exection
+// shader execution
 extern int VK_API_CALL vkCreateShader (VK_DEVICE, VK_SHADER_CREATE_INFO*, VK_SHADER*);
 
 // queue management
