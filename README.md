@@ -16,7 +16,7 @@
 
 ### Host ###
 - cross-platform process management and interprocess communication
-- unified runtime allocator management for the host
+- unified runtime allocator management
 - specialized host & shared memory allocators
 - query hardware and os information
 
@@ -97,8 +97,10 @@
 - resource management
 
 ### Longterm Goals ###
-- drop freetype
+- completely integrate into the std library
+- unified dynamic memory management for both host and compute devices
 - drop opengl, directx, glew
+- drop freetype
 - drop openal
 - drop sndfile
 - transparent filesystem managament

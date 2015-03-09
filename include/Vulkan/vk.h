@@ -171,10 +171,10 @@ extern int VK_API_CALL vkGetGpuInfo    (uint32_t gpu_id, uint16_t type, size_t**
 extern int VK_API_CALL vkGetMultiGpuCompatibility (uint32_t, uint32_t, VK_GPU_COMPATIBILITY_INFO*);
 
 // command execution
-extern int VK_API_CALL vkCreateCommandBuffer      (VK_DEVICE, VK_CMD_BUFFER_CREATE_INFO*, VK_CMD_BUFFER*);
-extern int VK_API_CALL vkBeginCommandBuffer       (VK_CMD_BUFFER, VK_CMD_BUFFER_BEGIN_INFO*);
-extern int VK_API_CALL vkEndCommandBuffer         (VK_CMD_BUFFER);
-extern int VK_API_CALL vkCmdEnqueue               (VK_CMD_BUFFER, ...);
+extern int VK_API_CALL vkCreateCommandBuffer (VK_DEVICE, VK_CMD_BUFFER_CREATE_INFO*, VK_CMD_BUFFER*);
+extern int VK_API_CALL vkBeginCommandBuffer  (VK_CMD_BUFFER, VK_CMD_BUFFER_BEGIN_INFO*);
+extern int VK_API_CALL vkEndCommandBuffer    (VK_CMD_BUFFER);
+extern int VK_API_CALL vkCmdEnqueue          (VK_CMD_BUFFER, ...);
 
 // shader execution
 extern int VK_API_CALL vkCreateShader (VK_DEVICE, VK_SHADER_CREATE_INFO*, VK_SHADER*);
