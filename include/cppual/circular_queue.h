@@ -356,7 +356,7 @@ void CircularQueue<T, Allocator, Atomic>::dispose ()
 	clear ();
 	allocator_type::deallocate (m_pArray, capacity ());
 	m_uCapacity = size_type ();
-	m_pArray    = pointer ();
+	m_pArray    = pointer   ();
 }
 
 // ====================================================

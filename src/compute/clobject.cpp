@@ -55,7 +55,7 @@ Object<DeviceQueue>::~Object () noexcept
 }
 
 template <>
-Object<MemoryRegion>::~Object () noexcept
+Object<GlobalMemory>::~Object () noexcept
 {
     if (m_object != nullptr) ::clReleaseMemObject (m_object.get<CL::memory_type> ());
 }
@@ -109,7 +109,7 @@ Object<Event>::Object (Object const& rhs) noexcept
 }
 
 template <>
-Object<MemoryRegion>::Object (Object const& rhs) noexcept
+Object<GlobalMemory>::Object (Object const& rhs) noexcept
 : m_object (rhs.m_object)
 {
     if (m_object != nullptr) ::clRetainMemObject (m_object.get<CL::memory_type> ());
@@ -176,7 +176,7 @@ Object<Event>& Object<Event>::operator = (Object const& rhs) noexcept
 }
 
 template <>
-Object<MemoryRegion>& Object<MemoryRegion>::operator = (Object const& rhs) noexcept
+Object<GlobalMemory>& Object<GlobalMemory>::operator = (Object const& rhs) noexcept
 {
     if (this == &rhs) return *this;
     if (m_object != nullptr) ::clReleaseMemObject (m_object.get<CL::memory_type> ());

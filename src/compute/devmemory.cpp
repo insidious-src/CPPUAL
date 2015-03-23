@@ -19,10 +19,43 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <Vulkan/vk.h>
 #include <cppual/compute/devmemory.h>
+#include <cppual/compute/device.h>
+
+void* operator new (std::size_t size, GlobalMemory& obj, std::size_t align)
+{
+    using namespace cppual::Compute;
+
+    if (!obj.device ().isValid ()) throw memory_source_not_available ();
+
+	::VK_GPU_MEMORY mem_obj = nullptr;
+
+	::VK_MEMORY_ALLOC_INFO nfo =
+	{
+        size,
+        align ? align : size,
+        0,
+        1,
+        { 0 },
+        0
+	};
+
+	if (::vkAllocMemory (obj.device ().handle ().get<VK_DEVICE> (), &nfo, &mem_obj))
+		throw std::bad_alloc ();
+	return mem_obj;
+}
+
+void operator delete (void* ptr, GlobalMemory& obj)
+{
+    using namespace cppual::Compute;
+
+    if (!obj.device ().isValid ()) throw memory_source_not_available ();
+    if (::vkFreeMemory (ptr)) throw std::out_of_range ("pointer is not an allocated memory block");
+}
+
+// =========================================================
 
 namespace cppual { namespace Compute {
-
-
 
 } } // namespace Compute

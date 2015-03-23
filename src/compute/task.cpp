@@ -38,7 +38,7 @@ struct ThreadPoolInitializer
 
 	~ThreadPoolInitializer ();
 
-	inline ThreadPoolInitializer () noexcept
+	ThreadPoolInitializer () noexcept
 	: threadMutex (),
 	  threads     ()
 	{ }
@@ -50,7 +50,7 @@ struct ThreadPoolInitializer
 
 // =========================================================
 
-ThreadPoolInitializer::~ThreadPoolInitializer ()
+inline ThreadPoolInitializer::~ThreadPoolInitializer ()
 {
 	// block thread reservation until all threads exit
 	// and clear the container
@@ -76,20 +76,20 @@ inline ThreadPoolInitializer& pool () noexcept
 class Assign final
 {
 public:
-    Assign (HostQueue& gTasks) : m_queue (gTasks)
-    {
-        m_queue.m_gQueueMutex.lock ();
-        ++m_queue.m_uNumAssigned;
-        m_queue.m_gQueueMutex.unlock ();
+	Assign (HostQueue& gTasks) : m_queue (gTasks)
+	{
+		m_queue.m_gQueueMutex.lock ();
+		++m_queue.m_uNumAssigned;
+		m_queue.m_gQueueMutex.unlock ();
 	}
 
-    ~Assign ()
+	~Assign ()
 	{
 		// RAII lock
-        {
-            m_queue.m_gQueueMutex.lock ();
+		{
+			m_queue.m_gQueueMutex.lock ();
 			--m_queue.m_uNumAssigned;
-            m_queue.m_gQueueMutex.unlock ();
+			m_queue.m_gQueueMutex.unlock ();
 		}
 
 		m_queue.m_gTaskCond.notify_all ();
@@ -101,56 +101,37 @@ private:
 
 // =========================================================
 
-class Worker final
+void HostQueue::operator ()()
 {
-public:
-	typedef HostQueue::call_type  call_type;
-	typedef HostQueue::read_lock  read_lock;
-	typedef HostQueue::write_lock write_lock;
-
-	constexpr Worker (HostQueue& s)
-	: m_queue (s)
-	{ }
-
-	void operator ()();
-
-private:
-	HostQueue& m_queue;
-};
-
-// =========================================================
-
-void Worker::operator ()()
-{
-	Assign    assign (m_queue);
+	Assign    assign (*this);
 	call_type run;
 
 	while (true)
 	{
 		// RAII lock
 		{
-			read_lock gReadLock (m_queue.m_gQueueMutex);
+			read_lock gReadLock (m_gQueueMutex);
 
-			m_queue.m_gTaskCond.wait (gReadLock, [&]
+			m_gTaskCond.wait (gReadLock, [&]
 			{
-				return HostQueue::Running > m_queue.m_eState or
-                        !m_queue.m_gTaskQueue.empty ();
+				return HostQueue::Running > m_eState or
+						!m_gTaskQueue.empty ();
 			});
 
 			// process a task if there is one scheduled,
 			// otherwise return if the execution state
 			// requires it
-			if (HostQueue::Interrupted == m_queue.m_eState or
-				(m_queue.m_gTaskQueue.empty () and HostQueue::Inactive == m_queue.m_eState))
+			if (HostQueue::Interrupted == m_eState or
+				(m_gTaskQueue.empty () and HostQueue::Inactive == m_eState))
 				break;
 
-			run = std::move (m_queue.m_gTaskQueue.front ());
+			run = std::move (m_gTaskQueue.front ());
 			gReadLock.unlock ();
 
 			// RAII lock
 			{
-				write_lock gWriteLock (m_queue.m_gQueueMutex);
-				m_queue.m_gTaskQueue.pop_front ();
+				write_lock gWriteLock (m_gQueueMutex);
+				m_gTaskQueue.pop_front ();
 			}
 		}
 
@@ -158,11 +139,11 @@ void Worker::operator ()()
 
 		// RAII lock
 		{
-			write_lock gWriteLock (m_queue.m_gQueueMutex);
-			++m_queue.m_uNumCompleted;
+			write_lock gWriteLock (m_gQueueMutex);
+			++m_uNumCompleted;
 		}
 
-		m_queue.m_gTaskCond.notify_all ();
+		m_gTaskCond.notify_all ();
 	}
 }
 
@@ -177,7 +158,7 @@ bool ThreadPool::reserve (HostQueue& gTaskQueue, size_type uAddThreads, bool bDe
 
 	while (uAddThreads--)
 	{
-		Internal::pool ().threads.emplace_back (thread (Worker (gTaskQueue)));
+		Internal::pool ().threads.emplace_back (thread (gTaskQueue));
 		if (bDetached) Internal::pool ().threads.back ().detach ();
 	}
 

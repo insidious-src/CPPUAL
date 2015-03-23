@@ -23,10 +23,10 @@
 #define CPPUAL_COMPUTE_DEVICE_H_
 #ifdef __cplusplus
 
-#include <cppual/mstring.h>
+#include <string>
 #include <cppual/flags.h>
 #include <cppual/noncopyable.h>
-#include <cppual/compute/clobject.h>
+#include <cppual/compute/object.h>
 
 using std::string;
 
@@ -35,6 +35,7 @@ namespace cppual { namespace Compute {
 class device_exception    : public std::bad_exception { };
 class bad_device          : public device_exception   { };
 class not_available       : public device_exception   { };
+class already_created     : public device_exception   { };
 class bad_partition_count : public device_exception   { };
 
 // =========================================================
@@ -44,16 +45,8 @@ class Device
 public:
 	enum Type
 	{
-		CPU         = 1 << 1,
-		GPU         = 1 << 2,
-		Accelerator = 1 << 3,
-		Custom      = 1 << 4,
-	};
-
-	enum class DevType : unsigned char
-	{
 		CPU    = 1 << 0, // serial processing
-		GPU    = 1 << 1, // shader and parallel processing
+		GPU    = 1 << 1, // shader, texture and parallel processing
 		PPU    = 1 << 2, // dedicated parallel processing (generic processing)
 		DSP    = 1 << 3, // digital signal processing (audio)
 		BSD    = 1 << 4, // bit stream decoder (video)
@@ -64,18 +57,8 @@ public:
 
 	enum Attribute
 	{
-		Specialized, // specialized processing
-		Extended,    // supports OpenCL 2.0
-		Native       // supoorts execution of native functions
-	};
-
-	typedef BitSet<DevType> AvailableTypes;
-
-	enum
-	{
-		Null    = 0,
-		Default = 1 << 0,
-		All     = Default | CPU | GPU | Accelerator | Custom
+		Specialized = 1 << 0, // specialized processing
+		Native      = 1 << 1  // supoorts execution of native functions
 	};
 
 	enum class Info : unsigned char
@@ -87,75 +70,30 @@ public:
 		Version
 	};
 
-	class Partition : public Object <Device>
-	{
-	public:
-		Partition () = delete;
-		Partition (Partition&&);
-		Partition (Partition const&);
-		Partition& operator = (Partition&&);
-		Partition& operator = (Partition const&);
+	typedef BitSet<Type>      Types;
+	typedef BitSet<Attribute> Attributes;
+	typedef Handle            pointer;
+	typedef std::size_t       size_type;
 
-	private:
-		Partition (Device&);
-		friend class Device;
-	};
-
-	typedef typename std::underlying_type<Type>::type type_size;
-	typedef Object<Device>::int_type                  int_type;
-	typedef Object<Device>::uint_type                 uint_type;
-	typedef std::size_t                               size_type;
-
-	static uint_type count (u16 platform = 0);
-	bool   available       (cchar* feature);
-
-	Device (Device const&) noexcept;
-	Device (Type type = count (GPU) ? GPU : CPU, u16 platform = 0, uint_type id = 0);
-
-	Partition part (uint_type);
-	string    info (Info);
-	uint_type dimensions   () const;
-	size_type groupSize    () const;
-	uint_type items        () const;
+	static size_type count ();
+	bool      available    (cchar* feature);
+	string    info         (Info);
 	size_type cache        () const;
-	uint_type cacheLine    () const;
+	size_type cacheLine    () const;
 	size_type localMemory  () const;
 	size_type constMemory  () const;
 	size_type globalMemory () const;
 
-	inline uint_type platform () const noexcept { return m_uPlatformId; }
-	inline uint_type units    () const noexcept { return m_uNumUnits; }
-	inline Type      type     () const noexcept { return m_eType; }
-	inline bool      isValid  () const noexcept { return m_uNumUnits; }
+	pointer handle  () const noexcept { return m_pHandle; }
+	Type    type    () const noexcept { return m_eType;   }
+	bool    isValid () const noexcept { return m_pHandle; }
 
 private:
-	u16       m_uPlatformId;
-	Type      m_eType;
-	uint_type m_uId, m_uNumUnits;
+	pointer m_pHandle;
+	Type    m_eType;
 };
 
-template <typename CharT, typename Traits>
-std::basic_ostream<CharT, Traits>&
-operator << (std::basic_ostream<CharT, Traits>& os, Device::Type u)
-{
-	switch (u)
-	{
-	case Device::CPU:
-		return os << "CPU";
-	case Device::GPU:
-		return os << "GPU";
-	case Device::Accelerator:
-		return os << "Accelerator";
-	case Device::Custom:
-		return os << "Custom";
-	default:
-		return os;
-	}
-}
-
-}
-
-} // Compute
+} } // Compute
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_DEVICE_H_

@@ -31,6 +31,13 @@ namespace cppual { namespace Compute {
 class platform_exception : public std::bad_exception { };
 class bad_platform       : public platform_exception { };
 
+class Instance : public NonCopyable
+{
+public:
+	size_t deviceCount ();
+	size_t gpuCount    ();
+};
+
 namespace Platform {
 
 enum class Info : unsigned char

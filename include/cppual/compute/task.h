@@ -70,6 +70,7 @@ public:
 
 	bool schedule (call_type const&);
 	void quit     (bool interrupt = false) noexcept;
+	void operator ()();
 
 	void whenAnyFinish ();
 	void whenAllFinish ();
@@ -107,7 +108,6 @@ public:
 	}
 
 	friend class Assign;
-	friend class Worker;
 
 private:
 	mutable mutex_type m_gQueueMutex;

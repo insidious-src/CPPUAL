@@ -88,23 +88,27 @@ add_library(cppual-host SHARED
 add_library(cppual-compute SHARED
 	include/Vulkan/vk.h
 	include/cppual/resource.h
-	src/compute/cldef.h
-	include/cppual/compute/platform.h
-	src/compute/opencl.cpp
-	include/cppual/compute/clobject.h
-	src/compute/clobject.cpp
-	include/cppual/compute/program.h
-	src/compute/program.cpp
+	include/cppual/compute/bridge.h
+	src/compute/bridge.cpp
+	include/cppual/compute/behaviour.h
+	src/compute/behaviour.cpp
+	include/cppual/compute/object.h
+	src/compute/object.cpp
+#	src/compute/cldef.h
+#	include/cppual/compute/platform.h
+#	src/compute/opencl.cpp
+#	include/cppual/compute/clobject.h
+#	src/compute/clobject.cpp
+#	include/cppual/compute/program.h
+#	src/compute/program.cpp
 	include/cppual/compute/device.h
 	src/compute/device.cpp
 	include/cppual/compute/devmemory.h
 	src/compute/devmemory.cpp
-	include/cppual/compute/devsurface.h
-	src/compute/devsurface.cpp
-	include/cppual/compute/plltask.h
-	src/compute/plltask.cpp
-	src/compute/context.cpp
-	include/cppual/compute/context.h
+	include/cppual/compute/devtask.h
+	src/compute/devtask.cpp
+#	src/compute/context.cpp
+#	include/cppual/compute/context.h
 	include/cppual/compute/pll_ops.h
 	src/compute/task.cpp
 	include/cppual/compute/task.h

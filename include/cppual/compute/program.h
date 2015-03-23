@@ -27,7 +27,7 @@
 #include <cppual/types.h>
 #include <cppual/resource.h>
 #include <cppual/noncopyable.h>
-#include <cppual/compute/plltask.h>
+#include <cppual/compute/devtask.h>
 
 using std::vector;
 
@@ -36,15 +36,15 @@ namespace cppual { namespace Compute {
 class Program : public Object <Program>
 {
 public:
-    Program ();
-    Program (Behaviour const&, string const& binary_path);
-    Program (Behaviour const&, vector<string> const& source);
-    Program (Program&&);
-    Program (Program const&);
-    Program& operator = (Program&&);
-    Program& operator = (Program const&);
+	Program ();
+	Program (Behaviour const&, string const& binary_path);
+	Program (Behaviour const&, vector<string> const& source);
+	Program (Program&&);
+	Program (Program const&);
+	Program& operator = (Program&&);
+	Program& operator = (Program const&);
 
-    void bind  (DeviceQueue const& queue);
+	void bind  (DeviceQueue const& queue);
 	bool build ();
 
 	static Program* current () noexcept;

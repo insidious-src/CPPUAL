@@ -28,11 +28,12 @@
 
 namespace cppual { namespace Compute {
 
+class Instance;
 class Device;
 class Behaviour;
 class DeviceQueue;
 class DeviceSurface;
-class MemoryRegion;
+class GlobalMemory;
 class Program;
 class Kernel;
 class Event;
@@ -42,27 +43,27 @@ class Event;
 class Handle
 {
 public:
-    typedef void* pointer;
+	typedef void* pointer;
 
-    inline    Handle () noexcept = default;
-    constexpr Handle (pointer handle) noexcept : m_handle (handle) { }
-    constexpr Handle (std::nullptr_t) noexcept : m_handle ()       { }
+	inline    Handle () noexcept = default;
+	constexpr Handle (pointer handle) noexcept : m_handle (handle) { }
+	constexpr Handle (std::nullptr_t) noexcept : m_handle ()       { }
 
-    constexpr operator pointer () const noexcept
-    { return m_handle; }
+	constexpr operator pointer () const noexcept
+	{ return m_handle; }
 
-    template <typename T>
-    constexpr typename std::remove_pointer<T>::type* get () const noexcept
-    { return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
+	template <typename T>
+	constexpr typename std::remove_pointer<T>::type* get () const noexcept
+	{ return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
 
-    friend
-    constexpr bool operator == (Handle const&, Handle const&) noexcept;
+	friend
+	constexpr bool operator == (Handle const&, Handle const&) noexcept;
 
-    friend
-    constexpr bool operator == (Handle const&, std::nullptr_t) noexcept;
+	friend
+	constexpr bool operator == (Handle const&, std::nullptr_t) noexcept;
 
 private:
-    pointer m_handle;
+	pointer m_handle;
 };
 
 constexpr bool operator == (Handle const& conn1, Handle const& conn2) noexcept
@@ -83,24 +84,21 @@ template <class T>
 class Object
 {
 public:
-    typedef Handle pointer;
-    typedef u32    uint_type;
-    typedef int32  int_type;
+	typedef Handle pointer;
+	typedef u32    uint_type;
+	typedef int32  int_type;
 
 	Object (Object&&) noexcept = default;
-    Object (Object const& rhs) noexcept;
-    Object& operator = (Object&&) = default;
-    Object& operator = (Object const& rhs) noexcept;
-    ~Object () noexcept;
+	Object (Object const& rhs) noexcept;
+	Object& operator = (Object&&) = default;
+	Object& operator = (Object const& rhs) noexcept;
+	~Object () noexcept;
 
-    constexpr Object () noexcept : m_object () { }
-    constexpr pointer handle () const noexcept { return m_object; }
+	constexpr Object () noexcept : m_object () { }
+	constexpr pointer handle () const noexcept { return m_object; }
 
-    constexpr pointer  operator ()() const noexcept { return m_object; }
-    inline    pointer& operator ()() noexcept { return m_object; }
-
-    constexpr Object (pointer obj) noexcept : m_object (obj)
-    { }
+	constexpr Object (pointer obj) noexcept : m_object (obj)
+	{ }
 
 private:
 	pointer m_object;
