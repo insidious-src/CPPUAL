@@ -132,15 +132,6 @@ add_library(cppual-dom SHARED
 	include/cppual/dom/dom.h
 	)
 
-# Document Object Model (xml, cmdargs, web)
-add_library(cppual-stream SHARED
-	include/cppual/stream/iobase.h
-	include/cppual/stream/filesystem.h
-	include/cppual/stream/device_memory.h
-	src/stream/device_memory.cpp
-	include/cppual/stream/console.h
-	)
-
 # transparent network facilities
 add_library(cppual-network SHARED
 	src/network/address.cpp
@@ -160,6 +151,9 @@ add_library(cppual-network SHARED
 	include/cppual/network/transport/tcplistener.h
 	src/network/transport/udp.cpp
 	include/cppual/network/transport/udp.h
+	include/cppual/network/protocols/ftp.h
+	include/cppual/network/protocols/http.h
+	include/cppual/network/protocols/protocol.h
 	)
 
 # raw device input

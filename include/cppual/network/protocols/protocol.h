@@ -32,18 +32,17 @@ class ProtocolContext;
 class IProtocol
 {
 public:
-	ProtocolContext* createContext ();
-	bool             addLowerLayer (IProtocol*);
+	ProtocolContext* createContext  ();
+	bool             addLowerLayer  (IProtocol*);
 	IProtocol*       getLowestLayer () const;
 
-	virtual uint getRequiredOutputSize (uint max_input);
+	virtual uint getRequiredOutputSize        (uint max_input);
 	virtual uint getRequiredRecyclableStreams (uint max_connections,
 											   uint max_concurrent_calls);
 
-	virtual void startSession (ProtocolContext&, Packet& outgoing_packet) = 0;
-	virtual bool readData (ProtocolContext&, Packet& incoming_packet) = 0;
-	virtual byte tryDecode (ProtocolContext&, Packet& output_packet) = 0;
-
+	virtual void startSession  (ProtocolContext&, Packet& outgoing_packet) = 0;
+	virtual bool readData      (ProtocolContext&, Packet& incoming_packet) = 0;
+	virtual byte tryDecode     (ProtocolContext&, Packet& output_packet  ) = 0;
 	virtual byte encodeContent (ProtocolContext&,
 								Packet& input_packet,
 								Packet& output_packet) = 0;
