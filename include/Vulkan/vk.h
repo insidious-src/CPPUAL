@@ -56,7 +56,7 @@ typedef VK_OBJECT      VK_IMAGE;
 typedef VK_OBJECT      VK_BUFFER;
 typedef VK_OBJECT      VK_RENDER_PASS;
 typedef VK_OBJECT      VK_EVENT;
-typedef std::size_t    VK_SIZE;
+typedef size_t         VK_SIZE;
 typedef int            VK_RESULT;
 typedef unsigned       VK_UINT;
 typedef unsigned short VK_ENUM;

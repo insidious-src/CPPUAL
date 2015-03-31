@@ -151,8 +151,21 @@ add_library(cppual-network SHARED
 	include/cppual/network/transport/tcplistener.h
 	src/network/transport/udp.cpp
 	include/cppual/network/transport/udp.h
+	src/network/transport/proxy.cpp
+	include/cppual/network/transport/proxy.h
+	src/network/protocols/ftp.cpp
 	include/cppual/network/protocols/ftp.h
+	src/network/protocols/http.cpp
 	include/cppual/network/protocols/http.h
+	src/network/protocols/p2p.cpp
+	include/cppual/network/protocols/p2p.h
+	src/network/protocols/metalink.cpp
+	include/cppual/network/protocols/metalink.h
+	src/network/protocols/icmp.cpp
+	include/cppual/network/protocols/icmp.h
+	src/network/protocols/ssh.cpp
+	include/cppual/network/protocols/ssh.h
+	src/network/protocols/protocol.cpp
 	include/cppual/network/protocols/protocol.h
 	)
 

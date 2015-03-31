@@ -29,7 +29,6 @@ namespace cppual { namespace Network { namespace Http {
 
 class Request final
 {
-
 };
 
 class Response final
@@ -39,7 +38,19 @@ class Response final
 
 class Client final
 {
+	enum class ConnectionType : unsigned char
+	{
+		Plain,
+		SSL,
+		TLS,
+		Mixed,
+		Custom
+	};
 
+	int version ();
+
+private:
+	ConnectionType m_eConnType;
 };
 
 } } } // Http
