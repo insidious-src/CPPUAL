@@ -32,27 +32,27 @@ namespace cppual { namespace Compute {
 class DeviceQueue : public Object
 {
 public:
-	enum EngineType
-	{
-		Graphics  = 1 << 0,
-		DMA       = 1 << 1, // direct memory access
-		Compute   = 1 << 2,
-		Universal = 1 << 3,
-		Timer     = 1 << 4,
-		Custom    = 1 << 5,
-	};
+    enum EngineType
+    {
+        Graphics  = 1 << 0,
+        DMA       = 1 << 1, // direct memory access
+        Compute   = 1 << 2,
+        Universal = 1 << 3,
+        Timer     = 1 << 4,
+        Custom    = 1 << 5,
+    };
 
-	typedef BitSet<EngineType> EngineTypes;
+    typedef BitSet<EngineType> EngineTypes;
 
-	DeviceQueue ();
-	DeviceQueue (Device const&, EngineType exec_engine_type);
-	DeviceQueue (DeviceQueue&&);
-	DeviceQueue& operator = (DeviceQueue&&);
+    DeviceQueue ();
+    DeviceQueue (Device const&, EngineType exec_engine_type);
+    DeviceQueue (DeviceQueue&&);
+    DeviceQueue& operator = (DeviceQueue&&);
 
-	EngineType type () const noexcept { return m_eQueueType; }
+    EngineType type () const noexcept { return m_eQueueType; }
 
 private:
-	EngineType m_eQueueType;
+    EngineType m_eQueueType;
 };
 
 template <typename T>

@@ -30,14 +30,14 @@ enum class MessageType : char { Plain, Information, Warning, Error };
 typedef    BitSet<Dialog::Result> Results;
 
 Dialog::Result showQuestion (string&& title,
-							 string&& question,
-							 Results  answers,
-							 Window*  owner = nullptr);
+                             string&& question,
+                             Results  answers,
+                             Window*  owner = nullptr);
 
 void showMessage (string&&    title,
-				  string&&    message,
-				  MessageType message_type = MessageType::Warning,
-				  Window*     owner        = nullptr);
+                  string&&    message,
+                  MessageType message_type = MessageType::Warning,
+                  Window*     owner        = nullptr);
 
 } } // namespace Ui
 

@@ -30,97 +30,97 @@ namespace cppual { namespace Ui {
 
 enum class Visibility : unsigned char
 {
-	Hidden,
-	Normal,
-	Minimized,
-	Maximized
+    Hidden,
+    Normal,
+    Minimized,
+    Maximized
 };
 
 class FrameView : public SkinnableView
 {
 public:
-	typedef Graphics::Image image_type;
+    typedef Graphics::Image image_type;
 
-	enum Edge
-	{
-		Left        = 1 << 0,
-		Top         = 1 << 1,
-		Right       = 1 << 2,
-		Bottom      = 1 << 3,
-		TopLeft     = Left  | Top,
-		TopRight    = Right | Top,
-		BottomLeft  = Left  | Bottom,
-		BottomRight = Right | Bottom
-	};
+    enum Edge
+    {
+        Left        = 1 << 0,
+        Top         = 1 << 1,
+        Right       = 1 << 2,
+        Bottom      = 1 << 3,
+        TopLeft     = Left  | Top,
+        TopRight    = Right | Top,
+        BottomLeft  = Left  | Bottom,
+        BottomRight = Right | Bottom
+    };
 
-	enum MouseState
-	{
-		MouseLeftDown  = 1 << 0,
-		MouseRightDown = 1 << 1,
-	};
+    enum MouseState
+    {
+        MouseLeftDown  = 1 << 0,
+        MouseRightDown = 1 << 1,
+    };
 
-	typedef BitSet<FrameView::MouseState> MouseStates;
-	typedef BitSet<FrameView::Edge>       Edges;
+    typedef BitSet<FrameView::MouseState> MouseStates;
+    typedef BitSet<FrameView::Edge>       Edges;
 
-	FrameView () noexcept;
-	FrameView (FrameView&&) noexcept;
-	FrameView (FrameView const&) noexcept;
-	FrameView& operator = (FrameView&&) noexcept;
-	FrameView& operator = (FrameView const&) noexcept;
-	~FrameView () noexcept;
+    FrameView () noexcept;
+    FrameView (FrameView&&) noexcept;
+    FrameView (FrameView const&) noexcept;
+    FrameView& operator = (FrameView&&) noexcept;
+    FrameView& operator = (FrameView const&) noexcept;
+    ~FrameView () noexcept;
 
-	void stretch ();
-	void unstretch ();
-	void attach (View*);
-	void detach ();
-	void setIcon (image_type*);
-	void setLabel (string const&);
-	void setFlags (WindowFlags);
+    void stretch ();
+    void unstretch ();
+    void attach (View*);
+    void detach ();
+    void setIcon (image_type*);
+    void setLabel (string const&);
+    void setFlags (WindowFlags);
 
-	FrameView (View*       parent,
-			   Rect const& target_rect,
-			   string&&    title,
-			   image_type* icon,
-			   WindowFlags flags = WindowHints);
+    FrameView (View*       parent,
+               Rect const& target_rect,
+               string&&    title,
+               image_type* icon,
+               WindowFlags flags = WindowHints);
 
-	inline image_type* icon () const noexcept { return m_pIcon; }
-	inline View*	   attached () const noexcept { return m_pTarget; }
-	inline PopupMenu*  menu () noexcept { return &m_gSysMenu; }
-	inline WindowFlags flags () const noexcept { return m_gFrameFlags; }
-	inline Visibility  visibility () const noexcept { return m_eVisibility; }
+    inline image_type* icon () const noexcept { return m_pIcon; }
+    inline View*       attached () const noexcept { return m_pTarget; }
+    inline PopupMenu*  menu () noexcept { return &m_gSysMenu; }
+    inline WindowFlags flags () const noexcept { return m_gFrameFlags; }
+    inline Visibility  visibility () const noexcept { return m_eVisibility; }
 
-	inline bool isStretched () const noexcept
-	{ return m_eVisibility == Visibility::Maximized; }
+    inline bool isStretched () const noexcept
+    { return m_eVisibility == Visibility::Maximized; }
 
 protected:
-	void onBeginSizeMove (Rect const&);
-	void onEndSizeMove (Rect const&);
+    void onBeginSizeMove (Rect const&);
+    void onEndSizeMove (Rect const&);
 
 private:
-	PushButton  m_gCloseBtn;
-	PushButton  m_gMaxBtn;
-	PushButton  m_gMinBtn;
-	PushButton  m_gHelpBtn;
-	PopupMenu   m_gSysMenu;
-	string      m_gTitle;
-	Rect        m_gIconRect;
-	Rect        m_gFrameBtnsRect;
-	image_type* m_pIcon;
-	View*       m_pTarget;
-	WindowFlags m_gFrameFlags;
-	MouseStates m_gMouseStates;
-	Edges       m_gHoldingEdges;
-	Visibility  m_eVisibility;
+    PushButton  m_gCloseBtn;
+    PushButton  m_gMaxBtn;
+    PushButton  m_gMinBtn;
+    PushButton  m_gHelpBtn;
+    PopupMenu   m_gSysMenu;
+    string      m_gTitle;
+    Rect        m_gIconRect;
+    Rect        m_gFrameBtnsRect;
+    image_type* m_pIcon;
+    View*       m_pTarget;
+    WindowFlags m_gFrameFlags;
+    MouseStates m_gMouseStates;
+    Edges       m_gHoldingEdges;
+    Visibility  m_eVisibility;
 
-	Rect calcFrameSize (Rect const& client_rect) noexcept;
-	void onShow (bool);
-	void onPaint (Rect const&);
-	void onSize (point2u);
-	void onMouseLeftDown (point2i);
-	void onMouseLeftUp (point2i);
-	void onMouseRightDown (point2i);
-	void onMouseRightUp (point2i);
-	void onMouseMove (point2i);
+    Rect calcFrameSize (Rect const& client_rect) noexcept;
+    void onShow (bool);
+    void onPaint (Rect const&);
+    void onSize (point2u);
+    void onMouseLeftDown (point2i);
+    void onMouseLeftUp (point2i);
+    void onMouseRightDown (point2i);
+    void onMouseRightUp (point2i);
+    void onMouseMove (point2i);
 };
 
 // =========================================================
@@ -130,24 +130,24 @@ private:
 class Frame
 {
 public:
-	typedef FrameView::image_type image_type;
+    typedef FrameView::image_type image_type;
 
-	void stretch ();
-	void unstretch ();
-	void attach (View*);
-	void detach ();
-	void setIcon (image_type*);
-	void setLabel (string const&);
+    void stretch ();
+    void unstretch ();
+    void attach (View*);
+    void detach ();
+    void setIcon (image_type*);
+    void setLabel (string const&);
 
-	image_type* icon () const noexcept;
-	View*	    attached () const noexcept;
-	PopupMenu*  menu () noexcept;
-	Visibility  visibility () const noexcept;
-	bool        isStretched () const noexcept;
+    image_type* icon () const noexcept;
+    View*        attached () const noexcept;
+    PopupMenu*  menu () noexcept;
+    Visibility  visibility () const noexcept;
+    bool        isStretched () const noexcept;
 
 private:
-	FrameView* m_pInternalFrame;
-	bool       m_bIsUsingInternalCompositor;
+    FrameView* m_pInternalFrame;
+    bool       m_bIsUsingInternalCompositor;
 };
 
 } } // namespace Ui

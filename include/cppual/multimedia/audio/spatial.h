@@ -29,26 +29,26 @@ namespace cppual { namespace Audio {
 
 enum class ObjectType : bool
 {
-	Buffer,
-	Source
+    Buffer,
+    Source
 };
 
 enum class EmitType : unsigned char
 {
-	Undetermined,
-	Static,
-	Streaming
+    Undetermined,
+    Static,
+    Streaming
 };
 
 enum class DistanceModel : unsigned char
 {
-	Plain,
-	InverseDistance,
-	InverseDistanceClamped,
-	LinearDistance,
-	LinearDistanceClamped,
-	ExponentDistance,
-	ExponentDistanceClamped
+    Plain,
+    InverseDistance,
+    InverseDistanceClamped,
+    LinearDistance,
+    LinearDistanceClamped,
+    ExponentDistance,
+    ExponentDistanceClamped
 };
 
 } } // namespace Audio

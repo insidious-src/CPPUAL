@@ -29,26 +29,26 @@ namespace cppual { namespace Graphics { namespace GL {
 
 enum class BufferType : unsigned char
 {
-	Array,
-	AtomicCounter,
-	CopyRead,
-	CopyWrite,
-	DrawIndirect,
-	DispatchIndirect,
-	ElementArray,
-	PixelPack,
-	PixelUnpack,
-	Query,
-	ShaderStorage,
-	Texture,
-	TransformFeedback,
-	Uniform
+    Array,
+    AtomicCounter,
+    CopyRead,
+    CopyWrite,
+    DrawIndirect,
+    DispatchIndirect,
+    ElementArray,
+    PixelPack,
+    PixelUnpack,
+    Query,
+    ShaderStorage,
+    Texture,
+    TransformFeedback,
+    Uniform
 };
 
 class BufferObject : public Object
 {
 public:
-	BufferObject () noexcept;
+    BufferObject () noexcept;
 };
 
 } } } // namespace GL

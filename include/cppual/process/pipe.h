@@ -38,26 +38,26 @@ namespace cppual { namespace Process {
 
 enum class PipeType : unsigned char
 {
-	Memory,
-	Interprocess,
-	Network
+    Memory,
+    Interprocess,
+    Network
 };
 
 class Pipe : public NonCopyable
 {
 public:
-	Pipe () = delete;
-	Pipe (Pipe&&) noexcept;
-	Pipe& operator = (Pipe&&) noexcept;
-	~Pipe () noexcept;
+    Pipe () = delete;
+    Pipe (Pipe&&) noexcept;
+    Pipe& operator = (Pipe&&) noexcept;
+    ~Pipe () noexcept;
 
-	void setBlocking (bool) noexcept;
+    void setBlocking (bool) noexcept;
 
-	inline bool isBlocking () const noexcept
-	{ return m_bIsBlocking; }
+    inline bool isBlocking () const noexcept
+    { return m_bIsBlocking; }
 
 private:
-	bool m_bIsBlocking;
+    bool m_bIsBlocking;
 };
 
 } } // namespace Process

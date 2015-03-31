@@ -36,22 +36,22 @@ class DataGroup
 class ViewGroup
 {
 public:
-	enum class ItemType : unsigned char
-	{
-		Action,
-		Separator,
-		View
-	};
+    enum class ItemType : unsigned char
+    {
+        Action,
+        Separator,
+        View
+    };
 
-	void setLabel (string const& text);
-	void addSeparator (int pos = -1);
-	bool addView (View*, int pos = -1);
-	bool addCommand (Command const&, int pos = -1);
-	bool moveItem (int pos, int new_pos);
-	bool removeItem (int pos);
+    void setLabel (string const& text);
+    void addSeparator (int pos = -1);
+    bool addView (View*, int pos = -1);
+    bool addCommand (Command const&, int pos = -1);
+    bool moveItem (int pos, int new_pos);
+    bool removeItem (int pos);
 
-	ItemType itemType (int pos) const;
-	uint     itemCount () const;
+    ItemType itemType (int pos) const;
+    uint     itemCount () const;
 };
 
 } } // namespace Ui

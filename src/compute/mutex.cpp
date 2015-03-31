@@ -32,15 +32,15 @@ Mutex::Mutex ()
 
 void Mutex::lock ()
 {
-	if (m_gOwner.load () != Thread::Id ()) m_gCond.wait ();
-	m_gOwner.store (Thread::Id (ThisThread::handle ()));
+    if (m_gOwner.load () != Thread::Id ()) m_gCond.wait ();
+    m_gOwner.store (Thread::Id (ThisThread::handle ()));
 }
 
 void Mutex::unlock ()
 {
-	if (m_gOwner.load () != Thread::Id (ThisThread::handle ())) return;
-	m_gOwner.store (Thread::Id ());
-	m_gCond.notifyAll ();
+    if (m_gOwner.load () != Thread::Id (ThisThread::handle ())) return;
+    m_gOwner.store (Thread::Id ());
+    m_gCond.notifyAll ();
 }
 
 } } // Concurency

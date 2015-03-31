@@ -38,30 +38,30 @@ namespace cppual { namespace Graphics { namespace GL {
 
 enum class UsageType : unsigned char
 {
-	StreamDraw,
-	StreamRead,
-	StreamCopy,
-	StaticDraw,
-	StaticRead,
-	StaticCopy,
-	DynamicDraw,
-	DynamicRead,
-	DynamicCopy
+    StreamDraw,
+    StreamRead,
+    StreamCopy,
+    StaticDraw,
+    StaticRead,
+    StaticCopy,
+    DynamicDraw,
+    DynamicRead,
+    DynamicCopy
 };
 
 struct GLMapFlag final
 {
-	enum Type
-	{
-		Read			 = 1 << 0,
-		Write			 = 1 << 1,
-		InvalidateRange  = 1 << 2,
-		InvalidateBuffer = 1 << 3,
-		ExplicitFlush	 = 1 << 4,
-		Unsynchronized	 = 1 << 5,
-		Persistent		 = 1 << 6,
-		Coherent		 = 1 << 7
-	};
+    enum Type
+    {
+        Read             = 1 << 0,
+        Write             = 1 << 1,
+        InvalidateRange  = 1 << 2,
+        InvalidateBuffer = 1 << 3,
+        ExplicitFlush     = 1 << 4,
+        Unsynchronized     = 1 << 5,
+        Persistent         = 1 << 6,
+        Coherent         = 1 << 7
+    };
 };
 
 // ====================================================
@@ -73,27 +73,27 @@ typedef BitSet<GLMapFlag::Type> GLMapFlags;
 class VertexBuffer final : public BufferObject
 {
 public:
-	typedef byte         value_type;
-	typedef vector<byte> vector_type;
-	typedef byte*        pointer;
-	typedef byte const*  const_pointer;
+    typedef byte         value_type;
+    typedef vector<byte> vector_type;
+    typedef byte*        pointer;
+    typedef byte const*  const_pointer;
 
-	VertexBuffer () noexcept;
-	VertexBuffer (size_type size) noexcept;
-	void* mapBufferToMemory (AccessMode access) noexcept;
-	void* mapSubBufferToMemory (ptrdiff offset, ptrdiff length, GLMapFlags flags) noexcept;
-	void  unmapBuffer () noexcept;
-	void  bind (BufferType type) noexcept;
-	void  upload (UsageType usage_hint);
-	void  addData (pointer data, size_type data_size);
+    VertexBuffer () noexcept;
+    VertexBuffer (size_type size) noexcept;
+    void* mapBufferToMemory (AccessMode access) noexcept;
+    void* mapSubBufferToMemory (ptrdiff offset, ptrdiff length, GLMapFlags flags) noexcept;
+    void  unmapBuffer () noexcept;
+    void  bind (BufferType type) noexcept;
+    void  upload (UsageType usage_hint);
+    void  addData (pointer data, size_type data_size);
 
-	inline const_pointer getDataPointer () const noexcept
-	{ return m_bIsUploaded ? &m_gData[0] : nullptr; }
+    inline const_pointer getDataPointer () const noexcept
+    { return m_bIsUploaded ? &m_gData[0] : nullptr; }
 
 private:
-	vector_type m_gData;
-	BufferType  m_eType;
-	bool        m_bIsUploaded;
+    vector_type m_gData;
+    BufferType  m_eType;
+    bool        m_bIsUploaded;
 };
 
 // ====================================================
@@ -101,7 +101,7 @@ private:
 class VertexArray final : public Object
 {
 public:
-	VertexArray () noexcept;
+    VertexArray () noexcept;
 };
 
 } } } // namespace GL

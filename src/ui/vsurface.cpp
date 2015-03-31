@@ -25,8 +25,8 @@ namespace cppual { namespace Ui {
 
 ProxyRenderable::ProxyRenderable (shared_window const& pParent, Rect const& gRect) noexcept
 : IWindow (pParent != nullptr ? pParent->connection () : nullptr,
-			pParent != nullptr ? pParent->id () : Element (nullptr),
-			ResourceType::Surface),
+            pParent != nullptr ? pParent->id () : Element (nullptr),
+            ResourceType::Surface),
   m_pParent (pParent),
   m_gRect (gRect),
   m_bIsVisible ()
@@ -43,13 +43,13 @@ ProxyRenderable::ProxyRenderable (ProxyRenderable const&) noexcept
 
 ProxyRenderable& ProxyRenderable::operator = (IWindow*) noexcept
 {
-	return *this;
+    return *this;
 }
 
 ProxyRenderable& ProxyRenderable::operator = (ProxyRenderable const& gObj) noexcept
 {
-	if (this == &gObj) return *this;
-	return *this;
+    if (this == &gObj) return *this;
+    return *this;
 }
 
 void ProxyRenderable::setGeometry (Rect const&) noexcept
@@ -62,20 +62,20 @@ void ProxyRenderable::setOwner (const_pointer) noexcept
 
 void ProxyRenderable::map () noexcept
 {
-	if (m_pParent == nullptr) return;
+    if (m_pParent == nullptr) return;
 }
 
 void ProxyRenderable::unmap () noexcept
 {
-	if (m_pParent == nullptr) return;
+    if (m_pParent == nullptr) return;
 }
 
 void ProxyRenderable::move (point2i gPos) noexcept
 {
-	if (m_pParent != nullptr)
-	{
-		m_gRect = Rect (gPos.x, gPos.y, m_gRect.width (), m_gRect.height ());
-	}
+    if (m_pParent != nullptr)
+    {
+        m_gRect = Rect (gPos.x, gPos.y, m_gRect.width (), m_gRect.height ());
+    }
 }
 
 // =========================================================

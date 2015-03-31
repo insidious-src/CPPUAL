@@ -22,19 +22,19 @@
 #include <cppual/input/joystick.h>
 
 #ifdef OS_STD_UNIX
-#	ifdef OS_GNU_LINUX
-#		include <fcntl.h>
-#		include <linux/joystick.h>
-#	elif defined (OS_MAC)
-#		include <mach/mach.h>
-#	elif defined (OS_AIX) or defined (OS_SOLARIS)
-#		include <fcntl.h>
-#		include <procfs.h>
-#	elif defined (OS_BSD)
-#		include <sys/sysctl.h>
-#	endif
+#    ifdef OS_GNU_LINUX
+#        include <fcntl.h>
+#        include <linux/joystick.h>
+#    elif defined (OS_MAC)
+#        include <mach/mach.h>
+#    elif defined (OS_AIX) or defined (OS_SOLARIS)
+#        include <fcntl.h>
+#        include <procfs.h>
+#    elif defined (OS_BSD)
+#        include <sys/sysctl.h>
+#    endif
 #elif defined (OS_WINDOWS)
-#	include <Windows.h>
+#    include <Windows.h>
 #endif
 
 namespace cppual { namespace Input {

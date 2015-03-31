@@ -32,13 +32,13 @@ namespace cppual { namespace Ui {
 
 enum class MenuItemType : unsigned char
 {
-	Invalid,
-	Command,
-	Separator,
-	Parent,
-	Radio,
-	Check,
-	Group
+    Invalid,
+    Command,
+    Separator,
+    Parent,
+    Radio,
+    Check,
+    Group
 };
 
 // ====================================================
@@ -46,58 +46,58 @@ enum class MenuItemType : unsigned char
 class PopupMenu : public SkinnableView
 {
 public:
-	PopupMenu ();
-	PopupMenu (PopupMenu&&);
-	PopupMenu (PopupMenu const&);
-	PopupMenu& operator = (PopupMenu&&);
-	PopupMenu& operator = (PopupMenu const&);
+    PopupMenu ();
+    PopupMenu (PopupMenu&&);
+    PopupMenu (PopupMenu const&);
+    PopupMenu& operator = (PopupMenu&&);
+    PopupMenu& operator = (PopupMenu const&);
 
-	MenuItemType itemType (int pos);
-	PopupMenu*   subMenu (int menu_pos);
-	Command*     command (int action_pos);
-	size_type    delay ();
-	bool         create (point2i);
-	bool         addCommand (Command*, int pos = -1);
-	bool         addCheck (Command*, int pos = -1);
-	bool         addRadio (Command*, int pos = -1);
-	bool         addSubMenu (PopupMenu*, string const&, int pos = -1);
-	bool         addSeparator (int pos = -1);
-	bool         addGroup (int pos = -1);
-	bool         addToGroup (int group_pos, View*);
-	bool         removeFromGroup (int group_pos, View*);
-	bool         removeItem (int pos);
-	void         setDelay (size_type ms);
-	void         setPosition (point2i);
-	void         setGroupName (int group_pos, string const&);
+    MenuItemType itemType (int pos);
+    PopupMenu*   subMenu (int menu_pos);
+    Command*     command (int action_pos);
+    size_type    delay ();
+    bool         create (point2i);
+    bool         addCommand (Command*, int pos = -1);
+    bool         addCheck (Command*, int pos = -1);
+    bool         addRadio (Command*, int pos = -1);
+    bool         addSubMenu (PopupMenu*, string const&, int pos = -1);
+    bool         addSeparator (int pos = -1);
+    bool         addGroup (int pos = -1);
+    bool         addToGroup (int group_pos, View*);
+    bool         removeFromGroup (int group_pos, View*);
+    bool         removeItem (int pos);
+    void         setDelay (size_type ms);
+    void         setPosition (point2i);
+    void         setGroupName (int group_pos, string const&);
 
-	static size_type defaultDelay ();
-	static void      setDefaultDelay (size_type ms);
+    static size_type defaultDelay ();
+    static void      setDefaultDelay (size_type ms);
 
-	inline size_type itemCount () const noexcept
-	{ return m_gItemList.size (); }
+    inline size_type itemCount () const noexcept
+    { return m_gItemList.size (); }
 
 private:
-	union ItemData
-	{
-		Command*   action;
-		CheckBox*  check;
-		RadioBox*  radio;
-		PopupMenu* subMenu;
-	};
+    union ItemData
+    {
+        Command*   action;
+        CheckBox*  check;
+        RadioBox*  radio;
+        PopupMenu* subMenu;
+    };
 
-	class MenuItem final
-	{
-//		ItemData     data;
-//		MenuItemType type;
-		friend class PopupMenu;
-	};
+    class MenuItem final
+    {
+//        ItemData     data;
+//        MenuItemType type;
+        friend class PopupMenu;
+    };
 
-	void onPaint (Rect const&);
-	void onFocusKilled ();
-	void onKeyPress (u8);
-	void onKeyRelease (u8);
+    void onPaint (Rect const&);
+    void onFocusKilled ();
+    void onKeyPress (u8);
+    void onKeyRelease (u8);
 
-	vector<MenuItem*> m_gItemList;
+    vector<MenuItem*> m_gItemList;
 
 };
 

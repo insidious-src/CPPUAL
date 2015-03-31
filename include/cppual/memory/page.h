@@ -33,22 +33,22 @@ namespace cppual { namespace Memory {
 class PageAllocator final : public Allocator, NonCopyable
 {
 public:
-	PageAllocator (size_type size);
-	PageAllocator (Allocator* allocator, size_type size);
-	//PageAllocator (string&& shared_name, size_type size);
+    PageAllocator (size_type size);
+    PageAllocator (Allocator* allocator, size_type size);
+    //PageAllocator (string&& shared_name, size_type size);
 
-	void* allocate (size_type size, align_type align) noexcept;
-	void  deallocate (void* p, size_type size) noexcept;
-	void  clear () noexcept;
+    void* allocate (size_type size, align_type align) noexcept;
+    void  deallocate (void* p, size_type size) noexcept;
+    void  clear () noexcept;
 
-	inline size_type count () const noexcept
-	{ return 0; }
+    inline size_type count () const noexcept
+    { return 0; }
 
-	inline size_type size () const noexcept
-	{ return 0; }
+    inline size_type size () const noexcept
+    { return 0; }
 
-	inline size_type max_size () const noexcept
-	{ return 0; }
+    inline size_type max_size () const noexcept
+    { return 0; }
 };
 
 // =========================================================

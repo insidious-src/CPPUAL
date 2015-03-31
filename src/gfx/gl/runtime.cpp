@@ -35,18 +35,18 @@ namespace {
 
 struct Internal
 {
-	typedef Process::Module                                 module_type;
-	typedef StaticAllocator<sizeof (module_type)>           allocator_type;
-	typedef StaticPolicy<module_type, sizeof (module_type)> policy_type;
+    typedef Process::Module                                 module_type;
+    typedef StaticAllocator<sizeof (module_type)>           allocator_type;
+    typedef StaticPolicy<module_type, sizeof (module_type)> policy_type;
 
-	inline Internal () : allocator (), instance ()
-	{ /*Driver::load ("libGL"s);*/ }
+    inline Internal () : allocator (), instance ()
+    { /*Driver::load ("libGL"s);*/ }
 
-	inline ~Internal () noexcept
-	{ /*Driver::unload ();*/ }
+    inline ~Internal () noexcept
+    { /*Driver::unload ();*/ }
 
-	allocator_type allocator;
-	module_type*   instance;
+    allocator_type allocator;
+    module_type*   instance;
 
 } internal;
 
@@ -54,67 +54,67 @@ struct Internal
 
 bool Driver::load (string const& gName)
 {
-	if (internal.instance) unload ();
-	Internal::policy_type gAtor (internal.allocator);
+    if (internal.instance) unload ();
+    Internal::policy_type gAtor (internal.allocator);
 
-	internal.instance = gAtor.allocate (1);
-	if (!internal.instance) return false;
-	gAtor.construct (internal.instance, gName.c_str ());
+    internal.instance = gAtor.allocate (1);
+    if (!internal.instance) return false;
+    gAtor.construct (internal.instance, gName.c_str ());
 
-	if (!internal.instance->is_attached ())
-	{
-		std::cout << "Failed to load OpenGL driver "
-				  << internal.instance->path () << std::endl;
+    if (!internal.instance->is_attached ())
+    {
+        std::cout << "Failed to load OpenGL driver "
+                  << internal.instance->path () << std::endl;
 
-		unload ();
-		return false;
-	}
+        unload ();
+        return false;
+    }
 
-	//internal.instance->get ("glAttachShader", internal.glAttachShader);
-	return false;
+    //internal.instance->get ("glAttachShader", internal.glAttachShader);
+    return false;
 }
 
 void Driver::unload ()
 {
-	if (!internal.instance) return;
-	internal.instance->~Module ();
-	Internal::policy_type (internal.allocator).deallocate (internal.instance, 1);
-	internal.instance = nullptr;
+    if (!internal.instance) return;
+    internal.instance->~Module ();
+    Internal::policy_type (internal.allocator).deallocate (internal.instance, 1);
+    internal.instance = nullptr;
 }
 
 bool Driver::hasValidInstance () noexcept
 {
-	return internal.instance;
+    return internal.instance;
 }
 
 GFXVersion Driver::version ()
 {
-	return GFXVersion ();
+    return GFXVersion ();
 }
 
 GFXVersion Driver::glVersion ()
 {
-	return GFXVersion ();
+    return GFXVersion ();
 }
 
 GFXVersion Driver::glslVersion ()
 {
-	return GFXVersion ();
+    return GFXVersion ();
 }
 
 string Driver::glLabel (StringQuery)
 {
-	return string ();
+    return string ();
 }
 
 bool Driver::isVersionSupported (GFXVersion const&)
 {
-	return false;
+    return false;
 }
 
 bool Driver::isExtensionSupported (string const&)
 {
-	return false;
+    return false;
 }
 
 } } } // namespace GL

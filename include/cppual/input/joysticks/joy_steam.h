@@ -29,28 +29,28 @@ namespace cppual { namespace Platform { namespace Joystick { namespace Steam {
 
 enum
 {
-	ButtonCount = 17
+    ButtonCount = 17
 };
 
 enum SteamButton
 {
-	A,
-	B,
-	X,
-	Y,
-	Left,
-	Up,
-	Right,
-	Down,
-	LB,
-	LT,
-	RB,
-	RT,
-	LeftPaddle,
-	RightPaddle,
-	Return,
-	Back,
-	Menu
+    A,
+    B,
+    X,
+    Y,
+    Left,
+    Up,
+    Right,
+    Down,
+    LB,
+    LT,
+    RB,
+    RT,
+    LeftPaddle,
+    RightPaddle,
+    Return,
+    Back,
+    Menu
 };
 
 } } } } // namespace Steam

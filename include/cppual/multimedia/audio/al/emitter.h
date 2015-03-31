@@ -31,44 +31,44 @@ namespace cppual { namespace Audio { namespace AL {
 class SoundEmitter final : public SoundSource
 {
 public:
-	using    SoundSource::SoundSource;
-	explicit SoundEmitter (SoundEmitter const&) noexcept;
-	SoundEmitter& operator = (SoundEmitter&&) noexcept = default;
-	SoundEmitter& operator = (SoundEmitter const&) noexcept;
+    using    SoundSource::SoundSource;
+    explicit SoundEmitter (SoundEmitter const&) noexcept;
+    SoundEmitter& operator = (SoundEmitter&&) noexcept = default;
+    SoundEmitter& operator = (SoundEmitter const&) noexcept;
 
-	EmitType getType () const noexcept;
+    EmitType getType () const noexcept;
 
-	void	setType (Audio::EmitType type) noexcept;
-	void	setRelativeToListener (bool value) noexcept;
-	bool	isRelativeToListener () const noexcept;
+    void    setType (Audio::EmitType type) noexcept;
+    void    setRelativeToListener (bool value) noexcept;
+    bool    isRelativeToListener () const noexcept;
 
-	void	setMinVolume (float value) noexcept;
-	float	getMinVolume () const noexcept;
-	void	setMaxVolume (float value) noexcept;
-	float	getMaxVolume () const noexcept;
-	void	setConeOuterVolume (float value) noexcept;
-	float	getConeOuterVolume () const noexcept;
+    void    setMinVolume (float value) noexcept;
+    float    getMinVolume () const noexcept;
+    void    setMaxVolume (float value) noexcept;
+    float    getMaxVolume () const noexcept;
+    void    setConeOuterVolume (float value) noexcept;
+    float    getConeOuterVolume () const noexcept;
 
-	void	setReferenceDistance (float value) noexcept;
-	float	getReferenceDistance () const noexcept;
-	void	setCancelation (float value) noexcept;
-	float	getCancelation () const noexcept;
-	void	setMaxDistance (float value) noexcept;
-	float	getMaxDistance () const noexcept;
-	void	setPosition (point3f const& pos) noexcept;
-	point3f	getPosition () const noexcept;
-	void	setVelocity (point3f const& pos) noexcept;
-	point3f	getVelocity () const noexcept;
-	void	setDirection (point3f const& pos) noexcept;
-	point3f	getDirection () const noexcept;
+    void    setReferenceDistance (float value) noexcept;
+    float    getReferenceDistance () const noexcept;
+    void    setCancelation (float value) noexcept;
+    float    getCancelation () const noexcept;
+    void    setMaxDistance (float value) noexcept;
+    float    getMaxDistance () const noexcept;
+    void    setPosition (point3f const& pos) noexcept;
+    point3f    getPosition () const noexcept;
+    void    setVelocity (point3f const& pos) noexcept;
+    point3f    getVelocity () const noexcept;
+    void    setDirection (point3f const& pos) noexcept;
+    point3f    getDirection () const noexcept;
 
-	void	setConeInnerAngle (anglef angle) noexcept;
-	anglef	getConeInnerAngle () const noexcept;
-	void	setConeOuterAngle (anglef angle) noexcept;
-	anglef	getConeOuterAngle () const noexcept;
+    void    setConeInnerAngle (anglef angle) noexcept;
+    anglef    getConeInnerAngle () const noexcept;
+    void    setConeOuterAngle (anglef angle) noexcept;
+    anglef    getConeOuterAngle () const noexcept;
 
 private:
-	void copyEmitterState (SoundEmitter const&) noexcept;
+    void copyEmitterState (SoundEmitter const&) noexcept;
 };
 
 } } } // namespace Audio

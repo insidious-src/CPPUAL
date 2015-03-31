@@ -36,13 +36,13 @@ struct memory_source_not_available : std::bad_alloc { };
 class GlobalMemory : public Object
 {
 public:
-	GlobalMemory (Device const&, size_type size);
+    GlobalMemory (Device const&, size_type size);
 
-	Device const& device () const noexcept
-	{ return *m_pDevice; }
+    Device const& device () const noexcept
+    { return *m_pDevice; }
 
 private:
-	Device const* m_pDevice;
+    Device const* m_pDevice;
 };
 
 } } // namespace Compute

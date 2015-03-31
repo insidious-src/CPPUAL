@@ -28,23 +28,23 @@ namespace {
 
 inline Program::pointer createProgramFromSource (Behaviour const& context, vector<string> const& source)
 {
-	if (!source.empty ())
-	{
-		vector<string>::size_type sizes[source.size ()];
+    if (!source.empty ())
+    {
+        vector<string>::size_type sizes[source.size ()];
 
-		for (vector<string>::size_type i = 0; i < source.size (); ++i)
-			sizes[i] = source[i].size ();
+        for (vector<string>::size_type i = 0; i < source.size (); ++i)
+            sizes[i] = source[i].size ();
 
-		auto sources = source.front ().c_str ();
+        auto sources = source.front ().c_str ();
 
-		return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
-											static_cast<uint> (source.size ()),
-											&sources,
-											sizes,
-											nullptr);
-	}
+        return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
+                                            static_cast<uint> (source.size ()),
+                                            &sources,
+                                            sizes,
+                                            nullptr);
+    }
 
-	return nullptr;
+    return nullptr;
 }
 
 } // anonymous namespace

@@ -35,16 +35,16 @@ namespace { namespace Xcb { // optimize for internal unit usage
 
 inline Connection x11_connection (cchar* pName) noexcept
 {
-	static Connection pDisplay    = nullptr;
-	static cchar*     pCachedName = "";
+    static Connection pDisplay    = nullptr;
+    static cchar*     pCachedName = "";
 
-	return pDisplay and pName == pCachedName ?
-				pDisplay : pDisplay = XOpenDisplay (pCachedName = pName);
+    return pDisplay and pName == pCachedName ?
+                pDisplay : pDisplay = XOpenDisplay (pCachedName = pName);
 }
 
 inline Connection get_connection (cchar* pName) noexcept
 {
-	return XGetXCBConnection (x11_connection (pName).get<legacy_type> ());
+    return XGetXCBConnection (x11_connection (pName).get<legacy_type> ());
 }
 
 } } // anonymous namespace Xcb
@@ -53,27 +53,27 @@ XDisplay::XDisplay (cchar* pName) noexcept
 : IDisplay (Xcb::get_connection (pName), Xcb::x11_connection (pName)),
   m_gName  (native () ? pName : nullptr)
 {
-	if (!native ()) return;
+    if (!native ()) return;
 
-	// take ownership of the event queue
-	XSetEventQueueOwner (gl ().get<legacy_type> (), XCBOwnsEventQueue);
+    // take ownership of the event queue
+    XSetEventQueueOwner (gl ().get<legacy_type> (), XCBOwnsEventQueue);
 
-	if (xcb_connection_has_error (native ().get<display_type> ()))
-	{
-		std::cout << "error when connecting to display: "
-				  << pName << std::endl;
-	}
+    if (xcb_connection_has_error (native ().get<display_type> ()))
+    {
+        std::cout << "error when connecting to display: "
+                  << pName << std::endl;
+    }
 }
 
 XDisplay::~XDisplay ()
 {
-	if (native ()) XCloseDisplay (gl ().get<legacy_type> ());
+    if (native ()) XCloseDisplay (gl ().get<legacy_type> ());
 }
 
 uint XDisplay::screenCount () const noexcept
 {
-	return static_cast<uint>
-			(xcb_setup_roots_length (xcb_get_setup (native ().get<display_type> ())));
+    return static_cast<uint>
+            (xcb_setup_roots_length (xcb_get_setup (native ().get<display_type> ())));
 }
 
 } } // namespace Ui

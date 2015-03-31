@@ -29,14 +29,14 @@ namespace cppual { namespace Ui {
 class BrowserDialog final : public Dialog
 {
 public:
-	enum Flag
-	{
-		Directory,
-		MultiSelect,
-	};
+    enum Flag
+    {
+        Directory,
+        MultiSelect,
+    };
 
-	void setDirectoryDialog (bool);
-	void setMultiSelect     (bool);
+    void setDirectoryDialog (bool);
+    void setMultiSelect     (bool);
 };
 
 } } // namespace Ui

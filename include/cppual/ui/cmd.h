@@ -37,35 +37,35 @@ class PopupMenu;
 class Command
 {
 public:
-	inline Icon* icon () const noexcept { return const_cast<Icon*> (&m_gIcon); }
-	inline uint  id () const noexcept { return m_uId; }
-	inline uint  hotkey () const noexcept { return m_uHotkey; }
-	inline bool  hasMenu () const noexcept { return m_pMenu; }
-	inline bool  hasSideMenu () const noexcept { return m_bSideMenu; }
+    inline Icon* icon () const noexcept { return const_cast<Icon*> (&m_gIcon); }
+    inline uint  id () const noexcept { return m_uId; }
+    inline uint  hotkey () const noexcept { return m_uHotkey; }
+    inline bool  hasMenu () const noexcept { return m_pMenu; }
+    inline bool  hasSideMenu () const noexcept { return m_bSideMenu; }
 
-	inline bool setIcon (string const& gPath) noexcept
-	{ return m_gIcon.load (gPath); }
+    inline bool setIcon (string const& gPath) noexcept
+    { return m_gIcon.load (gPath); }
 
-	inline void setText (string const& gText) noexcept
-	{ m_gText = gText; }
+    inline void setText (string const& gText) noexcept
+    { m_gText = gText; }
 
-	inline void setMenu (PopupMenu* pMenu) noexcept
-	{ if (pMenu) m_pMenu = pMenu; }
+    inline void setMenu (PopupMenu* pMenu) noexcept
+    { if (pMenu) m_pMenu = pMenu; }
 
-	inline void setMenuSideMode (bool bSide) noexcept
-	{ if (m_pMenu) m_bSideMenu = bSide; }
+    inline void setMenuSideMode (bool bSide) noexcept
+    { if (m_pMenu) m_bSideMenu = bSide; }
 
-	inline string const& text () const noexcept
-	{ return m_gText; }
+    inline string const& text () const noexcept
+    { return m_gText; }
 
-	Signal<void(bool)> triggered;
+    Signal<void(bool)> triggered;
 
 private:
-	Icon       m_gIcon;
-	string     m_gText;
-	uint       m_uId, m_uHotkey;
-	PopupMenu* m_pMenu;
-	bool       m_bSideMenu;
+    Icon       m_gIcon;
+    string     m_gText;
+    uint       m_uId, m_uHotkey;
+    PopupMenu* m_pMenu;
+    bool       m_bSideMenu;
 
 };
 

@@ -37,20 +37,20 @@ Device::Device (string const&, Type)
 
 bool Device::isExtensionSupported (string const&) noexcept
 {
-	return false;
+    return false;
 }
 
 bool Device::isExtensionPresent (string const&) noexcept
 {
-	return false;
+    return false;
 }
 
 // ====================================================
 
 //CaptureDevice::CaptureDevice (string const&,
-//							  uint,
-//							  OutputFormat,
-//							  SoundQuality) noexcept
+//                              uint,
+//                              OutputFormat,
+//                              SoundQuality) noexcept
 //{
 
 //}
@@ -67,7 +67,7 @@ CaptureDevice::~CaptureDevice () noexcept
 
 bool CaptureDevice::busy () noexcept
 {
-	return false;
+    return false;
 }
 
 // ====================================================
@@ -111,12 +111,12 @@ void Context::invalidate () noexcept
 
 bool Context::setCapability (int, bool) noexcept
 {
-	return false;
+    return false;
 }
 
 bool Context::hasCapability (int) noexcept
 {
-	return false;
+    return false;
 }
 
 void Context::process () noexcept

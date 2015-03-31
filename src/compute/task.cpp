@@ -32,19 +32,19 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 struct ThreadPoolInitializer
 {
-	typedef HostQueue::mutex_type mutex_type;
-	typedef HostQueue::write_lock write_lock;
-	typedef HostQueue::read_lock  read_lock;
+    typedef HostQueue::mutex_type mutex_type;
+    typedef HostQueue::write_lock write_lock;
+    typedef HostQueue::read_lock  read_lock;
 
-	~ThreadPoolInitializer ();
+    ~ThreadPoolInitializer ();
 
-	ThreadPoolInitializer () noexcept
-	: threadMutex (),
-	  threads     ()
-	{ }
+    ThreadPoolInitializer () noexcept
+    : threadMutex (),
+      threads     ()
+    { }
 
-	mutex_type    threadMutex;
-	deque<thread> threads;
+    mutex_type    threadMutex;
+    deque<thread> threads;
 
 };
 
@@ -52,21 +52,21 @@ struct ThreadPoolInitializer
 
 inline ThreadPoolInitializer::~ThreadPoolInitializer ()
 {
-	// block thread reservation until all threads exit
-	// and clear the container
-	read_lock gLock (threadMutex);
+    // block thread reservation until all threads exit
+    // and clear the container
+    read_lock gLock (threadMutex);
 
-	if (!threads.empty ())
-	{
-		for (thread& gThread : threads)
-			if (gThread.joinable ()) gThread.join ();
-	}
+    if (!threads.empty ())
+    {
+        for (thread& gThread : threads)
+            if (gThread.joinable ()) gThread.join ();
+    }
 }
 
 inline ThreadPoolInitializer& pool () noexcept
 {
-	static ThreadPoolInitializer thread_pool;
-	return thread_pool;
+    static ThreadPoolInitializer thread_pool;
+    return thread_pool;
 }
 
 } } // anonymous namespace Internal
@@ -76,93 +76,93 @@ inline ThreadPoolInitializer& pool () noexcept
 class Assign final
 {
 public:
-	Assign (HostQueue& gTasks) : m_queue (gTasks)
-	{
-		m_queue.m_gQueueMutex.lock ();
-		++m_queue.m_uNumAssigned;
-		m_queue.m_gQueueMutex.unlock ();
-	}
+    Assign (HostQueue& gTasks) : m_queue (gTasks)
+    {
+        m_queue.m_gQueueMutex.lock ();
+        ++m_queue.m_uNumAssigned;
+        m_queue.m_gQueueMutex.unlock ();
+    }
 
-	~Assign ()
-	{
-		// RAII lock
-		{
-			m_queue.m_gQueueMutex.lock ();
-			--m_queue.m_uNumAssigned;
-			m_queue.m_gQueueMutex.unlock ();
-		}
+    ~Assign ()
+    {
+        // RAII lock
+        {
+            m_queue.m_gQueueMutex.lock ();
+            --m_queue.m_uNumAssigned;
+            m_queue.m_gQueueMutex.unlock ();
+        }
 
-		m_queue.m_gTaskCond.notify_all ();
-	}
+        m_queue.m_gTaskCond.notify_all ();
+    }
 
 private:
-	HostQueue& m_queue;
+    HostQueue& m_queue;
 };
 
 // =========================================================
 
 void HostQueue::operator ()()
 {
-	Assign    assign (*this);
-	call_type run;
+    Assign    assign (*this);
+    call_type run;
 
-	while (true)
-	{
-		// RAII lock
-		{
-			read_lock gReadLock (m_gQueueMutex);
+    while (true)
+    {
+        // RAII lock
+        {
+            read_lock gReadLock (m_gQueueMutex);
 
-			m_gTaskCond.wait (gReadLock, [&]
-			{
-				return HostQueue::Running > m_eState or
-						!m_gTaskQueue.empty ();
-			});
+            m_gTaskCond.wait (gReadLock, [&]
+            {
+                return HostQueue::Running > m_eState or
+                        !m_gTaskQueue.empty ();
+            });
 
-			// process a task if there is one scheduled,
-			// otherwise return if the execution state
-			// requires it
-			if (HostQueue::Interrupted == m_eState or
-				(m_gTaskQueue.empty () and HostQueue::Inactive == m_eState))
-				break;
+            // process a task if there is one scheduled,
+            // otherwise return if the execution state
+            // requires it
+            if (HostQueue::Interrupted == m_eState or
+                (m_gTaskQueue.empty () and HostQueue::Inactive == m_eState))
+                break;
 
-			run = std::move (m_gTaskQueue.front ());
-			gReadLock.unlock ();
+            run = std::move (m_gTaskQueue.front ());
+            gReadLock.unlock ();
 
-			// RAII lock
-			{
-				write_lock gWriteLock (m_gQueueMutex);
-				m_gTaskQueue.pop_front ();
-			}
-		}
+            // RAII lock
+            {
+                write_lock gWriteLock (m_gQueueMutex);
+                m_gTaskQueue.pop_front ();
+            }
+        }
 
-		run (); // run the aquired task if valid
+        run (); // run the aquired task if valid
 
-		// RAII lock
-		{
-			write_lock gWriteLock (m_gQueueMutex);
-			++m_uNumCompleted;
-		}
+        // RAII lock
+        {
+            write_lock gWriteLock (m_gQueueMutex);
+            ++m_uNumCompleted;
+        }
 
-		m_gTaskCond.notify_all ();
-	}
+        m_gTaskCond.notify_all ();
+    }
 }
 
 // =========================================================
 
 bool ThreadPool::reserve (HostQueue& gTaskQueue, size_type uAddThreads, bool bDetached)
 {
-	if (uAddThreads == 0) return false;
+    if (uAddThreads == 0) return false;
 
-	// add threads to the container and initialize them
-	write_lock gLock (Internal::pool ().threadMutex);
+    // add threads to the container and initialize them
+    write_lock gLock (Internal::pool ().threadMutex);
 
-	while (uAddThreads--)
-	{
-		Internal::pool ().threads.emplace_back (thread (gTaskQueue));
-		if (bDetached) Internal::pool ().threads.back ().detach ();
-	}
+    while (uAddThreads--)
+    {
+        Internal::pool ().threads.emplace_back (thread (gTaskQueue));
+        if (bDetached) Internal::pool ().threads.back ().detach ();
+    }
 
-	return true;
+    return true;
 }
 
 // =========================================================
@@ -178,74 +178,74 @@ HostQueue::HostQueue (HostQueue&&)
 
 HostQueue& HostQueue::operator = (HostQueue&&)
 {
-	return *this;
+    return *this;
 }
 
 HostQueue& HostQueue::operator = (HostQueue const&)
 {
-	return *this;
+    return *this;
 }
 
 bool HostQueue::schedule (call_type const& callable)
 {
-	// RAII lock
-	{
-		write_lock gLock (m_gQueueMutex);
-		if (m_uNumAssigned == 0) return false;
+    // RAII lock
+    {
+        write_lock gLock (m_gQueueMutex);
+        if (m_uNumAssigned == 0) return false;
 
-		// schedule task
-		m_gTaskQueue.push_back (callable);
-		m_eState = HostQueue::Running;
-	}
+        // schedule task
+        m_gTaskQueue.push_back (callable);
+        m_eState = HostQueue::Running;
+    }
 
-	// wake a thread to receive the task
-	m_gTaskCond.notify_one ();
-	return true;
+    // wake a thread to receive the task
+    m_gTaskCond.notify_one ();
+    return true;
 }
 
 void HostQueue::quit (bool bInterrupt) noexcept
 {
-	// RAII lock
-	{
-		read_lock gLock (m_gQueueMutex);
+    // RAII lock
+    {
+        read_lock gLock (m_gQueueMutex);
 
-		if (m_eState != HostQueue::Running) return;
-		m_eState = bInterrupt ? HostQueue::Interrupted : HostQueue::Inactive;
-	}
+        if (m_eState != HostQueue::Running) return;
+        m_eState = bInterrupt ? HostQueue::Interrupted : HostQueue::Inactive;
+    }
 
-	// wake all threads to check the execution state
-	m_gTaskCond.notify_all ();
+    // wake all threads to check the execution state
+    m_gTaskCond.notify_all ();
 }
 
 void HostQueue::whenAnyFinish ()
 {
-	read_lock gLock (m_gQueueMutex);
+    read_lock gLock (m_gQueueMutex);
 
-	m_gTaskCond.wait (gLock, [this, num_completed = m_uNumCompleted]
-	{
-		return m_uNumAssigned == 0 or num_completed < m_uNumCompleted;
-	});
+    m_gTaskCond.wait (gLock, [this, num_completed = m_uNumCompleted]
+    {
+        return m_uNumAssigned == 0 or num_completed < m_uNumCompleted;
+    });
 }
 
 void HostQueue::whenAllFinish ()
 {
-	read_lock gLock (m_gQueueMutex);
+    read_lock gLock (m_gQueueMutex);
 
-	m_gTaskCond.wait (gLock, [this, num_completed = m_uNumCompleted]
-	{
-		return m_uNumAssigned == 0 or
-				(num_completed < m_uNumCompleted and m_gTaskQueue.empty ());
-	});
+    m_gTaskCond.wait (gLock, [this, num_completed = m_uNumCompleted]
+    {
+        return m_uNumAssigned == 0 or
+                (num_completed < m_uNumCompleted and m_gTaskQueue.empty ());
+    });
 }
 
 void HostQueue::whenAllExit ()
 {
-	read_lock gLock (m_gQueueMutex);
+    read_lock gLock (m_gQueueMutex);
 
-	m_gTaskCond.wait (gLock, [&]
-	{
-		return m_uNumAssigned == 0;
-	});
+    m_gTaskCond.wait (gLock, [&]
+    {
+        return m_uNumAssigned == 0;
+    });
 }
 
 } } // namespace Concurency

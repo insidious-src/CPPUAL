@@ -29,43 +29,43 @@ namespace cppual { namespace Platform { namespace Joystick { namespace Xbox {
 
 enum X360Button
 {
-	A,
-	B,
-	X,
-	Y,
-	Left,
-	Up,
-	Right,
-	Down,
-	LB,
-	LT,
-	LS,
-	RB,
-	RT,
-	RS,
-	Start,
-	Back,
-	Menu
+    A,
+    B,
+    X,
+    Y,
+    Left,
+    Up,
+    Right,
+    Down,
+    LB,
+    LT,
+    LS,
+    RB,
+    RT,
+    RS,
+    Start,
+    Back,
+    Menu
 };
 
 enum XOneButton
 {
-	A,
-	B,
-	X,
-	Y,
-	Left,
-	Up,
-	Right,
-	Down,
-	LB,
-	LT,
-	LS,
-	RB,
-	RT,
-	RS,
-	Menu,
-	Item
+    A,
+    B,
+    X,
+    Y,
+    Left,
+    Up,
+    Right,
+    Down,
+    LB,
+    LT,
+    LS,
+    RB,
+    RT,
+    RS,
+    Menu,
+    Item
 };
 
 } } } } // namespace Xbox

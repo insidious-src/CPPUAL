@@ -37,31 +37,31 @@ namespace { // optimize for internal unit usage
 
 struct GLStates final
 {
-	static bool hasDirectAccess;
+    static bool hasDirectAccess;
 };
 
 bool GLStates::hasDirectAccess = false;
 
 constexpr int convertMagFilter (Texture::MagFilter eMag) noexcept
 {
-	return eMag == Texture::MagFilter::Bilinear ? GL::Linear : GL::Nearest;
+    return eMag == Texture::MagFilter::Bilinear ? GL::Linear : GL::Nearest;
 }
 
 inline int convertMinFilter (Texture::MinFilter eMin) noexcept
 {
-	switch (eMin)
-	{
-	case Texture::MinFilter::Bilinear:
-		return GL::Linear;
-	case Texture::MinFilter::NearestMipMap:
-		return GL::NearestMipMapNearest;
-	case Texture::MinFilter::BilinearMipMap:
-		return GL::LinearMipMapNearest;
-	case Texture::MinFilter::TrilinearMipMap:
-		return GL::LinearMipMapLinear;
-	default:
-		return GL::Nearest;
-	}
+    switch (eMin)
+    {
+    case Texture::MinFilter::Bilinear:
+        return GL::Linear;
+    case Texture::MinFilter::NearestMipMap:
+        return GL::NearestMipMapNearest;
+    case Texture::MinFilter::BilinearMipMap:
+        return GL::LinearMipMapNearest;
+    case Texture::MinFilter::TrilinearMipMap:
+        return GL::LinearMipMapLinear;
+    default:
+        return GL::Nearest;
+    }
 }
 
 } // anonymous namespace
@@ -79,8 +79,8 @@ Texture::Texture () noexcept
 { }
 
 Texture::Texture (string const&      gFile,
-				  PixelFormat const& gFormat,
-				  bool               bGenMipMaps)
+                  PixelFormat const& gFormat,
+                  bool               bGenMipMaps)
 : Object (ResourceType::Texture),
   m_gFormat (),
   m_gSize (),
@@ -89,144 +89,144 @@ Texture::Texture (string const&      gFile,
   m_eMag (MagFilter::Nearest),
   m_gStates ()
 {
-	if (loadTexture2D (gFile, gFormat, bGenMipMaps))
-	{
-		if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
-		m_gStates += Texture::IsLoaded;
-	}
+    if (loadTexture2D (gFile, gFormat, bGenMipMaps))
+    {
+        if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
+        m_gStates += Texture::IsLoaded;
+    }
 }
 
 Texture::~Texture () noexcept
 {
-	if (id () and m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
+    if (id () and m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
 }
 
 void Texture::setState (State eState, bool bSwitch) noexcept
 {
-	switch (eState)
-	{
-	case State::DirectAccess:
-		GLStates::hasDirectAccess = bSwitch;
-		break;
-	}
+    switch (eState)
+    {
+    case State::DirectAccess:
+        GLStates::hasDirectAccess = bSwitch;
+        break;
+    }
 }
 
 bool Texture::loadTexture2D (string const&      gFilePath,
-							 PixelFormat const& gFormat,
-							 bool               bGenMipMaps)
+                             PixelFormat const& gFormat,
+                             bool               bGenMipMaps)
 {
-	if (!id () or m_gStates.test (Texture::IsLoaded)) return false;
-	ifstream gFile (gFilePath, ios_base::binary);
-	uint	 uFormat;
+    if (!id () or m_gStates.test (Texture::IsLoaded)) return false;
+    ifstream gFile (gFilePath, ios_base::binary);
+    uint     uFormat;
 
-	if (gFile.is_open ())
-	{
-		if (m_gSize.x and !isPowerOfTwo (m_gSize.x)) --m_gSize.x;
-		if (m_gSize.y and !isPowerOfTwo (m_gSize.y)) --m_gSize.y;
-	}
+    if (gFile.is_open ())
+    {
+        if (m_gSize.x and !isPowerOfTwo (m_gSize.x)) --m_gSize.x;
+        if (m_gSize.y and !isPowerOfTwo (m_gSize.y)) --m_gSize.y;
+    }
 
-	if (m_gSize.x == 0 or m_gSize.y == 0) return false;
+    if (m_gSize.x == 0 or m_gSize.y == 0) return false;
 
-	uFormat	= gFormat.depth == 24 ?
-				  GL_RGB : (gFormat.depth == 8 ? GL_LUMINANCE : 0);
+    uFormat    = gFormat.depth == 24 ?
+                  GL_RGB : (gFormat.depth == 8 ? GL_LUMINANCE : 0);
 
-	glTexImage2D (GL::Texture2D,
-				  0, // level
-				  gFormat.depth == 24 ? GL_RGB : GL_DEPTH_COMPONENT,
-				  m_gSize.x, m_gSize.y,
-				  0, // border
-				  uFormat,
-				  GL_UNSIGNED_BYTE,
-				  gFile.rdbuf ());
+    glTexImage2D (GL::Texture2D,
+                  0, // level
+                  gFormat.depth == 24 ? GL_RGB : GL_DEPTH_COMPONENT,
+                  m_gSize.x, m_gSize.y,
+                  0, // border
+                  uFormat,
+                  GL_UNSIGNED_BYTE,
+                  gFile.rdbuf ());
 
-	gFile.close ();
+    gFile.close ();
 
-	if (bGenMipMaps) glGenerateMipmap (GL::Texture2D);
-	glGenSamplers (1, &m_uSampleId);
+    if (bGenMipMaps) glGenerateMipmap (GL::Texture2D);
+    glGenSamplers (1, &m_uSampleId);
 
-	m_gFormat  = gFormat;
-	m_gStates += Texture::IsLoaded;
-	if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
-	return true;
+    m_gFormat  = gFormat;
+    m_gStates += Texture::IsLoaded;
+    if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
+    return true;
 }
 
 bool Texture::loadTexture2D (cvoid*             pPixels,
-							 point2i     const& gSize,
-							 PixelFormat const& gFormat,
-							 bool               bGenMipMaps)
+                             point2i     const& gSize,
+                             PixelFormat const& gFormat,
+                             bool               bGenMipMaps)
 {
-	if (!id () or m_gStates.test (Texture::IsLoaded) or
-			!pPixels or !gSize.x or !gSize.y)
-		return false;
+    if (!id () or m_gStates.test (Texture::IsLoaded) or
+            !pPixels or !gSize.x or !gSize.y)
+        return false;
 
-	uint uFormat = gFormat.depth == 24 ?
-					   GL::RGB : (gFormat.depth == 8 ?
-									  static_cast<uint> (GL::Luminance) : 0);
+    uint uFormat = gFormat.depth == 24 ?
+                       GL::RGB : (gFormat.depth == 8 ?
+                                      static_cast<uint> (GL::Luminance) : 0);
 
-	glTexImage2D (GL::Texture2D,
-				  0, // level
-				  gFormat.depth == 24 ? static_cast<int> (GL::RGB) : GL_DEPTH_COMPONENT,
-				  m_gSize.x, m_gSize.y,
-				  0, // border
-				  uFormat,
-				  GL_UNSIGNED_BYTE,
-				  pPixels);
+    glTexImage2D (GL::Texture2D,
+                  0, // level
+                  gFormat.depth == 24 ? static_cast<int> (GL::RGB) : GL_DEPTH_COMPONENT,
+                  m_gSize.x, m_gSize.y,
+                  0, // border
+                  uFormat,
+                  GL_UNSIGNED_BYTE,
+                  pPixels);
 
-	if (bGenMipMaps) glGenerateMipmap (GL::Texture2D);
-	glGenSamplers (1, &m_uSampleId);
+    if (bGenMipMaps) glGenerateMipmap (GL::Texture2D);
+    glGenSamplers (1, &m_uSampleId);
 
-	m_gFormat  = gFormat;
-	m_gStates += Texture::IsLoaded;
-	if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
-	return true;
+    m_gFormat  = gFormat;
+    m_gStates += Texture::IsLoaded;
+    if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
+    return true;
 }
 
 void Texture::setParameter (uint uName, int nParam) noexcept
 {
-	if (!id ()) return;
+    if (!id ()) return;
 
-	if (!GLStates::hasDirectAccess)
-	{
-		uint uBoundTex = 0;
+    if (!GLStates::hasDirectAccess)
+    {
+        uint uBoundTex = 0;
 
-		glGetIntegerv (GL_TEXTURE_BINDING_2D, reinterpret_cast<int*> (&uBoundTex));
-		glBindTexture (GL::Texture2D, id ());
-		glTexParameteri (GL::Texture2D, uName, nParam);
-		glBindTexture (GL::Texture2D, uBoundTex);
-	}
-	else glTextureParameteriEXT (id (), GL::Texture2D, uName, nParam);
+        glGetIntegerv (GL_TEXTURE_BINDING_2D, reinterpret_cast<int*> (&uBoundTex));
+        glBindTexture (GL::Texture2D, id ());
+        glTexParameteri (GL::Texture2D, uName, nParam);
+        glBindTexture (GL::Texture2D, uBoundTex);
+    }
+    else glTextureParameteriEXT (id (), GL::Texture2D, uName, nParam);
 }
 
 void Texture::bind (uint uTexId) noexcept
 {
-	if (m_gStates.test (Texture::IsLoaded))
-	{
-		glActiveTexture (GL_TEXTURE0 + uTexId);
-		glBindTexture (GL::Texture2D, id ());
-		glBindSampler (uTexId, m_uSampleId);
-	}
+    if (m_gStates.test (Texture::IsLoaded))
+    {
+        glActiveTexture (GL_TEXTURE0 + uTexId);
+        glBindTexture (GL::Texture2D, id ());
+        glBindSampler (uTexId, m_uSampleId);
+    }
 }
 
 void Texture::setFiltering (MagFilter eMag, MinFilter eMin) noexcept
 {
-	if (m_uSampleId)
-	{
-		glSamplerParameteri (m_uSampleId, GL::Tex2DMinFilter, convertMinFilter (eMin));
-		glSamplerParameteri (m_uSampleId, GL::Tex2DMagFilter, convertMagFilter (eMag));
+    if (m_uSampleId)
+    {
+        glSamplerParameteri (m_uSampleId, GL::Tex2DMinFilter, convertMinFilter (eMin));
+        glSamplerParameteri (m_uSampleId, GL::Tex2DMagFilter, convertMagFilter (eMag));
 
-		m_eMin = eMin;
-		m_eMag = eMag;
-	}
+        m_eMin = eMin;
+        m_eMag = eMag;
+    }
 }
 
 void Texture::release () noexcept
 {
-	if (m_gStates.test (Texture::IsLoaded))
-	{
-		if (m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
-		m_uSampleId = 0;
-		m_gStates  -= Texture::IsLoaded;
-	}
+    if (m_gStates.test (Texture::IsLoaded))
+    {
+        if (m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
+        m_uSampleId = 0;
+        m_gStates  -= Texture::IsLoaded;
+    }
 }
 
 } } } // namespace GL

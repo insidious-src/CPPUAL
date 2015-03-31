@@ -39,16 +39,16 @@ typedef shared_ptr<Factory> shared_manager;
 
 struct Factory : public NonCopyableVirtual
 {
-	virtual shared_window createWindow (Rect const& rect,
-										u32         screen  = 0,
-										IDisplay*   display = IDisplay::instance ()) = 0;
+    virtual shared_window createWindow (Rect const& rect,
+                                        u32         screen  = 0,
+                                        IDisplay*   display = IDisplay::instance ()) = 0;
 
-	virtual shared_display connectDisplay (cchar* name = nullptr) = 0;
-	virtual shared_queue   createQueueInstance () = 0;
+    virtual shared_display connectDisplay (cchar* name = nullptr) = 0;
+    virtual shared_queue   createQueueInstance () = 0;
 
-	static Factory* instance ();
-	static Module&  module   ();
-	static bool     hasValidInstance () noexcept;
+    static Factory* instance ();
+    static Module&  module   ();
+    static bool     hasValidInstance () noexcept;
 };
 
 } } } // namespace Platform

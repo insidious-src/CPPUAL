@@ -33,20 +33,20 @@ typedef IDeviceContext*                     context_pointer;
 
 inline context_pointer& current () noexcept
 {
-	static thread_local context_pointer current_dc;
-	return current_dc;
+    static thread_local context_pointer current_dc;
+    return current_dc;
 }
 
 inline manager2d_type& manager2D () noexcept
 {
-	static manager2d_type drawable_mgr;
-	return drawable_mgr;
+    static manager2d_type drawable_mgr;
+    return drawable_mgr;
 }
 
 inline manager3d_type& manager3D () noexcept
 {
-	static manager3d_type drawable_mgr;
-	return drawable_mgr;
+    static manager3d_type drawable_mgr;
+    return drawable_mgr;
 }
 
 } } // anonymous namespace Internal
@@ -55,7 +55,7 @@ inline manager3d_type& manager3D () noexcept
 
 IDeviceContext* IDeviceContext::current () noexcept
 {
-	return Internal::current ();
+    return Internal::current ();
 }
 
 void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
@@ -75,12 +75,12 @@ void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
 
 IDrawable2D* DrawableFactory::create2D (string const& gName)
 {
-	return Internal::manager2D ().construct (gName);
+    return Internal::manager2D ().construct (gName);
 }
 
 IDrawable3D* DrawableFactory::create3D (string const& gName)
 {
-	return Internal::manager3D ().construct (gName);
+    return Internal::manager3D ().construct (gName);
 }
 
 } } // namespace Graphics

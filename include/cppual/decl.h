@@ -48,48 +48,48 @@
 // operating system support verification & definitions
 #if defined (_WIN32) or defined (__WIN32) or defined (__WIN32__)
 #
-#	define OS_WIN32
-#	define OS_WINDOWS OS_WIN32
-#	define OS_CURRENT OS_WINDOWS
+    #define OS_WIN32
+    #define OS_WINDOWS OS_WIN32
+    #define OS_CURRENT OS_WINDOWS
 #
 #elif defined (_WIN64) or defined (__WIN64) or defined (__WIN64__)
 #
-#	define OS_WIN64
-#	define OS_WINDOWS OS_WIN64
-#	define OS_CURRENT OS_WINDOWS
+    #define OS_WIN64
+    #define OS_WINDOWS OS_WIN64
+    #define OS_CURRENT OS_WINDOWS
 #
 #elif defined (__unix__) or defined (__unix)
 #
-#	define OS_STD_UNIX
-#	include <unistd.h>
-#	if (defined (_POSIX_VERSION))
-#		define OS_STD_POSIX _POSIX_VERSION
-#	endif // POSIX
-#	if defined (__linux__) or defined (__linux)
-#		define OS_GNU_LINUX
-#		define OS_CURRENT OS_GNU_LINUX
-#	elif defined (BSD)
-#		define OS_BSD
-#		define OS_CURRENT OS_BSD
-#	elif defined (_AIX)
-#		define OS_AIX
-#		define OS_CURRENT OS_AIX
-#		error aix support not implemented yet!
-#	elif (defined (__sun) or defined (__sun__)) and (defined (__SVR4) or defined (__SVR4__))
-#		define OS_SOLARIS
-#		define OS_CURRENT OS_SOLARIS
-#		error solaris support not implemented yet!
-#	endif
+    #define OS_STD_UNIX
+    #include <unistd.h>
+    #if (defined (_POSIX_VERSION))
+        #define OS_STD_POSIX _POSIX_VERSION
+    #endif // POSIX
+    #if defined (__linux__) or defined (__linux)
+        #define OS_GNU_LINUX
+        #define OS_CURRENT OS_GNU_LINUX
+    #elif defined (BSD)
+        #define OS_BSD
+        #define OS_CURRENT OS_BSD
+    #elif defined (_AIX)
+        #define OS_AIX
+        #define OS_CURRENT OS_AIX
+        #error aix support not implemented yet!
+    #elif (defined (__sun) or defined (__sun__)) and (defined (__SVR4) or defined (__SVR4__))
+        #define OS_SOLARIS
+        #define OS_CURRENT OS_SOLARIS
+        #error solaris support not implemented yet!
+    #endif
 #
 #elif defined (__APPLE__) and defined (__MACH__)
-#	define OS_STD_UNIX
-#	define OS_STD_MAC
-#	include <unistd.h>
-#	if (defined (_POSIX_VERSION))
-#		define OS_STD_POSIX _POSIX_VERSION
-#	endif // POSIX
+    #define OS_STD_UNIX
+    #define OS_STD_MAC
+    #include <unistd.h>
+    #if (defined (_POSIX_VERSION))
+        #define OS_STD_POSIX _POSIX_VERSION
+    #endif // POSIX
 #else
-#	error unsupported operating system!
+    #error unsupported operating system!
 #endif // OS
 
 #undef PACKED
@@ -101,9 +101,9 @@
 #if defined (_MSC_VER) and (_MSC_VER > 1300) // vc++ 2005
 #
 #   pragma once
-#	define PACKED __declspec(align(packed))
-#	define NOVTABLE __declspec(novtable)
-#	define DEPRECATED(msg)
+    #define PACKED __declspec(align(packed))
+    #define NOVTABLE __declspec(novtable)
+    #define DEPRECATED(msg)
 #   define FORCEINLINE __forceinline
 #   define DECLSPEC_ALIGN(x) __declspec(align(x))
 #   if !defined (STDCALL) and !defined (FASTCALL) and !defined (CDECL)
@@ -114,9 +114,9 @@
 #
 #elif defined (__GNUC__)
 #
-#	define PACKED __attribute__ ((__packed__))
-#	define NOVTABLE
-#	define DEPRECATED(msg) __attribute__ ((deprecated(msg)))
+    #define PACKED __attribute__ ((__packed__))
+    #define NOVTABLE
+    #define DEPRECATED(msg) __attribute__ ((deprecated(msg)))
 //#   define FORCEINLINE __inline__
 #   define FORCEINLINE inline __attribute__((always_inline))
 #   define DECLSPEC_ALIGN(x) __attribute__((aligned(x)))
@@ -128,9 +128,9 @@
 #
 #else
 #
-#	define PACKED
-#	define NOVTABLE
-#	define DEPRECATED(msg)
+    #define PACKED
+    #define NOVTABLE
+    #define DEPRECATED(msg)
 #   define FORCEINLINE
 #   define DECLSPEC_ALIGN(x)
 #   if !defined (STDCALL) and !defined (FASTCALL) and !defined (CDECL)
@@ -143,42 +143,42 @@
 
 #if !defined (DECL_EXPORT) and !defined (DECL_IMPORT) and !defined (DECL_HIDDEN)
 #
-#	ifdef __GNUC__
-#		define DECL_EXPORT __attribute__((visibility("default")))
-#		define DECL_IMPORT __attribute__((visibility("default")))
-#  		define DECL_HIDDEN __attribute__((visibility("hidden")))
-#	elif defined (_MSC_VER)
-#    	define DECL_EXPORT __declspec(dllexport)
-#    	define DECL_IMPORT __declspec(dllimport)
-#  		define DECL_HIDDEN
-#	else
-#    	define DECL_IMPORT
-#    	define DECL_EXPORT
-#  		define DECL_HIDDEN
-#	endif
+    #ifdef __GNUC__
+        #define DECL_EXPORT __attribute__((visibility("default")))
+        #define DECL_IMPORT __attribute__((visibility("default")))
+#          define DECL_HIDDEN __attribute__((visibility("hidden")))
+    #elif defined (_MSC_VER)
+#        define DECL_EXPORT __declspec(dllexport)
+#        define DECL_IMPORT __declspec(dllimport)
+#          define DECL_HIDDEN
+    #else
+#        define DECL_IMPORT
+#        define DECL_EXPORT
+#          define DECL_HIDDEN
+    #endif
 #
 #endif // DECL_EXPORT and DECL_IMPORT and DECL_HIDDEN
 
 #ifdef OS_WINDOWS
-#	define DLCALL STDCALL
+    #define DLCALL STDCALL
 #else
-#	define DLCALL
+    #define DLCALL
 #endif
 
 #ifndef TRANSPARENT_UNION
 #
-#	ifdef __GNUC__
-#		define TRANSPARENT_UNION __attribute__((__transparent_union__))
-#	else
-#    	define TRANSPARENT_UNION
-#	endif
+    #ifdef __GNUC__
+        #define TRANSPARENT_UNION __attribute__((__transparent_union__))
+    #else
+#        define TRANSPARENT_UNION
+    #endif
 #
 #endif // TRANSPARENT_UNION
 
 #ifdef API_EXPORT
-#	define SHARED_API DECL_EXPORT
+    #define SHARED_API DECL_EXPORT
 #else
-#	define SHARED_API DECL_IMPORT
+    #define SHARED_API DECL_IMPORT
 #endif
 
 #if !defined (NDEBUG) or defined (__DEBUG) or defined (_DEBUG) or defined (__DEBUG__)
@@ -188,35 +188,35 @@
 #ifdef __cplusplus
 
 #if __cplusplus < 201103L or (defined (_MSC_VER) and _MSC_VER < 1700)
-#	error this compiler does not support ISO C++11!
+    #error this compiler does not support ISO C++11!
 #endif
 
 // character storage literals
 #ifdef __STD_UTF_8__
-#	define TXT_STD_UTF8
-#	define TXT(quote) u8 ## quote
+    #define TXT_STD_UTF8
+    #define TXT(quote) u8 ## quote
 #elif defined (__STD_UTF_16__)
-#	define TXT_STD_UTF16
-#	define TXT(quote) u ## quote
+    #define TXT_STD_UTF16
+    #define TXT(quote) u ## quote
 #elif defined (__STD_UTF_32__)
-#	define TXT_STD_UTF32
-#	define TXT(quote) U ## quote
+    #define TXT_STD_UTF32
+    #define TXT(quote) U ## quote
 #elif defined (__STD_UNICODE__)
-#	define TXT_STD_OLD_UNICODE
-#	define TXT(quote) L ## quote
+    #define TXT_STD_OLD_UNICODE
+    #define TXT(quote) L ## quote
 #else
-#	define TXT_STD_ASCII
-#	define TXT(quote) quote
+    #define TXT_STD_ASCII
+    #define TXT(quote) quote
 #endif
 
 template <typename T, typename U>
 inline U pointer_cast (T value)
 {
-#	ifdef DEBUG_MODE
-	return dynamic_cast<U> (value);
-#	else
-	return static_cast<U>  (value);
-#	endif
+    #ifdef DEBUG_MODE
+    return dynamic_cast<U> (value);
+    #else
+    return static_cast<U>  (value);
+    #endif
 }
 
 

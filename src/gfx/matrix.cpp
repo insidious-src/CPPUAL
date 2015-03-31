@@ -25,33 +25,33 @@ namespace cppual { namespace Graphics {
 
 Matrix2& Matrix2::transpose () noexcept
 {
-	std::swap ((*this)[1], (*this)[2]);
-	return *this;
+    std::swap ((*this)[1], (*this)[2]);
+    return *this;
 }
 
 // =========================================================
 
 Matrix3& Matrix3::transpose () noexcept
 {
-	std::swap ((*this)[1], (*this)[3]);
-	std::swap ((*this)[2], (*this)[6]);
-	std::swap ((*this)[5], (*this)[7]);
+    std::swap ((*this)[1], (*this)[3]);
+    std::swap ((*this)[2], (*this)[6]);
+    std::swap ((*this)[5], (*this)[7]);
 
-	return *this;
+    return *this;
 }
 
 // =========================================================
 
 Matrix4& Matrix4::transpose () noexcept
 {
-	std::swap ((*this)[ 1], (*this)[ 4]);
-	std::swap ((*this)[ 2], (*this)[ 8]);
-	std::swap ((*this)[ 3], (*this)[12]);
-	std::swap ((*this)[ 6], (*this)[ 9]);
-	std::swap ((*this)[ 7], (*this)[13]);
-	std::swap ((*this)[11], (*this)[14]);
+    std::swap ((*this)[ 1], (*this)[ 4]);
+    std::swap ((*this)[ 2], (*this)[ 8]);
+    std::swap ((*this)[ 3], (*this)[12]);
+    std::swap ((*this)[ 6], (*this)[ 9]);
+    std::swap ((*this)[ 7], (*this)[13]);
+    std::swap ((*this)[11], (*this)[14]);
 
-	return *this;
+    return *this;
 }
 
 } } // namespace Graphics

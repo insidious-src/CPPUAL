@@ -26,7 +26,7 @@ namespace cppual { namespace Compute {
 
 Object::~Object () noexcept
 {
-	if (m_object) ::vkDestroyObject (m_object.get<VK_OBJECT> ());
+    if (m_object) ::vkDestroyObject (m_object.get<VK_OBJECT> ());
 }
 
 } } // namespace Compute

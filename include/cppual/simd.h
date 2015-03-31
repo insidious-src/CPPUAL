@@ -46,19 +46,19 @@ template <typename T, std::size_t N>
 class simd_vector
 {
 public:
-	typedef T              value_type;
-	typedef std::size_t    size_type;
-	typedef simd_vector<T> self_type;
+    typedef T              value_type;
+    typedef std::size_t    size_type;
+    typedef simd_vector<T> self_type;
 
-	constexpr simd_vector () noexcept = default;
-	simd_vector (simd_vector const&);
-	simd_vector& operator = (simd_vector const&);
+    constexpr simd_vector () noexcept = default;
+    simd_vector (simd_vector const&);
+    simd_vector& operator = (simd_vector const&);
 
-	constexpr size_type size () const noexcept
-	{ sizeof (m_data); }
+    constexpr size_type size () const noexcept
+    { sizeof (m_data); }
 
 private:
-	value_type m_data[N];
+    value_type m_data[N];
 };
 
 } // cppual

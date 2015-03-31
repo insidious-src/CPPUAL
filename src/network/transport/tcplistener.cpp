@@ -22,9 +22,9 @@
 #include <cppual/network/transport/tcplistener.h>
 
 #ifdef OS_STD_UNIX
-//#	include <netinet/in.h>
-//#	include <netdb.h>
-#	include <arpa/inet.h>
+//#    include <netinet/in.h>
+//#    include <netdb.h>
+#    include <arpa/inet.h>
 #elif defined OS_WINDOWS
 #   include <windows.h>
 #   define socklen_t int
@@ -41,41 +41,41 @@ TcpListener::TcpListener (Address const& gAddr) noexcept
 
 bool TcpListener::accept (TcpStream&) noexcept
 {
-	if (!isValid () or m_bIsListening) return false;
+    if (!isValid () or m_bIsListening) return false;
 
     sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
-	socklen_t   uLen  = sizeof (sockaddr_in);
+    socklen_t   uLen  = sizeof (sockaddr_in);
 
-	replaceFromId (::accept (id (),
-							reinterpret_cast<sockaddr*> (&gAddr),
-							&uLen));
-	return true;
+    replaceFromId (::accept (id (),
+                            reinterpret_cast<sockaddr*> (&gAddr),
+                            &uLen));
+    return true;
 }
 
 bool TcpListener::listen (u16 uPort) noexcept
 {
-	if (!isValid () or m_bIsListening) return false;
+    if (!isValid () or m_bIsListening) return false;
 
 #   ifdef OS_STD_UNIX
-	sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
-	gAddr.sin_family  = PF_INET;
-	gAddr.sin_port    = htons (uPort);
+    sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
+    gAddr.sin_family  = PF_INET;
+    gAddr.sin_port    = htons (uPort);
 
-	if (m_gAddr.toString ().size ())
-		::inet_pton (PF_INET, m_gAddr.toString ().c_str (), &gAddr.sin_addr);
-	else
-		gAddr.sin_addr.s_addr = INADDR_ANY;
+    if (m_gAddr.toString ().size ())
+        ::inet_pton (PF_INET, m_gAddr.toString ().c_str (), &gAddr.sin_addr);
+    else
+        gAddr.sin_addr.s_addr = INADDR_ANY;
 
-	int optval = 1;
-	::setsockopt (id (), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
+    int optval = 1;
+    ::setsockopt (id (), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
 
-	if (::bind (id (), (sockaddr*) &gAddr, sizeof (gAddr)) > -1 or
-			::listen (id (), 0) > -1)
-		return m_bIsListening;
+    if (::bind (id (), (sockaddr*) &gAddr, sizeof (gAddr)) > -1 or
+            ::listen (id (), 0) > -1)
+        return m_bIsListening;
 
-	m_uPort = uPort;
+    m_uPort = uPort;
 #   endif
-	return m_bIsListening = true;
+    return m_bIsListening = true;
 }
 
 } } // namespace Network

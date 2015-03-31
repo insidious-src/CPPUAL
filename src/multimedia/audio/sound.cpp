@@ -39,106 +39,106 @@ Sound::Sound (Sound&& gObj) noexcept
   m_nChannelCount (gObj.m_nChannelCount),
   m_gFlags (gObj.m_gFlags)
 {
-	gObj.m_nSampleCount = gObj.m_nChannelCount = gObj.m_nSampleRate = 0;
-	gObj.m_pSndDesc     = nullptr;
-	gObj.m_gFlags       = 0;
+    gObj.m_nSampleCount = gObj.m_nChannelCount = gObj.m_nSampleRate = 0;
+    gObj.m_pSndDesc     = nullptr;
+    gObj.m_gFlags       = 0;
 }
 
 Sound& Sound::operator = (Sound&& gObj) noexcept
 {
-	if (this == &gObj) return *this;
-	return *this;
+    if (this == &gObj) return *this;
+    return *this;
 }
 
 Sound::~Sound () noexcept
 {
-	if (m_pSndDesc) sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+    if (m_pSndDesc) sf_close (static_cast<SNDFILE*> (m_pSndDesc));
 }
 
 int Sound::openReadOnly (string const& gFile) noexcept
 {
-	close ();
+    close ();
 
-	SF_INFO gInfo { 0, 0, 0, 0, 0, 0 };
-	m_pSndDesc = sf_open (gFile.c_str (), 0, &gInfo);
+    SF_INFO gInfo { 0, 0, 0, 0, 0, 0 };
+    m_pSndDesc = sf_open (gFile.c_str (), 0, &gInfo);
 
-	if (m_pSndDesc)
-	{
-		if (gInfo.channels > MaxChannels)
-		{
-			sf_close (static_cast<SNDFILE*> (m_pSndDesc));
-			return false;
-		}
+    if (m_pSndDesc)
+    {
+        if (gInfo.channels > MaxChannels)
+        {
+            sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+            return false;
+        }
 
-		m_nChannelCount = gInfo.channels;
-		m_nSampleCount  = gInfo.frames;
-		m_nSampleRate   = gInfo.samplerate;
+        m_nChannelCount = gInfo.channels;
+        m_nSampleCount  = gInfo.frames;
+        m_nSampleRate   = gInfo.samplerate;
 
-		if (gInfo.seekable) m_gFlags += Sound::Read | Sound::Seekable;
-		else m_gFlags += Sound::Read;
+        if (gInfo.seekable) m_gFlags += Sound::Read | Sound::Seekable;
+        else m_gFlags += Sound::Read;
 
-		// using format to save an int copy
-		if (!(gInfo.format = onOpen ()))
-		{
-			close ();
-			return gInfo.format;
-		}
+        // using format to save an int copy
+        if (!(gInfo.format = onOpen ()))
+        {
+            close ();
+            return gInfo.format;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 int Sound::openReadOnly (cvoid*, size_type) noexcept
 {
-	close ();
-	m_gFlags = Sound::Read;
-	return false;
+    close ();
+    m_gFlags = Sound::Read;
+    return false;
 }
 
 int Sound::openWritable (string const&, int, int) noexcept
 {
-	close ();
-	m_gFlags = Sound::Read | Sound::Write;
+    close ();
+    m_gFlags = Sound::Read | Sound::Write;
 
-	onOpen ();
-	return false;
+    onOpen ();
+    return false;
 }
 
 bool Sound::save (string const& gFileName) noexcept
 {
-	if (m_pSndDesc)
-	{
-		onSave (gFileName);
-		return true;
-	}
+    if (m_pSndDesc)
+    {
+        onSave (gFileName);
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 void Sound::close () noexcept
 {
-	if (m_pSndDesc)
-	{
-		onClose ();
-		sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+    if (m_pSndDesc)
+    {
+        onClose ();
+        sf_close (static_cast<SNDFILE*> (m_pSndDesc));
 
-		m_nSampleCount = m_nSampleRate = m_nChannelCount = 0;
-		m_gFlags = 0;
-	}
+        m_nSampleCount = m_nSampleRate = m_nChannelCount = 0;
+        m_gFlags = 0;
+    }
 }
 
 void Sound::seek (std::chrono::seconds) noexcept
 {
-	if (m_gFlags.test (Sound::Seekable))
-	{
-	}
+    if (m_gFlags.test (Sound::Seekable))
+    {
+    }
 }
 
 string Sound::attribute (Attribute eType) const noexcept
 {
-	return sf_get_string (static_cast<SNDFILE*> (m_pSndDesc), eType);
+    return sf_get_string (static_cast<SNDFILE*> (m_pSndDesc), eType);
 }
 
 

@@ -30,12 +30,12 @@ namespace cppual { namespace Audio { namespace AL {
 struct SoundPlayer final : public SoundSource
 {
 public:
-	using SoundSource::SoundSource;
-	SoundPlayer () noexcept;
-	SoundPlayer (SoundBuffer&) noexcept;
+    using SoundSource::SoundSource;
+    SoundPlayer () noexcept;
+    SoundPlayer (SoundBuffer&) noexcept;
 
-	inline bool isUsable () const noexcept
-	{ return m_pBuffer and m_pBuffer->channelCount () > 1; }
+    inline bool isUsable () const noexcept
+    { return m_pBuffer and m_pBuffer->channelCount () > 1; }
 };
 
 } } } // namespace Audio

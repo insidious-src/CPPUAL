@@ -44,28 +44,28 @@ TcpStream::~TcpStream () noexcept
 
 void TcpStream::disconnect () noexcept
 {
-	if (m_bIsConnected)
-	{
-		m_bIsConnected = false;
-	}
+    if (m_bIsConnected)
+    {
+        m_bIsConnected = false;
+    }
 }
 
 TcpStream& TcpStream::operator << (Packet const&) noexcept // send
 {
-	if (m_bIsConnected)
-	{
-	}
+    if (m_bIsConnected)
+    {
+    }
 
-	return *this;
+    return *this;
 }
 
 TcpStream& TcpStream::operator >> (Packet&) noexcept // receive
 {
-	if (m_bIsConnected)
-	{
-	}
+    if (m_bIsConnected)
+    {
+    }
 
-	return *this;
+    return *this;
 }
 
 } } // namespace Network

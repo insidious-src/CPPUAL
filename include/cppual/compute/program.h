@@ -36,18 +36,18 @@ namespace cppual { namespace Compute {
 class Program : public Object <Program>
 {
 public:
-	Program ();
-	Program (Behaviour const&, string const& binary_path);
-	Program (Behaviour const&, vector<string> const& source);
-	Program (Program&&);
-	Program (Program const&);
-	Program& operator = (Program&&);
-	Program& operator = (Program const&);
+    Program ();
+    Program (Behaviour const&, string const& binary_path);
+    Program (Behaviour const&, vector<string> const& source);
+    Program (Program&&);
+    Program (Program const&);
+    Program& operator = (Program&&);
+    Program& operator = (Program const&);
 
-	void bind  (DeviceQueue const& queue);
-	bool build ();
+    void bind  (DeviceQueue const& queue);
+    bool build ();
 
-	static Program* current () noexcept;
+    static Program* current () noexcept;
 };
 
 } } // namespace Compute

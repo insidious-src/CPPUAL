@@ -19,8 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_NETWORK_PROTOCOLS_ABSTRACT_H_
-#define CPPUAL_NETWORK_PROTOCOLS_ABSTRACT_H_
+#ifndef CPPUAL_NETWORK_PROTOCOL_INTERFACE_H_
+#define CPPUAL_NETWORK_PROTOCOL_INTERFACE_H_
 #ifdef __cplusplus
 
 #include <cppual/network/packet.h>
@@ -32,31 +32,31 @@ class ProtocolContext;
 class IProtocol
 {
 public:
-	ProtocolContext* createContext  ();
-	bool             addLowerLayer  (IProtocol*);
-	IProtocol*       getLowestLayer () const;
+    ProtocolContext* createContext  ();
+    bool             addLowerLayer  (IProtocol*);
+    IProtocol*       getLowestLayer () const;
 
-	virtual uint getRequiredOutputSize        (uint max_input);
-	virtual uint getRequiredRecyclableStreams (uint max_connections,
-											   uint max_concurrent_calls);
+    virtual uint getRequiredOutputSize        (uint max_input);
+    virtual uint getRequiredRecyclableStreams (uint max_connections,
+                                               uint max_concurrent_calls);
 
-	virtual void startSession  (ProtocolContext&, Packet& outgoing_packet) = 0;
-	virtual bool readData      (ProtocolContext&, Packet& incoming_packet) = 0;
-	virtual byte tryDecode     (ProtocolContext&, Packet& output_packet  ) = 0;
-	virtual byte encodeContent (ProtocolContext&,
-								Packet& input_packet,
-								Packet& output_packet) = 0;
+    virtual void startSession  (ProtocolContext&, Packet& outgoing_packet) = 0;
+    virtual bool readData      (ProtocolContext&, Packet& incoming_packet) = 0;
+    virtual byte tryDecode     (ProtocolContext&, Packet&   output_packet) = 0;
+    virtual byte encodeContent (ProtocolContext&,
+                                Packet&  input_packet,
+                                Packet& output_packet) = 0;
 
 
-	inline IProtocol* getUpperLayer () const { return m_pUpperProt; }
-	inline IProtocol* getLowerLayer () const { return m_pLowerProt; }
+    IProtocol* getUpperLayer () const { return m_pUpperProt; }
+    IProtocol* getLowerLayer () const { return m_pLowerProt; }
 
 private:
-	IProtocol* m_pUpperProt;
-	IProtocol* m_pLowerProt;
+    IProtocol* m_pUpperProt;
+    IProtocol* m_pLowerProt;
 };
 
 } } // Network
 
 #endif // __cplusplus
-#endif // CPPUAL_NETWORK_PROTOCOLS_ABSTRACT_H_
+#endif // CPPUAL_NETWORK_PROTOCOL_INTERFACE_H_

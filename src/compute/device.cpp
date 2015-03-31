@@ -30,55 +30,55 @@ namespace { // optimize for internal unit usage
 
 //constexpr std::size_t const_hash (cchar* input) noexcept
 //{
-//	return *input ?
-//				static_cast<unsigned int> (*input) + 33 * const_hash (input + 1) : 1;
+//    return *input ?
+//                static_cast<unsigned int> (*input) + 33 * const_hash (input + 1) : 1;
 //}
 
 //inline CL::size_type infotype (Device::Info eType) noexcept
 //{
-//	switch (eType)
-//	{
-//	case Device::Info::Name:
-//		return CL_DEVICE_NAME;
-//	case Device::Info::Board:
-//		return CL_DEVICE_VENDOR;
-//	case Device::Info::Vendor:
-//		return CL_DEVICE_VENDOR;
-//	case Device::Info::Profile:
-//		return CL_DEVICE_PROFILE;
-//	case Device::Info::Version:
-//		return CL_DEVICE_VERSION;
-//	default:
-//		return 0;
-//	}
+//    switch (eType)
+//    {
+//    case Device::Info::Name:
+//        return CL_DEVICE_NAME;
+//    case Device::Info::Board:
+//        return CL_DEVICE_VENDOR;
+//    case Device::Info::Vendor:
+//        return CL_DEVICE_VENDOR;
+//    case Device::Info::Profile:
+//        return CL_DEVICE_PROFILE;
+//    case Device::Info::Version:
+//        return CL_DEVICE_VERSION;
+//    default:
+//        return 0;
+//    }
 //}
 
 //inline Device::uint_type infou (Device::uint_type uNfo,
-//								u8                uType,
-//								u16               uPlatform,
-//								Device::uint_type uId)
+//                                u8                uType,
+//                                u16               uPlatform,
+//                                Device::uint_type uId)
 //{
-//	Device::uint_type value;
+//    Device::uint_type value;
 
-//	if (::clGetDeviceInfo (CL::handle (uType, uPlatform, uId),
-//						   uNfo, sizeof (Device::uint_type), &value, nullptr) != CL_SUCCESS)
-//		return 0;
+//    if (::clGetDeviceInfo (CL::handle (uType, uPlatform, uId),
+//                           uNfo, sizeof (Device::uint_type), &value, nullptr) != CL_SUCCESS)
+//        return 0;
 
-//	return value;
+//    return value;
 //}
 
 //inline Device::size_type infoul (Device::uint_type uNfo,
-//								 u8                uType,
-//								 u16               uPlatform,
-//								 Device::uint_type uId)
+//                                 u8                uType,
+//                                 u16               uPlatform,
+//                                 Device::uint_type uId)
 //{
-//	Device::size_type value;
+//    Device::size_type value;
 
-//	if (::clGetDeviceInfo (CL::handle (uType, uPlatform, uId),
-//						   uNfo, sizeof (Device::size_type), &value, nullptr) != CL_SUCCESS)
-//		return 0;
+//    if (::clGetDeviceInfo (CL::handle (uType, uPlatform, uId),
+//                           uNfo, sizeof (Device::size_type), &value, nullptr) != CL_SUCCESS)
+//        return 0;
 
-//	return value;
+//    return value;
 //}
 
 } // anonymous
@@ -103,105 +103,105 @@ namespace { // optimize for internal unit usage
 
 //Device::Partition Device::part (uint_type)
 //{
-//	return std::move (Partition (*this));
+//    return std::move (Partition (*this));
 //}
 
 //string Device::info (Info eInfo)
 //{
-//	static std::size_t n = 0;
-//	static string      text;
+//    static std::size_t n = 0;
+//    static string      text;
 
-//	if (m_uNumUnits)
-//	{
-//		CL::device_type dev = CL::handle (m_eType, m_uPlatformId, m_uId);
+//    if (m_uNumUnits)
+//    {
+//        CL::device_type dev = CL::handle (m_eType, m_uPlatformId, m_uId);
 
-//		if (::clGetDeviceInfo (dev, infotype (eInfo), 0, nullptr, &n) != CL_SUCCESS)
-//			return string ();
+//        if (::clGetDeviceInfo (dev, infotype (eInfo), 0, nullptr, &n) != CL_SUCCESS)
+//            return string ();
 
-//		text.resize (n);
+//        text.resize (n);
 
-//		if (::clGetDeviceInfo (dev, infotype (eInfo), n, &text[0], nullptr) != CL_SUCCESS)
-//			return string ();
+//        if (::clGetDeviceInfo (dev, infotype (eInfo), n, &text[0], nullptr) != CL_SUCCESS)
+//            return string ();
 
-//		text.resize (--n);
-//	}
+//        text.resize (--n);
+//    }
 
-//	return std::move (text);
+//    return std::move (text);
 //}
 
 //bool Device::available (cchar* feature)
 //{
-//	if (m_uNumUnits)
-//	{
-//		static size_type       uSize = 0;
-//		const  CL::device_type dev   = CL::handle (m_eType, m_uPlatformId, m_uId);
+//    if (m_uNumUnits)
+//    {
+//        static size_type       uSize = 0;
+//        const  CL::device_type dev   = CL::handle (m_eType, m_uPlatformId, m_uId);
 
-//		if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
-//							   0, nullptr, &uSize) != CL_SUCCESS or !uSize)
-//			return false;
+//        if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
+//                               0, nullptr, &uSize) != CL_SUCCESS or !uSize)
+//            return false;
 
-//		char text[uSize];
+//        char text[uSize];
 
-//		if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
-//							   uSize, text, nullptr) != CL_SUCCESS)
-//			return false;
+//        if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
+//                               uSize, text, nullptr) != CL_SUCCESS)
+//            return false;
 
-//		text[--uSize] = 0;
-//		text[--uSize] = 0;
+//        text[--uSize] = 0;
+//        text[--uSize] = 0;
 
-//		for (cchar* pEnd = ::strchr (text, ' '), *pBegin = text; ;
-//			 pEnd = ::strchr (pBegin = ++pEnd, ' '))
-//		{
-//			if (!pEnd) return !::strcmp (pBegin, feature) ? true : false;
-//			else
-//			{
-//				text[pEnd - text] = 0;
-//				if (!::strcmp (pBegin, feature)) return true;
-//			}
-//		}
-//	}
+//        for (cchar* pEnd = ::strchr (text, ' '), *pBegin = text; ;
+//             pEnd = ::strchr (pBegin = ++pEnd, ' '))
+//        {
+//            if (!pEnd) return !::strcmp (pBegin, feature) ? true : false;
+//            else
+//            {
+//                text[pEnd - text] = 0;
+//                if (!::strcmp (pBegin, feature)) return true;
+//            }
+//        }
+//    }
 
-//	return false;
+//    return false;
 //}
 
 //Device::uint_type Device::dimensions () const
 //{
-//	return infou (CL::MaxDimensions, m_eType, m_uPlatformId, m_uId);
+//    return infou (CL::MaxDimensions, m_eType, m_uPlatformId, m_uId);
 //}
 
 //Device::size_type Device::groupSize () const
 //{
-//	return infoul (CL::MaxGroupSize, m_eType, m_uPlatformId, m_uId);
+//    return infoul (CL::MaxGroupSize, m_eType, m_uPlatformId, m_uId);
 //}
 
 //Device::uint_type Device::items () const
 //{
-//	return infou (CL::MaxItemCount, m_eType, m_uPlatformId, m_uId);
+//    return infou (CL::MaxItemCount, m_eType, m_uPlatformId, m_uId);
 //}
 
 //Device::size_type Device::cache () const
 //{
-//	return infoul (CL::CacheSize, m_eType, m_uPlatformId, m_uId);
+//    return infoul (CL::CacheSize, m_eType, m_uPlatformId, m_uId);
 //}
 
 //Device::uint_type Device::cacheLine () const
 //{
-//	return infou (CL::CacheLineSize, m_eType, m_uPlatformId, m_uId);
+//    return infou (CL::CacheLineSize, m_eType, m_uPlatformId, m_uId);
 //}
 
 //Device::size_type Device::localMemory () const
 //{
-//	return infoul (CL::LocalMemSize, m_eType, m_uPlatformId, m_uId);
+//    return infoul (CL::LocalMemSize, m_eType, m_uPlatformId, m_uId);
 //}
 
 //Device::size_type Device::constMemory () const
 //{
-//	return infoul (CL::ConstMemSize, m_eType, m_uPlatformId, m_uId);
+//    return infoul (CL::ConstMemSize, m_eType, m_uPlatformId, m_uId);
 //}
 
 //Device::size_type Device::globalMemory () const
 //{
-//	return infoul (CL::GlobalMemSize, m_eType, m_uPlatformId, m_uId);
+//    return infoul (CL::GlobalMemSize, m_eType, m_uPlatformId, m_uId);
 //}
 
 //// =========================================================
@@ -223,22 +223,22 @@ namespace { // optimize for internal unit usage
 
 //Device::Partition& Device::Partition::operator = (Device::Partition&& gObj)
 //{
-//	if (this != &gObj)
-//	{
-//		Object::operator = (std::move (gObj));
-//	}
+//    if (this != &gObj)
+//    {
+//        Object::operator = (std::move (gObj));
+//    }
 
-//	return *this;
+//    return *this;
 //}
 
 //Device::Partition& Device::Partition::operator = (Device::Partition const& gObj)
 //{
-//	if (this != &gObj)
-//	{
-//		Object::operator = (gObj);
-//	}
+//    if (this != &gObj)
+//    {
+//        Object::operator = (gObj);
+//    }
 
-//	return *this;
+//    return *this;
 //}
 
 } } // Compute

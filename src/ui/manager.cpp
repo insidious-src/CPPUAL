@@ -28,11 +28,11 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 inline cchar* server () noexcept
 {
-#	if defined OS_GNU_LINUX or defined OS_BSD
-	return getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" : "libcppual-ui-xorg";
-#	elif defined OS_WINDOWS
-	return "libcppual-win";
-#	endif
+#    if defined OS_GNU_LINUX or defined OS_BSD
+    return getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" : "libcppual-ui-xorg";
+#    elif defined OS_WINDOWS
+    return "libcppual-win";
+#    endif
 }
 
 struct Initializer
@@ -40,26 +40,26 @@ struct Initializer
     Module         mod;
     shared_manager mgr;
 
-	inline Initializer () noexcept
+    inline Initializer () noexcept
     : mod (server (), true, Module::ResolvePolicy::Lazy),
-	  mgr ()
-	{ }
+      mgr ()
+    { }
 };
 
 inline Initializer& platform () noexcept
 {
-	static Initializer init;
-	return init;
+    static Initializer init;
+    return init;
 }
 
 inline shared_manager& instance () noexcept
 {
-	return platform ().mgr;
+    return platform ().mgr;
 }
 
 inline Module& module () noexcept
 {
-	return platform ().mod;
+    return platform ().mod;
 }
 
 } } // anonymous namespace Internal
@@ -68,25 +68,25 @@ inline Module& module () noexcept
 
 Factory* Factory::instance ()
 {
-	if (Internal::instance () == nullptr)
-	{
+    if (Internal::instance () == nullptr)
+    {
         if (!Internal::module ().contains ("module_main") or
                 Internal::module   ().call<int> ("module_main", Internal::instance ()) or
-				Internal::instance () == nullptr)
-			throw std::bad_alloc ();
-	}
+                Internal::instance () == nullptr)
+            throw std::bad_alloc ();
+    }
 
-	return Internal::instance ().get ();
+    return Internal::instance ().get ();
 }
 
 Module& Factory::module ()
 {
-	return Internal::module ();
+    return Internal::module ();
 }
 
 bool Factory::hasValidInstance () noexcept
 {
-	return Internal::instance () != nullptr;
+    return Internal::instance () != nullptr;
 }
 
 } } } // namespace Platform

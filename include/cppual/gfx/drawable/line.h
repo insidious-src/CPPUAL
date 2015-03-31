@@ -38,37 +38,37 @@ enum class LineStyle : char { Solid, Dash, Dot, DashDotDot };
 class Line : public IDrawable2D
 {
 public:
-	void draw (ISurface* target_surface, Transform2D const& transform_info);
+    void draw (ISurface* target_surface, Transform2D const& transform_info);
 
-	Color     getColor ()                 const noexcept { return m_gColor;   }
-	uint      getSize  ()                 const noexcept { return m_uSize;    }
-	LineStyle getStyle ()                 const noexcept { return m_eStyle;   }
-	void      setColor (Color const& gColor) noexcept { m_gColor = gColor; }
-	void      setSize  (uint uSize)             noexcept { m_uSize = uSize;   }
-	void      setStyle (LineStyle eStyle)       noexcept { m_eStyle = eStyle; }
+    Color     getColor ()                 const noexcept { return m_gColor;   }
+    uint      getSize  ()                 const noexcept { return m_uSize;    }
+    LineStyle getStyle ()                 const noexcept { return m_eStyle;   }
+    void      setColor (Color const& gColor) noexcept { m_gColor = gColor; }
+    void      setSize  (uint uSize)             noexcept { m_uSize = uSize;   }
+    void      setStyle (LineStyle eStyle)       noexcept { m_eStyle = eStyle; }
 
-	Line (const Color& gFillColor,
-		  uint            uLineSize = 1U,
-		  LineStyle       eStyle    = LineStyle::Solid) noexcept
-	: m_gColor (gFillColor), m_uSize (uLineSize), m_eStyle (eStyle)
-	{ }
+    Line (const Color& gFillColor,
+          uint            uLineSize = 1U,
+          LineStyle       eStyle    = LineStyle::Solid) noexcept
+    : m_gColor (gFillColor), m_uSize (uLineSize), m_eStyle (eStyle)
+    { }
 
-	Line (Line const& gObj) noexcept
-	: m_gColor (gObj.m_gColor), m_uSize (gObj.m_uSize), m_eStyle (gObj.m_eStyle)
-	{ }
+    Line (Line const& gObj) noexcept
+    : m_gColor (gObj.m_gColor), m_uSize (gObj.m_uSize), m_eStyle (gObj.m_eStyle)
+    { }
 
-	Line& operator = (Line const& gObj) noexcept
-	{
-		m_gColor = gObj.m_gColor;
-		m_uSize  = gObj.m_uSize;
-		m_eStyle = gObj.m_eStyle;
-		return *this;
-	}
+    Line& operator = (Line const& gObj) noexcept
+    {
+        m_gColor = gObj.m_gColor;
+        m_uSize  = gObj.m_uSize;
+        m_eStyle = gObj.m_eStyle;
+        return *this;
+    }
 
 private:
-	Color  m_gColor;
-	uint	  m_uSize;
-	LineStyle m_eStyle;
+    Color  m_gColor;
+    uint      m_uSize;
+    LineStyle m_eStyle;
 };
 
 } } // Graphics

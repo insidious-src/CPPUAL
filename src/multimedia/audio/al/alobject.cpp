@@ -34,19 +34,19 @@ namespace { // optimize for internal unit usage
 
 inline uint generateObject (ObjectType eType) noexcept
 {
-	uint n = 0;
+    uint n = 0;
 
-	switch (eType)
-	{
-	case ObjectType::Buffer:
-		alGenBuffers (1, &n);
-		break;
-	case ObjectType::Source:
-		alGenSources (1, &n);
-		break;
-	}
+    switch (eType)
+    {
+    case ObjectType::Buffer:
+        alGenBuffers (1, &n);
+        break;
+    case ObjectType::Source:
+        alGenSources (1, &n);
+        break;
+    }
 
-	return n;
+    return n;
 }
 
 } // anonymous
@@ -56,62 +56,62 @@ inline uint generateObject (ObjectType eType) noexcept
 AudioObject::AudioObject (ObjectType eType) noexcept
 : m_uObjId (generateObject (eType)), m_eObjType (eType)
 {
-	if (m_uObjId) ++sm_uALObjCount;
+    if (m_uObjId) ++sm_uALObjCount;
 }
 
 AudioObject::AudioObject (AudioObject const& gObj) noexcept
 : m_uObjId (generateObject (gObj.m_eObjType)), m_eObjType (gObj.m_eObjType)
 {
-	if (m_uObjId) ++sm_uALObjCount;
+    if (m_uObjId) ++sm_uALObjCount;
 }
 
 AudioObject::AudioObject (AudioObject&& gObj) noexcept
 : m_uObjId (gObj.m_uObjId),
   m_eObjType (gObj.m_eObjType)
 {
-	gObj.m_uObjId = 0;
+    gObj.m_uObjId = 0;
 }
 
 AudioObject& AudioObject::operator = (AudioObject&& gObj) noexcept
 {
-	if (this != &gObj)
-	{
-		reset ();
-		m_uObjId   = gObj.m_uObjId;
-		m_eObjType = gObj.m_eObjType;
-		gObj.m_uObjId = 0;
-	}
+    if (this != &gObj)
+    {
+        reset ();
+        m_uObjId   = gObj.m_uObjId;
+        m_eObjType = gObj.m_eObjType;
+        gObj.m_uObjId = 0;
+    }
 
-	return *this;
+    return *this;
 }
 
 AudioObject& AudioObject::operator = (AudioObject const& gObj) noexcept
 {
-	if (this != &gObj and m_eObjType != gObj.m_eObjType)
-	{
-		reset ();
-		m_uObjId   = generateObject (gObj.m_eObjType);
-		m_eObjType = gObj.m_eObjType;
-	}
+    if (this != &gObj and m_eObjType != gObj.m_eObjType)
+    {
+        reset ();
+        m_uObjId   = generateObject (gObj.m_eObjType);
+        m_eObjType = gObj.m_eObjType;
+    }
 
-	return *this;
+    return *this;
 }
 
 void AudioObject::reset () noexcept
 {
-	if (!m_uObjId) return;
+    if (!m_uObjId) return;
 
-	switch (m_eObjType)
-	{
-	case ObjectType::Buffer:
-		alDeleteBuffers (1, &m_uObjId);
-		break;
-	case ObjectType::Source:
-		alDeleteSources (1, &m_uObjId);
-		break;
-	}
+    switch (m_eObjType)
+    {
+    case ObjectType::Buffer:
+        alDeleteBuffers (1, &m_uObjId);
+        break;
+    case ObjectType::Source:
+        alDeleteSources (1, &m_uObjId);
+        break;
+    }
 
-	--sm_uALObjCount;
+    --sm_uALObjCount;
 }
 
 } } } // namespace Audio

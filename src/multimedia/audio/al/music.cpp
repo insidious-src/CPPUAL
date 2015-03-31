@@ -27,23 +27,23 @@ namespace cppual { namespace Audio { namespace AL {
 
 inline void makePlayer (uint uId) noexcept
 {
-	point3f gValue { 0, 0, 0 };
+    point3f gValue { 0, 0, 0 };
 
-	alSourcei (uId, AL::IsRelativeToListener, true);
-	alSourcefv (uId, AL::Position, &gValue.x);
-	//alSourcefv (getObjectId (), AL::Direction, &gValue.x);
+    alSourcei (uId, AL::IsRelativeToListener, true);
+    alSourcefv (uId, AL::Position, &gValue.x);
+    //alSourcefv (getObjectId (), AL::Direction, &gValue.x);
 }
 
 SoundPlayer::SoundPlayer () noexcept
 : SoundSource ()
 {
-	if (isValid ()) makePlayer (id ());
+    if (isValid ()) makePlayer (id ());
 }
 
 SoundPlayer::SoundPlayer (SoundBuffer& gBuffer) noexcept
 : SoundSource (gBuffer)
 {
-	if (isValid ()) makePlayer (id ());
+    if (isValid ()) makePlayer (id ());
 }
 
 } } } // namespace Audio

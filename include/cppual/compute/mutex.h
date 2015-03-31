@@ -37,18 +37,18 @@ template <class T>
 class UniqueLock final
 {
 private:
-	//T& m_gMutex;
+    //T& m_gMutex;
 };
 
 template <class T>
 class SharedLock final
 {
 public:
-	typedef std::atomic_size_t atomic_size;
+    typedef std::atomic_size_t atomic_size;
 
 private:
-	atomic_size m_uLockCount;
-	//T&          m_mutex;
+    atomic_size m_uLockCount;
+    //T&          m_mutex;
 };
 
 // ====================================================
@@ -58,17 +58,17 @@ private:
 class Mutex final : public NonCopyable
 {
 public:
-	typedef std::atomic<Thread::Id> atomic_id;
+    typedef std::atomic<Thread::Id> atomic_id;
 
-	Mutex ();
-	bool tryLock () noexcept;
-	bool tryLockFor (uint millisec);
-	void lock ();
-	void unlock ();
+    Mutex ();
+    bool tryLock () noexcept;
+    bool tryLockFor (uint millisec);
+    void lock ();
+    void unlock ();
 
 private:
-	ConditionVariable m_gCond;
-	atomic_id         m_gOwner;
+    ConditionVariable m_gCond;
+    atomic_id         m_gOwner;
 };
 
 

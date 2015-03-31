@@ -31,8 +31,8 @@ namespace {  namespace Internal { // optimize for internal unit usage
 
 inline shared_display& backend () noexcept
 {
-	static shared_display back;
-	return back;
+    static shared_display back;
+    return back;
 }
 
 } } // anonymous namespace Internal
@@ -41,40 +41,40 @@ inline shared_display& backend () noexcept
 
 IDisplay* IDisplay::instance ()
 {
-	if (Internal::backend () == nullptr) set (nullptr);
-	return Internal::backend ().get ();
+    if (Internal::backend () == nullptr) set (nullptr);
+    return Internal::backend ().get ();
 }
 
 bool IDisplay::hasValidInstance () noexcept
 {
-	return Internal::backend () != nullptr;
+    return Internal::backend () != nullptr;
 }
 
 bool IDisplay::set (cchar* pDevName)
 {
-	static bool bConnected = false;
+    static bool bConnected = false;
 
     if (Platform::Factory::hasValidInstance ())
-	{
+    {
         Internal::backend () = Platform::Factory::instance ()->connectDisplay (pDevName);
 
-		if (Internal::backend () != nullptr and !Internal::backend ()->native ())
-			Internal::backend ().reset ();
-	}
+        if (Internal::backend () != nullptr and !Internal::backend ()->native ())
+            Internal::backend ().reset ();
+    }
 
-	if (!bConnected and Internal::backend () != nullptr) return (bConnected = true);
-	return Internal::backend () != nullptr;
+    if (!bConnected and Internal::backend () != nullptr) return (bConnected = true);
+    return Internal::backend () != nullptr;
 }
 
 IDisplay::pointer IDisplay::connect (cchar* pDevName)
 {
-	if (Internal::backend () != nullptr and
-			Internal::backend ()->name () == pDevName)
-		return Internal::backend ();
+    if (Internal::backend () != nullptr and
+            Internal::backend ()->name () == pDevName)
+        return Internal::backend ();
 
     return Platform::Factory::hasValidInstance () ?
                 std::move (Platform::Factory::instance ()->connectDisplay (pDevName)) :
-				IDisplay::pointer ();
+                IDisplay::pointer ();
 }
 
 } } // namespace Ui

@@ -34,12 +34,12 @@ std::atomic_bool Internal::compositing (true);
 
 void useInternalCompositor (bool bUse) noexcept
 {
-	return Internal::compositing.store (bUse);
+    return Internal::compositing.store (bUse);
 }
 
 bool isUsingInternalCompositor () noexcept
 {
-	return Internal::compositing.load ();
+    return Internal::compositing.load ();
 }
 
 } } // namespace Ui

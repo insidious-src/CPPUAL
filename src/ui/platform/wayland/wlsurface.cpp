@@ -33,62 +33,62 @@ namespace cppual { namespace Ui {
 class WlSurface final : public IWindow
 {
 public:
-	WlSurface () = delete;
-	WlSurface (Rect const&, IWindow*, u32, PixelFormat const&) noexcept;
-	~WlSurface () noexcept;
+    WlSurface () = delete;
+    WlSurface (Rect const&, IWindow*, u32, PixelFormat const&) noexcept;
+    ~WlSurface () noexcept;
 
-	bool isMapped () const noexcept;
-	void setOwner (const_pointer) noexcept;
-	void move (point2i) noexcept;
-	void setGeometry (Rect const&) noexcept;
-	void raise () noexcept;
-	void lower () noexcept;
-	void map () noexcept;
-	void unmap () noexcept;
+    bool isMapped () const noexcept;
+    void setOwner (const_pointer) noexcept;
+    void move (point2i) noexcept;
+    void setGeometry (Rect const&) noexcept;
+    void raise () noexcept;
+    void lower () noexcept;
+    void map () noexcept;
+    void unmap () noexcept;
 
-	IDisplay*   display () const noexcept { return m_pDisplay; }
-	Element     handle () const noexcept { return m_pViewHandle; }
-	PixelFormat format () const noexcept { return m_gFormat; }
-	weak_window owner () const noexcept { return m_pParent; }
-	Rect        geometry () const noexcept { return m_gRect; }
-	u32         screen () const noexcept { return 0; }
+    IDisplay*   display () const noexcept { return m_pDisplay; }
+    Element     handle () const noexcept { return m_pViewHandle; }
+    PixelFormat format () const noexcept { return m_gFormat; }
+    weak_window owner () const noexcept { return m_pParent; }
+    Rect        geometry () const noexcept { return m_gRect; }
+    u32         screen () const noexcept { return 0; }
 
-	WindowFlags flags () const { return WindowFlags (); }
-	void setFlags (WindowFlags) { }
+    WindowFlags flags () const { return WindowFlags (); }
+    void setFlags (WindowFlags) { }
 
-	string title () const { return string (); }
-	void setTitle (string const&) { }
-	void setShaded (bool) { }
-	bool isShaded () { return false; }
-	void setModal (bool) { }
-	bool isModal () { return false; }
-	void setFullscreen (bool) { }
-	bool isFullscreen () { return false; }
-	void setMaximized (bool) { }
-	bool isMaximized () { return false; }
-	void setMinimized (bool) { }
-	bool isMinimized () { return false; }
-	void setVisibleInTaskbar (bool) { }
-	bool isVisibleInTaskbar () { return false; }
-	void setVisibleInPager (bool) { }
-	bool isVisibleInPager () { return false; }
-	void flash (uint) { }
+    string title () const { return string (); }
+    void setTitle (string const&) { }
+    void setShaded (bool) { }
+    bool isShaded () { return false; }
+    void setModal (bool) { }
+    bool isModal () { return false; }
+    void setFullscreen (bool) { }
+    bool isFullscreen () { return false; }
+    void setMaximized (bool) { }
+    bool isMaximized () { return false; }
+    void setMinimized (bool) { }
+    bool isMinimized () { return false; }
+    void setVisibleInTaskbar (bool) { }
+    bool isVisibleInTaskbar () { return false; }
+    void setVisibleInPager (bool) { }
+    bool isVisibleInPager () { return false; }
+    void flash (uint) { }
 
 private:
-	PixelFormat       m_gFormat;
-	shared_window m_pParent;
-	Rect              m_gRect;
-	IDisplay*      m_pDisplay;
-	wl_surface*       m_pViewHandle;
-	u32               m_uScreen;
+    PixelFormat       m_gFormat;
+    shared_window m_pParent;
+    Rect              m_gRect;
+    IDisplay*      m_pDisplay;
+    wl_surface*       m_pViewHandle;
+    u32               m_uScreen;
 };
 
 // ====================================================
 
 WlSurface::WlSurface (Rect const&        gRect,
-					  IWindow*           pParent,
-					  u32                nScreen,
-					  PixelFormat const& gFormat) noexcept
+                      IWindow*           pParent,
+                      u32                nScreen,
+                      PixelFormat const& gFormat) noexcept
 : m_gFormat     (gFormat),
   m_pParent     (pParent),
   m_gRect       (gRect),

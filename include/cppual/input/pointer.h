@@ -35,42 +35,42 @@ struct Pointer;
 class PointerEvent
 {
 public:
-	typedef u16 size_type;
+    typedef u16 size_type;
 
-	enum class Type : unsigned char
-	{
-		Move,
-		Press,
-		Release,
-		Scroll
-	};
+    enum class Type : unsigned char
+    {
+        Move,
+        Press,
+        Release,
+        Scroll
+    };
 
-	struct PointerData
-	{
-		size_type id;
-		point2i   pos;
-	};
+    struct PointerData
+    {
+        size_type id;
+        point2i   pos;
+    };
 
-	struct ButtonData
-	{
-		size_type id;
-		point2i   pos;
-		u8        button;
-	};
+    struct ButtonData
+    {
+        size_type id;
+        point2i   pos;
+        u8        button;
+    };
 
-	struct WheelData
-	{
-		size_type id;
-		point2i   pos;
-		int32     delta;
-	};
+    struct WheelData
+    {
+        size_type id;
+        point2i   pos;
+        int32     delta;
+    };
 
-	union Data
-	{
-		PointerData pointer;
-		ButtonData  button;
-		WheelData   scroll;
-	};
+    union Data
+    {
+        PointerData pointer;
+        ButtonData  button;
+        WheelData   scroll;
+    };
 
 private:
 };
@@ -81,20 +81,20 @@ private:
 class TouchEvent
 {
 public:
-	typedef u16 size_type;
+    typedef u16 size_type;
 
-	enum class Type : unsigned char
-	{
-		Move,
-		Press,
-		Release
-	};
+    enum class Type : unsigned char
+    {
+        Move,
+        Press,
+        Release
+    };
 
-	struct TouchData
-	{
-		size_type id;
-		point2i   pos;
-	};
+    struct TouchData
+    {
+        size_type id;
+        point2i   pos;
+    };
 
 private:
 };
@@ -104,9 +104,9 @@ private:
 class PointerQueue : NonConstructible
 {
 public:
-	typedef PointerEvent event_type;
+    typedef PointerEvent event_type;
 
-	static bool pop_front (event_type& next_event, bool wait = false) noexcept;
+    static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
 
 // =========================================================
@@ -114,37 +114,37 @@ public:
 class TouchQueue : NonConstructible
 {
 public:
-	typedef TouchEvent event_type;
+    typedef TouchEvent event_type;
 
-	static bool pop_front (event_type& next_event, bool wait = false) noexcept;
+    static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
 
 // =========================================================
 
 struct Pointer
 {
-	typedef PointerQueue queue_type;
+    typedef PointerQueue queue_type;
 
-	enum
-	{
-		ButtonCount = 7
-	};
+    enum
+    {
+        ButtonCount = 7
+    };
 
-	enum Button
-	{
-		Left     = 1 << 0,
-		Right    = 1 << 1,
-		Middle   = 1 << 2,
-		XButton1 = 1 << 3,
-		XButton2 = 1 << 4,
-		XButton3 = 1 << 5,
-		XButton4 = 1 << 6
-	};
+    enum Button
+    {
+        Left     = 1 << 0,
+        Right    = 1 << 1,
+        Middle   = 1 << 2,
+        XButton1 = 1 << 3,
+        XButton2 = 1 << 4,
+        XButton3 = 1 << 5,
+        XButton4 = 1 << 6
+    };
 
-	static point2i position ();
-	static void    setPosition (point2i pos);
-	static bool    isButtonPressed (u8 btn);
-	static bool    isConnected () noexcept;
+    static point2i position ();
+    static void    setPosition (point2i pos);
+    static bool    isButtonPressed (u8 btn);
+    static bool    isConnected () noexcept;
 };
 
 } } // namespace Input

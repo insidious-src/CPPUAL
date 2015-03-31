@@ -29,23 +29,23 @@ template <typename> class Disposable { };
 
 enum class ResourceType : unsigned char
 {
-	Null = 0,
-	Device,
-	Image,
-	Font,
-	Macro,
-	Texture,
-	Shader,
-	Program,
-	Query,
+    Null = 0,
+    Device,
+    Image,
+    Font,
+    Macro,
+    Texture,
+    Shader,
+    Program,
+    Query,
     Window,
-	Surface,
-	Buffer,
-	Pixmap,
-	Colormap,
-	Cursor,
-	GlyphCursor,
-	Context
+    Surface,
+    Buffer,
+    Pixmap,
+    Colormap,
+    Cursor,
+    GlyphCursor,
+    Context
 };
 
 // =========================================================
@@ -54,11 +54,11 @@ template <class Controller, class ID>
 class Resource
 {
 public:
-	typedef ID         value_type;
-	typedef Controller controller;
+    typedef ID         value_type;
+    typedef Controller controller;
 
-	Resource (Resource const&) = delete;
-	Resource& operator = (Resource const&) = delete;
+    Resource (Resource const&) = delete;
+    Resource& operator = (Resource const&) = delete;
     ~Resource () { }
 
     controller   connection () const noexcept { return m_pCon; }
@@ -75,17 +75,17 @@ public:
     Resource (Controller pCon, value_type id, ResourceType eType) noexcept
     : m_pCon     (pCon),
       m_id       (id),
-	  m_eResType (eType)
-	{ }
+      m_eResType (eType)
+    { }
 
-	template <class Controller_, class ID_>
+    template <class Controller_, class ID_>
     friend constexpr bool operator == (Resource<Controller_, ID_> const&,
                                        Resource<Controller_, ID_> const&);
 
 private:
-	controller   m_pCon;
-	value_type   m_id;
-	ResourceType m_eResType;
+    controller   m_pCon;
+    value_type   m_id;
+    ResourceType m_eResType;
 };
 
 // =========================================================
@@ -94,11 +94,11 @@ template <class ID>
 class Resource < void, ID>
 {
 public:
-	typedef ID   value_type;
-	typedef void controller;
+    typedef ID   value_type;
+    typedef void controller;
 
-	Resource (Resource const&) = delete;
-	Resource& operator = (Resource const&) = delete;
+    Resource (Resource const&) = delete;
+    Resource& operator = (Resource const&) = delete;
     ~Resource () { }
 
     value_type   id      () const noexcept { return m_id;       }
@@ -112,16 +112,16 @@ public:
 
     Resource (value_type id, ResourceType eType) noexcept
     : m_id       (id),
-	  m_eResType (eType)
-	{ }
+      m_eResType (eType)
+    { }
 
     template <class ID_>
     friend constexpr bool operator == (Resource<void, ID_> const&,
                                        Resource<void, ID_> const&);
 
 private:
-	value_type   m_id;
-	ResourceType m_eResType;
+    value_type   m_id;
+    ResourceType m_eResType;
 };
 
 // =========================================================
@@ -138,15 +138,15 @@ constexpr bool operator != (Resource<void, ID> const& gObj1,
 
 template <class Controller, class ID>
 constexpr bool operator == (Resource<Controller, ID> const& gObj1,
-							Resource<Controller, ID> const& gObj2)
+                            Resource<Controller, ID> const& gObj2)
 {
-	return gObj1.m_pCon == gObj2.m_pCon and gObj1.m_id == gObj2.m_id and
-			gObj1.m_eResType == gObj2.m_eResType;
+    return gObj1.m_pCon == gObj2.m_pCon and gObj1.m_id == gObj2.m_id and
+            gObj1.m_eResType == gObj2.m_eResType;
 }
 
 template <class Controller, class ID>
 constexpr bool operator != (Resource<Controller, ID> const& gObj1,
-							Resource<Controller, ID> const& gObj2)
+                            Resource<Controller, ID> const& gObj2)
 { return !(gObj1 == gObj2); }
 
 } // cppual

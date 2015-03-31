@@ -29,48 +29,48 @@ namespace cppual { namespace Ui {
 class Progress : public SkinnableView
 {
 public:
-	void setValue (int);
-	void setStep (int);
-	void setRange (int min, int max);
-	void setMarquee (bool);
-	void showValue (bool);
-	void increment ();
-	void decrement ();
+    void setValue (int);
+    void setStep (int);
+    void setRange (int min, int max);
+    void setMarquee (bool);
+    void showValue (bool);
+    void increment ();
+    void decrement ();
 
-	bool create (View*     parent,
-				 Rect const& rect,
-				 int         value =   0,
-				 int         min   =   0,
-				 int         max   = 100,
-				 int         step  =   1);
+    bool create (View*     parent,
+                 Rect const& rect,
+                 int         value =   0,
+                 int         min   =   0,
+                 int         max   = 100,
+                 int         step  =   1);
 
-	enum ProgressFlag
-	{
-		Marquee   = 1 << 0,
-		ShowValue = 1 << 1
-	};
+    enum ProgressFlag
+    {
+        Marquee   = 1 << 0,
+        ShowValue = 1 << 1
+    };
 
-	typedef FlagSet<ProgressFlag, u8> ProgressFlags;
+    typedef FlagSet<ProgressFlag, u8> ProgressFlags;
 
-	inline int getValue () const noexcept { return m_nValue; }
-	inline int getMinValue () const noexcept { return m_nMin; }
-	inline int getMaxValue () const noexcept { return m_nMax; }
-	inline int getStep () const noexcept { return m_nStep; }
+    inline int getValue () const noexcept { return m_nValue; }
+    inline int getMinValue () const noexcept { return m_nMin; }
+    inline int getMaxValue () const noexcept { return m_nMax; }
+    inline int getStep () const noexcept { return m_nStep; }
 
-	inline bool isMarquee () const noexcept
-	{ return m_eProgressFlags.hasFlag (Progress::Marquee); }
+    inline bool isMarquee () const noexcept
+    { return m_eProgressFlags.hasFlag (Progress::Marquee); }
 
-	inline bool isValueVisible () const noexcept
-	{ return m_eProgressFlags.hasFlag (Progress::ShowValue); }
+    inline bool isValueVisible () const noexcept
+    { return m_eProgressFlags.hasFlag (Progress::ShowValue); }
 
-	Signal<void(int)> signalValueChanged;
+    Signal<void(int)> signalValueChanged;
 
 private:
-	int           m_nValue, m_nMin, m_nMax, m_nStep;
-	ProgressFlags m_eProgressFlags;
+    int           m_nValue, m_nMin, m_nMax, m_nStep;
+    ProgressFlags m_eProgressFlags;
 
-	void onPaint ();
-	void onSize (Rect const&);
+    void onPaint ();
+    void onSize (Rect const&);
 };
 
 } } // Ui

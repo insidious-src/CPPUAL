@@ -28,22 +28,22 @@ namespace cppual { namespace Input {
 
 bool Keyboard::isKeyPressed (int)
 {
-	return false;
+    return false;
 }
 
 bool Keyboard::isLockActive (Lock)
 {
-	return false;
+    return false;
 }
 
 bool Keyboard::isConnected () noexcept
 {
-	return true;
+    return true;
 }
 
 bool KeyQueue::pop_front (event_type&, bool) noexcept
 {
-	return false;
+    return false;
 }
 
 } } // namespace Input

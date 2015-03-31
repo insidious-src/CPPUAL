@@ -29,7 +29,7 @@ namespace cppual { namespace Network {
 
 struct TcpClient
 {
-	static bool connect (TcpStream&, Address const&, u16 port) noexcept;
+    static bool connect (TcpStream&, Address const&, u16 port) noexcept;
 };
 
 } } // namespace Network

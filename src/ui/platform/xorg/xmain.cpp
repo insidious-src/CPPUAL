@@ -31,24 +31,24 @@ namespace cppual { namespace Ui { namespace Platform {
 
 struct XFactory final : Factory
 {
-	shared_queue   createQueueInstance ();
-	shared_display connectDisplay      (cchar*);
-	shared_window  createWindow        (Rect const&, u32, IDisplay*);
+    shared_queue   createQueueInstance ();
+    shared_display connectDisplay      (cchar*);
+    shared_window  createWindow        (Rect const&, u32, IDisplay*);
 };
 
 shared_display XFactory::connectDisplay (cchar* pDeviceName)
 {
-	return shared_display (new XDisplay (pDeviceName? pDeviceName : getenv ("DISPLAY")));
+    return shared_display (new XDisplay (pDeviceName? pDeviceName : getenv ("DISPLAY")));
 }
 
 shared_queue XFactory::createQueueInstance ()
 {
-	return shared_queue (new XQueue);
+    return shared_queue (new XQueue);
 }
 
 shared_window XFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
 {
-	return shared_window (new XWindow (gRect, nScreen, pDisplay));
+    return shared_window (new XWindow (gRect, nScreen, pDisplay));
 }
 
 } } } // namespace Platform
@@ -60,8 +60,8 @@ using cppual::Ui::Platform::shared_manager;
 
 extern "C" int module_main (shared_manager& instance)
 {
-	instance.reset (new XFactory);
-	return instance == nullptr;
+    instance.reset (new XFactory);
+    return instance == nullptr;
 }
 
 #endif // OS_GNU_LINUX or OS_BSD

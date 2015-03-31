@@ -22,9 +22,9 @@
 #include <cppual/network/transport/tcpclient.h>
 
 #ifdef OS_STD_UNIX
-//#	include <netinet/in.h>
-#	include <netdb.h>
-#	include <arpa/inet.h>
+//#    include <netinet/in.h>
+#    include <netdb.h>
+#    include <arpa/inet.h>
 #elif defined OS_WINDOWS
 #   include <windows.h>
 #endif
@@ -34,38 +34,38 @@ namespace cppual { namespace Network {
 bool resolveHostName (cchar* hostname, in_addr* addr) noexcept
 {
 #   ifdef OS_STD_UNIX
-	addrinfo* res;
+    addrinfo* res;
 
-	if (::getaddrinfo (hostname, nullptr, nullptr, &res) == 0)
-	{
-		*addr = reinterpret_cast<sockaddr_in*> (res->ai_addr)->sin_addr;
-		::freeaddrinfo (res);
-		return true;
-	}
+    if (::getaddrinfo (hostname, nullptr, nullptr, &res) == 0)
+    {
+        *addr = reinterpret_cast<sockaddr_in*> (res->ai_addr)->sin_addr;
+        ::freeaddrinfo (res);
+        return true;
+    }
 #   endif
 
-	return false;
+    return false;
 }
 
 bool TcpClient::connect (TcpStream& gStream, Address const& server, u16 port) noexcept
 {
-	sockaddr_in gAddr;
+    sockaddr_in gAddr;
 
-	gAddr.sin_family = AF_INET;
-	gAddr.sin_port   = htons (port);
+    gAddr.sin_family = AF_INET;
+    gAddr.sin_port   = htons (port);
 
-	if (resolveHostName (server.toString ().c_str (), &gAddr.sin_addr))
-	{
+    if (resolveHostName (server.toString ().c_str (), &gAddr.sin_addr))
+    {
 #       ifdef OS_STD_UNIX
-		::inet_pton (PF_INET, server.toString ().c_str (), &gAddr.sin_addr);
+        ::inet_pton (PF_INET, server.toString ().c_str (), &gAddr.sin_addr);
 #       endif
-	}
+    }
 
-	if (gStream.isValid ())
-		::connect (gStream.id (),
-				   reinterpret_cast<sockaddr*> (&gAddr),
-				   sizeof (sockaddr_in));
-	return true;
+    if (gStream.isValid ())
+        ::connect (gStream.id (),
+                   reinterpret_cast<sockaddr*> (&gAddr),
+                   sizeof (sockaddr_in));
+    return true;
 }
 
 } } // namespace Network

@@ -36,37 +36,37 @@ class SkinnableView;
 
 enum class SkinElement : char
 {
-	Toolbar,
-	Menu,
-	Button,
-	Radio,
-	CheckBox,
-	GroupBox,
-	Combo,
-	List,
-	Tree,
-	Progress,
-	TabView,
-	Slider,
-	ScrollBar,
-	Tooltip,
-	Switch,
-	Roller,
-	Separator,
-	Window
+    Toolbar,
+    Menu,
+    Button,
+    Radio,
+    CheckBox,
+    GroupBox,
+    Combo,
+    List,
+    Tree,
+    Progress,
+    TabView,
+    Slider,
+    ScrollBar,
+    Tooltip,
+    Switch,
+    Roller,
+    Separator,
+    Window
 };
 
 enum class IconGroup : unsigned char
 {
-	Actions,
-	Animations,
-	Apps,
-	Categories,
-	Devices,
-	Emblems,
-	MIMETypes,
-	Places,
-	States
+    Actions,
+    Animations,
+    Apps,
+    Categories,
+    Devices,
+    Emblems,
+    MIMETypes,
+    Places,
+    States
 };
 
 // Static - always stays the same; Dynamic - changes its properties on specific events
@@ -77,24 +77,24 @@ enum class SkinType : bool { Static, Dynamic };
 class ISkin : public NonCopyableVirtual
 {
 public:
-	typedef Graphics::Font::Format font_format;
-	typedef Graphics::Image        image_type;
+    typedef Graphics::Font::Format font_format;
+    typedef Graphics::Image        image_type;
 
-	virtual image_type* getIcon (IconGroup     group,
-								 string const& icon_name,
-								 Rect const&   size) = 0;
+    virtual image_type* getIcon (IconGroup     group,
+                                 string const& icon_name,
+                                 Rect const&   size) = 0;
 
-	virtual image_type* getImage (SkinElement element,
-								  int         image_id) = 0;
+    virtual image_type* getImage (SkinElement element,
+                                  int         image_id) = 0;
 
-	virtual font_format  getFont  (SkinElement element, int font_id)  = 0;
-	virtual Color     getColor (SkinElement element, int color_id) = 0;
-	virtual int		     getValue (SkinElement element, int value_id) = 0;
-	virtual SkinType     getType () const = 0;
-	virtual bool	     reload () = 0;
+    virtual font_format  getFont  (SkinElement element, int font_id)  = 0;
+    virtual Color     getColor (SkinElement element, int color_id) = 0;
+    virtual int             getValue (SkinElement element, int value_id) = 0;
+    virtual SkinType     getType () const = 0;
+    virtual bool         reload () = 0;
 
-	static ISkin* getDefault () noexcept;
-	static bool   setDefault (ISkin* skin) noexcept;
+    static ISkin* getDefault () noexcept;
+    static bool   setDefault (ISkin* skin) noexcept;
 
 };
 
@@ -103,11 +103,11 @@ public:
 class SkinEngine final : public NonCopyable
 {
 public:
-	SkinEngine (SkinnableView*) noexcept;
-	inline bool isValid () const noexcept { return m_pView; }
+    SkinEngine (SkinnableView*) noexcept;
+    inline bool isValid () const noexcept { return m_pView; }
 
 private:
-	SkinnableView* m_pView;
+    SkinnableView* m_pView;
 };
 
 // =========================================================
@@ -115,35 +115,35 @@ private:
 class SkinnableView : public View
 {
 public:
-	typedef typename Signal<void(PaintEvent)>::slot_type skin_conn;
+    typedef typename Signal<void(PaintEvent)>::slot_type skin_conn;
 
-	SkinnableView ();
-	SkinnableView (SkinnableView&&);
-	SkinnableView (SkinnableView const&);
-	SkinnableView& operator = (SkinnableView&&);
-	SkinnableView& operator = (SkinnableView const&);
+    SkinnableView ();
+    SkinnableView (SkinnableView&&);
+    SkinnableView (SkinnableView const&);
+    SkinnableView& operator = (SkinnableView&&);
+    SkinnableView& operator = (SkinnableView const&);
 
-	SkinnableView (View* pParent, Rect const& gRect, u32 uScreen = 0)
-	: View (pParent, gRect, uScreen),
-	  m_gSkinEngine (this),
-	  m_pSkin ()
-	{ }
+    SkinnableView (View* pParent, Rect const& gRect, u32 uScreen = 0)
+    : View (pParent, gRect, uScreen),
+      m_gSkinEngine (this),
+      m_pSkin ()
+    { }
 
-	void setSkin (ISkin*) noexcept;
+    void setSkin (ISkin*) noexcept;
 
-	inline ISkin* getSkin () noexcept
-	{ return m_pSkin; }
+    inline ISkin* getSkin () noexcept
+    { return m_pSkin; }
 
 protected:
-	SkinEngine m_gSkinEngine;
-	ISkin*     m_pSkin;
+    SkinEngine m_gSkinEngine;
+    ISkin*     m_pSkin;
 
-	virtual void onSkinChange () { }
-	virtual bool onCreatePost () { return true; }
+    virtual void onSkinChange () { }
+    virtual bool onCreatePost () { return true; }
 
 private:
-	void onCreate ();
-	void changeSkin ();
+    void onCreate ();
+    void changeSkin ();
 };
 
 } } // namespace Ui

@@ -29,8 +29,8 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 inline const shared_queue& queue ()
 {
-	static const shared_queue instance (Platform::Factory::instance ()->createQueueInstance ());
-	return instance;
+    static const shared_queue instance (Platform::Factory::instance ()->createQueueInstance ());
+    return instance;
 }
 
 } } // anonymous namespace Internal
@@ -39,12 +39,12 @@ inline const shared_queue& queue ()
 
 IDisplayQueue* IDisplayQueue::instance ()
 {
-	return Internal::queue ().get ();
+    return Internal::queue ().get ();
 }
 
 bool IDisplayQueue::hasValidInstance () noexcept
 {
-	return Internal::queue () != nullptr;
+    return Internal::queue () != nullptr;
 }
 
 } } // namespace Input

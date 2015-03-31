@@ -31,26 +31,26 @@ namespace cppual { namespace Graphics {
 class Label2D final : public IDrawable2D, public ITransformable2D
 {
 public:
-	using Styles = Font::Styles;
+    using Styles = Font::Styles;
 
-	Label2D ();
-	Label2D (string  const&, Font&);
-	Label2D (Label2D const&);
-	Label2D (Label2D&&) noexcept;
-	Label2D& operator = (Label2D const&);
-	Label2D& operator = (Label2D&&) noexcept;
-	void draw (Transform2D const&);
+    Label2D ();
+    Label2D (string  const&, Font&);
+    Label2D (Label2D const&);
+    Label2D (Label2D&&) noexcept;
+    Label2D& operator = (Label2D const&);
+    Label2D& operator = (Label2D&&) noexcept;
+    void draw (Transform2D const&);
 
-	DeviceType type     ()              const noexcept { return DeviceType::GL; }
-	string     text     ()              const noexcept { return m_gText;        }
-	Styles     style    ()              const noexcept { return m_gStyle;       }
-	void       setStyle (Styles gStyle)       noexcept { m_gStyle = gStyle;     }
-	void       setText  (string const& gText) noexcept { m_gText  = gText;      }
+    DeviceType type     ()              const noexcept { return DeviceType::GL; }
+    string     text     ()              const noexcept { return m_gText;        }
+    Styles     style    ()              const noexcept { return m_gStyle;       }
+    void       setStyle (Styles gStyle)       noexcept { m_gStyle = gStyle;     }
+    void       setText  (string const& gText) noexcept { m_gText  = gText;      }
 
 private:
-	Font*  m_pFont;
-	string m_gText;
-	Styles m_gStyle;
+    Font*  m_pFont;
+    string m_gText;
+    Styles m_gStyle;
 };
 
 // =========================================================
@@ -58,27 +58,27 @@ private:
 class Label3D final : public IDrawable3D, public ITransformable3D
 {
 public:
-	using Styles = Font::Styles;
+    using Styles = Font::Styles;
 
-	Label3D ();
-	Label3D (string const&, Font const& = Font ());
-	Label3D (string&&, Font const& = Font ()) noexcept;
-	Label3D (Label3D const&);
-	Label3D (Label3D&&) noexcept;
-	Label3D& operator = (Label3D const&);
-	Label3D& operator = (Label3D&&) noexcept;
-	void draw (Transform3D const&);
+    Label3D ();
+    Label3D (string const&, Font const& = Font ());
+    Label3D (string&&, Font const& = Font ()) noexcept;
+    Label3D (Label3D const&);
+    Label3D (Label3D&&) noexcept;
+    Label3D& operator = (Label3D const&);
+    Label3D& operator = (Label3D&&) noexcept;
+    void draw (Transform3D const&);
 
-	DeviceType type     ()              const noexcept { return DeviceType::GL; }
-	string     text     ()              const noexcept { return m_gText;        }
-	Styles     style    ()              const noexcept { return m_gStyle;       }
-	void       setStyle (Styles gStyle)       noexcept { m_gStyle = gStyle;     }
-	void       setText  (string const& gText) noexcept { m_gText  = gText;      }
+    DeviceType type     ()              const noexcept { return DeviceType::GL; }
+    string     text     ()              const noexcept { return m_gText;        }
+    Styles     style    ()              const noexcept { return m_gStyle;       }
+    void       setStyle (Styles gStyle)       noexcept { m_gStyle = gStyle;     }
+    void       setText  (string const& gText) noexcept { m_gText  = gText;      }
 
 private:
-	Font*  m_pFont;
-	string m_gText;
-	Styles m_gStyle;
+    Font*  m_pFont;
+    string m_gText;
+    Styles m_gStyle;
 };
 
 } } // Graphics

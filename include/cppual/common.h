@@ -27,22 +27,22 @@ namespace cppual {
 
 enum class AccessMode : unsigned char
 {
-	Read,
-	Write,
-	ReadWrite
+    Read,
+    Write,
+    ReadWrite
 };
 
 enum class LoadFrom : unsigned char
 {
-	File,
-	Memory,
-	Binary
+    File,
+    Memory,
+    Binary
 };
 
 enum class Orientation : unsigned char
 {
-	Horizontal,
-	Vertical
+    Horizontal,
+    Vertical
 };
 
 } // cppual

@@ -31,28 +31,28 @@ namespace cppual { namespace Compute { namespace CL {
 
 enum DeviceType
 {
-	Default     = CL_DEVICE_TYPE_DEFAULT,
-	Any         = CL_DEVICE_TYPE_ALL,
-	CPU         = CL_DEVICE_TYPE_CPU,
-	GPU         = CL_DEVICE_TYPE_GPU,
-	Accelerator = CL_DEVICE_TYPE_ACCELERATOR,
-	Custom      = CL_DEVICE_TYPE_CUSTOM
+    Default     = CL_DEVICE_TYPE_DEFAULT,
+    Any         = CL_DEVICE_TYPE_ALL,
+    CPU         = CL_DEVICE_TYPE_CPU,
+    GPU         = CL_DEVICE_TYPE_GPU,
+    Accelerator = CL_DEVICE_TYPE_ACCELERATOR,
+    Custom      = CL_DEVICE_TYPE_CUSTOM
 };
 
 enum
 {
-	MaxUnits      = CL_DEVICE_MAX_COMPUTE_UNITS,
-	MaxDimensions = CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
-	MaxGroupSize  = CL_DEVICE_MAX_WORK_GROUP_SIZE,
-	MaxItemCount  = CL_DEVICE_MAX_WORK_ITEM_SIZES,
-	GlobalMemSize = CL_DEVICE_GLOBAL_MEM_SIZE,
-	CacheSize     = CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
-	CacheLineSize = CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
-	ConstMemSize  = CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
-	LocalMemSize  = CL_DEVICE_LOCAL_MEM_SIZE,
+    MaxUnits      = CL_DEVICE_MAX_COMPUTE_UNITS,
+    MaxDimensions = CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
+    MaxGroupSize  = CL_DEVICE_MAX_WORK_GROUP_SIZE,
+    MaxItemCount  = CL_DEVICE_MAX_WORK_ITEM_SIZES,
+    GlobalMemSize = CL_DEVICE_GLOBAL_MEM_SIZE,
+    CacheSize     = CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
+    CacheLineSize = CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
+    ConstMemSize  = CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE,
+    LocalMemSize  = CL_DEVICE_LOCAL_MEM_SIZE,
 
-	PlatformExtensions = CL_PLATFORM_EXTENSIONS,
-	DeviceExtensions   = CL_DEVICE_EXTENSIONS
+    PlatformExtensions = CL_PLATFORM_EXTENSIONS,
+    DeviceExtensions   = CL_DEVICE_EXTENSIONS
 };
 
 typedef cl_uint                                size_type;

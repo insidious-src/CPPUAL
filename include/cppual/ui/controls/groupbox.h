@@ -31,10 +31,10 @@ namespace cppual { namespace Ui {
 class GroupBox : public View
 {
 public:
-	void showLabel (bool);
-	void setHeaderOnly (bool);
-	bool isLabelVisible () const;
-	bool isHeaderOnly () const;
+    void showLabel (bool);
+    void setHeaderOnly (bool);
+    bool isLabelVisible () const;
+    bool isHeaderOnly () const;
 };
 
 } } // Ui

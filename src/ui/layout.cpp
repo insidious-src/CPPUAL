@@ -41,12 +41,12 @@ void Layout::setViewMetrics (View*, LayoutMetrics const&)
 
 bool Layout::addView (View*, LayoutMetrics const&)
 {
-	return false;
+    return false;
 }
 
 bool Layout::removeView (View*)
 {
-	return false;
+    return false;
 }
 
 } } // namespace Ui

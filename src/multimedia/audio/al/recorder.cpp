@@ -29,33 +29,33 @@ namespace cppual { namespace Audio { namespace AL {
 
 bool SoundStreamRecorder::record () noexcept
 {
-	if (m_gDevice.isValid () and !m_bIsRecording)
-	{
-		alcCaptureStart (static_cast<ALCdevice*> (m_gDevice.object ()));
-		return m_bIsRecording = true;
-	}
+    if (m_gDevice.isValid () and !m_bIsRecording)
+    {
+        alcCaptureStart (static_cast<ALCdevice*> (m_gDevice.object ()));
+        return m_bIsRecording = true;
+    }
 
-	return false;
+    return false;
 }
 
 void SoundStreamRecorder::stop () noexcept
 {
-	if (m_bIsRecording)
-	{
-		alcCaptureStop (static_cast<ALCdevice*> (m_gDevice.object ()));
-		m_bIsRecording = false;
-	}
+    if (m_bIsRecording)
+    {
+        alcCaptureStop (static_cast<ALCdevice*> (m_gDevice.object ()));
+        m_bIsRecording = false;
+    }
 }
 
 void SoundStreamRecorder::setSamples (int nSamples) noexcept
 {
-	if (m_gDevice.isValid ())
-	{
-		alcCaptureSamples (static_cast<ALCdevice*> (m_gDevice.object ()),
-						   nullptr,
-						   nSamples);
-		m_nSamples = nSamples;
-	}
+    if (m_gDevice.isValid ())
+    {
+        alcCaptureSamples (static_cast<ALCdevice*> (m_gDevice.object ()),
+                           nullptr,
+                           nSamples);
+        m_nSamples = nSamples;
+    }
 }
 
 SoundStreamRecorder::SoundStreamRecorder (CaptureDevice& gDevice) noexcept
@@ -66,8 +66,8 @@ SoundStreamRecorder::SoundStreamRecorder (CaptureDevice& gDevice) noexcept
 
 bool SoundStreamRecorder::isAvailable () noexcept
 {
-	return (AudioDevice::isExtensionSupported ("ALC_EXT_CAPTURE") or
-			AudioDevice::isExtensionSupported ("ALC_EXT_capture"));
+    return (AudioDevice::isExtensionSupported ("ALC_EXT_CAPTURE") or
+            AudioDevice::isExtensionSupported ("ALC_EXT_capture"));
 }
 
 } } } // namespace Audio

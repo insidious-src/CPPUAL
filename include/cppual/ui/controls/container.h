@@ -29,33 +29,33 @@ namespace cppual { namespace Ui {
 class CContainer : public View
 {
 protected:
-	uint m_uBorderSize;
+    uint m_uBorderSize;
 
 public:
-	void SetBorderSize (uint);
-	void SetPadding (uint);
-	bool Create (View*, const Rect&, uint = 0U);
+    void SetBorderSize (uint);
+    void SetPadding (uint);
+    bool Create (View*, const Rect&, uint = 0U);
 
-	uint GetBorderSize () const { return m_uBorderSize; }
-	uint GetPadding () const { return 0U; }
+    uint GetBorderSize () const { return m_uBorderSize; }
+    uint GetPadding () const { return 0U; }
 };
 
 class CAdvTable : public CContainer
 {
 protected:
-	uint m_uNumColumns, m_uNumRows;
-	Layout m_cTableLayout;
+    uint m_uNumColumns, m_uNumRows;
+    Layout m_cTableLayout;
 
 public:
-	void SetNumColumns (uint);
-	void SetNumRows (uint);
-	void SetItemRect (const Rect&);
-	bool AddView (View*, uint, uint, uint = 1U, uint = 1U);
-	bool RemoveView (View*);
-	bool Create (View*, const Rect&, uint, uint, uint = 0U);
+    void SetNumColumns (uint);
+    void SetNumRows (uint);
+    void SetItemRect (const Rect&);
+    bool AddView (View*, uint, uint, uint = 1U, uint = 1U);
+    bool RemoveView (View*);
+    bool Create (View*, const Rect&, uint, uint, uint = 0U);
 
-	uint GetNumColumns () const { return m_uNumColumns; }
-	uint GetNumRows () const { return m_uNumRows; }
+    uint GetNumColumns () const { return m_uNumColumns; }
+    uint GetNumRows () const { return m_uNumRows; }
 };
 
 } } // Ui

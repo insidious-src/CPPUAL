@@ -32,26 +32,26 @@ namespace cppual { namespace Network {
 class TcpStream final : public TransportSocket
 {
 public:
-	typedef std::size_t size_type;
-	typedef ssize_t     stream_size;
+    typedef std::size_t size_type;
+    typedef ssize_t     stream_size;
 
-	TcpStream& operator << (Packet const&) noexcept; // send
-	TcpStream& operator >> (Packet&) noexcept;       // receive
-	TcpStream  () noexcept;
-	~TcpStream () noexcept;
+    TcpStream& operator << (Packet const&) noexcept; // send
+    TcpStream& operator >> (Packet&) noexcept;       // receive
+    TcpStream  () noexcept;
+    ~TcpStream () noexcept;
 
-	void disconnect () noexcept;
+    void disconnect () noexcept;
 
-	Address getPeerIp   () const noexcept { return m_gPeerAddr; }
-	u16     getPeerPort () const noexcept { return m_nPeerPort; }
+    Address getPeerIp   () const noexcept { return m_gPeerAddr; }
+    u16     getPeerPort () const noexcept { return m_nPeerPort; }
 
 private:
-	Address m_gPeerAddr;
-	u16     m_nPeerPort;
-	bool    m_bIsConnected;
+    Address m_gPeerAddr;
+    u16     m_nPeerPort;
+    bool    m_bIsConnected;
 
-	TcpStream (TcpStream&& stream) noexcept;
-	TcpStream (Address const& address, u16 port) noexcept;
+    TcpStream (TcpStream&& stream) noexcept;
+    TcpStream (Address const& address, u16 port) noexcept;
 };
 
 } } // namespace Network

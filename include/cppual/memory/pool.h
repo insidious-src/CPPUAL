@@ -33,65 +33,65 @@ namespace cppual { namespace Memory {
 class PoolAllocator final : public Allocator, NonCopyable
 {
 public:
-	void* allocate   (size_type blk_count, align_type align) noexcept override;
-	void  deallocate (void* p, size_type size) override;
+    void* allocate   (size_type blk_count, align_type align) noexcept override;
+    void  deallocate (void* p, size_type size) override;
 
-	// local memory
-	PoolAllocator (size_type  blk_count,
-				   size_type  blk_size,
-				   align_type blk_align);
+    // local memory
+    PoolAllocator (size_type  blk_count,
+                   size_type  blk_size,
+                   align_type blk_align);
 
-	// nested allocators
-	PoolAllocator (Allocator& allocator,
-				   size_type   blk_count,
-				   size_type   blk_size,
-				   align_type  blk_align);
+    // nested allocators
+    PoolAllocator (Allocator& allocator,
+                   size_type   blk_count,
+                   size_type   blk_size,
+                   align_type  blk_align);
 
-	// shared memory
-	PoolAllocator (SharedObject& shared_obj,
-				   size_type     blk_count,
-				   size_type     blk_size,
-				   align_type    blk_align);
+    // shared memory
+    PoolAllocator (SharedObject& shared_obj,
+                   size_type     blk_count,
+                   size_type     blk_size,
+                   align_type    blk_align);
 
-	~PoolAllocator ();
-	void clear () noexcept;
+    ~PoolAllocator ();
+    void clear () noexcept;
 
-	size_type blockSize  () const noexcept { return m_uBlkSize; }
-	size_type blockAlign () const noexcept { return m_uBlkAlign; }
-	size_type blockCount () const noexcept { return m_uBlkNum; }
+    size_type blockSize  () const noexcept { return m_uBlkSize; }
+    size_type blockAlign () const noexcept { return m_uBlkAlign; }
+    size_type blockCount () const noexcept { return m_uBlkNum; }
 
-	bool is_equal (Allocator const& gObj) const noexcept
-	{ return &gObj == &m_gOwner; }
+    bool is_equal (Allocator const& gObj) const noexcept
+    { return &gObj == &m_gOwner; }
 
-	size_type max_size () const noexcept
-	{ return m_pBegin != nullptr ? m_uBlkSize : 0; }
+    size_type max_size () const noexcept
+    { return m_pBegin != nullptr ? m_uBlkSize : 0; }
 
-	size_type count () const noexcept
-	{ return m_uNumAlloc; }
+    size_type count () const noexcept
+    { return m_uNumAlloc; }
 
-	size_type size () const noexcept
-	{
-		return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
-									   static_cast<math_pointer> (m_pBegin));
-	}
+    size_type size () const noexcept
+    {
+        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
+                                       static_cast<math_pointer> (m_pBegin));
+    }
 
-	bool is_shared () const noexcept
-	{ return false;  }
+    bool is_shared () const noexcept
+    { return false;  }
 
-	Allocator& owner () const noexcept
-	{ return m_gOwner; }
+    Allocator& owner () const noexcept
+    { return m_gOwner; }
 
 private:
-	size_type        m_uNumAlloc;
-	Allocator&       m_gOwner;
-	pointer const    m_pBegin;
-	pointer const    m_pEnd;
-	pointer*         m_pFreeList;
-	const_size       m_uBlkSize;
-	align_type const m_uBlkAlign;
-	size_type        m_uBlkNum;
+    size_type        m_uNumAlloc;
+    Allocator&       m_gOwner;
+    pointer const    m_pBegin;
+    pointer const    m_pEnd;
+    pointer*         m_pFreeList;
+    const_size       m_uBlkSize;
+    align_type const m_uBlkAlign;
+    size_type        m_uBlkNum;
 
-	void initialize () noexcept;
+    void initialize () noexcept;
 };
 
 template <class T>

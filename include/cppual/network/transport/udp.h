@@ -35,32 +35,32 @@ namespace cppual { namespace Network {
 class UdpStream final : public TransportSocket
 {
 public:
-	typedef std::size_t size_type;
-	typedef ssize_t     stream_size;
+    typedef std::size_t size_type;
+    typedef ssize_t     stream_size;
 
-	UdpStream& operator << (Packet const&) noexcept;
-	UdpStream& operator >> (Packet&) noexcept;
-	UdpStream () noexcept;
-	~UdpStream () noexcept;
+    UdpStream& operator << (Packet const&) noexcept;
+    UdpStream& operator >> (Packet&) noexcept;
+    UdpStream () noexcept;
+    ~UdpStream () noexcept;
 
-	inline Address getPeerIp () const noexcept { return m_gPeerAddr; }
-	inline int     getPeerPort () const noexcept { return m_nPeerPort; }
+    inline Address getPeerIp () const noexcept { return m_gPeerAddr; }
+    inline int     getPeerPort () const noexcept { return m_nPeerPort; }
 
-	inline void setPeer (Address const& gAddr, u16 uPort) noexcept
-	{ m_gPeerAddr = gAddr; m_nPeerPort = uPort; }
+    inline void setPeer (Address const& gAddr, u16 uPort) noexcept
+    { m_gPeerAddr = gAddr; m_nPeerPort = uPort; }
 
-	inline void setPeerIp (Address const& gAddr) noexcept
-	{ m_gPeerAddr = gAddr; }
+    inline void setPeerIp (Address const& gAddr) noexcept
+    { m_gPeerAddr = gAddr; }
 
-	inline void setPeerPort (u16 uPort) noexcept
-	{ m_nPeerPort = uPort; }
+    inline void setPeerPort (u16 uPort) noexcept
+    { m_nPeerPort = uPort; }
 
 private:
-	Address m_gPeerAddr;
-	u16     m_nPeerPort;
+    Address m_gPeerAddr;
+    u16     m_nPeerPort;
 
-	UdpStream (UdpStream&& stream) noexcept;
-	UdpStream (Address const& address, u16 port = AnyPort) noexcept;
+    UdpStream (UdpStream&& stream) noexcept;
+    UdpStream (Address const& address, u16 port = AnyPort) noexcept;
 };
 
 } } // namespace Network

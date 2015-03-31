@@ -32,7 +32,7 @@ namespace cppual { namespace Process {
 
 process_handle create    (string const& path, char* args[]);
 process_handle clone     ();
-int			   terminate (process_handle process_identificator);
+int               terminate (process_handle process_identificator);
 bool           running   (cchar*) noexcept;
 
 // =========================================================

@@ -34,44 +34,44 @@ namespace cppual
 class CommandLine
 {
 protected:
-	ushort m_uArgCount;
-	ctchar* m_pArgArray;
+    ushort m_uArgCount;
+    ctchar* m_pArgArray;
 
-	CommandLine& operator = (const CommandLine&);
-	bool IsSpace ();
-	ctchar* IsolateQuotes ();
+    CommandLine& operator = (const CommandLine&);
+    bool IsSpace ();
+    ctchar* IsolateQuotes ();
 
-	void SetArgCount (ctchar* pArgArray) { m_uArgCount = CalcLength (pArgArray); }
+    void SetArgCount (ctchar* pArgArray) { m_uArgCount = CalcLength (pArgArray); }
 
 public:
-	ctchar* Parse (ctchar*);
-	short FindArgument (ctchar*);
+    ctchar* Parse (ctchar*);
+    short FindArgument (ctchar*);
 
-	CommandLine (ctchar* pArgArray) : m_uArgCount (), m_pArgArray (Parse (pArgArray)) { }
-	ushort GetArgCount () const { return (m_uArgCount); }
-	ctchar GetArgument (uint uIndex) const { return (m_pArgArray[uIndex]); }
-	ctchar operator [] (uint uIndex) const { return (m_pArgArray[uIndex]); }
+    CommandLine (ctchar* pArgArray) : m_uArgCount (), m_pArgArray (Parse (pArgArray)) { }
+    ushort GetArgCount () const { return (m_uArgCount); }
+    ctchar GetArgument (uint uIndex) const { return (m_pArgArray[uIndex]); }
+    ctchar operator [] (uint uIndex) const { return (m_pArgArray[uIndex]); }
 };
 
 inline bool CommandLine::IsSpace ()
 {
-	return false;
+    return false;
 }
 
 inline ctchar* CommandLine::IsolateQuotes ()
 {
-	return 0;
+    return 0;
 }
 
 ctchar* CommandLine::Parse (ctchar* pArray)
 {
-	return 0;
+    return 0;
 }
 
 inline short CommandLine::FindArgument (ctchar* pArgArray)
 {
-	for (ushort n = 0; n < m_uArgCount; ++n) if (m_pArgArray[n] == pArgArray) return n;
-	return -1;
+    for (ushort n = 0; n < m_uArgCount; ++n) if (m_pArgArray[n] == pArgArray) return n;
+    return -1;
 }
 
 } /* cppual */

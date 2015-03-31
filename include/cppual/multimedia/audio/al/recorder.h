@@ -31,21 +31,21 @@ namespace cppual { namespace Audio { namespace AL {
 class SoundStreamRecorder final : public NonCopyable
 {
 public:
-	SoundStreamRecorder () = delete;
-	explicit SoundStreamRecorder (CaptureDevice&) noexcept;
-	static bool isAvailable () noexcept;
+    SoundStreamRecorder () = delete;
+    explicit SoundStreamRecorder (CaptureDevice&) noexcept;
+    static bool isAvailable () noexcept;
 
-	bool record () noexcept;
-	void stop () noexcept;
-	void setSamples (int samples) noexcept;
+    bool record () noexcept;
+    void stop () noexcept;
+    void setSamples (int samples) noexcept;
 
-	inline CaptureDevice& getCaptureDevice () noexcept { return m_gDevice; }
-	inline int            getSamples () const noexcept { return m_nSamples; }
+    inline CaptureDevice& getCaptureDevice () noexcept { return m_gDevice; }
+    inline int            getSamples () const noexcept { return m_nSamples; }
 
 private:
-	CaptureDevice& m_gDevice;
-	int            m_nSamples;
-	bool           m_bIsRecording;
+    CaptureDevice& m_gDevice;
+    int            m_nSamples;
+    bool           m_bIsRecording;
 };
 
 } } } // namespace Audio

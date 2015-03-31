@@ -34,24 +34,24 @@ namespace cppual {
 class DOMParser
 {
 public:
-	inline DOMParser () = default;
+    inline DOMParser () = default;
 
-	inline
-	explicit DOMParser (string const& gPath,
-						string const& gDelimBegin  = "<",
-						string const& gDelimBegin2 = "</",
-						string const& gDelimEnd	   = "/>",
-						string const& gDelimEnd2   = ">")
-	: m_gFile (gPath),
-	  m_gDelimBegin (gDelimBegin),
-	  m_gDelimBegin2 (gDelimBegin2),
-	  m_gDelimEnd (gDelimEnd),
-	  m_gDelimEnd2 (gDelimEnd2)
-	{ }
+    inline
+    explicit DOMParser (string const& gPath,
+                        string const& gDelimBegin  = "<",
+                        string const& gDelimBegin2 = "</",
+                        string const& gDelimEnd       = "/>",
+                        string const& gDelimEnd2   = ">")
+    : m_gFile (gPath),
+      m_gDelimBegin (gDelimBegin),
+      m_gDelimBegin2 (gDelimBegin2),
+      m_gDelimEnd (gDelimEnd),
+      m_gDelimEnd2 (gDelimEnd2)
+    { }
 
 private:
-	fstream m_gFile;
-	string  m_gDelimBegin, m_gDelimBegin2, m_gDelimEnd, m_gDelimEnd2;
+    fstream m_gFile;
+    string  m_gDelimBegin, m_gDelimBegin2, m_gDelimEnd, m_gDelimEnd2;
 };
 
 } // cppual

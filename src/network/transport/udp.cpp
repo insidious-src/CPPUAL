@@ -46,12 +46,12 @@ UdpStream::~UdpStream () noexcept
 
 UdpStream& UdpStream::operator << (Packet const&) noexcept
 {
-	return *this;
+    return *this;
 }
 
 UdpStream& UdpStream::operator >> (Packet&) noexcept
 {
-	return *this;
+    return *this;
 }
 
 } } // namespace Network

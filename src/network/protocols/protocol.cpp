@@ -26,24 +26,24 @@ namespace cppual { namespace Network {
 
 IProtocol* IProtocol::getLowestLayer () const
 {
-	if (m_pLowerProt != nullptr)
-	{
-		IProtocol* pLowestProt = m_pLowerProt->getLowerLayer ();
-		while (pLowestProt != nullptr) pLowestProt = pLowestProt->getLowerLayer ();
-		return pLowestProt;
-	}
+    if (m_pLowerProt != nullptr)
+    {
+        IProtocol* pLowestProt = m_pLowerProt->getLowerLayer ();
+        while (pLowestProt != nullptr) pLowestProt = pLowestProt->getLowerLayer ();
+        return pLowestProt;
+    }
 
-	return nullptr;
+    return nullptr;
 }
 
 uint IProtocol::getRequiredOutputSize (uint)
 {
-	return 0;
+    return 0;
 }
 
 uint IProtocol::getRequiredRecyclableStreams (uint, uint)
 {
-	return 0;
+    return 0;
 }
 
 } } // Network

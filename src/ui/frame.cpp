@@ -59,14 +59,14 @@ FrameView::FrameView (FrameView const& gObj) noexcept
 
 FrameView& FrameView::operator = (FrameView&& gObj) noexcept
 {
-	if (this == &gObj) return *this;
-	return *this;
+    if (this == &gObj) return *this;
+    return *this;
 }
 
 FrameView& FrameView::operator = (FrameView const& gObj) noexcept
 {
-	if (this == &gObj) return *this;
-	return *this;
+    if (this == &gObj) return *this;
+    return *this;
 }
 
 FrameView::~FrameView () noexcept
@@ -75,49 +75,49 @@ FrameView::~FrameView () noexcept
 
 void FrameView::stretch ()
 {
-	renderable ().lock ().get ()->setMaximized (true);
+    renderable ().lock ().get ()->setMaximized (true);
 }
 
 void FrameView::unstretch ()
 {
-	renderable ().lock ().get ()->setMaximized (false);
+    renderable ().lock ().get ()->setMaximized (false);
 }
 
 void FrameView::attach (View* pView)
 {
-	if (!pView or !pView->valid ()) return;
+    if (!pView or !pView->valid ()) return;
 
-	if (!isUsingInternalCompositor ())
-	{
-		if (m_pTarget and m_pTarget->valid ())
-		{
-			m_pTarget->renderable_unsafe ()->setFlags
-					(m_pTarget->renderable_unsafe ()->flags () += WindowFlag::Frame);
-		}
-		else
-		{
-			m_pTarget->renderable_unsafe ()->setFlags
-					(m_pTarget->renderable_unsafe ()->flags () -= WindowFlag::Frame);
-		}
-	}
+    if (!isUsingInternalCompositor ())
+    {
+        if (m_pTarget and m_pTarget->valid ())
+        {
+            m_pTarget->renderable_unsafe ()->setFlags
+                    (m_pTarget->renderable_unsafe ()->flags () += WindowFlag::Frame);
+        }
+        else
+        {
+            m_pTarget->renderable_unsafe ()->setFlags
+                    (m_pTarget->renderable_unsafe ()->flags () -= WindowFlag::Frame);
+        }
+    }
 
-	m_pTarget = pView;
+    m_pTarget = pView;
 }
 
 void FrameView::detach ()
 {
-	if (!m_pTarget) return;
+    if (!m_pTarget) return;
 
-	if (!isUsingInternalCompositor ())
-	{
-		m_pTarget->renderable_unsafe ()->setFlags
-				(m_pTarget->renderable_unsafe ()->flags () -= Frame);
-	}
-	else
-	{
-	}
+    if (!isUsingInternalCompositor ())
+    {
+        m_pTarget->renderable_unsafe ()->setFlags
+                (m_pTarget->renderable_unsafe ()->flags () -= Frame);
+    }
+    else
+    {
+    }
 
-	m_pTarget = nullptr;
+    m_pTarget = nullptr;
 }
 
 void FrameView::setIcon (image_type*)
@@ -133,10 +133,10 @@ void FrameView::setFlags (WindowFlags)
 }
 
 FrameView::FrameView (View*       pParent,
-					  Rect const& gTargetRect,
-					  string&&    gLabel,
-					  image_type* pIcon,
-					  WindowFlags gFlags)
+                      Rect const& gTargetRect,
+                      string&&    gLabel,
+                      image_type* pIcon,
+                      WindowFlags gFlags)
 : SkinnableView (pParent, calcFrameSize (gTargetRect)),
   m_gCloseBtn (),
   m_gMaxBtn (),
@@ -153,30 +153,30 @@ FrameView::FrameView (View*       pParent,
   m_gHoldingEdges (),
   m_eVisibility ()
 {
-	if (valid ())
-	{
-		m_gCloseBtn.create (this, string ());
-		m_gMinBtn.create (this, string ());
-		if (gFlags.test (Maximize)) m_gMaxBtn.create (this, string ());
-		if (gFlags.test (Help)) m_gHelpBtn.create (this, string ());
-		if (pIcon) setIcon (pIcon);
-		m_gTitle = std::forward<string> (gLabel);
+    if (valid ())
+    {
+        m_gCloseBtn.create (this, string ());
+        m_gMinBtn.create (this, string ());
+        if (gFlags.test (Maximize)) m_gMaxBtn.create (this, string ());
+        if (gFlags.test (Help)) m_gHelpBtn.create (this, string ());
+        if (pIcon) setIcon (pIcon);
+        m_gTitle = std::forward<string> (gLabel);
 
-		if (m_gSysMenu.create ({ m_gIconRect.left, m_gIconRect.top }))
-		{
-			m_gSysMenu.addCommand (nullptr);
-			m_gSysMenu.addCommand (nullptr);
-			m_gSysMenu.addSeparator ();
-			m_gSysMenu.addSubMenu (nullptr, "Compositor");
-			m_gSysMenu.addSeparator ();
-			m_gSysMenu.addCommand (nullptr);
-		}
-	}
+        if (m_gSysMenu.create ({ m_gIconRect.left, m_gIconRect.top }))
+        {
+            m_gSysMenu.addCommand (nullptr);
+            m_gSysMenu.addCommand (nullptr);
+            m_gSysMenu.addSeparator ();
+            m_gSysMenu.addSubMenu (nullptr, "Compositor");
+            m_gSysMenu.addSeparator ();
+            m_gSysMenu.addCommand (nullptr);
+        }
+    }
 }
 
 void FrameView::onShow (bool bVisible)
 {
-	if (!bVisible) m_gSysMenu.hide ();
+    if (!bVisible) m_gSysMenu.hide ();
 }
 
 void FrameView::onPaint (Rect const&)
@@ -189,70 +189,70 @@ void FrameView::onSize (point2u)
 
 void FrameView::onMouseLeftDown (point2i gPos)
 {
-	m_gMouseStates += FrameView::MouseLeftDown;
+    m_gMouseStates += FrameView::MouseLeftDown;
 
-	if (m_gFrameBtnsRect.contains (gPos))
-	{
-		// frame buttons
-	}
-	else if (m_gIconRect.contains (gPos))
-	{
-		m_gSysMenu.setPosition (point2i { m_gIconRect.left,
-										  m_gIconRect.bottom });
-		m_gSysMenu.show ();
-	}
-	else
-	{
-		onBeginSizeMove (geometry ());
-	}
+    if (m_gFrameBtnsRect.contains (gPos))
+    {
+        // frame buttons
+    }
+    else if (m_gIconRect.contains (gPos))
+    {
+        m_gSysMenu.setPosition (point2i { m_gIconRect.left,
+                                          m_gIconRect.bottom });
+        m_gSysMenu.show ();
+    }
+    else
+    {
+        onBeginSizeMove (geometry ());
+    }
 }
 
 void FrameView::onMouseLeftUp (point2i)
 {
-	m_gMouseStates -= FrameView::MouseLeftDown;
+    m_gMouseStates -= FrameView::MouseLeftDown;
 }
 
 void FrameView::onMouseRightDown (point2i gPos)
 {
-	m_gMouseStates += FrameView::MouseRightDown;
+    m_gMouseStates += FrameView::MouseRightDown;
 
-	if (geometry ().contains (gPos) and
-			!m_gIconRect.contains (gPos) and
-			!m_gFrameBtnsRect.contains (gPos))
-	{
-		m_gSysMenu.setPosition (gPos);
-		m_gSysMenu.show ();
-	}
+    if (geometry ().contains (gPos) and
+            !m_gIconRect.contains (gPos) and
+            !m_gFrameBtnsRect.contains (gPos))
+    {
+        m_gSysMenu.setPosition (gPos);
+        m_gSysMenu.show ();
+    }
 }
 
 void FrameView::onMouseRightUp (point2i)
 {
-	m_gMouseStates -= FrameView::MouseRightDown;
+    m_gMouseStates -= FrameView::MouseRightDown;
 }
 
 void FrameView::onMouseMove (point2i)
 {
-	if (!m_gMouseStates.test (FrameView::MouseLeftDown)) return;
+    if (!m_gMouseStates.test (FrameView::MouseLeftDown)) return;
 
-	switch (m_gHoldingEdges)
-	{
-	case FrameView::Left:
-		break;
-	case FrameView::Top:
-		break;
-	case FrameView::Right:
-		break;
-	case FrameView::Bottom:
-		break;
-	case FrameView::TopLeft:
-		break;
-	case FrameView::TopRight:
-		break;
-	case FrameView::BottomLeft:
-		break;
-	case FrameView::BottomRight:
-		break;
-	}
+    switch (m_gHoldingEdges)
+    {
+    case FrameView::Left:
+        break;
+    case FrameView::Top:
+        break;
+    case FrameView::Right:
+        break;
+    case FrameView::Bottom:
+        break;
+    case FrameView::TopLeft:
+        break;
+    case FrameView::TopRight:
+        break;
+    case FrameView::BottomLeft:
+        break;
+    case FrameView::BottomRight:
+        break;
+    }
 }
 
 void FrameView::onBeginSizeMove (Rect const&)
@@ -265,7 +265,7 @@ void FrameView::onEndSizeMove (Rect const&)
 
 Rect FrameView::calcFrameSize (Rect const& gRect) noexcept
 {
-	return gRect;
+    return gRect;
 }
 
 } } // namespace Ui

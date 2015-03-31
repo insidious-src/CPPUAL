@@ -33,63 +33,63 @@ namespace cppual { namespace Ui {
 class IAnimation : public NonCopyAssignable
 {
 public:
-	static  float defaultSpeed;
-	virtual float speed    () const = 0;
-	virtual void  setSpeed (float speed) = 0;
-	virtual void  play     (int repeat_num = 0) = 0;
-	virtual void  cancel   () = 0;
-	virtual void  pause    () = 0;
-	virtual void  resume   () = 0;
+    static  float defaultSpeed;
+    virtual float speed    () const = 0;
+    virtual void  setSpeed (float speed) = 0;
+    virtual void  play     (int repeat_num = 0) = 0;
+    virtual void  cancel   () = 0;
+    virtual void  pause    () = 0;
+    virtual void  resume   () = 0;
 };
 
 class AnimationBase : public IAnimation
 {
 public:
-	inline float speed () const noexcept
-	{ return m_fSpeed; }
+    inline float speed () const noexcept
+    { return m_fSpeed; }
 
-	inline void cancel () noexcept
-	{ m_bIsPlaying.store (true, std::memory_order_relaxed); }
+    inline void cancel () noexcept
+    { m_bIsPlaying.store (true, std::memory_order_relaxed); }
 
-	inline void setSpeed (float fSpeed) noexcept
-	{ if (!m_bIsPlaying.load ()) m_fSpeed = fSpeed; }
+    inline void setSpeed (float fSpeed) noexcept
+    { if (!m_bIsPlaying.load ()) m_fSpeed = fSpeed; }
 
 protected:
-	IWindow*    m_pObject;
-	float       m_fSpeed;
-	atomic_bool m_bIsPlaying;
+    IWindow*    m_pObject;
+    float       m_fSpeed;
+    atomic_bool m_bIsPlaying;
 };
 
 class Motion final : public AnimationBase
 {
 public:
-	void play   (int);
-	void pause  ();
-	void resume ();
+    void play   (int);
+    void pause  ();
+    void resume ();
 };
 
 class Fade final : public AnimationBase
 {
 public:
-	void play   (int);
-	void pause  ();
-	void resume ();
+    void play   (int);
+    void pause  ();
+    void resume ();
 };
 
 class Rotation final : public AnimationBase
 {
 public:
-	void play   (int);
-	void pause  ();
-	void resume ();
+    void play   (int);
+    void pause  ();
+    void resume ();
 };
 
 class Pulse final : public AnimationBase
 {
 public:
-	void play   (int);
-	void pause  ();
-	void resume ();
+    void play   (int);
+    void pause  ();
+    void resume ();
 };
 
 } } // namespace Ui

@@ -35,13 +35,13 @@ struct LayoutMetrics
 
 struct Align
 {
-	enum Side
-	{
-		Left   = 1 << 0,
-		Top    = 1 << 1,
-		Right  = 1 << 2,
-		Bottom = 1 << 3
-	};
+    enum Side
+    {
+        Left   = 1 << 0,
+        Top    = 1 << 1,
+        Right  = 1 << 2,
+        Bottom = 1 << 3
+    };
 };
 
 // =========================================================
@@ -49,23 +49,23 @@ struct Align
 class Layout
 {
 public:
-	Layout ();
-	Layout (Layout&&);
-	Layout (Layout const&);
-	Layout& operator = (Layout&&);
-	Layout& operator = (Layout const&);
+    Layout ();
+    Layout (Layout&&);
+    Layout (Layout const&);
+    Layout& operator = (Layout&&);
+    Layout& operator = (Layout const&);
 
-	bool addView (View*, LayoutMetrics const&);
-	bool removeView (View*);
-	void setViewMetrics (View*, LayoutMetrics const&);
-	void setPadding (Rect const&);
+    bool addView (View*, LayoutMetrics const&);
+    bool removeView (View*);
+    void setViewMetrics (View*, LayoutMetrics const&);
+    void setPadding (Rect const&);
 
 private:
-	vector<View*> m_gViewList;
-	View*         m_pOwner;
-	uint          m_uNumRows, m_uNumColumns;
+    vector<View*> m_gViewList;
+    View*         m_pOwner;
+    uint          m_uNumRows, m_uNumColumns;
 
-	void onSize (Rect const&);
+    void onSize (Rect const&);
 };
 
 } } // namespace Ui

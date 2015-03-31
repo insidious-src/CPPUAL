@@ -33,69 +33,69 @@ namespace cppual { namespace Graphics { namespace GL {
 class Texture : public Object, ITransformable2D
 {
 public:
-	enum class MinFilter : unsigned char
-	{
-		Nearest,
-		Bilinear,
-		NearestMipMap,
-		BilinearMipMap,
-		TrilinearMipMap
-	};
+    enum class MinFilter : unsigned char
+    {
+        Nearest,
+        Bilinear,
+        NearestMipMap,
+        BilinearMipMap,
+        TrilinearMipMap
+    };
 
-	enum class MagFilter : unsigned char
-	{
-		Nearest,
-		Bilinear
-	};
+    enum class MagFilter : unsigned char
+    {
+        Nearest,
+        Bilinear
+    };
 
-	enum class State : unsigned char
-	{
-		DirectAccess
-	};
+    enum class State : unsigned char
+    {
+        DirectAccess
+    };
 
-	Texture () noexcept;
-	~Texture () noexcept;
-	static void setState (State type, bool state) noexcept;
-	//bool loadTexture2D (RasterImage const& image, bool gen_mipmap = false);
-	void setParameter (uint name, int param) noexcept;
-	void bind (uint texture_id) noexcept;
-	void setFiltering (MagFilter mag, MinFilter min) noexcept;
-	void release () noexcept;
+    Texture () noexcept;
+    ~Texture () noexcept;
+    static void setState (State type, bool state) noexcept;
+    //bool loadTexture2D (RasterImage const& image, bool gen_mipmap = false);
+    void setParameter (uint name, int param) noexcept;
+    void bind (uint texture_id) noexcept;
+    void setFiltering (MagFilter mag, MinFilter min) noexcept;
+    void release () noexcept;
 
-	Texture (string      const& file,
-			 PixelFormat const& format     = PixelFormat (),
-			 bool               gen_mipmap = false);
+    Texture (string      const& file,
+             PixelFormat const& format     = PixelFormat (),
+             bool               gen_mipmap = false);
 
-	bool loadTexture2D (cvoid*             pixels,
-						point2i     const& size,
-						PixelFormat const& format     = PixelFormat (),
-						bool               gen_mipmap = false);
+    bool loadTexture2D (cvoid*             pixels,
+                        point2i     const& size,
+                        PixelFormat const& format     = PixelFormat (),
+                        bool               gen_mipmap = false);
 
-	bool loadTexture2D (string      const& path,
-						PixelFormat const& format     = PixelFormat (),
-						bool               gen_mipmap = false);
+    bool loadTexture2D (string      const& path,
+                        PixelFormat const& format     = PixelFormat (),
+                        bool               gen_mipmap = false);
 
-	MinFilter   minFilter () const noexcept { return m_eMin; }
-	MagFilter   magFilter () const noexcept { return m_eMag; }
-	PixelFormat format    () const noexcept { return m_gFormat; }
-	uint        sample    () const noexcept { return m_uSampleId; }
+    MinFilter   minFilter () const noexcept { return m_eMin; }
+    MagFilter   magFilter () const noexcept { return m_eMag; }
+    PixelFormat format    () const noexcept { return m_gFormat; }
+    uint        sample    () const noexcept { return m_uSampleId; }
 
-	bool isLoaded () const noexcept
-	{ return m_gStates.test (Texture::IsLoaded); }
+    bool isLoaded () const noexcept
+    { return m_gStates.test (Texture::IsLoaded); }
 
-	bool hasMipMaps () const noexcept
-	{ return m_gStates.test (Texture::HasMipMaps); }
+    bool hasMipMaps () const noexcept
+    { return m_gStates.test (Texture::HasMipMaps); }
 
 private:
-	enum    Flag { IsLoaded = 1 << 0, HasMipMaps = 1 << 1 };
-	typedef BitSet<Texture::Flag> Flags;
+    enum    Flag { IsLoaded = 1 << 0, HasMipMaps = 1 << 1 };
+    typedef BitSet<Texture::Flag> Flags;
 
-	PixelFormat m_gFormat;
-	point2i     m_gSize;
-	uint        m_uSampleId;
-	MinFilter   m_eMin;
-	MagFilter   m_eMag;
-	Flags       m_gStates;
+    PixelFormat m_gFormat;
+    point2i     m_gSize;
+    uint        m_uSampleId;
+    MinFilter   m_eMin;
+    MagFilter   m_eMag;
+    Flags       m_gStates;
 };
 
 } } } // namespace GL

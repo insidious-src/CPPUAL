@@ -31,19 +31,19 @@ namespace cppual { namespace Network {
 class TcpListener final : public TransportSocket
 {
 public:
-	TcpListener () = delete;
-	TcpListener (Address const&) noexcept;
+    TcpListener () = delete;
+    TcpListener (Address const&) noexcept;
 
-	bool accept (TcpStream&) noexcept;
-	bool listen (u16 port) noexcept;
+    bool accept (TcpStream&) noexcept;
+    bool listen (u16 port) noexcept;
 
-	bool isListening () const noexcept
-	{ return m_bIsListening; }
+    bool isListening () const noexcept
+    { return m_bIsListening; }
 
 private:
-	Address m_gAddr;
-	ushort  m_uPort;
-	bool    m_bIsListening;
+    Address m_gAddr;
+    ushort  m_uPort;
+    bool    m_bIsListening;
 };
 
 } } // namespace Network

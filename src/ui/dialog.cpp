@@ -25,13 +25,13 @@ namespace cppual { namespace Ui {
 
 Dialog& Dialog::operator = (Dialog&& gObj) noexcept
 {
-	if (this == &gObj) return *this;
-	return *this;
+    if (this == &gObj) return *this;
+    return *this;
 }
 
 Dialog& Dialog::operator = (Dialog const& gObj) noexcept
 {
-	if (this == &gObj) return *this;
+    if (this == &gObj) return *this;
     return *this;
 }
 
@@ -42,34 +42,34 @@ Dialog::Result Dialog::getResult() noexcept
 
 void Dialog::showModal (Ui::Window* pOwner) noexcept
 {
-	if (valid ())
-	{
-		if (pOwner and pOwner->valid ())
-		{
-			m_pOwnerWnd = pOwner;
-			pOwner->disable ();
-		}
+    if (valid ())
+    {
+        if (pOwner and pOwner->valid ())
+        {
+            m_pOwnerWnd = pOwner;
+            pOwner->disable ();
+        }
 
-		show ();
-		setFocus ();
-	}
+        show ();
+        setFocus ();
+    }
 }
 
 void Dialog::onCreate ()
 {
-	onInit ();
+    onInit ();
 }
 
 void Dialog::onDestroy ()
 {
-	onEnd ();
+    onEnd ();
 
-	if (m_pOwnerWnd)
-	{
-		m_pOwnerWnd->enable ();
-		m_pOwnerWnd->setFocus ();
-		m_pOwnerWnd = nullptr;
-	}
+    if (m_pOwnerWnd)
+    {
+        m_pOwnerWnd->enable ();
+        m_pOwnerWnd->setFocus ();
+        m_pOwnerWnd = nullptr;
+    }
 }
 
 } } // namespace Ui

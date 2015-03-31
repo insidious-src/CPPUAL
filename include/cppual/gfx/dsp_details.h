@@ -31,24 +31,24 @@ namespace cppual { namespace Graphics {
 class Connection
 {
 public:
-	typedef void* pointer;
+    typedef void* pointer;
 
-	inline    Connection () noexcept = default;
-	constexpr Connection (pointer display) noexcept : m_handle (display) { }
-	constexpr Connection (std::nullptr_t ) noexcept : m_handle ()        { }
+    inline    Connection () noexcept = default;
+    constexpr Connection (pointer display) noexcept : m_handle (display) { }
+    constexpr Connection (std::nullptr_t ) noexcept : m_handle ()        { }
 
-	constexpr operator pointer () const noexcept
-	{ return m_handle; }
+    constexpr operator pointer () const noexcept
+    { return m_handle; }
 
-	template <typename T>
-	constexpr typename std::remove_pointer<T>::type* get () const noexcept
-	{ return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
+    template <typename T>
+    constexpr typename std::remove_pointer<T>::type* get () const noexcept
+    { return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
 
-	friend
-	constexpr bool operator == (Connection const&, Connection const&) noexcept;
+    friend
+    constexpr bool operator == (Connection const&, Connection const&) noexcept;
 
 private:
-	pointer m_handle;
+    pointer m_handle;
 };
 
 constexpr bool operator == (Connection const& conn1, Connection const& conn2) noexcept
@@ -62,38 +62,38 @@ constexpr bool operator != (Connection const& conn1, Connection const& conn2) no
 class Element
 {
 public:
-	typedef uptr  value_type;
-	typedef void* pointer;
+    typedef uptr  value_type;
+    typedef void* pointer;
 
-	Element () noexcept = default;
+    Element () noexcept = default;
 
-	template <typename T>
-	constexpr T get () const noexcept
-	{ return static_cast<T> (reinterpret_cast<pointer> (m_handle)); }
+    template <typename T>
+    constexpr T get () const noexcept
+    { return static_cast<T> (reinterpret_cast<pointer> (m_handle)); }
 
     Element (pointer p) noexcept
     : m_handle (reinterpret_cast<value_type> (p))
-	{ }
+    { }
 
     constexpr Element (value_type val) noexcept
     : m_handle (val)
     { }
 
-	constexpr Element (std::nullptr_t) noexcept
-	: m_handle ()
-	{ }
+    constexpr Element (std::nullptr_t) noexcept
+    : m_handle ()
+    { }
 
-	constexpr operator value_type () const noexcept
-	{ return m_handle; }
+    constexpr operator value_type () const noexcept
+    { return m_handle; }
 
-	Element& operator = (std::nullptr_t) noexcept
-	{ m_handle = 0; return *this; }
+    Element& operator = (std::nullptr_t) noexcept
+    { m_handle = 0; return *this; }
 
-	friend
-	constexpr bool operator == (Element const&, Element const&) noexcept;
+    friend
+    constexpr bool operator == (Element const&, Element const&) noexcept;
 
 private:
-	value_type m_handle;
+    value_type m_handle;
 };
 
 template <>

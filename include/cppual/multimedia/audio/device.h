@@ -32,9 +32,9 @@ namespace cppual { namespace Audio {
 
 enum class StringQuery : unsigned char
 {
-	Version,
-	Renderer,
-	Vendor
+    Version,
+    Renderer,
+    Vendor
 };
 
 // ====================================================
@@ -42,57 +42,57 @@ enum class StringQuery : unsigned char
 class Device : public NonCopyable
 {
 public:
-	typedef std::size_t size_type;
+    typedef std::size_t size_type;
 
-	enum Type
-	{
-		Null,
-		Playback,
-		Capture
-	};
+    enum Type
+    {
+        Null,
+        Playback,
+        Capture
+    };
 
-	Device (string const&, Type);
+    Device (string const&, Type);
 
-	static bool isExtensionSupported (string const& name) noexcept;
-	bool		isExtensionPresent   (string const& name) noexcept;
+    static bool isExtensionSupported (string const& name) noexcept;
+    bool        isExtensionPresent   (string const& name) noexcept;
 
-	inline Type   type () const noexcept { return m_eType; }
-	inline string name () const noexcept { return m_gDeviceName; }
-	inline bool   isValid () const noexcept { return m_eType != Device::Null; }
+    inline Type   type () const noexcept { return m_eType; }
+    inline string name () const noexcept { return m_gDeviceName; }
+    inline bool   isValid () const noexcept { return m_eType != Device::Null; }
 
 protected:
-	string    m_gDeviceName;
-	size_type m_uId;
-	Type      m_eType;
+    string    m_gDeviceName;
+    size_type m_uId;
+    Type      m_eType;
 
 };
 
 class PlaybackDevice : public Device
 {
 public:
-	PlaybackDevice () noexcept;
-	PlaybackDevice (string const& name) noexcept;
-	~PlaybackDevice () noexcept;
+    PlaybackDevice () noexcept;
+    PlaybackDevice (string const& name) noexcept;
+    ~PlaybackDevice () noexcept;
 };
 
 class CaptureDevice : public Device
 {
 public:
-	CaptureDevice  () noexcept;
-	~CaptureDevice () noexcept;
-	bool busy () noexcept;
+    CaptureDevice  () noexcept;
+    ~CaptureDevice () noexcept;
+    bool busy () noexcept;
 
-	CaptureDevice (string const&,
-				   uint         = 22050,
-				   SoundQuality = SoundQuality::Low,
-				   OutputFormat = OutputFormat::Stereo) noexcept;
+    CaptureDevice (string const&,
+                   uint         = 22050,
+                   SoundQuality = SoundQuality::Low,
+                   OutputFormat = OutputFormat::Stereo) noexcept;
 
-	SoundQuality quality () const noexcept { return m_eQuality; }
-	OutputFormat format  () const noexcept { return m_eFormat;  }
+    SoundQuality quality () const noexcept { return m_eQuality; }
+    OutputFormat format  () const noexcept { return m_eFormat;  }
 
 private:
-	SoundQuality m_eQuality;
-	OutputFormat m_eFormat;
+    SoundQuality m_eQuality;
+    OutputFormat m_eFormat;
 };
 
 // ====================================================
@@ -100,35 +100,35 @@ private:
 class Context
 {
 public:
-	Context () = delete;
-	Context (PlaybackDevice& device, bool make_current = false) noexcept;
-	~Context () noexcept;
+    Context () = delete;
+    Context (PlaybackDevice& device, bool make_current = false) noexcept;
+    ~Context () noexcept;
 
-	using Scenario = Compute::DeviceGroup;
+    using Scenario = Compute::DeviceGroup;
 
-	void use ();
-	void invalidate () noexcept;
-	bool setCapability (int cap, bool enable) noexcept;
-	bool hasCapability (int cap) noexcept;
-	void process () noexcept;
-	void suspend () noexcept;
+    void use ();
+    void invalidate () noexcept;
+    bool setCapability (int cap, bool enable) noexcept;
+    bool hasCapability (int cap) noexcept;
+    void process () noexcept;
+    void suspend () noexcept;
 
-	static DistanceModel distanceModel () noexcept;
-	static void			 setDistanceModel (DistanceModel model) noexcept;
-	static Context*	     current () noexcept;
-	static string		 label (StringQuery query) noexcept;
-	static void			 setDopplerFactor (float factor) noexcept;
-	static float		 dopplerFactor () noexcept;
-	static void			 setSpeedOfSound (float speed) noexcept;
-	static float		 speedOfSound () noexcept;
-	static Scenario      scenario () noexcept;
-	static bool          setScenario (Scenario&) noexcept;
+    static DistanceModel distanceModel () noexcept;
+    static void             setDistanceModel (DistanceModel model) noexcept;
+    static Context*         current () noexcept;
+    static string         label (StringQuery query) noexcept;
+    static void             setDopplerFactor (float factor) noexcept;
+    static float         dopplerFactor () noexcept;
+    static void             setSpeedOfSound (float speed) noexcept;
+    static float         speedOfSound () noexcept;
+    static Scenario      scenario () noexcept;
+    static bool          setScenario (Scenario&) noexcept;
 
-	PlaybackDevice& device () const noexcept
-	{ return *m_gDevice; }
+    PlaybackDevice& device () const noexcept
+    { return *m_gDevice; }
 
 private:
-	PlaybackDevice* m_gDevice;
+    PlaybackDevice* m_gDevice;
 };
 
 } } // namespace Audio

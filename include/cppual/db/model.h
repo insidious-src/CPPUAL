@@ -33,7 +33,7 @@ namespace cppual {
 class ItemModel
 {
 public:
-	void addItem ();
+    void addItem ();
 };
 
 } // cppual

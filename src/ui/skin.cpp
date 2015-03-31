@@ -27,15 +27,15 @@ namespace cppual { namespace Ui {
 
 bool ISkin::setDefault (ISkin* pSkin) noexcept
 {
-	if (!pSkin) return false;
+    if (!pSkin) return false;
 
-	Event::registers ().winPaint (Element (), PaintEvent (nullptr, Rect ()).data ().paint);
-	return true;
+    Event::registers ().winPaint (Element (), PaintEvent (nullptr, Rect ()).data ().paint);
+    return true;
 }
 
 ISkin* ISkin::getDefault () noexcept
 {
-	return nullptr;
+    return nullptr;
 }
 
 // =========================================================
@@ -69,33 +69,33 @@ SkinnableView::SkinnableView (SkinnableView const& gObj)
 
 SkinnableView& SkinnableView::operator = (SkinnableView&& gObj)
 {
-	if (this == &gObj) return *this;
-	return *this;
+    if (this == &gObj) return *this;
+    return *this;
 }
 
 SkinnableView& SkinnableView::operator = (SkinnableView const& gObj)
 {
-	if (this == &gObj) return *this;
-	return *this;
+    if (this == &gObj) return *this;
+    return *this;
 }
 
 void SkinnableView::setSkin (ISkin* pNewSkin) noexcept
 {
-	m_pSkin = pNewSkin;
-	if (valid ()) refresh ();
+    m_pSkin = pNewSkin;
+    if (valid ()) refresh ();
 }
 
 void SkinnableView::onCreate ()
 {
-	onCreatePost ();
-//	m_gConnSkin = std::move (connect (Platform::EventQueue::events.visual,
-//									  this, &SkinnableView::changeSkin));
+    onCreatePost ();
+//    m_gConnSkin = std::move (connect (Platform::EventQueue::events.visual,
+//                                      this, &SkinnableView::changeSkin));
 }
 
 void SkinnableView::changeSkin ()
 {
-	refresh ();
-	onSkinChange ();
+    refresh ();
+    onSkinChange ();
 }
 
 } } // namespace Ui

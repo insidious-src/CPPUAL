@@ -30,16 +30,16 @@ namespace cppual { namespace Ui {
 class CRibbonSkin final : public ISkin
 {
 public:
-	bool Load ();
-	int GetValue (const SkinElement, int);
-	RGBColor GetColor (const SkinElement, int);
-	IImage* GetImage (const SkinElement, int);
-	Font GetFont (const SkinElement);
+    bool Load ();
+    int GetValue (const SkinElement, int);
+    RGBColor GetColor (const SkinElement, int);
+    IImage* GetImage (const SkinElement, int);
+    Font GetFont (const SkinElement);
 
-	SkinType getType () const noexcept { return sm_eType; }
+    SkinType getType () const noexcept { return sm_eType; }
 
 private:
-	static const SkinType sm_eType = SkinType::Static;
+    static const SkinType sm_eType = SkinType::Static;
 };
 
 } } // Ui

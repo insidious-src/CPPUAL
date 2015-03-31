@@ -32,52 +32,52 @@ namespace cppual { namespace Ui {
 class ComboBox : public SkinnableView
 {
 public:
-	ComboBox ();
-	ComboBox (ComboBox&&);
-	ComboBox (ComboBox const&);
-	ComboBox& operator = (ComboBox&&);
-	ComboBox& operator = (ComboBox const&);
+    ComboBox ();
+    ComboBox (ComboBox&&);
+    ComboBox (ComboBox const&);
+    ComboBox& operator = (ComboBox&&);
+    ComboBox& operator = (ComboBox const&);
 
-	uint getItemCount ();
-	int  getCurItemIdx ();
-	bool addItem (ActionItem*, int pos = -1);
-	bool removeItem (int pos);
-	bool isEditable () const;
-	void setEditable (bool);
-	void setTextLimit (size_type max_chars_shown);
-	void setDropListWidth (int);
-	void setItemIcon (int, IImage*);
-	void setItemText (int, string const&);
-	void setItemDesc (int, string const&);
-	void setItemHeight (int);
-	void showDropList ();
-	void hideDropList ();
-	void clear ();
+    uint getItemCount ();
+    int  getCurItemIdx ();
+    bool addItem (ActionItem*, int pos = -1);
+    bool removeItem (int pos);
+    bool isEditable () const;
+    void setEditable (bool);
+    void setTextLimit (size_type max_chars_shown);
+    void setDropListWidth (int);
+    void setItemIcon (int, IImage*);
+    void setItemText (int, string const&);
+    void setItemDesc (int, string const&);
+    void setItemHeight (int);
+    void showDropList ();
+    void hideDropList ();
+    void clear ();
 
-	bool addItem (string const&   text,
-				  string const&   desc,
-				  IImage* icon = nullptr,
-				  int             pos  = -1);
+    bool addItem (string const&   text,
+                  string const&   desc,
+                  IImage* icon = nullptr,
+                  int             pos  = -1);
 
-	Signal<void(int)>  signalItemIdxChanged;
-	Signal<void(int)>  signalItemAdded;
-	Signal<void(int)>  signalItemRemoved;
-	Signal<void(int)>  signalItemTextChanged;
-	Signal<void(int)>  signalItemIconChanged;
-	Signal<void(int)>  signalItemDescChanged;
-	Signal<void()>     signalDoubleClick;
-	Signal<void(bool)> signalDropDown;
+    Signal<void(int)>  signalItemIdxChanged;
+    Signal<void(int)>  signalItemAdded;
+    Signal<void(int)>  signalItemRemoved;
+    Signal<void(int)>  signalItemTextChanged;
+    Signal<void(int)>  signalItemIconChanged;
+    Signal<void(int)>  signalItemDescChanged;
+    Signal<void()>     signalDoubleClick;
+    Signal<void(bool)> signalDropDown;
 
 private:
-	void onCreate ();
-	void onShow (bool);
-	void onPaint ();
-	void onEnable (bool);
-	void onSize (Rect const&);
-	void onGotFocus ();
-	void onFocusKilled ();
-	void onKeyPress (int);
-	void onKeyRelease (int);
+    void onCreate ();
+    void onShow (bool);
+    void onPaint ();
+    void onEnable (bool);
+    void onSize (Rect const&);
+    void onGotFocus ();
+    void onFocusKilled ();
+    void onKeyPress (int);
+    void onKeyRelease (int);
 };
 
 } } // Ui

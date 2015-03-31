@@ -40,31 +40,31 @@ class SoundSource;
 class SoundBuffer : public AudioObject, public Sound
 {
 public:
-	typedef vector<SoundSource*>        vector_type;
-	typedef vector_type::const_iterator const_iterator;
-	typedef std::size_t                 size_type;
-	friend  class                       SoundSource;
+    typedef vector<SoundSource*>        vector_type;
+    typedef vector_type::const_iterator const_iterator;
+    typedef std::size_t                 size_type;
+    friend  class                       SoundSource;
 
-	SoundBuffer () noexcept;
-	SoundBuffer (SoundBuffer&&) noexcept;
-	SoundBuffer (SoundBuffer const&) noexcept;
-	SoundBuffer& operator = (SoundBuffer&&) noexcept;
-	SoundBuffer& operator = (SoundBuffer const&) noexcept;
-	~SoundBuffer () noexcept;
+    SoundBuffer () noexcept;
+    SoundBuffer (SoundBuffer&&) noexcept;
+    SoundBuffer (SoundBuffer const&) noexcept;
+    SoundBuffer& operator = (SoundBuffer&&) noexcept;
+    SoundBuffer& operator = (SoundBuffer const&) noexcept;
+    ~SoundBuffer () noexcept;
 
-	int getFrequency () const noexcept;
-	int getSize () const noexcept;
-	int getBits () const noexcept;
-	int getDuration () const noexcept;
+    int getFrequency () const noexcept;
+    int getSize () const noexcept;
+    int getBits () const noexcept;
+    int getDuration () const noexcept;
 
-	inline Instance* getContext () const noexcept
-	{ return m_pContext; }
+    inline Instance* getContext () const noexcept
+    { return m_pContext; }
 
 private:
-	vector_type m_gSources;
+    vector_type m_gSources;
     Instance*   m_pContext;
 
-	int onOpen () noexcept;
+    int onOpen () noexcept;
 };
 
 } } } // namespace Audio

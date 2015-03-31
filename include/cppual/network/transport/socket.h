@@ -40,8 +40,8 @@ typedef int socket_id;
 
 enum class SocketType : bool
 {
-	Tcp,
-	Udp
+    Tcp,
+    Udp
 };
 
 // ====================================================
@@ -49,40 +49,40 @@ enum class SocketType : bool
 class TransportSocket : public NonCopyable
 {
 public:
-	typedef socket_id const const_id;
-	TransportSocket () = delete;
-	TransportSocket (SocketType) noexcept;
-	TransportSocket (TransportSocket&&) noexcept;
-	TransportSocket& operator = (TransportSocket&&) noexcept;
+    typedef socket_id const const_id;
+    TransportSocket () = delete;
+    TransportSocket (SocketType) noexcept;
+    TransportSocket (TransportSocket&&) noexcept;
+    TransportSocket& operator = (TransportSocket&&) noexcept;
 
-	void setBlocking (bool) noexcept;
+    void setBlocking (bool) noexcept;
 
-	enum
-	{
-		AnyPort = 0
-	};
+    enum
+    {
+        AnyPort = 0
+    };
 
-	inline ~TransportSocket () noexcept { close (); }
-	inline socket_id  id () const noexcept { return m_nId; }
-	inline SocketType type () const noexcept { return m_eProtocol; }
+    inline ~TransportSocket () noexcept { close (); }
+    inline socket_id  id () const noexcept { return m_nId; }
+    inline SocketType type () const noexcept { return m_eProtocol; }
     inline bool       isValid () const noexcept { return m_nId != nullSocket (); }
-	inline bool       isBlocking () const noexcept { return m_bIsBlocking; }
+    inline bool       isBlocking () const noexcept { return m_bIsBlocking; }
 
-	static socket_id nullSocket () noexcept
-	{ return sm_nInvalid; }
+    static socket_id nullSocket () noexcept
+    { return sm_nInvalid; }
 
 protected:
-	static socket_id create (SocketType) noexcept;
-	void replaceFromId (socket_id) noexcept;
-	void close () noexcept;
+    static socket_id create (SocketType) noexcept;
+    void replaceFromId (socket_id) noexcept;
+    void close () noexcept;
 
 private:
-	static const_id sm_nInvalid;
-	socket_id        m_nId;
-	SocketType       m_eProtocol;
-	bool             m_bIsBlocking;
+    static const_id sm_nInvalid;
+    socket_id        m_nId;
+    SocketType       m_eProtocol;
+    bool             m_bIsBlocking;
 
-	void initSocket () noexcept;
+    void initSocket () noexcept;
 };
 
 } } // namespace Network

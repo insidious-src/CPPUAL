@@ -51,25 +51,25 @@ typedef Angle <double> angled;
 template <typename T>
 struct Point2 final
 {
-	T x, y;
-	static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
+    T x, y;
+    static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
 
-	Point2 () noexcept = default;
+    Point2 () noexcept = default;
 
-	template <typename U>
-	constexpr Point2 (U x_, U y_) noexcept
-	: x (T (x_)), y (T (y_))
-	{ }
+    template <typename U>
+    constexpr Point2 (U x_, U y_) noexcept
+    : x (T (x_)), y (T (y_))
+    { }
 };
 
 template <typename T>
 constexpr bool operator == (Point2<T> const& gObj1,
-							Point2<T> const& gObj2) noexcept
+                            Point2<T> const& gObj2) noexcept
 { return (gObj1.x == gObj2.x and gObj1.y == gObj2.y); }
 
 template <typename T>
 constexpr bool operator != (Point2<T> const& gObj1,
-							Point2<T> const& gObj2) noexcept
+                            Point2<T> const& gObj2) noexcept
 { return (gObj1.x != gObj2.x or gObj1.y != gObj2.y); }
 
 // ====================================================
@@ -77,18 +77,18 @@ constexpr bool operator != (Point2<T> const& gObj1,
 template <typename T>
 struct Point3 final
 {
-	T x, y, z;
-	static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
+    T x, y, z;
+    static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
 };
 
 template <typename T>
 constexpr bool operator == (Point3<T> const& gObj1,
-							Point3<T> const& gObj2) noexcept
+                            Point3<T> const& gObj2) noexcept
 { return (gObj1.x == gObj2.x and gObj1.y == gObj2.y and gObj1.z == gObj2.z); }
 
 template <typename T>
 constexpr bool operator != (Point3<T> const& gObj1,
-							Point3<T> const& gObj2) noexcept
+                            Point3<T> const& gObj2) noexcept
 { return !(gObj1 == gObj2); }
 
 // ====================================================
@@ -96,96 +96,96 @@ constexpr bool operator != (Point3<T> const& gObj1,
 template <typename T>
 struct Point4 final
 {
-	T x, y, z, w;
-	static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
+    T x, y, z, w;
+    static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
 };
 
 template <typename T>
 constexpr bool operator == (Point4<T> const& gObj1,
-							Point4<T> const& gObj2) noexcept
+                            Point4<T> const& gObj2) noexcept
 {
-	return (gObj1.x == gObj2.x and
-			gObj1.y == gObj2.y and
-			gObj1.z == gObj2.z and
-			gObj1.w == gObj2.w);
+    return (gObj1.x == gObj2.x and
+            gObj1.y == gObj2.y and
+            gObj1.z == gObj2.z and
+            gObj1.w == gObj2.w);
 }
 
 template <typename T>
 constexpr bool operator != (Point4<T> const& gObj1,
-							Point4<T> const& gObj2) noexcept
+                            Point4<T> const& gObj2) noexcept
 { return !(gObj1 == gObj2); }
 
 // ====================================================
 
 struct Rect final
 {
-	typedef int16 value_type;
+    typedef int16 value_type;
 
-	value_type left, top, right, bottom;
+    value_type left, top, right, bottom;
 
-	inline Rect () noexcept = default;
+    inline Rect () noexcept = default;
 
-	constexpr Rect (value_type x, value_type y, u16 width, u16 height) noexcept
-	: left (x),
-	  top  (y),
-	  right  (static_cast<value_type> (x + width)),
-	  bottom (static_cast<value_type> (y + height))
-	{ }
+    constexpr Rect (value_type x, value_type y, u16 width, u16 height) noexcept
+    : left (x),
+      top  (y),
+      right  (static_cast<value_type> (x + width)),
+      bottom (static_cast<value_type> (y + height))
+    { }
 
-	constexpr Rect (point2u size) noexcept
-	: left (),
-	  top  (),
-	  right  (static_cast<value_type> (size.x)),
-	  bottom (static_cast<value_type> (size.y))
-	{ }
+    constexpr Rect (point2u size) noexcept
+    : left (),
+      top  (),
+      right  (static_cast<value_type> (size.x)),
+      bottom (static_cast<value_type> (size.y))
+    { }
 
-	constexpr u16 width () const noexcept
-	{ return static_cast<u16> (right - left); }
+    constexpr u16 width () const noexcept
+    { return static_cast<u16> (right - left); }
 
-	constexpr u16 height () const noexcept
-	{ return static_cast<u16> (bottom - top); }
+    constexpr u16 height () const noexcept
+    { return static_cast<u16> (bottom - top); }
 
-	constexpr point2u size () const noexcept
-	{ return { width (), height () }; }
+    constexpr point2u size () const noexcept
+    { return { width (), height () }; }
 
-	inline void setWidth (u16 uWidth) noexcept
-	{ right = static_cast<value_type> (left + uWidth); }
+    inline void setWidth (u16 uWidth) noexcept
+    { right = static_cast<value_type> (left + uWidth); }
 
-	inline void setHeight (u16 uHeight) noexcept
-	{ bottom = static_cast<value_type> (top + uHeight); }
+    inline void setHeight (u16 uHeight) noexcept
+    { bottom = static_cast<value_type> (top + uHeight); }
 
-	inline void reset () noexcept
-	{ left = top = right = bottom = 0; }
+    inline void reset () noexcept
+    { left = top = right = bottom = 0; }
 
-	constexpr bool isPoint () const noexcept
-	{ return (left == right and top == bottom); }
+    constexpr bool isPoint () const noexcept
+    { return (left == right and top == bottom); }
 
-	constexpr bool intersects (Rect const& gObj) const noexcept
-	{
-		return (right > gObj.left  and bottom > gObj.top) or
-				(left < gObj.right and top    < gObj.bottom);
-	}
+    constexpr bool intersects (Rect const& gObj) const noexcept
+    {
+        return (right > gObj.left  and bottom > gObj.top) or
+                (left < gObj.right and top    < gObj.bottom);
+    }
 
-	constexpr bool contains (point2i gPoint) const noexcept
-	{
-		return (left < gPoint.x and gPoint.x < right and
-				top  < gPoint.y and gPoint.y < bottom);
-	}
+    constexpr bool contains (point2i gPoint) const noexcept
+    {
+        return (left < gPoint.x and gPoint.x < right and
+                top  < gPoint.y and gPoint.y < bottom);
+    }
 
-	inline Rect& operator = (point2i gPoint) noexcept
-	{
-		right  = static_cast<int16> (gPoint.x + width  ());
-		bottom = static_cast<int16> (gPoint.y + height ());
-		left   = gPoint.x;
-		top    = gPoint.y;
-		return *this;
-	}
+    inline Rect& operator = (point2i gPoint) noexcept
+    {
+        right  = static_cast<int16> (gPoint.x + width  ());
+        bottom = static_cast<int16> (gPoint.y + height ());
+        left   = gPoint.x;
+        top    = gPoint.y;
+        return *this;
+    }
 };
 
 constexpr bool operator == (Rect const& gObj1, Rect const& gObj2) noexcept
 {
-	return (gObj1.left  == gObj2.left  and gObj1.top    == gObj2.top and
-			gObj1.right == gObj2.right and gObj1.bottom == gObj2.bottom);
+    return (gObj1.left  == gObj2.left  and gObj1.top    == gObj2.top and
+            gObj1.right == gObj2.right and gObj1.bottom == gObj2.bottom);
 }
 
 constexpr bool operator != (Rect const& gObj1, Rect const& gObj2) noexcept
@@ -193,20 +193,20 @@ constexpr bool operator != (Rect const& gObj1, Rect const& gObj2) noexcept
 
 //inline Rect& operator += (Rect& gObj, point2i gPoint) noexcept
 //{
-//	gObj.left   += gPoint.x;
-//	gObj.right  += gPoint.x;
-//	gObj.top    += gPoint.y;
-//	gObj.bottom += gPoint.y;
-//	return gObj;
+//    gObj.left   += gPoint.x;
+//    gObj.right  += gPoint.x;
+//    gObj.top    += gPoint.y;
+//    gObj.bottom += gPoint.y;
+//    return gObj;
 //}
 
 //inline Rect& operator -= (Rect& gObj, point2i gPoint) noexcept
 //{
-//	gObj.left   -= gPoint.x;
-//	gObj.right  -= gPoint.x;
-//	gObj.top    -= gPoint.y;
-//	gObj.bottom -= gPoint.y;
-//	return gObj;
+//    gObj.left   -= gPoint.x;
+//    gObj.right  -= gPoint.x;
+//    gObj.top    -= gPoint.y;
+//    gObj.bottom -= gPoint.y;
+//    return gObj;
 //}
 
 // ====================================================
@@ -214,15 +214,15 @@ constexpr bool operator != (Rect const& gObj1, Rect const& gObj2) noexcept
 template <typename T>
 struct Angle final
 {
-	T radians;
+    T radians;
 
-	static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
-	inline Angle () noexcept = default;
+    static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
+    inline Angle () noexcept = default;
 
-	template <typename U>
-	inline Angle (Angle<U> const& gObj) noexcept
-	: radians (T (gObj.radians))
-	{ }
+    template <typename U>
+    inline Angle (Angle<U> const& gObj) noexcept
+    : radians (T (gObj.radians))
+    { }
 };
 
 template <typename T>

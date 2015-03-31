@@ -32,112 +32,112 @@ namespace cppual { namespace Ui {
 
 enum class ToolStyle : unsigned char
 {
-	Flat,
-	Modern
+    Flat,
+    Modern
 };
 
 enum class ToolButton : unsigned char
 {
-	TextBesideIcon,
-	IconAboveText,
-	TextOnly,
-	IconOnly
+    TextBesideIcon,
+    IconAboveText,
+    TextOnly,
+    IconOnly
 };
 
 class ToolBar : public SkinnableView
 {
 public:
-	enum ToolFlag
-	{
-		AutoHide    = 1 << 0,
-		HotTracking = 1 << 1,
-		Splitter    = 1 << 2,
-		Movable     = 1 << 3,
-		Draggable   = 1 << 4,
-		Floatable   = 1 << 5
-	};
+    enum ToolFlag
+    {
+        AutoHide    = 1 << 0,
+        HotTracking = 1 << 1,
+        Splitter    = 1 << 2,
+        Movable     = 1 << 3,
+        Draggable   = 1 << 4,
+        Floatable   = 1 << 5
+    };
 
-	typedef FlagSet<ToolFlag, u8>     ToolFlags;
-	typedef std::vector<ViewGroup*> group_vector;
+    typedef FlagSet<ToolFlag, u8>     ToolFlags;
+    typedef std::vector<ViewGroup*> group_vector;
 
-	point2i iconSize () const;
-	u8      getRowCount ();
+    point2i iconSize () const;
+    u8      getRowCount ();
 
-	void setStyle (ToolStyle);
-	void setSimple (bool);
-	void setMovable (bool);
-	void setDraggable (bool);
-	void setFloatable (bool);
-	void setButtonType (ToolButton);
-	void setButtonStyle (ToolStyle);
-	void setIconSize (point2i const&);
-	void setMaxRows (u8);
-	void setOrientation (Orientation);
-	void setAutoHide (bool);
-	void setHotTracking (bool);
-	void enableSplitter (bool);
-	void moveGroup (size_type pos, size_type new_pos);
-	void maximizeGroup (size_type pos);
-	void minimizeGroup (size_type pos);
-	void pushChevron (); // auto hide
-	bool isFloating () const;
-	bool addGroup (ViewGroup&, size_type pos);
+    void setStyle (ToolStyle);
+    void setSimple (bool);
+    void setMovable (bool);
+    void setDraggable (bool);
+    void setFloatable (bool);
+    void setButtonType (ToolButton);
+    void setButtonStyle (ToolStyle);
+    void setIconSize (point2i const&);
+    void setMaxRows (u8);
+    void setOrientation (Orientation);
+    void setAutoHide (bool);
+    void setHotTracking (bool);
+    void enableSplitter (bool);
+    void moveGroup (size_type pos, size_type new_pos);
+    void maximizeGroup (size_type pos);
+    void minimizeGroup (size_type pos);
+    void pushChevron (); // auto hide
+    bool isFloating () const;
+    bool addGroup (ViewGroup&, size_type pos);
 
-	inline ToolButton getButtonType () const noexcept
-	{ return m_eButtonType; }
+    inline ToolButton getButtonType () const noexcept
+    { return m_eButtonType; }
 
-	inline Orientation getOrientation () const noexcept
-	{ return m_eOrientation; }
+    inline Orientation getOrientation () const noexcept
+    { return m_eOrientation; }
 
-	inline bool isMovable () const noexcept
-	{ return m_eToolFlags.hasFlag (ToolBar::Movable); }
+    inline bool isMovable () const noexcept
+    { return m_eToolFlags.hasFlag (ToolBar::Movable); }
 
-	inline bool isDraggable () const noexcept
-	{ return m_eToolFlags.hasFlag (ToolBar::Draggable); }
+    inline bool isDraggable () const noexcept
+    { return m_eToolFlags.hasFlag (ToolBar::Draggable); }
 
-	inline bool isFloatable () const noexcept
-	{ return m_eToolFlags.hasFlag (ToolBar::Floatable); }
+    inline bool isFloatable () const noexcept
+    { return m_eToolFlags.hasFlag (ToolBar::Floatable); }
 
-	inline bool isAutoHide () const noexcept
-	{ return m_eToolFlags.hasFlag (ToolBar::AutoHide); }
+    inline bool isAutoHide () const noexcept
+    { return m_eToolFlags.hasFlag (ToolBar::AutoHide); }
 
-	inline bool hasHotTracking () const noexcept
-	{ return m_eToolFlags.hasFlag (ToolBar::HotTracking); }
+    inline bool hasHotTracking () const noexcept
+    { return m_eToolFlags.hasFlag (ToolBar::HotTracking); }
 
-	inline bool hasSplitter () const noexcept
-	{ return m_eToolFlags.hasFlag (ToolBar::Splitter); }
+    inline bool hasSplitter () const noexcept
+    { return m_eToolFlags.hasFlag (ToolBar::Splitter); }
 
-	inline size_type getGroupCount () const noexcept
-	{ return m_gGroups.size (); }
+    inline size_type getGroupCount () const noexcept
+    { return m_gGroups.size (); }
 
-	inline ViewGroup* getGroup (size_type uId) const noexcept
-	{ return m_gGroups[uId]; }
+    inline ViewGroup* getGroup (size_type uId) const noexcept
+    { return m_gGroups[uId]; }
 
-	Signal<void()> signalClick;
-	Signal<void()> signalDoubleClick;
-	Signal<void()> signalRClick;
-	Signal<void()> signalChildResized;
-	Signal<void()> signalGroupAdded;
-	Signal<void()> signalGroupRemoved;
-	Signal<void()> signalBeginDrag;
-	Signal<void()> signalEndDrag;
-	Signal<void()> signalChevronPushed;
-	Signal<void()> signalHeightChanged;
-	Signal<void()> signalSplitterDrag;
-	Signal<void()> signalOrientationChanged;
+    Signal<void()> signalClick;
+    Signal<void()> signalDoubleClick;
+    Signal<void()> signalRClick;
+    Signal<void()> signalChildResized;
+    Signal<void()> signalGroupAdded;
+    Signal<void()> signalGroupRemoved;
+    Signal<void()> signalBeginDrag;
+    Signal<void()> signalEndDrag;
+    Signal<void()> signalChevronPushed;
+    Signal<void()> signalHeightChanged;
+    Signal<void()> signalSplitterDrag;
+    Signal<void()> signalOrientationChanged;
 
 private:
-	group_vector  m_gGroups;
-	ToolButton    m_eButtonType;
-	ToolFlags     m_eToolFlags;
-	Orientation m_eOrientation;
+    group_vector  m_gGroups;
+    ToolButton    m_eButtonType;
+    ToolFlags     m_eToolFlags;
+    Orientation m_eOrientation;
 
-	void onPaint ();
-	void onEnable (bool);
-	void onSize (Rect const&);
-	void onMove (Rect const&);
-	void onGotFocus ();
-	void onFocusKilled ();
+    void onPaint ();
+    void onEnable (bool);
+    void onSize (Rect const&);
+    void onMove (Rect const&);
+    void onGotFocus ();
+    void onFocusKilled ();
 };
 
 } } // Ui

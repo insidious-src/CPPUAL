@@ -31,9 +31,9 @@ namespace cppual { namespace Graphics { namespace GL { namespace Driver {
 
 enum StringQuery
 {
-	Renderer,
-	Vendor,
-	Version
+    Renderer,
+    Vendor,
+    Version
 };
 
 bool hasValidInstance () noexcept;

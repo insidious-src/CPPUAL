@@ -25,8 +25,8 @@ namespace cppual { namespace Ui {
 
 void AbstractButton::setLabel (string const& gText)
 {
-	m_gLabel = gText;
-	if (valid () and isHidden ()) refresh ();
+    m_gLabel = gText;
+    if (valid () and isHidden ()) refresh ();
 }
 
 AbstractButton::~AbstractButton () noexcept
@@ -37,7 +37,7 @@ AbstractButton::~AbstractButton () noexcept
 
 bool PushButton::create (View*, string const&)
 {
-	return true;
+    return true;
 }
 
 void PushButton::press ()
@@ -50,15 +50,15 @@ void PushButton::release ()
 
 void PushButton::onPaint (Rect const&)
 {
-//	Rect gBtnRect (getSurface ()->getRect ());
-//	IAbstractImage* pBackImage = m_pSkin->getImage (SkinElement::Button, 0);
-//	CPaintWorker cPainter (m_pSurface, true);
+//    Rect gBtnRect (getSurface ()->getRect ());
+//    IAbstractImage* pBackImage = m_pSkin->getImage (SkinElement::Button, 0);
+//    CPaintWorker cPainter (m_pSurface, true);
 
-//	if (!cPainter.IsActive ()) return;
-//	cPainter.SetActiveObject (pBackImage);
-//	cPainter.DrawImage (gBtnRect);
-//	cPainter.SetActiveObject (&m_gFont);
-	//	cPainter.DrawText (gBtnRect, &m_Label);
+//    if (!cPainter.IsActive ()) return;
+//    cPainter.SetActiveObject (pBackImage);
+//    cPainter.DrawImage (gBtnRect);
+//    cPainter.SetActiveObject (&m_gFont);
+    //    cPainter.DrawText (gBtnRect, &m_Label);
 }
 
 void PushButton::onSize (point2u)
@@ -73,7 +73,7 @@ void PushButton::onFocus (bool)
 
 bool RadioBox::create (View*, string const&, bool)
 {
-	return false;
+    return false;
 }
 
 void RadioBox::select ()
@@ -100,7 +100,7 @@ void RadioBox::onFocus (bool)
 
 bool CheckBox::create (View*, string const&, CheckState)
 {
-	return false;
+    return false;
 }
 
 void CheckBox::setCheckState (CheckState)

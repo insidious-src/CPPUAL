@@ -28,18 +28,18 @@
 namespace cppual { namespace Audio { namespace Listener {
 
 void    reset () noexcept;
-void	setPosition (point3f const& position) noexcept;
+void    setPosition (point3f const& position) noexcept;
 point3f position () noexcept;
-void	setVelocity (point3f const& velocity) noexcept;
+void    setVelocity (point3f const& velocity) noexcept;
 point3f velocity () noexcept;
-void	setOrientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) noexcept;
+void    setOrientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) noexcept;
 point3f orientationAt () noexcept;
 point3f orientationUp () noexcept;
-void	setVolume (float value) noexcept;
-float	volume () noexcept;
+void    setVolume (float value) noexcept;
+float    volume () noexcept;
 bool    isMute () noexcept;
-void	mute () noexcept;
-void	unmute () noexcept;
+void    mute () noexcept;
+void    unmute () noexcept;
 
 } } } // namespace Listener
 

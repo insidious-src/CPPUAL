@@ -30,8 +30,8 @@ namespace cppual { namespace Graphics { namespace GL {
 class ObjectInstance
 {
 public:
-	ObjectInstance () noexcept;
-	~ObjectInstance () noexcept;
+    ObjectInstance () noexcept;
+    ~ObjectInstance () noexcept;
 
 private:
 };
@@ -39,8 +39,8 @@ private:
 class LODInstance
 {
 public:
-	LODInstance () noexcept;
-	~LODInstance () noexcept;
+    LODInstance () noexcept;
+    ~LODInstance () noexcept;
 
 private:
 };

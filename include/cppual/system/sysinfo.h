@@ -32,68 +32,68 @@ namespace cppual { namespace System {
 
 enum class QueryCategory : unsigned char
 {
-	Motherboard,
-	CPU,
-	GPU,
-	PPU,
-	Voltages,
-	Sensors,
-	Services,
-	Kernel,
-	Environment
+    Motherboard,
+    CPU,
+    GPU,
+    PPU,
+    Voltages,
+    Sensors,
+    Services,
+    Kernel,
+    Environment
 };
 
 struct Motherboard final
 {
-	enum
-	{
-		FullName = 1,
-		Vendor,
-		Model,
-		Revision,
-		FormFactor,
-		BIOSName,
-		BIOSVersion,
-		RAMDAC,
-		RAMQuantity
-	};
+    enum
+    {
+        FullName = 1,
+        Vendor,
+        Model,
+        Revision,
+        FormFactor,
+        BIOSName,
+        BIOSVersion,
+        RAMDAC,
+        RAMQuantity
+    };
 };
 
 struct CPU final
 {
-	enum
-	{
-		FullName = 1,
-		Vendor,
-		Model,
-		CodeName,
-		Architecture,
-		PhysicalCoresCount,
-		LogicalCoresCount,
-		SSE,
-		SIMD
-	};
+    enum
+    {
+        FullName = 1,
+        Vendor,
+        Model,
+        CodeName,
+        Architecture,
+        PhysicalCoresCount,
+        LogicalCoresCount,
+        SSE,
+        SIMD
+    };
 };
 
 struct GPU final
 {
-	enum
-	{
-		FullName = 1,
-		Vendor,
-		Model,
-		CodeName,
-		Architecture,
-		ComputeCoresCount,
-		ShaderModel,
-		VRAMQuantity
-	};
+    enum
+    {
+        FullName = 1,
+        Vendor,
+        Model,
+        CodeName,
+        Architecture,
+        ComputeCoresCount,
+        ShaderModel,
+        VRAMQuantity
+    };
 };
 
 struct SystemInfoQuery final
 {
-	static string label (QueryCategory category, uint query_id);
-	static int    value (QueryCategory category, uint query_id);
+    static string label (QueryCategory category, uint query_id);
+    static int    value (QueryCategory category, uint query_id);
 };
 
 } } // namespace System

@@ -40,25 +40,25 @@ typedef RGBColor Color;
 
 enum class ColorName : unsigned char
 {
-	White,
-	Black,
-	Grey,
-	Red,
-	Green,
-	Blue,
-	Yellow,
-	Brown,
-	Orange
+    White,
+    Black,
+    Grey,
+    Red,
+    Green,
+    Blue,
+    Yellow,
+    Brown,
+    Orange
 };
 
 enum class ColorType : unsigned char
 {
-	TrueType,
-	Direct,
-	Pseudo,
-	Static,
-	Grey,
-	StaticGrey
+    TrueType,
+    Direct,
+    Pseudo,
+    Static,
+    Grey,
+    StaticGrey
 };
 
 // =========================================================
@@ -68,16 +68,16 @@ struct RGBColor
 
 inline bool operator == (RGBColor const& gObj1, RGBColor const& gObj2) noexcept
 {
-	return (gObj1.red	== gObj2.red   and
-			gObj1.green == gObj2.green and
-			gObj1.blue	== gObj2.blue);
+    return (gObj1.red    == gObj2.red   and
+            gObj1.green == gObj2.green and
+            gObj1.blue    == gObj2.blue);
 }
 
 inline bool operator != (RGBColor const& gObj1, RGBColor const& gObj2) noexcept
 {
-	return (gObj1.red != gObj2.red or
-						 gObj1.green != gObj2.green or
-										gObj1.blue != gObj2.blue);
+    return (gObj1.red != gObj2.red or
+                         gObj1.green != gObj2.green or
+                                        gObj1.blue != gObj2.blue);
 }
 
 // =========================================================

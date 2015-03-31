@@ -28,7 +28,7 @@
 #include <cppual/concepts.h>
 
 #ifdef DEBUG_MODE
-#	include <functional>
+    #include <functional>
 #endif
 
 namespace cppual {
@@ -51,28 +51,28 @@ using MemberFn = T (AnyObject::*)(Args...);
 template <std::size_t N>
 struct SimplifyMemFunc
 {
-	template <class X, class XFuncType>
-	inline static AnyObject* convert (X const*, XFuncType, AnyMemberFn&) noexcept
-	{
-		static_assert (N - 100,
-					   "unsupported member function pointer on this compiler");
-		return nullptr;
-	}
+    template <class X, class XFuncType>
+    inline static AnyObject* convert (X const*, XFuncType, AnyMemberFn&) noexcept
+    {
+        static_assert (N - 100,
+                       "unsupported member function pointer on this compiler");
+        return nullptr;
+    }
 };
 
 template <>
 struct SimplifyMemFunc <sizeof (AnyMemberFn)>
 {
-	template <class X, class XFuncType>
-	inline
-	static
-	AnyObject* convert (X const*     mPtrThis,
-						XFuncType    mFuncToBind,
-						AnyMemberFn& mFuncBound) noexcept
-	{
-		mFuncBound = reinterpret_cast<AnyMemberFn> (mFuncToBind);
-		return reinterpret_cast<AnyObject*> (const_cast<X*> (mPtrThis));
-	}
+    template <class X, class XFuncType>
+    inline
+    static
+    AnyObject* convert (X const*     mPtrThis,
+                        XFuncType    mFuncToBind,
+                        AnyMemberFn& mFuncBound) noexcept
+    {
+        mFuncBound = reinterpret_cast<AnyMemberFn> (mFuncToBind);
+        return reinterpret_cast<AnyObject*> (const_cast<X*> (mPtrThis));
+    }
 };
 
 // ====================================================
@@ -81,137 +81,137 @@ template <class TMemFunc, class TStaticFunc>
 class Closure
 {
 public:
-	typedef std::size_t size_type;
-	typedef AnyObject*  pointer;
-	typedef AnyMemberFn value_type;
+    typedef std::size_t size_type;
+    typedef AnyObject*  pointer;
+    typedef AnyMemberFn value_type;
 
-	constexpr Closure () noexcept = default;
-	constexpr Closure (std::nullptr_t) noexcept { }
+    constexpr Closure () noexcept = default;
+    constexpr Closure (std::nullptr_t) noexcept { }
 
-	constexpr Closure (Closure const& mClosure) noexcept
-	: m_pObj { mClosure.m_pObj },
-	  m_fn   { mClosure.m_fn   }
-	{ }
+    constexpr Closure (Closure const& mClosure) noexcept
+    : m_pObj { mClosure.m_pObj },
+      m_fn   { mClosure.m_fn   }
+    { }
 
-	inline Closure (Closure&& mClosure) noexcept
-	: m_pObj { std::move (mClosure.m_pObj) },
-	  m_fn   { std::move (mClosure.m_fn  ) }
-	{ mClosure = nullptr; }
+    inline Closure (Closure&& mClosure) noexcept
+    : m_pObj { std::move (mClosure.m_pObj) },
+      m_fn   { std::move (mClosure.m_fn  ) }
+    { mClosure = nullptr; }
 
-	inline Closure& operator = (std::nullptr_t) noexcept
-	{
-		m_pObj = nullptr;
-		m_fn   = nullptr;
-		return *this;
-	}
+    inline Closure& operator = (std::nullptr_t) noexcept
+    {
+        m_pObj = nullptr;
+        m_fn   = nullptr;
+        return *this;
+    }
 
-	inline Closure& operator = (Closure const& mRhs) noexcept
-	{
-		m_pObj = mRhs.m_pObj;
-		m_fn   = mRhs.m_fn;
-		return *this;
-	}
+    inline Closure& operator = (Closure const& mRhs) noexcept
+    {
+        m_pObj = mRhs.m_pObj;
+        m_fn   = mRhs.m_fn;
+        return *this;
+    }
 
-	inline Closure& operator = (Closure&& mRhs) noexcept
-	{
-		m_pObj = std::move (mRhs.m_pObj);
-		m_fn   = std::move (mRhs.m_fn  );
-		return *this;
-	}
+    inline Closure& operator = (Closure&& mRhs) noexcept
+    {
+        m_pObj = std::move (mRhs.m_pObj);
+        m_fn   = std::move (mRhs.m_fn  );
+        return *this;
+    }
 
-	template <class X, class XMemFunc>
-	inline void bindMemFunc (X* mPtrThis, XMemFunc mFuncToBind) noexcept
-	{
-		m_pObj = SimplifyMemFunc<sizeof (mFuncToBind)>::convert
-				 (mPtrThis, mFuncToBind, m_fn);
-	}
+    template <class X, class XMemFunc>
+    inline void bindMemFunc (X* mPtrThis, XMemFunc mFuncToBind) noexcept
+    {
+        m_pObj = SimplifyMemFunc<sizeof (mFuncToBind)>::convert
+                 (mPtrThis, mFuncToBind, m_fn);
+    }
 
-	template <class DerivedClass, class ParentInvokerSig>
-	inline void bindStaticFunc (DerivedClass*    mPtrParent,
-								ParentInvokerSig mStaticFuncInvoker,
-								TStaticFunc      mFuncToBind) noexcept
-	{
-		static_assert (sizeof (pointer) == sizeof (mFuncToBind),
-					   "Cannot use direct_cast");
-		if (mFuncToBind == nullptr) m_fn = nullptr;
-		else bindMemFunc (mPtrParent, mStaticFuncInvoker);
-		m_pObj = direct_cast<pointer> (mFuncToBind);
-	}
+    template <class DerivedClass, class ParentInvokerSig>
+    inline void bindStaticFunc (DerivedClass*    mPtrParent,
+                                ParentInvokerSig mStaticFuncInvoker,
+                                TStaticFunc      mFuncToBind) noexcept
+    {
+        static_assert (sizeof (pointer) == sizeof (mFuncToBind),
+                       "Cannot use direct_cast");
+        if (mFuncToBind == nullptr) m_fn = nullptr;
+        else bindMemFunc (mPtrParent, mStaticFuncInvoker);
+        m_pObj = direct_cast<pointer> (mFuncToBind);
+    }
 
-	constexpr bool operator == (std::nullptr_t) const noexcept
-	{ return m_fn == nullptr and m_pObj == nullptr; }
+    constexpr bool operator == (std::nullptr_t) const noexcept
+    { return m_fn == nullptr and m_pObj == nullptr; }
 
-	constexpr bool operator == (Closure const& mRhs) const noexcept
-	{ return m_pObj == mRhs.m_pObj and m_fn == mRhs.m_fn; }
+    constexpr bool operator == (Closure const& mRhs) const noexcept
+    { return m_pObj == mRhs.m_pObj and m_fn == mRhs.m_fn; }
 
-	constexpr bool operator == (TStaticFunc mPtr) const noexcept
-	{
-		return mPtr == nullptr ?
-					*this == nullptr :
-					mPtr  == reinterpret_cast<TStaticFunc> (getStaticFunc ());
-	}
+    constexpr bool operator == (TStaticFunc mPtr) const noexcept
+    {
+        return mPtr == nullptr ?
+                    *this == nullptr :
+                    mPtr  == reinterpret_cast<TStaticFunc> (getStaticFunc ());
+    }
 
-	constexpr bool operator != (std::nullptr_t) const noexcept
-	{ return !operator == (nullptr); }
+    constexpr bool operator != (std::nullptr_t) const noexcept
+    { return !operator == (nullptr); }
 
-	constexpr bool operator != (Closure const& mRhs) const noexcept
-	{ return !operator == (mRhs); }
+    constexpr bool operator != (Closure const& mRhs) const noexcept
+    { return !operator == (mRhs); }
 
-	constexpr bool operator != (TStaticFunc mPtr) const noexcept
-	{ return !operator == (mPtr); }
+    constexpr bool operator != (TStaticFunc mPtr) const noexcept
+    { return !operator == (mPtr); }
 
-	inline bool operator < (Closure const& mRhs) const
-	{
-		return m_pObj != mRhs.m_pObj ?
-							  m_pObj < mRhs.m_pObj :
-							  std::memcmp (&m_fn, &mRhs.m_fn, sizeof (m_fn)) < 0;
-	}
+    inline bool operator < (Closure const& mRhs) const
+    {
+        return m_pObj != mRhs.m_pObj ?
+                              m_pObj < mRhs.m_pObj :
+                              std::memcmp (&m_fn, &mRhs.m_fn, sizeof (m_fn)) < 0;
+    }
 
-	inline bool operator > (Closure const& mRhs) const
-	{ return mRhs < *this; }
+    inline bool operator > (Closure const& mRhs) const
+    { return mRhs < *this; }
 
-	inline size_type hash () const noexcept
-	{
-		return reinterpret_cast<size_type> (m_pObj) ^
-				unsafe_direct_cast<size_type> (m_fn);
-	}
+    inline size_type hash () const noexcept
+    {
+        return reinterpret_cast<size_type> (m_pObj) ^
+                unsafe_direct_cast<size_type> (m_fn);
+    }
 
-	inline pointer object () const noexcept
-	{ return m_pObj; }
+    inline pointer object () const noexcept
+    { return m_pObj; }
 
-	inline TMemFunc getPtrFunction () const noexcept
-	{ return reinterpret_cast<TMemFunc> (m_fn); }
+    inline TMemFunc getPtrFunction () const noexcept
+    { return reinterpret_cast<TMemFunc> (m_fn); }
 
-	inline TStaticFunc getStaticFunc () const noexcept
-	{
-		static_assert (sizeof (TStaticFunc) == sizeof (this),
-					   "Cannot use direct_cast");
-		return direct_cast<TStaticFunc> (this);
-	}
-
-private:
-	template<class Out, class In>
-	constexpr Out direct_cast (In in) noexcept
-	{
-		typedef union { Out out; In in; } cast_union;
-
-		static_assert (sizeof (In) == sizeof (cast_union) and
-					   sizeof (In) == sizeof (Out),
-					   "cannot use direct_cast");
-
-		return cast_union (in).out;
-	}
-
-	template<class Out, class In>
-	constexpr Out unsafe_direct_cast (In in) noexcept
-	{
-		typedef union { Out out; In in; } cast_union;
-		return cast_union (in).out;
-	}
+    inline TStaticFunc getStaticFunc () const noexcept
+    {
+        static_assert (sizeof (TStaticFunc) == sizeof (this),
+                       "Cannot use direct_cast");
+        return direct_cast<TStaticFunc> (this);
+    }
 
 private:
-	pointer    m_pObj { nullptr };
-	value_type m_fn   { nullptr };
+    template<class Out, class In>
+    constexpr Out direct_cast (In in) noexcept
+    {
+        typedef union { Out out; In in; } cast_union;
+
+        static_assert (sizeof (In) == sizeof (cast_union) and
+                       sizeof (In) == sizeof (Out),
+                       "cannot use direct_cast");
+
+        return cast_union (in).out;
+    }
+
+    template<class Out, class In>
+    constexpr Out unsafe_direct_cast (In in) noexcept
+    {
+        typedef union { Out out; In in; } cast_union;
+        return cast_union (in).out;
+    }
+
+private:
+    pointer    m_pObj { nullptr };
+    value_type m_fn   { nullptr };
 };
 
 // ====================================================
@@ -220,128 +220,128 @@ template <typename T, typename... Args>
 class Function <T(Args...)>
 {
 public:
-	typedef MemberFn<T, Args...>                     any_mem_fn_type;
-	typedef StaticFn<T, Args...>                     static_fn_type;
-	typedef Closure<any_mem_fn_type, static_fn_type> closure_type;
-	typedef std::shared_ptr<void>                    storage_type;
-	typedef typename closure_type::value_type        value_type;
-	typedef typename closure_type::pointer           pointer;
+    typedef MemberFn<T, Args...>                     any_mem_fn_type;
+    typedef StaticFn<T, Args...>                     static_fn_type;
+    typedef Closure<any_mem_fn_type, static_fn_type> closure_type;
+    typedef std::shared_ptr<void>                    storage_type;
+    typedef typename closure_type::value_type        value_type;
+    typedef typename closure_type::pointer           pointer;
 
-	template <typename X>
-	using MemberFnToBind = T (X::*)(Args...);
+    template <typename X>
+    using MemberFnToBind = T (X::*)(Args...);
 
-	// lambda constructor
-	template <typename Callable,
-			  bool HasCapture = sizeof (value_type) < sizeof (Callable)>
-	inline Function (Callable&& mFunc)
-	: m_storage (HasCapture ? operator new (sizeof (Callable)) : nullptr,
-				 deleter<typename std::decay<Callable>::type>)
-	{
-		using FuncType = typename std::decay<Callable>::type;
+    // lambda constructor
+    template <typename Callable,
+              bool HasCapture = sizeof (value_type) < sizeof (Callable)>
+    inline Function (Callable&& mFunc)
+    : m_storage (HasCapture ? operator new (sizeof (Callable)) : nullptr,
+                 deleter<typename std::decay<Callable>::type>)
+    {
+        using FuncType = typename std::decay<Callable>::type;
 
-		if (HasCapture)
-		{
-			new (m_storage.get ()) FuncType (std::forward<Callable> (mFunc));
-			m_closure.bindMemFunc (m_storage.get (), &FuncType::operator ());
-		}
-		else
-			m_closure.bindMemFunc (&mFunc, &FuncType::operator ());
-	}
+        if (HasCapture)
+        {
+            new (m_storage.get ()) FuncType (std::forward<Callable> (mFunc));
+            m_closure.bindMemFunc (m_storage.get (), &FuncType::operator ());
+        }
+        else
+            m_closure.bindMemFunc (&mFunc, &FuncType::operator ());
+    }
 
-	constexpr Function () noexcept = default;
-	constexpr Function (std::nullptr_t) noexcept { }
+    constexpr Function () noexcept = default;
+    constexpr Function (std::nullptr_t) noexcept { }
 
-	constexpr Function (Function const& mImpl) noexcept
-	: m_closure { mImpl.m_closure },
-	  m_storage { mImpl.m_storage }
-	{ }
+    constexpr Function (Function const& mImpl) noexcept
+    : m_closure { mImpl.m_closure },
+      m_storage { mImpl.m_storage }
+    { }
 
-	inline Function (Function&& mImpl) noexcept
-	: m_closure { std::move (mImpl.m_closure) },
-	  m_storage { std::move (mImpl.m_storage) }
-	{ }
+    inline Function (Function&& mImpl) noexcept
+    : m_closure { std::move (mImpl.m_closure) },
+      m_storage { std::move (mImpl.m_storage) }
+    { }
 
-	// static function constructor
-	inline Function (static_fn_type mFuncToBind) noexcept
-	{ bind (mFuncToBind); }
+    // static function constructor
+    inline Function (static_fn_type mFuncToBind) noexcept
+    { bind (mFuncToBind); }
 
-	// member function constructor
-	template <typename X, typename Y>
-	inline Function (MemberFnToBind<X> mFuncToBind, Y* mPtrThis) noexcept
-	{ bind (mFuncToBind, mPtrThis); }
+    // member function constructor
+    template <typename X, typename Y>
+    inline Function (MemberFnToBind<X> mFuncToBind, Y* mPtrThis) noexcept
+    { bind (mFuncToBind, mPtrThis); }
 
-	inline Function& operator = (Function const& mImpl) noexcept
-	{
-		m_closure = mImpl.m_closure;
-		m_storage = mImpl.m_storage;
-		return *this;
-	}
+    inline Function& operator = (Function const& mImpl) noexcept
+    {
+        m_closure = mImpl.m_closure;
+        m_storage = mImpl.m_storage;
+        return *this;
+    }
 
-	inline Function& operator = (Function&& mImpl) noexcept
-	{
-		m_closure = std::move (mImpl.m_closure);
-		m_storage = std::move (mImpl.m_storage);
-		return *this;
-	}
+    inline Function& operator = (Function&& mImpl) noexcept
+    {
+        m_closure = std::move (mImpl.m_closure);
+        m_storage = std::move (mImpl.m_storage);
+        return *this;
+    }
 
-	inline Function& operator = (static_fn_type mFuncToBind) noexcept
-	{
-		bind (mFuncToBind);
-		m_storage.reset ();
-		return *this;
-	}
+    inline Function& operator = (static_fn_type mFuncToBind) noexcept
+    {
+        bind (mFuncToBind);
+        m_storage.reset ();
+        return *this;
+    }
 
-	inline T operator () (Args... mArgs) const
-	{
-#		ifdef DEBUG_MODE
-		if (m_closure == nullptr) throw std::bad_function_call ();
-#		endif
-		return (m_closure.object ()->*(m_closure.getPtrFunction ()))
-				(std::forward<Args> (mArgs)...);
-	}
+    inline T operator () (Args... mArgs) const
+    {
+        #ifdef DEBUG_MODE
+        if (m_closure == nullptr) throw std::bad_function_call ();
+        #endif
+        return (m_closure.object ()->*(m_closure.getPtrFunction ()))
+                (std::forward<Args> (mArgs)...);
+    }
 
-	constexpr bool operator == (std::nullptr_t) const noexcept
-	{ return m_closure == nullptr; }
+    constexpr bool operator == (std::nullptr_t) const noexcept
+    { return m_closure == nullptr; }
 
-	constexpr bool operator == (Function const& mImpl) const noexcept
-	{ return m_closure == mImpl.m_closure; }
+    constexpr bool operator == (Function const& mImpl) const noexcept
+    { return m_closure == mImpl.m_closure; }
 
-	constexpr bool operator == (static_fn_type mFuncPtr) const noexcept
-	{ return m_closure == mFuncPtr; }
+    constexpr bool operator == (static_fn_type mFuncPtr) const noexcept
+    { return m_closure == mFuncPtr; }
 
-	constexpr bool operator != (std::nullptr_t) const noexcept
-	{ return !operator == (nullptr); }
+    constexpr bool operator != (std::nullptr_t) const noexcept
+    { return !operator == (nullptr); }
 
-	constexpr bool operator != (Function const& mImpl) const noexcept
-	{ return !operator == (mImpl); }
+    constexpr bool operator != (Function const& mImpl) const noexcept
+    { return !operator == (mImpl); }
 
-	constexpr bool operator != (static_fn_type mFuncPtr) const noexcept
-	{ return !operator == (mFuncPtr); }
+    constexpr bool operator != (static_fn_type mFuncPtr) const noexcept
+    { return !operator == (mFuncPtr); }
 
-	constexpr bool operator  < (Function const& mImpl) const
-	{ return m_closure < mImpl.m_closure; }
+    constexpr bool operator  < (Function const& mImpl) const
+    { return m_closure < mImpl.m_closure; }
 
-	constexpr bool operator  > (Function const& mImpl) const
-	{ return m_closure > mImpl.m_closure; }
-
-private:
-	template <typename U>
-	inline static void deleter (void* mPtr)
-	{ static_cast<U*> (mPtr)->~U (); operator delete (mPtr); }
-
-	inline T invokeStaticFunc (Args... mArgs) const
-	{ return (*(m_closure.getStaticFunc ()))(std::forward<Args> (mArgs)...); }
-
-	inline void bind (static_fn_type mFuncToBind) noexcept
-	{ m_closure.bindStaticFunc (this, &Function::invokeStaticFunc, mFuncToBind); }
-
-	template<typename X, typename Y>
-	inline void bind (MemberFnToBind<X> mFuncToBind, Y* mPtrThis) noexcept
-	{ m_closure.bindMemFunc (reinterpret_cast<const Y*> (mPtrThis), mFuncToBind); }
+    constexpr bool operator  > (Function const& mImpl) const
+    { return m_closure > mImpl.m_closure; }
 
 private:
-	closure_type m_closure;
-	storage_type m_storage;
+    template <typename U>
+    inline static void deleter (void* mPtr)
+    { static_cast<U*> (mPtr)->~U (); operator delete (mPtr); }
+
+    inline T invokeStaticFunc (Args... mArgs) const
+    { return (*(m_closure.getStaticFunc ()))(std::forward<Args> (mArgs)...); }
+
+    inline void bind (static_fn_type mFuncToBind) noexcept
+    { m_closure.bindStaticFunc (this, &Function::invokeStaticFunc, mFuncToBind); }
+
+    template<typename X, typename Y>
+    inline void bind (MemberFnToBind<X> mFuncToBind, Y* mPtrThis) noexcept
+    { m_closure.bindMemFunc (reinterpret_cast<const Y*> (mPtrThis), mFuncToBind); }
+
+private:
+    closure_type m_closure;
+    storage_type m_storage;
 };
 
 } // cppual

@@ -23,25 +23,25 @@
 //#include <boost/interprocess/shared_memory_object.hpp>
 
 #ifdef OS_STD_UNIX
-#	include <unistd.h>
-#	include <sys/mman.h>
-#	include <sys/resource.h>
-//#	include <sys/types.h>
-//#	include <sys/param.h>
-#	ifdef OS_GNU_LINUX
-#		include <fcntl.h>
-#		include <stdio.h>
-#	elif defined (OS_MAC)
-#		include <mach/mach.h>
-#	elif defined (OS_AIX) or defined (OS_SOLARIS) or defined (OS_SOLARIS)
-#		include <fcntl.h>
-#		include <procfs.h>
-#	elif defined (OS_BSD)
-#		include <sys/sysctl.h>
-#	endif
+#    include <unistd.h>
+#    include <sys/mman.h>
+#    include <sys/resource.h>
+//#    include <sys/types.h>
+//#    include <sys/param.h>
+#    ifdef OS_GNU_LINUX
+#        include <fcntl.h>
+#        include <stdio.h>
+#    elif defined (OS_MAC)
+#        include <mach/mach.h>
+#    elif defined (OS_AIX) or defined (OS_SOLARIS) or defined (OS_SOLARIS)
+#        include <fcntl.h>
+#        include <procfs.h>
+#    elif defined (OS_BSD)
+#        include <sys/sysctl.h>
+#    endif
 #elif defined (OS_WINDOWS)
-#	include <windows.h>
-#	include <psapi.h>
+#    include <windows.h>
+#    include <psapi.h>
 #endif
 
 using std::string;
@@ -52,20 +52,20 @@ namespace cppual { namespace Memory {
 
 inline int flags1 (State eState) noexcept
 {
-	switch (eState)
-	{
-	case State::ReadOnly:
-		return O_RDONLY | O_EXCL;
-	case State::ReadWrite:
-		return O_RDWR | O_EXCL;
-	default:
-		return O_EXCL;
-	}
+    switch (eState)
+    {
+    case State::ReadOnly:
+        return O_RDONLY | O_EXCL;
+    case State::ReadWrite:
+        return O_RDWR | O_EXCL;
+    default:
+        return O_EXCL;
+    }
 }
 
 constexpr int flags (Mode eMode) noexcept
 {
-	return eMode == Mode::Create ? O_CREAT : 0;
+    return eMode == Mode::Create ? O_CREAT : 0;
 }
 
 #endif
@@ -82,13 +82,13 @@ SharedObject::SharedObject (string const& gName, Mode eMode, State eState)
 SharedObject::~SharedObject () noexcept
 {
 #   ifdef OS_STD_UNIX
-	if (m_nId != -1) shm_unlink (m_gName.c_str ());
+    if (m_nId != -1) shm_unlink (m_gName.c_str ());
 #   endif
 }
 
 bool SharedObject::truncate (size_type) noexcept
 {
-	return false;
+    return false;
 }
 
 SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
@@ -96,24 +96,24 @@ SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
   m_pRegion (),
   m_uSize (gObj.isValid () ? uSize : 0)
 {
-	if (gObj.isValid ())
-	{
-		if (gObj.mode () != Mode::Open) gObj.truncate (uSize);
+    if (gObj.isValid ())
+    {
+        if (gObj.mode () != Mode::Open) gObj.truncate (uSize);
 
 #       ifdef OS_STD_UNIX
-		m_pRegion = mmap (nullptr, uSize,
-						  bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
-						  MAP_SHARED, gObj.id (), 0);
+        m_pRegion = mmap (nullptr, uSize,
+                          bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
+                          MAP_SHARED, gObj.id (), 0);
 #       elif defined OS_WINDOWS
         bWritable = bWritable;
 #       endif
-	}
+    }
 }
 
 SharedRegion::~SharedRegion () noexcept
 {
 #   ifdef OS_STD_UNIX
-	if (m_pRegion) munmap (m_pRegion, m_uSize);
+    if (m_pRegion) munmap (m_pRegion, m_uSize);
 #   endif
 }
 

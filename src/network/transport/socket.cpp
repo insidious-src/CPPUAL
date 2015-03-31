@@ -36,17 +36,17 @@ namespace cppual { namespace Network {
 
 struct SocketFlag
 {
-	enum Type
-	{
+    enum Type
+    {
 #       ifdef OS_STD_UNIX
-		NonBlocking = O_NONBLOCK,
+        NonBlocking = O_NONBLOCK,
 #       endif
-		NoDelay     = TCP_NODELAY,
-		Broadcast   = SO_BROADCAST,
+        NoDelay     = TCP_NODELAY,
+        Broadcast   = SO_BROADCAST,
 #       ifdef OS_LEOPARD_X
-		NoSigPipe   = SO_NOSIGPIPE
+        NoSigPipe   = SO_NOSIGPIPE
 #       endif
-	};
+    };
 };
 
 socket_id const TransportSocket::sm_nInvalid = -1;
@@ -56,7 +56,7 @@ TransportSocket::TransportSocket (SocketType eProt) noexcept
   m_eProtocol (eProt),
   m_bIsBlocking (true)
 {
-	initSocket ();
+    initSocket ();
 }
 
 TransportSocket::TransportSocket (TransportSocket&& gObj) noexcept
@@ -64,22 +64,22 @@ TransportSocket::TransportSocket (TransportSocket&& gObj) noexcept
   m_eProtocol (gObj.m_eProtocol),
   m_bIsBlocking (gObj.m_bIsBlocking)
 {
-	gObj.m_nId = nullSocket ();
+    gObj.m_nId = nullSocket ();
 }
 
 TransportSocket& TransportSocket::operator = (TransportSocket&& gObj) noexcept
 {
-	m_nId         = gObj.m_nId;
-	m_eProtocol   = gObj.m_eProtocol;
-	m_bIsBlocking = gObj.m_bIsBlocking;
-	gObj.m_nId    = nullSocket ();
-	return *this;
+    m_nId         = gObj.m_nId;
+    m_eProtocol   = gObj.m_eProtocol;
+    m_bIsBlocking = gObj.m_bIsBlocking;
+    gObj.m_nId    = nullSocket ();
+    return *this;
 }
 
 void TransportSocket::setBlocking (bool bBlock) noexcept
 {
-	if (m_nId != nullSocket ())
-	{
+    if (m_nId != nullSocket ())
+    {
 #       ifdef OS_STD_UNIX
         int nStatus = ::fcntl (id (), F_GETFL);
 
@@ -87,21 +87,21 @@ void TransportSocket::setBlocking (bool bBlock) noexcept
         else nStatus |= SocketFlag::NonBlocking;
 
         ::fcntl (id (), F_SETFL, nStatus);
-		m_bIsBlocking = bBlock;
+        m_bIsBlocking = bBlock;
 #       endif
-	}
+    }
 }
 
 socket_id TransportSocket::create (SocketType eProt) noexcept
 {
-	return ::socket (PF_INET,
-					 eProt == SocketType::Tcp ? SOCK_STREAM : SOCK_DGRAM,
-					 0);
+    return ::socket (PF_INET,
+                     eProt == SocketType::Tcp ? SOCK_STREAM : SOCK_DGRAM,
+                     0);
 }
 
 void TransportSocket::replaceFromId (socket_id nId) noexcept
 {
-	if (nId   == nullSocket ()) return;
+    if (nId   == nullSocket ()) return;
 #   ifdef OS_STD_UNIX
     if (id () != nullSocket ()) ::close (id ());
     m_nId = nId;
@@ -120,45 +120,45 @@ void TransportSocket::close () noexcept
 void TransportSocket::initSocket () noexcept
 {
     if (id () != nullSocket ())
-	{
-		if (m_eProtocol == SocketType::Tcp)
-		{
+    {
+        if (m_eProtocol == SocketType::Tcp)
+        {
 #           ifdef OS_STD_UNIX
-			// Disable the Nagle algorithm (ie. removes buffering of TCP packets)
-			int yes = 1;
+            // Disable the Nagle algorithm (ie. removes buffering of TCP packets)
+            int yes = 1;
 
             if (::setsockopt (id (),
-							  IPPROTO_TCP,
+                              IPPROTO_TCP,
                               SocketFlag::NoDelay,
-							  reinterpret_cast<char*> (&yes),
-							  sizeof (int)) == -1)
-			{
-				std::cerr << "Failed to set socket option \"TCP_NODELAY\"; "
-							 "All your TCP packets will be buffered" << std::endl;
-			}
+                              reinterpret_cast<char*> (&yes),
+                              sizeof (int)) == -1)
+            {
+                std::cerr << "Failed to set socket option \"TCP_NODELAY\"; "
+                             "All your TCP packets will be buffered" << std::endl;
+            }
 #           elif defined OS_LEOPARD_X
-			// On Mac OS X, disable the SIGPIPE signal on disconnection
+            // On Mac OS X, disable the SIGPIPE signal on disconnection
             if (::setsockopt (id (),
-							  SOL_SOCKET,
+                              SOL_SOCKET,
                               SocketFlag::NoSigPipe,
-							  reinterpret_cast<char*>(&yes),
-							  sizeof (int)) == -1)
-				std::cerr << "Failed to set socket option \"SO_NOSIGPIPE\"" << std::endl;
+                              reinterpret_cast<char*>(&yes),
+                              sizeof (int)) == -1)
+                std::cerr << "Failed to set socket option \"SO_NOSIGPIPE\"" << std::endl;
 #           endif
-		}
-		else
-		{
-			// Enable broadcast by default for UDP sockets
-			int yes = 1;
+        }
+        else
+        {
+            // Enable broadcast by default for UDP sockets
+            int yes = 1;
 
             if (::setsockopt (id (),
-							  SOL_SOCKET,
+                              SOL_SOCKET,
                               SocketFlag::Broadcast,
-							  reinterpret_cast<char*> (&yes),
-							  sizeof (int)) == -1)
-				std::cerr << "Failed to enable broadcast on UDP socket" << std::endl;
+                              reinterpret_cast<char*> (&yes),
+                              sizeof (int)) == -1)
+                std::cerr << "Failed to enable broadcast on UDP socket" << std::endl;
         }
-	}
+    }
 }
 
 } } // namespace Network

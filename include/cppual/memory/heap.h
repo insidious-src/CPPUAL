@@ -33,46 +33,46 @@ namespace cppual { namespace Memory {
 class HeapAllocator final : public Allocator, NonCopyable
 {
 public:
-	HeapAllocator (size_type size);
-	HeapAllocator (Allocator& allocator, size_type size);
-	//HeapAllocator (string& shared_name, size_type size);
-	~HeapAllocator ();
+    HeapAllocator (size_type size);
+    HeapAllocator (Allocator& allocator, size_type size);
+    //HeapAllocator (string& shared_name, size_type size);
+    ~HeapAllocator ();
 
-	void* allocate (size_type size, align_type align) noexcept override;
-	void  deallocate (void* p, size_type size) override;
-	void  clear () noexcept;
+    void* allocate (size_type size, align_type align) noexcept override;
+    void  deallocate (void* p, size_type size) override;
+    void  clear () noexcept;
 
-	bool is_equal (Allocator const& gObj) const noexcept
-	{ return &gObj == &m_gOwner; }
+    bool is_equal (Allocator const& gObj) const noexcept
+    { return &gObj == &m_gOwner; }
 
-	size_type max_size () const noexcept
-	{ return m_pFreeBlocks != nullptr ? m_pFreeBlocks->size : 0; }
+    size_type max_size () const noexcept
+    { return m_pFreeBlocks != nullptr ? m_pFreeBlocks->size : 0; }
 
-	size_type count () const noexcept
-	{ return m_uNumAlloc; }
+    size_type count () const noexcept
+    { return m_uNumAlloc; }
 
-	size_type size () const noexcept
-	{
-		return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
-									   static_cast<math_pointer> (m_pBegin));
-	}
+    size_type size () const noexcept
+    {
+        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
+                                       static_cast<math_pointer> (m_pBegin));
+    }
 
-	bool is_shared () const noexcept
-	{ return m_bIsMemShared;  }
+    bool is_shared () const noexcept
+    { return m_bIsMemShared;  }
 
-	Allocator& owner () const noexcept
-	{ return m_gOwner; }
+    Allocator& owner () const noexcept
+    { return m_gOwner; }
 
 private:
-	struct Header    { size_type size, adjust; };
-	struct FreeBlock { size_type size; FreeBlock* next; };
+    struct Header    { size_type size, adjust; };
+    struct FreeBlock { size_type size; FreeBlock* next; };
 
-	size_type     m_uNumAlloc;
-	Allocator&   m_gOwner;
-	pointer const m_pBegin;
-	pointer const m_pEnd;
-	FreeBlock*    m_pFreeBlocks;
-	cbool         m_bIsMemShared;
+    size_type     m_uNumAlloc;
+    Allocator&   m_gOwner;
+    pointer const m_pBegin;
+    pointer const m_pEnd;
+    FreeBlock*    m_pFreeBlocks;
+    cbool         m_bIsMemShared;
 };
 
 // =========================================================
@@ -80,44 +80,44 @@ private:
 class ListAllocator final : public Allocator, NonCopyable
 {
 public:
-	struct Header;
+    struct Header;
 
-	ListAllocator (size_type size);
-	ListAllocator (Allocator& allocator, size_type size);
-	//ListAllocator (string& shared_name, size_type size);
-	~ListAllocator ();
+    ListAllocator (size_type size);
+    ListAllocator (Allocator& allocator, size_type size);
+    //ListAllocator (string& shared_name, size_type size);
+    ~ListAllocator ();
 
-	size_type max_size () const noexcept;
-	void      defragment () noexcept;
-	void*     allocate (size_type size, align_type align) noexcept;
-	void      deallocate (void* p, size_type size);
-	void      clear () noexcept;
+    size_type max_size () const noexcept;
+    void      defragment () noexcept;
+    void*     allocate (size_type size, align_type align) noexcept;
+    void      deallocate (void* p, size_type size);
+    void      clear () noexcept;
 
-	bool is_equal (Allocator const& gObj) const noexcept
-	{ return &gObj == &m_gOwner; }
+    bool is_equal (Allocator const& gObj) const noexcept
+    { return &gObj == &m_gOwner; }
 
-	size_type count () const noexcept
-	{ return m_uNumAlloc; }
+    size_type count () const noexcept
+    { return m_uNumAlloc; }
 
-	size_type size () const noexcept
-	{
-		return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
-									   static_cast<math_pointer> (m_pBegin));
-	}
+    size_type size () const noexcept
+    {
+        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
+                                       static_cast<math_pointer> (m_pBegin));
+    }
 
-	bool is_shared () const noexcept
-	{ return m_bIsMemShared;  }
+    bool is_shared () const noexcept
+    { return m_bIsMemShared;  }
 
-	Allocator& owner () const noexcept
-	{ return m_gOwner; }
+    Allocator& owner () const noexcept
+    { return m_gOwner; }
 
 private:
-	pointer const m_pBegin;
-	pointer const m_pEnd;
-	Header*       m_pFirstFreeBlock;
-	size_type     m_uNumAlloc;
-	Allocator&   m_gOwner;
-	cbool         m_bIsMemShared;
+    pointer const m_pBegin;
+    pointer const m_pEnd;
+    Header*       m_pFirstFreeBlock;
+    size_type     m_uNumAlloc;
+    Allocator&   m_gOwner;
+    cbool         m_bIsMemShared;
 };
 
 // =========================================================

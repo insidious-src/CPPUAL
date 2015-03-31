@@ -52,34 +52,34 @@ Label2D::Label2D (Label2D&& gObj) noexcept
 
 Label2D& Label2D::operator = (Label2D const&)
 {
-	return *this;
+    return *this;
 }
 
 Label2D& Label2D::operator = (Label2D&&) noexcept
 {
-	return *this;
+    return *this;
 }
 
 void Label2D::draw (Transform2D const& transform)
 {
-	if (m_gText.empty ()) return;
+    if (m_gText.empty ()) return;
 
-	glBindTexture (GL::Texture2D, 0);
-	glBegin (GL::Quads);
+    glBindTexture (GL::Texture2D, 0);
+    glBegin (GL::Quads);
 
-	for (std::size_t i = 0; i < m_gText.length (); ++i)
-	{
-		//glTexCoord2f (glyph->tex_x1, glyph->tex_y1);
-		glVertex2i (transform.geometry ().left, transform.geometry ().top);
-		//glTexCoord2f (glyph->tex_x1, glyph->tex_y1 + _tex_line_height);
-		//glVertex2i (transform.x (), transform.y () + font ().lineHeight);
-		//glTexCoord2f (glyph->tex_x2, glyph->tex_y1 + _tex_line_height);
-		//glVertex2i (transform.x () + glyph->advance, transform.y () + m_gFont.height);
-		//glTexCoord2f (glyph->tex_x2, glyph->tex_y1);
-		//glVertex2i (transform.x () + glyph->advance, transform.y ());
-	}
+    for (std::size_t i = 0; i < m_gText.length (); ++i)
+    {
+        //glTexCoord2f (glyph->tex_x1, glyph->tex_y1);
+        glVertex2i (transform.geometry ().left, transform.geometry ().top);
+        //glTexCoord2f (glyph->tex_x1, glyph->tex_y1 + _tex_line_height);
+        //glVertex2i (transform.x (), transform.y () + font ().lineHeight);
+        //glTexCoord2f (glyph->tex_x2, glyph->tex_y1 + _tex_line_height);
+        //glVertex2i (transform.x () + glyph->advance, transform.y () + m_gFont.height);
+        //glTexCoord2f (glyph->tex_x2, glyph->tex_y1);
+        //glVertex2i (transform.x () + glyph->advance, transform.y ());
+    }
 
-	glEnd ();
+    glEnd ();
 }
 
 } } // namespace Graphics

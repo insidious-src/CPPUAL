@@ -35,10 +35,10 @@ namespace cppual { namespace Graphics {
 
 enum class MatrixType : unsigned char
 {
-	Projection,
-	ModelTransform,
-	Texture,
-	Color
+    Projection,
+    ModelTransform,
+    Texture,
+    Color
 };
 
 // =========================================================
@@ -47,101 +47,101 @@ template <typename T, typename Allocator = std::allocator<T> >
 class DynamicMatrix
 {
 public:
-	typedef T                             value_type;
-	typedef T const*                      const_pointer;
-	typedef deque<T, Allocator>           array_type;
-	typedef Allocator                     allocator_type;
-	typedef typename Allocator::size_type size_type;
+    typedef T                             value_type;
+    typedef T const*                      const_pointer;
+    typedef deque<T, Allocator>           array_type;
+    typedef Allocator                     allocator_type;
+    typedef typename Allocator::size_type size_type;
 
-	DynamicMatrix<T>& identity ();
+    DynamicMatrix<T>& identity ();
 
-	constexpr size_type size   () const noexcept { return m_uCols * m_uRows; }
-	constexpr size_type cols   () const noexcept { return m_uCols; }
-	constexpr size_type rows   () const noexcept { return m_uRows; }
-	constexpr size_type maxRow () noexcept { return m_uRows - 1; }
-	constexpr size_type maxCol () noexcept { return m_uCols - 1; }
+    constexpr size_type size   () const noexcept { return m_uCols * m_uRows; }
+    constexpr size_type cols   () const noexcept { return m_uCols; }
+    constexpr size_type rows   () const noexcept { return m_uRows; }
+    constexpr size_type maxRow () noexcept { return m_uRows - 1; }
+    constexpr size_type maxCol () noexcept { return m_uCols - 1; }
 
-	constexpr value_type& operator [] (size_type uIdx) const noexcept
-	{ return m_matrix[uIdx]; }
+    constexpr value_type& operator [] (size_type uIdx) const noexcept
+    { return m_matrix[uIdx]; }
 
-	value_type& operator [] (size_type uIdx) noexcept
-	{ return m_matrix[uIdx]; }
+    value_type& operator [] (size_type uIdx) noexcept
+    { return m_matrix[uIdx]; }
 
-	constexpr void swapCoord () noexcept
-	{ if (m_uCols != m_uRows) std::swap (m_uCols, m_uRows); }
+    constexpr void swapCoord () noexcept
+    { if (m_uCols != m_uRows) std::swap (m_uCols, m_uRows); }
 
-	constexpr const_pointer data () const noexcept
-	{ return m_matrix.data (); }
+    constexpr const_pointer data () const noexcept
+    { return m_matrix.data (); }
 
-	virtual ~DynamicMatrix ()
-	{ }
+    virtual ~DynamicMatrix ()
+    { }
 
-	constexpr DynamicMatrix () noexcept
-	: m_matrix (),
-	  m_uCols (),
-	  m_uRows ()
-	{ }
+    constexpr DynamicMatrix () noexcept
+    : m_matrix (),
+      m_uCols (),
+      m_uRows ()
+    { }
 
-	DynamicMatrix (DynamicMatrix&& gObj) noexcept
-	: m_matrix (std::move (gObj.m_matrix)),
-	  m_uCols (gObj.m_uCols),
-	  m_uRows (gObj.m_uRows)
-	{ }
+    DynamicMatrix (DynamicMatrix&& gObj) noexcept
+    : m_matrix (std::move (gObj.m_matrix)),
+      m_uCols (gObj.m_uCols),
+      m_uRows (gObj.m_uRows)
+    { }
 
-	DynamicMatrix (DynamicMatrix const& gObj) noexcept
-	: m_matrix (gObj.m_matrix),
-	  m_uCols (gObj.m_uCols),
-	  m_uRows (gObj.m_uRows)
-	{ }
+    DynamicMatrix (DynamicMatrix const& gObj) noexcept
+    : m_matrix (gObj.m_matrix),
+      m_uCols (gObj.m_uCols),
+      m_uRows (gObj.m_uRows)
+    { }
 
-	template <typename... Ts>
-	DynamicMatrix (Ts... vals) noexcept
-	: m_matrix { vals... }
-	{ static_assert (sizeof... (vals) == size (), "Wrong number of initializers!"); }
+    template <typename... Ts>
+    DynamicMatrix (Ts... vals) noexcept
+    : m_matrix { vals... }
+    { static_assert (sizeof... (vals) == size (), "Wrong number of initializers!"); }
 
-	inline
-	DynamicMatrix&
-	setColumn (size_type idx, value_type const* values, size_type uSize) noexcept
-	{
-		if (idx >= m_uCols) idx = maxCol ();
-		for (auto i = 0; i < uSize and i < rows (); ++i)
-			m_matrix[(m_uCols * i) + idx] = *values[i];
-		return *this;
-	}
+    inline
+    DynamicMatrix&
+    setColumn (size_type idx, value_type const* values, size_type uSize) noexcept
+    {
+        if (idx >= m_uCols) idx = maxCol ();
+        for (auto i = 0; i < uSize and i < rows (); ++i)
+            m_matrix[(m_uCols * i) + idx] = *values[i];
+        return *this;
+    }
 
-	inline
-	DynamicMatrix&
-	fillColumn (size_type idx, value_type value) noexcept
-	{
-		if (idx >= m_uCols) idx = maxCol ();
-		for (auto i = 0; i < rows (); ++i)
-			m_matrix[(m_uCols * i) + idx] = value;
-		return *this;
-	}
+    inline
+    DynamicMatrix&
+    fillColumn (size_type idx, value_type value) noexcept
+    {
+        if (idx >= m_uCols) idx = maxCol ();
+        for (auto i = 0; i < rows (); ++i)
+            m_matrix[(m_uCols * i) + idx] = value;
+        return *this;
+    }
 
-	inline
-	DynamicMatrix&
-	setRow (size_type idx, value_type const* values, size_type uSize) noexcept
-	{
-		if (idx >= m_uRows) idx = maxRow ();
-		for (auto i = 0; i < uSize and i < cols (); ++i)
-			m_matrix[(m_uCols * idx) + i] = *values[i];
-		return *this;
-	}
+    inline
+    DynamicMatrix&
+    setRow (size_type idx, value_type const* values, size_type uSize) noexcept
+    {
+        if (idx >= m_uRows) idx = maxRow ();
+        for (auto i = 0; i < uSize and i < cols (); ++i)
+            m_matrix[(m_uCols * idx) + i] = *values[i];
+        return *this;
+    }
 
-	inline
-	DynamicMatrix&
-	fillRow (size_type idx, value_type value) noexcept
-	{
-		if (idx >= m_uRows) idx = maxRow ();
-		for (auto i = 0; i < cols (); ++i)
-			m_matrix[(m_uCols * idx) + i] = value;
-		return *this;
-	}
+    inline
+    DynamicMatrix&
+    fillRow (size_type idx, value_type value) noexcept
+    {
+        if (idx >= m_uRows) idx = maxRow ();
+        for (auto i = 0; i < cols (); ++i)
+            m_matrix[(m_uCols * idx) + i] = value;
+        return *this;
+    }
 
 private:
-	array_type m_matrix;
-	size_type  m_uCols, m_uRows;
+    array_type m_matrix;
+    size_type  m_uCols, m_uRows;
 };
 
 // =========================================================
@@ -150,121 +150,121 @@ template <u16 C, u16 R, typename T = float>
 class StaticMatrix
 {
 public:
-	static_assert (1 < C or 1 < R, "Ivalid number of dimensions!");
+    static_assert (1 < C or 1 < R, "Ivalid number of dimensions!");
 
-	typedef T               value_type;
-	typedef T const*        const_pointer;
-	typedef array<T, C * R> array_type;
-	typedef u16             size_type;
+    typedef T               value_type;
+    typedef T const*        const_pointer;
+    typedef array<T, C * R> array_type;
+    typedef u16             size_type;
 
-	StaticMatrix<C, R, T>& identity ()
-	{ return *this; }
+    StaticMatrix<C, R, T>& identity ()
+    { return *this; }
 
-	constexpr size_type cols () const noexcept
-	{ return C != R ? m_uCols : C; }
+    constexpr size_type cols () const noexcept
+    { return C != R ? m_uCols : C; }
 
-	constexpr size_type rows () const noexcept
-	{ return C != R ? m_uRows : R; }
+    constexpr size_type rows () const noexcept
+    { return C != R ? m_uRows : R; }
 
-	constexpr size_type maxRow () noexcept
-	{ return m_uRows - 1; }
+    constexpr size_type maxRow () noexcept
+    { return m_uRows - 1; }
 
-	constexpr size_type maxCol () noexcept
-	{ return m_uCols - 1; }
+    constexpr size_type maxCol () noexcept
+    { return m_uCols - 1; }
 
-	constexpr size_type colMul (size_type n) noexcept
-	{ return m_uCols * n; }
+    constexpr size_type colMul (size_type n) noexcept
+    { return m_uCols * n; }
 
-	inline
-	StaticMatrix<C, R, T>&
-	setColumn (size_type idx, value_type const* values, size_type uSize) noexcept
-	{
-		if (idx >= m_uCols) idx = maxCol ();
-		for (auto i = 0; i < uSize and i < rows (); ++i)
-			m_matrix[(m_uCols * i) + idx] = *values[i];
-		return *this;
-	}
+    inline
+    StaticMatrix<C, R, T>&
+    setColumn (size_type idx, value_type const* values, size_type uSize) noexcept
+    {
+        if (idx >= m_uCols) idx = maxCol ();
+        for (auto i = 0; i < uSize and i < rows (); ++i)
+            m_matrix[(m_uCols * i) + idx] = *values[i];
+        return *this;
+    }
 
-	inline
-	StaticMatrix<C, R, T>&
-	fillColumn (size_type idx, value_type value) noexcept
-	{
-		if (idx >= m_uCols) idx = maxCol ();
-		for (auto i = 0; i < rows (); ++i)
-			m_matrix[(m_uCols * i) + idx] = value;
-		return *this;
-	}
+    inline
+    StaticMatrix<C, R, T>&
+    fillColumn (size_type idx, value_type value) noexcept
+    {
+        if (idx >= m_uCols) idx = maxCol ();
+        for (auto i = 0; i < rows (); ++i)
+            m_matrix[(m_uCols * i) + idx] = value;
+        return *this;
+    }
 
-	inline
-	StaticMatrix<C, R, T>&
-	setRow (size_type idx, value_type const* values, size_type uSize) noexcept
-	{
-		if (idx >= m_uRows) idx = maxRow ();
-		for (auto i = 0; i < uSize and i < cols (); ++i)
-			m_matrix[colMul (idx) + i] = *values[i];
-		return *this;
-	}
+    inline
+    StaticMatrix<C, R, T>&
+    setRow (size_type idx, value_type const* values, size_type uSize) noexcept
+    {
+        if (idx >= m_uRows) idx = maxRow ();
+        for (auto i = 0; i < uSize and i < cols (); ++i)
+            m_matrix[colMul (idx) + i] = *values[i];
+        return *this;
+    }
 
-	inline
-	StaticMatrix<C, R, T>&
-	fillRow (size_type idx, value_type value) noexcept
-	{
-		if (idx >= m_uRows) idx = maxRow ();
-		for (auto i = 0; i < cols (); ++i)
-			m_matrix[colMul (idx) + i] = value;
-		return *this;
-	}
+    inline
+    StaticMatrix<C, R, T>&
+    fillRow (size_type idx, value_type value) noexcept
+    {
+        if (idx >= m_uRows) idx = maxRow ();
+        for (auto i = 0; i < cols (); ++i)
+            m_matrix[colMul (idx) + i] = value;
+        return *this;
+    }
 
-	virtual ~StaticMatrix ()
-	{ }
+    virtual ~StaticMatrix ()
+    { }
 
-	constexpr StaticMatrix (StaticMatrix<C, R, T> const& gObj) noexcept
-	: m_uCols (gObj.m_uCols),
-	  m_uRows (gObj.m_uRows),
-	  m_matrix (gObj.m_matrix)
-	{ }
+    constexpr StaticMatrix (StaticMatrix<C, R, T> const& gObj) noexcept
+    : m_uCols (gObj.m_uCols),
+      m_uRows (gObj.m_uRows),
+      m_matrix (gObj.m_matrix)
+    { }
 
-	constexpr StaticMatrix () noexcept
-	: m_uCols (C),
-	  m_uRows (R),
-	  m_matrix ()
-	{ }
+    constexpr StaticMatrix () noexcept
+    : m_uCols (C),
+      m_uRows (R),
+      m_matrix ()
+    { }
 
-	template <typename... Ts>
-	constexpr StaticMatrix (Ts... vals) noexcept
-	: m_uCols (C),
-	  m_uRows (R),
-	  m_matrix { vals... }
-	{ static_assert (sizeof... (vals) == size (), "Wrong number of initializers!"); }
+    template <typename... Ts>
+    constexpr StaticMatrix (Ts... vals) noexcept
+    : m_uCols (C),
+      m_uRows (R),
+      m_matrix { vals... }
+    { static_assert (sizeof... (vals) == size (), "Wrong number of initializers!"); }
 
-	constexpr value_type& operator [] (size_type uIdx) const noexcept
-	{ return m_matrix[uIdx]; }
+    constexpr value_type& operator [] (size_type uIdx) const noexcept
+    { return m_matrix[uIdx]; }
 
-	value_type& operator [] (size_type uIdx) noexcept
-	{ return m_matrix[uIdx]; }
+    value_type& operator [] (size_type uIdx) noexcept
+    { return m_matrix[uIdx]; }
 
-	static constexpr size_type size () noexcept
-	{ return C * R; }
+    static constexpr size_type size () noexcept
+    { return C * R; }
 
-	constexpr void swapCoord () noexcept
-	{ if (C != R) std::swap (m_uCols, m_uRows); }
+    constexpr void swapCoord () noexcept
+    { if (C != R) std::swap (m_uCols, m_uRows); }
 
-	const_pointer data () const noexcept
-	{ return m_matrix.data (); }
+    const_pointer data () const noexcept
+    { return m_matrix.data (); }
 
-	StaticMatrix<C, R, T>& operator  = (StaticMatrix<C, R, T> const&);
-	StaticMatrix<C, R, T>& operator *= (StaticMatrix<C, R, T> const&);
-	StaticMatrix<C, R, T>& operator *  (StaticMatrix<C, R, T> const&);
-	StaticMatrix<C, R, T>& operator += (StaticMatrix<C, R, T> const&);
-	StaticMatrix<C, R, T>& operator +  (StaticMatrix<C, R, T> const&);
-	StaticMatrix<C, R, T>& operator -= (StaticMatrix<C, R, T> const&);
-	StaticMatrix<C, R, T>& operator -  (StaticMatrix<C, R, T> const&);
-	StaticMatrix<C, R, T>& operator != (StaticMatrix<C, R, T> const&);
-	StaticMatrix<C, R, T>& operator == (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator  = (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator *= (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator *  (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator += (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator +  (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator -= (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator -  (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator != (StaticMatrix<C, R, T> const&);
+    StaticMatrix<C, R, T>& operator == (StaticMatrix<C, R, T> const&);
 
 private:
-	size_type  m_uCols, m_uRows;
-	array_type m_matrix;
+    size_type  m_uCols, m_uRows;
+    array_type m_matrix;
 };
 
 // =========================================================
@@ -272,8 +272,8 @@ private:
 class Matrix2 : public StaticMatrix <2, 2, float>
 {
 public:
-	Matrix2& invert ();
-	Matrix2& transpose () noexcept;
+    Matrix2& invert ();
+    Matrix2& transpose () noexcept;
 };
 
 // =========================================================
@@ -281,8 +281,8 @@ public:
 class Matrix3 : public StaticMatrix <3, 3, float>
 {
 public:
-	Matrix3& invert ();
-	Matrix3& transpose () noexcept;
+    Matrix3& invert ();
+    Matrix3& transpose () noexcept;
 };
 
 // =========================================================
@@ -290,23 +290,23 @@ public:
 class Matrix4 : public StaticMatrix <4, 4, float>
 {
 public:
-	using StaticMatrix<4, 4, float>::StaticMatrix;
+    using StaticMatrix<4, 4, float>::StaticMatrix;
 
-	Matrix4& invert ();
-	Matrix4& transpose () noexcept;
-	Matrix4& rotate (anglef, point3f);
-	Matrix4& rotateX (anglef);
-	Matrix4& rotateY (anglef);
-	Matrix4& rotateZ (anglef);
-	Matrix4& translate (point3f) noexcept;
-	Matrix4& scale (value_type);
-	Matrix4& scale (point3f);
+    Matrix4& invert ();
+    Matrix4& transpose () noexcept;
+    Matrix4& rotate (anglef, point3f);
+    Matrix4& rotateX (anglef);
+    Matrix4& rotateY (anglef);
+    Matrix4& rotateZ (anglef);
+    Matrix4& translate (point3f) noexcept;
+    Matrix4& scale (value_type);
+    Matrix4& scale (point3f);
 
-	const_pointer transposed () const noexcept
-	{ return &m_fTranspose[0]; }
+    const_pointer transposed () const noexcept
+    { return &m_fTranspose[0]; }
 
 private:
-	value_type m_fTranspose[size ()];
+    value_type m_fTranspose[size ()];
 };
 
 // =========================================================
@@ -314,11 +314,11 @@ private:
 class ViewMatrix : public Matrix4
 {
 public:
-	enum class Type : bool
-	{
-		Perspective,
-		Orthographic
-	};
+    enum class Type : bool
+    {
+        Perspective,
+        Orthographic
+    };
 };
 
 } } // namespace Graphics

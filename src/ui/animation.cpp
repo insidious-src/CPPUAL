@@ -29,17 +29,17 @@ float IAnimation::defaultSpeed = 1.0;
 
 void Motion::play (int nRepeat)
 {
-	if (!m_bIsPlaying.load () and m_pObject and m_pObject->valid ())
-	{
-		m_bIsPlaying.store (true);
+    if (!m_bIsPlaying.load () and m_pObject and m_pObject->valid ())
+    {
+        m_bIsPlaying.store (true);
 
-		do
-		{
-		}
-		while (nRepeat < 0 ? true : --nRepeat);
+        do
+        {
+        }
+        while (nRepeat < 0 ? true : --nRepeat);
 
-		m_bIsPlaying.store (false);
-	}
+        m_bIsPlaying.store (false);
+    }
 }
 
 void Motion::pause ()
@@ -54,9 +54,9 @@ void Motion::resume ()
 
 void Fade::play (int)
 {
-	if (!m_bIsPlaying and m_pObject and m_pObject->valid ())
-	{
-	}
+    if (!m_bIsPlaying and m_pObject and m_pObject->valid ())
+    {
+    }
 }
 
 void Fade::pause ()
@@ -71,10 +71,10 @@ void Fade::resume ()
 
 void Rotation::play (int)
 {
-	if (!m_bIsPlaying.load (std::memory_order_consume) and
-			m_pObject and m_pObject->valid ())
-	{
-	}
+    if (!m_bIsPlaying.load (std::memory_order_consume) and
+            m_pObject and m_pObject->valid ())
+    {
+    }
 }
 
 void Rotation::pause ()
@@ -89,10 +89,10 @@ void Rotation::resume ()
 
 void Pulse::play (int)
 {
-	if (!m_bIsPlaying.load (std::memory_order_consume) and
-			m_pObject and m_pObject->valid ())
-	{
-	}
+    if (!m_bIsPlaying.load (std::memory_order_consume) and
+            m_pObject and m_pObject->valid ())
+    {
+    }
 }
 
 void Pulse::pause ()

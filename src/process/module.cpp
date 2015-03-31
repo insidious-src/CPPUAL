@@ -23,10 +23,10 @@
 #include <iostream>
 
 #ifdef OS_STD_POSIX
-#	include <dlfcn.h>
+#    include <dlfcn.h>
 #elif defined (OS_WINDOWS)
 #   define WIN32_LEAN_AND_MEAN
-#	include <windows.h>
+#    include <windows.h>
 #endif
 
 using std::string;
@@ -35,13 +35,13 @@ namespace { // optimize for internal unit usage
 
 constexpr const char* shared_ext () noexcept
 {
-#	if defined (OS_GNU_LINUX) or defined (OS_BSD)
-	return ".so";
-#	elif defined (OS_STD_MAC)
-	return ".dylib";
-#	elif defined (OS_WINDOWS)
-	return ".dll";
-#	endif
+#    if defined (OS_GNU_LINUX) or defined (OS_BSD)
+    return ".so";
+#    elif defined (OS_STD_MAC)
+    return ".dylib";
+#    elif defined (OS_WINDOWS)
+    return ".dll";
+#    endif
 }
 
 } // anonymous namespace
@@ -49,9 +49,9 @@ constexpr const char* shared_ext () noexcept
 namespace cppual { namespace Process {
 
 Module::Module (cchar*        pPath,
-				bool          bAttach,
-				ResolvePolicy eResolve,
-				Flags         gFlags) noexcept
+                bool          bAttach,
+                ResolvePolicy eResolve,
+                Flags         gFlags) noexcept
 : m_pHandle (),
   m_gLibPath (gFlags.test (AddExt) ? std::move (string (pPath) += shared_ext ()) : pPath),
   m_eResolve (eResolve)
@@ -61,102 +61,102 @@ Module::Module (cchar*        pPath,
 
 bool Module::attach () noexcept
 {
-	if (m_pHandle) return true;
-	int nLibMode = 0;
+    if (m_pHandle) return true;
+    int nLibMode = 0;
 
-#	ifdef OS_STD_POSIX
+#    ifdef OS_STD_POSIX
 
-	switch (m_eResolve)
-	{
-	case ResolvePolicy::Static:
-		nLibMode = RTLD_GLOBAL;
-		break;
-	case ResolvePolicy::Immediate:
-		nLibMode = RTLD_NOW;
-		break;
-	default:
-		nLibMode = RTLD_LAZY;
-		break;
-	}
+    switch (m_eResolve)
+    {
+    case ResolvePolicy::Static:
+        nLibMode = RTLD_GLOBAL;
+        break;
+    case ResolvePolicy::Immediate:
+        nLibMode = RTLD_NOW;
+        break;
+    default:
+        nLibMode = RTLD_LAZY;
+        break;
+    }
 
-	m_pHandle = dlopen (m_gLibPath.c_str (), nLibMode);
-	if (!m_pHandle) std::cerr << dlerror () << std::endl;
+    m_pHandle = dlopen (m_gLibPath.c_str (), nLibMode);
+    if (!m_pHandle) std::cerr << dlerror () << std::endl;
 
-#	elif defined (OS_WINDOWS)
+#    elif defined (OS_WINDOWS)
 
-	switch (m_eResolve)
-	{
-	case ResolvePolicy::Static:
-		nLibMode |= LOAD_LIBRARY_AS_DATAFILE;
-		break;
-	case ResolvePolicy::Lazy:
-		nLibMode |= DONT_RESOLVE_DLL_REFERENCES;
-		break;
+    switch (m_eResolve)
+    {
+    case ResolvePolicy::Static:
+        nLibMode |= LOAD_LIBRARY_AS_DATAFILE;
+        break;
+    case ResolvePolicy::Lazy:
+        nLibMode |= DONT_RESOLVE_DLL_REFERENCES;
+        break;
     default:
         break;
-	}
+    }
 
     nLibMode |= LOAD_LIBRARY_SEARCH_DEFAULT_DIRS;
 
-	m_pHandle = LoadLibraryEx (m_gLibPath.data (), nullptr, nLibMode);
-	if (!m_pHandle) std::cerr << GetLastError () << std::endl;
+    m_pHandle = LoadLibraryEx (m_gLibPath.data (), nullptr, nLibMode);
+    if (!m_pHandle) std::cerr << GetLastError () << std::endl;
 
-#	endif
+#    endif
 
-	return m_pHandle;
+    return m_pHandle;
 }
 
 void Module::detach () noexcept
 {
-	if (!m_pHandle) return;
+    if (!m_pHandle) return;
 
-#	ifdef OS_STD_POSIX
+#    ifdef OS_STD_POSIX
 
-	if (dlclose (m_pHandle) != 0) std::cerr << dlerror () << std::endl;
+    if (dlclose (m_pHandle) != 0) std::cerr << dlerror () << std::endl;
 
-#	elif defined (OS_WINDOWS)
+#    elif defined (OS_WINDOWS)
 
     if (!FreeLibrary (static_cast<HMODULE> (m_pHandle))) std::cerr << GetLastError () << std::endl;;
 
-#	endif
+#    endif
 
-	m_pHandle = nullptr;
+    m_pHandle = nullptr;
 }
 
 void* Module::get_address (cchar* pName) const noexcept
 {
-#	ifdef OS_STD_POSIX
+#    ifdef OS_STD_POSIX
 
-	void* pAddr = dlsym (m_pHandle, pName);
-	if (!pAddr) std::cerr << dlerror () << std::endl;
-	return pAddr;
+    void* pAddr = dlsym (m_pHandle, pName);
+    if (!pAddr) std::cerr << dlerror () << std::endl;
+    return pAddr;
 
-#	elif defined (OS_WINDOWS)
+#    elif defined (OS_WINDOWS)
 
     union { function_type func; void* obj; } convert;
     convert.func = GetProcAddress (static_cast<HMODULE> (m_pHandle), pName);
     if (!convert.func) std::cerr << "error: " << GetLastError () << "\naddress not found!\n";
     return convert.obj;
 
-#	endif
+#    endif
 }
 
 Module::function_type Module::get_function (cchar* pName) const noexcept
 {
-#	ifdef OS_STD_POSIX
+#    ifdef OS_STD_POSIX
 
     union { void* obj; function_type func; } convert;
     convert.obj = dlsym (m_pHandle, pName);
     if (!convert.obj) std::cerr << dlerror () << std::endl;
     return convert.func;
 
-#	elif defined (OS_WINDOWS)
+#    elif defined (OS_WINDOWS)
 
     function_type func = GetProcAddress (static_cast<HMODULE> (m_pHandle), pName);
     if (!func) std::cerr << "error: " << GetLastError () << "\nfunction not found!\n";
     return func;
 
-#	endif
+#    endif
 }
 
 } } // namespace Process

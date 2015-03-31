@@ -29,12 +29,12 @@ namespace cppual { namespace Ui {
 class WizardPage
 {
 public:
-	enum Type
-	{
-		Introduction = 1 << 0,
-		License,
-		InstallDir
-	};
+    enum Type
+    {
+        Introduction = 1 << 0,
+        License,
+        InstallDir
+    };
 };
 
 class WizardDialog : public Dialog

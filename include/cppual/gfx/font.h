@@ -35,69 +35,69 @@ namespace cppual { namespace Graphics {
 class Font
 {
 public:
-	enum Style
-	{
-		Undecorated = 0,
-		Italic		= 1 << 0,
-		Bold		= 1 << 1,
-		Underlined	= 1 << 2,
-		Overlined	= 1 << 3,
-		Erased		= 1 << 4
-	};
+    enum Style
+    {
+        Undecorated = 0,
+        Italic        = 1 << 0,
+        Bold        = 1 << 1,
+        Underlined    = 1 << 2,
+        Overlined    = 1 << 3,
+        Erased        = 1 << 4
+    };
 
-	enum class SubPixel : unsigned char
-	{
-		None = 0,
-		RGB,
-		BGR,
-		VerticalRGB,
-		VerticalBGR
-	};
+    enum class SubPixel : unsigned char
+    {
+        None = 0,
+        RGB,
+        BGR,
+        VerticalRGB,
+        VerticalBGR
+    };
 
-	typedef std::size_t                              size_type;
-	typedef Memory::GenericPolicy<uint>              allocator_type;
-	typedef std::vector<uint, allocator_type>        vector_type;
-	typedef BitSet<Font::Style>                      Styles;
-	typedef struct { u8 spacing, size, lineHeight; } Format;
+    typedef std::size_t                              size_type;
+    typedef Memory::GenericPolicy<uint>              allocator_type;
+    typedef std::vector<uint, allocator_type>        vector_type;
+    typedef BitSet<Font::Style>                      Styles;
+    typedef struct { u8 spacing, size, lineHeight; } Format;
 
-	class Atlas
-	{
-	public:
-		Atlas (string const& name);
-		~Atlas ();
+    class Atlas
+    {
+    public:
+        Atlas (string const& name);
+        ~Atlas ();
 
-		Atlas () noexcept
-		: m_gName (), m_pFace ()
-		{ }
+        Atlas () noexcept
+        : m_gName (), m_pFace ()
+        { }
 
-		friend class Font;
+        friend class Font;
 
-	private:
-		string m_gName;
-		void*  m_pFace;
-	};
+    private:
+        string m_gName;
+        void*  m_pFace;
+    };
 
-	Font ();
-	Font (Font&&);
-	Font (Font const&);
-	Font& operator = (Font&&);
-	Font& operator = (Font const&);
-	~Font ();
+    Font ();
+    Font (Font&&);
+    Font (Font const&);
+    Font& operator = (Font&&);
+    Font& operator = (Font const&);
+    ~Font ();
 
-	Font (Atlas const&,
-		  allocator_type&,
-		  int  kerning    = 0,
-		  bool anti_alias = true,
-		  SubPixel        = SubPixel::None);
+    Font (Atlas const&,
+          allocator_type&,
+          int  kerning    = 0,
+          bool anti_alias = true,
+          SubPixel        = SubPixel::None);
 
-	SubPixel subPixelRendering ();
-	bool     isAntiAliased () const;
-	int      kerning () const;
-	void     glyph (size_type idx) const;
-	void     setKerning (int);
+    SubPixel subPixelRendering ();
+    bool     isAntiAliased () const;
+    int      kerning () const;
+    void     glyph (size_type idx) const;
+    void     setKerning (int);
 
 private:
-	vector_type m_gPixels;
+    vector_type m_gPixels;
 };
 
 } } // Graphics

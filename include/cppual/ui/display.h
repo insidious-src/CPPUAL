@@ -44,30 +44,30 @@ typedef weak_ptr  <IDisplay> weak_display;
 class IDisplay : public NonCopyableVirtual
 {
 public:
-	typedef Connection     value_type;
-	typedef shared_display pointer;
+    typedef Connection     value_type;
+    typedef shared_display pointer;
 
-	virtual string name        () const = 0;
-	virtual uint   screenCount () const = 0;
+    virtual string name        () const = 0;
+    virtual uint   screenCount () const = 0;
 
-	static  IDisplay* instance         ();
-	static  bool      hasValidInstance () noexcept;
-	static  bool      set              (cchar*);
-	static  pointer   connect          (cchar*);
+    static  IDisplay* instance         ();
+    static  bool      hasValidInstance () noexcept;
+    static  bool      set              (cchar*);
+    static  pointer   connect          (cchar*);
 
-	value_type native () const noexcept { return m_native; }
-	value_type gl     () const noexcept { return m_gl;     }
+    value_type native () const noexcept { return m_native; }
+    value_type gl     () const noexcept { return m_gl;     }
 
-	IDisplay () noexcept
-	: m_native (), m_gl ()
-	{ }
+    IDisplay () noexcept
+    : m_native (), m_gl ()
+    { }
 
-	IDisplay (value_type native, value_type gl) noexcept
-	: m_native (native), m_gl (gl)
-	{ }
+    IDisplay (value_type native, value_type gl) noexcept
+    : m_native (native), m_gl (gl)
+    { }
 
 private:
-	value_type m_native, m_gl;
+    value_type m_native, m_gl;
 };
 
 } } // namespace Ui

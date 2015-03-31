@@ -27,77 +27,77 @@ namespace cppual {
 
 struct NonConstructible
 {
-	NonConstructible () = delete;
-	NonConstructible (NonConstructible const&) = delete;
-	NonConstructible& operator = (NonConstructible const&) = delete;
+    NonConstructible () = delete;
+    NonConstructible (NonConstructible const&) = delete;
+    NonConstructible& operator = (NonConstructible const&) = delete;
 };
 
 // ====================================================
 
 struct NonDefaultConstructible
 {
-	NonDefaultConstructible () = delete;
+    NonDefaultConstructible () = delete;
 };
 
 // ====================================================
 
 struct NonDefaultConstructibleVirtual
 {
-	NonDefaultConstructibleVirtual () = delete;
-	inline virtual ~NonDefaultConstructibleVirtual () { }
+    NonDefaultConstructibleVirtual () = delete;
+    inline virtual ~NonDefaultConstructibleVirtual () { }
 };
 
 // ====================================================
 
 struct NonCopyable
 {
-	constexpr NonCopyable () = default;
-	NonCopyable (NonCopyable const&) = delete;
-	NonCopyable& operator = (NonCopyable const&) = delete;
+    constexpr NonCopyable () = default;
+    NonCopyable (NonCopyable const&) = delete;
+    NonCopyable& operator = (NonCopyable const&) = delete;
 };
 
 // ====================================================
 
 struct NonCopyableVirtual
 {
-	constexpr NonCopyableVirtual () = default;
-	NonCopyableVirtual (NonCopyableVirtual const&) = delete;
-	NonCopyableVirtual& operator = (NonCopyableVirtual const&) = delete;
-	virtual ~NonCopyableVirtual () { }
+    constexpr NonCopyableVirtual () = default;
+    NonCopyableVirtual (NonCopyableVirtual const&) = delete;
+    NonCopyableVirtual& operator = (NonCopyableVirtual const&) = delete;
+    virtual ~NonCopyableVirtual () { }
 };
 
 // ====================================================
 
 struct NonCopyConstructible
 {
-	constexpr NonCopyConstructible () = default;
-	NonCopyConstructible (NonCopyConstructible const&) = delete;
+    constexpr NonCopyConstructible () = default;
+    NonCopyConstructible (NonCopyConstructible const&) = delete;
 };
 
 // ====================================================
 
 struct NonCopyConstructibleVirtual
 {
-	constexpr NonCopyConstructibleVirtual () = default;
-	NonCopyConstructibleVirtual (NonCopyConstructibleVirtual const&) = delete;
-	virtual ~NonCopyConstructibleVirtual () noexcept { }
+    constexpr NonCopyConstructibleVirtual () = default;
+    NonCopyConstructibleVirtual (NonCopyConstructibleVirtual const&) = delete;
+    virtual ~NonCopyConstructibleVirtual () noexcept { }
 };
 
 // ====================================================
 
 struct NonCopyAssignable
 {
-	constexpr NonCopyAssignable () = default;
-	NonCopyAssignable& operator = (NonCopyAssignable  const&) = delete;
+    constexpr NonCopyAssignable () = default;
+    NonCopyAssignable& operator = (NonCopyAssignable  const&) = delete;
 };
 
 // ====================================================
 
 struct NonCopyAssignableVirtual
 {
-	constexpr NonCopyAssignableVirtual () = default;
-	NonCopyAssignableVirtual& operator = (NonCopyAssignableVirtual const&) = delete;
-	virtual ~NonCopyAssignableVirtual () noexcept { }
+    constexpr NonCopyAssignableVirtual () = default;
+    NonCopyAssignableVirtual& operator = (NonCopyAssignableVirtual const&) = delete;
+    virtual ~NonCopyAssignableVirtual () noexcept { }
 };
 
 } // cppual

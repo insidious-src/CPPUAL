@@ -37,8 +37,8 @@ namespace cppual { namespace Graphics {
 class Image : public IDrawable2D, public ITransformable2D
 {
 public:
-	virtual VirtualBuffer* map () noexcept = 0;
-	virtual bool	       isLoaded () const noexcept = 0;
+    virtual VirtualBuffer* map () noexcept = 0;
+    virtual bool           isLoaded () const noexcept = 0;
 };
 
 // =========================================================
@@ -51,38 +51,38 @@ public:
 class RasterImage final : public Image, private Memory::GenericPolicy<RasterImage>
 {
 public:
-	RasterImage () = delete;
-	~RasterImage ();
-	void draw (Transform2D const& info);
+    RasterImage () = delete;
+    ~RasterImage ();
+    void draw (Transform2D const& info);
 
-	inline RasterImage (string const&      gPath,
-						Allocator&         pAtor,
-						PixelFormat const& gFomat = PixelFormat (),
-						Color              gMask  = Color ())
-	: AllocatorPolicy (pAtor),
-	  m_gPixBuffer ({ 0, 0 }, gFomat),
-	  m_gColorMask (gMask),
-	  m_bIsLoaded (parseImage (gPath))
-	{ }
+    inline RasterImage (string const&      gPath,
+                        Allocator&         pAtor,
+                        PixelFormat const& gFomat = PixelFormat (),
+                        Color              gMask  = Color ())
+    : AllocatorPolicy (pAtor),
+      m_gPixBuffer ({ 0, 0 }, gFomat),
+      m_gColorMask (gMask),
+      m_bIsLoaded (parseImage (gPath))
+    { }
 
-	inline Color mask () const noexcept { return m_gColorMask; }
-	inline bool		isLoaded () const noexcept { return m_bIsLoaded; }
+    inline Color mask () const noexcept { return m_gColorMask; }
+    inline bool        isLoaded () const noexcept { return m_bIsLoaded; }
 
-	inline DeviceType type () const noexcept
-	{ return DeviceType::GL; }
+    inline DeviceType type () const noexcept
+    { return DeviceType::GL; }
 
-	inline void setMask (Color gMask) noexcept
-	{ m_gColorMask = gMask; }
+    inline void setMask (Color gMask) noexcept
+    { m_gColorMask = gMask; }
 
-	inline VirtualBuffer* map () noexcept
-	{ return &m_gPixBuffer; }
+    inline VirtualBuffer* map () noexcept
+    { return &m_gPixBuffer; }
 
 private:
-	VirtualBuffer m_gPixBuffer;
-	Color      m_gColorMask;
-	cbool         m_bIsLoaded;
+    VirtualBuffer m_gPixBuffer;
+    Color      m_gColorMask;
+    cbool         m_bIsLoaded;
 
-	bool parseImage (string const&);
+    bool parseImage (string const&);
 };
 
 // =========================================================
@@ -95,32 +95,32 @@ private:
 class VectorImage final : public Image, private Memory::GenericPolicy<VectorImage>
 {
 public:
-	VectorImage () = delete;
-	~VectorImage ();
-	void draw (Transform2D const& info);
+    VectorImage () = delete;
+    ~VectorImage ();
+    void draw (Transform2D const& info);
 
-	inline DeviceType type () const noexcept
-	{ return DeviceType::GL; }
+    inline DeviceType type () const noexcept
+    { return DeviceType::GL; }
 
-	inline VirtualBuffer* map () noexcept
-	{ return &m_gPixBuffer; }
+    inline VirtualBuffer* map () noexcept
+    { return &m_gPixBuffer; }
 
-	inline bool isLoaded () const noexcept
-	{ return m_bIsLoaded; }
+    inline bool isLoaded () const noexcept
+    { return m_bIsLoaded; }
 
-	inline VectorImage (string const&      gPath,
-						Allocator&         pAtor,
-						PixelFormat const& gFomat = PixelFormat ())
-	: AllocatorPolicy (pAtor),
-	  m_gPixBuffer ({ 0, 0 }, gFomat),
-	  m_bIsLoaded (parseImage (gPath))
-	{ }
+    inline VectorImage (string const&      gPath,
+                        Allocator&         pAtor,
+                        PixelFormat const& gFomat = PixelFormat ())
+    : AllocatorPolicy (pAtor),
+      m_gPixBuffer ({ 0, 0 }, gFomat),
+      m_bIsLoaded (parseImage (gPath))
+    { }
 
 private:
-	VirtualBuffer m_gPixBuffer;
-	cbool         m_bIsLoaded;
+    VirtualBuffer m_gPixBuffer;
+    cbool         m_bIsLoaded;
 
-	bool parseImage (string const&);
+    bool parseImage (string const&);
 };
 
 // =========================================================
@@ -128,9 +128,9 @@ private:
 class Icon final
 {
 public:
-	Icon () { }
-	Icon (string const&) { }
-	bool load (string const&) { return false; }
+    Icon () { }
+    Icon (string const&) { }
+    bool load (string const&) { return false; }
 };
 
 } } // Graphics

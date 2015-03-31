@@ -31,10 +31,10 @@ namespace cppual { namespace Compute {
 class HostConnection : public NonCopyable
 {
 public:
-	typedef std::size_t size_type;
+    typedef std::size_t size_type;
 
-	size_type deviceCount ();
-	size_type gpuCount    ();
+    size_type deviceCount ();
+    size_type gpuCount    ();
 };
 
 } } // namespace Platform

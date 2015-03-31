@@ -27,45 +27,45 @@ namespace cppual { namespace Ui {
 
 bool Label::create (View*       pParent,
                     string const& gText,
-					Rect const&   gRect,
-					TextFormat)
+                    Rect const&   gRect,
+                    TextFormat)
 {
     if (pParent and !pParent->valid ()) pParent = nullptr;
 
-	if (createView (pParent, gRect, pParent ?
+    if (createView (pParent, gRect, pParent ?
                       pParent->renderable_unsafe ()->screen () :
-					  0))
-	{
-		m_gText = gText;
-		return true;
-	}
+                      0))
+    {
+        m_gText = gText;
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 void Label::setText (string const& gText)
 {
-	m_gText = gText;
+    m_gText = gText;
 
-	if (isValid ())
-	{
-		onPaint ();
-		signalTextChanged.notify ();
-	}
+    if (isValid ())
+    {
+        onPaint ();
+        signalTextChanged.notify ();
+    }
 }
 
 void Label::setFormat (TextFormat eFormat)
 {
-	if (m_eFormat != eFormat)
-	{
-		m_eFormat = eFormat;
+    if (m_eFormat != eFormat)
+    {
+        m_eFormat = eFormat;
 
-		if (isValid ())
-		{
-			onPaint ();
-			signalTextChanged.notify ();
-		}
-	}
+        if (isValid ())
+        {
+            onPaint ();
+            signalTextChanged.notify ();
+        }
+    }
 }
 
 void Label::onPaint ()

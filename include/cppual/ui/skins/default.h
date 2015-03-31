@@ -33,40 +33,40 @@ namespace cppual { namespace Ui {
 class DefaultSkin final : public ISkin
 {
 public:
-	SkinType getType () const noexcept { return sm_eType; }
+    SkinType getType () const noexcept { return sm_eType; }
 
-	bool reload ()
-	{
-		return false;
-	}
+    bool reload ()
+    {
+        return false;
+    }
 
-	int getValue (const SkinElement, int)
-	{
-		return 0;
-	}
+    int getValue (const SkinElement, int)
+    {
+        return 0;
+    }
 
-	RGBColor getColor (const SkinElement, int)
-	{
-		return RGBColor ();
-	}
+    RGBColor getColor (const SkinElement, int)
+    {
+        return RGBColor ();
+    }
 
-	image_type* getImage (const SkinElement, int)
-	{
-		return nullptr;
-	}
+    image_type* getImage (const SkinElement, int)
+    {
+        return nullptr;
+    }
 
-	image_type* getIcon (IconGroup, string const&, Rect const&)
-	{
-		return nullptr;
-	}
+    image_type* getIcon (IconGroup, string const&, Rect const&)
+    {
+        return nullptr;
+    }
 
-	font_format getFont (const SkinElement, int)
-	{
-		return font_format ();
-	}
+    font_format getFont (const SkinElement, int)
+    {
+        return font_format ();
+    }
 
 private:
-	static const SkinType sm_eType = SkinType::Dynamic;
+    static const SkinType sm_eType = SkinType::Dynamic;
 };
 
 } } // Ui

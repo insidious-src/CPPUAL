@@ -31,90 +31,90 @@ using std::ios_base;
 namespace cppual { namespace Audio { namespace AL {
 
 //inline int convertQuality (OutputFormat eFormat,
-//						   SoundQuality eQuality) noexcept
+//                           SoundQuality eQuality) noexcept
 //{
-//	switch (eFormat)
-//	{
-//	case OutputFormat::Mono:
-//		switch (eQuality)
-//		{
-//		case SoundQuality::Low:
-//			return AL::Mono8;
-//		case SoundQuality::Medium:
-//			return AL::Mono16;
-//		case SoundQuality::High:
-//			return AL::Mono32;
-//		}
-//		break;
-//	case OutputFormat::Stereo:
-//		switch (eQuality)
-//		{
-//		case SoundQuality::Low:
-//			return AL::Stereo8;
-//		case SoundQuality::Medium:
-//			return AL::Stereo16;
-//		case SoundQuality::High:
-//			return AL::Stereo32;
-//		}
-//		break;
-//	case OutputFormat::Rear:
-//		switch (eQuality)
-//		{
-//		case SoundQuality::Low:
-//			return AL::Rear8;
-//		case SoundQuality::Medium:
-//			return AL::Rear16;
-//		case SoundQuality::High:
-//			return AL::Rear32;
-//		}
-//		break;
-//	case OutputFormat::Quad:
-//		switch (eQuality)
-//		{
-//		case SoundQuality::Low:
-//			return AL::Quad8;
-//		case SoundQuality::Medium:
-//			return AL::Quad16;
-//		case SoundQuality::High:
-//			return AL::Quad32;
-//		}
-//		break;
-//	case OutputFormat::CH51:
-//		switch (eQuality)
-//		{
-//		case SoundQuality::Low:
-//			return AL::CH51_8;
-//		case SoundQuality::Medium:
-//			return AL::CH51_16;
-//		case SoundQuality::High:
-//			return AL::CH51_32;
-//		}
-//		break;
-//	case OutputFormat::CH61:
-//		switch (eQuality)
-//		{
-//		case SoundQuality::Low:
-//			return AL::CH61_8;
-//		case SoundQuality::Medium:
-//			return AL::CH61_16;
-//		case SoundQuality::High:
-//			return AL::CH61_32;
-//		}
-//		break;
-//	case OutputFormat::CH71:
-//		switch (eQuality)
-//		{
-//		case SoundQuality::Low:
-//			return AL::CH71_8;
-//		case SoundQuality::Medium:
-//			return AL::CH71_16;
-//		case SoundQuality::High:
-//			return AL::CH71_32;
-//		}
-//		break;
-//	}
+//    switch (eFormat)
+//    {
+//    case OutputFormat::Mono:
+//        switch (eQuality)
+//        {
+//        case SoundQuality::Low:
+//            return AL::Mono8;
+//        case SoundQuality::Medium:
+//            return AL::Mono16;
+//        case SoundQuality::High:
+//            return AL::Mono32;
+//        }
+//        break;
+//    case OutputFormat::Stereo:
+//        switch (eQuality)
+//        {
+//        case SoundQuality::Low:
+//            return AL::Stereo8;
+//        case SoundQuality::Medium:
+//            return AL::Stereo16;
+//        case SoundQuality::High:
+//            return AL::Stereo32;
+//        }
+//        break;
+//    case OutputFormat::Rear:
+//        switch (eQuality)
+//        {
+//        case SoundQuality::Low:
+//            return AL::Rear8;
+//        case SoundQuality::Medium:
+//            return AL::Rear16;
+//        case SoundQuality::High:
+//            return AL::Rear32;
+//        }
+//        break;
+//    case OutputFormat::Quad:
+//        switch (eQuality)
+//        {
+//        case SoundQuality::Low:
+//            return AL::Quad8;
+//        case SoundQuality::Medium:
+//            return AL::Quad16;
+//        case SoundQuality::High:
+//            return AL::Quad32;
+//        }
+//        break;
+//    case OutputFormat::CH51:
+//        switch (eQuality)
+//        {
+//        case SoundQuality::Low:
+//            return AL::CH51_8;
+//        case SoundQuality::Medium:
+//            return AL::CH51_16;
+//        case SoundQuality::High:
+//            return AL::CH51_32;
+//        }
+//        break;
+//    case OutputFormat::CH61:
+//        switch (eQuality)
+//        {
+//        case SoundQuality::Low:
+//            return AL::CH61_8;
+//        case SoundQuality::Medium:
+//            return AL::CH61_16;
+//        case SoundQuality::High:
+//            return AL::CH61_32;
+//        }
+//        break;
+//    case OutputFormat::CH71:
+//        switch (eQuality)
+//        {
+//        case SoundQuality::Low:
+//            return AL::CH71_8;
+//        case SoundQuality::Medium:
+//            return AL::CH71_16;
+//        case SoundQuality::High:
+//            return AL::CH71_32;
+//        }
+//        break;
+//    }
 
-//	return AL::Mono8;
+//    return AL::Mono8;
 //}
 
 // ====================================================
@@ -130,8 +130,8 @@ SoundBuffer::SoundBuffer (SoundBuffer&& gObj) noexcept
   m_gSources (std::move (gObj.m_gSources)),
   m_pContext (Instance::current ())
 {
-	for (size_type i = 0; i < m_gSources.size (); ++i)
-		if (m_gSources[i]) m_gSources[i]->m_pBuffer = this;
+    for (size_type i = 0; i < m_gSources.size (); ++i)
+        if (m_gSources[i]) m_gSources[i]->m_pBuffer = this;
 }
 
 SoundBuffer::SoundBuffer (SoundBuffer const& gObj) noexcept
@@ -143,64 +143,64 @@ SoundBuffer::SoundBuffer (SoundBuffer const& gObj) noexcept
 
 SoundBuffer& SoundBuffer::operator = (SoundBuffer&& gObj) noexcept
 {
-	for (size_type i = 0; i < m_gSources.size (); ++i)
-		if (m_gSources[i]) m_gSources[i]->m_pBuffer = this;
+    for (size_type i = 0; i < m_gSources.size (); ++i)
+        if (m_gSources[i]) m_gSources[i]->m_pBuffer = this;
 
-	m_gSources = std::move (gObj.m_gSources);
-	return *this;
+    m_gSources = std::move (gObj.m_gSources);
+    return *this;
 }
 
 SoundBuffer& SoundBuffer::operator = (SoundBuffer const& gObj) noexcept
 {
-	if (id () and gObj.id ())
-	{
-		for (size_type i = 0; i < m_gSources.size (); ++i)
-			if (m_gSources[i]) m_gSources[i]->onDetach ();
+    if (id () and gObj.id ())
+    {
+        for (size_type i = 0; i < m_gSources.size (); ++i)
+            if (m_gSources[i]) m_gSources[i]->onDetach ();
 
-		m_gSources.clear ();
-	}
+        m_gSources.clear ();
+    }
 
-	return *this;
+    return *this;
 }
 
 SoundBuffer::~SoundBuffer () noexcept
 {
-	if (id ())
-	{
-		for (size_type i = 0; i < m_gSources.size (); ++i)
-			if (m_gSources[i]) m_gSources[i]->onDetach ();
-	}
+    if (id ())
+    {
+        for (size_type i = 0; i < m_gSources.size (); ++i)
+            if (m_gSources[i]) m_gSources[i]->onDetach ();
+    }
 }
 
 int SoundBuffer::getFrequency () const noexcept
 {
-	int nFreq = 0;
-	if (id ()) alGetBufferi (id (), AL::Frequency, &nFreq);
-	return nFreq;
+    int nFreq = 0;
+    if (id ()) alGetBufferi (id (), AL::Frequency, &nFreq);
+    return nFreq;
 }
 
 int SoundBuffer::getSize () const noexcept
 {
-	int nSize = 0;
-	if (id ()) alGetBufferi (id (), AL::Size, &nSize);
-	return nSize;
+    int nSize = 0;
+    if (id ()) alGetBufferi (id (), AL::Size, &nSize);
+    return nSize;
 }
 
 int SoundBuffer::getBits () const noexcept
 {
-	int nBits = 0;
-	if (id ()) alGetBufferi (id (), AL::Bits, &nBits);
-	return nBits;
+    int nBits = 0;
+    if (id ()) alGetBufferi (id (), AL::Bits, &nBits);
+    return nBits;
 }
 
 int SoundBuffer::getDuration () const noexcept
 {
-	return 0;
+    return 0;
 }
 
 int SoundBuffer::onOpen () noexcept
 {
-	return Error::Failed;
+    return Error::Failed;
 }
 
 } } } // namespace Audio

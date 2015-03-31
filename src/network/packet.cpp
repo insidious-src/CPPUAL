@@ -26,202 +26,202 @@ namespace cppual { namespace Network {
 
 void Packet::append (cvoid* pData, size_type uSize) noexcept
 {
-	if (pData and (uSize > 0))
-	{
-		std::size_t start = m_gData.size ();
-		m_gData.reserve (start + uSize);
+    if (pData and (uSize > 0))
+    {
+        std::size_t start = m_gData.size ();
+        m_gData.reserve (start + uSize);
         std::memcpy (&m_gData[start], pData, uSize);
-	}
+    }
 }
 
 Packet& Packet::operator >> (bool& bData) noexcept
 {
-	u8 value;
-	if (*this >> value) bData = (value != 0);
-	return *this;
+    u8 value;
+    if (*this >> value) bData = (value != 0);
+    return *this;
 }
 
 Packet& Packet::operator >> (int8& nData) noexcept
 {
-	if (canExchange (sizeof (nData)))
-	{
-		nData   = *reinterpret_cast<cint8*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (nData);
-	}
+    if (canExchange (sizeof (nData)))
+    {
+        nData   = *reinterpret_cast<cint8*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (nData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (u8& uData) noexcept
 {
-	if (canExchange (sizeof (uData)))
-	{
-		uData   = *reinterpret_cast<cu8*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (uData);
-	}
+    if (canExchange (sizeof (uData)))
+    {
+        uData   = *reinterpret_cast<cu8*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (uData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (int16& nData) noexcept
 {
-	if (canExchange (sizeof (nData)))
-	{
-		nData   = *reinterpret_cast<cint16*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (nData);
-	}
+    if (canExchange (sizeof (nData)))
+    {
+        nData   = *reinterpret_cast<cint16*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (nData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (u16& uData) noexcept
 {
-	if (canExchange (sizeof (uData)))
-	{
-		uData   = *reinterpret_cast<cu16*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (uData);
-	}
+    if (canExchange (sizeof (uData)))
+    {
+        uData   = *reinterpret_cast<cu16*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (uData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (int32& nData) noexcept
 {
-	if (canExchange (sizeof (nData)))
-	{
-		nData   = *reinterpret_cast<cint32*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (nData);
-	}
+    if (canExchange (sizeof (nData)))
+    {
+        nData   = *reinterpret_cast<cint32*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (nData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (u32& uData) noexcept
 {
-	if (canExchange (sizeof (uData)))
-	{
-		uData   = *reinterpret_cast<cu32*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (uData);
-	}
+    if (canExchange (sizeof (uData)))
+    {
+        uData   = *reinterpret_cast<cu32*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (uData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (float& fData) noexcept
 {
-	if (canExchange (sizeof (fData)))
-	{
-		fData   = *reinterpret_cast<cfloat*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (fData);
-	}
+    if (canExchange (sizeof (fData)))
+    {
+        fData   = *reinterpret_cast<cfloat*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (fData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (double& dData) noexcept
 {
-	if (canExchange (sizeof (dData)))
-	{
-		dData   = *reinterpret_cast<cdouble*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (dData);
-	}
+    if (canExchange (sizeof (dData)))
+    {
+        dData   = *reinterpret_cast<cdouble*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (dData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (ldouble& dData) noexcept
 {
-	if (canExchange (sizeof (dData)))
-	{
-		dData   = *reinterpret_cast<cu32*> (&m_gData[m_uPos]);
-		m_uPos +=  sizeof (dData);
-	}
+    if (canExchange (sizeof (dData)))
+    {
+        dData   = *reinterpret_cast<cu32*> (&m_gData[m_uPos]);
+        m_uPos +=  sizeof (dData);
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (char* pData) noexcept
 {
-	// First extract string uLength
-	u32 uLength = 0;
-	*this >> uLength;
+    // First extract string uLength
+    u32 uLength = 0;
+    *this >> uLength;
 
-	if ((uLength > 0) and canExchange (uLength))
-	{
-		// Then extract characters
-		::memcpy (pData, &m_gData[m_uPos], uLength);
-		pData[uLength] = '\0';
+    if ((uLength > 0) and canExchange (uLength))
+    {
+        // Then extract characters
+        ::memcpy (pData, &m_gData[m_uPos], uLength);
+        pData[uLength] = '\0';
 
-		// Update reading position
-		m_uPos += uLength;
-	}
+        // Update reading position
+        m_uPos += uLength;
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (std::string& gData) noexcept
 {
-	// First extract string uLength
-	u32 uLength = 0;
-	*this >> uLength;
+    // First extract string uLength
+    u32 uLength = 0;
+    *this >> uLength;
 
-	gData.clear ();
-	if ((uLength > 0) and canExchange (uLength))
-	{
-		// Then extract characters
-		gData.assign (&m_gData[m_uPos], uLength);
+    gData.clear ();
+    if ((uLength > 0) and canExchange (uLength))
+    {
+        // Then extract characters
+        gData.assign (&m_gData[m_uPos], uLength);
 
-		// Update reading position
-		m_uPos += uLength;
-	}
+        // Update reading position
+        m_uPos += uLength;
+    }
 
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (wchar*) noexcept
 {
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (std::wstring&) noexcept
 {
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (char16*) noexcept
 {
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (std::u16string&) noexcept
 {
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (char32*) noexcept
 {
-	return *this;
+    return *this;
 }
 
 Packet& Packet::operator >> (std::u32string&) noexcept
 {
-	return *this;
+    return *this;
 }
 
 cvoid* Packet::onSend (size_type& uSize)
 {
-	uSize = getSize ();
-	return getData ();
+    uSize = getSize ();
+    return  getData ();
 }
 
 void Packet::onReceive (cvoid* pData, size_type uSize)
 {
-	append (pData, uSize);
+    append (pData, uSize);
 }
 
 bool Packet::canExchange (size_type uSize) noexcept
 {
-	return m_bIsValid = m_bIsValid and (m_uPos + uSize <= m_gData.size ());
+    return m_bIsValid = m_bIsValid and (m_uPos + uSize <= m_gData.size ());
 }
 
 } } // namespace Network

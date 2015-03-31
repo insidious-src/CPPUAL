@@ -32,15 +32,15 @@ namespace cppual { namespace Ui {
 class XDisplay final : public IDisplay
 {
 public:
-	XDisplay () = delete;
-	XDisplay (cchar*) noexcept;
-	~XDisplay ();
-	uint screenCount () const noexcept;
+    XDisplay () = delete;
+    XDisplay (cchar*) noexcept;
+    ~XDisplay ();
+    uint screenCount () const noexcept;
 
-	string name () const { return m_gName; }
+    string name () const { return m_gName; }
 
 private:
-	string m_gName;
+    string m_gName;
 };
 
 } } // namespace Ui

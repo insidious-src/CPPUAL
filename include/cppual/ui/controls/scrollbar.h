@@ -30,35 +30,35 @@ namespace cppual { namespace Ui {
 class ScrollBar : public AbstractSlider
 {
 public:
-	enum class Arrows : unsigned char
-	{
-		NoArrows,
-		DoubleSided,
-		DoubleSidedExtra
-	};
+    enum class Arrows : unsigned char
+    {
+        NoArrows,
+        DoubleSided,
+        DoubleSidedExtra
+    };
 
-	bool create (View*, Orientation = Orientation::Vertical);
-	void setArrowStyle (Arrows);
-	void setRange (int min, int max);
-	void setPosition (int);
-	void setOrientation (Orientation);
+    bool create (View*, Orientation = Orientation::Vertical);
+    void setArrowStyle (Arrows);
+    void setRange (int min, int max);
+    void setPosition (int);
+    void setOrientation (Orientation);
 
-	inline Orientation getOrientation () const noexcept
-	{ return m_eOrientation; }
+    inline Orientation getOrientation () const noexcept
+    { return m_eOrientation; }
 
-	inline Arrows getArrowStyle () const noexcept
-	{ return m_eArrows; }
+    inline Arrows getArrowStyle () const noexcept
+    { return m_eArrows; }
 
-	Signal<void(int)> signalHorizChanged;
-	Signal<void(int)> signalVertChanged;
+    Signal<void(int)> signalHorizChanged;
+    Signal<void(int)> signalVertChanged;
 
 private:
-	Arrows      m_eArrows;
-	Orientation m_eOrientation;
+    Arrows      m_eArrows;
+    Orientation m_eOrientation;
 
-	void onPaint ();
-	void onEnable (bool);
-	void onSize (Rect const&);
+    void onPaint ();
+    void onEnable (bool);
+    void onSize (Rect const&);
 };
 
 } } // Ui

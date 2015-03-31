@@ -32,11 +32,11 @@ namespace cppual { namespace Compute {
 class ConditionVariable final
 {
 public:
-	void notifyOne ();
-	void notifyAll ();
-	void waitUntil ();
-	void waitFor ();
-	void wait ();
+    void notifyOne ();
+    void notifyAll ();
+    void waitUntil ();
+    void waitFor ();
+    void wait ();
 };
 
 } } // Concurency

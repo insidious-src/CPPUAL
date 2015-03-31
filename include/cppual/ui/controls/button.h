@@ -32,15 +32,15 @@ namespace cppual { namespace Ui {
 class AbstractButton : public SkinnableView
 {
 public:
-	void setLabel (string const&);
-	~AbstractButton () noexcept;
+    void setLabel (string const&);
+    ~AbstractButton () noexcept;
 
-	inline string getLabel () const noexcept
-	{ return m_gLabel; }
+    inline string getLabel () const noexcept
+    { return m_gLabel; }
 
 protected:
-	Graphics::Font m_gFont;
-	string         m_gLabel;
+    Graphics::Font m_gFont;
+    string         m_gLabel;
 };
 
 // =========================================================
@@ -48,19 +48,19 @@ protected:
 class PushButton : public AbstractButton
 {
 public:
-	bool create (View* parent, string const& text);
-	void press ();
-	void release ();
+    bool create (View* parent, string const& text);
+    void press ();
+    void release ();
 
-	inline bool isPushed () const noexcept
-	{ return m_bIsPushed; }
+    inline bool isPushed () const noexcept
+    { return m_bIsPushed; }
 
 private:
-	bool m_bIsPushed;
+    bool m_bIsPushed;
 
-	void onPaint (Rect const&);
-	void onSize (point2u);
-	void onFocus (bool);
+    void onPaint (Rect const&);
+    void onSize (point2u);
+    void onFocus (bool);
 };
 
 // =========================================================
@@ -68,48 +68,48 @@ private:
 class RadioBox : public AbstractButton
 {
 public:
-	bool create (View* parent, string const& text, bool selected = false);
-	void select ();
-	void clear ();
+    bool create (View* parent, string const& text, bool selected = false);
+    void select ();
+    void clear ();
 
-	inline bool isSelected () const noexcept
-	{ return m_bIsSelected; }
+    inline bool isSelected () const noexcept
+    { return m_bIsSelected; }
 
 private:
-	bool m_bIsSelected;
+    bool m_bIsSelected;
 
-	void onPaint (Rect const&);
-	void onSize (point2u);
-	void onFocus (bool);
+    void onPaint (Rect const&);
+    void onSize (point2u);
+    void onFocus (bool);
 };
 
 // =========================================================
 
 enum class CheckState : unsigned char
 {
-	Unchecked,
-	Checked,
-	Intermediate
+    Unchecked,
+    Checked,
+    Intermediate
 };
 
 class CheckBox : public AbstractButton
 {
 public:
-	bool create (View*         parent,
-				 string const& text,
-				 CheckState    state = CheckState::Unchecked);
+    bool create (View*         parent,
+                 string const& text,
+                 CheckState    state = CheckState::Unchecked);
 
-	void setCheckState (CheckState);
+    void setCheckState (CheckState);
 
-	inline CheckState getCheckState () const noexcept
-	{ return m_eCheckState; }
+    inline CheckState getCheckState () const noexcept
+    { return m_eCheckState; }
 
 private:
-	CheckState m_eCheckState;
+    CheckState m_eCheckState;
 
-	void onPaint (Rect const&);
-	void onSize (point2u);
-	void onFocus (bool);
+    void onPaint (Rect const&);
+    void onSize (point2u);
+    void onFocus (bool);
 };
 
 } } // namespace Ui

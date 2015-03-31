@@ -28,48 +28,48 @@ using namespace std;
 namespace cppual { namespace Memory {
 
 PoolAllocator::PoolAllocator (size_type  uBlkCount,
-							  size_type  uBlkSize,
-							  align_type uBlkAlign)
+                              size_type  uBlkSize,
+                              align_type uBlkAlign)
 : m_uNumAlloc (),
   m_gOwner (*this),
   m_pBegin (uBlkCount ? ::operator new (uBlkCount * uBlkSize) : nullptr),
   m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
-								nullptr),
+                                nullptr),
   m_pFreeList (),
   m_uBlkSize (uBlkSize),
   m_uBlkAlign (uBlkAlign),
   m_uBlkNum ()
 {
-	initialize ();
+    initialize ();
 }
 
 PoolAllocator::PoolAllocator (Allocator& pOwner,
-							  size_type   uBlkCount,
-							  size_type   uBlkSize,
-							  align_type  uBlkAlign)
+                              size_type   uBlkCount,
+                              size_type   uBlkSize,
+                              align_type  uBlkAlign)
 : m_uNumAlloc (),
   m_gOwner ((uBlkCount * uBlkSize) > pOwner.max_size () ? *this : pOwner),
   m_pBegin (&m_gOwner != this ?
-							 (uBlkCount and uBlkSize and uBlkAlign ?
-								  static_cast<pointer> (pOwner.allocate (
-															uBlkCount * uBlkSize,
-															alignof (size_type))) :
-								  nullptr) :
-							(uBlkCount? ::operator new (uBlkCount * uBlkSize) : nullptr)),
+                             (uBlkCount and uBlkSize and uBlkAlign ?
+                                  static_cast<pointer> (pOwner.allocate (
+                                                            uBlkCount * uBlkSize,
+                                                            alignof (size_type))) :
+                                  nullptr) :
+                            (uBlkCount? ::operator new (uBlkCount * uBlkSize) : nullptr)),
   m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
-								nullptr),
+                                nullptr),
   m_pFreeList (),
   m_uBlkSize (uBlkSize),
   m_uBlkAlign (uBlkAlign),
   m_uBlkNum ()
 {
-	initialize ();
+    initialize ();
 }
 
 //PoolAllocator::PoolAllocator (SharedObject& gObj,
-//							  size_type     uBlkCount,
-//							  size_type     uBlkSize,
-//							  align_type    uBlkAlign)
+//                              size_type     uBlkCount,
+//                              size_type     uBlkSize,
+//                              align_type    uBlkAlign)
 //: m_uNumAlloc (),
 //  m_gOwner (this),
 //  m_gSharedMem (gObj, uBlkCount * uBlkSize),
@@ -80,68 +80,68 @@ PoolAllocator::PoolAllocator (Allocator& pOwner,
 //  m_uBlkAlign (uBlkAlign),
 //  m_uBlkNum (true)
 //{
-//	initialize ();
+//    initialize ();
 //}
 
 PoolAllocator::~PoolAllocator ()
 {
-	if (m_pBegin == nullptr) return;
+    if (m_pBegin == nullptr) return;
 
-	if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
-	else ::operator delete (m_pBegin);
+    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
+    else ::operator delete (m_pBegin);
 }
 
 void PoolAllocator::initialize () noexcept
 {
-	if (m_pBegin)
-	{
-		size_type uAdjust = alignAdjust (m_pBegin, m_uBlkAlign);
+    if (m_pBegin)
+    {
+        size_type uAdjust = alignAdjust (m_pBegin, m_uBlkAlign);
 
-		pointer* p = m_pFreeList =
-				reinterpret_cast<pointer*> (static_cast<math_pointer> (m_pBegin) + uAdjust);
+        pointer* p = m_pFreeList =
+                reinterpret_cast<pointer*> (static_cast<math_pointer> (m_pBegin) + uAdjust);
 
-		m_uBlkNum = ((m_uBlkSize - uAdjust) / m_uBlkSize) - 1;
+        m_uBlkNum = ((m_uBlkSize - uAdjust) / m_uBlkSize) - 1;
 
-		for (size_type i = 0; i < m_uBlkNum; ++i)
-		{
-			*p = reinterpret_cast<pointer>  ( p + m_uBlkSize);
-			 p = reinterpret_cast<pointer*> (*p);
-		}
+        for (size_type i = 0; i < m_uBlkNum; ++i)
+        {
+            *p = reinterpret_cast<pointer>  ( p + m_uBlkSize);
+             p = reinterpret_cast<pointer*> (*p);
+        }
 
-		*p = nullptr;
-		++m_uBlkNum;
-	}
+        *p = nullptr;
+        ++m_uBlkNum;
+    }
 }
 
 void* PoolAllocator::allocate (size_type uSize, align_type uAlign) noexcept
 {
-	// check if size and alignment match with the ones from
-	// the current pool instance
-	if (!m_pFreeList or uSize != m_uBlkSize or uAlign != m_uBlkAlign)
-		return nullptr;
+    // check if size and alignment match with the ones from
+    // the current pool instance
+    if (!m_pFreeList or uSize != m_uBlkSize or uAlign != m_uBlkAlign)
+        return nullptr;
 
-	pointer p   = reinterpret_cast<pointer > ( m_pFreeList);
-	m_pFreeList = reinterpret_cast<pointer*> (*m_pFreeList);
+    pointer p   = reinterpret_cast<pointer > ( m_pFreeList);
+    m_pFreeList = reinterpret_cast<pointer*> (*m_pFreeList);
 
-	++m_uNumAlloc;
-	return p;
+    ++m_uNumAlloc;
+    return p;
 }
 
 void PoolAllocator::deallocate (void* p, size_type uSize)
 {
-	if (uSize != m_uBlkSize) throw std::length_error ("not equal to blocksize");
-	if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
+    if (uSize != m_uBlkSize) throw std::length_error ("not equal to blocksize");
+    if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
 
-	*(reinterpret_cast<pointer*> (p)) = reinterpret_cast<pointer> (m_pFreeList);
-	m_pFreeList = reinterpret_cast<pointer*> (p);
-	--m_uNumAlloc;
+    *(reinterpret_cast<pointer*> (p)) = reinterpret_cast<pointer> (m_pFreeList);
+    m_pFreeList = reinterpret_cast<pointer*> (p);
+    --m_uNumAlloc;
 }
 
 void PoolAllocator::clear () noexcept
 {
-	m_uNumAlloc = 0;
-	m_pFreeList = reinterpret_cast<pointer*> (static_cast<math_pointer> (m_pBegin) +
-											  alignAdjust (m_pBegin, m_uBlkAlign));
+    m_uNumAlloc = 0;
+    m_pFreeList = reinterpret_cast<pointer*> (static_cast<math_pointer> (m_pBegin) +
+                                              alignAdjust (m_pBegin, m_uBlkAlign));
 }
 
 } } // namespace Memory

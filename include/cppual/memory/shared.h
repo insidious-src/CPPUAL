@@ -33,83 +33,83 @@ namespace cppual { namespace Memory {
 
 enum class Mode : unsigned char
 {
-	Create,
-	CreateOrOpen,
-	Open
+    Create,
+    CreateOrOpen,
+    Open
 };
 
 enum class State : unsigned char
 {
-	ReadOnly,
-	ReadWrite,
-	CopyOnWrite,
-	ReadPrivate,
-	Invalid
+    ReadOnly,
+    ReadWrite,
+    CopyOnWrite,
+    ReadPrivate,
+    Invalid
 };
 
 class SharedObject final : public NonCopyable
 {
 public:
-	typedef std::size_t size_type;
-	typedef u16         offset;
+    typedef std::size_t size_type;
+    typedef u16         offset;
 
-	SharedObject (string const&, Mode = Mode::CreateOrOpen, State = State::ReadWrite);
-	~SharedObject () noexcept;
-	bool truncate (size_type mem_size) noexcept;
+    SharedObject (string const&, Mode = Mode::CreateOrOpen, State = State::ReadWrite);
+    ~SharedObject () noexcept;
+    bool truncate (size_type mem_size) noexcept;
 
-	inline State  state   () const noexcept { return m_eState; }
-	inline Mode   mode    () const noexcept { return m_eMode; }
-	inline int    id      () const noexcept { return m_nId; }
-	inline bool   isValid () const noexcept { return m_nId != -1; }
-	inline string name    () const noexcept { return m_gName; }
+    inline State  state   () const noexcept { return m_eState; }
+    inline Mode   mode    () const noexcept { return m_eMode; }
+    inline int    id      () const noexcept { return m_nId; }
+    inline bool   isValid () const noexcept { return m_nId != -1; }
+    inline string name    () const noexcept { return m_gName; }
 
-	inline SharedObject () noexcept
-	: m_gName (),
-	  m_eMode (),
-	  m_eState (),
-	  m_nId (-1)
-	{ }
+    inline SharedObject () noexcept
+    : m_gName (),
+      m_eMode (),
+      m_eState (),
+      m_nId (-1)
+    { }
 
 private:
-	string m_gName;
-	Mode   m_eMode;
-	State  m_eState;
-	int    m_nId;
+    string m_gName;
+    Mode   m_eMode;
+    State  m_eState;
+    int    m_nId;
 };
 
 class SharedRegion final : public NonCopyable
 {
 public:
-	typedef std::size_t size_type;
-	typedef u16         offset;
+    typedef std::size_t size_type;
+    typedef u16         offset;
 
-	SharedRegion (SharedObject&, size_type, bool writable = true);
-	~SharedRegion () noexcept;
+    SharedRegion (SharedObject&, size_type, bool writable = true);
+    ~SharedRegion () noexcept;
 
-	inline bool isWritable () const noexcept
-	{ return m_bWritable; }
+    inline bool isWritable () const noexcept
+    { return m_bWritable; }
 
-	inline bool isValid () const noexcept
-	{ return m_pRegion; }
+    inline bool isValid () const noexcept
+    { return m_pRegion; }
 
-	inline void* address () const noexcept
-	{ return m_pRegion; }
+    inline void* address () const noexcept
+    { return m_pRegion; }
 
-	inline size_type size () const noexcept
-	{ return m_uSize; }
+    inline size_type size () const noexcept
+    { return m_uSize; }
 
-	inline SharedObject& object () const noexcept
-	{ return m_gObject; }
+    inline SharedObject& object () const noexcept
+    { return m_gObject; }
 
-	template <typename T>
-	constexpr T* ptr (T* pOffset) const noexcept
-	{ return pOffset + m_pRegion; }
+    template <typename T>
+    constexpr T* ptr (T* pOffset) const noexcept
+    { return pOffset + m_pRegion; }
 
 private:
-	SharedObject& m_gObject;
-	void*         m_pRegion;
-	size_type     m_uSize;
-	bool          m_bWritable;
+    SharedObject& m_gObject;
+    void*         m_pRegion;
+    size_type     m_uSize;
+    bool          m_bWritable;
 };
 
 } } // namespace Memory

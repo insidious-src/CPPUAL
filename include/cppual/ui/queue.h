@@ -44,28 +44,28 @@ typedef shared_ptr<IDisplayQueue> shared_queue;
 class IDisplayQueue : public NonCopyableVirtual
 {
 public:
-	typedef BitSet<Event::Type> mask_type;
-	typedef IWindow             window_type;
-	typedef Event               event_type;
+    typedef BitSet<Event::Type> mask_type;
+    typedef IWindow             window_type;
+    typedef Event               event_type;
 
-	virtual bool set_window_events (window_type const&, mask_type) = 0;
-	virtual bool pop_front         (event_type& receiver, bool wait) = 0;
-	virtual int  poll              (window_type const&, atomic_bool& poll) = 0;
-	virtual void send              (event_type const&) = 0;
-	virtual void post              (event_type const&) = 0;
+    virtual bool set_window_events (window_type const&, mask_type) = 0;
+    virtual bool pop_front         (event_type& receiver, bool wait) = 0;
+    virtual int  poll              (window_type const&, atomic_bool& poll) = 0;
+    virtual void send              (event_type const&) = 0;
+    virtual void post              (event_type const&) = 0;
 
-	static IDisplayQueue* instance ();
-	static bool           hasValidInstance () noexcept;
+    static IDisplayQueue* instance ();
+    static bool           hasValidInstance () noexcept;
 
-	Connection display () const noexcept { return m_display; }
-	bool       valid   () const noexcept { return m_display; }
+    Connection display () const noexcept { return m_display; }
+    bool       valid   () const noexcept { return m_display; }
 
-	constexpr IDisplayQueue (Connection display) noexcept
-	: m_display (display)
-	{ }
+    constexpr IDisplayQueue (Connection display) noexcept
+    : m_display (display)
+    { }
 
 private:
-	Connection m_display;
+    Connection m_display;
 };
 
 // =========================================================
@@ -73,36 +73,36 @@ private:
 class EventQueue : public NonCopyable
 {
 public:
-	typedef IDisplayQueue::event_type event_type;
-	typedef View                      window_type;
+    typedef IDisplayQueue::event_type event_type;
+    typedef View                      window_type;
 
-	EventQueue () noexcept
-	: queue    (IDisplayQueue::instance ()),
-	  polling  ()
-	{ }
+    EventQueue () noexcept
+    : queue    (IDisplayQueue::instance ()),
+      polling  ()
+    { }
 
-	int poll (window_type const& window)
-	{
-		if (std::this_thread::get_id () != window.renderable_unsafe ()->thread_id ())
-			throw std::logic_error ("the window was created on a different thread");
+    int poll (window_type const& window)
+    {
+        if (std::this_thread::get_id () != window.renderable_unsafe ()->thread_id ())
+            throw std::logic_error ("the window was created on a different thread");
 
-		polling = true;
-		return queue->poll (*window.renderable_unsafe (), polling);
-	}
+        polling = true;
+        return queue->poll (*window.renderable_unsafe (), polling);
+    }
 
-	void send (event_type const& event) { queue->send (event); }
-	void post (event_type const& event) { queue->post (event); }
-	void quit () noexcept { polling = false; }
+    void send (event_type const& event) { queue->send (event); }
+    void post (event_type const& event) { queue->post (event); }
+    void quit () noexcept { polling = false; }
 
-	bool pop_front (event_type& receiver, bool wait)
-	{ return queue->pop_front (receiver, wait); }
+    bool pop_front (event_type& receiver, bool wait)
+    { return queue->pop_front (receiver, wait); }
 
-	bool isPolling () const noexcept
-	{ return polling.load (); }
+    bool isPolling () const noexcept
+    { return polling.load (); }
 
 private:
-	IDisplayQueue* queue;
-	atomic_bool    polling;
+    IDisplayQueue* queue;
+    atomic_bool    polling;
 };
 
 } } // namespace Input

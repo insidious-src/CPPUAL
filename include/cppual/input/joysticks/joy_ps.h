@@ -29,44 +29,44 @@ namespace cppual { namespace Platform { namespace Joystick { namespace PlayStati
 
 enum PSButton
 {
-	Cross,
-	Square,
-	Circle,
-	Triangle,
-	Left,
-	Up,
-	Right,
-	Down,
-	L1,
-	L2,
-	L3,
-	R1,
-	R2,
-	R3,
-	Start,
-	Select,
-	Digital
+    Cross,
+    Square,
+    Circle,
+    Triangle,
+    Left,
+    Up,
+    Right,
+    Down,
+    L1,
+    L2,
+    L3,
+    R1,
+    R2,
+    R3,
+    Start,
+    Select,
+    Digital
 };
 
 enum PS4Button
 {
-	Cross,
-	Square,
-	Circle,
-	Triangle,
-	Left,
-	Up,
-	Right,
-	Down,
-	L1,
-	L2,
-	L3,
-	R1,
-	R2,
-	R3,
-	Options,
-	Share,
-	Digital
+    Cross,
+    Square,
+    Circle,
+    Triangle,
+    Left,
+    Up,
+    Right,
+    Down,
+    L1,
+    L2,
+    L3,
+    R1,
+    R2,
+    R3,
+    Options,
+    Share,
+    Digital
 };
 
 } } } } // namespace PlayStation

@@ -32,51 +32,51 @@ namespace { // optimize for internal unit usage
 
 inline uint generateObject (ResourceType eType)
 {
-	IDeviceContext* pContext = IDeviceContext::current ();
+    IDeviceContext* pContext = IDeviceContext::current ();
 
-	if (!pContext or pContext->device () != DeviceType::GL)
-		throw bad_context ("NO GL context bound to thread");
+    if (!pContext or pContext->device () != DeviceType::GL)
+        throw bad_context ("NO GL context bound to thread");
 
-	uint uId;
+    uint uId;
 
-	switch (eType)
-	{
-	case ResourceType::Buffer:
-		pContext->version () < 3 ?
-					glGenBuffers (1, &uId) : glGenBuffersARB (1, &uId);
-		break;
-	case ResourceType::Macro:
-		glGenVertexArrays (1, &uId);
-		break;
-	case ResourceType::Program:
-		uId = pContext->version () < 3 ?
-				  glCreateProgram () : glCreateProgramObjectARB ();
-		break;
-	case ResourceType::Query:
-		pContext->version () < 3 ?
-					glGenQueries (1, &uId) : glGenQueriesARB (1, &uId);
-		break;
-	case ResourceType::Texture:
-		glGenTextures (1, &uId);
-		if (uId) glBindTexture (GL::Texture2D, uId);
-		break;
-	default:
-		uId = 0;
-		break;
-	}
+    switch (eType)
+    {
+    case ResourceType::Buffer:
+        pContext->version () < 3 ?
+                    glGenBuffers (1, &uId) : glGenBuffersARB (1, &uId);
+        break;
+    case ResourceType::Macro:
+        glGenVertexArrays (1, &uId);
+        break;
+    case ResourceType::Program:
+        uId = pContext->version () < 3 ?
+                  glCreateProgram () : glCreateProgramObjectARB ();
+        break;
+    case ResourceType::Query:
+        pContext->version () < 3 ?
+                    glGenQueries (1, &uId) : glGenQueriesARB (1, &uId);
+        break;
+    case ResourceType::Texture:
+        glGenTextures (1, &uId);
+        if (uId) glBindTexture (GL::Texture2D, uId);
+        break;
+    default:
+        uId = 0;
+        break;
+    }
 
-	return uId;
+    return uId;
 }
 
 inline uint generateShader (uint uType)
 {
-	IDeviceContext* pContext = IDeviceContext::current ();
+    IDeviceContext* pContext = IDeviceContext::current ();
 
-	if (!pContext or pContext->device () != DeviceType::GL)
-		throw bad_context ("NO GL context bound to thread");
+    if (!pContext or pContext->device () != DeviceType::GL)
+        throw bad_context ("NO GL context bound to thread");
 
-	return pContext->version () < 3 ?
-				glCreateShader (uType) : glCreateShaderObjectARB (uType);
+    return pContext->version () < 3 ?
+                glCreateShader (uType) : glCreateShaderObjectARB (uType);
 }
 
 } // anonymous
@@ -93,55 +93,55 @@ Object::Object (uint uShaderType)
 
 Object::~Object () noexcept
 {
-	uint uId = id ();
+    uint uId = id ();
 
-	if (uId)
-	{
-		if (IDeviceContext::current ()->version () < 3)
-		{
-			switch (resType ())
-			{
-			case ResourceType::Buffer:
-				glDeleteBuffers (1, &uId);
-				break;
-			case ResourceType::Macro:
-				glDeleteVertexArrays (1, &uId);
-				break;
-			case ResourceType::Program:
-				glDeleteProgram (uId);
-				break;
-			case ResourceType::Query:
-				glDeleteQueries (1, &uId);
-				break;
-			case ResourceType::Shader:
-				glDeleteShader (uId);
-				break;
-			case ResourceType::Texture:
-				glDeleteTextures (1, &uId);
-				break;
-			default:
-				break;
-			}
-		}
-		else
-		{
-			switch (resType ())
-			{
-			case ResourceType::Buffer:
-				glDeleteBuffersARB (1, &uId);
-				break;
-			case ResourceType::Program:
-				glDeleteProgramsARB (1, &uId);
-				break;
-			case ResourceType::Query:
-				glDeleteQueriesARB (1, &uId);
-				break;
-			default:
-				glDeleteObjectARB (uId);
-				break;
-			}
-		}
-	}
+    if (uId)
+    {
+        if (IDeviceContext::current ()->version () < 3)
+        {
+            switch (resType ())
+            {
+            case ResourceType::Buffer:
+                glDeleteBuffers (1, &uId);
+                break;
+            case ResourceType::Macro:
+                glDeleteVertexArrays (1, &uId);
+                break;
+            case ResourceType::Program:
+                glDeleteProgram (uId);
+                break;
+            case ResourceType::Query:
+                glDeleteQueries (1, &uId);
+                break;
+            case ResourceType::Shader:
+                glDeleteShader (uId);
+                break;
+            case ResourceType::Texture:
+                glDeleteTextures (1, &uId);
+                break;
+            default:
+                break;
+            }
+        }
+        else
+        {
+            switch (resType ())
+            {
+            case ResourceType::Buffer:
+                glDeleteBuffersARB (1, &uId);
+                break;
+            case ResourceType::Program:
+                glDeleteProgramsARB (1, &uId);
+                break;
+            case ResourceType::Query:
+                glDeleteQueriesARB (1, &uId);
+                break;
+            default:
+                glDeleteObjectARB (uId);
+                break;
+            }
+        }
+    }
 }
 
 } } } // namespace GL

@@ -31,82 +31,82 @@ namespace cppual { namespace Ui {
 class TabBar : public SkinnableView
 {
 public:
-	TabBar ();
-	TabBar (TabBar&&);
-	TabBar (TabBar const&);
-	TabBar& operator = (TabBar&&);
-	TabBar& operator = (TabBar const&);
+    TabBar ();
+    TabBar (TabBar&&);
+    TabBar (TabBar const&);
+    TabBar& operator = (TabBar&&);
+    TabBar& operator = (TabBar const&);
 
-	enum TabFlag
-	{
-		Movable,
-		Draggable,
-		Removable,
-		CloseButton,
-		AddButton,
-		ShowIcons
-	};
+    enum TabFlag
+    {
+        Movable,
+        Draggable,
+        Removable,
+        CloseButton,
+        AddButton,
+        ShowIcons
+    };
 
-	typedef FlagSet<TabFlag, u8> TabFlags;
+    typedef FlagSet<TabFlag, u8> TabFlags;
 
-	bool create (View* parent, Rect const&);
-	bool addTab (string const&, IImage* = nullptr, int pos = -1);
-	bool removeTab (int pos);
-	bool moveTab (int pos, int new_pos);
-	bool isMovable () const;
-	bool isDraggable () const;
-	bool isRemovable () const;
-	bool hasCloseButtton () const;
-	bool hasAddButton () const;
-	void setMovable (bool);
-	void setDraggable (bool);
-	void setRemovable (bool);
-	void setTabLabel (int pos, string const& text);
-	void setTabIcon (int pos, IImage*);
-	void setAddButtonFlags ();
-	void setCloseButtonFlags ();
-	void enableCloseButton (bool);
-	void enableAddButton (bool);
+    bool create (View* parent, Rect const&);
+    bool addTab (string const&, IImage* = nullptr, int pos = -1);
+    bool removeTab (int pos);
+    bool moveTab (int pos, int new_pos);
+    bool isMovable () const;
+    bool isDraggable () const;
+    bool isRemovable () const;
+    bool hasCloseButtton () const;
+    bool hasAddButton () const;
+    void setMovable (bool);
+    void setDraggable (bool);
+    void setRemovable (bool);
+    void setTabLabel (int pos, string const& text);
+    void setTabIcon (int pos, IImage*);
+    void setAddButtonFlags ();
+    void setCloseButtonFlags ();
+    void enableCloseButton (bool);
+    void enableAddButton (bool);
 
-	Signal<void(int)> signalTabIdxChanged;
-	Signal<void(int)> signalTabAddded;
-	Signal<void(int)> signalTabRemoved;
+    Signal<void(int)> signalTabIdxChanged;
+    Signal<void(int)> signalTabAddded;
+    Signal<void(int)> signalTabRemoved;
 
 private:
-	TabFlags m_gTabFlags;
+    TabFlags m_gTabFlags;
 
-	void onCreate ();
-	void onShow (bool);
-	void onPaint ();
-	void onSize (Rect const&);
-	void onGotFocus ();
-	void onFocusKilled ();
+    void onCreate ();
+    void onShow (bool);
+    void onPaint ();
+    void onSize (Rect const&);
+    void onGotFocus ();
+    void onFocusKilled ();
 };
 
 class TabView : public SkinnableView
 {
 public:
-	TabView ();
-	TabView (TabView&&);
-	TabView (TabView const&);
-	TabView& operator = (TabView&&);
-	TabView& operator = (TabView const&);
+    TabView ();
+    TabView (TabView&&);
+    TabView (TabView const&);
+    TabView& operator = (TabView&&);
+    TabView& operator = (TabView const&);
 
-	View* getTabContainer (int);
-	bool    create (View* parent, Rect const&);
+    View* getTabContainer (int);
+    bool    create (View* parent, Rect const&);
 
-	TabBar* getTabBar () noexcept
-	{ return &m_TabBar; }
+    TabBar* getTabBar () noexcept
+    { return &m_TabBar; }
 
 private:
-	TabBar m_TabBar;
-	function<void(int)> m_gSlotTabIdx;
-	function<void(int)> m_gSlotAddTab;
-	function<void(int)> m_gSlotRemoveTab;
+    TabBar m_TabBar;
+    function<void(int)> m_gSlotTabIdx;
+    function<void(int)> m_gSlotAddTab;
+    function<void(int)> m_gSlotRemoveTab;
 
-	void onTabIdxChange (int);
-	void onAddTab (int);
-	void onRemoveTab (int);
+    void onTabIdxChange (int);
+    void onAddTab (int);
+    void onRemoveTab (int);
 };
 
 } } // Ui

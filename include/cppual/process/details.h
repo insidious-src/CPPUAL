@@ -26,12 +26,12 @@
 #include <cppual/decl.h>
 
 #ifdef OS_STD_POSIX
-#	include <pthread.h>
-#	include <unistd.h>
-#	include <errno.h>
-#	include <signal.h>
+    #include <pthread.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <signal.h>
 #elif defined (OS_WINDOWS)
-#	include <Windows.h>
+    #include <Windows.h>
 #endif
 
 namespace cppual { namespace Process {
@@ -61,10 +61,10 @@ typedef HANDLE process_handle;
 struct TaskTraits final
 {
 #ifdef OS_WINDOWS
-	HANDLE          m_pEvent;
+    HANDLE          m_pEvent;
 #elif defined (OS_STD_POSIX)
-	pthread_cond_t  m_gReady;
-	pthread_mutex_t m_gLock;
+    pthread_cond_t  m_gReady;
+    pthread_mutex_t m_gLock;
 #endif
 };
 

@@ -30,16 +30,16 @@ namespace cppual { namespace Ui {
 class CAeroSkin final : public ISkin
 {
 public:
-	bool Load ();
-	int GetValue (SkinElement, int);
-	RGBColor GetColor (SkinElement, int);
-	IImage* GetImage (SkinElement, int);
-	Font GetFont (SkinElement);
+    bool Load ();
+    int GetValue (SkinElement, int);
+    RGBColor GetColor (SkinElement, int);
+    IImage* GetImage (SkinElement, int);
+    Font GetFont (SkinElement);
 
-	SkinType getType () const noexcept { return sm_eType; }
+    SkinType getType () const noexcept { return sm_eType; }
 
 private:
-	static const SkinType sm_eType = SkinType::Static;
+    static const SkinType sm_eType = SkinType::Static;
 };
 
 } } // Ui

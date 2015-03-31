@@ -31,36 +31,36 @@ namespace cppual { namespace Graphics { namespace GL {
 
 bool isExtSupported (cchar* extension) noexcept
 {
-	cchar* list  = IGLContext::current ()->version ().major == 2 ?
-					   (cchar*) glGetString (GL_EXTENSIONS) : nullptr;
-	cchar* where = strchr (extension, ' ');
-	cchar* terminator;
+    cchar* list  = IGLContext::current ()->version ().major == 2 ?
+                       (cchar*) glGetString (GL_EXTENSIONS) : nullptr;
+    cchar* where = strchr (extension, ' ');
+    cchar* terminator;
 
-	/* Extension names should not have spaces. */
-	if (where or *extension == '\0') return false;
+    /* Extension names should not have spaces. */
+    if (where or *extension == '\0') return false;
 
-	/* It takes a bit of care to be fool-proof about parsing the
-	 OpenGL extensions string. Don't be fooled by sub-strings,
-	 etc. */
-	while ((where = strstr (list, extension)) != nullptr)
-	{
-		terminator = where + strlen (extension);
+    /* It takes a bit of care to be fool-proof about parsing the
+     OpenGL extensions string. Don't be fooled by sub-strings,
+     etc. */
+    while ((where = strstr (list, extension)) != nullptr)
+    {
+        terminator = where + strlen (extension);
 
-		if (where == list or *(where - 1) == ' ')
-		{
-			if (*terminator == ' ' or *terminator == '\0')
-				return true;
-		}
+        if (where == list or *(where - 1) == ' ')
+        {
+            if (*terminator == ' ' or *terminator == '\0')
+                return true;
+        }
 
-		list = terminator;
-	}
+        list = terminator;
+    }
 
-	return false;
+    return false;
 }
 
 bool loadExtension (string const&)
 {
-	return false;
+    return false;
 }
 
 } } } // GL

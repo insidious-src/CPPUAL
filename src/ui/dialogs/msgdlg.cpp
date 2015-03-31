@@ -31,51 +31,51 @@ class MessageBox final : public Dialog
 {
     //Label m_gMessage;
 
-	void onInit ();
-	void onEnd ();
+    void onInit ();
+    void onEnd ();
 
-	using Dialog::Dialog;
+    using Dialog::Dialog;
 };
 
 Dialog::Result showQuestion (string&& gTitle,
-							 string&& /*gQuestion*/,
-							 Results  /*gAnswers*/,
-							 Window*  pOwner)
+                             string&& /*gQuestion*/,
+                             Results  /*gAnswers*/,
+                             Window*  pOwner)
 {
-	MessageBox gQuestionBox (nullptr, Rect (), std::forward<string> (gTitle), nullptr);
+    MessageBox gQuestionBox (nullptr, Rect (), std::forward<string> (gTitle), nullptr);
 
-	if (gQuestionBox.valid ())
-	{
-		gQuestionBox.showInTaskbar (false);
-		gQuestionBox.showModal (pOwner);
-		return gQuestionBox.getResult ();
-	}
+    if (gQuestionBox.valid ())
+    {
+        gQuestionBox.showInTaskbar (false);
+        gQuestionBox.showModal (pOwner);
+        return gQuestionBox.getResult ();
+    }
 
-	return Dialog::Close;
+    return Dialog::Close;
 }
 
 void showMessage (string&&    gTitle,
-				  string&&    /*gMessage*/,
-				  MessageType /*eType*/,
-				  Window*     pOwner)
+                  string&&    /*gMessage*/,
+                  MessageType /*eType*/,
+                  Window*     pOwner)
 {
-	MessageBox gMessageBox (nullptr, Rect (), std::forward<string> (gTitle), nullptr);
+    MessageBox gMessageBox (nullptr, Rect (), std::forward<string> (gTitle), nullptr);
 
-	if (gMessageBox.valid ())
-	{
-		gMessageBox.showInTaskbar (false);
-		gMessageBox.showModal (pOwner);
-	}
+    if (gMessageBox.valid ())
+    {
+        gMessageBox.showInTaskbar (false);
+        gMessageBox.showModal (pOwner);
+    }
 }
 
 void MessageBox::onInit ()
 {
-//	m_gMessage.create (this,
-//					   "",
-//					   Rect (100, 100,
-//							 static_cast<u16> (geometry ().width  () - 20u),
-//							 static_cast<u16> (geometry ().height () - 20u))
-//					   );
+//    m_gMessage.create (this,
+//                       "",
+//                       Rect (100, 100,
+//                             static_cast<u16> (geometry ().width  () - 20u),
+//                             static_cast<u16> (geometry ().height () - 20u))
+//                       );
 }
 
 void MessageBox::onEnd ()

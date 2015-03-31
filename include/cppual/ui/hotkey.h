@@ -38,28 +38,28 @@ namespace cppual { namespace Ui {
 class HotKey
 {
 public:
-	typedef Event::KeyData value_type;
+    typedef Event::KeyData value_type;
 
-	HotKey () noexcept;
-	HotKey (value_type const) noexcept;
-	void setKeyCode (value_type const) noexcept;
+    HotKey () noexcept;
+    HotKey (value_type const) noexcept;
+    void setKeyCode (value_type const) noexcept;
 
-	inline value_type getKeyCode () const noexcept
-	{ return m_gKeyCode; }
+    inline value_type getKeyCode () const noexcept
+    { return m_gKeyCode; }
 
-	inline bool isTriggered () const noexcept
-	{ return m_bIsTriggered.load (std::memory_order_consume); }
+    inline bool isTriggered () const noexcept
+    { return m_bIsTriggered.load (std::memory_order_consume); }
 
-	Signal<void()> signalTriggered;
-	Signal<void()> signalReleased;
+    Signal<void()> signalTriggered;
+    Signal<void()> signalReleased;
 
 private:
-	value_type  m_gKeyCode;
-	atomic_bool m_bIsTriggered;
+    value_type  m_gKeyCode;
+    atomic_bool m_bIsTriggered;
 
-	void onKeyPress (u8) noexcept;
-	void onKeyRelease (u8) noexcept;
-	void onKeyNotify (value_type const) noexcept;
+    void onKeyPress (u8) noexcept;
+    void onKeyRelease (u8) noexcept;
+    void onKeyNotify (value_type const) noexcept;
 };
 
 

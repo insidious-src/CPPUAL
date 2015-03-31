@@ -72,122 +72,122 @@ template <typename T>
 class CircularIterator
 {
 public:
-	typedef T                               buf_type;
-	typedef typename T::pointer             pointer;
-	typedef typename T::const_pointer       const_pointer;
-	typedef typename T::reference           reference;
-	typedef typename T::const_reference     const_reference;
-	typedef typename T::difference_type     difference_type;
-	typedef typename T::size_type           size_type;
-	typedef typename T::value_type          value_type;
-	typedef CircularIterator<T>             self_type;
-	typedef std::bidirectional_iterator_tag iterator_category;
+    typedef T                               buf_type;
+    typedef typename T::pointer             pointer;
+    typedef typename T::const_pointer       const_pointer;
+    typedef typename T::reference           reference;
+    typedef typename T::const_reference     const_reference;
+    typedef typename T::difference_type     difference_type;
+    typedef typename T::size_type           size_type;
+    typedef typename T::value_type          value_type;
+    typedef CircularIterator<T>             self_type;
+    typedef std::bidirectional_iterator_tag iterator_category;
 
-	typedef typename std::conditional<std::is_const<buf_type>::value,
-	value_type const, value_type>::type
-	elem_type;
+    typedef typename std::conditional<std::is_const<buf_type>::value,
+    value_type const, value_type>::type
+    elem_type;
 
-	friend class CircularIterator<buf_type const>;
+    friend class CircularIterator<buf_type const>;
 
-	constexpr elem_type& operator *  () { return   get ()[m_uPos];  }
-	constexpr elem_type* operator -> () { return &(get ()[m_uPos]); }
+    constexpr elem_type& operator *  () { return   get ()[m_uPos];  }
+    constexpr elem_type* operator -> () { return &(get ()[m_uPos]); }
 
-	constexpr CircularIterator () noexcept
-	: m_pBuf (0), m_uPos (0)
-	{ }
+    constexpr CircularIterator () noexcept
+    : m_pBuf (0), m_uPos (0)
+    { }
 
-	constexpr CircularIterator (buf_type& b, size_type p) noexcept
-	: m_pBuf (&b), m_uPos (p)
-	{ }
+    constexpr CircularIterator (buf_type& b, size_type p) noexcept
+    : m_pBuf (&b), m_uPos (p)
+    { }
 
-	// Converting a non-const iterator to a const iterator
-	constexpr
-	CircularIterator (CircularIterator<typename std::remove_const<buf_type>::type>
-					  const& other) noexcept
-	: m_pBuf (other.m_pBuf), m_uPos (other.m_uPos)
-	{ }
+    // Converting a non-const iterator to a const iterator
+    constexpr
+    CircularIterator (CircularIterator<typename std::remove_const<buf_type>::type>
+                      const& other) noexcept
+    : m_pBuf (other.m_pBuf), m_uPos (other.m_uPos)
+    { }
 
-	inline self_type& operator ++ ()
-	{
-		++m_uPos;
-		return *this;
-	}
+    inline self_type& operator ++ ()
+    {
+        ++m_uPos;
+        return *this;
+    }
 
-	inline self_type operator ++ (int)
-	{
-		self_type tmp (*this);
-		++m_uPos;
-		return tmp;
-	}
+    inline self_type operator ++ (int)
+    {
+        self_type tmp (*this);
+        ++m_uPos;
+        return tmp;
+    }
 
-	inline self_type& operator -- ()
-	{
-		--m_uPos;
-		return *this;
-	}
-	inline self_type operator -- (int)
-	{
-		self_type tmp (*this);
-		--m_uPos;
-		return tmp;
-	}
+    inline self_type& operator -- ()
+    {
+        --m_uPos;
+        return *this;
+    }
+    inline self_type operator -- (int)
+    {
+        self_type tmp (*this);
+        --m_uPos;
+        return tmp;
+    }
 
-	constexpr self_type operator + (difference_type n) const
-	{
-		self_type tmp (*this);
-		tmp.m_uPos += n;
-		return tmp;
-	}
+    constexpr self_type operator + (difference_type n) const
+    {
+        self_type tmp (*this);
+        tmp.m_uPos += n;
+        return tmp;
+    }
 
-	inline self_type& operator += (difference_type n)
-	{
-		m_uPos += n;
-		return *this;
-	}
+    inline self_type& operator += (difference_type n)
+    {
+        m_uPos += n;
+        return *this;
+    }
 
-	constexpr self_type operator - (difference_type n) const
-	{
-		self_type tmp (*this);
-		tmp.m_uPos -= n;
-		return tmp;
-	}
+    constexpr self_type operator - (difference_type n) const
+    {
+        self_type tmp (*this);
+        tmp.m_uPos -= n;
+        return tmp;
+    }
 
-	inline self_type& operator -= (difference_type n)
-	{
-		m_uPos -= n;
-		return *this;
-	}
+    inline self_type& operator -= (difference_type n)
+    {
+        m_uPos -= n;
+        return *this;
+    }
 
-	constexpr difference_type operator - (self_type const& c) const
-	{ return difference_type (m_uPos - c.m_uPos); }
+    constexpr difference_type operator - (self_type const& c) const
+    { return difference_type (m_uPos - c.m_uPos); }
 
-	constexpr bool operator == (self_type const& other) const
-	{ return m_uPos == other.m_uPos and m_pBuf == other.m_pBuf; }
+    constexpr bool operator == (self_type const& other) const
+    { return m_uPos == other.m_uPos and m_pBuf == other.m_pBuf; }
 
-	constexpr bool operator != (self_type const& other) const
-	{ return m_uPos != other.m_uPos or m_pBuf != other.m_pBuf; }
+    constexpr bool operator != (self_type const& other) const
+    { return m_uPos != other.m_uPos or m_pBuf != other.m_pBuf; }
 
-	constexpr bool operator > (self_type const& other) const
-	{ return m_uPos > other.m_uPos; }
+    constexpr bool operator > (self_type const& other) const
+    { return m_uPos > other.m_uPos; }
 
-	constexpr bool operator >= (self_type const& other) const
-	{ return m_uPos >= other.m_uPos; }
+    constexpr bool operator >= (self_type const& other) const
+    { return m_uPos >= other.m_uPos; }
 
-	constexpr bool operator < (self_type const& other) const
-	{ return m_uPos < other.m_uPos; }
+    constexpr bool operator < (self_type const& other) const
+    { return m_uPos < other.m_uPos; }
 
-	constexpr bool operator <= (self_type const& other) const
-	{ return m_uPos <= other.m_uPos; }
+    constexpr bool operator <= (self_type const& other) const
+    { return m_uPos <= other.m_uPos; }
 
-	constexpr buf_type& get () const noexcept
-	{ return *m_pBuf; }
+    constexpr buf_type& get () const noexcept
+    { return *m_pBuf; }
 
-	constexpr size_type pos () const noexcept
-	{ return m_uPos; }
+    constexpr size_type pos () const noexcept
+    { return m_uPos; }
 
 private:
-	buf_type* m_pBuf;
-	size_type m_uPos;
+    buf_type* m_pBuf;
+    size_type m_uPos;
 };
 
 // =========================================================
@@ -196,14 +196,14 @@ template <typename circular_buffer_iterator_t>
 constexpr
 circular_buffer_iterator_t
 operator + (const typename circular_buffer_iterator_t::difference_type &a,
-			const circular_buffer_iterator_t                           &b)
+            const circular_buffer_iterator_t                           &b)
 { return circular_buffer_iterator_t (a) + b; }
 
 template <typename circular_buffer_iterator_t>
 constexpr
 circular_buffer_iterator_t
 operator - (const typename circular_buffer_iterator_t::difference_type &a,
-			const circular_buffer_iterator_t                           &b)
+            const circular_buffer_iterator_t                           &b)
 { return circular_buffer_iterator_t (a) - b; }
 
 } // cppual

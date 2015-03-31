@@ -29,10 +29,10 @@
 namespace cppual { namespace Memory {
 
 static_assert (sizeof (std::size_t) == sizeof (u8*),
-			   "size_t is not equal to the size of a pointer!");
+               "size_t is not equal to the size of a pointer!");
 
 static_assert (alignof (std::size_t) == alignof (u8*),
-			   "The alignment is wrong!");
+               "The alignment is wrong!");
 
 // =========================================================
 

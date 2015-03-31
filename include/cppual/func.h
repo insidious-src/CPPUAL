@@ -31,21 +31,21 @@ namespace cppual
 template <typename Type>
 inline uint getArrayLen (Type type) noexcept
 {
-	return (sizeof (type) / sizeof (Type));
+    return (sizeof (type) / sizeof (Type));
 }
 
 inline byte getNumDigits (int nNum) noexcept
 {
-	byte nDigitCount = 0;
+    byte nDigitCount = 0;
 
-	for (int n = (nNum < 0 ? -nNum : nNum); n > 0; n /= 10) ++nDigitCount;
-	return nDigitCount;
+    for (int n = (nNum < 0 ? -nNum : nNum); n > 0; n /= 10) ++nDigitCount;
+    return nDigitCount;
 }
 
 inline bool isPowerOfTwo (int nNum) noexcept
 {
-	if (nNum < 1) return false;
-	return (nNum & (nNum - 1)) == 0;
+    if (nNum < 1) return false;
+    return (nNum & (nNum - 1)) == 0;
 }
 
 } // cppual

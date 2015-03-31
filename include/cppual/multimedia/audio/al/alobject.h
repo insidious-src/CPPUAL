@@ -33,28 +33,28 @@ namespace cppual { namespace Audio { namespace AL {
 class AudioObject
 {
 public:
-	AudioObject (ObjectType type) noexcept;
-	AudioObject (AudioObject&&) noexcept;
-	AudioObject (AudioObject const&) noexcept;
-	AudioObject& operator = (AudioObject&&) noexcept;
-	AudioObject& operator = (AudioObject const&) noexcept;
+    AudioObject (ObjectType type) noexcept;
+    AudioObject (AudioObject&&) noexcept;
+    AudioObject (AudioObject const&) noexcept;
+    AudioObject& operator = (AudioObject&&) noexcept;
+    AudioObject& operator = (AudioObject const&) noexcept;
 
-	inline  AudioObject () noexcept : m_uObjId (), m_eObjType () { }
-	inline ~AudioObject () noexcept { reset (); }
+    inline  AudioObject () noexcept : m_uObjId (), m_eObjType () { }
+    inline ~AudioObject () noexcept { reset (); }
 
-	inline ObjectType type () const noexcept { return m_eObjType; }
-	inline uint       id () const noexcept { return m_uObjId; }
-	inline bool       isValid () const noexcept { return m_uObjId; }
+    inline ObjectType type () const noexcept { return m_eObjType; }
+    inline uint       id () const noexcept { return m_uObjId; }
+    inline bool       isValid () const noexcept { return m_uObjId; }
 
-	inline static uint count () noexcept
-	{ return sm_uALObjCount.load (std::memory_order_consume); }
+    inline static uint count () noexcept
+    { return sm_uALObjCount.load (std::memory_order_consume); }
 
 private:
-	static atomic_uint sm_uALObjCount;
-	uint                m_uObjId;
-	ObjectType          m_eObjType;
+    static atomic_uint sm_uALObjCount;
+    uint                m_uObjId;
+    ObjectType          m_eObjType;
 
-	void reset () noexcept;
+    void reset () noexcept;
 };
 
 } } } // namespace Audio

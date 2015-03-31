@@ -33,114 +33,114 @@ namespace cppual { namespace Ui {
 class View
 {
 public:
-	typedef Event                                event_type;
-	typedef Memory::GenericPolicy<View*>         allocator_type;
-	typedef CircularQueue<View*, allocator_type> container;
-	typedef std::size_t	                         size_type;
+    typedef Event                                event_type;
+    typedef Memory::GenericPolicy<View*>         allocator_type;
+    typedef CircularQueue<View*, allocator_type> container;
+    typedef std::size_t                             size_type;
 
-	typedef typename
-	container::iterator iterator;
+    typedef typename
+    container::iterator iterator;
 
-	typedef typename
-	Signal<void(event_type::window_type, point2u)>
-	::slot_type mouse_move_conn;
+    typedef typename
+    Signal<void(event_type::window_type, point2u)>
+    ::slot_type mouse_move_conn;
 
-	typedef typename
-	Signal<void(event_type::window_type, event_type::MouseButtonData)>
-	::slot_type mouse_btn_conn;
+    typedef typename
+    Signal<void(event_type::window_type, event_type::MouseButtonData)>
+    ::slot_type mouse_btn_conn;
 
-	enum
-	{
-		DefaultWidth  = 800,
-		DefaultHeight = 600
-	};
+    enum
+    {
+        DefaultWidth  = 800,
+        DefaultHeight = 600
+    };
 
-	View (View&&) noexcept;
-	View (View const&) noexcept;
-	View& operator = (View&&) noexcept;
-	View& operator = (View const&) noexcept;
-	~View ();
+    View (View&&) noexcept;
+    View (View const&) noexcept;
+    View& operator = (View&&) noexcept;
+    View& operator = (View const&) noexcept;
+    ~View ();
 
-	View (View*       parent,
-		  Rect const& rect,
-		  u32         screen    = 0,
-		  allocator_type const& = allocator_type ());
+    View (View*       parent,
+          Rect const& rect,
+          u32         screen    = 0,
+          allocator_type const& = allocator_type ());
 
-	void destroy ();
-	void show ();
-	void hide ();
-	bool setParent (View* parent, point2i pos = point2i ());
-	void setGeometry (Rect const&);
-	void setMinimumSize (point2u);
-	void setMaximumSize (point2u);
-	void move (point2i);
-	void destroyChildren ();
-	void refresh ();
-	void enable ();
-	void disable ();
-	void setFocus ();
-	void killFocus ();
+    void destroy ();
+    void show ();
+    void hide ();
+    bool setParent (View* parent, point2i pos = point2i ());
+    void setGeometry (Rect const&);
+    void setMinimumSize (point2u);
+    void setMaximumSize (point2u);
+    void move (point2i);
+    void destroyChildren ();
+    void refresh ();
+    void enable ();
+    void disable ();
+    void setFocus ();
+    void killFocus ();
 
-	inline weak_window renderable () const noexcept { return m_pRenderable; }
-	inline IWindow*    renderable_unsafe () const noexcept { return m_pRenderable.get (); }
-	inline point2u     minimumSize () const noexcept { return m_gMinSize; }
-	inline point2u     maximumSize () const noexcept { return m_gMaxSize; }
+    inline weak_window renderable () const noexcept { return m_pRenderable; }
+    inline IWindow*    renderable_unsafe () const noexcept { return m_pRenderable.get (); }
+    inline point2u     minimumSize () const noexcept { return m_gMinSize; }
+    inline point2u     maximumSize () const noexcept { return m_gMaxSize; }
 
-	inline bool valid () const noexcept
-	{ return m_gStateFlags.test (View::Valid); }
+    inline bool valid () const noexcept
+    { return m_gStateFlags.test (View::Valid); }
 
-	inline bool isEnabled () const noexcept
-	{ return m_gStateFlags.test (View::Enabled); }
+    inline bool isEnabled () const noexcept
+    { return m_gStateFlags.test (View::Enabled); }
 
-	inline bool hasFocus () const noexcept
-	{ return m_gStateFlags.test (View::HasFocus); }
+    inline bool hasFocus () const noexcept
+    { return m_gStateFlags.test (View::HasFocus); }
 
-	inline bool isHidden () const noexcept
-	{ return !m_gStateFlags.test (View::Valid) or !m_pRenderable->isMapped (); }
+    inline bool isHidden () const noexcept
+    { return !m_gStateFlags.test (View::Valid) or !m_pRenderable->isMapped (); }
 
-	inline Rect geometry () const noexcept
-	{ return m_gStateFlags.test (View::Valid) ? m_pRenderable->geometry () : Rect (); }
+    inline Rect geometry () const noexcept
+    { return m_gStateFlags.test (View::Valid) ? m_pRenderable->geometry () : Rect (); }
 
-	inline View () noexcept
-	: View (nullptr, Rect (0, 0, DefaultWidth, DefaultHeight))
-	{ }
+    inline View () noexcept
+    : View (nullptr, Rect (0, 0, DefaultWidth, DefaultHeight))
+    { }
 
 protected:
-	virtual void onDestroy () { }
-	virtual void onShow (bool) { }
-	virtual void onPaint (Rect const&) { }
-	virtual void onEnable (bool) { }
-	virtual void onSize (point2u) { }
-	virtual void onMove (point2i) { }
-	virtual void onBeginSizeMove (Rect const&) { }
-	virtual void onEndSizeMove (Rect const&) { }
-	virtual void onMinMaxSize (point2u) { }
-	virtual void onFocus (bool) { }
-	virtual void onParentSize (point2u) { }
+    virtual void onDestroy () { }
+    virtual void onShow (bool) { }
+    virtual void onPaint (Rect const&) { }
+    virtual void onEnable (bool) { }
+    virtual void onSize (point2u) { }
+    virtual void onMove (point2i) { }
+    virtual void onBeginSizeMove (Rect const&) { }
+    virtual void onEndSizeMove (Rect const&) { }
+    virtual void onMinMaxSize (point2u) { }
+    virtual void onFocus (bool) { }
+    virtual void onParentSize (point2u) { }
 
 private:
-	enum StateFlag
-	{
-		Valid    = 1 << 0,
-		HasFocus = 1 << 1,
-		Enabled  = 1 << 2
-	};
+    enum StateFlag
+    {
+        Valid    = 1 << 0,
+        HasFocus = 1 << 1,
+        Enabled  = 1 << 2
+    };
 
-	typedef BitSet<StateFlag> StateFlags;
+    typedef BitSet<StateFlag> StateFlags;
 
-	void paint (Rect const&);
-	void size (point2u);
-	void mouseMoved (point2u);
-	void mousePressed (event_type::MouseButtonData const&);
-	void mouseReleased (event_type::MouseButtonData const&);
-	void destroyResources ();
-	void invalidate () noexcept;
-	static void registerEvents ();
+    void paint (Rect const&);
+    void size (point2u);
+    void mouseMoved (point2u);
+    void mousePressed (event_type::MouseButtonData const&);
+    void mouseReleased (event_type::MouseButtonData const&);
+    void destroyResources ();
+    void invalidate () noexcept;
+    static void registerEvents ();
 
 private:
     container     m_gChildrenList;
     point2u       m_gMinSize, m_gMaxSize;
-	shared_window m_pRenderable;
+    shared_window m_pRenderable;
     iterator      m_gItFromParent;
     View*         m_pParentObj;
     StateFlags    m_gStateFlags;
@@ -151,77 +151,77 @@ private:
 class Widget
 {
 public:
-	typedef Memory::GenericPolicy<Widget*>         allocator_type;
-	typedef CircularQueue<Widget*, allocator_type> container_type;
-	typedef std::size_t	                           size_type;
+    typedef Memory::GenericPolicy<Widget*>         allocator_type;
+    typedef CircularQueue<Widget*, allocator_type> container_type;
+    typedef std::size_t                               size_type;
 
-	void destroy ();
-	void show ();
-	void hide ();
-	bool setParent (View* parent, point2i pos = point2i ());
-	void setGeometry (Rect const&);
-	void setSize (point2u);
-	void setMinimumSize (point2u);
-	void setMaximumSize (point2u);
-	void move (point2u);
-	void refresh ();
-	void enable ();
-	void disable ();
-	void setFocus ();
-	void killFocus ();
+    void destroy ();
+    void show ();
+    void hide ();
+    bool setParent (View* parent, point2i pos = point2i ());
+    void setGeometry (Rect const&);
+    void setSize (point2u);
+    void setMinimumSize (point2u);
+    void setMaximumSize (point2u);
+    void move (point2u);
+    void refresh ();
+    void enable ();
+    void disable ();
+    void setFocus ();
+    void killFocus ();
 
-	Widget (Widget*     parent,
-			Rect const& rect,
-			allocator_type const& = allocator_type ());
+    Widget (Widget*     parent,
+            Rect const& rect,
+            allocator_type const& = allocator_type ());
 
-	point2u minimumSize () const noexcept { return m_gMinSize; }
-	point2u maximumSize () const noexcept { return m_gMaxSize; }
+    point2u minimumSize () const noexcept { return m_gMinSize; }
+    point2u maximumSize () const noexcept { return m_gMaxSize; }
 
-	bool isEnabled () const noexcept
-	{ return m_gStateFlags.test (Widget::Enabled); }
+    bool isEnabled () const noexcept
+    { return m_gStateFlags.test (Widget::Enabled); }
 
-	bool hasFocus () const noexcept
-	{ return m_gStateFlags.test (Widget::HasFocus); }
+    bool hasFocus () const noexcept
+    { return m_gStateFlags.test (Widget::HasFocus); }
 
-	bool isHidden () const noexcept
-	{ return !m_gBuffer.isMapped (); }
+    bool isHidden () const noexcept
+    { return !m_gBuffer.isMapped (); }
 
-	Rect geometry () const noexcept
-	{ return m_gBuffer.geometry (); }
+    Rect geometry () const noexcept
+    { return m_gBuffer.geometry (); }
 
-	string name () const noexcept
-	{ return m_gName; }
+    string name () const noexcept
+    { return m_gName; }
 
 protected:
-	virtual void onDestroy () { }
-	virtual void onShow (bool) { }
-	virtual void onPaint (Rect const&) { }
-	virtual void onEnable (bool) { }
-	virtual void onSize (point2u) { }
-	virtual void onMove (point2u) { }
-	virtual void onBeginSizeMove (Rect const&) { }
-	virtual void onEndSizeMove (Rect const&) { }
-	virtual void onFocus (bool) { }
-	virtual void onParentSize (point2u) { }
+    virtual void onDestroy () { }
+    virtual void onShow (bool) { }
+    virtual void onPaint (Rect const&) { }
+    virtual void onEnable (bool) { }
+    virtual void onSize (point2u) { }
+    virtual void onMove (point2u) { }
+    virtual void onBeginSizeMove (Rect const&) { }
+    virtual void onEndSizeMove (Rect const&) { }
+    virtual void onFocus (bool) { }
+    virtual void onParentSize (point2u) { }
 
 private:
-	enum StateFlag
-	{
-		HasFocus = 1 << 1,
-		Enabled  = 1 << 2
-	};
+    enum StateFlag
+    {
+        HasFocus = 1 << 1,
+        Enabled  = 1 << 2
+    };
 
-	typedef BitSet<StateFlag> StateFlags;
+    typedef BitSet<StateFlag> StateFlags;
 
-	void paint (Rect const&);
+    void paint (Rect const&);
 
 private:
-	VirtualBuffer  m_gBuffer;
-	container_type m_gChildren;
-	Widget*        m_pParent;
-	string         m_gName;
-	point2u        m_gMinSize, m_gMaxSize;
-	StateFlags     m_gStateFlags;
+    VirtualBuffer  m_gBuffer;
+    container_type m_gChildren;
+    Widget*        m_pParent;
+    string         m_gName;
+    point2u        m_gMinSize, m_gMaxSize;
+    StateFlags     m_gStateFlags;
 };
 
 } } // namespace Ui

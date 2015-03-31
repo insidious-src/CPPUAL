@@ -36,14 +36,14 @@ typedef FT_ListNode  font_listnode;
 
 inline font_library init () noexcept
 {
-	font_library lib;
-	return FT_Init_FreeType (&lib) == 0 ? lib : nullptr;
+    font_library lib;
+    return FT_Init_FreeType (&lib) == 0 ? lib : nullptr;
 }
 
 inline font_library instance () noexcept
 {
-	static font_library lib = init ();
-	return lib;
+    static font_library lib = init ();
+    return lib;
 }
 
 } } // anonymous namespace FreeType
@@ -54,17 +54,17 @@ Font::Atlas::Atlas (string const& gName)
 : m_gName (gName),
   m_pFace ()
 {
-	FreeType::font_face tmp_handle;
+    FreeType::font_face tmp_handle;
 
-	if (FT_New_Face (FreeType::instance (), gName.c_str (), 0, &tmp_handle))
-		std::cout << "Couldn't load font " << gName << std::endl;
-	else
-		m_pFace = tmp_handle;
+    if (FT_New_Face (FreeType::instance (), gName.c_str (), 0, &tmp_handle))
+        std::cout << "Couldn't load font " << gName << std::endl;
+    else
+        m_pFace = tmp_handle;
 }
 
 Font::Atlas::~Atlas ()
 {
-	if (m_pFace) FT_Done_Face (static_cast<FreeType::font_face> (m_pFace));
+    if (m_pFace) FT_Done_Face (static_cast<FreeType::font_face> (m_pFace));
 }
 
 // =========================================================

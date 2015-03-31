@@ -45,82 +45,82 @@ PopupMenu::PopupMenu (PopupMenu const& gObj)
 
 PopupMenu& PopupMenu::operator = (PopupMenu&&)
 {
-	return *this;
+    return *this;
 }
 
 PopupMenu& PopupMenu::operator = (PopupMenu const&)
 {
-	return *this;
+    return *this;
 }
 
 MenuItemType PopupMenu::itemType (int)
 {
-	return MenuItemType::Invalid;
+    return MenuItemType::Invalid;
 }
 
 PopupMenu* PopupMenu::subMenu (int)
 {
-	return nullptr;
+    return nullptr;
 }
 
 Command* PopupMenu::command (int)
 {
-	return nullptr;
+    return nullptr;
 }
 
 PopupMenu::size_type PopupMenu::delay ()
 {
-	return 0;
+    return 0;
 }
 
 bool PopupMenu::create (point2i)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::addCommand (Command*, int)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::addCheck (Command*, int)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::addRadio (Command*, int)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::addSubMenu (PopupMenu*, string const&, int)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::addSeparator (int)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::addGroup (int)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::addToGroup (int, View*)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::removeFromGroup (int, View*)
 {
-	return false;
+    return false;
 }
 
 bool PopupMenu::removeItem (int)
 {
-	return false;
+    return false;
 }
 
 void PopupMenu::setDelay (View::size_type)
@@ -137,7 +137,7 @@ void PopupMenu::setGroupName (int, string const&)
 
 PopupMenu::size_type PopupMenu::defaultDelay ()
 {
-	return 0;
+    return 0;
 }
 
 void PopupMenu::setDefaultDelay (size_type)
@@ -150,7 +150,7 @@ void PopupMenu::onPaint (Rect const&)
 
 void PopupMenu::onFocusKilled ()
 {
-	hide ();
+    hide ();
 }
 
 void PopupMenu::onKeyPress (u8)

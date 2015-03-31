@@ -31,9 +31,9 @@ namespace cppual { namespace Graphics { namespace GL {
 class FrameBuffer final : public BufferObject
 {
 public:
-	FrameBuffer () noexcept;
-	FrameBuffer (FrameBuffer&&) = default;
-	FrameBuffer& operator = (FrameBuffer&&) = default;
+    FrameBuffer () noexcept;
+    FrameBuffer (FrameBuffer&&) = default;
+    FrameBuffer& operator = (FrameBuffer&&) = default;
 };
 
 } } } // namespace GL

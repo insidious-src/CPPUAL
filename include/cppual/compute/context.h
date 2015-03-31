@@ -52,13 +52,13 @@ public:
     Behaviour& operator = (Behaviour&&) = default;
     ~Behaviour ();
 
-	bool set (DeviceGroup&);
+    bool set (DeviceGroup&);
 
-	DeviceGroup& devices () const noexcept
-	{ return *m_gDevice; }
+    DeviceGroup& devices () const noexcept
+    { return *m_gDevice; }
 
 private:
-	DeviceGroup* m_gDevice;
+    DeviceGroup* m_gDevice;
 };
 
 } } // namespace Compute

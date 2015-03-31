@@ -35,9 +35,9 @@ namespace { // optimize for internal unit usage
 
 struct Internal final : NonConstructible
 {
-	static mutex       listenerMutex;
-	static atomic_bool listenerIsMute;
-	static float       listenerVolume;
+    static mutex       listenerMutex;
+    static atomic_bool listenerIsMute;
+    static float       listenerVolume;
 };
 
 mutex       Internal::listenerMutex;
@@ -50,103 +50,103 @@ float       Internal::listenerVolume = 1.0f;
 
 void Listener::reset () noexcept
 {
-	int nOrient[6] { 0, 0, -1, 0, 1, 0 };
+    int nOrient[6] { 0, 0, -1, 0, 1, 0 };
 
-	alListener3i (AL::Position,  0, 0, 0);
-	alListener3i (AL::Velocity,  0, 0, 0);
-	alListener3i (AL::Direction, 0, 0, 0);
-	alListeneriv (AL::Orientation, nOrient);
+    alListener3i (AL::Position,  0, 0, 0);
+    alListener3i (AL::Velocity,  0, 0, 0);
+    alListener3i (AL::Direction, 0, 0, 0);
+    alListeneriv (AL::Orientation, nOrient);
 }
 
 void Listener::setPosition (point3f const& gPos) noexcept
 {
-	alListenerfv (AL::Position, &gPos.x);
+    alListenerfv (AL::Position, &gPos.x);
 }
 
 point3f Listener::position () noexcept
 {
-	point3f gValue;
-	alGetListenerfv (AL::Position, &gValue.x);
-	return gValue;
+    point3f gValue;
+    alGetListenerfv (AL::Position, &gValue.x);
+    return gValue;
 }
 
 void Listener::setVelocity (point3f const& gVelocity) noexcept
 {
-	alListenerfv (AL::Velocity, &gVelocity.x);
+    alListenerfv (AL::Velocity, &gVelocity.x);
 }
 
 point3f Listener::velocity () noexcept
 {
-	point3f gValue;
-	alGetListenerfv (AL::Velocity, &gValue.x);
-	return gValue;
+    point3f gValue;
+    alGetListenerfv (AL::Velocity, &gValue.x);
+    return gValue;
 }
 
 void Listener::setOrientation (point3f const& gAt, point3f const& gUp) noexcept
 {
-	float fOrient[] { gAt.x, gAt.y, gAt.z, gUp.x, gUp.y, gUp.z };
-	alListenerfv (AL::Orientation, &fOrient[0]);
+    float fOrient[] { gAt.x, gAt.y, gAt.z, gUp.x, gUp.y, gUp.z };
+    alListenerfv (AL::Orientation, &fOrient[0]);
 }
 
 point3f Listener::orientationAt () noexcept
 {
-	float fOrient[6];
-	alGetListenerfv (AL::Orientation, &fOrient[0]);
-	return { fOrient[0], fOrient[1], fOrient[2] };
+    float fOrient[6];
+    alGetListenerfv (AL::Orientation, &fOrient[0]);
+    return { fOrient[0], fOrient[1], fOrient[2] };
 }
 
 point3f Listener::orientationUp () noexcept
 {
-	float fOrient[6];
-	alGetListenerfv (AL::Orientation, &fOrient[0]);
-	return { fOrient[3], fOrient[4], fOrient[5] };
+    float fOrient[6];
+    alGetListenerfv (AL::Orientation, &fOrient[0]);
+    return { fOrient[3], fOrient[4], fOrient[5] };
 }
 
 void Listener::setVolume (float fValue) noexcept
 {
-	if (fValue <= .0f)
-	{
-		alListenerf (AL::Volume, fValue);
-		Internal::listenerIsMute.store (true);
-	}
-	else
-	{
-		if (!Internal::listenerIsMute.load (std::memory_order_relaxed))
-		{
-			alListenerf (AL::Volume, fValue);
-		}
+    if (fValue <= .0f)
+    {
+        alListenerf (AL::Volume, fValue);
+        Internal::listenerIsMute.store (true);
+    }
+    else
+    {
+        if (!Internal::listenerIsMute.load (std::memory_order_relaxed))
+        {
+            alListenerf (AL::Volume, fValue);
+        }
 
-		Internal::listenerMutex.lock ();
-		Internal::listenerVolume = fValue;
-		Internal::listenerMutex.unlock ();
-	}
+        Internal::listenerMutex.lock ();
+        Internal::listenerVolume = fValue;
+        Internal::listenerMutex.unlock ();
+    }
 }
 
 float Listener::volume () noexcept
 {
-	lock_guard<mutex> gLock (Internal::listenerMutex);
-	return Internal::listenerVolume;
+    lock_guard<mutex> gLock (Internal::listenerMutex);
+    return Internal::listenerVolume;
 }
 
 bool Listener::isMute () noexcept
 {
-	return Internal::listenerIsMute.load ();
+    return Internal::listenerIsMute.load ();
 }
 
 void Listener::mute () noexcept
 {
-	if (Internal::listenerIsMute.load (std::memory_order_acquire)) return;
-	alListenerf (AL::Volume, .0f);
-	Internal::listenerIsMute.store (true, std::memory_order_release);
+    if (Internal::listenerIsMute.load (std::memory_order_acquire)) return;
+    alListenerf (AL::Volume, .0f);
+    Internal::listenerIsMute.store (true, std::memory_order_release);
 }
 
 void Listener::unmute () noexcept
 {
-	if (!Internal::listenerIsMute.load (std::memory_order_acquire)) return;
-	Internal::listenerMutex.lock ();
-	alListenerf (AL::Volume, Internal::listenerVolume);
-	Internal::listenerMutex.unlock ();
-	Internal::listenerIsMute.store (false, std::memory_order_release);
+    if (!Internal::listenerIsMute.load (std::memory_order_acquire)) return;
+    Internal::listenerMutex.lock ();
+    alListenerf (AL::Volume, Internal::listenerVolume);
+    Internal::listenerMutex.unlock ();
+    Internal::listenerIsMute.store (false, std::memory_order_release);
 }
 
 } } } // namespace Audio

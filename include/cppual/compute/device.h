@@ -43,54 +43,54 @@ class bad_partition_count : public device_exception   { };
 class Device
 {
 public:
-	enum Type
-	{
-		CPU    = 1 << 0, // serial processing
-		GPU    = 1 << 1, // shader, texture and parallel processing
-		PPU    = 1 << 2, // dedicated parallel processing (generic processing)
-		DSP    = 1 << 3, // digital signal processing (audio)
-		BSD    = 1 << 4, // bit stream decoder (video)
-		VCE    = 1 << 5, // codec engine (video)
-		SPU    = 1 << 6, // multiple specialized processing cores
-		Custom = 1 << 7
-	};
+    enum Type
+    {
+        CPU    = 1 << 0, // serial processing
+        GPU    = 1 << 1, // shader, texture and parallel processing
+        PPU    = 1 << 2, // dedicated parallel processing (generic processing)
+        DSP    = 1 << 3, // digital signal processing (audio)
+        BSD    = 1 << 4, // bit stream decoder (video)
+        VCE    = 1 << 5, // codec engine (video)
+        SPU    = 1 << 6, // multiple specialized processing cores
+        Custom = 1 << 7
+    };
 
-	enum Attribute
-	{
-		Specialized = 1 << 0, // specialized processing
-		Native      = 1 << 1  // supoorts execution of native functions
-	};
+    enum Attribute
+    {
+        Specialized = 1 << 0, // specialized processing
+        Native      = 1 << 1  // supoorts execution of native functions
+    };
 
-	enum class Info : unsigned char
-	{
-		Name,
-		Board,
-		Vendor,
-		Profile,
-		Version
-	};
+    enum class Info : unsigned char
+    {
+        Name,
+        Board,
+        Vendor,
+        Profile,
+        Version
+    };
 
-	typedef BitSet<Type>      Types;
-	typedef BitSet<Attribute> Attributes;
-	typedef Handle            pointer;
-	typedef std::size_t       size_type;
+    typedef BitSet<Type>      Types;
+    typedef BitSet<Attribute> Attributes;
+    typedef Handle            pointer;
+    typedef std::size_t       size_type;
 
-	static size_type count ();
-	bool      available    (cchar* feature);
-	string    info         (Info);
-	size_type cache        () const;
-	size_type cacheLine    () const;
-	size_type localMemory  () const;
-	size_type constMemory  () const;
-	size_type globalMemory () const;
+    static size_type count ();
+    bool      available    (cchar* feature);
+    string    info         (Info);
+    size_type cache        () const;
+    size_type cacheLine    () const;
+    size_type localMemory  () const;
+    size_type constMemory  () const;
+    size_type globalMemory () const;
 
-	pointer handle  () const noexcept { return m_pHandle; }
-	Type    type    () const noexcept { return m_eType;   }
-	bool    isValid () const noexcept { return m_pHandle; }
+    pointer handle  () const noexcept { return m_pHandle; }
+    Type    type    () const noexcept { return m_eType;   }
+    bool    isValid () const noexcept { return m_pHandle; }
 
 private:
-	pointer m_pHandle;
-	Type    m_eType;
+    pointer m_pHandle;
+    Type    m_eType;
 };
 
 } } // Compute

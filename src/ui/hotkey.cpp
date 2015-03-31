@@ -33,47 +33,47 @@ HotKey::HotKey (value_type const) noexcept
 
 void HotKey::setKeyCode (value_type const gCode) noexcept
 {
-	m_gKeyCode = gCode;
+    m_gKeyCode = gCode;
 }
 
 void HotKey::onKeyPress (u8 nKey) noexcept
 {
-	if (!m_bIsTriggered.load (std::memory_order_consume) and
-			m_gKeyCode.key == nKey)
-	{
-		m_bIsTriggered.store (true, std::memory_order_relaxed);
-		signalTriggered ();
-	}
+    if (!m_bIsTriggered.load (std::memory_order_consume) and
+            m_gKeyCode.key == nKey)
+    {
+        m_bIsTriggered.store (true, std::memory_order_relaxed);
+        signalTriggered ();
+    }
 }
 
 void HotKey::onKeyRelease (u8 nKey) noexcept
 {
-	if (m_bIsTriggered.load (std::memory_order_consume) and
-			m_gKeyCode.key == nKey)
-	{
-		m_bIsTriggered.store (false, std::memory_order_relaxed);
-		signalReleased ();
-	}
+    if (m_bIsTriggered.load (std::memory_order_consume) and
+            m_gKeyCode.key == nKey)
+    {
+        m_bIsTriggered.store (false, std::memory_order_relaxed);
+        signalReleased ();
+    }
 }
 
 void HotKey::onKeyNotify (value_type const gCode) noexcept
 {
-	if (m_bIsTriggered.load (std::memory_order_consume))
-	{
-		if (m_gKeyCode.key == gCode.key)
-		{
-			m_bIsTriggered.store (true, std::memory_order_relaxed);
-			signalTriggered ();
-		}
-	}
-	else
-	{
-		if (m_gKeyCode.key == gCode.key)
-		{
-			m_bIsTriggered.store (false, std::memory_order_relaxed);
-			signalReleased ();
-		}
-	}
+    if (m_bIsTriggered.load (std::memory_order_consume))
+    {
+        if (m_gKeyCode.key == gCode.key)
+        {
+            m_bIsTriggered.store (true, std::memory_order_relaxed);
+            signalTriggered ();
+        }
+    }
+    else
+    {
+        if (m_gKeyCode.key == gCode.key)
+        {
+            m_bIsTriggered.store (false, std::memory_order_relaxed);
+            signalReleased ();
+        }
+    }
 }
 
 } } // namespace Ui

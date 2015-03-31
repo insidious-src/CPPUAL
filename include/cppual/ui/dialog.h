@@ -29,50 +29,50 @@ namespace cppual { namespace Ui {
 class Dialog : public Ui::Window
 {
 public:
-	Dialog () noexcept;
-	Dialog (Dialog&&) noexcept;
-	Dialog (Dialog const&) noexcept;
-	Dialog& operator = (Dialog&&) noexcept;
-	Dialog& operator = (Dialog const&) noexcept;
+    Dialog () noexcept;
+    Dialog (Dialog&&) noexcept;
+    Dialog (Dialog const&) noexcept;
+    Dialog& operator = (Dialog&&) noexcept;
+    Dialog& operator = (Dialog const&) noexcept;
 
-	Dialog (View*       parent,
-			Rect const& rect,
-			string&&    title,
-			image_type* icon   = nullptr,
-			u32         screen = 0)
-	: Window (parent, rect, std::forward<string> (title), icon, screen),
-	  m_pOwnerWnd ()
-	{ }
+    Dialog (View*       parent,
+            Rect const& rect,
+            string&&    title,
+            image_type* icon   = nullptr,
+            u32         screen = 0)
+    : Window (parent, rect, std::forward<string> (title), icon, screen),
+      m_pOwnerWnd ()
+    { }
 
-	enum Result
-	{
-		Close	 = 0,
-		OK		 = 1 <<  0,
-		Cancel	 = 1 <<  1,
-		Yes		 = 1 <<  2,
-		YesToAll = 1 <<  3,
-		No		 = 1 <<  4,
-		NoToAll	 = 1 <<  5,
-		Discard	 = 1 <<  6,
-		Accept   = 1 <<  7,
-		Decline  = 1 <<  8,
-		Save     = 1 <<  9,
-		SaveAll  = 1 << 10,
-		Ignore   = 1 << 11
-	};
+    enum Result
+    {
+        Close     = 0,
+        OK         = 1 <<  0,
+        Cancel     = 1 <<  1,
+        Yes         = 1 <<  2,
+        YesToAll = 1 <<  3,
+        No         = 1 <<  4,
+        NoToAll     = 1 <<  5,
+        Discard     = 1 <<  6,
+        Accept   = 1 <<  7,
+        Decline  = 1 <<  8,
+        Save     = 1 <<  9,
+        SaveAll  = 1 << 10,
+        Ignore   = 1 << 11
+    };
 
-	Result getResult () noexcept;
-	void   showModal (Ui::Window*) noexcept;
+    Result getResult () noexcept;
+    void   showModal (Ui::Window*) noexcept;
 
 protected:
-	virtual void onInit () { }
-	virtual void onEnd () { }
+    virtual void onInit () { }
+    virtual void onEnd () { }
 
 private:
-	Ui::Window* m_pOwnerWnd;
+    Ui::Window* m_pOwnerWnd;
 
-	void onCreate ();
-	void onDestroy ();
+    void onCreate ();
+    void onDestroy ();
 };
 
 } } // namespace Ui

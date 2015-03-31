@@ -41,11 +41,11 @@ StackedAllocator::StackedAllocator (Allocator& pOwner, size_type uSize)
   m_uNumAlloc (),
   m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pCurMarker (&m_gOwner != this ?
-							 (uSize > 0 ?
-								  static_cast<pointer> (pOwner.allocate (
-															uSize, alignof (uptr))) :
-								  nullptr) :
-							 (uSize > 0 ? ::operator new (uSize) : nullptr)),
+                             (uSize > 0 ?
+                                  static_cast<pointer> (pOwner.allocate (
+                                                            uSize, alignof (uptr))) :
+                                  nullptr) :
+                             (uSize > 0 ? ::operator new (uSize) : nullptr)),
   m_pBegin (m_pCurMarker),
   m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + uSize : nullptr),
 
@@ -65,43 +65,43 @@ StackedAllocator::StackedAllocator (Allocator& pOwner, size_type uSize)
 
 StackedAllocator::~StackedAllocator ()
 {
-	if (m_pBegin == nullptr) return;
+    if (m_pBegin == nullptr) return;
 
-	if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
-	else if (!m_bIsMemShared) ::operator delete (m_pBegin);
+    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
+    else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
 void* StackedAllocator::allocate (size_type uBytes, align_type uAlign) noexcept
 {
-	// check whether there is enough space to allocate
-	if (!m_pBegin or !uBytes) return nullptr;
+    // check whether there is enough space to allocate
+    if (!m_pBegin or !uBytes) return nullptr;
 
-	size_type const uAdjust    = alignAdjust (m_pCurMarker, uAlign);
-	pointer   const pNewMarker = static_cast<math_pointer> (m_pCurMarker) + uAdjust + uBytes;
+    size_type const uAdjust    = alignAdjust (m_pCurMarker, uAlign);
+    pointer   const pNewMarker = static_cast<math_pointer> (m_pCurMarker) + uAdjust + uBytes;
 
-	if (pNewMarker > m_pEnd) return nullptr;
+    if (pNewMarker > m_pEnd) return nullptr;
 
-	// shift the marker to the next available address
-	// and increment the allocation count
-	++m_uNumAlloc;
-	return m_pCurMarker = pNewMarker;
+    // shift the marker to the next available address
+    // and increment the allocation count
+    ++m_uNumAlloc;
+    return m_pCurMarker = pNewMarker;
 }
 
 void StackedAllocator::deallocate (void* p, size_type uSize)
 {
-	if ((static_cast<math_pointer> (p) + uSize) != m_pCurMarker)
-		throw std::out_of_range ("pointer doesn't match the last element");
+    if ((static_cast<math_pointer> (p) + uSize) != m_pCurMarker)
+        throw std::out_of_range ("pointer doesn't match the last element");
 
-	// shift the marker to the end of the previous allocated block
-	// and decrement the allocation count
-	m_pCurMarker = p;
-	--m_uNumAlloc;
+    // shift the marker to the end of the previous allocated block
+    // and decrement the allocation count
+    m_pCurMarker = p;
+    --m_uNumAlloc;
 }
 
 void StackedAllocator::clear () noexcept
 {
-	m_pCurMarker = m_pBegin;
-	m_uNumAlloc  = 0;
+    m_pCurMarker = m_pBegin;
+    m_uNumAlloc  = 0;
 }
 
 // =========================================================
@@ -112,7 +112,7 @@ DStackedAllocator::DStackedAllocator (size_type uSize, size_type uHint)
   m_gOwner (*this),
   m_pTopMarker (uSize > 0 ? ::operator new[] (uSize) : nullptr),
   m_pBottomMarker (m_pTopMarker != nullptr ? static_cast<math_pointer> (m_pTopMarker) + uSize :
-											 nullptr),
+                                             nullptr),
   m_pBegin (m_pTopMarker),
   m_uHint (uHint),
   m_pEnd (m_pBottomMarker),
@@ -120,19 +120,19 @@ DStackedAllocator::DStackedAllocator (size_type uSize, size_type uHint)
 { }
 
 DStackedAllocator::DStackedAllocator (Allocator& pOwner,
-									  size_type   uSize,
-									  size_type   uHint)
+                                      size_type   uSize,
+                                      size_type   uHint)
 : //m_gSharedName (),
   m_uNumAlloc (),
   m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pTopMarker (&m_gOwner != this ?
-								 (uSize > 0 ?
-									  static_cast<pointer> (pOwner.allocate (
-																uSize, alignof (uptr))) :
-									  nullptr) :
-								 (uSize > 0 ? ::operator new[] (uSize) : nullptr)),
+                                 (uSize > 0 ?
+                                      static_cast<pointer> (pOwner.allocate (
+                                                                uSize, alignof (uptr))) :
+                                      nullptr) :
+                                 (uSize > 0 ? ::operator new[] (uSize) : nullptr)),
   m_pBottomMarker (m_pTopMarker != nullptr ? static_cast<math_pointer> (m_pTopMarker) + uSize :
-											 nullptr),
+                                             nullptr),
   m_pBegin (m_pTopMarker),
   m_uHint (uHint),
   m_pEnd (m_pBottomMarker),
@@ -140,8 +140,8 @@ DStackedAllocator::DStackedAllocator (Allocator& pOwner,
 { }
 
 //DStackedAllocator::DStackedAllocator (string&   gName,
-//									  size_type uSize,
-//									  size_type uHint)
+//                                      size_type uSize,
+//                                      size_type uHint)
 //: m_gSharedName (std::move (gName)),
 //  m_uNumAlloc (),
 //  m_gOwner (*this),
@@ -155,52 +155,52 @@ DStackedAllocator::DStackedAllocator (Allocator& pOwner,
 
 DStackedAllocator::~DStackedAllocator ()
 {
-	if (m_pBegin == nullptr) return;
+    if (m_pBegin == nullptr) return;
 
-	if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
-	else if (!m_bIsMemShared) delete[] static_cast<math_pointer> (m_pBegin);
+    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
+    else if (!m_bIsMemShared) delete[] static_cast<math_pointer> (m_pBegin);
 }
 
 void* DStackedAllocator::allocate (size_type uBytes, align_type uAlign) noexcept
 {
-	// check whether there is enough space to allocate
-	if (!m_pBegin or !uBytes) return nullptr;
+    // check whether there is enough space to allocate
+    if (!m_pBegin or !uBytes) return nullptr;
 
-	size_type const uAdjust       = alignAdjust (m_pTopMarker, uAlign);
-	pointer   const pNewTopMarker = static_cast<math_pointer> (m_pTopMarker) + uAdjust + uBytes;
+    size_type const uAdjust       = alignAdjust (m_pTopMarker, uAlign);
+    pointer   const pNewTopMarker = static_cast<math_pointer> (m_pTopMarker) + uAdjust + uBytes;
 
-	if (pNewTopMarker > m_pBottomMarker) return nullptr;
+    if (pNewTopMarker > m_pBottomMarker) return nullptr;
 
-	++m_uNumAlloc;
+    ++m_uNumAlloc;
 
-	return uBytes < m_uHint ?
-				m_pTopMarker = pNewTopMarker :
-							   m_pBottomMarker = static_cast<math_pointer> (m_pBottomMarker) -
-												 alignAdjust (m_pTopMarker, uAlign) - uBytes;
+    return uBytes < m_uHint ?
+                m_pTopMarker = pNewTopMarker :
+                               m_pBottomMarker = static_cast<math_pointer> (m_pBottomMarker) -
+                                                 alignAdjust (m_pTopMarker, uAlign) - uBytes;
 }
 
 void DStackedAllocator::deallocate (void* p, size_type uBytes)
 {
-	// if the pointer belongs to the top side
-	if ((static_cast<math_pointer> (p) + (uBytes = alignedSize (uBytes))) == m_pTopMarker)
-	{
-		m_pTopMarker = p;
-		--m_uNumAlloc;
-	}
-	// if the pointer belongs to the bottom side
-	else if (p == m_pBottomMarker)
-	{
-		m_pBottomMarker = static_cast<math_pointer> (p) + uBytes;
-		--m_uNumAlloc;
-	}
-	else throw std::out_of_range ("pointer doesn't match the last element is both markers");
+    // if the pointer belongs to the top side
+    if ((static_cast<math_pointer> (p) + (uBytes = alignedSize (uBytes))) == m_pTopMarker)
+    {
+        m_pTopMarker = p;
+        --m_uNumAlloc;
+    }
+    // if the pointer belongs to the bottom side
+    else if (p == m_pBottomMarker)
+    {
+        m_pBottomMarker = static_cast<math_pointer> (p) + uBytes;
+        --m_uNumAlloc;
+    }
+    else throw std::out_of_range ("pointer doesn't match the last element is both markers");
 }
 
 void DStackedAllocator::clear () noexcept
 {
-	m_pTopMarker    = m_pBegin;
-	m_pBottomMarker = m_pEnd;
-	m_uNumAlloc     = 0;
+    m_pTopMarker    = m_pBegin;
+    m_pBottomMarker = m_pEnd;
+    m_uNumAlloc     = 0;
 }
 
 } } // namespace Memory

@@ -34,59 +34,59 @@ namespace cppual { namespace Audio { namespace AL {
 class SoundSource : public AudioObject
 {
 public:
-	typedef std::deque<SoundBuffer*> queue_type;
-	typedef std::size_t              size_type;
+    typedef std::deque<SoundBuffer*> queue_type;
+    typedef std::size_t              size_type;
 
-	SoundSource () noexcept;
-	SoundSource (SoundBuffer&) noexcept;
+    SoundSource () noexcept;
+    SoundSource (SoundBuffer&) noexcept;
 
-	explicit SoundSource (SoundSource&&) noexcept;
-	explicit SoundSource (SoundSource const&) noexcept;
-	SoundSource& operator = (SoundSource&&) noexcept;
-	SoundSource& operator = (SoundSource const&) noexcept;
-	~SoundSource () noexcept;
+    explicit SoundSource (SoundSource&&) noexcept;
+    explicit SoundSource (SoundSource const&) noexcept;
+    SoundSource& operator = (SoundSource&&) noexcept;
+    SoundSource& operator = (SoundSource const&) noexcept;
+    ~SoundSource () noexcept;
 
-	SoundState state () const noexcept;
+    SoundState state () const noexcept;
 
-	void  play () noexcept;
-	void  replay () noexcept;
-	void  pause () noexcept;
-	void  stop () noexcept;
-	void  rewind () noexcept;
-	bool  isPlaying () const noexcept;
+    void  play () noexcept;
+    void  replay () noexcept;
+    void  pause () noexcept;
+    void  stop () noexcept;
+    void  rewind () noexcept;
+    bool  isPlaying () const noexcept;
 
-	void  setLooping (bool value) noexcept;
-	bool  isLooping () const noexcept;
+    void  setLooping (bool value) noexcept;
+    bool  isLooping () const noexcept;
 
-	void  enqueue (SoundBuffer&) noexcept;
-	bool  attach (SoundBuffer&) noexcept;
-	void  detach () noexcept;
+    void  enqueue (SoundBuffer&) noexcept;
+    bool  attach (SoundBuffer&) noexcept;
+    void  detach () noexcept;
 
-	void  setVolume (float value) noexcept;
-	float getVolume () const noexcept;
+    void  setVolume (float value) noexcept;
+    float getVolume () const noexcept;
 
-	void  setPlayingSpeed (float value) noexcept;
-	float playingSpeed () const noexcept;
-	void  setPlayingOffset (std::chrono::seconds value) noexcept;
-	int   playingOffset () noexcept;
-	void  setSampleOffset (float value) noexcept;
-	void  setByteOffset (float value) noexcept;
+    void  setPlayingSpeed (float value) noexcept;
+    float playingSpeed () const noexcept;
+    void  setPlayingOffset (std::chrono::seconds value) noexcept;
+    int   playingOffset () noexcept;
+    void  setSampleOffset (float value) noexcept;
+    void  setByteOffset (float value) noexcept;
 
-	void  mute () noexcept;
-	void  unmute () noexcept;
+    void  mute () noexcept;
+    void  unmute () noexcept;
 
-	inline SoundBuffer* buffer () const noexcept { return m_pBuffer; }
-	inline void         clear () noexcept { m_gQueue.clear (); }
+    inline SoundBuffer* buffer () const noexcept { return m_pBuffer; }
+    inline void         clear () noexcept { m_gQueue.clear (); }
 
 protected:
-	queue_type    m_gQueue;
-	mutex mutable m_gMutex;
-	SoundBuffer*  m_pBuffer;
-	size_type     m_uBufferSlot;
-	float         m_fVolume;
+    queue_type    m_gQueue;
+    mutex mutable m_gMutex;
+    SoundBuffer*  m_pBuffer;
+    size_type     m_uBufferSlot;
+    float         m_fVolume;
 
-	void onDetach () noexcept;
-	friend class SoundBuffer;
+    void onDetach () noexcept;
+    friend class SoundBuffer;
 };
 
 } } } // namespace Audio

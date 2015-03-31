@@ -35,52 +35,52 @@ namespace cppual { namespace Ui {
 class Window : public View
 {
 public:
-	typedef Graphics::Image image_type;
+    typedef Graphics::Image image_type;
 
-	Window ();
-	Window (Window&&);
-	Window (Window const&);
-	Window& operator = (Window&&);
-	Window& operator = (Window const&);
-	~Window ();
+    Window ();
+    Window (Window&&);
+    Window (Window const&);
+    Window& operator = (Window&&);
+    Window& operator = (Window const&);
+    ~Window ();
 
-	bool setIcon (image_type*);
-	void setTitle (string const&);
-	void goFullscreen ();
-	void exitFullscreen ();
-	void flash (ushort);
-	void showInTaskbar (bool);
-	void restore ();
-	void minimize ();
-	void maximize ();
-	void close ();
+    bool setIcon (image_type*);
+    void setTitle (string const&);
+    void goFullscreen ();
+    void exitFullscreen ();
+    void flash (ushort);
+    void showInTaskbar (bool);
+    void restore ();
+    void minimize ();
+    void maximize ();
+    void close ();
 
-	Window (View*         parent,
-			Rect   const& rect,
-			string const& title,
-			image_type*   icon   = nullptr,
-			u32           screen = 0);
+    Window (View*         parent,
+            Rect   const& rect,
+            string const& title,
+            image_type*   icon   = nullptr,
+            u32           screen = 0);
 
-	inline FrameView*  frame () noexcept { return m_gFrame; }
-	inline image_type* icon () const noexcept { return m_pIcon; }
-	inline bool        isFullscreen () const noexcept { return m_bIsFullScreen; }
+    inline FrameView*  frame () noexcept { return m_gFrame; }
+    inline image_type* icon () const noexcept { return m_pIcon; }
+    inline bool        isFullscreen () const noexcept { return m_bIsFullScreen; }
 
-	inline bool isMinimized () const noexcept
-	{ return m_gFrame->attached () == this and m_gFrame->isHidden (); }
+    inline bool isMinimized () const noexcept
+    { return m_gFrame->attached () == this and m_gFrame->isHidden (); }
 
-	inline bool isMaximized () const noexcept
-	{ return m_gFrame->attached () == this and m_gFrame->isStretched (); }
+    inline bool isMaximized () const noexcept
+    { return m_gFrame->attached () == this and m_gFrame->isStretched (); }
 
 protected:
-	virtual bool onClose () { return true; }
-	virtual void onMinimize () { }
-	virtual void onMaximize () { }
-	virtual void onHelp () { }
+    virtual bool onClose () { return true; }
+    virtual void onMinimize () { }
+    virtual void onMaximize () { }
+    virtual void onHelp () { }
 
 private:
-	FrameView*  m_gFrame;
-	image_type* m_pIcon;
-	bool        m_bIsFullScreen;
+    FrameView*  m_gFrame;
+    image_type* m_pIcon;
+    bool        m_bIsFullScreen;
 };
 
 // =========================================================
@@ -88,85 +88,85 @@ private:
 class WindowAdapter : public NonCopyableVirtual
 {
 public:
-	typedef Event                                  event_type;
-	typedef Memory::GenericPolicy<Widget*>         allocator_type;
-	typedef CircularQueue<Widget*, allocator_type> container;
-	typedef std::size_t	                           size_type;
+    typedef Event                                  event_type;
+    typedef Memory::GenericPolicy<Widget*>         allocator_type;
+    typedef CircularQueue<Widget*, allocator_type> container;
+    typedef std::size_t                               size_type;
 
-	typedef typename
-	container::iterator iterator;
+    typedef typename
+    container::iterator iterator;
 
-	typedef typename
-	Signal<void(event_type::window_type, point2u)>
-	::slot_type
-	move_slot;
+    typedef typename
+    Signal<void(event_type::window_type, point2u)>
+    ::slot_type
+    move_slot;
 
-	typedef typename
-	Signal<void(event_type::window_type, event_type::MouseButtonData)>
-	::slot_type
-	btn_slot;
+    typedef typename
+    Signal<void(event_type::window_type, event_type::MouseButtonData)>
+    ::slot_type
+    btn_slot;
 
-	enum
-	{
-		DefaultWidth  = 1024,
-		DefaultHeight = 768
-	};
+    enum
+    {
+        DefaultWidth  = 1024,
+        DefaultHeight = 768
+    };
 
-	WindowAdapter (WindowAdapter&&);
-	WindowAdapter& operator = (WindowAdapter&&);
+    WindowAdapter (WindowAdapter&&);
+    WindowAdapter& operator = (WindowAdapter&&);
 
-	WindowAdapter (Widget&     main_widget,
-				   WindowFlags flags  = WindowHints,
-				   Icon const& icon   = Icon (),
-				   u32         screen = 0);
+    WindowAdapter (Widget&     main_widget,
+                   WindowFlags flags  = WindowHints,
+                   Icon const& icon   = Icon (),
+                   u32         screen = 0);
 
-	bool setIcon (Icon const&);
-	void restore ();
+    bool setIcon (Icon const&);
+    void restore ();
 
-	void close ()
-	{ if (m_pPlatformWnd) m_pPlatformWnd.reset (); }
+    void close ()
+    { if (m_pPlatformWnd) m_pPlatformWnd.reset (); }
 
-	void flash (uint count = 1)
-	{ if (m_pPlatformWnd) m_pPlatformWnd->flash (count); }
+    void flash (uint count = 1)
+    { if (m_pPlatformWnd) m_pPlatformWnd->flash (count); }
 
-	void goFullscreen ()
-	{ if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (true); }
+    void goFullscreen ()
+    { if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (true); }
 
-	void exitFullscreen ()
-	{ if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (false); }
+    void exitFullscreen ()
+    { if (m_pPlatformWnd) m_pPlatformWnd->setFullscreen (false); }
 
-	void setFlags (WindowFlags state)
-	{ if (m_pPlatformWnd) m_pPlatformWnd->setFlags (state); }
+    void setFlags (WindowFlags state)
+    { if (m_pPlatformWnd) m_pPlatformWnd->setFlags (state); }
 
-	void minimize ()
-	{ if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }
+    void minimize ()
+    { if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }
 
-	void maximize ()
-	{ if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }
+    void maximize ()
+    { if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }
 
-
-private:
-	virtual bool onClose        () { return true; }
-	virtual void onMinimize     () { }
-	virtual void onMaximize     () { }
-	virtual void onHelp         () { }
-	virtual void onPointerMove  (point2u) { }
-	virtual void onMousePress   (event_type::MouseButtonData) { }
-	virtual void onMouseRelease (event_type::MouseButtonData) { }
-	virtual void onKeyPress     (event_type::KeyData) { }
-	virtual void onKeyRelease   (event_type::KeyData) { }
-
-	virtual void onSize         (point2u);
-	virtual void onPaint        (event_type::PaintData) { }
-	virtual void onFocus        (bool) { }
-	virtual void onShow         (bool) { }
-
-	static void registerEvents ();
 
 private:
-	shared_window m_pPlatformWnd;
-	Widget*       m_pMainWidget;
-	Icon          m_pIcon;
+    virtual bool onClose        () { return true; }
+    virtual void onMinimize     () { }
+    virtual void onMaximize     () { }
+    virtual void onHelp         () { }
+    virtual void onPointerMove  (point2u) { }
+    virtual void onMousePress   (event_type::MouseButtonData) { }
+    virtual void onMouseRelease (event_type::MouseButtonData) { }
+    virtual void onKeyPress     (event_type::KeyData) { }
+    virtual void onKeyRelease   (event_type::KeyData) { }
+
+    virtual void onSize         (point2u);
+    virtual void onPaint        (event_type::PaintData) { }
+    virtual void onFocus        (bool) { }
+    virtual void onShow         (bool) { }
+
+    static void registerEvents ();
+
+private:
+    shared_window m_pPlatformWnd;
+    Widget*       m_pMainWidget;
+    Icon          m_pIcon;
 };
 
 class Wnd : public WindowAdapter

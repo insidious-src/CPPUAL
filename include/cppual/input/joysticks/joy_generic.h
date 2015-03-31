@@ -29,20 +29,20 @@ namespace cppual { namespace Platform { namespace Joystick { namespace Generic {
 
 enum XButton
 {
-	Btn1,
-	Btn2,
-	Btn3,
-	Btn4,
-	Btn5,
-	Btn6,
-	Btn7,
-	Btn8,
-	Btn9,
-	Btn10,
-	Btn11,
-	Btn12,
-	Btn13,
-	Btn14
+    Btn1,
+    Btn2,
+    Btn3,
+    Btn4,
+    Btn5,
+    Btn6,
+    Btn7,
+    Btn8,
+    Btn9,
+    Btn10,
+    Btn11,
+    Btn12,
+    Btn13,
+    Btn14
 };
 
 } } } } // namespace Generic

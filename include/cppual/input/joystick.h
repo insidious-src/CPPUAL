@@ -39,50 +39,50 @@ struct Joystick;
 class JoystickEvent
 {
 public:
-	typedef std::size_t size_type;
+    typedef std::size_t size_type;
 
-	enum class Type : unsigned char
-	{
-		Connect,
-		Disconnect,
-		Press,
-		Release,
-		Move,
-		Trigger,
-		TrackMove
-	};
+    enum class Type : unsigned char
+    {
+        Connect,
+        Disconnect,
+        Press,
+        Release,
+        Move,
+        Trigger,
+        TrackMove
+    };
 
-	struct JoyButtonData
-	{
-		size_type id;
-		int32     button;
-	};
+    struct JoyButtonData
+    {
+        size_type id;
+        int32     button;
+    };
 
-	struct JoyAxisData
-	{
-		size_type id;
-		u8        axis;
-		int16     value;
-	};
+    struct JoyAxisData
+    {
+        size_type id;
+        u8        axis;
+        int16     value;
+    };
 
-	struct JoyTriggerData
-	{
-		size_type id;
-		u8        trigger;
-		int16     threshold;
-	};
+    struct JoyTriggerData
+    {
+        size_type id;
+        u8        trigger;
+        int16     threshold;
+    };
 
-	struct JoyTrackData
-	{
-		size_type id;
-		u8        track;
-		point2i   pos;
-	};
+    struct JoyTrackData
+    {
+        size_type id;
+        u8        track;
+        point2i   pos;
+    };
 
-	struct JoyPlugData
-	{
-		size_type id;
-	};
+    struct JoyPlugData
+    {
+        size_type id;
+    };
 
 private:
 };
@@ -92,53 +92,53 @@ private:
 class JoystickQueue : NonConstructible
 {
 public:
-	typedef JoystickEvent event_type;
+    typedef JoystickEvent event_type;
 
-	static bool pop_front (event_type& next_event, bool wait = false) noexcept;
+    static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
 
 // =========================================================
 
 struct Joystick : NonCopyableVirtual
 {
-	typedef std::size_t size_type;
+    typedef std::size_t size_type;
 
-	enum
-	{
-		MaxCount	= 16,
-		ButtonCount = 32,
-		AxisCount	=  8
-	};
+    enum
+    {
+        MaxCount    = 16,
+        ButtonCount = 32,
+        AxisCount    =  8
+    };
 
-	enum class Axis : unsigned char
-	{
-		X,
-		Y,
-		Z,
-		R,
-		U,
-		V,
-		PovX,
-		PovY
-	};
+    enum class Axis : unsigned char
+    {
+        X,
+        Y,
+        Z,
+        R,
+        U,
+        V,
+        PovX,
+        PovY
+    };
 
-	enum class Surface : unsigned char
-	{
-		TrackPad,
-		TrackBall,
-		Touch
-	};
+    enum class Surface : unsigned char
+    {
+        TrackPad,
+        TrackBall,
+        Touch
+    };
 
-	virtual string    getModelName () const = 0;
-	virtual float     getAxisPosition (Axis) = 0;
-	virtual size_type getId () const = 0;
-	virtual size_type getButtonCount () const = 0;
-	virtual bool      isValid () const = 0;
-	virtual bool      isButtonPressed (int) = 0;
-	virtual bool      hasAxis (Axis) const = 0;
-	virtual bool      hasSurface (Surface) const = 0;
-	virtual bool      hasMotor () const = 0;
-	virtual void      vibrate (ushort) noexcept = 0;
+    virtual string    getModelName () const = 0;
+    virtual float     getAxisPosition (Axis) = 0;
+    virtual size_type getId () const = 0;
+    virtual size_type getButtonCount () const = 0;
+    virtual bool      isValid () const = 0;
+    virtual bool      isButtonPressed (int) = 0;
+    virtual bool      hasAxis (Axis) const = 0;
+    virtual bool      hasSurface (Surface) const = 0;
+    virtual bool      hasMotor () const = 0;
+    virtual void      vibrate (ushort) noexcept = 0;
 };
 
 } } // namespace Input

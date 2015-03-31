@@ -31,34 +31,34 @@ namespace cppual { namespace Graphics { namespace GL {
 class Query : public Object
 {
 public:
-	enum class Type : unsigned char
-	{
-		Undefined = 0,
-		SamplesPassed,
-		AnySamplesPassed,
-		AnySamplesPassedConservative,
-		PrimitivesGenerated,
-		TransformFeedbackPrimitivesWritten,
-		TimeElapsed,
-		Timestamp
-	};
+    enum class Type : unsigned char
+    {
+        Undefined = 0,
+        SamplesPassed,
+        AnySamplesPassed,
+        AnySamplesPassedConservative,
+        PrimitivesGenerated,
+        TransformFeedbackPrimitivesWritten,
+        TimeElapsed,
+        Timestamp
+    };
 
-	Query () noexcept;
-	~Query () noexcept;
-	u64  get64 () noexcept;
-	uint get () noexcept;
-	bool isReady () noexcept;
-	void beginQuery (Type type) noexcept;
-	void beginQueryIndexed (Type type, uint index) noexcept;
-	void endQuery () noexcept;
-	void queryCounter (Type type) noexcept;
+    Query () noexcept;
+    ~Query () noexcept;
+    u64  get64 () noexcept;
+    uint get () noexcept;
+    bool isReady () noexcept;
+    void beginQuery (Type type) noexcept;
+    void beginQueryIndexed (Type type, uint index) noexcept;
+    void endQuery () noexcept;
+    void queryCounter (Type type) noexcept;
 
-	inline Type queryType () const noexcept
-	{ return m_eType; }
+    inline Type queryType () const noexcept
+    { return m_eType; }
 
 private:
-	Type m_eType;
-	bool m_bHasQuery;
+    Type m_eType;
+    bool m_bHasQuery;
 };
 
 } } } // namespace GL

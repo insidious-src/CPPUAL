@@ -27,20 +27,20 @@ namespace cppual {
 
 struct Error
 {
-	enum Type
-	{
-		Already               =   0,
-		Failed                =  -1,
-		Invalid               =  -2,
-		Denied                =  -3,
-		NoResources           =  -4,
-		NoAccess              =  -5,
-		Terminated            =  -6,
-		Incomplete            =  -7,
-		NotSupported          =  -8,
-		ConnectionLost        =  -9,
-		Undefined             = -10
-	};
+    enum Type
+    {
+        Already               =   0,
+        Failed                =  -1,
+        Invalid               =  -2,
+        Denied                =  -3,
+        NoResources           =  -4,
+        NoAccess              =  -5,
+        Terminated            =  -6,
+        Incomplete            =  -7,
+        NotSupported          =  -8,
+        ConnectionLost        =  -9,
+        Undefined             = -10
+    };
 };
 
 } // cppual

@@ -32,19 +32,19 @@ namespace cppual { namespace Ui {
 class WlBackend final : public IDisplay
 {
 public:
-	WlBackend () = delete;
-	WlBackend (cchar*) noexcept;
-	~WlBackend () noexcept;
+    WlBackend () = delete;
+    WlBackend (cchar*) noexcept;
+    ~WlBackend () noexcept;
 
-	Connection native () const noexcept { return m_pDisplay; }
-	string     name () const { return string (); }
-	Connection gl () const noexcept { return m_pEGLDisplay; }
-	uint       screenCount () const noexcept { return m_nScreenCount; }
+    Connection native () const noexcept { return m_pDisplay; }
+    string     name () const { return string (); }
+    Connection gl () const noexcept { return m_pEGLDisplay; }
+    uint       screenCount () const noexcept { return m_nScreenCount; }
 
 private:
-	wl_display* m_pDisplay;
-	void*       m_pEGLDisplay;
-	uint        m_nScreenCount;
+    wl_display* m_pDisplay;
+    void*       m_pEGLDisplay;
+    uint        m_nScreenCount;
 };
 
 // ====================================================
@@ -57,7 +57,7 @@ WlBackend::WlBackend (cchar* pName) noexcept
 
 WlBackend::~WlBackend () noexcept
 {
-	if (m_pDisplay) wl_display_disconnect (m_pDisplay);
+    if (m_pDisplay) wl_display_disconnect (m_pDisplay);
 }
 
 } } // namespace Graphics

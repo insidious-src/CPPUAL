@@ -32,18 +32,18 @@ namespace cppual {
 class ThreadObject
 {
 public:
-	inline ThreadObject () noexcept
-	: m_uThreadOwner (std::this_thread::get_id ())
-	{ }
+    inline ThreadObject () noexcept
+    : m_uThreadOwner (std::this_thread::get_id ())
+    { }
 
-	inline virtual ~ThreadObject ()
-	{ }
+    inline virtual ~ThreadObject ()
+    { }
 
-	inline thread::id threadOwner () const noexcept
-	{ return m_uThreadOwner; }
+    inline thread::id threadOwner () const noexcept
+    { return m_uThreadOwner; }
 
 private:
-	thread::id const m_uThreadOwner;
+    thread::id const m_uThreadOwner;
 };
 
 } // cppual

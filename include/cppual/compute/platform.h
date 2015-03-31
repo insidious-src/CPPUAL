@@ -34,18 +34,18 @@ class bad_platform       : public platform_exception { };
 class Instance : public NonCopyable
 {
 public:
-	size_t deviceCount ();
-	size_t gpuCount    ();
+    size_t deviceCount ();
+    size_t gpuCount    ();
 };
 
 namespace Platform {
 
 enum class Info : unsigned char
 {
-	Name,
-	Vendor,
-	Profile,
-	Version
+    Name,
+    Vendor,
+    Profile,
+    Version
 };
 
 u16    count () noexcept;

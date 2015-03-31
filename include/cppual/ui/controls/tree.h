@@ -31,26 +31,26 @@ namespace cppual { namespace Ui {
 class CTreeView : public View
 {
 protected:
-	typedef struct SNodeList { string strNodeName; CVector<SNodeList> vChildNodeList; } NodeList;
-	byte m_nTreeType;
-	CVector<NodeList> m_vNodeList;
+    typedef struct SNodeList { string strNodeName; CVector<SNodeList> vChildNodeList; } NodeList;
+    byte m_nTreeType;
+    CVector<NodeList> m_vNodeList;
 
-	virtual void OnPaint ();
-	virtual void OnNodeClick ();
+    virtual void OnPaint ();
+    virtual void OnNodeClick ();
 
 public:
-	string& GetNodeName (uint, uint);
-	int Find (const string&);
-	bool InsertNode (const string&, uint);
-	bool Remove (uint);
+    string& GetNodeName (uint, uint);
+    int Find (const string&);
+    bool InsertNode (const string&, uint);
+    bool Remove (uint);
 
-	CTreeView () : m_nTreeType (), m_vNodeList () { }
+    CTreeView () : m_nTreeType (), m_vNodeList () { }
 
-	void SetType (byte nTreeType)
-	{
-		m_nTreeType = nTreeType;
-		Update ();
-	}
+    void SetType (byte nTreeType)
+    {
+        m_nTreeType = nTreeType;
+        Update ();
+    }
 };
 
 } } // Ui

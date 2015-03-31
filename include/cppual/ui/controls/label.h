@@ -28,37 +28,37 @@ namespace cppual { namespace Ui {
 
 enum class TextFormat : unsigned char
 {
-	Plain,
-	WordWrap,
-	Enclosed
+    Plain,
+    WordWrap,
+    Enclosed
 };
 
 class Label : public SkinnableView
 {
 public:
-	Label () { }
-	~Label () { }
+    Label () { }
+    ~Label () { }
 
-	void setText (string const&);
-	void setFormat (TextFormat);
+    void setText (string const&);
+    void setFormat (TextFormat);
 
-	bool create (View*       parent,
-				 string const& text,
-				 Rect const&   rect,
-				 TextFormat    format = TextFormat::Plain);
+    bool create (View*       parent,
+                 string const& text,
+                 Rect const&   rect,
+                 TextFormat    format = TextFormat::Plain);
 
-	inline TextFormat getFormat () const noexcept { return m_eFormat; }
-	inline string     getText () const noexcept { return m_gText; }
+    inline TextFormat getFormat () const noexcept { return m_eFormat; }
+    inline string     getText () const noexcept { return m_gText; }
 
-	Signal<void()> signalTextChanged;
+    Signal<void()> signalTextChanged;
 
 private:
-	string     m_gText;
-	TextFormat m_eFormat;
+    string     m_gText;
+    TextFormat m_eFormat;
 
-	void onPaint (Rect const&);
-	void onEnable (bool);
-	void onSize (point2u);
+    void onPaint (Rect const&);
+    void onEnable (bool);
+    void onSize (point2u);
 };
 
 } } // Ui

@@ -33,14 +33,14 @@ namespace cppual { namespace Ui {
 
 struct DECL_EXPORT XQueue final : public IDisplayQueue
 {
-	typedef IDisplayQueue::event_type event_type;
+    typedef IDisplayQueue::event_type event_type;
 
-	XQueue ();
-	bool set_window_events (IWindow const&, mask_type) noexcept;
-	bool pop_front         (event_type&, bool) noexcept;
-	int  poll              (IWindow const&, std::atomic_bool&);
-	void send              (event_type const&);
-	void post              (event_type const&);
+    XQueue ();
+    bool set_window_events (IWindow const&, mask_type) noexcept;
+    bool pop_front         (event_type&, bool) noexcept;
+    int  poll              (IWindow const&, std::atomic_bool&);
+    void send              (event_type const&);
+    void post              (event_type const&);
 };
 
 } } // namespace Input

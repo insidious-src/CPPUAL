@@ -53,49 +53,49 @@ template <typename T>
 class Reactive : Signal<void(T const&)>
 {
 public:
-	typedef T        value_type;
-	typedef T&       reference;
-	typedef T const& const_reference;
+    typedef T        value_type;
+    typedef T&       reference;
+    typedef T const& const_reference;
 
-	constexpr Reactive () noexcept = default;
-	inline Reactive (Reactive&&) = default;
-	inline Reactive (Reactive const&) = default;
-	inline Reactive& operator = (Reactive&&) = default;
+    constexpr Reactive () noexcept = default;
+    inline Reactive (Reactive&&) = default;
+    inline Reactive (Reactive const&) = default;
+    inline Reactive& operator = (Reactive&&) = default;
 
-	inline Reactive (value_type&& value) : m_value (std::forward<T> (value)) { }
-	inline Reactive (const_reference value) : m_value (value) { }
+    inline Reactive (value_type&& value) : m_value (std::forward<T> (value)) { }
+    inline Reactive (const_reference value) : m_value (value) { }
 
-	inline Reactive& operator = (Reactive const& gObj)
-	{
-		if (this != &gObj)
-		{
-			Signal<void(T const&)>::operator = (gObj);
-			m_value = gObj.m_value;
-			*this (m_value);
-		}
+    inline Reactive& operator = (Reactive const& gObj)
+    {
+        if (this != &gObj)
+        {
+            Signal<void(T const&)>::operator = (gObj);
+            m_value = gObj.m_value;
+            *this (m_value);
+        }
 
-		return *this;
-	}
+        return *this;
+    }
 
-	inline Reactive& operator = (value_type&& value)
-	{
-		m_value = std::forward<T> (value);
-		*this (m_value);
-		return *this;
-	}
+    inline Reactive& operator = (value_type&& value)
+    {
+        m_value = std::forward<T> (value);
+        *this (m_value);
+        return *this;
+    }
 
-	inline Reactive& operator = (const_reference value)
-	{
-		m_value = value;
-		*this (m_value);
-		return *this;
-	}
+    inline Reactive& operator = (const_reference value)
+    {
+        m_value = value;
+        *this (m_value);
+        return *this;
+    }
 
-	constexpr operator const_reference () const noexcept
-	{ return m_value; }
+    constexpr operator const_reference () const noexcept
+    { return m_value; }
 
 private:
-	T m_value;
+    T m_value;
 };
 
 } // cppual

@@ -19,11 +19,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_NETWORK_HTTP_H_
-#define CPPUAL_NETWORK_HTTP_H_
+#ifndef CPPUAL_NETWORK_PROTOCOL_HTTP_H_
+#define CPPUAL_NETWORK_PROTOCOL_HTTP_H_
 #ifdef __cplusplus
 
 #include <cppual/decl.h>
+#include <cppual/network/protocols/protocol.h>
 
 namespace cppual { namespace Network { namespace Http {
 
@@ -33,27 +34,30 @@ class Request final
 
 class Response final
 {
-
 };
 
-class Client final
+class Client : public IProtocol
 {
-	enum class ConnectionType : unsigned char
-	{
-		Plain,
-		SSL,
-		TLS,
-		Mixed,
-		Custom
-	};
+    enum class ConnectionType : unsigned char
+    {
+        Plain,
+        SSL,
+        TLS,
+        Mixed,
+        Custom
+    };
 
-	int version ();
+    void startSession  (ProtocolContext&, Packet& outgoing_packet);
+    bool readData      (ProtocolContext&, Packet& incoming_packet);
+    byte tryDecode     (ProtocolContext&, Packet& output_packet);
+    byte encodeContent (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    int  version       ();
 
 private:
-	ConnectionType m_eConnType;
+    ConnectionType m_eConnType;
 };
 
 } } } // Http
 
 #endif // __cplusplus
-#endif // CPPUAL_NETWORK_HTTP_H_
+#endif // CPPUAL_NETWORK_PROTOCOL_HTTP_H_

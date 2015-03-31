@@ -35,30 +35,30 @@ Address::Address (string const&) noexcept
 
 string Address::toString () const noexcept
 {
-	std::stringstream output;
+    std::stringstream output;
 
-	if (!isV4 ())
-	{
-		for (uint i = 0; i < 7; ++i) output << m_uBytes[i] << ':';
-		output << m_uBytes[7];
-	}
-	else
-	{
-		for (uint i = 0; i < 2; ++i) output << m_uBytes[i] << '.';
-		output << m_uBytes[3];
-	}
+    if (!isV4 ())
+    {
+        for (uint i = 0; i < 7; ++i) output << m_uBytes[i] << ':';
+        output << m_uBytes[7];
+    }
+    else
+    {
+        for (uint i = 0; i < 2; ++i) output << m_uBytes[i] << '.';
+        output << m_uBytes[3];
+    }
 
-	return std::move (output.str ());
+    return std::move (output.str ());
 }
 
 Address Address::localAddress () noexcept
 {
-	return Address ();
+    return Address ();
 }
 
 Address Address::publicAddress () noexcept
 {
-	return Address ();
+    return Address ();
 }
 
 } } // namespace Network
