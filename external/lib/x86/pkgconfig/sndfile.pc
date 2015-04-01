@@ -5,8 +5,8 @@ includedir=${prefix}/include
 
 Name: sndfile
 Description: A library for reading and writing audio files
-Requires: 
+Requires:
 Version: 1.0.25
 Libs: -L${libdir} -lsndfile
 Libs.private: Ext/libflac.la Ext/libvorbis.la Ext/libogg.la
-Cflags: -I${includedir} 
+Cflags: -I${includedir}

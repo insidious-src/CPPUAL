@@ -114,12 +114,6 @@ add_library(cppual-compute SHARED
     include/cppual/compute/task.h
     )
 
- # device compute (OpenGL interop)
-add_library(cppual-compute-gl SHARED
-    include/cppual/compute/gl_interop.h
-    src/compute/gl_interop.cpp
-    )
-
 #add_library(cppual-db SHARED
 #	include/cppual/db/model.h
 #	)
@@ -259,21 +253,21 @@ add_library(cppual-gl SHARED
     )
 
 # drawable objects library
-add_library(cppual-gfx-drawables SHARED
-    include/cppual/gfx/drawable/shape.h
-    src/gfx/drawable/image.cpp
-    include/cppual/gfx/drawable/image.h
-    src/gfx/drawable/text.cpp
-    include/cppual/gfx/drawable/text.h
-    src/gfx/drawable/elipse.cpp
-    include/cppual/gfx/drawable/elipse.h
-    src/gfx/drawable/rectangle.cpp
-    include/cppual/gfx/drawable/rectangle.h
-    src/gfx/drawable/polygon.cpp
-    include/cppual/gfx/drawable/polygon.h
-    src/gfx/drawable/line.cpp
-    include/cppual/gfx/drawable/line.h
-    )
+#add_library(cppual-gfx-drawables SHARED
+#    include/cppual/gfx/drawable/shape.h
+#    src/gfx/drawable/image.cpp
+#    include/cppual/gfx/drawable/image.h
+#    src/gfx/drawable/text.cpp
+#    include/cppual/gfx/drawable/text.h
+#    src/gfx/drawable/elipse.cpp
+#    include/cppual/gfx/drawable/elipse.h
+#    src/gfx/drawable/rectangle.cpp
+#    include/cppual/gfx/drawable/rectangle.h
+#    src/gfx/drawable/polygon.cpp
+#    include/cppual/gfx/drawable/polygon.h
+#    src/gfx/drawable/line.cpp
+#    include/cppual/gfx/drawable/line.h
+#    )
 
 # multimedia
 add_library(cppual-multimedia SHARED
@@ -295,11 +289,6 @@ add_library(cppual-video-xorg MODULE
 )
 
 endif()
-
-# OpenGL video backend
-add_library(cppual-video-gl MODULE
-    src/multimedia/video/backend/vgl.cpp
-)
 
 # compute video backend
 add_library(cppual-video-compute MODULE
@@ -426,11 +415,9 @@ endif()
 
 target_link_libraries(cppual-host DL::Library)
 target_link_libraries(cppual-compute cppual-host OpenCL::Library)
-target_link_libraries(cppual-compute-gl cppual-compute OpenCL::Library GLEW::Library OpenGL::Library)
 target_link_libraries(cppual-gfx cppual-host Freetype::Library)
 target_link_libraries(cppual-network Sockets::Library)
-target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)
-target_link_libraries(cppual-video-gl cppual-gl GLEW::Library OpenGL::Library)
+#target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)
 target_link_libraries(cppual-video-compute cppual-compute)
 target_link_libraries(cppual-audio cppual-compute SndFile::Library)
 target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)

@@ -84,13 +84,15 @@ public:
     size_type constMemory  () const;
     size_type globalMemory () const;
 
-    pointer handle  () const noexcept { return m_pHandle; }
-    Type    type    () const noexcept { return m_eType;   }
-    bool    isValid () const noexcept { return m_pHandle; }
+    size_type physical () const noexcept { return m_uId;     }
+    pointer   handle   () const noexcept { return m_pHandle; }
+    Type      type     () const noexcept { return m_eType;   }
+    bool      valid    () const noexcept { return m_pHandle; }
 
 private:
-    pointer m_pHandle;
-    Type    m_eType;
+    pointer   m_pHandle;
+    size_type m_uId;
+    Type      m_eType;
 };
 
 } } // Compute

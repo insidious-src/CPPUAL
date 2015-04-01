@@ -27,6 +27,15 @@
 
 namespace cppual { namespace Network { namespace P2P {
 
+class BaseClient : public IProtocol
+{
+public:
+    void startSession  (ProtocolContext&, Packet& outgoing_packet);
+    bool readData      (ProtocolContext&, Packet& incoming_packet);
+    byte tryDecode     (ProtocolContext&, Packet& output_packet);
+    byte encodeContent (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+};
+
 class TorrentClient : public IProtocol
 {
 public:

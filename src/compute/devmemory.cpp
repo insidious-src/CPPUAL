@@ -27,7 +27,7 @@ void* operator new (std::size_t size, GlobalMemory& obj, std::size_t align)
 {
     using namespace cppual::Compute;
 
-    if (!obj.device ().isValid ()) throw memory_source_not_available ();
+    if (!obj.device ().valid ()) throw memory_source_not_available ();
 
     ::VK_GPU_MEMORY mem_obj = nullptr;
 
@@ -50,7 +50,7 @@ void operator delete (void* ptr, GlobalMemory& obj)
 {
     using namespace cppual::Compute;
 
-    if (!obj.device ().isValid ()) throw memory_source_not_available ();
+    if (!obj.device ().valid ()) throw memory_source_not_available ();
     if (::vkFreeMemory (ptr)) throw std::out_of_range ("pointer is not an allocated memory block");
 }
 

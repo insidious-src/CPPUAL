@@ -32,9 +32,15 @@ class HostConnection : public NonCopyable
 {
 public:
     typedef std::size_t size_type;
+    typedef Handle      pointer;
 
     size_type deviceCount ();
     size_type gpuCount    ();
+
+    pointer handle () const noexcept { return m_pConn; }
+
+private:
+    pointer m_pConn;
 };
 
 } } // namespace Platform
