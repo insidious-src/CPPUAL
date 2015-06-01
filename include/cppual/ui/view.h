@@ -36,7 +36,7 @@ public:
     typedef Event                                event_type;
     typedef Memory::GenericPolicy<View*>         allocator_type;
     typedef CircularQueue<View*, allocator_type> container;
-    typedef std::size_t                             size_type;
+    typedef std::size_t                          size_type;
 
     typedef typename
     container::iterator iterator;
@@ -153,7 +153,7 @@ class Widget
 public:
     typedef Memory::GenericPolicy<Widget*>         allocator_type;
     typedef CircularQueue<Widget*, allocator_type> container_type;
-    typedef std::size_t                               size_type;
+    typedef std::size_t                            size_type;
 
     void destroy ();
     void show ();

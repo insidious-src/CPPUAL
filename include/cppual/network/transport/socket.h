@@ -50,6 +50,7 @@ class TransportSocket : public NonCopyable
 {
 public:
     typedef socket_id const const_id;
+
     TransportSocket () = delete;
     TransportSocket (SocketType) noexcept;
     TransportSocket (TransportSocket&&) noexcept;

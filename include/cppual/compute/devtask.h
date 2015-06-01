@@ -39,7 +39,7 @@ public:
         Compute   = 1 << 2,
         Universal = 1 << 3,
         Timer     = 1 << 4,
-        Custom    = 1 << 5,
+        Custom    = 1 << 5
     };
 
     typedef BitSet<EngineType> EngineTypes;
@@ -48,6 +48,8 @@ public:
     DeviceQueue (Device const&, EngineType exec_engine_type);
     DeviceQueue (DeviceQueue&&);
     DeviceQueue& operator = (DeviceQueue&&);
+
+    static EngineTypes supportedTypes (Device const&) noexcept;
 
     EngineType type () const noexcept { return m_eQueueType; }
 

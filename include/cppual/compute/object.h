@@ -31,15 +31,14 @@ namespace cppual { namespace Compute {
 class HostConnection; // application instance info
 class Device;
 class Object;
-class Behaviour; // device and queue load balancing
-class MixedQueue; // host and multiple devices
-class HostQueue; // thread queue
+class Behaviour;      // device and queue load balancing
+class MixedQueue;     // host and multiple devices
+class HostQueue;      // thread queue
 class DeviceQueue;
 class DeviceSurface;
-class GlobalMemory; // explicit allocation or buffer
 class Pipeline;
 class Image;
-class Render; // render passes and states
+class Render;         // render passes and states
 class Command;
 class CommandSequence;
 class Event;
@@ -92,17 +91,34 @@ public:
     typedef Handle      pointer;
     typedef std::size_t size_type;
 
+    enum Resource
+    {
+        Buffer,
+        CommandSequence,
+        Image,
+        Pipeline,
+        RenderPass,
+        Shader,
+        DescriptorPool,
+        Event,
+        State,
+        Queue
+    };
+
     Object (Object&&) noexcept = default;
     Object (Object const& rhs) noexcept;
     Object& operator = (Object&&) = default;
     Object& operator = (Object const& rhs) noexcept;
     ~Object () noexcept;
 
-    Object () noexcept : m_object () { }
-    pointer handle () const noexcept { return m_object; }
+    Object () noexcept : m_object (), m_resType () { }
+    Resource resource_type () const noexcept { return m_resType; }
+    pointer  handle        () const noexcept { return m_object;  }
+
 
 private:
-    pointer m_object;
+    pointer  m_object;
+    Resource m_resType;
 };
 
 } } // Compute

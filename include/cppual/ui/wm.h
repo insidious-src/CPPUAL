@@ -59,8 +59,8 @@ enum WindowFlag
 
 class   IWindow;
 typedef shared_ptr<IWindow> shared_window;
-typedef weak_ptr<IWindow>   weak_window;
-typedef BitSet<WindowFlag>  WindowFlags;
+typedef weak_ptr  <IWindow> weak_window;
+typedef BitSet <WindowFlag> WindowFlags;
 
 // ====================================================
 

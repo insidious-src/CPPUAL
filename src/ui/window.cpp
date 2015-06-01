@@ -23,6 +23,9 @@
 #include <cppual/ui/window.h>
 #include <cppual/ui/manager.h>
 
+using std::make_pair;
+using std::unordered_map;
+
 namespace cppual { namespace Ui {
 
 namespace { namespace Internal {
@@ -39,76 +42,89 @@ inline map_type& map ()
 
 // =========================================================
 
-void WindowAdapter::registerEvents ()
-{
-    connect (event_type::registers ().mouseMove,
-             [](event_type::window_type wnd, point2u pos)
-    {
-        Internal::map ()[wnd]->onPointerMove (pos);
-    });
-
-    connect (event_type::registers ().mousePress,
-             [](event_type::window_type wnd, event_type::MouseButtonData data)
-    {
-        Internal::map ()[wnd]->onMousePress (data);
-    });
-
-    connect (event_type::registers ().mouseRelease,
-             [](event_type::window_type wnd, event_type::MouseButtonData data)
-    {
-        Internal::map ()[wnd]->onMouseRelease (data);
-    });
-
-    connect (event_type::registers ().winPaint,
-             [](event_type::window_type wnd, event_type::PaintData data)
-    {
-        Internal::map ()[wnd]->onPaint (data);
-    });
-
-    connect (event_type::registers ().winFocus,
-             [](event_type::window_type wnd, bool state)
-    {
-        Internal::map ()[wnd]->onFocus (state);
-    });
-
-    connect (event_type::registers ().winSize,
-             [](event_type::window_type wnd, point2u size)
-    {
-        Internal::map ()[wnd]->onSize (size);
-    });
-
-    connect (event_type::registers ().winVisible,
-             [](event_type::window_type wnd, bool state)
-    {
-        Internal::map ()[wnd]->onShow (state);
-    });
-}
-
-// =========================================================
-
 WindowAdapter::WindowAdapter (Widget&     widget,
                               WindowFlags flags,
                               Icon const& icon,
                               u32         screen)
-: m_pPlatformWnd (Platform::Factory::instance ()->createWindow (widget.geometry (), screen)),
+: m_pPlatformWnd (Platform::Factory::instance ()->createWindow (widget.geometry (),
+                                                                screen)),
   m_pMainWidget  (&widget),
   m_pIcon        (icon)
 {
     if (!m_pPlatformWnd) throw std::bad_alloc ();
 
-    uptr key = m_pPlatformWnd->id ();
+    static bool registered = false;
 
-    if (!Internal::map ().emplace (std::make_pair (key, this)).second)
+    if (!registered)
+    {
+        connect (event_type::registers ().keyPress,
+                 [](event_type::window_type wnd, event_type::KeyData data)
+        {
+            Internal::map ()[wnd]->keyPress (data);
+        });
+
+        connect (event_type::registers ().keyRelease,
+                 [](event_type::window_type wnd, event_type::KeyData data)
+        {
+            Internal::map ()[wnd]->keyRelease (data);
+        });
+
+        connect (event_type::registers ().mouseMove,
+                 [](event_type::window_type wnd, point2u pos)
+        {
+            Internal::map ()[wnd]->onPointerMove (pos);
+        });
+
+        connect (event_type::registers ().mousePress,
+                 [](event_type::window_type wnd, event_type::MouseButtonData data)
+        {
+            Internal::map ()[wnd]->onMousePress (data);
+        });
+
+        connect (event_type::registers ().mouseRelease,
+                 [](event_type::window_type wnd, event_type::MouseButtonData data)
+        {
+            Internal::map ()[wnd]->onMouseRelease (data);
+        });
+
+        connect (event_type::registers ().winPaint,
+                 [](event_type::window_type wnd, event_type::PaintData data)
+        {
+            Internal::map ()[wnd]->paint (data);
+        });
+
+        connect (event_type::registers ().winFocus,
+                 [](event_type::window_type wnd, bool state)
+        {
+            Internal::map ()[wnd]->focus (state);
+        });
+
+        connect (event_type::registers ().winSize,
+                 [](event_type::window_type wnd, point2u size)
+        {
+            Internal::map ()[wnd]->resize (size);
+        });
+
+        connect (event_type::registers ().winVisible,
+                 [](event_type::window_type wnd, bool state)
+        {
+            Internal::map ()[wnd]->show (state);
+        });
+
+        registered = true;
+    }
+
+    if (!Internal::map ().emplace (std::make_pair<uptr> (m_pPlatformWnd->id (), this)).second)
     {
         m_pPlatformWnd.reset ();
         throw std::logic_error ("failed to register WindowAdapter events");
     }
 
-    IDisplayQueue::instance ()->
+    IDisplayQueue::primary ()->
             set_window_events (*m_pPlatformWnd,
-                             event_type::Key     |
-                             event_type::Pointer |
-                             event_type::Window);
+                               event_type::Key     |
+                               event_type::Pointer |
+                               event_type::Window);
 
     m_pPlatformWnd->setFlags (flags);
     m_pPlatformWnd->setTitle (widget.name ());
@@ -129,7 +145,7 @@ void WindowAdapter::restore ()
     }
 }
 
-void WindowAdapter::onSize (point2u gSize)
+void WindowAdapter::resize (point2u gSize)
 {
     m_pMainWidget->setSize (gSize);
 }

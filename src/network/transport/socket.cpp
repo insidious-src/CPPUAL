@@ -19,9 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/network/transport/socket.h>
-#include <iostream>
 #include <cstring>
+#include <iostream>
+#include <cppual/network/transport/socket.h>
 
 #ifdef OS_STD_UNIX
 #   include <errno.h>
@@ -101,11 +101,8 @@ socket_id TransportSocket::create (SocketType eProt) noexcept
 
 void TransportSocket::replaceFromId (socket_id nId) noexcept
 {
-    if (nId   == nullSocket ()) return;
-#   ifdef OS_STD_UNIX
-    if (id () != nullSocket ()) ::close (id ());
+    close ();
     m_nId = nId;
-#   endif
 }
 
 void TransportSocket::close () noexcept

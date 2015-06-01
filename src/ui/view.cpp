@@ -142,7 +142,7 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
             }
         }
 
-        IDisplayQueue::instance ()->
+        IDisplayQueue::primary ()->
                 set_window_events (*m_pRenderable,
                                      event_type::Key     |
                                      event_type::Pointer |

@@ -37,7 +37,7 @@ inline const shared_queue& queue ()
 
 // =========================================================
 
-IDisplayQueue* IDisplayQueue::instance ()
+IDisplayQueue* IDisplayQueue::primary () noexcept
 {
     return Internal::queue ().get ();
 }

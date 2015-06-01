@@ -49,7 +49,6 @@ struct SystemMessage final
 class Event
 {
 public:
-
     typedef Graphics::Element window_type;
     typedef std::size_t       size_type;
 
@@ -77,8 +76,8 @@ public:
     enum
     {
         Key       = KeyPressed | KeyReleased,
-        Pointer      = ButtonDown | ButtonUp     | PointerMove | Scroll,
-        Touch      = TouchPress | TouchRelease | TouchMove,
+        Pointer   = ButtonDown | ButtonUp     | PointerMove | Scroll,
+        Touch     = TouchPress | TouchRelease | TouchMove,
         Window    = Paint | Focus   | Size    | Visibility | Property,
         AllEvents = Key   | Pointer | Touch   | Window     | SystemMessage
     };
@@ -152,8 +151,8 @@ public:
     };
 
     Event () noexcept = default;
-    constexpr Data const& data   () const noexcept { return m_gData; }
-    constexpr Event::Type type   () const noexcept { return m_eType; }
+    constexpr Data const& data   () const noexcept { return m_data; }
+    constexpr Event::Type type   () const noexcept { return m_type; }
     constexpr window_type window () const noexcept { return m_window; }
 
     static Signals& registers ()
@@ -164,14 +163,14 @@ public:
 
     constexpr Event (Type type, window_type window = window_type ()) noexcept
     : m_window (window),
-      m_gData  (),
-      m_eType  (type)
+      m_data   (),
+      m_type   (type)
     { }
 
 protected:
     window_type m_window;
-    Data        m_gData;
-    Type        m_eType;
+    Data        m_data;
+    Type        m_type;
 };
 
 // =========================================================
@@ -181,7 +180,7 @@ struct MessageEvent : public Event
     MessageEvent (int nMsg) noexcept
     : Event (Event::SystemMessage)
     {
-        m_gData.message = nMsg;
+        m_data.message = nMsg;
     }
 };
 
@@ -192,7 +191,7 @@ struct VisibilityEvent : public Event
     VisibilityEvent (window_type wnd, bool bVis) noexcept
     : Event (Event::Visibility, wnd)
     {
-        m_gData.state = bVis;
+        m_data.state = bVis;
     }
 };
 
@@ -203,7 +202,7 @@ struct PaintEvent : public Event
     PaintEvent (window_type wnd, Rect gRect) noexcept
     : Event (Event::Paint, wnd)
     {
-        m_gData.paint.region = gRect;
+        m_data.paint.region = gRect;
     }
 };
 
@@ -214,7 +213,7 @@ struct SizeEvent : public Event
     SizeEvent (window_type wnd, point2u size) noexcept
     : Event (Event::Size, wnd)
     {
-        m_gData.size = size;
+        m_data.size = size;
     }
 };
 
@@ -225,7 +224,7 @@ struct FocusEvent : public Event
     FocusEvent (window_type wnd, bool in) noexcept
     : Event (Event::Focus, wnd)
     {
-        m_gData.state = in;
+        m_data.state = in;
     }
 };
 
@@ -236,7 +235,7 @@ struct StepEvent : public Event
     StepEvent (window_type wnd, bool in) noexcept
     : Event (Event::Step, wnd)
     {
-        m_gData.state = in;
+        m_data.state = in;
     }
 };
 
@@ -247,8 +246,8 @@ struct PropertyEvent : public Event
     PropertyEvent (window_type wnd, u32 prop, int32 value) noexcept
     : Event (Event::Property, wnd)
     {
-        m_gData.property.prop  = prop;
-        m_gData.property.value = value;
+        m_data.property.prop  = prop;
+        m_data.property.value = value;
     }
 };
 
@@ -259,7 +258,7 @@ struct KeyPressEvent : public Event
     KeyPressEvent (window_type wnd, u8 nKey) noexcept
     : Event (Event::KeyPressed, wnd)
     {
-        m_gData.keyCode.key = nKey;
+        m_data.keyCode.key = nKey;
     }
 };
 
@@ -270,7 +269,7 @@ struct KeyReleaseEvent : public Event
     KeyReleaseEvent (window_type wnd, u8 nKey) noexcept
     : Event (Event::KeyReleased, wnd)
     {
-        m_gData.keyCode.key = nKey;
+        m_data.keyCode.key = nKey;
     }
 };
 
@@ -281,8 +280,8 @@ struct MousePressEvent : public Event
     MousePressEvent (window_type wnd, u8 nBtn, point2u gPos) noexcept
     : Event (Event::ButtonDown, wnd)
     {
-        m_gData.mouseButton.button = nBtn;
-        m_gData.mouseButton.pos    = gPos;
+        m_data.mouseButton.button = nBtn;
+        m_data.mouseButton.pos    = gPos;
     }
 };
 
@@ -293,8 +292,8 @@ struct MouseReleaseEvent : public Event
     MouseReleaseEvent (window_type wnd, u8 nBtn, point2u gPos) noexcept
     : Event (Event::ButtonUp, wnd)
     {
-        m_gData.mouseButton.button  = nBtn;
-        m_gData.mouseButton.pos     = gPos;
+        m_data.mouseButton.button  = nBtn;
+        m_data.mouseButton.pos     = gPos;
     }
 };
 
@@ -305,7 +304,7 @@ struct PointerMoveEvent : public Event
     PointerMoveEvent (window_type wnd, point2u gPos) noexcept
     : Event (Event::PointerMove, wnd)
     {
-        m_gData.position = gPos;
+        m_data.position = gPos;
     }
 };
 
@@ -316,8 +315,8 @@ struct ScrollEvent : public Event
     ScrollEvent (window_type wnd, int32 nDelta, point2u gPos) noexcept
     : Event (Event::Scroll, wnd)
     {
-        m_gData.scroll.delta = nDelta;
-        m_gData.scroll.pos   = gPos;
+        m_data.scroll.delta = nDelta;
+        m_data.scroll.pos   = gPos;
     }
 };
 
@@ -328,8 +327,8 @@ struct TouchPressEvent : public Event
     TouchPressEvent (int32 pid, point2i gPos) noexcept
     : Event (Event::TouchPress)
     {
-        m_gData.touch.pid = pid;
-        m_gData.touch.pos = gPos;
+        m_data.touch.pid = pid;
+        m_data.touch.pos = gPos;
     }
 };
 
@@ -340,8 +339,8 @@ struct TouchReleaseEvent : public Event
     TouchReleaseEvent (int32 pid, point2i gPos) noexcept
     : Event (Event::TouchRelease)
     {
-        m_gData.touch.pid = pid;
-        m_gData.touch.pos = gPos;
+        m_data.touch.pid = pid;
+        m_data.touch.pos = gPos;
     }
 };
 
@@ -352,8 +351,8 @@ struct TouchMovedEvent : public Event
     TouchMovedEvent (int32 pid, point2i gPos) noexcept
     : Event (Event::TouchMove)
     {
-        m_gData.touch.pid = pid;
-        m_gData.touch.pos = gPos;
+        m_data.touch.pid = pid;
+        m_data.touch.pos = gPos;
     }
 };
 

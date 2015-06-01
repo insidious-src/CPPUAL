@@ -75,7 +75,9 @@ public:
     typedef Handle            pointer;
     typedef std::size_t       size_type;
 
-    static size_type count ();
+    static size_type count () noexcept;
+    static Device&   host  () noexcept;
+
     bool      available    (cchar* feature);
     string    info         (Info);
     size_type cache        () const;

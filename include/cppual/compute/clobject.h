@@ -33,7 +33,7 @@ class Device;
 class Behaviour;
 class DeviceQueue;
 class DeviceSurface;
-class GlobalMemory;
+class MemoryChunk;
 class Program;
 class Kernel;
 class Event;

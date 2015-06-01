@@ -27,37 +27,46 @@
 #include <cppual/compute/object.h>
 #include <cppual/noncopyable.h>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace Memory {
 
 struct memory_source_not_available : std::bad_alloc { };
 
 // =========================================================
 
-class GlobalMemory : public Object
+class MemoryChunk : public Compute::Object
 {
 public:
-    GlobalMemory (Device const&, size_type size);
+    typedef Compute::Device device_type;
 
-    Device const& device () const noexcept
+    enum class Type : unsigned char
+    {
+        Restricted,
+        Specialized,
+        Global
+    };
+
+    MemoryChunk (device_type const&, size_type size);
+
+    device_type const& device () const noexcept
     { return *m_pDevice; }
 
 private:
-    Device const* m_pDevice;
+    device_type const* m_pDevice;
 };
 
 } } // namespace Compute
 
 // =========================================================
 
-using cppual::Compute::GlobalMemory;
+using cppual::Memory::MemoryChunk;
 
-void* operator new    (std::size_t size, GlobalMemory& source, std::size_t align = 0);
-void  operator delete (void* ptr, GlobalMemory& source);
+void* operator new    (std::size_t size, MemoryChunk& source, std::size_t align = 0);
+void  operator delete (void* ptr, MemoryChunk& source);
 
-inline void* operator new[] (std::size_t size, GlobalMemory& source, std::size_t align = 0)
+inline void* operator new[] (std::size_t size, MemoryChunk& source, std::size_t align = 0)
 { return ::operator new (size, source, align); }
 
-inline void  operator delete[] (void* ptr, GlobalMemory& source)
+inline void  operator delete[] (void* ptr, MemoryChunk& source)
 { ::operator delete (ptr, source); }
 
 #endif // __cplusplus

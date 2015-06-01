@@ -54,7 +54,7 @@ public:
     virtual void send              (event_type const&) = 0;
     virtual void post              (event_type const&) = 0;
 
-    static IDisplayQueue* instance ();
+    static IDisplayQueue* primary          () noexcept;
     static bool           hasValidInstance () noexcept;
 
     Connection display () const noexcept { return m_display; }
@@ -77,7 +77,7 @@ public:
     typedef View                      window_type;
 
     EventQueue () noexcept
-    : queue    (IDisplayQueue::instance ()),
+    : queue    (IDisplayQueue::primary ()),
       polling  ()
     { }
 

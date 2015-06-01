@@ -24,6 +24,7 @@
 #ifdef OS_WINDOWS
 
 #include <cppual/ui/manager.h>
+
 #include "w32input.h"
 #include "w32window.h"
 #include "w32backend.h"

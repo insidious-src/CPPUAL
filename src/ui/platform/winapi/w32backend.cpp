@@ -67,6 +67,11 @@ uint Win32Display::screenCount () const noexcept
     return 1;
 }
 
+void Win32Display::flush () noexcept
+{
+    ::UpdateWindow (desktop_window ());
+}
+
 } } // Ui
 
 #endif // OS_WINDOWS

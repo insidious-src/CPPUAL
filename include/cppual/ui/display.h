@@ -49,6 +49,7 @@ public:
 
     virtual string name        () const = 0;
     virtual uint   screenCount () const = 0;
+    virtual void   flush       ()       = 0;
 
     static  IDisplay* instance         ();
     static  bool      hasValidInstance () noexcept;

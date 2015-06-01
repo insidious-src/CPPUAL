@@ -27,7 +27,7 @@
 
 namespace cppual { namespace Audio {
 
-enum class AudioFormat
+enum AudioFormat
 {
     Undefined =  0,
     WAV       =  1,

@@ -22,7 +22,7 @@
 #include <cppual/compute/platform.h>
 #include <iostream>
 #include <cstring>
-#include "cldef.h"
+//#include "cldef.h"
 
 namespace cppual { namespace Compute {
 
@@ -81,9 +81,22 @@ namespace { // optimize for internal unit usage
 //    return value;
 //}
 
-} // anonymous
+}
+
+// anonymous
 
 // =========================================================
+
+Device::size_type Device::count () noexcept
+{
+    return 0;
+}
+
+Device& Device::host () noexcept
+{
+    static Device dev;
+    return dev;
+}
 
 //Device::Device (Device const& gObj) noexcept
 //: m_uPlatformId (gObj.m_uPlatformId),

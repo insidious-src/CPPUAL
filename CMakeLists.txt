@@ -10,7 +10,7 @@ include(cmake/ToolChainConfig.cmake REQUIRED)
 
 find_package(DL       REQUIRED) ## dynamic loading of libraries
 find_package(WM       REQUIRED) ## platform window manager
-find_package(OpenCL   REQUIRED) ## primary compute & graphics api
+#find_package(OpenCL   REQUIRED) ## backup compute api
 #find_package(Vulkan   REQUIRED) ## primary compute & graphics api
 find_package(Sockets  REQUIRED) ## network interface & interprocess
 find_package(EGL      REQUIRED) ## cross-platform Vulkan/GL/ES surface management
@@ -36,7 +36,7 @@ include_directories(include
 
 ### compile libraries
 
-# process, modules, memory
+# process, modules
 add_library(cppual-host SHARED
     include/cppual/functional.h
     include/cppual/flags.h
@@ -57,6 +57,21 @@ add_library(cppual-host SHARED
     include/cppual/timeline.h
     include/cppual/noncopyable.h
     src/memory/gc.cpp
+    src/process/proc_model.cpp
+    include/cppual/process/proc_model.h
+    src/process/interproc.cpp
+    include/cppual/process/interproc.h
+    include/cppual/process/details.h
+    include/cppual/process/pipe.h
+    src/process/module.cpp
+    include/cppual/process/module.h
+    src/system/sysinfo.cpp
+    include/cppual/system/sysinfo.h
+    include/cppual/system/clock.h
+    )
+
+ # device compute, memory (Vulkan, Serial)
+add_library(cppual-compute SHARED
     include/cppual/memory/gc.h
     include/cppual/memory/allocator.h
     include/cppual/memory/static.h
@@ -71,21 +86,6 @@ add_library(cppual-host SHARED
     include/cppual/memory/page.h
     src/memory/page.cpp
     include/cppual/memory/shared.h
-    src/process/proc_model.cpp
-    include/cppual/process/proc_model.h
-    src/process/interproc.cpp
-    include/cppual/process/interproc.h
-    include/cppual/process/details.h
-    include/cppual/process/pipe.h
-    src/process/module.cpp
-    include/cppual/process/module.h
-    src/system/sysinfo.cpp
-    include/cppual/system/sysinfo.h
-    include/cppual/system/clock.h
-    )
-
- # device compute (OpenCL, Vulkan, Serial)
-add_library(cppual-compute SHARED
     include/Vulkan/vk.h
     include/cppual/resource.h
     include/cppual/compute/bridge.h
@@ -103,8 +103,8 @@ add_library(cppual-compute SHARED
 #	src/compute/program.cpp
     include/cppual/compute/device.h
     src/compute/device.cpp
-    include/cppual/compute/devmemory.h
-    src/compute/devmemory.cpp
+    include/cppual/memory/devmemory.h
+    src/memory/devmemory.cpp
     include/cppual/compute/devtask.h
     src/compute/devtask.cpp
 #	src/compute/context.cpp
@@ -414,8 +414,8 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 target_link_libraries(cppual-host DL::Library)
-target_link_libraries(cppual-compute cppual-host OpenCL::Library)
-target_link_libraries(cppual-gfx cppual-host Freetype::Library)
+#target_link_libraries(cppual-compute Vulkan::Library OpenCL::Library)
+target_link_libraries(cppual-gfx cppual-compute Freetype::Library)
 target_link_libraries(cppual-network Sockets::Library)
 #target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)
 target_link_libraries(cppual-video-compute cppual-compute)

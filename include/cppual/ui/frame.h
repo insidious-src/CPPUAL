@@ -140,7 +140,7 @@ public:
     void setLabel (string const&);
 
     image_type* icon () const noexcept;
-    View*        attached () const noexcept;
+    View*       attached () const noexcept;
     PopupMenu*  menu () noexcept;
     Visibility  visibility () const noexcept;
     bool        isStretched () const noexcept;

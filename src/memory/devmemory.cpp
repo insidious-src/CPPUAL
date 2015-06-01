@@ -20,12 +20,12 @@
  */
 
 #include <Vulkan/vk.h>
-#include <cppual/compute/devmemory.h>
+#include <cppual/memory/devmemory.h>
 #include <cppual/compute/device.h>
 
-void* operator new (std::size_t size, GlobalMemory& obj, std::size_t align)
+void* operator new (std::size_t size, MemoryChunk& obj, std::size_t align)
 {
-    using namespace cppual::Compute;
+    using namespace cppual::Memory;
 
     if (!obj.device ().valid ()) throw memory_source_not_available ();
 
@@ -46,16 +46,17 @@ void* operator new (std::size_t size, GlobalMemory& obj, std::size_t align)
     return mem_obj;
 }
 
-void operator delete (void* ptr, GlobalMemory& obj)
+void operator delete (void* ptr, MemoryChunk& obj)
 {
-    using namespace cppual::Compute;
+    using namespace cppual::Memory;
 
     if (!obj.device ().valid ()) throw memory_source_not_available ();
-    if (::vkFreeMemory (ptr)) throw std::out_of_range ("pointer is not an allocated memory block");
+    if (::vkFreeMemory (ptr))    throw std::out_of_range
+            ("pointer is not an allocated memory block");
 }
 
 // =========================================================
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace Memory {
 
 } } // namespace Compute

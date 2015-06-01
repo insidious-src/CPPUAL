@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/dom/xml.h>
+#include <cppual/decl.h>
 
 using std::string;
 using std::fstream;

@@ -25,25 +25,26 @@
 
 #include <limits>
 #include <memory>
-#include <cppual/types.h>
+#include <cppual/compute/device.h>
 
 namespace cppual { namespace Memory {
 
 struct Allocator
 {
     typedef std::size_t     align_type;
-    typedef std::size_t        size_type;
-    typedef size_type const const_size;
-    typedef u8*             math_pointer;
+    typedef std::size_t     size_type;
+    typedef std::uint8_t*   math_pointer;
     typedef void*           pointer;
-    typedef cvoid*          const_pointer;
+    typedef const void*     const_pointer;
     typedef std::ptrdiff_t  difference_type;
+    typedef Compute::Device device_type;
 
-    virtual size_type count          () const { return 0; }
-    virtual void      clear          () { }
-    virtual bool      is_thread_safe () const noexcept { return false;  }
-    virtual bool      is_lock_free   () const noexcept { return false;  }
-    virtual bool      is_shared      () const noexcept { return false;  }
+    virtual size_type    count          () const { return 0; }
+    virtual device_type& device         () const noexcept { return Compute::Device::host (); }
+    virtual void         clear          () { }
+    virtual bool         is_thread_safe () const noexcept { return false; }
+    virtual bool         is_lock_free   () const noexcept { return false; }
+    virtual bool         is_shared      () const noexcept { return false; }
 
     virtual size_type max_size () const
     { return std::numeric_limits<size_type>::max (); }
@@ -52,13 +53,13 @@ struct Allocator
     { return std::numeric_limits<size_type>::max (); }
 
     virtual bool is_equal (Allocator const& gObj) const
-    { return std::numeric_limits<size_type>::max () == gObj.size (); }
+    { return this == &gObj; }
 
     virtual void* allocate (size_type size, align_type)
     { return ::operator new (size); }
 
     virtual void deallocate (void* pointer, size_type)
-    { ::operator delete (pointer); }
+    { ::operator delete (pointer);  }
 
     virtual Allocator& owner () const noexcept
     { return const_cast<Allocator&> (*this); }
@@ -76,17 +77,17 @@ template <typename T, class Ator = void>
 class AllocatorPolicy
 {
 public:
-    typedef T                value_type;
-    typedef T*                pointer;
+    typedef T               value_type;
+    typedef T*              pointer;
     typedef T const*        const_pointer;
-    typedef T&                reference;
+    typedef T&              reference;
     typedef T const&        const_reference;
     typedef Ator            allocator_type;
-    typedef std::size_t        size_type;
+    typedef std::size_t     size_type;
     typedef std::ptrdiff_t  difference_type;
+    typedef std::true_type  propagate_on_container_swap;
     typedef std::false_type propagate_on_container_copy_assignment;
     typedef std::true_type  propagate_on_container_move_assignment;
-    typedef std::true_type  propagate_on_container_swap;
 
     AllocatorPolicy () = delete;
     inline    AllocatorPolicy (AllocatorPolicy&&) noexcept = default;

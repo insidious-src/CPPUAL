@@ -34,6 +34,7 @@ struct DECL_EXPORT Win32Display final : public IDisplay
     ~Win32Display      () noexcept;
     string name        () const noexcept;
     uint   screenCount () const noexcept;
+    void   flush       () noexcept;
 };
 
 } } // namespace Input

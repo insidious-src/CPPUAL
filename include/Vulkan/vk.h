@@ -22,6 +22,14 @@
 #ifndef KHRONOS_VULKAN_H_
 #define KHRONOS_VULKAN_H_
 
+#if defined(_WIN32) || defined(__CYGWIN__)
+#	define VK_API_CALL __stdcall
+#	define VK_CALLBACK __stdcall
+#else
+#	define VK_API_CALL
+#	define VK_CALLBACK
+#endif
+
 #ifdef __cplusplus
 #	include <cstdlib>
 #	include <cstdint>
@@ -29,14 +37,6 @@ extern "C" {
 #else
 #	include <stdint.h>
 #	include <stdlib.h>
-#endif
-
-#if defined(_WIN32) || defined(__CYGWIN__)
-#	define VK_API_CALL __stdcall
-#	define VK_CALLBACK __stdcall
-#else
-#	define VK_API_CALL
-#	define VK_CALLBACK
 #endif
 
 struct  _VK_INSTANCE;
@@ -68,40 +68,40 @@ typedef void  (VK_CALLBACK* VK_FREE_FUNCTION )(void* pMem);
 
 enum VK_DEVICE_TYPE
 {
-	VK_DEVICE_GPU         = 1 << 0,
-	VK_DEVICE_CPU         = 1 << 1,
-	VK_DEVICE_ACCELERATOR = 1 << 2,
-	VK_DEVICE_CUSTOM      = 1 << 3
+    VK_DEVICE_GPU         = 1 << 0,
+    VK_DEVICE_CPU         = 1 << 1,
+    VK_DEVICE_ACCELERATOR = 1 << 2,
+    VK_DEVICE_CUSTOM      = 1 << 3
 };
 
 enum VK_QUEUE_TYPE
 {
-	VK_QUEUE_COMPUTE   = 1 << 0,
-	VK_QUEUE_GRAPHICS  = 1 << 1,
-	VK_QUEUE_DMA       = 1 << 2,
-	VK_QUEUE_UNIVERSAL = 1 << 3
+    VK_QUEUE_COMPUTE   = 1 << 0,
+    VK_QUEUE_GRAPHICS  = 1 << 1,
+    VK_QUEUE_DMA       = 1 << 2,
+    VK_QUEUE_UNIVERSAL = 1 << 3
 };
 
 enum
 {
-	VK_INFO_TYPE_IMAGE_MEMORY_REQUIREMENTS,
-	VK_GPU_INFO_WHATEVER,
-	VK_PIPELINE_BIND_POINT_GRAPHICS
+    VK_INFO_TYPE_IMAGE_MEMORY_REQUIREMENTS,
+    VK_GPU_INFO_WHATEVER,
+    VK_PIPELINE_BIND_POINT_GRAPHICS
 };
 
 struct VK_APPLICATION_INFO
 {
-	VK_CHAR const* pAppName;
-	VK_UINT32      appVersion;
-	VK_CHAR const* pEngineName;
-	VK_UINT32      engineVersion;
-	VK_UINT32      apiVersion;
+    VK_CHAR const* pAppName;
+    VK_UINT32      appVersion;
+    VK_CHAR const* pEngineName;
+    VK_UINT32      engineVersion;
+    VK_UINT32      apiVersion;
 };
 
 struct VK_ALLOC_CALLBACKS
 {
-	VK_ALLOC_FUNCTION pfnAlloc;
-	VK_FREE_FUNCTION  pfnFree;
+    VK_ALLOC_FUNCTION pfnAlloc;
+    VK_FREE_FUNCTION  pfnFree;
 };
 
 
@@ -155,12 +155,12 @@ struct VK_IMAGE_MEMORY_REQUIREMENTS
 
 struct VK_MEMORY_ALLOC_INFO
 {
-	VK_SIZE size;
-	VK_SIZE alignment;
-	VK_ENUM flags;
-	VK_UINT heapCount;
-	VK_UINT heaps[5];
-	VK_ENUM memPriority;
+    VK_SIZE size;
+    VK_SIZE alignment;
+    VK_ENUM flags;
+    VK_UINT heapCount;
+    VK_UINT heaps[5];
+    VK_ENUM memPriority;
 };
 
 struct VK_RENDER_PASS_CREATE_INFO
@@ -169,7 +169,7 @@ struct VK_RENDER_PASS_CREATE_INFO
 
 struct VK_RENDER_PASS_BEGIN
 {
-	VK_RENDER_PASS pass;
+    VK_RENDER_PASS pass;
 };
 
 struct VK_EVENT_CREATE_INFO
@@ -182,8 +182,8 @@ struct VK_IMAGE_MEMORY_BARRIER
 
 struct VK_PIPELINE_BARRIER
 {
-	VK_UINT32                num;
-	VK_IMAGE_MEMORY_BARRIER* barrier;
+    VK_UINT32                num;
+    VK_IMAGE_MEMORY_BARRIER* barrier;
 };
 
 struct VK_MEMORY_OPEN_INFO

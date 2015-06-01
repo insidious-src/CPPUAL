@@ -87,7 +87,7 @@ private:
     pointer const    m_pBegin;
     pointer const    m_pEnd;
     pointer*         m_pFreeList;
-    const_size       m_uBlkSize;
+    size_type  const m_uBlkSize;
     align_type const m_uBlkAlign;
     size_type        m_uBlkNum;
 

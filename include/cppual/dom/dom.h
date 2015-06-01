@@ -23,8 +23,8 @@
 #define CPPUAL_FORMAT_DOM_H_
 #ifdef __cplusplus
 
+#include <string>
 #include <fstream>
-#include <cppual/mstring.h>
 
 using std::string;
 using std::fstream;
@@ -37,21 +37,19 @@ public:
     inline DOMParser () = default;
 
     inline
-    explicit DOMParser (string const& gPath,
-                        string const& gDelimBegin  = "<",
+    explicit DOMParser (string const& /*gSource*/,
+                        string const& gDelimBegin  = "<" ,
                         string const& gDelimBegin2 = "</",
-                        string const& gDelimEnd       = "/>",
-                        string const& gDelimEnd2   = ">")
-    : m_gFile (gPath),
-      m_gDelimBegin (gDelimBegin),
+                        string const& gDelimEnd    = "/>",
+                        string const& gDelimEnd2   =  ">")
+    : m_gDelimBegin  (gDelimBegin ),
       m_gDelimBegin2 (gDelimBegin2),
-      m_gDelimEnd (gDelimEnd),
-      m_gDelimEnd2 (gDelimEnd2)
+      m_gDelimEnd    (gDelimEnd   ),
+      m_gDelimEnd2   (gDelimEnd2  )
     { }
 
 private:
-    fstream m_gFile;
-    string  m_gDelimBegin, m_gDelimBegin2, m_gDelimEnd, m_gDelimEnd2;
+    string m_gDelimBegin, m_gDelimBegin2, m_gDelimEnd, m_gDelimEnd2;
 };
 
 } // cppual

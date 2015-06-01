@@ -89,28 +89,10 @@ class WindowAdapter : public NonCopyableVirtual
 {
 public:
     typedef Event                                  event_type;
+    typedef std::size_t                            size_type;
     typedef Memory::GenericPolicy<Widget*>         allocator_type;
     typedef CircularQueue<Widget*, allocator_type> container;
-    typedef std::size_t                               size_type;
-
-    typedef typename
-    container::iterator iterator;
-
-    typedef typename
-    Signal<void(event_type::window_type, point2u)>
-    ::slot_type
-    move_slot;
-
-    typedef typename
-    Signal<void(event_type::window_type, event_type::MouseButtonData)>
-    ::slot_type
-    btn_slot;
-
-    enum
-    {
-        DefaultWidth  = 1024,
-        DefaultHeight = 768
-    };
+    typedef typename container::iterator           iterator;
 
     WindowAdapter (WindowAdapter&&);
     WindowAdapter& operator = (WindowAdapter&&);
@@ -144,8 +126,10 @@ public:
     void maximize ()
     { if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }
 
+    Signal<void(event_type::KeyData)> keyPress;
+    Signal<void(event_type::KeyData)> keyRelease;
 
-private:
+protected:
     virtual bool onClose        () { return true; }
     virtual void onMinimize     () { }
     virtual void onMaximize     () { }
@@ -153,26 +137,17 @@ private:
     virtual void onPointerMove  (point2u) { }
     virtual void onMousePress   (event_type::MouseButtonData) { }
     virtual void onMouseRelease (event_type::MouseButtonData) { }
-    virtual void onKeyPress     (event_type::KeyData) { }
-    virtual void onKeyRelease   (event_type::KeyData) { }
 
-    virtual void onSize         (point2u);
-    virtual void onPaint        (event_type::PaintData) { }
-    virtual void onFocus        (bool) { }
-    virtual void onShow         (bool) { }
-
-    static void registerEvents ();
+private:
+    void resize (point2u);
+    void paint  (event_type::PaintData) { }
+    void focus  (bool) { }
+    void show   (bool) { }
 
 private:
     shared_window m_pPlatformWnd;
     Widget*       m_pMainWidget;
     Icon          m_pIcon;
-};
-
-class Wnd : public WindowAdapter
-{
-public:
-private:
 };
 
 } } // namespace Ui

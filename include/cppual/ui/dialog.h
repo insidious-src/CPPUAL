@@ -26,7 +26,7 @@
 
 namespace cppual { namespace Ui {
 
-class Dialog : public Ui::Window
+class Dialog : public Window
 {
 public:
     Dialog () noexcept;
@@ -35,25 +35,25 @@ public:
     Dialog& operator = (Dialog&&) noexcept;
     Dialog& operator = (Dialog const&) noexcept;
 
-    Dialog (View*       parent,
-            Rect const& rect,
-            string&&    title,
-            image_type* icon   = nullptr,
-            u32         screen = 0)
-    : Window (parent, rect, std::forward<string> (title), icon, screen),
+    Dialog (View*         parent,
+            Rect const&   rect,
+            string const& title,
+            image_type*   icon   = nullptr,
+            u32           screen = 0)
+    : Window (parent, rect, title, icon, screen),
       m_pOwnerWnd ()
     { }
 
     enum Result
     {
-        Close     = 0,
-        OK         = 1 <<  0,
-        Cancel     = 1 <<  1,
-        Yes         = 1 <<  2,
+        Close    = 0,
+        OK       = 1 <<  0,
+        Cancel   = 1 <<  1,
+        Yes      = 1 <<  2,
         YesToAll = 1 <<  3,
-        No         = 1 <<  4,
-        NoToAll     = 1 <<  5,
-        Discard     = 1 <<  6,
+        No       = 1 <<  4,
+        NoToAll  = 1 <<  5,
+        Discard  = 1 <<  6,
         Accept   = 1 <<  7,
         Decline  = 1 <<  8,
         Save     = 1 <<  9,
@@ -66,12 +66,12 @@ public:
 
 protected:
     virtual void onInit () { }
-    virtual void onEnd () { }
+    virtual void onEnd  () { }
 
 private:
     Ui::Window* m_pOwnerWnd;
 
-    void onCreate ();
+    void onCreate  ();
     void onDestroy ();
 };
 
