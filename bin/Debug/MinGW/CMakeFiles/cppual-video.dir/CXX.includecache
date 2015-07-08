@@ -1,0 +1,12 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+E:/Development/c++/projects/cross/cppual/src/multimedia/video/vequalizer.cpp
+
+E:/Development/c++/projects/cross/cppual/src/multimedia/video/vfilter.cpp
+

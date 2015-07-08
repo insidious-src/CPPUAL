@@ -61,6 +61,21 @@ public:
         Native      = 1 << 1  // supoorts execution of native functions
     };
 
+    enum class Backend : unsigned char
+    {
+        OpenCL,
+        Vulkan,
+        CUDA,
+        D3D12
+    };
+
+    enum class IRL : unsigned char
+    {
+        SPIRV,
+        SPIR2,
+        HLIL
+    };
+
     enum class Info : unsigned char
     {
         Name,

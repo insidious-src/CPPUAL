@@ -179,7 +179,7 @@ void Win32Queue::post (event_type const& event)
 
 bool Win32Queue::pop_front (event_type& event, bool wait)
 {
-    Win32Event internal_event;
+    static Win32Event internal_event;
 
     if (wait ? ::GetMessageA  (&internal_event, nullptr, 0, 0) :
                ::PeekMessageA (&internal_event, nullptr, 0, 0, PM_NOREMOVE) <= 0)

@@ -1,0 +1,1 @@
+libcppual-compute.dll.a "C:/Program Files (x86)/AMD APP SDK/3.0-0-Beta/lib/x86/libOpenCL.a" -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

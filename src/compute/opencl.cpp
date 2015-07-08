@@ -23,7 +23,7 @@
 #include <cstring>
 #include <cppual/compute/platform.h>
 #include <cppual/memory/stack.h>
-#include "cldef.h"
+#include "backend.h"
 
 using std::vector;
 using cppual::Memory::StackedAllocator;
@@ -194,7 +194,7 @@ CL::device_type CL::handle (type_size eType, u16 uPfId, size_type uDevId)
 
 // =========================================================
 
-Device::uint_type Device::count (u16 uId)
+CL::size_type Device::count (u16 uId)
 {
     if (Internal::get ().platforms.size () <= uId) throw bad_platform ();
     return static_cast<uint_type> (Internal::get ().platforms[uId].devices.size ());

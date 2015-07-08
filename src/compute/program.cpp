@@ -20,7 +20,7 @@
  */
 
 #include <cppual/compute/program.h>
-#include "cldef.h"
+#include "backend.h"
 
 namespace cppual { namespace Compute {
 

@@ -10,7 +10,7 @@ include(cmake/ToolChainConfig.cmake REQUIRED)
 
 find_package(DL       REQUIRED) ## dynamic loading of libraries
 find_package(WM       REQUIRED) ## platform window manager
-#find_package(OpenCL   REQUIRED) ## backup compute api
+find_package(OpenCL   REQUIRED) ## backup compute api
 #find_package(Vulkan   REQUIRED) ## primary compute & graphics api
 find_package(Sockets  REQUIRED) ## network interface & interprocess
 find_package(EGL      REQUIRED) ## cross-platform Vulkan/GL/ES surface management
@@ -94,13 +94,13 @@ add_library(cppual-compute SHARED
     src/compute/behaviour.cpp
     include/cppual/compute/object.h
     src/compute/object.cpp
-#	src/compute/cldef.h
-#	include/cppual/compute/platform.h
-#	src/compute/opencl.cpp
-#	include/cppual/compute/clobject.h
-#	src/compute/clobject.cpp
-#	include/cppual/compute/program.h
-#	src/compute/program.cpp
+    src/compute/backend.h
+    src/compute/backend.cpp
+    include/cppual/compute/platform.h
+    include/cppual/compute/clobject.h
+    src/compute/clobject.cpp
+    include/cppual/compute/program.h
+    src/compute/program.cpp
     include/cppual/compute/device.h
     src/compute/device.cpp
     include/cppual/memory/devmemory.h
@@ -253,21 +253,21 @@ add_library(cppual-gl SHARED
     )
 
 # drawable objects library
-#add_library(cppual-gfx-drawables SHARED
-#    include/cppual/gfx/drawable/shape.h
-#    src/gfx/drawable/image.cpp
-#    include/cppual/gfx/drawable/image.h
-#    src/gfx/drawable/text.cpp
-#    include/cppual/gfx/drawable/text.h
-#    src/gfx/drawable/elipse.cpp
-#    include/cppual/gfx/drawable/elipse.h
-#    src/gfx/drawable/rectangle.cpp
-#    include/cppual/gfx/drawable/rectangle.h
-#    src/gfx/drawable/polygon.cpp
-#    include/cppual/gfx/drawable/polygon.h
-#    src/gfx/drawable/line.cpp
-#    include/cppual/gfx/drawable/line.h
-#    )
+add_library(cppual-gfx-drawables SHARED
+    include/cppual/gfx/drawable/shape.h
+    src/gfx/drawable/image.cpp
+    include/cppual/gfx/drawable/image.h
+    src/gfx/drawable/text.cpp
+    include/cppual/gfx/drawable/text.h
+    src/gfx/drawable/elipse.cpp
+    include/cppual/gfx/drawable/elipse.h
+    src/gfx/drawable/rectangle.cpp
+    include/cppual/gfx/drawable/rectangle.h
+    src/gfx/drawable/polygon.cpp
+    include/cppual/gfx/drawable/polygon.h
+    src/gfx/drawable/line.cpp
+    include/cppual/gfx/drawable/line.h
+    )
 
 # multimedia
 add_library(cppual-multimedia SHARED
@@ -414,10 +414,10 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 target_link_libraries(cppual-host DL::Library)
-#target_link_libraries(cppual-compute Vulkan::Library OpenCL::Library)
+target_link_libraries(cppual-compute OpenCL::Library)
 target_link_libraries(cppual-gfx cppual-compute Freetype::Library)
 target_link_libraries(cppual-network Sockets::Library)
-#target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)
+target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)
 target_link_libraries(cppual-video-compute cppual-compute)
 target_link_libraries(cppual-audio cppual-compute SndFile::Library)
 target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)

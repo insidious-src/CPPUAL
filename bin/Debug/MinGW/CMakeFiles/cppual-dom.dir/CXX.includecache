@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../../../include/cppual/decl.h
+unistd.h
+-
+unistd.h
+-
+
+../../../include/cppual/dom/dom.h
+string
+-
+fstream
+-
+
+../../../include/cppual/dom/xml.h
+cppual/dom/dom.h
+-
+
+E:/Development/c++/projects/cross/cppual/src/dom/xml.cpp
+cppual/dom/xml.h
+-
+cppual/decl.h
+-
+

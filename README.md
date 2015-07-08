@@ -11,20 +11,20 @@
 
 **So the real question is:** Why would you want to have all these libraries when OpenCL is pushing hard and you can program it pretty much like a regular CPU? It's just a matter of time until OpenCL evolves and turns into a all-in-one standard.
 
-**March 6th 2015:** Well,... it evolved into Vulkan
+**March 6th 2015:** Well,... it evolved into Vulkan, however OpenCL still remains as a new revision was released (2.1). Both are using a common IL - SPIR-V.
 
 
 ### Host ###
 - cross-platform process management and interprocess communication
 - unified runtime allocator management
-- specialized host & shared memory allocators
 - query hardware and os information
 
 ### Compute ###
 - use concurrency as host implementation
+- specialized device & shared memory allocators
 - memory management following the host allocator pattern
 - host/device out-of-order and continuation tasks
-- use Vulkan as a SINGLE SOURCE backend (SPIR-V is required to implement the C++ interpreter)
+- use Vulkan & OpenCL as SINGLE SOURCE backends (SPIR-V is required to implement eventual C++ interpreter)
 - behaviour-based device scheduling and manipulation
 - branched device tasks
 
@@ -44,11 +44,11 @@
 ### Network ###
 - implementation of the C++17 network library
 - simplified packet exchange
-- advanced protocol interface
+- layered protocol interface
 - http, https, ftp protocols
 
 ### Graphics ###
-- unified surface management using EGL
+- unified surface management using Vulkan Extensions
 - gfx algorithms based on compute library
 - abstract draw objects
 - scene graph
@@ -61,7 +61,7 @@
 - display management
 - window adaptor for platform window management
 - completely independant widgets implemented as functional structures (can be used everywhere from 3D environments to desktop)
-- abstract controls (draw objects can be changed on the fly)
+- abstract interchangeable controls (draw objects can be changed on the fly)
 - skin engine (native, html/css, xml & custom)
 
 ### Multimedia ###
