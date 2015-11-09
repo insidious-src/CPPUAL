@@ -219,14 +219,14 @@ public:
     { }
 
     constexpr StaticMatrix (StaticMatrix<C, R, T> const& gObj) noexcept
-    : m_uCols (gObj.m_uCols),
-      m_uRows (gObj.m_uRows),
+    : m_uCols  (gObj.m_uCols),
+      m_uRows  (gObj.m_uRows),
       m_matrix (gObj.m_matrix)
     { }
 
     constexpr StaticMatrix () noexcept
-    : m_uCols (C),
-      m_uRows (R),
+    : m_uCols  (C),
+      m_uRows  (R),
       m_matrix ()
     { }
 
@@ -272,7 +272,7 @@ private:
 class Matrix2 : public StaticMatrix <2, 2, float>
 {
 public:
-    Matrix2& invert ();
+    Matrix2& invert    ();
     Matrix2& transpose () noexcept;
 };
 
@@ -281,7 +281,7 @@ public:
 class Matrix3 : public StaticMatrix <3, 3, float>
 {
 public:
-    Matrix3& invert ();
+    Matrix3& invert    ();
     Matrix3& transpose () noexcept;
 };
 
@@ -292,15 +292,15 @@ class Matrix4 : public StaticMatrix <4, 4, float>
 public:
     using StaticMatrix<4, 4, float>::StaticMatrix;
 
-    Matrix4& invert ();
+    Matrix4& invert    ();
     Matrix4& transpose () noexcept;
-    Matrix4& rotate (anglef, point3f);
-    Matrix4& rotateX (anglef);
-    Matrix4& rotateY (anglef);
-    Matrix4& rotateZ (anglef);
+    Matrix4& rotate    (anglef, point3f);
+    Matrix4& rotateX   (anglef);
+    Matrix4& rotateY   (anglef);
+    Matrix4& rotateZ   (anglef);
     Matrix4& translate (point3f) noexcept;
-    Matrix4& scale (value_type);
-    Matrix4& scale (point3f);
+    Matrix4& scale     (value_type);
+    Matrix4& scale     (point3f);
 
     const_pointer transposed () const noexcept
     { return &m_fTranspose[0]; }

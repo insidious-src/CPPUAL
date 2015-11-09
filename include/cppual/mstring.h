@@ -36,7 +36,7 @@ struct Buffer
     static_assert (is_char<T>::value, "T is not of any char type");
 
     T*          data;
-    std::size_t    capacity;
+    std::size_t capacity;
 };
 
 template <typename T, class TAlloc = std::allocator<T>>
@@ -53,11 +53,11 @@ public:
     constexpr FastString () noexcept = default;
     FastString<T, TAlloc> substr (size_type begin_pos, size_type end_pos);
 
-    constexpr const_pointer c_str () const noexcept { return m_gBuffer.data; }
-    constexpr const_pointer data () const noexcept { return m_gBuffer.data; }
-    constexpr size_type     length () const noexcept { return m_uLength; }
-    constexpr size_type     size () const noexcept { return m_gBuffer.capacity; }
-    constexpr bool          empty () const noexcept { return !m_uLength; }
+    constexpr const_pointer c_str         () const noexcept { return m_gBuffer.data; }
+    constexpr const_pointer data          () const noexcept { return m_gBuffer.data; }
+    constexpr size_type     length        () const noexcept { return m_uLength; }
+    constexpr size_type     size          () const noexcept { return m_gBuffer.capacity; }
+    constexpr bool          empty         () const noexcept { return !m_uLength; }
     constexpr TAlloc        get_allocator () const noexcept { return *this; }
 
     inline FastString& operator = (T const* pText) noexcept
@@ -119,8 +119,8 @@ public:
 
     inline FastString& operator = (FastString<T, TAlloc>&& gObj) noexcept
     {
-        m_uLength       = gObj.m_uLength;
-        m_gBuffer       = gObj.m_gBuffer;
+        m_uLength      = gObj.m_uLength;
+        m_gBuffer      = gObj.m_gBuffer;
         gObj.m_gBuffer = { 0 };
         gObj.m_uLength = 0;
         return *this;
@@ -141,7 +141,7 @@ public:
     template <typename U, class TAtor>
     friend FastString<U, TAtor>& assignToString (FastString<U, TAtor>& assign_to,
                                                  U const*              assign_from,
-                                                 size_type               length) noexcept;
+                                                 size_type             length) noexcept;
 
     template <typename U, class TAtor>
     friend FastString<U, TAtor>& addToString (FastString<U, TAtor>& add_to,
@@ -202,7 +202,7 @@ FastString<T, TAlloc> FastString<T, TAlloc>::substr (size_type uBeginPos,
 
 template <typename T, class TAlloc>
 void copyToString (FastString<T, TAlloc>&                    gObj,
-                   T const*                                     pFromText,
+                   T const*                                  pFromText,
                    typename FastString<T, TAlloc>::size_type uLength) noexcept
 {
     if (pFromText)
@@ -222,10 +222,9 @@ constexpr T const* strend (T const* pBegin, std::size_t uLen) noexcept
 { return pBegin + (sizeof (T) * uLen) + sizeof (T); }
 
 template <typename T, class TAlloc>
-FastString<T, TAlloc>& assignToString (FastString<T, TAlloc>& gObj,
-                                       T const*                  pFromText,
-                                       typename FastString<T, TAlloc>::size_type
-                                       uLength) noexcept
+FastString<T, TAlloc>& assignToString (FastString<T, TAlloc>&                    gObj,
+                                       T const*                                  pFromText,
+                                       typename FastString<T, TAlloc>::size_type uLength) noexcept
 {
     if (!pFromText) return gObj;
 
@@ -252,7 +251,7 @@ FastString<T, TAlloc>& assignToString (FastString<T, TAlloc>& gObj,
 template <typename T, class TAlloc>
 FastString<T, TAlloc>& addToString (FastString<T, TAlloc>& gObj,
                                     T const*               pFromText,
-                                    std::size_t               uAddLength) noexcept
+                                    std::size_t            uAddLength) noexcept
 {
     typename FastString<T, TAlloc>::size_type const uLength =
             gObj.m_uLength + uAddLength;

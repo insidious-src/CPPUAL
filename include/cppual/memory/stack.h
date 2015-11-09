@@ -62,11 +62,11 @@ public:
     }
 
     Allocator& owner     () const noexcept { return m_gOwner; }
-    bool        is_shared () const noexcept { return m_bIsMemShared; }
+    bool       is_shared () const noexcept { return m_bIsMemShared; }
 
 private:
     size_type     m_uNumAlloc;
-    Allocator&   m_gOwner;
+    Allocator&    m_gOwner;
     pointer       m_pCurMarker;
     pointer const m_pBegin;
     pointer const m_pEnd;

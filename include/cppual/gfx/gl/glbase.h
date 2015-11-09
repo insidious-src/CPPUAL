@@ -46,9 +46,9 @@ public:
     typedef std::ptrdiff_t ptrdiff;
     typedef std::size_t       size_type;
 
-    Object () noexcept = default;
-    Object (ResourceType type);
-    Object (uint  shader_type);
+    Object  () noexcept = default;
+    Object  (ResourceType type);
+    Object  (uint  shader_type);
     ~Object () noexcept;
 };
 

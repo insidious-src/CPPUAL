@@ -202,8 +202,8 @@ void Texture::bind (uint uTexId) noexcept
     if (m_gStates.test (Texture::IsLoaded))
     {
         glActiveTexture (GL_TEXTURE0 + uTexId);
-        glBindTexture (GL::Texture2D, id ());
-        glBindSampler (uTexId, m_uSampleId);
+        glBindTexture   (GL::Texture2D, id ());
+        glBindSampler   (uTexId, m_uSampleId);
     }
 }
 

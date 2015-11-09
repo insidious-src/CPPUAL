@@ -379,7 +379,7 @@ public:
 
     inline size_type size () const noexcept
     {
-        const_size uBeginPos = m_uReadPos.load (std::memory_order_relaxed);
+        const_size uBeginPos = m_uReadPos.load  (std::memory_order_relaxed);
         const_size uEndPos   = m_uWritePos.load (std::memory_order_relaxed);
 
         return uBeginPos > uEndPos ? ((capacity () - uBeginPos) + uEndPos) + 1
@@ -423,7 +423,7 @@ public:
 
     template <typename Iterator>
     UniformQueue (InputIterator<Iterator> gBegin, InputIterator<Iterator> gEnd) noexcept
-    : m_uReadPos (),
+    : m_uReadPos  (),
       m_uWritePos (size_type (gEnd - gBegin) > N ? N : size_type (gEnd - gBegin))
     { std::copy (gBegin, gBegin + m_uWritePos, m_Array); }
 
