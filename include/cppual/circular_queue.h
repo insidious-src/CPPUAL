@@ -71,9 +71,9 @@ public:
     void resize   (size_type new_capacity);
     void erase    (const_iterator&);
 
-    constexpr const_pointer    data () const noexcept { return m_pArray; }
+    constexpr const_pointer    data  () const noexcept { return m_pArray; }
     inline    iterator         begin () noexcept { return iterator (*this, 0); }
-    inline    iterator         end () noexcept { return iterator (*this, size ()); }
+    inline    iterator         end   () noexcept { return iterator (*this, size ()); }
     constexpr const_iterator   begin () const noexcept { return const_iterator (*this, 0); }
     constexpr const_iterator   end () const noexcept { return const_iterator (*this, size ()); }
     constexpr const_iterator   cbegin () const noexcept { return const_iterator (*this, 0); }
@@ -82,11 +82,11 @@ public:
     inline    reverse_iterator rend () noexcept { return reverse_iterator (begin ()); }
     constexpr const_reference  front () const { return m_pArray[m_uBeginPos];  }
     constexpr const_reference  back  () const { return m_pArray[m_uEndPos]; }
-    inline    reference        front () { return m_pArray[m_uBeginPos];  }
-    inline    reference        back  () { return m_pArray[m_uEndPos]; }
+    inline    reference        front ()       { return m_pArray[m_uBeginPos];  }
+    inline    reference        back  ()       { return m_pArray[m_uEndPos]; }
     constexpr allocator_type   get_allocator () const noexcept { return *this; }
-    inline    void             pop_front () { if (!empty ()) pop_front_priv (); }
-    inline    void             pop_back  () { if (!empty ()) pop_back_priv  (); }
+    inline    void             pop_front     () { if (!empty ()) pop_front_priv (); }
+    inline    void             pop_back      () { if (!empty ()) pop_back_priv  (); }
 
     CircularQueue& operator = (CircularQueue&& gObj)
     {
@@ -126,7 +126,7 @@ public:
       m_pArray       (!gObj.empty () ? allocator_type::allocate (gObj.size ()) : pointer ()),
       m_uBeginPos    (),
       m_uEndPos      (m_pArray ? gObj.size () - 1 : m_uBeginPos),
-      m_uCapacity    (m_pArray ? m_uEndPos   + 1 : m_uBeginPos)
+      m_uCapacity    (m_pArray ? m_uEndPos    + 1 : m_uBeginPos)
     {
         if (!gObj.empty () and !m_pArray) throw std::bad_array_length ();
         std::copy (gObj.cbegin (), gObj.cend (), begin ());
@@ -160,7 +160,7 @@ public:
     constexpr size_type max_size () const noexcept
     { return std::numeric_limits<size_type>::max (); }
 
-    inline array_range array_one () noexcept
+    array_range array_one () noexcept
     {
         return array_range (m_pArray + m_uBeginPos, is_linearized () ?
                                 size () : capacity () - m_uBeginPos);
@@ -172,19 +172,19 @@ public:
                                       size () : capacity () - m_uBeginPos);
     }
 
-    inline array_range array_two () noexcept
+    array_range array_two () noexcept
     {
         return !is_linearized () ? const_array_range (m_pArray + (m_uEndPos - 1), m_uEndPos) :
                                    const_array_range ();
     }
 
-    constexpr const_array_range array_two () const noexcept
+    const_array_range array_two () const noexcept
     {
         return !is_linearized () ? const_array_range (m_pArray + (m_uEndPos - 1), m_uEndPos) :
                                    const_array_range ();
     }
 
-    constexpr size_type size () const noexcept
+    size_type size () const noexcept
     {
         return !is_linearized () ? m_uEndPos + (capacity () - m_uBeginPos)
                                  : m_uEndPos - m_uBeginPos;
@@ -213,10 +213,10 @@ public:
     void emplace_front (Args&&... args)
     { push_front (std::forward<Args> (args)...); }
 
-    inline const_reference at (size_type n) const
+    const_reference at (size_type n) const
     { return size () > n ? (*this)[n] : throw std::out_of_range ("index is out of range"); }
 
-    inline reference at (size_type n)
+    reference at (size_type n)
     { return size () > n ? (*this)[n] : throw std::out_of_range ("index is out of range"); }
 
     template <typename... Args>
@@ -362,7 +362,7 @@ void CircularQueue<T, Allocator, Atomic>::dispose ()
 // ====================================================
 
 // lock-free circular queue (1 producer / 1 consumer)
-// ex. suficient for event handling
+// ex. sufficient for event handling
 template <typename T, std::size_t N>
 class UniformQueue : NonCopyable
 {
@@ -388,8 +388,8 @@ public:
 
     constexpr bool is_linearized () const noexcept
     {
-        return m_uReadPos.load (std::memory_order_relaxed) <=
-                m_uWritePos.load (std::memory_order_relaxed);
+        return m_uReadPos.load  (std::memory_order_relaxed) <=
+               m_uWritePos.load (std::memory_order_relaxed);
     }
 
     constexpr static size_type capacity () noexcept

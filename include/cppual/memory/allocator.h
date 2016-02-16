@@ -154,13 +154,13 @@ template <typename T>
 class AllocatorPolicy <T, Allocator>
 {
 public:
-    typedef T                value_type;
-    typedef T*                pointer;
+    typedef T               value_type;
+    typedef T*              pointer;
     typedef T const*        const_pointer;
-    typedef T&                reference;
+    typedef T&              reference;
     typedef T const&        const_reference;
     typedef Allocator       allocator_type;
-    typedef std::size_t        size_type;
+    typedef std::size_t     size_type;
     typedef std::ptrdiff_t  difference_type;
     typedef std::false_type propagate_on_container_copy_assignment;
     typedef std::true_type  propagate_on_container_move_assignment;
