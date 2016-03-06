@@ -13,7 +13,7 @@ find_package(WM       REQUIRED) ## platform window manager
 find_package(OpenCL   REQUIRED) ## backup compute api
 find_package(Vulkan   REQUIRED) ## primary compute & graphics api
 find_package(Sockets  REQUIRED) ## network interface & interprocess
-find_package(EGL      REQUIRED) ## cross-platform GL/ES surface management
+find_package(EGL      REQUIRED) ## will be dropped at some point
 find_package(GLEW     REQUIRED) ## will be dropped at some point
 find_package(OpenGL   REQUIRED) ## will be dropped at some point
 find_package(OpenAL   REQUIRED) ## will be dropped at some point

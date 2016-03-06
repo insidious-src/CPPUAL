@@ -15,6 +15,8 @@
 
 
 ### Host ###
+- modules
+- utilities
 - cross-platform process management and interprocess communication
 - query hardware and os information
 
