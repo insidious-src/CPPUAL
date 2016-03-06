@@ -1,7 +1,7 @@
-# C++ Unified Abstraction Library #                 | ![Logo](https://bitbucket.org/repo/jXXjaG/images/1113278086-cppual.png "C++ Unified Abstraction Library")
+C++ Unified Abstraction Library                     | ![Logo](https://bitbucket.org/repo/jXXjaG/images/1113278086-cppual.png "C++ Unified Abstraction Library")
 :---------------------------------------------------|-------------------------------------------------------------------------------------------------------------:
-	Latest Supported Language Standard: C++14       |
-	Future Language Standards: C++17 or D Language  |
+	Latest Supported Language Standard: C++14
+	Future Language Standards: C++17 or D Language
 
 ### Why reinvent the wheel and replace parts of the standard library and Qt? ###
 - the whole idea is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, VDPAU, OVD, XVideo, TrueAudio and OpenAL completely.
