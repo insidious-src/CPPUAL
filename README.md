@@ -1,7 +1,4 @@
-![Logo](https://bitbucket.org/repo/jXXjaG/images/1113278086-cppual.png "# C++ Unified Abstraction Library #
-
-	Latest Supported Language Standard: C++14
-	Future Language Standards: C++17 or D Language")
+![Logo](https://bitbucket.org/repo/jXXjaG/images/1113278086-cppual.png "# C++ Unified Abstraction Library # Latest Supported Language Standard: C++14 Future Language Standards: C++17 or D Language")
 
 
 ### Why reinvent the wheel and replace parts of the standard library and Qt? ###
