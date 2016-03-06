@@ -1,4 +1,4 @@
-![Logo](https://bitbucket.org/repo/jXXjaG/images/1113278086-cppual.png#right "C++ Unified Abstraction Library")
+![Logo](https://bitbucket.org/repo/jXXjaG/images/1113278086-cppual.png "C++ Unified Abstraction Library").float-right
 
 # C++ Unified Abstraction Library #
 
