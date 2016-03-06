@@ -104,9 +104,9 @@ inline string infostr (u16 id, CL::size_type info) noexcept
     static thread_local std::size_t n = 0;
     static thread_local string      text;
 
-    ::clGetPlatformInfo (Internal::get ().platforms[id].handle, info, 0, nullptr, &n);
+    ::clGetPlatformInfo (get ().platforms[id].handle, info, 0, nullptr, &n);
     text.resize (n);
-    ::clGetPlatformInfo (Internal::get ().platforms[id].handle, info, n, &text[0], nullptr);
+    ::clGetPlatformInfo (get ().platforms[id].handle, info, n, &text[0], nullptr);
     text.resize (--n);
 
     return std::move (text);

@@ -35,9 +35,9 @@ public:
     typedef Handle      pointer;
 
     size_type deviceCount ();
-    size_type gpuCount    ();
 
-    pointer handle () const noexcept { return m_pConn; }
+    template <typename T>
+    pointer handle () const noexcept { return m_pConn.get<T> (); }
 
 private:
     pointer m_pConn;

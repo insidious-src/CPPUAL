@@ -19,21 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Vulkan/vk.h>
+#include <vulkan/vulkan.h>
 #include <cppual/compute/bridge.h>
 
 namespace cppual { namespace Compute {
 
 HostConnection::size_type HostConnection::deviceCount ()
 {
-    return 0;
-}
-
-HostConnection::size_type HostConnection::gpuCount ()
-{
     size_type count;
 
-    ::vkEnumerateGpus (handle ().get<VK_INSTANCE> (), 0, &count, nullptr);
+    ::vkEnumeratePhysicalDevices (handle<VkInstance> (), &count, nullptr);
     return count;
 }
 

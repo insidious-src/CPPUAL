@@ -66,7 +66,8 @@ public:
         OpenCL,
         Vulkan,
         CUDA,
-        D3D12
+        D3D12,
+        Custom
     };
 
     enum class IRL : unsigned char

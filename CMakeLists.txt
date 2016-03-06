@@ -11,9 +11,9 @@ include(cmake/ToolChainConfig.cmake REQUIRED)
 find_package(DL       REQUIRED) ## dynamic loading of libraries
 find_package(WM       REQUIRED) ## platform window manager
 find_package(OpenCL   REQUIRED) ## backup compute api
-#find_package(Vulkan   REQUIRED) ## primary compute & graphics api
+find_package(Vulkan   REQUIRED) ## primary compute & graphics api
 find_package(Sockets  REQUIRED) ## network interface & interprocess
-find_package(EGL      REQUIRED) ## cross-platform Vulkan/GL/ES surface management
+find_package(EGL      REQUIRED) ## cross-platform GL/ES surface management
 find_package(GLEW     REQUIRED) ## will be dropped at some point
 find_package(OpenGL   REQUIRED) ## will be dropped at some point
 find_package(OpenAL   REQUIRED) ## will be dropped at some point
@@ -23,6 +23,7 @@ find_package(Freetype REQUIRED) ## will be dropped at some point
 include_directories(include
     DL::Library
     OpenCL::Library
+    Vulkan::Library
     Sockets::Library
     WM::Library
     EGL::Library
@@ -70,7 +71,7 @@ add_library(cppual-host SHARED
     include/cppual/system/clock.h
     )
 
- # device compute, memory (Vulkan, Serial)
+ # device compute, memory (Vulkan, OpenCL, Serial)
 add_library(cppual-compute SHARED
     include/cppual/memory/gc.h
     include/cppual/memory/allocator.h
@@ -86,7 +87,6 @@ add_library(cppual-compute SHARED
     include/cppual/memory/page.h
     src/memory/page.cpp
     include/cppual/memory/shared.h
-    include/Vulkan/vk.h
     include/cppual/resource.h
     include/cppual/compute/bridge.h
     src/compute/bridge.cpp
@@ -414,7 +414,7 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 target_link_libraries(cppual-host DL::Library)
-target_link_libraries(cppual-compute OpenCL::Library)
+target_link_libraries(cppual-compute Vulkan::Library OpenCL::Library)
 target_link_libraries(cppual-gfx cppual-compute Freetype::Library)
 target_link_libraries(cppual-network Sockets::Library)
 target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)

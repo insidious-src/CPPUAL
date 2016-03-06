@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <CL/cl.h>
-#include <Vulkan/vk.h>
+#include <vulkan/vulkan.h>
 #include <type_traits>
 #include <cppual/types.h>
 
