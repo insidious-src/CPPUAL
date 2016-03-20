@@ -50,6 +50,46 @@ enum class ResourceType : unsigned char
 
 // =========================================================
 
+class Handle
+{
+public:
+    typedef void* pointer;
+
+    inline    Handle () noexcept = default;
+    constexpr Handle (pointer handle) noexcept : m_handle (handle) { }
+    constexpr Handle (std::nullptr_t) noexcept : m_handle ()       { }
+
+    constexpr operator pointer () const noexcept
+    { return m_handle; }
+
+    template <typename T>
+    constexpr typename std::remove_pointer<T>::type* get () const noexcept
+    { return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
+
+    friend
+    constexpr bool operator == (Handle const&, Handle const&) noexcept;
+
+    friend
+    constexpr bool operator == (Handle const&, std::nullptr_t) noexcept;
+
+private:
+    pointer m_handle;
+};
+
+constexpr bool operator == (Handle const& conn1, Handle const& conn2) noexcept
+{ return conn1.m_handle == conn2.m_handle; }
+
+constexpr bool operator == (Handle const& conn1, std::nullptr_t) noexcept
+{ return conn1.m_handle == nullptr; }
+
+constexpr bool operator != (Handle const& conn1, Handle const& conn2) noexcept
+{ return !(conn1 == conn2); }
+
+constexpr bool operator != (Handle const& conn1, std::nullptr_t) noexcept
+{ return !(conn1 == nullptr); }
+
+// =========================================================
+
 template <class Controller, class ID>
 class Resource
 {

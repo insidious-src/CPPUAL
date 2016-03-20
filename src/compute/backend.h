@@ -71,7 +71,8 @@ public:
     typedef cl_command_queue                       queue_type;
     typedef std::underlying_type<DeviceType>::type type_size;
 
-    device_type handle (type_size type, u16 platform_type, size_type id);
+    static device_type handle (type_size type, u16 platform_type, size_type id);
+    static size_type count (u16 uId);
 };
 
 // =========================================================

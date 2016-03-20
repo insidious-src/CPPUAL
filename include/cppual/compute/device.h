@@ -67,7 +67,7 @@ public:
         Vulkan,
         CUDA,
         D3D12,
-        Custom
+        Metal
     };
 
     enum class IRL : unsigned char
@@ -103,14 +103,18 @@ public:
     size_type globalMemory () const;
 
     size_type physical () const noexcept { return m_uId;     }
-    pointer   handle   () const noexcept { return m_pHandle; }
     Type      type     () const noexcept { return m_eType;   }
     bool      valid    () const noexcept { return m_pHandle; }
+    Backend   backend  () const noexcept { return m_eBackend; }
+
+    template <typename T = pointer::pointer>
+    T handle () const noexcept { return m_pHandle.get<T> (); }
 
 private:
     pointer   m_pHandle;
     size_type m_uId;
     Type      m_eType;
+    Backend   m_eBackend;
 };
 
 } } // Compute

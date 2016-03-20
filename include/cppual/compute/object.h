@@ -25,12 +25,12 @@
 
 #include <type_traits>
 #include <cppual/types.h>
+#include <cppual/resource.h>
 
 namespace cppual { namespace Compute {
 
 class HostConnection; // application instance info
 class Device;
-class Object;
 class Behaviour;      // device and queue load balancing
 class MixedQueue;     // host and multiple devices
 class HostQueue;      // thread queue
@@ -45,65 +45,28 @@ class Event;
 
 // =========================================================
 
-class Handle
+enum class Resource : unsigned short
 {
-public:
-    typedef void* pointer;
-
-    inline    Handle () noexcept = default;
-    constexpr Handle (pointer handle) noexcept : m_handle (handle) { }
-    constexpr Handle (std::nullptr_t) noexcept : m_handle ()       { }
-
-    constexpr operator pointer () const noexcept
-    { return m_handle; }
-
-    template <typename T>
-    constexpr typename std::remove_pointer<T>::type* get () const noexcept
-    { return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
-
-    friend
-    constexpr bool operator == (Handle const&, Handle const&) noexcept;
-
-    friend
-    constexpr bool operator == (Handle const&, std::nullptr_t) noexcept;
-
-private:
-    pointer m_handle;
+    Buffer          = 1 << 0,
+    CommandSequence = 1 << 1,
+    Image           = 1 << 2,
+    Pipeline        = 1 << 3,
+    RenderPass      = 1 << 4,
+    Shader          = 1 << 5,
+    DescriptorPool  = 1 << 6,
+    Event           = 1 << 7,
+    State           = 1 << 8,
+    Queue           = 1 << 9
 };
-
-constexpr bool operator == (Handle const& conn1, Handle const& conn2) noexcept
-{ return conn1.m_handle == conn2.m_handle; }
-
-constexpr bool operator == (Handle const& conn1, std::nullptr_t) noexcept
-{ return conn1.m_handle == nullptr; }
-
-constexpr bool operator != (Handle const& conn1, Handle const& conn2) noexcept
-{ return !(conn1 == conn2); }
-
-constexpr bool operator != (Handle const& conn1, std::nullptr_t) noexcept
-{ return !(conn1 == nullptr); }
 
 // =========================================================
 
+template <Resource Type>
 class Object
 {
 public:
     typedef Handle      pointer;
     typedef std::size_t size_type;
-
-    enum Resource
-    {
-        Buffer,
-        CommandSequence,
-        Image,
-        Pipeline,
-        RenderPass,
-        Shader,
-        DescriptorPool,
-        Event,
-        State,
-        Queue
-    };
 
     Object (Object&&) noexcept = default;
     Object (Object const& rhs) noexcept;
@@ -111,14 +74,17 @@ public:
     Object& operator = (Object const& rhs) noexcept;
     ~Object () noexcept;
 
-    Object () noexcept : m_object (), m_resType () { }
-    Resource resource_type () const noexcept { return m_resType; }
-    pointer  handle        () const noexcept { return m_object;  }
+    Object (Device& owner) noexcept : m_object (), m_owner (&owner) { }
+    Device*   owner         () const noexcept { return m_owner; }
+    constexpr Resource type () const noexcept { return Type;    }
+
+    template <typename T = pointer::pointer>
+    T handle () const noexcept { return m_object.get<T> ();  }
 
 
 private:
-    pointer  m_object;
-    Resource m_resType;
+    pointer m_object;
+    Device* m_owner;
 };
 
 } } // Compute

@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
-#include <cppual/compute/plltask.h>
+#include <cppual/compute/devtask.h>
 
 namespace cppual { namespace Compute {
 

@@ -194,10 +194,10 @@ CL::device_type CL::handle (type_size eType, u16 uPfId, size_type uDevId)
 
 // =========================================================
 
-CL::size_type Device::count (u16 uId)
+CL::size_type CL::count (u16 uId)
 {
     if (Internal::get ().platforms.size () <= uId) throw bad_platform ();
-    return static_cast<uint_type> (Internal::get ().platforms[uId].devices.size ());
+    return static_cast<size_type> (Internal::get ().platforms[uId].devices.size ());
 }
 
 // =========================================================

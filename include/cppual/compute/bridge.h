@@ -37,7 +37,7 @@ public:
     size_type deviceCount ();
 
     template <typename T>
-    pointer handle () const noexcept { return m_pConn.get<T> (); }
+    T handle () const noexcept { return m_pConn.get<T> (); }
 
 private:
     pointer m_pConn;

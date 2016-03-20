@@ -29,14 +29,14 @@
 
 namespace cppual { namespace Compute {
 
-class DeviceQueue : public Object
+class DeviceQueue : public Object<Resource::Queue>
 {
 public:
     enum EngineType
     {
-        Graphics  = 1 << 0,
-        DMA       = 1 << 1, // direct memory access
-        Compute   = 1 << 2,
+        Compute   = 1 << 0,
+        Graphics  = 1 << 1,
+        DMA       = 1 << 2, // direct memory access
         Universal = 1 << 3,
         Timer     = 1 << 4,
         Custom    = 1 << 5

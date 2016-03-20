@@ -6,12 +6,12 @@ find_path(SOCKETS_INCLUDE_DIR NAMES winsock.h winsock2.h arpa/inet.h sys/socket.
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 		find_library(SOCKETS_LIBRARY
-						NAMES ws2_32 rt
+                                                NAMES ws2_32 rt wsock32
 						PATH_SUFFIXES lib32 lib
 						)
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		find_library(SOCKETS_LIBRARY
-						NAMES ws2_32 rt
+                                                NAMES ws2_32 rt wsock32
 						PATH_SUFFIXES lib lib64
 						)
 endif()

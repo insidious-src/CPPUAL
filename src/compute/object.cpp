@@ -19,41 +19,44 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/compute/object.h>
-#include <Vulkan/vk.h>
+#include <cppual/compute/device.h>
+#include <vulkan/vulkan.h>
 
 namespace cppual { namespace Compute {
 
 namespace { // optimize for internal unit usage
 
-inline Object::pointer copy_object (Object const& /*gObj*/) noexcept
-{
-    return nullptr;
-}
-
 } // anonymous namespace
 
-Object::Object (Object const& gObj) noexcept
-: m_object  (copy_object (gObj)),
-  m_resType (gObj.resource_type ())
+Object<Resource::Buffer>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
 {
 }
 
-Object& Object::operator = (Object const& gObj) noexcept
+//Object& Object::operator = (Object const& gObj) noexcept
+//{
+//    if (this != &gObj)
+//    {
+//        if (m_object) ::vkDestroyObject (m_object.get<VK_OBJECT> ());
+//        m_object  = copy_object (gObj);
+//    }
+
+//    return *this;
+//}
+
+Object<Resource::Buffer>::~Object () noexcept
 {
-    if (this != &gObj)
+    if (!m_owner) return;
+
+    switch (m_owner->backend ())
     {
-        if (m_object) ::vkDestroyObject (m_object.get<VK_OBJECT> ());
-        m_object  = copy_object (gObj);
-        m_resType = gObj.resource_type ();
+    case Device::Backend::Vulkan:
+        ::vkDestroyBuffer (m_owner->handle<VkDevice> (), handle<VkBuffer> (), nullptr);
+        break;
+    default:
+        break;
     }
-
-    return *this;
-}
-
-Object::~Object () noexcept
-{
-    if (m_object) ::vkDestroyObject (m_object.get<VK_OBJECT> ());
 }
 
 } } // namespace Compute
