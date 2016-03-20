@@ -15,22 +15,22 @@
 
 
 ### Host ###
-* modules ### (Done) ###
-* utilities ### (Done) ###
-* cross-platform process management and interprocess communication ### (~60%) ###
-* query hardware and os information ### (Done) ###
+* modules **(Done)**
+* utilities **(Done)**
+* cross-platform process management and interprocess communication **(~60%)**
+* query hardware and os information **(Done)**
 
 ### Compute ###
-* use concurrency as host implementation ### (Done) ###
-* specialized device & shared memory allocators ### (~80%) ###
-* unified memory management & allocator patterns ### (~90%) ###
-* host/device out-of-order and continuation tasks ### (~50%) ###
-* use Vulkan & OpenCL as SINGLE SOURCE backends (SPIR-V is required to implement eventual C++ interpreter) ### (~40%) ###
-* behaviour-based device scheduling and manipulation ### (WIP) ###
-* branched device tasks ### (WIP) ###
+* use concurrency as host implementation **(Done)**
+* specialized device & shared memory allocators **(~80%)**
+* unified memory management & allocator patterns **(~90%)**
+* host/device out-of-order and continuation tasks **(~50%)**
+* use Vulkan & OpenCL as SINGLE SOURCE backends (SPIR-V is required to implement eventual C++ interpreter) **(~40%)**
+* behaviour-based device scheduling and manipulation **(WIP)**
+* branched device tasks **(WIP)**
 
 ### Input ###
-* specialized raw input queues ### (WIP) ###
+* specialized raw input queues **(WIP)**
 * integrated security
 * all types of keyboards
 * all types of mice
@@ -43,27 +43,27 @@
 * touch surfaces
 
 ### Network ###
-* implementation of the C++17 network library ### (~80%) ###
-* simplified packet exchange ### (Done) ###
-* layered protocol interface ### (~30%) ###
+* implementation of the C++17 network library **(~80%)**
+* simplified packet exchange **(Done)**
+* layered protocol interface **(~30%)**
 * http, https, ftp protocols
 
 ### Graphics ###
-* unified surface management using Vulkan Extensions ### (WIP) ###
-* gfx algorithms based on compute library ### (WIP) ###
+* unified surface management using Vulkan Extensions **(WIP)**
+* gfx algorithms based on compute library **(WIP)**
 * abstract draw objects
 * scene graph
 * 2D images and icons
 * 3D images
-* cross-platform font texture generator ### (WIP) ###
+* cross-platform font texture generator **(WIP)**
 * color management and post-processing
 
 ### User Interface ###
 * display management (Done)
-* window adaptor for platform window management ### (~90%) ###
-* completely independant widgets implemented as functional structures (can be used everywhere from 3D environments to desktop) ### (~80%) ###
-* abstract interchangeable controls (draw objects can be changed on the fly) ### (WIP) ###
-* skin engine (native, html/css, xml & custom) ### (WIP) ###
+* window adaptor for platform window management **(~90%)**
+* completely independant widgets implemented as functional structures (can be used everywhere from 3D environments to desktop) **(~80%)**
+* abstract interchangeable controls (draw objects can be changed on the fly) **(WIP)**
+* skin engine (native, html/css, xml & custom) **(WIP)**
 
 ### Multimedia ###
 * codecs backend manager
@@ -71,13 +71,13 @@
 
 ### Audio ###
 * audio backend using compute library
-* audio file loader (format decoder, quality convertion and manipulation) ### (~30%) ###
-* listener functions ### (Done) ###
-* recorder ### (Done) ###
-* sound source ### (Done) ###
-* dynamic circular buffer ### (Done) ###
-* emitter ### (Done) ###
-* advanced player ### (WIP) ###
+* audio file loader (format decoder, quality convertion and manipulation) **(~30%)**
+* listener functions **(Done)**
+* recorder **(Done)**
+* sound source **(Done)**
+* dynamic circular buffer **(Done)**
+* emitter **(Done)**
+* advanced player **(WIP)**
 * equalizer and filters
 
 ### Video ###
@@ -87,22 +87,22 @@
 * desktop recording
 
 ### Utility ###
-* timer ### (Done) ###
+* timer **(Done)**
 * calendar
-* passive timeline with speed adjustment ### (Done) ###
-* fast COW string ### (Done) ###
-* circular queue + atomic ### (WIP) ###
-* signals ### (Done) ###
-* reactive functional types ### (WIP) ###
+* passive timeline with speed adjustment **(Done)**
+* fast COW string **(Done)**
+* circular queue + atomic **(WIP)**
+* signals **(Done)**
+* reactive functional types **(WIP)**
 * simd types
-* resource management ### (WIP) ###
+* resource management **(WIP)**
 
 ### Longterm Goals ###
-* completely integrate into the std library ### (~40%) ###
-* unified dynamic memory management for both host and compute devices ### (~80%) ###
-* drop opengl, directx, glew, egl ### (WIP) ###
-* drop freetype ### (WIP) ###
-* drop openal ### (WIP) ###
+* completely integrate into the std library **(~40%)**
+* unified dynamic memory management for both host and compute devices **(~80%)**
+* drop opengl, directx, glew, egl **(WIP)**
+* drop freetype **(WIP)**
+* drop openal **(WIP)**
 * drop sndfile
 * transparent filesystem management (using protocols)
 * prepare the library for universal memory (memristors)
