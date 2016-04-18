@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,28 +25,28 @@
 
 namespace cppual {
 
-template <typename> class Disposable { };
+//template <typename> class Disposable { };
 
-enum class ResourceType : unsigned char
-{
-    Null = 0,
-    Device,
-    Image,
-    Font,
-    Macro,
-    Texture,
-    Shader,
-    Program,
-    Query,
-    Window,
-    Surface,
-    Buffer,
-    Pixmap,
-    Colormap,
-    Cursor,
-    GlyphCursor,
-    Context
-};
+//enum class ResourceType : unsigned char
+//{
+//    Null = 0,
+//    Device,
+//    Image,
+//    Font,
+//    Macro,
+//    Texture,
+//    Shader,
+//    Program,
+//    Query,
+//    Window,
+//    Surface,
+//    Buffer,
+//    Pixmap,
+//    Colormap,
+//    Cursor,
+//    GlyphCursor,
+//    Context
+//};
 
 // =========================================================
 
@@ -103,19 +103,16 @@ public:
 
     controller   connection () const noexcept { return m_pCon; }
     value_type   id         () const noexcept { return m_id; }
-    ResourceType resType    () const noexcept { return m_eResType; }
     bool         valid      () const noexcept { return m_id; }
 
     Resource () noexcept
-    : m_pCon     (),
-      m_id       (),
-      m_eResType ()
+    : m_pCon (),
+      m_id   ()
     { }
 
-    Resource (Controller pCon, value_type id, ResourceType eType) noexcept
-    : m_pCon     (pCon),
-      m_id       (id),
-      m_eResType (eType)
+    Resource (Controller pCon, value_type id) noexcept
+    : m_pCon (pCon),
+      m_id   (id)
     { }
 
     template <class Controller_, class ID_>
@@ -123,15 +120,14 @@ public:
                                        Resource<Controller_, ID_> const&);
 
 private:
-    controller   m_pCon;
-    value_type   m_id;
-    ResourceType m_eResType;
+    controller m_pCon;
+    value_type m_id;
 };
 
 // =========================================================
 
 template <class ID>
-class Resource < void, ID>
+class Resource < void, ID >
 {
 public:
     typedef ID   value_type;
@@ -141,18 +137,15 @@ public:
     Resource& operator = (Resource const&) = delete;
     ~Resource () { }
 
-    value_type   id      () const noexcept { return m_id;       }
-    ResourceType resType () const noexcept { return m_eResType; }
-    bool         valid   () const noexcept { return m_id;       }
+    value_type   id    () const noexcept { return m_id; }
+    bool         valid () const noexcept { return m_id; }
 
     Resource () noexcept
-    : m_id       (),
-      m_eResType ()
+    : m_id   ()
     { }
 
-    Resource (value_type id, ResourceType eType) noexcept
-    : m_id       (id),
-      m_eResType (eType)
+    Resource (value_type id) noexcept
+    : m_id   (id)
     { }
 
     template <class ID_>
@@ -160,8 +153,7 @@ public:
                                        Resource<void, ID_> const&);
 
 private:
-    value_type   m_id;
-    ResourceType m_eResType;
+    value_type m_id;
 };
 
 // =========================================================

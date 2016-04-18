@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,13 +46,19 @@ public:
     enum Type
     {
         CPU    = 1 << 0, // serial processing
-        GPU    = 1 << 1, // shader, texture and parallel processing
-        PPU    = 1 << 2, // dedicated parallel processing (generic processing)
-        DSP    = 1 << 3, // digital signal processing (audio)
-        BSD    = 1 << 4, // bit stream decoder (video)
-        VCE    = 1 << 5, // codec engine (video)
-        SPU    = 1 << 6, // multiple specialized processing cores
-        Custom = 1 << 7
+        IGPU   = 1 << 1, // shader, texture and parallel processing
+        DGPU   = 1 << 2, // shader, texture and parallel processing
+        PPU    = 1 << 3, // dedicated parallel processing (generic processing)
+        DSP    = 1 << 4, // digital signal processing (audio)
+        BSD    = 1 << 5, // bit stream decoder (video)
+        VCE    = 1 << 6, // codec engine (video)
+        FPGA   = 1 << 7, // field-programmable gate array
+        MPU    = 1 << 8, // multi-specialized processing cores
+        Custom = 1 << 9,
+
+        GPU         = IGPU | DGPU,
+        Accelerator =  PPU |  DSP | BSD  | FPGA | VCE,
+        Any         =  CPU |  GPU | Accelerator | MPU | Custom
     };
 
     enum Attribute
@@ -63,6 +69,7 @@ public:
 
     enum class Backend : unsigned char
     {
+        Native,
         OpenCL,
         Vulkan,
         CUDA,
@@ -70,10 +77,11 @@ public:
         Metal
     };
 
-    enum class IRL : unsigned char
+    enum class IL : unsigned char
     {
+        None,
         SPIRV,
-        SPIR2,
+        CUDA,
         HLIL
     };
 
@@ -102,9 +110,9 @@ public:
     size_type constMemory  () const;
     size_type globalMemory () const;
 
-    size_type physical () const noexcept { return m_uId;     }
-    Type      type     () const noexcept { return m_eType;   }
-    bool      valid    () const noexcept { return m_pHandle; }
+    size_type physical () const noexcept { return m_uId;      }
+    Type      type     () const noexcept { return m_eType;    }
+    bool      valid    () const noexcept { return m_pHandle;  }
     Backend   backend  () const noexcept { return m_eBackend; }
 
     template <typename T = pointer::pointer>

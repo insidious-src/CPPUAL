@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ template <Allocator::size_type N>
 class StaticAllocator final : public Allocator, NonCopyable
 {
 public:
-    void* allocate (size_type n, align_type = 0) override;
+    void* allocate   (size_type n, align_type = 0) override;
     void  deallocate (void* p, size_type n) override;
 
     size_type size () const noexcept

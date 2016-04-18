@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ namespace { namespace Internal { // optimize for internal unit usage
 inline cchar* server () noexcept
 {
 #    if defined OS_GNU_LINUX or defined OS_BSD
-    return getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" : "libcppual-ui-xorg";
+    return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" : "libcppual-ui-xorg";
 #    elif defined OS_WINDOWS
     return "libcppual-win";
 #    endif
@@ -37,8 +37,8 @@ inline cchar* server () noexcept
 
 struct Initializer
 {
-    Module         mod;
-    shared_manager mgr;
+    Factory::module_type mod;
+    shared_manager       mgr;
 
     inline Initializer () noexcept
     : mod (server (), true, Module::ResolvePolicy::Lazy),
@@ -57,7 +57,7 @@ inline shared_manager& instance () noexcept
     return platform ().mgr;
 }
 
-inline Module& module () noexcept
+inline Factory::module_type& module () noexcept
 {
     return platform ().mod;
 }

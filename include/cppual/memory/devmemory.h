@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ struct memory_source_not_available : std::bad_alloc { };
 
 // =========================================================
 
-class MemoryChunk : public Compute::Object
+class MemoryChunk : public Compute::Object<Compute::Resource::Buffer>
 {
 public:
     typedef Compute::Device device_type;

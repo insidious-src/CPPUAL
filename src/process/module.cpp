@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,10 @@
 #include <iostream>
 
 #ifdef OS_STD_POSIX
-#    include <dlfcn.h>
+#   include <dlfcn.h>
 #elif defined (OS_WINDOWS)
 #   define WIN32_LEAN_AND_MEAN
-#    include <windows.h>
+#   include <windows.h>
 #endif
 
 using std::string;

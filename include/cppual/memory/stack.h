@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +37,9 @@ public:
     StackedAllocator (Allocator& allocator, size_type size);
     //StackedAllocator (string& shared_name, size_type size);
     ~StackedAllocator ();
-    void* allocate (size_type size, align_type align) noexcept override;
+    void* allocate   (size_type size, align_type align) noexcept override;
     void  deallocate (void* p, size_type size) override;
-    void  clear () noexcept;
+    void  clear      () noexcept;
 
     cvoid* marker () const noexcept
     { return m_pCurMarker; }
@@ -121,7 +121,7 @@ public:
 
 private:
     size_type     m_uNumAlloc;
-    Allocator&   m_gOwner;
+    Allocator&    m_gOwner;
     pointer       m_pTopMarker;
     pointer       m_pBottomMarker;
     pointer const m_pBegin;

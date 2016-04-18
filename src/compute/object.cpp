@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
  */
 
 #include <cppual/compute/device.h>
-#include <vulkan/vulkan.h>
 
 namespace cppual { namespace Compute {
 
@@ -28,35 +27,152 @@ namespace { // optimize for internal unit usage
 
 } // anonymous namespace
 
+template <>
 Object<Resource::Buffer>::Object (Object const& gObj) noexcept
 : m_object (),
   m_owner  (gObj.m_owner)
 {
 }
 
-//Object& Object::operator = (Object const& gObj) noexcept
-//{
-//    if (this != &gObj)
-//    {
-//        if (m_object) ::vkDestroyObject (m_object.get<VK_OBJECT> ());
-//        m_object  = copy_object (gObj);
-//    }
-
-//    return *this;
-//}
-
+template <>
 Object<Resource::Buffer>::~Object () noexcept
 {
     if (!m_owner) return;
+}
 
-    switch (m_owner->backend ())
-    {
-    case Device::Backend::Vulkan:
-        ::vkDestroyBuffer (m_owner->handle<VkDevice> (), handle<VkBuffer> (), nullptr);
-        break;
-    default:
-        break;
-    }
+// =========================================================
+
+template <>
+Object<Resource::CommandSequence>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::CommandSequence>::~Object () noexcept
+{
+    if (!m_owner) return;
+}
+
+// =========================================================
+
+template <>
+Object<Resource::Image>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::Image>::~Object () noexcept
+{
+    if (!m_owner) return;
+}
+
+// =========================================================
+
+template <>
+Object<Resource::Pipeline>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::Pipeline>::~Object () noexcept
+{
+    if (!m_owner) return;
+}
+
+// =========================================================
+
+template <>
+Object<Resource::RenderPass>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::RenderPass>::~Object () noexcept
+{
+    if (!m_owner) return;
+}
+
+// =========================================================
+
+template <>
+Object<Resource::Shader>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::Shader>::~Object () noexcept
+{
+    if (!m_owner) return;
+}
+
+// =========================================================
+
+template <>
+Object<Resource::DescriptorPool>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::DescriptorPool>::~Object () noexcept
+{
+    if (!m_owner) return;
+}
+
+// =========================================================
+
+template <>
+Object<Resource::Event>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::Event>::~Object () noexcept
+{
+    if (!m_owner) return;
+}
+
+// =========================================================
+
+template <>
+Object<Resource::State>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::State>::~Object () noexcept
+{
+    if (!m_owner) return;
+}
+
+// =========================================================
+
+template <>
+Object<Resource::Queue>::Object (Object const& gObj) noexcept
+: m_object (),
+  m_owner  (gObj.m_owner)
+{
+}
+
+template <>
+Object<Resource::Queue>::~Object () noexcept
+{
+    if (!m_owner) return;
 }
 
 } } // namespace Compute

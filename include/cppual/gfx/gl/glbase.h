@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,25 @@ class Texture;
 class FrameBuffer;
 class VertexBuffer;
 class VertexArray;
+
+enum class ResourceType : unsigned char
+{
+    Null = 0,
+    Device,
+    Image,
+    Font,
+    Macro,
+    Texture,
+    Shader,
+    Program,
+    Query,
+    Surface,
+    Buffer,
+    Pixmap,
+    Colormap,
+    Cursor,
+    Context
+};
 
 // ====================================================
 

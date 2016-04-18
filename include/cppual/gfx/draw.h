@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,12 +49,13 @@ enum class DeviceType : unsigned char
 {
     Custom,
     Native,
-    Compute,
+    Software,
     GL,
+    Vulkan,
     Direct3D,
+    Direct3D12,
     Direct2D,
-    Metal,
-    Software
+    Metal
 };
 
 enum class PolygonFace : unsigned char
@@ -84,8 +85,8 @@ struct GFXVersion
 
 struct PixelFormat final
 {
-    u8           red, green, blue, alpha;
-    u8           depth, stencil;
+    u8         red, green, blue, alpha;
+    u8         depth, stencil;
     PixelFlags flags;
     ColorType  colorType;
 
@@ -130,11 +131,11 @@ class VirtualBuffer
 {
 public:
     typedef std::vector<Color> vector_type;
-    typedef PixelFormat           format_type;
-    typedef std::size_t              size_type;
+    typedef PixelFormat        format_type;
+    typedef std::size_t        size_type;
     typedef Color              value_type;
 
-    inline format_type    format () const noexcept { return m_gFormat; }
+    inline format_type  format () const noexcept { return m_gFormat; }
     inline vector_type& data   ()       noexcept { return m_gPixels; }
 
     inline VirtualBuffer () noexcept
@@ -143,13 +144,13 @@ public:
     { }
 
     VirtualBuffer (point2i gSize, PixelFormat const& gFormat = PixelFormat::default2D ())
-    : m_gFormat (gFormat),
-      m_gPixels (size_type (gSize.x * gSize.y))
+    : m_gFormat   (gFormat),
+      m_gPixels   (size_type (gSize.x * gSize.y))
     { }
 
 private:
     PixelFormat m_gFormat;
-    vector_type    m_gPixels;
+    vector_type m_gPixels;
 };
 
 // =========================================================

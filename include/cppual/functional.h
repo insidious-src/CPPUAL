@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ public:
     typedef AnyMemberFn value_type;
 
     constexpr Closure () noexcept = default;
-    constexpr Closure (std::nullptr_t) noexcept { }
+    constexpr explicit Closure (std::nullptr_t) noexcept { }
 
     constexpr Closure (Closure const& mClosure) noexcept
     : m_pObj { mClosure.m_pObj },
@@ -233,7 +233,7 @@ public:
     // lambda constructor
     template <typename Callable,
               bool HasCapture = sizeof (value_type) < sizeof (Callable)>
-    inline Function (Callable&& mFunc)
+    inline explicit Function (Callable&& mFunc)
     : m_storage (HasCapture ? operator new (sizeof (Callable)) : nullptr,
                  deleter<typename std::decay<Callable>::type>)
     {
@@ -249,7 +249,7 @@ public:
     }
 
     constexpr Function () noexcept = default;
-    constexpr Function (std::nullptr_t) noexcept { }
+    constexpr explicit Function (std::nullptr_t) noexcept { }
 
     constexpr Function (Function const& mImpl) noexcept
     : m_closure { mImpl.m_closure },

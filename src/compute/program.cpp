@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,11 +37,11 @@ inline Program::pointer createProgramFromSource (Behaviour const& context, vecto
 
         auto sources = source.front ().c_str ();
 
-        return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
-                                            static_cast<uint> (source.size ()),
-                                            &sources,
-                                            sizes,
-                                            nullptr);
+//        return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
+//                                            static_cast<uint> (source.size ()),
+//                                            &sources,
+//                                            sizes,
+//                                            nullptr);
     }
 
     return nullptr;
@@ -51,14 +51,14 @@ inline Program::pointer createProgramFromSource (Behaviour const& context, vecto
 
 // =========================================================
 
-Program::Program (Behaviour const&, string const&)
-: Object ()
-{
-}
+//Program::Program (Behaviour const&, string const&)
+//: Object ()
+//{
+//}
 
-Program::Program (Behaviour const& context, vector<string> const& source)
-: Object (createProgramFromSource (context, source))
-{
-}
+//Program::Program (Behaviour const& context, vector<string> const& source)
+//: Object (createProgramFromSource (context, source))
+//{
+//}
 
 } } // namespace Compute

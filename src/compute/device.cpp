@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ namespace { // optimize for internal unit usage
 
 Device::size_type Device::count () noexcept
 {
-    return DeviceRepository::count ();
+    return 0;
 }
 
 Device& Device::host () noexcept

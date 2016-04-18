@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@
 #include <cppual/ui/queue.h>
 #include <cppual/ui/wm.h>
 
-using cppual::Process::Module;
-
 namespace cppual { namespace Ui { namespace Platform {
 
 struct  Factory;
@@ -39,6 +37,8 @@ typedef shared_ptr<Factory> shared_manager;
 
 struct Factory : public NonCopyableVirtual
 {
+    typedef Process::Module module_type;
+
     virtual shared_window createWindow (Rect const& rect,
                                         u32         screen  = 0,
                                         IDisplay*   display = IDisplay::instance ()) = 0;
@@ -46,9 +46,9 @@ struct Factory : public NonCopyableVirtual
     virtual shared_display connectDisplay (cchar* name = nullptr) = 0;
     virtual shared_queue   createQueueInstance () = 0;
 
-    static Factory* instance ();
-    static Module&  module   ();
-    static bool     hasValidInstance () noexcept;
+    static module_type& module   ();
+    static Factory*     instance ();
+    static bool         hasValidInstance () noexcept;
 };
 
 } } } // namespace Platform

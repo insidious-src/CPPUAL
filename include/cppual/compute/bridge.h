@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,10 +31,8 @@ namespace cppual { namespace Compute {
 class HostConnection : public NonCopyable
 {
 public:
-    typedef std::size_t size_type;
-    typedef Handle      pointer;
-
-    size_type deviceCount ();
+    typedef u32    size_type;
+    typedef Handle pointer;
 
     template <typename T>
     T handle () const noexcept { return m_pConn.get<T> (); }

@@ -96,6 +96,8 @@ add_library(cppual-compute SHARED
     src/compute/object.cpp
     src/compute/backend.h
     src/compute/backend.cpp
+    src/compute/backend/vulkan.cpp
+    src/compute/backend/opencl.cpp
     include/cppual/compute/platform.h
     include/cppual/compute/clobject.h
     src/compute/clobject.cpp
