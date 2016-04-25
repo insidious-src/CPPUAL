@@ -87,11 +87,11 @@ public:
     virtual image_type* getImage (SkinElement element,
                                   int         image_id) = 0;
 
-    virtual font_format  getFont  (SkinElement element, int font_id)  = 0;
-    virtual Color     getColor (SkinElement element, int color_id) = 0;
-    virtual int             getValue (SkinElement element, int value_id) = 0;
-    virtual SkinType     getType () const = 0;
-    virtual bool         reload () = 0;
+    virtual font_format getFont  (SkinElement element, int font_id)  = 0;
+    virtual Color       getColor (SkinElement element, int color_id) = 0;
+    virtual int         getValue (SkinElement element, int value_id) = 0;
+    virtual SkinType    getType  () const = 0;
+    virtual bool        reload   () = 0;
 
     static ISkin* getDefault () noexcept;
     static bool   setDefault (ISkin* skin) noexcept;
@@ -115,7 +115,8 @@ private:
 class SkinnableView : public View
 {
 public:
-    typedef typename Signal<void(PaintEvent)>::slot_type skin_conn;
+    typedef View::event_type                                        event_type;
+    typedef typename Signal<void(event_type::PaintData)>::slot_type skin_conn;
 
     SkinnableView ();
     SkinnableView (SkinnableView&&);

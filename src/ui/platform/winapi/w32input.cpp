@@ -85,24 +85,25 @@ struct Win32Event final : public message_type
         switch (type ())
         {
         case Win32Event::KeyPress:
-            event_type::registers ().keyPress (window (), { primary<u8> () });
+            EventQueue::emit ().keyPress (window (), { primary<u8> () });
             break;
         case Win32Event::KeyRelease:
-            event_type::registers ().keyRelease (window (), { primary<u8> () });
+            EventQueue::emit ().keyRelease (window (), { primary<u8> () });
             break;
         case Win32Event::ButtonPress:
-            event_type::registers ().mousePress (window (), { position (), primary<u8> () });
+            EventQueue::emit ().mousePress (window (), { position (), primary<u8> () });
             break;
         case Win32Event::ButtonRelease:
-            event_type::registers ().mouseRelease (window (), { position (), primary<u8> () });
+            EventQueue::emit ().mouseRelease (window (), { position (), primary<u8> () });
             break;
         case Win32Event::Scroll:
-            event_type::registers ().scroll (window (), { position (), primary<int32> () });
+            EventQueue::emit ().scroll (window (), { position (), primary<int32> () });
             break;
         case Win32Event::PointerMove:
-            event_type::registers ().mouseMove (window (), position ());
+            EventQueue::emit ().mouseMove (window (), position ());
             break;
         case Win32Event::Show:
+            EventQueue::emit ().winVisible (window (), primary<bool> ());
             break;
         case Win32Event::Destroy:
             break;
@@ -136,9 +137,9 @@ struct Win32Event final : public message_type
         case Win32Event::PointerMove:
             return PointerMoveEvent (window (), position ());
         case Win32Event::Show:
-            return event_type ();
+            return VisibilityEvent (window (), true);
         case Win32Event::Destroy:
-            return event_type ();
+            return VisibilityEvent (window (), false);
         case Win32Event::Paint:
             return event_type ();
         case Win32Event::Size:

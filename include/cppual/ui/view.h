@@ -26,14 +26,15 @@
 #include <cppual/gfx/coord.h>
 #include <cppual/circular_queue.h>
 #include <cppual/ui/vsurface.h>
-#include <cppual/ui/events.h>
+#include <cppual/input/event.h>
 
 namespace cppual { namespace Ui {
 
 class View
 {
 public:
-    typedef Event                                event_type;
+    typedef Input::Event                         event_type;
+    typedef Graphics::Element                    window_type;
     typedef Memory::GenericPolicy<View*>         allocator_type;
     typedef CircularQueue<View*, allocator_type> container;
     typedef std::size_t                          size_type;
@@ -42,11 +43,11 @@ public:
     container::iterator iterator;
 
     typedef typename
-    Signal<void(event_type::window_type, point2u)>
+    Signal<void(window_type, point2u)>
     ::slot_type mouse_move_conn;
 
     typedef typename
-    Signal<void(event_type::window_type, event_type::MouseButtonData)>
+    Signal<void(window_type, event_type::MButtonData)>
     ::slot_type mouse_btn_conn;
 
     enum
@@ -131,8 +132,8 @@ private:
     void paint (Rect const&);
     void size (point2u);
     void mouseMoved (point2u);
-    void mousePressed (event_type::MouseButtonData const&);
-    void mouseReleased (event_type::MouseButtonData const&);
+    void mousePressed (event_type::MButtonData const&);
+    void mouseReleased (event_type::MButtonData const&);
     void destroyResources ();
     void invalidate () noexcept;
     static void registerEvents ();

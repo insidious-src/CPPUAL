@@ -29,7 +29,7 @@ bool ISkin::setDefault (ISkin* pSkin) noexcept
 {
     if (!pSkin) return false;
 
-    Event::registers ().winPaint (Element (), PaintEvent (nullptr, Rect ()).data ().paint);
+    Event::emit ().winPaint (Element (), PaintEvent (nullptr, Rect ()).data ().paint);
     return true;
 }
 

@@ -356,7 +356,6 @@ add_library(cppual-ui SHARED
     include/cppual/ui/display.h
     src/ui/queue.cpp
     include/cppual/ui/queue.h
-    include/cppual/ui/events.h
     include/cppual/ui/wm.h
     src/ui/window.cpp
     include/cppual/ui/window.h

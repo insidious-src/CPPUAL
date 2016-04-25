@@ -38,7 +38,7 @@ struct XFactory final : Factory
 
 shared_display XFactory::connectDisplay (cchar* pDeviceName)
 {
-    return shared_display (new XDisplay (pDeviceName? pDeviceName : getenv ("DISPLAY")));
+    return shared_display (new XDisplay (pDeviceName));
 }
 
 shared_queue XFactory::createQueueInstance ()

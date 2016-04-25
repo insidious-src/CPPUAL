@@ -1,9 +1,9 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: fymfifa
+ * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2016 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,30 +19,34 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_PLATFORM_X_INPUT_H_
-#define CPPUAL_PLATFORM_X_INPUT_H_
+#ifndef CPPUAL_COMPUTE_BACKEND_VULKAN_H_
+#define CPPUAL_COMPUTE_BACKEND_VULKAN_H_
 #ifdef __cplusplus
 
-#include <cppual/ui/queue.h>
+#include <vector>
+#include <cstring>
+#include <type_traits>
+#include <vulkan/vulkan.h>
+#include <cppual/types.h>
+#include <cppual/memory/stack.h>
+#include <cppual/compute/device.h>
+#include "../backend.h"
 
-#if defined (OS_GNU_LINUX) or defined (OS_BSD)
+using std::vector;
+using cppual::Memory::StackedAllocator;
+using cppual::Memory::StackedPolicy;
 
-#include <xcb/xinput.h>
+namespace cppual { namespace Compute {
 
-namespace cppual { namespace Ui {
+namespace { // optimize for internal unit usage
 
-struct DECL_EXPORT XQueue final : public IDisplayQueue
-{
-    XQueue ();
-    bool set_window_events (window_type const&, mask_type) noexcept;
-    bool pop_front         (event_type&, bool) noexcept;
-    int  poll              (window_type const&, std::atomic_bool&);
-    void send              (window_type const&, event_type const&);
-    void post              (window_type const&, event_type const&);
-};
 
-} } // namespace Input
 
-#endif // OS_GNU_LINUX or OS_BSD
+} // anonymous namespace
+
+
+
+} } // namespace Compute
+
 #endif // __cplusplus
-#endif // CPPUAL_PLATFORM_X_INPUT_H_
+#endif // CPPUAL_COMPUTE_BACKEND_VULKAN_H_

@@ -28,7 +28,7 @@
 
 namespace cppual { namespace Ui {
 
-class Win32Window final : public IWindow
+class DECL_EXPORT Win32Window final : public IWindow
 {
 public:
     Win32Window  (Rect const& rect, u32 screen, IDisplay* display);

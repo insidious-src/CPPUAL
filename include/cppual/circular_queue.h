@@ -23,6 +23,7 @@
 #define CPPUAL_CIRCULAR_QUEUE_H_
 #ifdef __cplusplus
 
+#include <new>
 #include <atomic>
 #include <cppual/concepts.h>
 #include <cppual/iterator.h>

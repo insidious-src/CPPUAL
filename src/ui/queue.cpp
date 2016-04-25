@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cppual/ui/queue.h>
 #include <cppual/ui/manager.h>
 
 using std::string;

@@ -216,7 +216,6 @@ string XWindow::title () const noexcept
 
 void XWindow::setTitle (string const& gTitle) noexcept
 {
-    // set the title of the windowqdw
      xcb_change_property (connection ()->native ().get<display_type> (),
                           XCB_PROP_MODE_REPLACE,
                           id ().get<handle_type> (),

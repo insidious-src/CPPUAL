@@ -27,6 +27,7 @@
 #include <cppual/gfx/drawable/image.h>
 #include <cppual/ui/frame.h>
 #include <cppual/ui/view.h>
+#include <cppual/input/event.h>
 
 using cppual::Graphics::Icon;
 
@@ -88,7 +89,7 @@ private:
 class WindowAdapter : public NonCopyableVirtual
 {
 public:
-    typedef Event                                  event_type;
+    typedef Input::Event                           event_type;
     typedef std::size_t                            size_type;
     typedef Memory::GenericPolicy<Widget*>         allocator_type;
     typedef CircularQueue<Widget*, allocator_type> container;
@@ -135,8 +136,8 @@ protected:
     virtual void onMaximize     () { }
     virtual void onHelp         () { }
     virtual void onPointerMove  (point2u) { }
-    virtual void onMousePress   (event_type::MouseButtonData) { }
-    virtual void onMouseRelease (event_type::MouseButtonData) { }
+    virtual void onMousePress   (event_type::MButtonData) { }
+    virtual void onMouseRelease (event_type::MButtonData) { }
 
 private:
     void resize (point2u);

@@ -57,55 +57,55 @@ WindowAdapter::WindowAdapter (Widget&     widget,
 
     if (!registered)
     {
-        connect (event_type::registers ().keyPress,
+        connect (event_type::emit ().keyPress,
                  [](event_type::window_type wnd, event_type::KeyData data)
         {
             Internal::map ()[wnd]->keyPress (data);
         });
 
-        connect (event_type::registers ().keyRelease,
+        connect (event_type::emit ().keyRelease,
                  [](event_type::window_type wnd, event_type::KeyData data)
         {
             Internal::map ()[wnd]->keyRelease (data);
         });
 
-        connect (event_type::registers ().mouseMove,
+        connect (event_type::emit ().mouseMove,
                  [](event_type::window_type wnd, point2u pos)
         {
             Internal::map ()[wnd]->onPointerMove (pos);
         });
 
-        connect (event_type::registers ().mousePress,
+        connect (event_type::emit ().mousePress,
                  [](event_type::window_type wnd, event_type::MouseButtonData data)
         {
             Internal::map ()[wnd]->onMousePress (data);
         });
 
-        connect (event_type::registers ().mouseRelease,
+        connect (event_type::emit ().mouseRelease,
                  [](event_type::window_type wnd, event_type::MouseButtonData data)
         {
             Internal::map ()[wnd]->onMouseRelease (data);
         });
 
-        connect (event_type::registers ().winPaint,
+        connect (event_type::emit ().winPaint,
                  [](event_type::window_type wnd, event_type::PaintData data)
         {
             Internal::map ()[wnd]->paint (data);
         });
 
-        connect (event_type::registers ().winFocus,
+        connect (event_type::emit ().winFocus,
                  [](event_type::window_type wnd, bool state)
         {
             Internal::map ()[wnd]->focus (state);
         });
 
-        connect (event_type::registers ().winSize,
+        connect (event_type::emit ().winSize,
                  [](event_type::window_type wnd, point2u size)
         {
             Internal::map ()[wnd]->resize (size);
         });
 
-        connect (event_type::registers ().winVisible,
+        connect (event_type::emit ().winVisible,
                  [](event_type::window_type wnd, bool state)
         {
             Internal::map ()[wnd]->show (state);
