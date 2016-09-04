@@ -199,7 +199,7 @@ inline std::size_t size_of_platforms_data () noexcept
     CL::platform_type handles[n];
     ::clGetPlatformIDs (n, handles, nullptr);
 
-    for (CL::size_type i = 0, x; i < n; ++i)
+    for (auto i = 0, x; i < n; ++i)
     {
         ::clGetDeviceIDs (handles[i], DeviceType::Any, 0, nullptr, &x);
         size += sizeof (CL::device_type) * x;
@@ -231,7 +231,7 @@ Initializer::Initializer ()
                         handles, nullptr);
 
     // generate information for each platform
-    for (CL::size_type i = 0, pos = 0; i < platforms.size (); ++i, pos = 0)
+    for (auto i = 0, pos = 0; i < platforms.size (); ++i, pos = 0)
     {
         platforms[i].handle = handles[i];
 

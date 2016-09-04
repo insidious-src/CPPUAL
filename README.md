@@ -11,7 +11,7 @@
 
 **So the real question is:** Why would you want to have all these libraries when OpenCL is pushing hard and you can program it pretty much like a regular CPU? It's just a matter of time until OpenCL evolves and turns into an all-in-one standard.
 
-**March 6th 2015:** Well,... it evolved into Vulkan, however OpenCL still remains as a new revision was released (2.1). Both are using a common IL - SPIR-V.
+**March 6th 2015:** Well,... it evolved into Vulkan (GLNext), however OpenCL still remains as a new revision was released (2.1). Both are using a common IL - SPIR-V.
 
 
 ### Host ###
@@ -29,6 +29,29 @@
 * behaviour-based device scheduling and manipulation **(WIP)**
 * branched device tasks **(WIP)**
 
+### Active Model View Controller ###
+* node based + smart pointer web
+* the model not only contains data but also logic
+* a logic node can be bound to single or multiple data nodes
+* cyclic binding (actually the idea is to ABUSE it)
+* can generate multiple model repositories
+* interprocess interface
+* the interface is protocol agnostic (can exchange data across networks)
+* controllers are represented as signal structures + configuration data to interact with the model logic
+* the whole pattern can be used to form a universal communication method for almost any type of program
+* can generate user interfaces on the fly using layout data without requiring any ui library
+
+### Network ###
+* implementation of the C++17 network library **(~80%)**
+* simplified packet exchange **(Done)**
+* layered protocol interface **(~30%)**
+* http, https, ftp, bittorrent protocols
+
+### Universal Database Interface ###
+* based on AMVC
+* standard & relational database model extension
+* DOM model extension
+
 ### Input ###
 * specialized raw input queues **(WIP)**
 * integrated security
@@ -41,12 +64,6 @@
 * Steam controller
 * extended button layouts
 * touch surfaces
-
-### Network ###
-* implementation of the C++17 network library **(~80%)**
-* simplified packet exchange **(Done)**
-* layered protocol interface **(~30%)**
-* http, https, ftp protocols
 
 ### Graphics ###
 * unified surface management using Vulkan Extensions **(WIP)**
@@ -86,7 +103,7 @@
 * multi-screen support
 * desktop recording
 
-### Utility ###
+### Utilities ###
 * timer **(Done)**
 * calendar
 * passive timeline with speed adjustment **(Done)**

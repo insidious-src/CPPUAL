@@ -28,11 +28,11 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 inline cchar* server () noexcept
 {
-#    if defined OS_GNU_LINUX or defined OS_BSD
-    return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" : "libcppual-ui-xorg";
-#    elif defined OS_WINDOWS
-    return "libcppual-win";
-#    endif
+#   if defined OS_GNU_LINUX or defined OS_BSD
+        return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" : "libcppual-ui-xorg";
+#   elif defined OS_WINDOWS
+        return "libcppual-ui-win";
+#   endif
 }
 
 struct Initializer

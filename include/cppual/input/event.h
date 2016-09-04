@@ -105,7 +105,7 @@ public:
     struct TouchData
     {
         int32   pid;
-        point2i pos;
+        point2u pos;
     };
 
     struct JoyButtonData
@@ -189,7 +189,7 @@ protected:
 struct MessageEvent : public Event
 {
     MessageEvent (int nMsg) noexcept
-    : Event (Event::SystemMessage)
+    : Event      (Event::SystemMessage)
     {
         m_data.message = nMsg;
     }
@@ -200,7 +200,7 @@ struct MessageEvent : public Event
 struct VisibilityEvent : public Event
 {
     VisibilityEvent (bool bVis) noexcept
-    : Event (Event::Visibility)
+    : Event         (Event::Visibility)
     {
         m_data.state = bVis;
     }
@@ -211,7 +211,7 @@ struct VisibilityEvent : public Event
 struct PaintEvent : public Event
 {
     PaintEvent (Rect gRect) noexcept
-    : Event (Event::Paint)
+    : Event    (Event::Paint)
     {
         m_data.paint.region = gRect;
     }
@@ -222,7 +222,7 @@ struct PaintEvent : public Event
 struct SizeEvent : public Event
 {
     SizeEvent (point2u size) noexcept
-    : Event (Event::Size)
+    : Event   (Event::Size)
     {
         m_data.size = size;
     }
@@ -233,7 +233,7 @@ struct SizeEvent : public Event
 struct FocusEvent : public Event
 {
     FocusEvent (bool in) noexcept
-    : Event (Event::Focus)
+    : Event    (Event::Focus)
     {
         m_data.state = in;
     }
@@ -244,7 +244,7 @@ struct FocusEvent : public Event
 struct StepEvent : public Event
 {
     StepEvent (bool in) noexcept
-    : Event (Event::Step)
+    : Event   (Event::Step)
     {
         m_data.state = in;
     }
@@ -255,7 +255,7 @@ struct StepEvent : public Event
 struct PropertyEvent : public Event
 {
     PropertyEvent (u32 prop, int32 value) noexcept
-    : Event (Event::Property)
+    : Event       (Event::Property)
     {
         m_data.property.prop  = prop;
         m_data.property.value = value;
@@ -267,7 +267,7 @@ struct PropertyEvent : public Event
 struct KeyPressEvent : public Event
 {
     KeyPressEvent (u8 nKey) noexcept
-    : Event (Event::KeyPressed)
+    : Event       (Event::KeyPressed)
     {
         m_data.keyCode.key = nKey;
     }
@@ -278,7 +278,7 @@ struct KeyPressEvent : public Event
 struct KeyReleaseEvent : public Event
 {
     KeyReleaseEvent (u8 nKey) noexcept
-    : Event (Event::KeyReleased)
+    : Event         (Event::KeyReleased)
     {
         m_data.keyCode.key = nKey;
     }
@@ -289,7 +289,7 @@ struct KeyReleaseEvent : public Event
 struct MousePressEvent : public Event
 {
     MousePressEvent (u8 nBtn, point2u gPos) noexcept
-    : Event (Event::MButtonDown)
+    : Event         (Event::MButtonDown)
     {
         m_data.mouseButton.button = nBtn;
         m_data.mouseButton.pos    = gPos;
@@ -301,7 +301,7 @@ struct MousePressEvent : public Event
 struct MouseReleaseEvent : public Event
 {
     MouseReleaseEvent (u8 nBtn, point2u gPos) noexcept
-    : Event (Event::MButtonUp)
+    : Event           (Event::MButtonUp)
     {
         m_data.mouseButton.button  = nBtn;
         m_data.mouseButton.pos     = gPos;
@@ -313,7 +313,7 @@ struct MouseReleaseEvent : public Event
 struct PointerMoveEvent : public Event
 {
     PointerMoveEvent (point2u gPos) noexcept
-    : Event (Event::PointerMove)
+    : Event          (Event::PointerMove)
     {
         m_data.position = gPos;
     }
@@ -324,7 +324,7 @@ struct PointerMoveEvent : public Event
 struct ScrollEvent : public Event
 {
     ScrollEvent (int32 nDelta, point2u gPos) noexcept
-    : Event (Event::MWheelStep)
+    : Event     (Event::MWheelStep)
     {
         m_data.wheel.delta = nDelta;
         m_data.wheel.pos   = gPos;
@@ -335,8 +335,8 @@ struct ScrollEvent : public Event
 
 struct TouchPressEvent : public Event
 {
-    TouchPressEvent (int32 pid, point2i gPos) noexcept
-    : Event (Event::TouchPress)
+    TouchPressEvent (int32 pid, point2u gPos) noexcept
+    : Event         (Event::TouchPress)
     {
         m_data.touch.pid = pid;
         m_data.touch.pos = gPos;
@@ -347,8 +347,8 @@ struct TouchPressEvent : public Event
 
 struct TouchReleaseEvent : public Event
 {
-    TouchReleaseEvent (int32 pid, point2i gPos) noexcept
-    : Event (Event::TouchRelease)
+    TouchReleaseEvent (int32 pid, point2u gPos) noexcept
+    : Event           (Event::TouchRelease)
     {
         m_data.touch.pid = pid;
         m_data.touch.pos = gPos;
@@ -359,8 +359,8 @@ struct TouchReleaseEvent : public Event
 
 struct TouchMovedEvent : public Event
 {
-    TouchMovedEvent (int32 pid, point2i gPos) noexcept
-    : Event (Event::TouchMove)
+    TouchMovedEvent (int32 pid, point2u gPos) noexcept
+    : Event         (Event::TouchMove)
     {
         m_data.touch.pid = pid;
         m_data.touch.pos = gPos;

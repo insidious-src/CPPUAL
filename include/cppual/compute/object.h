@@ -81,7 +81,6 @@ public:
     template <typename T = pointer::pointer>
     T handle () const noexcept { return m_object.get<T> ();  }
 
-
 private:
     pointer m_object;
     Device* m_owner;

@@ -23,7 +23,6 @@
 #define CPPUAL_CIRCULAR_QUEUE_H_
 #ifdef __cplusplus
 
-#include <new>
 #include <atomic>
 #include <cppual/concepts.h>
 #include <cppual/iterator.h>
@@ -86,8 +85,8 @@ public:
     inline    reference        front ()       { return m_pArray[m_uBeginPos];  }
     inline    reference        back  ()       { return m_pArray[m_uEndPos]; }
     constexpr allocator_type   get_allocator () const noexcept { return *this; }
-    inline    void             pop_front     () { if (!empty ()) pop_front_priv (); }
-    inline    void             pop_back      () { if (!empty ()) pop_back_priv  (); }
+    inline    void             pop_front     () { if (!empty ()) _pop_front (); }
+    inline    void             pop_back      () { if (!empty ()) _pop_back  (); }
 
     CircularQueue& operator = (CircularQueue&& gObj)
     {
@@ -112,7 +111,7 @@ public:
       m_uBeginPos    (),
       m_uEndPos      (),
       m_uCapacity    (m_pArray ? uCapacity : size_type ())
-    { if (!uCapacity) throw std::bad_array_length (); }
+    { if (!uCapacity) throw std::bad_array_new_length (); }
 
     CircularQueue (allocator_type const& gAtor)
     : allocator_type (gAtor),
@@ -129,7 +128,7 @@ public:
       m_uEndPos      (m_pArray ? gObj.size () - 1 : m_uBeginPos),
       m_uCapacity    (m_pArray ? m_uEndPos    + 1 : m_uBeginPos)
     {
-        if (!gObj.empty () and !m_pArray) throw std::bad_array_length ();
+        if (!gObj.empty () and !m_pArray) throw std::bad_array_new_length ();
         std::copy (gObj.cbegin (), gObj.cend (), begin ());
     }
 
@@ -141,7 +140,7 @@ public:
       m_uBeginPos    (),
       m_uEndPos      (m_pArray ? diff (gEnd, gBegin) : 0),
       m_uCapacity    (m_pArray ? m_uEndPos + 1 : 0)
-    { m_pArray ? std::copy (gBegin, gEnd, begin ()) : throw std::bad_array_length (); }
+    { m_pArray ? std::copy (gBegin, gEnd, begin ()) : throw std::bad_array_new_length (); }
 
     constexpr const_reverse_iterator crbegin () const
     { return const_reverse_iterator (end ()); }
@@ -272,14 +271,14 @@ public:
     }
 
 private:
-    void pop_front_priv ()
+    void _pop_front ()
     {
         // ++front--
         allocator_type::destroy (&m_pArray[m_uBeginPos]);
         m_uBeginPos = normalize (++m_uBeginPos);
     }
 
-    void pop_back_priv ()
+    void _pop_back ()
     {
         // --back++
         allocator_type::destroy (&m_pArray[m_uEndPos = normalize (--m_uEndPos)]);
@@ -291,7 +290,7 @@ private:
     size_type index_to_subscript (size_type uIdx) const noexcept
     { return (m_uBeginPos + uIdx) % m_uCapacity; }
 
-    size_type expand_size () const noexcept
+    constexpr size_type expand_size () const noexcept
     { return expand_ratio<self_type, value_type>::value + 1; }
 
     template <typename Iterator>
@@ -346,8 +345,8 @@ void CircularQueue<T, Allocator, Atomic>::erase (const_iterator& gIt)
 
     auto pos = index_to_subscript (gIt.pos ());
 
-    if (pos == m_uBeginPos) pop_front_priv ();
-    else if (pos == index_to_subscript (size () - 1)) pop_back_priv ();
+    if (pos == m_uBeginPos) _pop_front ();
+    else if (pos == index_to_subscript (size () - 1)) _pop_back ();
     else allocator_type::destroy (&(*gIt));
 }
 
