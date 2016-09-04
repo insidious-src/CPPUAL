@@ -5,6 +5,8 @@
 	Latest Supported Language Standard: C++14
 	Future Language Standards: C++17 or D Language
 
+## Framework Goals ##
+
 ### Why reinvent the wheel and replace parts of the standard library and Qt? ###
 - the whole idea is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, VDPAU, OVD, XVideo, TrueAudio and OpenAL completely.
 - behaviour-based device processing and explicit events
@@ -13,6 +15,13 @@
 
 **March 6th 2015:** Well,... it evolved into Vulkan (GLNext), however OpenCL still remains as a new revision was released (2.1). Both are using a common IL - SPIR-V.
 
+
+## Concept Goals ##
+
+- A library imitating unified low-level brain communication system
+
+
+## Technical Specifications ##
 
 ### Host ###
 * modules **(Done)**
@@ -114,7 +123,8 @@
 * simd types
 * resource management **(WIP)**
 
-### Longterm Goals ###
+
+## Longterm Framework Goals ##
 * completely integrate into the std library **(~40%)**
 * unified dynamic memory management for both host and compute devices **(~80%)**
 * drop opengl, directx, glew, egl **(WIP)**
