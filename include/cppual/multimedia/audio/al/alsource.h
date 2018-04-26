@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,35 +48,35 @@ public:
 
     SoundState state () const noexcept;
 
-    void  play () noexcept;
-    void  replay () noexcept;
-    void  pause () noexcept;
-    void  stop () noexcept;
-    void  rewind () noexcept;
+    void  play      () noexcept;
+    void  replay    () noexcept;
+    void  pause     () noexcept;
+    void  stop      () noexcept;
+    void  rewind    () noexcept;
     bool  isPlaying () const noexcept;
 
     void  setLooping (bool value) noexcept;
-    bool  isLooping () const noexcept;
+    bool  isLooping  () const noexcept;
 
     void  enqueue (SoundBuffer&) noexcept;
-    bool  attach (SoundBuffer&) noexcept;
-    void  detach () noexcept;
+    bool  attach  (SoundBuffer&) noexcept;
+    void  detach  () noexcept;
 
     void  setVolume (float value) noexcept;
     float getVolume () const noexcept;
 
-    void  setPlayingSpeed (float value) noexcept;
-    float playingSpeed () const noexcept;
+    void  setPlayingSpeed  (float value) noexcept;
+    float playingSpeed     () const noexcept;
     void  setPlayingOffset (std::chrono::seconds value) noexcept;
-    int   playingOffset () noexcept;
-    void  setSampleOffset (float value) noexcept;
-    void  setByteOffset (float value) noexcept;
+    int   playingOffset    () noexcept;
+    void  setSampleOffset  (float value) noexcept;
+    void  setByteOffset    (float value) noexcept;
 
     void  mute () noexcept;
     void  unmute () noexcept;
 
-    inline SoundBuffer* buffer () const noexcept { return m_pBuffer; }
-    inline void         clear () noexcept { m_gQueue.clear (); }
+    inline SoundBuffer* buffer () const noexcept { return m_pBuffer;  }
+    inline void         clear  ()       noexcept { m_gQueue.clear (); }
 
 protected:
     queue_type    m_gQueue;

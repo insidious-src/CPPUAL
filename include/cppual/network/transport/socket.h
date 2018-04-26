@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ class TransportSocket : public NonCopyable
 {
 public:
     typedef socket_id const const_id;
+    constexpr static socket_id nullSocket = -1;
 
     TransportSocket () = delete;
     TransportSocket (SocketType) noexcept;
@@ -63,14 +64,11 @@ public:
         AnyPort = 0
     };
 
-    inline ~TransportSocket () noexcept { close (); }
-    inline socket_id  id () const noexcept { return m_nId; }
-    inline SocketType type () const noexcept { return m_eProtocol; }
-    inline bool       isValid () const noexcept { return m_nId != nullSocket (); }
-    inline bool       isBlocking () const noexcept { return m_bIsBlocking; }
-
-    static socket_id nullSocket () noexcept
-    { return sm_nInvalid; }
+    inline ~TransportSocket ()            noexcept { close ();                      }
+    inline socket_id  id ()         const noexcept { return m_nId;                  }
+    inline SocketType type ()       const noexcept { return m_eProtocol;            }
+    inline bool       isValid ()    const noexcept { return m_nId != nullSocket;    }
+    inline bool       isBlocking () const noexcept { return m_bIsBlocking;          }
 
 protected:
     static socket_id create (SocketType) noexcept;
@@ -78,7 +76,6 @@ protected:
     void close () noexcept;
 
 private:
-    static const_id sm_nInvalid;
     socket_id        m_nId;
     SocketType       m_eProtocol;
     bool             m_bIsBlocking;

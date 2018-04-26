@@ -31,7 +31,7 @@
 
 namespace cppual { namespace Ui {
 
-struct DECL_EXPORT XQueue final : public IDisplayQueue
+struct SHARED_API XQueue final : public IDisplayQueue
 {
     XQueue ();
     bool set_window_events (window_type const&, mask_type) noexcept;

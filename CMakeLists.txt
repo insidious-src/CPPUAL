@@ -64,8 +64,8 @@ add_library(cppual-host SHARED
     include/cppual/process/interproc.h
     include/cppual/process/details.h
     include/cppual/process/pipe.h
-    src/process/module.cpp
-    include/cppual/process/module.h
+    src/process/plugin.cpp
+    include/cppual/process/plugin.h
     src/system/sysinfo.cpp
     include/cppual/system/sysinfo.h
     include/cppual/system/clock.h
@@ -96,11 +96,11 @@ add_library(cppual-compute SHARED
     src/compute/object.cpp
     src/compute/backend.h
     src/compute/backend.cpp
+    src/compute/backend/vulkan.h
     src/compute/backend/vulkan.cpp
+    src/compute/backend/opencl.h
     src/compute/backend/opencl.cpp
     include/cppual/compute/platform.h
-    include/cppual/compute/clobject.h
-    src/compute/clobject.cpp
     include/cppual/compute/program.h
     src/compute/program.cpp
     include/cppual/compute/device.h

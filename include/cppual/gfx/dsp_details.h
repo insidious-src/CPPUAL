@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,37 +25,11 @@
 
 #include <type_traits>
 #include <cppual/types.h>
+#include <cppual/resource.h>
 
 namespace cppual { namespace Graphics {
 
-class Connection
-{
-public:
-    typedef void* pointer;
-
-    inline    Connection () noexcept = default;
-    constexpr Connection (pointer display) noexcept : m_handle (display) { }
-    constexpr Connection (std::nullptr_t ) noexcept : m_handle ()        { }
-
-    constexpr operator pointer () const noexcept
-    { return m_handle; }
-
-    template <typename T>
-    constexpr typename std::remove_pointer<T>::type* get () const noexcept
-    { return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
-
-    friend
-    constexpr bool operator == (Connection const&, Connection const&) noexcept;
-
-private:
-    pointer m_handle;
-};
-
-constexpr bool operator == (Connection const& conn1, Connection const& conn2) noexcept
-{ return conn1.m_handle == conn2.m_handle; }
-
-constexpr bool operator != (Connection const& conn1, Connection const& conn2) noexcept
-{ return !(conn1 == conn2); }
+typedef Handle Connection;
 
 // =========================================================
 

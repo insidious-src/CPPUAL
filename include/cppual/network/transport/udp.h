@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ using std::string;
 
 namespace cppual { namespace Network {
 
-class UdpStream final : public TransportSocket
+class UdpStream final : public virtual TransportSocket
 {
 public:
     typedef std::size_t size_type;
@@ -40,10 +40,10 @@ public:
 
     UdpStream& operator << (Packet const&) noexcept;
     UdpStream& operator >> (Packet&) noexcept;
-    UdpStream () noexcept;
+    UdpStream  () noexcept;
     ~UdpStream () noexcept;
 
-    inline Address getPeerIp () const noexcept { return m_gPeerAddr; }
+    inline Address getPeerIp   () const noexcept { return m_gPeerAddr; }
     inline int     getPeerPort () const noexcept { return m_nPeerPort; }
 
     inline void setPeer (Address const& gAddr, u16 uPort) noexcept

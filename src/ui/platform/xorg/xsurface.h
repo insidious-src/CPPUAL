@@ -30,7 +30,7 @@
 
 namespace cppual { namespace Ui {
 
-class XWindow final : public IWindow
+class SHARED_API XWindow final : public IWindow
 {
 public:
     XWindow () = delete;

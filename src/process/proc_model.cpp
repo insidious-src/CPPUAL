@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,26 +31,26 @@ namespace cppual { namespace Process {
 
 process_handle ThisProcess::handle () noexcept
 {
-#    ifdef OS_STD_POSIX
-    return getpid ();
-#    elif defined (OS_WINDOWS)
-    return GetCurrentProcess ();
-#    endif
+#   ifdef OS_STD_POSIX
+    return ::getpid ();
+#   elif defined (OS_WINDOWS)
+    return ::GetCurrentProcess ();
+#   endif
 }
 
 process_handle create (cchar* path, char* args[])
 {
-#    ifdef OS_STD_POSIX
+#   ifdef OS_STD_POSIX
     process_handle id = 0;
-    posix_spawn (&id, path, nullptr, nullptr, args, nullptr);
+    ::posix_spawn (&id, path, nullptr, nullptr, args, nullptr);
     return id;
-#    elif defined OS_WINDOWS
+#   elif defined OS_WINDOWS
     PROCESS_INFORMATION info;
-    if (!CreateProcessA (path, *args, nullptr, nullptr, true,
-                         0, nullptr, nullptr, nullptr, &info))
+    if (!::CreateProcessA (path, *args, nullptr, nullptr, true,
+                           0, nullptr, nullptr, nullptr, &info))
         return process_handle ();
     return info.hProcess;
-#    endif
+#   endif
 }
 
 int terminate (process_handle hProc)
@@ -58,18 +58,18 @@ int terminate (process_handle hProc)
     if (ThisProcess::handle () == hProc)
         throw std::logic_error ("using terminate on current process");
 
-#    ifdef OS_STD_POSIX
-    kill (hProc, SIGKILL);
-#    elif defined OS_WINDOWS
-    TerminateProcess (hProc, 0U);
-#    endif
+#   ifdef OS_STD_POSIX
+    ::kill (hProc, SIGKILL);
+#   elif defined OS_WINDOWS
+    ::TerminateProcess (hProc, 0U);
+#   endif
 
     return 0;
 }
 
 bool running (cchar* gName) noexcept
 {
-#    ifdef OS_STD_POSIX
+#   ifdef OS_STD_POSIX
     char command[32];
     std::sprintf (command, "pgrep %s > /dev/null", gName);
     return 0 == std::system (command);
@@ -80,7 +80,7 @@ bool running (cchar* gName) noexcept
 
 process_handle clone ()
 {
-#    ifdef OS_STD_POSIX
+#   ifdef OS_STD_POSIX
     return ::fork ();
 #   elif defined OS_WINDOWS
     return 0;

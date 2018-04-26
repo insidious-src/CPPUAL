@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,8 @@ namespace { namespace Internal { // optimize for internal unit usage
 inline cchar* server () noexcept
 {
 #   if defined OS_GNU_LINUX or defined OS_BSD
-        return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" : "libcppual-ui-xorg";
+        return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" :
+                                                 "libcppual-ui-xorg"    ;
 #   elif defined OS_WINDOWS
         return "libcppual-ui-win";
 #   endif
@@ -37,11 +38,11 @@ inline cchar* server () noexcept
 
 struct Initializer
 {
-    Factory::module_type mod;
+    Factory::plugin_type plg;
     shared_manager       mgr;
 
     inline Initializer () noexcept
-    : mod (server (), true, Module::ResolvePolicy::Lazy),
+    : plg (server (), true, Process::DynLoader::ResolvePolicy::Lazy),
       mgr ()
     { }
 };
@@ -57,9 +58,9 @@ inline shared_manager& instance () noexcept
     return platform ().mgr;
 }
 
-inline Factory::module_type& module () noexcept
+inline Factory::plugin_type& plugin () noexcept
 {
-    return platform ().mod;
+    return platform ().plg;
 }
 
 } } // anonymous namespace Internal
@@ -70,18 +71,18 @@ Factory* Factory::instance ()
 {
     if (Internal::instance () == nullptr)
     {
-        if (!Internal::module ().contains ("module_main") or
-                Internal::module   ().call<int> ("module_main", Internal::instance ()) or
-                Internal::instance () == nullptr)
+        if (!Internal::plugin    ().contains  ("plugin_main") or
+             Internal::plugin    ().call<int> ("plugin_main", Internal::instance ()) or
+             Internal::instance  () == nullptr)
             throw std::bad_alloc ();
     }
 
     return Internal::instance ().get ();
 }
 
-Module& Factory::module ()
+Factory::plugin_type& Factory::plugin ()
 {
-    return Internal::module ();
+    return Internal::plugin ();
 }
 
 bool Factory::hasValidInstance () noexcept

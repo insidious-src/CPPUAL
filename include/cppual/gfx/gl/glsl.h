@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,14 +37,14 @@ namespace cppual { namespace Graphics { namespace GL {
 
 enum class TessGenType : unsigned char
 {
-    Quads,
+    Quads    ,
     Triangles,
     Isolines
 };
 
 enum class TessGenSpacing : unsigned char
 {
-    Equal,
+    Equal         ,
     FractionalEven,
     FractionalOdd
 };
@@ -57,14 +57,9 @@ enum class VertexOrder : bool
 
 // ====================================================
 
-class Binary
+struct Binary
 {
-public:
-    static uint binaryFormats () noexcept
-    { return sm_uNumFormats; }
-
-private:
-    static cuint sm_uNumFormats;
+    static uint binaryFormats () noexcept;
 };
 
 // ====================================================
@@ -91,12 +86,12 @@ public:
 
     string log ();
     bool   compile () noexcept;
-    bool   loadFromFile   (string const& file);
-    bool   loadFromBinary (string const& file);
+    bool   loadFromFile   (string const& file  );
+    bool   loadFromBinary (string const& file  );
     bool   loadFromMemory (string const& source);
 
     string const& source () const noexcept { return m_gSource; }
-    Shader::Type  type   () const noexcept { return m_eType;   }
+    Shader::Type  type   () const noexcept { return m_eType  ; }
 
     bool isLoaded () const noexcept
     { return m_gStates.test (Shader::IsLoaded); }
@@ -109,10 +104,10 @@ public:
         switch (eMode)
         {
         case LoadFrom::File:
-            return loadFromFile (gString);
+            return loadFromFile   (gString);
         case LoadFrom::Memory:
             return loadFromMemory (gString);
-        default:
+        case LoadFrom::Binary:
             return loadFromBinary (gString);
         };
     }
@@ -129,7 +124,7 @@ private:
 private:
     string       m_gSource;
     States       m_gStates;
-    Shader::Type m_eType;
+    Shader::Type m_eType  ;
 };
 
 struct FragmentShader : public Shader

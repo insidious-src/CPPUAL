@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,12 +63,18 @@ class Object : public Resource < void, uint >
 {
 public:
     typedef std::ptrdiff_t ptrdiff;
-    typedef std::size_t       size_type;
+    typedef std::size_t    size_type;
 
     Object  () noexcept = default;
     Object  (ResourceType type);
     Object  (uint  shader_type);
     ~Object () noexcept;
+
+    ResourceType resType () const noexcept
+    { return m_eResType; }
+
+private:
+    ResourceType m_eResType;
 };
 
 } } } // namespace GL

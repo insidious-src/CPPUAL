@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@
 
 namespace cppual { namespace Graphics {
 
-struct  RGBColor;
-struct  CMYKColor;
-struct  HSLColor;
-struct  YUVColor;
-struct  YCbCrColor;
-struct  YPbPrColor;
+struct  RGBColor      ;
+struct  CMYKColor     ;
+struct  HSLColor      ;
+struct  YUVColor      ;
+struct  YCbCrColor    ;
+struct  YPbPrColor    ;
 typedef RGBColor Color;
 
 // =========================================================
@@ -68,9 +68,9 @@ struct RGBColor
 
 inline bool operator == (RGBColor const& gObj1, RGBColor const& gObj2) noexcept
 {
-    return (gObj1.red    == gObj2.red   and
+    return (gObj1.red   == gObj2.red   and
             gObj1.green == gObj2.green and
-            gObj1.blue    == gObj2.blue);
+            gObj1.blue  == gObj2.blue);
 }
 
 inline bool operator != (RGBColor const& gObj1, RGBColor const& gObj2) noexcept
@@ -118,23 +118,23 @@ inline bool operator != (Gradient const& gObj1, Gradient const& gObj2) noexcept
 
 // =========================================================
 
-RGBColor getColorFromName (ColorName) noexcept;
-RGBColor getColorFromHexValue (u8 value) noexcept; // ex. 0xff0000
-RGBColor CMYKtoRGBColor (CMYKColor const&) noexcept;
-RGBColor HSLtoRGBColor (HSLColor const&) noexcept;
-RGBColor YUVtoRGBColor (YUVColor const&) noexcept;
-RGBColor YCbCrtoRGBColor (YCbCrColor const&) noexcept;
-RGBColor YPbPrtoRGBColor (YPbPrColor const&) noexcept;
-RGBColor YCbCrtoRGBColorHDTV (YCbCrColor const&) noexcept;
-RGBColor YPbPrtoRGBColorHDTV (YPbPrColor const&) noexcept;
+RGBColor   getColorFromName     (ColorName)         noexcept;
+RGBColor   getColorFromHexValue (u8 value)          noexcept; // ex. 0xff0000
+RGBColor   CMYKtoRGBColor       (CMYKColor  const&) noexcept;
+RGBColor   HSLtoRGBColor        (HSLColor   const&) noexcept;
+RGBColor   YUVtoRGBColor        (YUVColor   const&) noexcept;
+RGBColor   YCbCrtoRGBColor      (YCbCrColor const&) noexcept;
+RGBColor   YPbPrtoRGBColor      (YPbPrColor const&) noexcept;
+RGBColor   YCbCrtoRGBColorHDTV  (YCbCrColor const&) noexcept;
+RGBColor   YPbPrtoRGBColorHDTV  (YPbPrColor const&) noexcept;
 
-CMYKColor  RGBtoCMYKColor (RGBColor const&) noexcept;
-HSLColor   RGBtoHSLColor (RGBColor const&) noexcept;
-YUVColor   RGBtoYUVColor (RGBColor const&) noexcept;
-YCbCrColor RGBtoYCbCrColor (RGBColor const&) noexcept;
-YPbPrColor RGBtoYPbPrColor (RGBColor const&) noexcept;
-YCbCrColor RGBtoYCbCrColorHDTV (RGBColor const&) noexcept;
-YPbPrColor RGBtoYPbPrColorHDTV (RGBColor const&) noexcept;
+CMYKColor  RGBtoCMYKColor       (RGBColor   const&) noexcept;
+HSLColor   RGBtoHSLColor        (RGBColor   const&) noexcept;
+YUVColor   RGBtoYUVColor        (RGBColor   const&) noexcept;
+YCbCrColor RGBtoYCbCrColor      (RGBColor   const&) noexcept;
+YPbPrColor RGBtoYPbPrColor      (RGBColor   const&) noexcept;
+YCbCrColor RGBtoYCbCrColorHDTV  (RGBColor   const&) noexcept;
+YPbPrColor RGBtoYPbPrColorHDTV  (RGBColor   const&) noexcept;
 
 } } // namespace Graphics
 

@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@
 #include <cppual/decl.h>
 
 #ifdef OS_STD_POSIX
-    #include <pthread.h>
-    #include <unistd.h>
-    #include <errno.h>
-    #include <signal.h>
+#   include <pthread.h>
+#   include <unistd.h>
+#   include <errno.h>
+#   include <signal.h>
 #elif defined (OS_WINDOWS)
-    #include <Windows.h>
+#   include <Windows.h>
 #endif
 
 namespace cppual { namespace Process {
@@ -68,7 +68,7 @@ struct TaskTraits final
 #endif
 };
 
-} } // namespace Cuncurency
+} } // namespace Compute
 
 #endif // __cplusplus
 #endif // CPPUAL_PROCESS_DETAILS

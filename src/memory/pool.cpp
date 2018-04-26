@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,34 +21,32 @@
 
 #include <cassert>
 #include <cppual/memory/pool.h>
-#include <cppual/memory/mop.h>
 
 using namespace std;
 
 namespace cppual { namespace Memory {
 
-PoolAllocator::PoolAllocator (size_type  uBlkCount,
+MonotonicPool::MonotonicPool (size_type  uBlkCount,
                               size_type  uBlkSize,
                               align_type uBlkAlign)
-: m_uNumAlloc (),
-  m_gOwner (*this),
-  m_pBegin (uBlkCount ? ::operator new (uBlkCount * uBlkSize) : nullptr),
-  m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
-                                nullptr),
+: m_gOwner    (*this),
+  m_pBegin    (uBlkCount ? ::operator new (uBlkCount * uBlkSize) : nullptr),
+  m_pEnd      (m_pBegin != nullptr ?
+                           static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
+                           nullptr),
   m_pFreeList (),
-  m_uBlkSize (uBlkSize),
+  m_uBlkSize  (uBlkSize),
   m_uBlkAlign (uBlkAlign),
-  m_uBlkNum ()
+  m_uBlkNum   ()
 {
     initialize ();
 }
 
-PoolAllocator::PoolAllocator (Allocator& pOwner,
+MonotonicPool::MonotonicPool (Repository& pOwner,
                               size_type   uBlkCount,
                               size_type   uBlkSize,
                               align_type  uBlkAlign)
-: m_uNumAlloc (),
-  m_gOwner ((uBlkCount * uBlkSize) > pOwner.max_size () ? *this : pOwner),
+: m_gOwner ((uBlkCount * uBlkSize) > pOwner.max_size () ? *this : pOwner),
   m_pBegin (&m_gOwner != this ?
                              (uBlkCount and uBlkSize and uBlkAlign ?
                                   static_cast<pointer> (pOwner.allocate (
@@ -59,19 +57,18 @@ PoolAllocator::PoolAllocator (Allocator& pOwner,
   m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
                                 nullptr),
   m_pFreeList (),
-  m_uBlkSize (uBlkSize),
+  m_uBlkSize  (uBlkSize),
   m_uBlkAlign (uBlkAlign),
-  m_uBlkNum ()
+  m_uBlkNum   ()
 {
     initialize ();
 }
 
-//PoolAllocator::PoolAllocator (SharedObject& gObj,
+//MonotonicPool::MonotonicPool (SharedObject& gObj,
 //                              size_type     uBlkCount,
 //                              size_type     uBlkSize,
 //                              align_type    uBlkAlign)
-//: m_uNumAlloc (),
-//  m_gOwner (this),
+//: m_gOwner (this),
 //  m_gSharedMem (gObj, uBlkCount * uBlkSize),
 //  m_pBegin (static_cast<pointer> (m_gSharedMem.address ())),
 //  m_pEnd (m_pBegin != nullptr ? m_pBegin + uBlkCount * uBlkSize : nullptr),
@@ -83,15 +80,15 @@ PoolAllocator::PoolAllocator (Allocator& pOwner,
 //    initialize ();
 //}
 
-PoolAllocator::~PoolAllocator ()
+MonotonicPool::~MonotonicPool ()
 {
     if (m_pBegin == nullptr) return;
 
-    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
+    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
     else ::operator delete (m_pBegin);
 }
 
-void PoolAllocator::initialize () noexcept
+void MonotonicPool::initialize () noexcept
 {
     if (m_pBegin)
     {
@@ -113,7 +110,7 @@ void PoolAllocator::initialize () noexcept
     }
 }
 
-void* PoolAllocator::allocate (size_type uSize, align_type uAlign) noexcept
+void* MonotonicPool::do_allocate (size_type uSize, align_type uAlign) noexcept
 {
     // check if size and alignment match with the ones from
     // the current pool instance
@@ -123,23 +120,20 @@ void* PoolAllocator::allocate (size_type uSize, align_type uAlign) noexcept
     pointer p   = reinterpret_cast<pointer > ( m_pFreeList);
     m_pFreeList = reinterpret_cast<pointer*> (*m_pFreeList);
 
-    ++m_uNumAlloc;
     return p;
 }
 
-void PoolAllocator::deallocate (void* p, size_type uSize)
+void MonotonicPool::do_deallocate (void* p, size_type uSize, align_type)
 {
     if (uSize != m_uBlkSize) throw std::length_error ("not equal to blocksize");
     if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
 
     *(reinterpret_cast<pointer*> (p)) = reinterpret_cast<pointer> (m_pFreeList);
     m_pFreeList = reinterpret_cast<pointer*> (p);
-    --m_uNumAlloc;
 }
 
-void PoolAllocator::clear () noexcept
+void MonotonicPool::clear () noexcept
 {
-    m_uNumAlloc = 0;
     m_pFreeList = reinterpret_cast<pointer*> (static_cast<math_pointer> (m_pBegin) +
                                               alignAdjust (m_pBegin, m_uBlkAlign));
 }

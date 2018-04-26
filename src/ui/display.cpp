@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ using std::shared_ptr;
 
 namespace cppual { namespace Ui {
 
-namespace {  namespace Internal { // optimize for internal unit usage
+namespace { // optimize for internal unit usage
 
 inline shared_display& backend () noexcept
 {
@@ -35,45 +35,39 @@ inline shared_display& backend () noexcept
     return back;
 }
 
-} } // anonymous namespace Internal
+} // anonymous namespace
 
 // ====================================================
 
-IDisplay* IDisplay::instance ()
+IDisplay* IDisplay::primary ()
 {
-    if (Internal::backend () == nullptr) set (nullptr);
-    return Internal::backend ().get ();
+    if (backend () == nullptr) primary (nullptr);
+    return backend ().get ();
 }
 
 bool IDisplay::hasValidInstance () noexcept
 {
-    return Internal::backend () != nullptr;
+    return backend () != nullptr;
 }
 
-bool IDisplay::set (cchar* pDevName)
+bool IDisplay::primary (cchar* pDevName)
 {
     static bool bConnected = false;
 
     if (Platform::Factory::hasValidInstance ())
-    {
-        Internal::backend () = Platform::Factory::instance ()->connectDisplay (pDevName);
+        backend () = Platform::Factory::instance ()->connectDisplay (pDevName);
 
-        if (Internal::backend () != nullptr and !Internal::backend ()->native ())
-            Internal::backend ().reset ();
-    }
-
-    if (!bConnected and Internal::backend () != nullptr) return (bConnected = true);
-    return Internal::backend () != nullptr;
+    if (!bConnected and backend () != nullptr) return (bConnected = true);
+    return backend () != nullptr;
 }
 
 IDisplay::pointer IDisplay::connect (cchar* pDevName)
 {
-    if (Internal::backend () != nullptr and
-            Internal::backend ()->name () == pDevName)
-        return Internal::backend ();
+    if (backend () != nullptr and backend ()->name () == pDevName)
+        return backend ();
 
     return Platform::Factory::hasValidInstance () ?
-                std::move (Platform::Factory::instance ()->connectDisplay (pDevName)) :
+                Platform::Factory::instance ()->connectDisplay (pDevName) :
                 IDisplay::pointer ();
 }
 

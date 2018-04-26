@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ Color getColorFromName (ColorName eName) noexcept
     switch (eName)
     {
     case ColorName::White:
-        return { 255, 0, 0 };
+        return { 255, 255, 255 };
     case ColorName::Grey:
-        return { 150, 0, 0 };
+        return { 150, 150, 150 };
     case ColorName::Red:
         return { 255, 0, 0 };
     case ColorName::Green:
@@ -43,7 +43,7 @@ Color getColorFromName (ColorName eName) noexcept
         return { 0, 0, 0 };
     case ColorName::Orange:
         return { 0, 0, 0 };
-    default: // black
+    case ColorName::Black:
         return { 0, 0, 0 };
     }
 }
@@ -55,12 +55,12 @@ Color getColorFromHexValue (u8) noexcept
 
 // =========================================================
 
-Color CMYKtoRGBColor (const CMYKColor& gCMYK) noexcept
+Color CMYKtoRGBColor (CMYKColor const& gCMYK) noexcept
 {
     return
     {
         u8 (gCMYK.yellow + gCMYK.magenta),
-        u8 (gCMYK.cyan   + gCMYK.yellow),
+        u8 (gCMYK.cyan   + gCMYK.yellow ),
         u8 (gCMYK.cyan   + gCMYK.magenta)
     };
 }
@@ -100,48 +100,48 @@ Color YPbPrtoRGBColorHDTV (const YPbPrColor&) noexcept
     return { 0, 0, 0 };
 }
 
-CMYKColor RGBtoCMYKColor (const Color& gRgb) noexcept
+CMYKColor RGBtoCMYKColor (Color const& gRgb) noexcept
 {
     return
     {
         u8 (gRgb.blue + gRgb.green),
-        u8 (gRgb.red  + gRgb.blue),
+        u8 (gRgb.red  + gRgb.blue ),
         u8 (gRgb.red  + gRgb.green),
         0
     };
 }
 
-HSLColor RGBtoHSLColor (const Color&) noexcept
+HSLColor RGBtoHSLColor (Color const&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-YUVColor RGBtoYUVColor (const Color& gRgb) noexcept
+YUVColor RGBtoYUVColor (Color const& gRgb) noexcept
 {
     return
     {
-        double ( 0.299  * gRgb.red + 0.587  * gRgb.green + 0.114 * gRgb.blue),
+        double ( 0.299  * gRgb.red + 0.587  * gRgb.green + 0.114 * gRgb.blue      ),
         double (-0.1687 * gRgb.red - 0.3313 * gRgb.green + 0.5   * gRgb.blue + 128),
         double ( 0.5    * gRgb.red - 0.4187 * gRgb.green - 0.813 * gRgb.blue + 128)
     };
 }
 
-YCbCrColor RGBtoYCbCrColor (const Color&) noexcept
+YCbCrColor RGBtoYCbCrColor (Color const&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-YPbPrColor RGBtoYPbPrColor (const Color&) noexcept
+YPbPrColor RGBtoYPbPrColor (Color const&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-YCbCrColor RGBtoYCbCrColorHDTV (const Color&) noexcept
+YCbCrColor RGBtoYCbCrColorHDTV (Color const&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-YPbPrColor RGBtoYPbPrColorHDTV (const Color&) noexcept
+YPbPrColor RGBtoYPbPrColorHDTV (Color const&) noexcept
 {
     return { 0, 0, 0 };
 }

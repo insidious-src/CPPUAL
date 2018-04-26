@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,13 +82,13 @@ public:
     { copyToString (*this, pText, std::strlen (pText)); }
 
     constexpr FastString (TAlloc const& gAtor = TAlloc ()) noexcept
-    : TAlloc (gAtor),
-      m_gBuffer (),
+    : TAlloc    (gAtor),
+      m_gBuffer ()     ,
       m_uLength ()
     { }
 
     inline FastString (pointer pText) noexcept
-        : TAlloc (), m_gBuffer { pText, std::strlen (pText) }
+    : TAlloc (), m_gBuffer { pText, std::strlen (pText) }
     { m_uLength = m_gBuffer.capacity; }
 
     inline FastString (FastString<T, TAlloc> const& gObj) noexcept
@@ -121,8 +121,8 @@ public:
     {
         m_uLength      = gObj.m_uLength;
         m_gBuffer      = gObj.m_gBuffer;
-        gObj.m_gBuffer = { 0 };
-        gObj.m_uLength = 0;
+        gObj.m_gBuffer = { 0 }         ;
+        gObj.m_uLength =   0           ;
         return *this;
     }
 
@@ -195,7 +195,7 @@ FastString<T, TAlloc> FastString<T, TAlloc>::substr (size_type uBeginPos,
         gSubStr.m_gBuffer.data[i++] = m_gBuffer.data[uBeginPos++];
 
     gSubStr[i] = T (0);
-    return std::move (gSubStr);
+    return std::move (gSubStr); // ?
 }
 
 // ====================================================
@@ -220,6 +220,7 @@ void copyToString (FastString<T, TAlloc>&                    gObj,
 template <typename T>
 constexpr T const* strend (T const* pBegin, std::size_t uLen) noexcept
 { return pBegin + (sizeof (T) * uLen) + sizeof (T); }
+
 
 template <typename T, class TAlloc>
 FastString<T, TAlloc>& assignToString (FastString<T, TAlloc>&                    gObj,
@@ -254,7 +255,7 @@ FastString<T, TAlloc>& addToString (FastString<T, TAlloc>& gObj,
                                     std::size_t            uAddLength) noexcept
 {
     typename FastString<T, TAlloc>::size_type const uLength =
-            gObj.m_uLength + uAddLength;
+             gObj.m_uLength + uAddLength;
 
     if (uLength > gObj.m_gBuffer.capacity)
     {

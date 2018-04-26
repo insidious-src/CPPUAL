@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,14 +26,11 @@ using std::string;
 
 namespace cppual { namespace Network {
 
-cu16 Address::v4_mapped_prefix[12] =
-{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
-
-Address::Address (string const&) noexcept
+Address::Address (string_type const&) noexcept
 {
 }
 
-string Address::toString () const noexcept
+Address::string_type Address::toString () const noexcept
 {
     std::stringstream output;
 
@@ -48,7 +45,7 @@ string Address::toString () const noexcept
         output << m_uBytes[3];
     }
 
-    return std::move (output.str ());
+    return output.str ();
 }
 
 Address Address::localAddress () noexcept

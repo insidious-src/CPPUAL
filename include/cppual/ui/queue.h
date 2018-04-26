@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,12 +48,13 @@ public:
     typedef IWindow                  window_type;
     typedef BitSet<event_type::Type> mask_type;
 
-
-    virtual bool set_window_events (window_type const&, mask_type) = 0;
-    virtual bool pop_front         (event_type& receiver, bool wait) = 0;
+    virtual bool set_window_events (window_type const&, mask_type)         = 0;
+    virtual bool pop_front         (event_type& receiver, bool wait)       = 0;
     virtual int  poll              (window_type const&, atomic_bool& poll) = 0;
     virtual void send              (window_type const&, event_type const&) = 0;
     virtual void post              (window_type const&, event_type const&) = 0;
+
+    virtual ~IDisplayQueue () = 0;
 
     static IDisplayQueue* primary          () noexcept;
     static bool           hasValidInstance () noexcept;
@@ -61,6 +62,7 @@ public:
     Connection display () const noexcept { return m_display; }
     bool       valid   () const noexcept { return m_display; }
 
+protected:
     constexpr IDisplayQueue (Connection display) noexcept
     : m_display (display)
     { }

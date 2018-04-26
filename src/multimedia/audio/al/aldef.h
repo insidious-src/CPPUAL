@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@ enum
 {
     // errors
     IllegalEnum                = AL_ILLEGAL_ENUM,
-    IllegalCommand            = AL_ILLEGAL_COMMAND,
+    IllegalCommand             = AL_ILLEGAL_COMMAND,
     Invalid                    = AL_INVALID,
     InvalidEnum                = AL_INVALID_ENUM,
-    InvalidValue            = AL_INVALID_VALUE,
+    InvalidValue               = AL_INVALID_VALUE,
     InvalidName                = AL_INVALID_NAME,
-    InvalidOperation        = AL_INVALID_OPERATION,
+    InvalidOperation           = AL_INVALID_OPERATION,
     OutOfMemory                = AL_OUT_OF_MEMORY,
 
     // operations

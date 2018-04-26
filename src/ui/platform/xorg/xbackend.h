@@ -29,19 +29,20 @@
 
 namespace cppual { namespace Ui {
 
-class XDisplay final : public IDisplay
+class SHARED_API XDisplay final : public IDisplay
 {
 public:
     XDisplay () = delete;
     XDisplay (cchar*) noexcept;
     ~XDisplay ();
+
     uint screenCount () const noexcept;
     void flush       () noexcept;
 
-    string name () const { return m_gName; }
+    string_type name () const { return m_gName; }
 
 private:
-    string m_gName;
+    string_type m_gName;
 };
 
 } } // namespace Ui

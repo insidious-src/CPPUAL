@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,8 +62,8 @@ public:
     inline Reactive (Reactive const&) = default;
     inline Reactive& operator = (Reactive&&) = default;
 
-    inline Reactive (value_type&& value) : m_value (std::forward<T> (value)) { }
-    inline Reactive (const_reference value) : m_value (value) { }
+    inline Reactive (value_type&&    value) : m_value (std::forward<T> (value)) { }
+    inline Reactive (const_reference value) : m_value (value)                   { }
 
     inline Reactive& operator = (Reactive const& gObj)
     {

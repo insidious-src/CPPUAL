@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,11 +92,11 @@ public:
     constexpr Config (Config const&) noexcept = default;
     inline    Config& operator = (Config const&) noexcept = default;
 
-    constexpr controller  display  ()   const noexcept { return m_pDisplay;  }
+    constexpr controller  display  ()   const noexcept { return m_pDisplay ; }
     constexpr Features    features ()   const noexcept { return m_eFeatures; }
-    constexpr format_type format   ()   const noexcept { return m_gFormat;   }
-    constexpr void*       operator ()() const noexcept { return m_pCfg;      }
-    constexpr operator    void*    ()   const noexcept { return m_pCfg;      }
+    constexpr format_type format   ()   const noexcept { return m_gFormat  ; }
+    constexpr void*       operator ()() const noexcept { return m_pCfg     ; }
+    constexpr operator    void*    ()   const noexcept { return m_pCfg     ; }
 
     constexpr explicit operator safe_bool () const noexcept
     { return m_pCfg ? &Config::m_pCfg : nullptr; }
@@ -111,9 +111,9 @@ private:
     format_type toFormat () const;
 
 private:
-    pointer     m_pDisplay;
-    pointer     m_pCfg;
-    format_type m_gFormat;
+    pointer     m_pDisplay ;
+    pointer     m_pCfg     ;
+    format_type m_gFormat  ;
     Features    m_eFeatures;
 };
 
@@ -152,10 +152,10 @@ public:
     Type           type       () const noexcept { return  m_eType;             }
 
 private:
-    conf_pointer m_pConf;
+    conf_pointer m_pConf  ;
     pointer      m_pHandle;
-    value_type   m_pOwner;
-    Type         m_eType;
+    value_type   m_pOwner ;
+    Type         m_eType  ;
 };
 
 // ====================================================
@@ -163,7 +163,7 @@ private:
 class Context : public IDeviceContext
 {
 public:
-    typedef Config const* conf_pointer;
+    typedef Config const* conf_pointer  ;
     typedef Config const& conf_reference;
 
     Context (Context const&);
@@ -211,12 +211,12 @@ class ContextMutex
 {
 public:
     ContextMutex (Context& context) noexcept
-    : m_context (context)
+    : m_context  (context)
     { }
 
     void lock ()
     {
-        m_mutex.lock ();
+        m_mutex  .lock   ();
         m_context.assign ();
     }
 
@@ -228,11 +228,11 @@ public:
     void unlock ()
     {
         m_context.release ();
-        m_mutex.unlock ();
+        m_mutex  .unlock  ();
     }
 
 private:
-    std::mutex m_mutex;
+    std::mutex m_mutex  ;
     Context&   m_context;
 };
 

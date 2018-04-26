@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,6 @@ enum class DeviceType : unsigned char
 {
     Custom,
     Native,
-    Software,
     GL,
     Vulkan,
     Direct3D,
@@ -70,9 +69,9 @@ struct  IDeviceContext;
 struct  IPixelSurface;
 typedef BitSet<PixelFlag::Type>         PixelFlags;
 typedef std::shared_ptr<IDeviceContext> shared_context;
-typedef std::shared_ptr<IPixelSurface>   shared_buffer;
+typedef std::shared_ptr<IPixelSurface>  shared_buffer;
 typedef std::weak_ptr  <IDeviceContext> weak_context;
-typedef std::weak_ptr  <IPixelSurface>   weak_buffer;
+typedef std::weak_ptr  <IPixelSurface>  weak_buffer;
 
 // =========================================================
 
@@ -184,7 +183,7 @@ struct IResource
     virtual format_type format     () const = 0;
     virtual value_type  handle     () const = 0;
     virtual DeviceType  device     () const = 0;
-    virtual void        flush      () = 0;
+    virtual void        flush      ()       = 0;
 };
 
 // =========================================================

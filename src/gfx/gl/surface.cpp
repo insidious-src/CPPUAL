@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ namespace cppual { namespace Graphics { namespace GL {
 
 namespace { namespace EGL { // optimize for internal unit usage
 
-typedef EGLint               value_type;
+typedef EGLint               value_type     ;
 typedef EGLDisplay           display_pointer;
 typedef EGLSurface           surface_pointer;
 typedef EGLContext           context_pointer;
@@ -144,30 +144,23 @@ inline void error <Create> ()
     {
     case NoMatch:
         throw bad_match ("rendering api not bound");
-        break;
     case BadDisplay:
         throw bad_display ("invalid display handle");
-        break;
     case NotInitialized:
         throw not_initialized ("EGL is NOT initialized for target display");
-        break;
     case BadConfig:
         throw bad_config ("NOT an EGL frame buffer configuration, "
                           "or does not support the current rendering API");
-        break;
     case BadNativeWindow:
         throw bad_window ("the window attributes do not correspond to target config "
                           "or it does not support rendering to windows");
-        break;
     case BadContext:
         throw bad_config ("shared context is not an EGL rendering context "
                           "of the same client API type as the newly created context");
     case BadAttribute:
         throw bad_config ("attribute value is NOT recognized or out of range");
-        break;
     case NoAlloc:
         throw std::bad_alloc ();
-        break;
     }
 }
 
@@ -235,7 +228,6 @@ inline Config::Features convertExtensions (display_pointer dsp)
             break;
         case const_hash ("EGL_KHR_create_context"):
             eFeatures += Config::ContextAttributesExt;
-            break;
             break;
         }
     }
@@ -351,7 +343,7 @@ inline context_pointer createGC (Config const& gConf, GFXVersion version, void* 
                                             pShared,
                                             &nContextAttribs[0]);
 
-    if (!pContext) error<Create> ();
+    if   (!pContext) error<Create> ();
     return pContext;
 }
 
@@ -359,7 +351,7 @@ inline point2u getSize (Config const& config, Surface::pointer surface) noexcept
 {
     value_type size[2];
 
-    if (eglQuerySurface (config.display (), surface, EGL::Width, &size[0]) == EGL::IntFalse)
+    if (eglQuerySurface (config.display (), surface, EGL::Width , &size[0]) == EGL::IntFalse)
         return point2u ();
 
     if (eglQuerySurface (config.display (), surface, EGL::Height, &size[1]) == EGL::IntFalse)
@@ -373,10 +365,10 @@ inline point2u getSize (Config const& config, Surface::pointer surface) noexcept
 // ====================================================
 
 Config::Config (controller dsp, format_type gFormat)
-: m_pDisplay  (eglGetDisplay (dsp.get<EGL::native_display> ())),
-  m_pCfg      (),
-  m_gFormat   (),
-  m_eFeatures ()
+: m_pDisplay   (eglGetDisplay (dsp.get<EGL::native_display> ())),
+  m_pCfg       (),
+  m_gFormat    (),
+  m_eFeatures  ()
 {
     if (!m_pDisplay) throw std::logic_error ("invalid display");
 
@@ -516,9 +508,9 @@ Surface& Surface::operator = (Surface&& obj) noexcept
     if (this == &obj) return *this;
     if (m_pHandle) eglDestroySurface (config ().display (), m_pHandle);
 
-    m_pConf        = obj.m_pConf;
-    m_pHandle      = obj.m_pHandle;
-    m_pOwner       = obj.m_pOwner;
+    m_pConf       = obj.m_pConf  ;
+    m_pHandle     = obj.m_pHandle;
+    m_pOwner      = obj.m_pOwner ;
 
     obj.m_pConf   = nullptr;
     obj.m_pHandle = nullptr;
@@ -616,8 +608,8 @@ Context& Context::operator = (Context const& obj)
 
     m_pReadTarget = m_pDrawTarget = nullptr;
     m_nVersion    = obj.m_nVersion;
-    m_pShared     = obj.m_pShared;
-    m_pConf       = obj.m_pConf;
+    m_pShared     = obj.m_pShared ;
+    m_pConf       = obj.m_pConf   ;
 
     return *this;
 }

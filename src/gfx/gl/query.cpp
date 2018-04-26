@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ inline uint convertTargetType (Query::Type eType) noexcept
         return GL::Timestamp;
     case Query::Type::TransformFeedbackPrimitivesWritten:
         return GL::TransformFeedbackPrimitivesWritten;
-    default:
+    case Query::Type::Undefined:
         return 0;
     }
 }
@@ -54,9 +54,9 @@ inline uint convertTargetType (Query::Type eType) noexcept
 
 // ====================================================
 
-Query::Query () noexcept
-: Object (ResourceType::Query),
-  m_eType (Query::Type::Undefined),
+Query::Query  () noexcept
+: Object      (ResourceType::Query)   ,
+  m_eType     (Query::Type::Undefined),
   m_bHasQuery ()
 { }
 
@@ -65,9 +65,9 @@ Query::~Query () noexcept
     if (m_bHasQuery)
     {
         if (IDeviceContext::current ()->version () < 3)
-            glEndQuery (convertTargetType (m_eType));
+            glEndQuery     (convertTargetType (m_eType));
         else
-            glEndQueryARB (convertTargetType (m_eType));
+            glEndQueryARB  (convertTargetType (m_eType));
     }
 }
 

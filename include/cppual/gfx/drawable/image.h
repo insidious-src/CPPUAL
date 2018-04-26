@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@
 #include <cppual/memory/allocator.h>
 
 using std::string;
-using cppual::Memory::AllocatorPolicy;
 using cppual::Memory::Allocator;
+using cppual::Memory::Repository;
 
 
 namespace cppual { namespace Graphics {
@@ -48,25 +48,25 @@ public:
  * @brief Raster image parser for jpg, png, bmp, tga, gif
  */
 
-class RasterImage final : public Image, private Memory::GenericPolicy<RasterImage>
+class RasterImage final : public Image, private Memory::Allocator<RasterImage, Repository>
 {
 public:
-    RasterImage () = delete;
+    RasterImage  () = delete;
     ~RasterImage ();
     void draw (Transform2D const& info);
 
     inline RasterImage (string const&      gPath,
-                        Allocator&         pAtor,
+                        Repository&        pAtor,
                         PixelFormat const& gFomat = PixelFormat (),
-                        Color              gMask  = Color ())
-    : AllocatorPolicy (pAtor),
+                        Color              gMask  = Color       ())
+    : Allocator (pAtor),
       m_gPixBuffer ({ 0, 0 }, gFomat),
       m_gColorMask (gMask),
-      m_bIsLoaded (parseImage (gPath))
+      m_bIsLoaded  (parseImage (gPath))
     { }
 
-    inline Color mask () const noexcept { return m_gColorMask; }
-    inline bool        isLoaded () const noexcept { return m_bIsLoaded; }
+    inline Color mask     () const noexcept { return m_gColorMask; }
+    inline bool  isLoaded () const noexcept { return m_bIsLoaded ; }
 
     inline DeviceType type () const noexcept
     { return DeviceType::GL; }
@@ -79,8 +79,8 @@ public:
 
 private:
     VirtualBuffer m_gPixBuffer;
-    Color      m_gColorMask;
-    cbool         m_bIsLoaded;
+    Color         m_gColorMask;
+    cbool         m_bIsLoaded ;
 
     bool parseImage (string const&);
 };
@@ -92,10 +92,10 @@ private:
  * @brief Vector image parser for svg
  */
 
-class VectorImage final : public Image, private Memory::GenericPolicy<VectorImage>
+class VectorImage final : public Image, private Memory::Allocator<VectorImage, Repository>
 {
 public:
-    VectorImage () = delete;
+    VectorImage  () = delete;
     ~VectorImage ();
     void draw (Transform2D const& info);
 
@@ -109,16 +109,16 @@ public:
     { return m_bIsLoaded; }
 
     inline VectorImage (string const&      gPath,
-                        Allocator&         pAtor,
+                        Repository&        pAtor,
                         PixelFormat const& gFomat = PixelFormat ())
-    : AllocatorPolicy (pAtor),
-      m_gPixBuffer ({ 0, 0 }, gFomat),
-      m_bIsLoaded (parseImage (gPath))
+    : Allocator (pAtor),
+      m_gPixBuffer ({ 0, 0 },   gFomat),
+      m_bIsLoaded  (parseImage (gPath))
     { }
 
 private:
     VirtualBuffer m_gPixBuffer;
-    cbool         m_bIsLoaded;
+    cbool         m_bIsLoaded ;
 
     bool parseImage (string const&);
 };

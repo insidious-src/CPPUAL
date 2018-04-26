@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ namespace cppual { namespace Graphics { namespace GL {
 class ObjectInstance
 {
 public:
-    ObjectInstance () noexcept;
+    ObjectInstance  () noexcept;
     ~ObjectInstance () noexcept;
 
 private:
@@ -39,7 +39,7 @@ private:
 class LODInstance
 {
 public:
-    LODInstance () noexcept;
+    LODInstance  () noexcept;
     ~LODInstance () noexcept;
 
 private:

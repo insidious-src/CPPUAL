@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,18 +29,12 @@
 
 namespace cppual { namespace Memory {
 
-template <Allocator::size_type N>
-class StaticAllocator final : public Allocator, NonCopyable
+template <Repository::size_type N>
+class StaticPool final : public Repository, NonCopyable
 {
 public:
-    void* allocate   (size_type n, align_type = 0) override;
-    void  deallocate (void* p, size_type n) override;
-
-    size_type size () const noexcept
+    size_type capacity () const noexcept
     { return sizeof (m_pBuffer); }
-
-    bool is_equal (Allocator const& gObj) const noexcept
-    { return &gObj == this; }
 
     size_type max_size () const noexcept
     {
@@ -48,28 +42,22 @@ public:
                                        static_cast<math_pointer> (m_pMarker));
     }
 
-    size_type count () const noexcept
-    { return m_uNumAlloc; }
-
-    void clear () noexcept
-    {
-        m_pMarker   = m_pBuffer;
-        m_uNumAlloc = 0;
-    }
-
-    constexpr StaticAllocator () noexcept
-    : m_pMarker   (m_pBuffer),
-      m_uNumAlloc ()
-    { }
+    void      clear      () noexcept { m_pMarker = m_pBuffer;   }
+    constexpr StaticPool () noexcept : m_pMarker  (m_pBuffer) { }
 
 private:
     pointer           m_pMarker;
-    size_type         m_uNumAlloc;
     alignas (uptr) u8 m_pBuffer[N];
+
+    void* do_allocate   (size_type size, align_type align);
+    void  do_deallocate (void* p, size_type size, align_type align);
+
+    bool  do_is_equal   (memory_resource const& gObj) const noexcept
+    { return &gObj == this; }
 };
 
-template <Allocator::size_type N>
-inline void* StaticAllocator<N>::allocate (size_type n, align_type a)
+template <Repository::size_type N>
+inline void* StaticPool<N>::do_allocate (size_type n, align_type a)
 {
     pointer const pMarker    = nextAlignedAddr (m_pMarker, a);
     pointer const pNewMarker = static_cast<math_pointer> (pMarker) + n;
@@ -77,23 +65,20 @@ inline void* StaticAllocator<N>::allocate (size_type n, align_type a)
     if (pNewMarker > m_pBuffer + sizeof (m_pBuffer)) throw std::bad_alloc ();
 
     m_pMarker = pNewMarker;
-    ++m_uNumAlloc;
-    return pMarker;
+    return      pMarker   ;
 }
 
-template <Allocator::size_type N>
-inline void StaticAllocator<N>::deallocate (void* p, size_type n)
+template <Repository::size_type N>
+inline void StaticPool<N>::do_deallocate (void* p, size_type n, align_type)
 {
     if (static_cast<math_pointer> (p) + n == m_pMarker)
-    {
         m_pMarker = p;
-        --m_uNumAlloc;
-    }
-    else throw std::out_of_range ("pointer doesn't match the last element allocated");
+    else
+        throw std::out_of_range ("pointer doesn't match the last element allocated");
 }
 
-template <class T, Allocator::size_type N>
-using StaticPolicy = AllocatorPolicy <T, StaticAllocator<N> >;
+template <class T, Repository::size_type N>
+using StaticAllocator = Allocator <T, StaticPool<N> >;
 
 } } // namespace Memory
 

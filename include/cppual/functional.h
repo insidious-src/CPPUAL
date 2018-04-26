@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,12 +66,12 @@ struct SimplifyMemFunc <sizeof (AnyMemberFn)>
     template <class X, class XFuncType>
     inline
     static
-    AnyObject* convert (X const*     mPtrThis,
+    AnyObject* convert (X const*     pThis,
                         XFuncType    mFuncToBind,
-                        AnyMemberFn& mFuncBound) noexcept
+                        AnyMemberFn& mFuncBound ) noexcept
     {
-        mFuncBound = reinterpret_cast<AnyMemberFn> (mFuncToBind);
-        return reinterpret_cast<AnyObject*> (const_cast<X*> (mPtrThis));
+        mFuncBound = reinterpret_cast<AnyMemberFn> (mFuncToBind)    ;
+        return reinterpret_cast<AnyObject*> (const_cast<X*> (pThis));
     }
 };
 
@@ -81,8 +81,8 @@ template <class TMemFunc, class TStaticFunc>
 class Closure
 {
 public:
-    typedef std::size_t size_type;
-    typedef AnyObject*  pointer;
+    typedef std::size_t size_type ;
+    typedef AnyObject*  pointer   ;
     typedef AnyMemberFn value_type;
 
     constexpr Closure () noexcept = default;
@@ -102,28 +102,28 @@ public:
     {
         m_pObj = nullptr;
         m_fn   = nullptr;
-        return *this;
+        return * this   ;
     }
 
     inline Closure& operator = (Closure const& mRhs) noexcept
     {
         m_pObj = mRhs.m_pObj;
-        m_fn   = mRhs.m_fn;
-        return *this;
+        m_fn   = mRhs.m_fn  ;
+        return * this       ;
     }
 
     inline Closure& operator = (Closure&& mRhs) noexcept
     {
         m_pObj = std::move (mRhs.m_pObj);
         m_fn   = std::move (mRhs.m_fn  );
-        return *this;
+        return * this                   ;
     }
 
     template <class X, class XMemFunc>
-    inline void bindMemFunc (X* mPtrThis, XMemFunc mFuncToBind) noexcept
+    inline void bindMemFunc (X* pThis, XMemFunc mFuncToBind) noexcept
     {
         m_pObj = SimplifyMemFunc<sizeof (mFuncToBind)>::convert
-                 (mPtrThis, mFuncToBind, m_fn);
+                 (pThis, mFuncToBind, m_fn);
     }
 
     template <class DerivedClass, class ParentInvokerSig>
@@ -132,10 +132,10 @@ public:
                                 TStaticFunc      mFuncToBind) noexcept
     {
         static_assert (sizeof (pointer) == sizeof (mFuncToBind),
-                       "Cannot use direct_cast");
-        if (mFuncToBind == nullptr) m_fn = nullptr;
+                       "Cannot use direct_cast")         ;
+        if (mFuncToBind == nullptr) m_fn = nullptr       ;
         else bindMemFunc (mPtrParent, mStaticFuncInvoker);
-        m_pObj = direct_cast<pointer> (mFuncToBind);
+        m_pObj = direct_cast<pointer> (mFuncToBind)      ;
     }
 
     constexpr bool operator == (std::nullptr_t) const noexcept
@@ -147,18 +147,18 @@ public:
     constexpr bool operator == (TStaticFunc mPtr) const noexcept
     {
         return mPtr == nullptr ?
-                    *this == nullptr :
-                    mPtr  == reinterpret_cast<TStaticFunc> (getStaticFunc ());
+              *this == nullptr :
+               mPtr == reinterpret_cast<TStaticFunc> (getStaticFunc ());
     }
 
     constexpr bool operator != (std::nullptr_t) const noexcept
     { return !operator == (nullptr); }
 
     constexpr bool operator != (Closure const& mRhs) const noexcept
-    { return !operator == (mRhs); }
+    { return !operator == (mRhs)   ; }
 
     constexpr bool operator != (TStaticFunc mPtr) const noexcept
-    { return !operator == (mPtr); }
+    { return !operator == (mPtr)   ; }
 
     inline bool operator < (Closure const& mRhs) const
     {
@@ -221,14 +221,14 @@ class Function <T(Args...)>
 {
 public:
     typedef MemberFn<T, Args...>                     any_mem_fn_type;
-    typedef StaticFn<T, Args...>                     static_fn_type;
-    typedef Closure<any_mem_fn_type, static_fn_type> closure_type;
-    typedef std::shared_ptr<void>                    storage_type;
-    typedef typename closure_type::value_type        value_type;
-    typedef typename closure_type::pointer           pointer;
+    typedef StaticFn<T, Args...>                     static_fn_type ;
+    typedef Closure<any_mem_fn_type, static_fn_type> closure_type   ;
+    typedef std::shared_ptr<void>                    storage_type   ;
+    typedef typename closure_type::value_type        value_type     ;
+    typedef typename closure_type::pointer           pointer        ;
 
     template <typename X>
-    using MemberFnToBind = T (X::*)(Args...);
+    using mem_fn_type = T (X::*)(Args...);
 
     // lambda constructor
     template <typename Callable,
@@ -251,7 +251,7 @@ public:
     constexpr Function () noexcept = default;
     constexpr explicit Function (std::nullptr_t) noexcept { }
 
-    constexpr Function (Function const& mImpl) noexcept
+    constexpr Function (Function const& mImpl)   noexcept
     : m_closure { mImpl.m_closure },
       m_storage { mImpl.m_storage }
     { }
@@ -267,8 +267,8 @@ public:
 
     // member function constructor
     template <typename X, typename Y>
-    inline Function (MemberFnToBind<X> mFuncToBind, Y* mPtrThis) noexcept
-    { bind (mFuncToBind, mPtrThis); }
+    inline Function (mem_fn_type<X> mFuncToBind, Y* pThis) noexcept
+    { bind (mFuncToBind, pThis); }
 
     inline Function& operator = (Function const& mImpl) noexcept
     {
@@ -336,8 +336,8 @@ private:
     { m_closure.bindStaticFunc (this, &Function::invokeStaticFunc, mFuncToBind); }
 
     template<typename X, typename Y>
-    inline void bind (MemberFnToBind<X> mFuncToBind, Y* mPtrThis) noexcept
-    { m_closure.bindMemFunc (reinterpret_cast<const Y*> (mPtrThis), mFuncToBind); }
+    inline void bind (mem_fn_type<X> mFuncToBind, Y* pThis) noexcept
+    { m_closure.bindMemFunc (reinterpret_cast<const Y*> (pThis), mFuncToBind); }
 
 private:
     closure_type m_closure;

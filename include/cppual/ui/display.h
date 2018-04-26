@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,51 +24,53 @@
 #ifdef __cplusplus
 
 #include <memory>
-#include <cppual/resource.h>
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/dsp_details.h>
-
-using std::shared_ptr;
-using std::weak_ptr;
-using std::string;
-using cppual::Graphics::Connection;
 
 namespace cppual { namespace Ui {
 
 class   IDisplay;
-typedef shared_ptr<IDisplay> shared_display;
-typedef weak_ptr  <IDisplay> weak_display;
+typedef std::shared_ptr<IDisplay> shared_display;
+typedef std::weak_ptr  <IDisplay> weak_display;
 
 // ====================================================
 
 class IDisplay : public NonCopyableVirtual
 {
 public:
-    typedef Connection     value_type;
-    typedef shared_display pointer;
+    typedef Graphics::Connection handle_type;
+    typedef std::string          string_type;
+    typedef shared_display       pointer;
 
-    virtual string name        () const = 0;
-    virtual uint   screenCount () const = 0;
-    virtual void   flush       ()       = 0;
+    IDisplay () noexcept = default;
 
-    static  IDisplay* instance         ();
-    static  bool      hasValidInstance () noexcept;
-    static  bool      set              (cchar*);
-    static  pointer   connect          (cchar*);
+    virtual string_type name             () const = 0;
+    virtual uint        screenCount      () const = 0;
+    virtual void        flush            ()       = 0;
 
-    value_type native () const noexcept { return m_native; }
-    value_type gl     () const noexcept { return m_gl;     }
+    static  IDisplay*   primary          ();
+    static  bool        hasValidInstance () noexcept;
+    static  bool        primary          (cchar*);
+    static  pointer     connect          (cchar*);
 
-    IDisplay () noexcept
-    : m_native (), m_gl ()
-    { }
+    handle_type native () const noexcept { return m_native; }
+    handle_type legacy () const noexcept { return m_legacy; }
 
-    IDisplay (value_type native, value_type gl) noexcept
-    : m_native (native), m_gl (gl)
+    template <typename U>
+    constexpr typename std::remove_pointer<U>::type* native () const noexcept
+    { return m_native.get<U> (); }
+
+    template <typename U>
+    constexpr typename std::remove_pointer<U>::type* legacy () const noexcept
+    { return m_legacy.get<U> (); }
+
+protected:
+    IDisplay (handle_type native, handle_type legacy) noexcept
+    : m_native (native), m_legacy (legacy)
     { }
 
 private:
-    value_type m_native, m_gl;
+    handle_type m_native { }, m_legacy { };
 };
 
 } } // namespace Ui

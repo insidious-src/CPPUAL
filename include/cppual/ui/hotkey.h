@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,8 @@
 #include <atomic>
 #include <iostream>
 #include <functional>
-#include <cppual/ui/events.h>
+#include <cppual/signal.h>
+#include <cppual/input/event.h>
 
 using std::function;
 using std::atomic_bool;
@@ -38,7 +39,7 @@ namespace cppual { namespace Ui {
 class HotKey
 {
 public:
-    typedef Event::KeyData value_type;
+    typedef Input::Event::KeyData value_type;
 
     HotKey () noexcept;
     HotKey (value_type const) noexcept;

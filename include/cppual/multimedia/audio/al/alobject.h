@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@ public:
     inline  AudioObject () noexcept : m_uObjId (), m_eObjType () { }
     inline ~AudioObject () noexcept { reset (); }
 
-    inline ObjectType type () const noexcept { return m_eObjType; }
-    inline uint       id () const noexcept { return m_uObjId; }
-    inline bool       isValid () const noexcept { return m_uObjId; }
+    inline ObjectType type    () const noexcept { return m_eObjType; }
+    inline uint       id      () const noexcept { return m_uObjId;   }
+    inline bool       isValid () const noexcept { return m_uObjId;   }
 
     inline static uint count () noexcept
     { return sm_uALObjCount.load (std::memory_order_consume); }

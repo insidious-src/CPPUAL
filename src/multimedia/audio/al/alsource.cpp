@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,19 +65,19 @@ inline Audio::SoundState convertEmitterState (int nState) noexcept
 // ====================================================
 
 SoundSource::SoundSource () noexcept
-: AudioObject (ObjectType::Source),
-  m_gMutex (),
-  m_pBuffer (),
+: AudioObject   (ObjectType::Source),
+  m_gMutex      (),
+  m_pBuffer     (),
   m_uBufferSlot (),
-  m_fVolume ()
+  m_fVolume     ()
 { }
 
 SoundSource::SoundSource (SoundBuffer& gBuffer) noexcept
-: AudioObject (ObjectType::Source),
-  m_gMutex (),
-  m_pBuffer (),
+: AudioObject   (ObjectType::Source),
+  m_gMutex      (),
+  m_pBuffer     (),
   m_uBufferSlot (gBuffer.m_gSources.size ()),
-  m_fVolume ()
+  m_fVolume     ()
 {
     if (id () and gBuffer.isValid ())
     {
@@ -87,25 +87,25 @@ SoundSource::SoundSource (SoundBuffer& gBuffer) noexcept
 }
 
 SoundSource::SoundSource (SoundSource&& gObj) noexcept
-: AudioObject (gObj),
-  m_gMutex (),
-  m_pBuffer (gObj.m_pBuffer),
+: AudioObject   (gObj),
+  m_gMutex      (),
+  m_pBuffer     (gObj.m_pBuffer),
   m_uBufferSlot (gObj.m_uBufferSlot),
-  m_fVolume (gObj.m_fVolume)
+  m_fVolume     (gObj.m_fVolume)
 {
     gObj.m_pBuffer = nullptr;
     if (m_pBuffer) m_pBuffer->m_gSources[m_uBufferSlot] = this;
 }
 
 SoundSource::SoundSource (SoundSource const& gObj) noexcept
-: AudioObject (gObj),
-  m_gMutex (),
-  m_pBuffer (gObj.m_pBuffer),
+: AudioObject   (gObj),
+  m_gMutex      (),
+  m_pBuffer     (gObj.m_pBuffer),
   m_uBufferSlot (gObj.m_pBuffer ? gObj.m_pBuffer->m_gSources.size () : 0),
-  m_fVolume (gObj.m_fVolume)
+  m_fVolume     (gObj.m_fVolume)
 {
-    setVolume (gObj.getVolume ());
-    setLooping (gObj.isLooping ());
+    setVolume       (gObj.getVolume    ());
+    setLooping      (gObj.isLooping    ());
     setPlayingSpeed (gObj.playingSpeed ());
     if (m_pBuffer) m_pBuffer->m_gSources.push_back (this);
 }
@@ -132,8 +132,8 @@ SoundSource& SoundSource::operator = (SoundSource const& gObj) noexcept
             gObj.m_pBuffer->m_gSources.push_back (this);
         }
 
-        setVolume (gObj.getVolume ());
-        setLooping (gObj.isLooping ());
+        setVolume       (gObj.getVolume    ());
+        setLooping      (gObj.isLooping    ());
         setPlayingSpeed (gObj.playingSpeed ());
     }
 
@@ -249,8 +249,8 @@ void SoundSource::setVolume (float fValue) noexcept
 {
     if (id ())
     {
-        alSourcef (id (), AL::Volume, fValue);
-        m_gMutex.lock ();
+        alSourcef       (id (), AL::Volume, fValue);
+        m_gMutex.lock   ();
         m_fVolume = fValue;
         m_gMutex.unlock ();
     }

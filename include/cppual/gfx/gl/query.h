@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,21 +43,21 @@ public:
         Timestamp
     };
 
-    Query () noexcept;
-    ~Query () noexcept;
-    u64  get64 () noexcept;
-    uint get () noexcept;
-    bool isReady () noexcept;
-    void beginQuery (Type type) noexcept;
+    Query                  () noexcept;
+    ~Query                 () noexcept;
+    u64  get64             () noexcept;
+    uint get               () noexcept;
+    bool isReady           () noexcept;
+    void beginQuery        (Type type) noexcept;
     void beginQueryIndexed (Type type, uint index) noexcept;
-    void endQuery () noexcept;
-    void queryCounter (Type type) noexcept;
+    void endQuery          () noexcept;
+    void queryCounter      (Type type) noexcept;
 
     inline Type queryType () const noexcept
     { return m_eType; }
 
 private:
-    Type m_eType;
+    Type m_eType    ;
     bool m_bHasQuery;
 };
 

@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,42 +46,42 @@ public:
     bool operator != (Packet const&) const = delete;
     void append (cvoid* data, size_type size_in_bytes) noexcept;
 
-    Packet& operator >> (bool&) noexcept;
-    Packet& operator >> (int8&) noexcept;
-    Packet& operator >> (u8&) noexcept;
-    Packet& operator >> (int16&) noexcept;
-    Packet& operator >> (u16&) noexcept;
-    Packet& operator >> (int32&) noexcept;
-    Packet& operator >> (u32&) noexcept;
-    Packet& operator >> (float&) noexcept;
-    Packet& operator >> (double&) noexcept;
-    Packet& operator >> (ldouble&) noexcept;
-    Packet& operator >> (char*) noexcept;
-    Packet& operator >> (string&) noexcept;
-    Packet& operator >> (wchar*) noexcept;
-    Packet& operator >> (wstring&) noexcept;
-    Packet& operator >> (char16*) noexcept;
+    Packet& operator >> (bool&)      noexcept;
+    Packet& operator >> (int8&)      noexcept;
+    Packet& operator >> (u8&)        noexcept;
+    Packet& operator >> (int16&)     noexcept;
+    Packet& operator >> (u16&)       noexcept;
+    Packet& operator >> (int32&)     noexcept;
+    Packet& operator >> (u32&)       noexcept;
+    Packet& operator >> (float&)     noexcept;
+    Packet& operator >> (double&)    noexcept;
+    Packet& operator >> (ldouble&)   noexcept;
+    Packet& operator >> (char*)      noexcept;
+    Packet& operator >> (string&)    noexcept;
+    Packet& operator >> (wchar*)     noexcept;
+    Packet& operator >> (wstring&)   noexcept;
+    Packet& operator >> (char16*)    noexcept;
     Packet& operator >> (u16string&) noexcept;
-    Packet& operator >> (char32*) noexcept;
+    Packet& operator >> (char32*)    noexcept;
     Packet& operator >> (u32string&) noexcept;
 
-    Packet& operator << (bool) noexcept;
-    Packet& operator << (int8) noexcept;
-    Packet& operator << (u8) noexcept;
-    Packet& operator << (int16) noexcept;
-    Packet& operator << (u16) noexcept;
-    Packet& operator << (int32) noexcept;
-    Packet& operator << (u32) noexcept;
-    Packet& operator << (float) noexcept;
-    Packet& operator << (double) noexcept;
-    Packet& operator << (ldouble) noexcept;
-    Packet& operator << (cchar*) noexcept;
-    Packet& operator << (string const&) noexcept;
-    Packet& operator << (cwchar*) noexcept;
-    Packet& operator << (wstring const&) noexcept;
-    Packet& operator << (cchar16*) noexcept;
+    Packet& operator << (bool)             noexcept;
+    Packet& operator << (int8)             noexcept;
+    Packet& operator << (u8)               noexcept;
+    Packet& operator << (int16)            noexcept;
+    Packet& operator << (u16)              noexcept;
+    Packet& operator << (int32)            noexcept;
+    Packet& operator << (u32)              noexcept;
+    Packet& operator << (float)            noexcept;
+    Packet& operator << (double)           noexcept;
+    Packet& operator << (ldouble)          noexcept;
+    Packet& operator << (cchar*)           noexcept;
+    Packet& operator << (string const&)    noexcept;
+    Packet& operator << (cwchar*)          noexcept;
+    Packet& operator << (wstring const&)   noexcept;
+    Packet& operator << (cchar16*)         noexcept;
     Packet& operator << (u16string const&) noexcept;
-    Packet& operator << (cchar32*) noexcept;
+    Packet& operator << (cchar32*)         noexcept;
     Packet& operator << (u32string const&) noexcept;
 
     inline size_type getSize () const noexcept
@@ -97,13 +97,10 @@ public:
     { return m_bIsValid ? &Packet::canExchange : nullptr; }
 
     inline void flush () noexcept
-    {
-        m_gData.clear ();
-        m_uPos = 0;
-    }
+    { m_gData.clear (); m_uPos = 0; }
 
 protected:
-    virtual cvoid* onSend (size_type& size);
+    virtual cvoid* onSend    (size_type& size);
     virtual void   onReceive (cvoid* data, size_type size);
 
 private:

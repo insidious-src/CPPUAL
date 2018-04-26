@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #define CPPUAL_PLATFORM_MANAGER_H_
 #ifdef __cplusplus
 
-#include <cppual/process/module.h>
+#include <cppual/process/plugin.h>
 #include <cppual/ui/display.h>
 #include <cppual/ui/queue.h>
 #include <cppual/ui/wm.h>
@@ -37,16 +37,16 @@ typedef shared_ptr<Factory> shared_manager;
 
 struct Factory : public NonCopyableVirtual
 {
-    typedef Process::Module module_type;
+    typedef Process::DynLoader plugin_type;
 
     virtual shared_window createWindow (Rect const& rect,
                                         u32         screen  = 0,
-                                        IDisplay*   display = IDisplay::instance ()) = 0;
+                                        IDisplay*   display = IDisplay::primary ()) = 0;
 
     virtual shared_display connectDisplay (cchar* name = nullptr) = 0;
     virtual shared_queue   createQueueInstance () = 0;
 
-    static module_type& module   ();
+    static plugin_type& plugin   ();
     static Factory*     instance ();
     static bool         hasValidInstance () noexcept;
 };

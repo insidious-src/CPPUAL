@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
  */
 
 #include <cppual/ui/skin.h>
+#include <cppual/ui/queue.h>
 
 using std::placeholders::_1;
 
@@ -29,7 +30,8 @@ bool ISkin::setDefault (ISkin* pSkin) noexcept
 {
     if (!pSkin) return false;
 
-    Event::emit ().winPaint (Element (), PaintEvent (nullptr, Rect ()).data ().paint);
+    EventQueue::emit ().winPaint (Element (),
+                                  Input::PaintEvent (Rect ()).data ().paint);
     return true;
 }
 

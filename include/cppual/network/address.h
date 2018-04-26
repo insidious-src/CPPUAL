@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,21 +27,22 @@
 #include <cstring>
 #include <cppual/types.h>
 
-using std::string;
-
 namespace cppual { namespace Network {
 
-class Address final
+class Address
 {
 private:
-    static cu16 v4_mapped_prefix[12];
+    constexpr static cu16 v4_mapped_prefix[12] =
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
 
 public:
+    typedef std::string string_type;
+
     Address () noexcept = default;
-    Address (string const&) noexcept;
+    Address (string_type const&) noexcept;
     Address (u8 byte1, u8 byte2, u8 byte3, u8 byte4) noexcept;
-    string toString () const noexcept;
-    bool   isValid  () const noexcept;
+    string_type toString () const noexcept;
+    bool        isValid  () const noexcept;
 
     static Address localAddress  () noexcept;
     static Address publicAddress () noexcept;
@@ -54,24 +55,22 @@ public:
 
     bool isLoopback () const noexcept
     {
-        if (isV4 ())
-            return m_uBytes[12] == 127;
-        else
-            return ((m_uBytes[ 0] == 0) and (m_uBytes[ 1] == 0) and
-                    (m_uBytes[ 2] == 0) and (m_uBytes[ 3] == 0) and
-                    (m_uBytes[ 4] == 0) and (m_uBytes[ 5] == 0) and
-                    (m_uBytes[ 6] == 0) and (m_uBytes[ 7] == 0) and
-                    (m_uBytes[ 8] == 0) and (m_uBytes[ 9] == 0) and
-                    (m_uBytes[10] == 0) and (m_uBytes[11] == 0) and
-                    (m_uBytes[12] == 0) and (m_uBytes[13] == 0) and
-                    (m_uBytes[14] == 0) and (m_uBytes[15] == 1));
+        return isV4 () ? m_uBytes[12] == 127 :
+                         m_uBytes[ 0] == 0 and m_uBytes[ 1] == 0 and
+                         m_uBytes[ 2] == 0 and m_uBytes[ 3] == 0 and
+                         m_uBytes[ 4] == 0 and m_uBytes[ 5] == 0 and
+                         m_uBytes[ 6] == 0 and m_uBytes[ 7] == 0 and
+                         m_uBytes[ 8] == 0 and m_uBytes[ 9] == 0 and
+                         m_uBytes[10] == 0 and m_uBytes[11] == 0 and
+                         m_uBytes[12] == 0 and m_uBytes[13] == 0 and
+                         m_uBytes[14] == 0 and m_uBytes[15] == 1;
     }
 
     bool isBroadcast () const noexcept
     {
         return isV4 () and
-                m_uBytes[12] == 0xff and m_uBytes[13] == 0xff and
-                m_uBytes[14] == 0xff and m_uBytes[15] == 0xff;
+               m_uBytes[12] == 0xff and m_uBytes[13] == 0xff and
+               m_uBytes[14] == 0xff and m_uBytes[15] == 0xff;
     }
 
     friend bool operator != (Address const&, Address const&) noexcept;
@@ -163,7 +162,7 @@ inline bool operator == (Address const& gObj1, Address const& gObj2) noexcept
 inline bool operator >= (Address const& gObj1, Address const& gObj2) noexcept
 { return gObj1 > gObj2 or gObj1 == gObj1; }
 
-// ====================================================
+// =========================================================
 
 static_assert (std::is_pod<Address>::value, "Address must be a POD");
 

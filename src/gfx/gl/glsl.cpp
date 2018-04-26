@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ string syncReadFile (string const& gFilePath, ios_base::openmode eMode = ios_bas
         gFile.close ();
     }
 
-    return std::move (gContent);
+    return gContent;
 }
 
 inline static uint getShaderType (Shader::Type eType) noexcept
@@ -77,7 +77,7 @@ inline static uint getShaderType (Shader::Type eType) noexcept
         return GL::TessEvaluationShaderARB;
     case Shader::Compute:
         return GL::ComputeShaderARB;
-    default:
+    case Shader::Fragment:
         return GL::FragmentShaderARB;
     }
 }
@@ -112,20 +112,26 @@ inline static uint formatCount () noexcept
 
 } // anonymous namespace
 
-cuint Binary::sm_uNumFormats = formatCount ();
+// ====================================================
+
+uint Binary::binaryFormats () noexcept
+{
+    static const auto formats = formatCount ();
+    return formats;
+}
 
 // ====================================================
 
 Shader::Shader (Shader::Type eType) noexcept
-: Object (getShaderType (eType)),
+: Object    (getShaderType (eType)),
   m_gSource (),
   m_gStates (),
-  m_eType (eType)
+  m_eType   (eType)
 { }
 
 string Shader::log ()
 {
-    if (!id ()) return std::move (string ());
+    if (!id ()) return string ();
 
     string gLogString;
     int       nLogLen;
@@ -134,17 +140,17 @@ string Shader::log ()
 
     if (nLogLen > 1)
     {
-        gLogString.resize (static_cast<string::size_type> (nLogLen));
-        glGetShaderInfoLog (id (), nLogLen, nullptr, &gLogString[0]);
+        gLogString.resize  (static_cast<string::size_type> (nLogLen));
+        glGetShaderInfoLog (id (), nLogLen, nullptr,  &gLogString[0]);
     }
 
-    return std::move (gLogString);
+    return gLogString;
 }
 
 bool Shader::loadFromFile (string const& gFile)
 {
     if (!id ()) return false;
-    string gContent (std::move (syncReadFile (gFile)));
+    string gContent (syncReadFile (gFile));
 
     if (gContent.length ())
     {
@@ -172,7 +178,7 @@ bool Shader::loadFromFile (string const& gFile)
 bool Shader::loadFromBinary (string const& gFile)
 {
     if (!id ()) return false;
-    string gContent (std::move (syncReadFile (gFile, ios_base::binary)));
+    string gContent (syncReadFile (gFile, ios_base::binary));
 
     if (gContent.length ())
     {
@@ -181,8 +187,8 @@ bool Shader::loadFromBinary (string const& gFile)
         glShaderBinary (1, &uId, 0, gContent.c_str (),
                 static_cast<GLsizei> (gContent.length ()));
 
-        m_gSource.clear ();
-        m_gStates -= Shader::IsLoaded;
+        m_gSource.clear ()             ;
+        m_gStates -= Shader::IsLoaded  ;
         m_gStates += Shader::IsCompiled;
         return true;
     }
@@ -207,47 +213,47 @@ bool Shader::loadFromMemory (string const& gSource)
         glShaderSourceARB (id (), 1, &pBuffer, nullptr);
     }
 
-    m_gStates += Shader::IsLoaded;
+    m_gStates += Shader::IsLoaded  ;
     m_gStates -= Shader::IsCompiled;
     return true;
 }
 
 bool Shader::compile () noexcept
 {
-    if (m_gStates.test (Shader::IsCompiled)) return true;
-    else if (!m_gStates.test (Shader::IsLoaded)) return false;
+    if      ( m_gStates.test (Shader::IsCompiled)) return  true;
+    else if (!m_gStates.test (Shader::IsLoaded  )) return false;
 
-    int    nStatus;
+    int nStatus;
 
     // compile the shader
-    IDeviceContext::current ()->version () < 3 ?
-                glCompileShader    (id ()) :
-                glCompileShaderARB (id ());
+    IDeviceContext::current ()->version () < 3  ?
+                    glCompileShader     (id ()) :
+                    glCompileShaderARB  (id ()) ;
 
     // check the compilation status
     glGetShaderiv (id (), GL::CompileStatus, &nStatus);
     nStatus == GL::TRUE ? m_gStates += Shader::IsCompiled :
-                                         m_gStates -= Shader::IsCompiled;
+                          m_gStates -= Shader::IsCompiled ;
 
     return m_gStates.test (Shader::IsCompiled);
 }
 
 SLProgram::SLProgram () noexcept
 : Object (ResourceType::Program),
-  m_gAttribLocList (),
+  m_gAttribLocList  (),
   m_gUniformLocList (),
-  m_uShaderCount (),
-  m_gShaderTypes (),
-  m_gStates ()
+  m_uShaderCount    (),
+  m_gShaderTypes    (),
+  m_gStates         ()
 { }
 
 SLProgram::SLProgram (string const& gBinaryName) noexcept
 : Object (ResourceType::Program),
-  m_gAttribLocList (),
+  m_gAttribLocList  (),
   m_gUniformLocList (),
-  m_uShaderCount (),
-  m_gShaderTypes (),
-  m_gStates ()
+  m_uShaderCount    (),
+  m_gShaderTypes    (),
+  m_gStates         ()
 { loadFromBinary (gBinaryName); }
 
 bool SLProgram::link () noexcept
@@ -270,7 +276,7 @@ bool SLProgram::link () noexcept
 
         // check linking status
         nStatus == GL::TRUE ? m_gStates += SLProgram::IsLinked :
-                                m_gStates -= SLProgram::IsLinked;
+                              m_gStates -= SLProgram::IsLinked ;
 
         return m_gStates.test (SLProgram::IsLinked);
     }
@@ -288,12 +294,12 @@ bool SLProgram::validate () noexcept
         if (IDeviceContext::current ()->version () < 3)
         {
             glValidateProgram (id ());
-            glGetProgramiv    (id (), GL::ValidateStatus, &nStatus);
+            glGetProgramiv    (id () , GL::ValidateStatus, &nStatus);
         }
         else
         {
             glValidateProgramARB (id ());
-            glGetProgramivARB    (id (), GL::ValidateStatus, &nStatus);
+            glGetProgramivARB    (id () , GL::ValidateStatus, &nStatus);
         }
 
         return nStatus;
@@ -331,7 +337,7 @@ void SLProgram::disable () noexcept
 bool SLProgram::loadFromBinary (string const& gFile)
 {
     if (!id ()) return false;
-    string gData (std::move (syncReadFile (gFile, ios_base::binary)));
+    string gData (syncReadFile (gFile, ios_base::binary));
 
     if (gData.length ())
     {
@@ -354,7 +360,7 @@ bool SLProgram::loadFromBinary (string const& gFile)
         if (nStatus == GL::FALSE)
         {
             m_uShaderCount = 0;
-            m_gStates      -= SLProgram::IsLinked;
+            m_gStates     -= SLProgram::IsLinked;
             return false;
         }
 
@@ -370,7 +376,7 @@ bool SLProgram::loadFromBinary (string const& gFile)
                                      &uAttached[0]);
 
         // shader count
-        m_uShaderCount = (uint) nCount;
+        m_uShaderCount = static_cast<uint> (nCount);
 
         // set linked shader types
         while (nCount)
@@ -483,14 +489,14 @@ bool SLProgram::isAttached (Shader const& gShader)
 
 string SLProgram::log ()
 {
-    if (!id ()) return std::move (string ());
+    if (!id ()) return string ();
 
     string gLogString;
     int       nLogLen;
 
     IDeviceContext::current ()->version () < 3 ?
                 glGetProgramiv    (id (), GL::LogLength, &nLogLen) :
-                glGetProgramivARB (id (), GL::LogLength, &nLogLen);
+                glGetProgramivARB (id (), GL::LogLength, &nLogLen) ;
 
     if (nLogLen > 1)
     {
@@ -498,7 +504,7 @@ string SLProgram::log ()
         glGetProgramInfoLog (id (), nLogLen, nullptr, &gLogString[0]);
     }
 
-    return std::move (gLogString);
+    return gLogString;
 }
 
 } } } // namespace GL

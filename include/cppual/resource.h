@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #ifndef CPPUAL_RESOURCE_H_
 #define CPPUAL_RESOURCE_H_
 #ifdef __cplusplus
+
+#include <type_traits>
 
 namespace cppual {
 
@@ -58,6 +60,10 @@ public:
     inline    Handle () noexcept = default;
     constexpr Handle (pointer handle) noexcept : m_handle (handle) { }
     constexpr Handle (std::nullptr_t) noexcept : m_handle ()       { }
+    inline    Handle (Handle&&) noexcept         = default;
+    constexpr Handle (Handle const&) noexcept    = default;
+    inline    Handle& operator = (Handle&&)      = default;
+    inline    Handle& operator = (Handle const&) = default;
 
     constexpr operator pointer () const noexcept
     { return m_handle; }
@@ -110,7 +116,7 @@ public:
       m_id   ()
     { }
 
-    Resource (Controller pCon, value_type id) noexcept
+    Resource (controller pCon, value_type id) noexcept
     : m_pCon (pCon),
       m_id   (id)
     { }
@@ -137,8 +143,8 @@ public:
     Resource& operator = (Resource const&) = delete;
     ~Resource () { }
 
-    value_type   id    () const noexcept { return m_id; }
-    bool         valid () const noexcept { return m_id; }
+    value_type id    () const noexcept { return m_id; }
+    bool       valid () const noexcept { return m_id; }
 
     Resource () noexcept
     : m_id   ()
@@ -158,12 +164,12 @@ private:
 
 // =========================================================
 
-template <class ID, class DisposableType>
+template <class ID>
 constexpr bool operator == (Resource<void, ID> const& gObj1,
                             Resource<void, ID> const& gObj2)
 { return gObj1.m_id == gObj2.m_id and gObj1.m_eResType == gObj2.m_eResType; }
 
-template <class ID, class DisposableType>
+template <class ID>
 constexpr bool operator != (Resource<void, ID> const& gObj1,
                             Resource<void, ID> const& gObj2)
 { return !(gObj1 == gObj2); }

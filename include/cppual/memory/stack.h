@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,21 +30,18 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class StackedAllocator final : Allocator
+class StackedPool final : Repository
 {
 public:
-    StackedAllocator (size_type size);
-    StackedAllocator (Allocator& allocator, size_type size);
-    //StackedAllocator (string& shared_name, size_type size);
-    ~StackedAllocator ();
-    void* allocate   (size_type size, align_type align) noexcept override;
-    void  deallocate (void* p, size_type size) override;
-    void  clear      () noexcept;
+    StackedPool  (size_type capacity);
+    StackedPool  (Repository& allocator, size_type capacity);
+    //StackedPool  (string& shared_name, size_type size);
+    ~StackedPool ();
 
-    cvoid* marker () const noexcept
-    { return m_pCurMarker; }
+    void   clear  ()       noexcept {        m_pCurMarker = m_pBegin; }
+    cvoid* marker () const noexcept { return m_pCurMarker;            }
 
-    bool is_equal (Allocator const& gObj) const noexcept
+    bool is_equal (Repository const& gObj) const noexcept
     { return &gObj == &m_gOwner; }
 
     size_type max_size () const noexcept
@@ -53,50 +50,56 @@ public:
                                        static_cast<math_pointer> (m_pCurMarker));
     }
 
-    size_type count () const noexcept { return m_uNumAlloc; }
-
-    size_type size () const noexcept
+    size_type capacity () const noexcept
     {
         return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
                                        static_cast<math_pointer> (m_pBegin));
     }
 
-    Allocator& owner     () const noexcept { return m_gOwner; }
-    bool       is_shared () const noexcept { return m_bIsMemShared; }
+    Repository& owner     () const noexcept { return m_gOwner; }
+    bool        is_shared () const noexcept { return m_bIsMemShared; }
 
 private:
-    size_type     m_uNumAlloc;
-    Allocator&    m_gOwner;
+    Repository&   m_gOwner;
     pointer       m_pCurMarker;
     pointer const m_pBegin;
     pointer const m_pEnd;
     cbool         m_bIsMemShared;
-};
 
-template <class T>
-using StackedPolicy = AllocatorPolicy <T, StackedAllocator>;
+    void* do_allocate   (size_type capacity, align_type align) noexcept;
+    void  do_deallocate (void* p, size_type capacity, align_type align);
+
+    bool  do_is_equal   (memory_resource const& gObj)    const noexcept
+    { return &gObj == &m_gOwner; }
+};
 
 // =========================================================
 
-class DStackedAllocator final : public Allocator, NonCopyable
+template <class T>
+using StackedPolicy = Allocator <T, StackedPool>;
+
+// =========================================================
+
+class DStackedPool final : public Repository, NonCopyable
 {
 public:
-    DStackedAllocator (size_type size, size_type marker_hint);
-    DStackedAllocator (Allocator& allocator, size_type size, size_type marker_hint);
-    //DStackedAllocator (string& shared, size_type size, size_type marker_hint);
-    ~DStackedAllocator ();
+    DStackedPool  (size_type capacity, size_type marker_hint);
+    DStackedPool  (Repository& allocator, size_type capacity, size_type marker_hint);
+    //DStackedPool  (string& shared, size_type size, size_type marker_hint);
+    ~DStackedPool ();
 
-    void* allocate (size_type size, align_type align) noexcept override;
-    void  deallocate (void* p, size_type size) override;
-    void  clear () noexcept;
+
 
     size_type hint () const noexcept { return m_uHint; }
     void      setHint (size_type uHint) noexcept { m_uHint = uHint; }
     cvoid*    bottomMarker () const noexcept { return m_pBottomMarker; }
     cvoid*    topMarker () const noexcept { return m_pTopMarker; }
 
-    bool is_equal (Allocator const& gObj) const noexcept
-    { return &gObj == &m_gOwner; }
+    bool is_shared () const noexcept
+    { return m_bIsMemShared;  }
+
+    Repository& owner () const noexcept
+    { return m_gOwner; }
 
     size_type max_size () const noexcept
     {
@@ -104,34 +107,38 @@ public:
                                        static_cast<math_pointer> (m_pTopMarker));
     }
 
-    size_type count () const noexcept
-    { return m_uNumAlloc; }
-
-    size_type size () const noexcept
+    size_type capacity () const noexcept
     {
         return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
                                        static_cast<math_pointer> (m_pBegin));
     }
 
-    bool is_shared () const noexcept
-    { return m_bIsMemShared;  }
-
-    Allocator& owner () const noexcept
-    { return m_gOwner; }
+    void clear () noexcept
+    {
+        m_pTopMarker    = m_pBegin;
+        m_pBottomMarker = m_pEnd;
+    }
 
 private:
-    size_type     m_uNumAlloc;
-    Allocator&    m_gOwner;
+    Repository&   m_gOwner;
     pointer       m_pTopMarker;
     pointer       m_pBottomMarker;
     pointer const m_pBegin;
     size_type     m_uHint;
     pointer const m_pEnd;
     cbool         m_bIsMemShared;
+
+    void* do_allocate   (size_type capacity, align_type align) noexcept;
+    void  do_deallocate (void* p, size_type capacity, align_type align);
+
+    bool  do_is_equal   (memory_resource const& gObj)    const noexcept
+    { return &gObj == &m_gOwner; }
 };
 
+// =========================================================
+
 template <class T>
-using DStackedPolicy = AllocatorPolicy <T, DStackedAllocator>;
+using DStackedPolicy = Allocator <T, DStackedPool>;
 
 } } // namespace Memory
 

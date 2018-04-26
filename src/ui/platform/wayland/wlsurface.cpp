@@ -46,12 +46,12 @@ public:
     void map () noexcept;
     void unmap () noexcept;
 
-    IDisplay*   display () const noexcept { return m_pDisplay; }
-    Element     handle () const noexcept { return m_pViewHandle; }
-    PixelFormat format () const noexcept { return m_gFormat; }
-    weak_window owner () const noexcept { return m_pParent; }
-    Rect        geometry () const noexcept { return m_gRect; }
-    u32         screen () const noexcept { return 0; }
+    IDisplay*   display  () const noexcept { return m_pDisplay;    }
+    Element     handle   () const noexcept { return m_pViewHandle; }
+    PixelFormat format   () const noexcept { return m_gFormat;     }
+    weak_window owner    () const noexcept { return m_pParent;     }
+    Rect        geometry () const noexcept { return m_gRect;       }
+    u32         screen   () const noexcept { return 0;             }
 
     WindowFlags flags () const { return WindowFlags (); }
     void setFlags (WindowFlags) { }
@@ -75,12 +75,12 @@ public:
     void flash (uint) { }
 
 private:
-    PixelFormat       m_gFormat;
+    PixelFormat   m_gFormat;
     shared_window m_pParent;
-    Rect              m_gRect;
-    IDisplay*      m_pDisplay;
-    wl_surface*       m_pViewHandle;
-    u32               m_uScreen;
+    Rect          m_gRect;
+    IDisplay*     m_pDisplay;
+    wl_surface*   m_pViewHandle;
+    u32           m_uScreen;
 };
 
 // ====================================================

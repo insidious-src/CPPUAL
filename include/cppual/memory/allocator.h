@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,18 @@
 
 #include <limits>
 #include <memory>
+#include <experimental/memory_resource>
 #include <cppual/compute/device.h>
+
+namespace std    { using std::experimental::pmr::memory_resource; }
 
 namespace cppual { namespace Memory {
 
-struct Allocator
+// =========================================================
+// Extend std::memory_resource for compute usage
+// =========================================================
+
+struct Repository : public std::memory_resource
 {
     typedef std::size_t     align_type;
     typedef std::size_t     size_type;
@@ -39,149 +46,87 @@ struct Allocator
     typedef std::ptrdiff_t  difference_type;
     typedef Compute::Device device_type;
 
-    virtual size_type    count          () const { return 0; }
-    virtual device_type& device         () const noexcept { return Compute::Device::host (); }
-    virtual void         clear          () { }
-    virtual bool         is_thread_safe () const noexcept { return false; }
-    virtual bool         is_lock_free   () const noexcept { return false; }
-    virtual bool         is_shared      () const noexcept { return false; }
+    virtual  bool is_thread_safe () const noexcept { return false; }
+    virtual  bool is_lock_free   () const noexcept { return false; }
+    virtual  bool is_shared      () const noexcept { return false; }
 
-    virtual size_type max_size () const
+    virtual  device_type& device () const noexcept
+    { return device_type::host   (); }
+
+    virtual  Repository& owner   () const noexcept
+    { return const_cast<Repository&> (*this); }
+
+    virtual  size_type  max_size () const
     { return std::numeric_limits<size_type>::max (); }
 
-    virtual size_type size () const
+    virtual  size_type capacity  () const
     { return std::numeric_limits<size_type>::max (); }
-
-    virtual bool is_equal (Allocator const& gObj) const
-    { return this == &gObj; }
-
-    virtual void* allocate (size_type size, align_type)
-    { return ::operator new (size); }
-
-    virtual void deallocate (void* pointer, size_type)
-    { ::operator delete (pointer);  }
-
-    virtual Allocator& owner () const noexcept
-    { return const_cast<Allocator&> (*this); }
-
-    static Allocator& new_allocator () noexcept
-    {
-        static Allocator alloc;
-        return alloc;
-    }
 };
 
 // =========================================================
-
-template <typename T, class Ator = void>
-class AllocatorPolicy
-{
-public:
-    typedef T               value_type;
-    typedef T*              pointer;
-    typedef T const*        const_pointer;
-    typedef T&              reference;
-    typedef T const&        const_reference;
-    typedef Ator            allocator_type;
-    typedef std::size_t     size_type;
-    typedef std::ptrdiff_t  difference_type;
-    typedef std::true_type  propagate_on_container_swap;
-    typedef std::false_type propagate_on_container_copy_assignment;
-    typedef std::true_type  propagate_on_container_move_assignment;
-
-    AllocatorPolicy () = delete;
-    inline    AllocatorPolicy (AllocatorPolicy&&) noexcept = default;
-    constexpr AllocatorPolicy (AllocatorPolicy const&) noexcept = default;
-    inline    AllocatorPolicy& operator = (AllocatorPolicy&&) noexcept = default;
-    inline    AllocatorPolicy& operator = (AllocatorPolicy const&) noexcept = default;
-
-    template <class U>
-    struct rebind { typedef AllocatorPolicy<U, allocator_type> other; };
-
-    void deallocate (pointer p, size_type n)
-    { get ().deallocate (p, n * sizeof (T)); }
-
-    pointer allocate (size_type n, cvoid* = nullptr)
-    { return static_cast<pointer> (get ().allocate (sizeof (T) * n, alignof (T))); }
-
-    size_type max_size () const noexcept
-    { return get ().max_size () / sizeof (T); }
-
-    constexpr static pointer address (reference x) noexcept
-    { return std::addressof (x); }
-
-    constexpr static const_pointer address (const_reference x) noexcept
-    { return std::addressof (x); }
-
-    template <class U, typename... Args>
-    static void construct (U* p, Args&&... args)
-    { new (p) U (std::forward<Args> (args)...); }
-
-    template <class U>
-    static void destroy (U* p)
-    { p->~U (); }
-
-    constexpr allocator_type& get () const noexcept
-    { return *m_pAtor; }
-
-    constexpr AllocatorPolicy (allocator_type& gAtor) noexcept
-    : m_pAtor (&gAtor)
-    { }
-
-    template <class U>
-    constexpr
-    explicit
-    AllocatorPolicy (AllocatorPolicy<U, allocator_type> const& gObj) noexcept
-    : m_pAtor (gObj.m_pAtor)
-    { }
-
-    template <typename, class>
-    friend class AllocatorPolicy;
-
-    template <class T1, class T2>
-    friend
-    bool
-    operator == (AllocatorPolicy<T1, Allocator> const&,
-                 AllocatorPolicy<T2, Allocator> const&) noexcept;
-
-private:
-    allocator_type* m_pAtor;
-};
-
+// Repository Concept
 // =========================================================
 
-template <typename T>
-class AllocatorPolicy <T, Allocator>
+template <class T>
+struct is_repository_helper : public std::conditional
+        <
+         std::is_base_of<Repository, T>::value,
+         std::true_type, std::false_type
+         >::type
+{ };
+
+template <>
+struct is_repository_helper < std::memory_resource > : public std::true_type
+{ };
+
+template <>
+struct is_repository_helper < Repository >           : public std::true_type
+{ };
+
+template <class T>
+struct is_repository : public is_repository_helper<T>
+{ static_assert (is_repository<T>::value, "invalid Repository object type!"); };
+
+template <class T>
+using RepositoryType = typename
+std::enable_if<is_repository<T>::value, T>::type;
+
+// =========================================================
+// Redefined allocator policy
+// =========================================================
+
+template <typename T, class R = void>
+class Allocator
 {
 public:
-    typedef T               value_type;
-    typedef T*              pointer;
-    typedef T const*        const_pointer;
-    typedef T&              reference;
-    typedef T const&        const_reference;
-    typedef Allocator       allocator_type;
-    typedef std::size_t     size_type;
-    typedef std::ptrdiff_t  difference_type;
-    typedef std::false_type propagate_on_container_copy_assignment;
-    typedef std::true_type  propagate_on_container_move_assignment;
-    typedef std::true_type  propagate_on_container_swap;
+    typedef T                 value_type;
+    typedef T*                pointer;
+    typedef T const*          const_pointer;
+    typedef T &               reference;
+    typedef T const&          const_reference;
+    typedef RepositoryType<R> resource_type;
+    typedef std::size_t       size_type;
+    typedef std::ptrdiff_t    difference_type;
+    typedef std::false_type   propagate_on_container_copy_assignment;
+    typedef std::true_type    propagate_on_container_move_assignment;
+    typedef std::true_type    propagate_on_container_swap;
 
-    inline    AllocatorPolicy (AllocatorPolicy&&) noexcept = default;
-    constexpr AllocatorPolicy (AllocatorPolicy const&) noexcept = default;
-    inline    AllocatorPolicy& operator = (AllocatorPolicy&&) noexcept = default;
-    inline    AllocatorPolicy& operator = (AllocatorPolicy const&) noexcept = default;
+    inline    Allocator (Allocator &&    )             noexcept = default;
+    constexpr Allocator (Allocator const&)             noexcept = default;
+    inline    Allocator& operator = (Allocator &&    ) noexcept = default;
+    inline    Allocator& operator = (Allocator const&) noexcept = default;
 
     template <class U>
-    struct rebind { typedef AllocatorPolicy<U, allocator_type> other; };
+    struct rebind { typedef Allocator<U, resource_type> other; };
 
     void deallocate (pointer p, size_type n)
-    { get ().deallocate (p, n * sizeof (T)); }
+    { resource ()->deallocate (p, n * sizeof (T)); }
 
     pointer allocate (size_type n, cvoid* = nullptr)
-    { return static_cast<pointer> (get ().allocate (sizeof (T) * n, alignof (T))); }
+    { return static_cast<pointer> (resource ()->allocate (sizeof (T) * n, alignof (T))); }
 
     size_type max_size () const noexcept
-    { return get ().max_size () / sizeof (T); }
+    { return resource ()->max_size () / sizeof (T); }
 
     static pointer address (reference x) noexcept
     { return std::addressof (x); }
@@ -197,37 +142,29 @@ public:
     static void destroy (U* p)
     { p->~U (); }
 
-    constexpr allocator_type& get () const noexcept
-    { return *m_pAtor; }
+    constexpr resource_type* resource () const noexcept
+    { return m_pAtor; }
 
-    constexpr AllocatorPolicy (allocator_type& gAtor) noexcept
+    constexpr Allocator (resource_type& gAtor) noexcept
     : m_pAtor (&gAtor)
-    { }
-
-    AllocatorPolicy () noexcept
-    : m_pAtor (&Allocator::new_allocator ())
     { }
 
     template <class U>
     constexpr
     explicit
-    AllocatorPolicy (AllocatorPolicy<U, allocator_type> const& gObj) noexcept
+    Allocator (Allocator<U, resource_type> const& gObj) noexcept
     : m_pAtor (gObj.m_pAtor)
     { }
 
     template <typename, class>
-    friend class AllocatorPolicy;
-
-    template <class T1, class T2>
-    friend
-    bool
-    operator == (AllocatorPolicy<T1, Allocator> const&,
-                 AllocatorPolicy<T2, Allocator> const&) noexcept;
+    friend class Allocator;
 
 private:
-    allocator_type* m_pAtor;
+    resource_type* m_pAtor;
 };
 
+// =========================================================
+// Allocator Concept
 // =========================================================
 
 template <typename T>
@@ -239,67 +176,71 @@ struct is_allocator_helper < std::allocator<T> > : public std::true_type
 { };
 
 template <typename T, typename U>
-struct is_allocator_helper < AllocatorPolicy <T, U> > : public std::true_type
+struct is_allocator_helper < Allocator <T, U> > : public std::true_type
 { };
 
 template <typename T>
 struct is_allocator : public is_allocator_helper<T>
 { };
 
-// =========================================================
-
-template <class T>
-struct AllocatorPolicy <T, void> : std::allocator<T>
-{ using std::allocator<T>::allocator; };
-
-template <typename T>
-using GenericPolicy = AllocatorPolicy<T, Allocator>;
-
 template <typename T>
 using AllocatorType = typename
 std::enable_if<is_allocator<T>::value, T>::type;
 
 // =========================================================
+// Generic Declarations
+// =========================================================
 
-template <class T, class U, class Allocator>
+template <typename T>
+struct Allocator <T, void> : std::allocator<T>
+{ using std::allocator<T>::allocator; };
+
+template <typename T>
+using PolymorphicAllocator = Allocator<T, Repository>;
+
+// =========================================================
+// Allocator Comparisons
+// =========================================================
+
+template <class T, class U, class A>
 inline
 bool
-operator == (AllocatorPolicy<T, Allocator> const& x,
-             AllocatorPolicy<U, Allocator> const& y) noexcept
-{ return x.m_pAtor == y.m_pAtor; }
+operator == (Allocator<T, A> const& x,
+             Allocator<U, A> const& y) noexcept
+{ return x.resource () == y.resource (); }
 
-template <class T, class U, class Allocator>
+template <class T, class U, class A>
 inline
 bool
-operator != (AllocatorPolicy<T, Allocator> const& x,
-             AllocatorPolicy<U, Allocator> const& y) noexcept
+operator != (Allocator<T, A> const& x,
+             Allocator<U, A> const& y) noexcept
 { return !(x == y); }
 
-template <class T, class Allocator, class RAllocator>
+template <class T, class A, class RAllocator>
 constexpr
 bool
-operator != (AllocatorPolicy<T, Allocator> const&,
+operator != (Allocator<T, A> const&,
              RAllocator const&) noexcept
 { return true; }
 
-template <class T, class Allocator, class RAllocator>
+template <class T, class A, class RAllocator>
 constexpr
 bool
-operator == (AllocatorPolicy<T, Allocator> const&,
+operator == (Allocator<T, A> const&,
              RAllocator const&) noexcept
 { return false; }
 
 template <class T, class U>
 constexpr
 bool
-operator != (AllocatorPolicy<T, void> const&,
+operator != (Allocator<T, void> const&,
              std::allocator<U> const&) noexcept
 { return false; }
 
 template <class T, class U>
 constexpr
 bool
-operator == (AllocatorPolicy<T, void> const&,
+operator == (Allocator<T, void> const&,
              std::allocator<U> const&) noexcept
 { return true; }
 

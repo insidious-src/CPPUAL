@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/gfx/font.h>
 #include <iostream>
 #include <ft2build.h>
 #include <freetype.h>
+#include <cppual/gfx/font.h>
 
 namespace cppual { namespace Graphics {
 
@@ -42,7 +42,7 @@ inline font_library init () noexcept
 
 inline font_library instance () noexcept
 {
-    static font_library lib = init ();
+    static const font_library lib = init ();
     return lib;
 }
 
@@ -50,7 +50,7 @@ inline font_library instance () noexcept
 
 // =========================================================
 
-Font::Atlas::Atlas (string const& gName)
+Font::Atlas::Atlas (string_type const& gName)
 : m_gName (gName),
   m_pFace ()
 {

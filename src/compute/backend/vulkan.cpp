@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_COMPUTE_BACKEND_VULKAN_H_
-#define CPPUAL_COMPUTE_BACKEND_VULKAN_H_
-#ifdef __cplusplus
-
 #include <vector>
 #include <cstring>
 #include <type_traits>
@@ -33,7 +29,7 @@
 #include "../backend.h"
 
 using std::vector;
-using cppual::Memory::StackedAllocator;
+using cppual::Memory::StackedPool;
 using cppual::Memory::StackedPolicy;
 
 namespace cppual { namespace Compute {
@@ -47,6 +43,3 @@ namespace { // optimize for internal unit usage
 
 
 } } // namespace Compute
-
-#endif // __cplusplus
-#endif // CPPUAL_COMPUTE_BACKEND_VULKAN_H_

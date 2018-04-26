@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ void    setOrientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) no
 point3f orientationAt () noexcept;
 point3f orientationUp () noexcept;
 void    setVolume (float value) noexcept;
-float    volume () noexcept;
+float   volume () noexcept;
 bool    isMute () noexcept;
 void    mute () noexcept;
 void    unmute () noexcept;

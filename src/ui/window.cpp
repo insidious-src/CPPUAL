@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,56 +57,56 @@ WindowAdapter::WindowAdapter (Widget&     widget,
 
     if (!registered)
     {
-        connect (event_type::emit ().keyPress,
-                 [](event_type::window_type wnd, event_type::KeyData data)
+        connect (EventQueue::emit ().keyPress,
+                 [](EventQueue::window_type wnd, event_type::KeyData data)
         {
             Internal::map ()[wnd]->keyPress (data);
         });
 
-        connect (event_type::emit ().keyRelease,
-                 [](event_type::window_type wnd, event_type::KeyData data)
+        connect (EventQueue::emit ().keyRelease,
+                 [](EventQueue::window_type wnd, event_type::KeyData data)
         {
             Internal::map ()[wnd]->keyRelease (data);
         });
 
-        connect (event_type::emit ().mouseMove,
-                 [](event_type::window_type wnd, point2u pos)
+        connect (EventQueue::emit ().mouseMove,
+                 [](EventQueue::window_type wnd, point2u pos)
         {
             Internal::map ()[wnd]->onPointerMove (pos);
         });
 
-        connect (event_type::emit ().mousePress,
-                 [](event_type::window_type wnd, event_type::MouseButtonData data)
+        connect (EventQueue::emit ().mousePress,
+                 [](EventQueue::window_type wnd, event_type::MButtonData data)
         {
             Internal::map ()[wnd]->onMousePress (data);
         });
 
-        connect (event_type::emit ().mouseRelease,
-                 [](event_type::window_type wnd, event_type::MouseButtonData data)
+        connect (EventQueue::emit ().mouseRelease,
+                 [](EventQueue::window_type wnd, event_type::MButtonData data)
         {
             Internal::map ()[wnd]->onMouseRelease (data);
         });
 
-        connect (event_type::emit ().winPaint,
-                 [](event_type::window_type wnd, event_type::PaintData data)
+        connect (EventQueue::emit ().winPaint,
+                 [](EventQueue::window_type wnd, event_type::PaintData data)
         {
             Internal::map ()[wnd]->paint (data);
         });
 
-        connect (event_type::emit ().winFocus,
-                 [](event_type::window_type wnd, bool state)
+        connect (EventQueue::emit ().winFocus,
+                 [](EventQueue::window_type wnd, bool state)
         {
             Internal::map ()[wnd]->focus (state);
         });
 
-        connect (event_type::emit ().winSize,
-                 [](event_type::window_type wnd, point2u size)
+        connect (EventQueue::emit ().winSize,
+                 [](EventQueue::window_type wnd, point2u size)
         {
             Internal::map ()[wnd]->resize (size);
         });
 
-        connect (event_type::emit ().winVisible,
-                 [](event_type::window_type wnd, bool state)
+        connect (EventQueue::emit ().winVisible,
+                 [](EventQueue::window_type wnd, bool state)
         {
             Internal::map ()[wnd]->show (state);
         });
@@ -122,8 +122,8 @@ WindowAdapter::WindowAdapter (Widget&     widget,
 
     IDisplayQueue::primary ()->
             set_window_events (*m_pPlatformWnd,
-                               event_type::Key     |
-                               event_type::Pointer |
+                               event_type::Key   |
+                               event_type::Mouse |
                                event_type::Window);
 
     m_pPlatformWnd->setFlags (flags);

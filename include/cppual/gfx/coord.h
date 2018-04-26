@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,20 +31,20 @@ namespace cppual {
 template <typename> struct Point2;
 template <typename> struct Point3;
 template <typename> struct Point4;
-template <typename> struct Angle;
+template <typename> struct Angle ;
 
-typedef Point2<int16>  point2i;
-typedef Point2<u16>    point2u;
-typedef Point2<float>  point2f;
-typedef Point3<float>  point3f;
-typedef Point3<float>  vec3;
+typedef Point2<int16 > point2i;
+typedef Point2<u16   > point2u;
+typedef Point2<float > point2f;
+typedef Point3<float > point3f;
+typedef Point3<float > vec3   ;
 typedef Point3<double> point3d;
-typedef Point3<int16>  point3i;
-typedef Point4<float>  point4f;
-typedef Point4<float>  vec4;
-typedef Point4<float>  point4d;
-typedef Angle <float>  anglef;
-typedef Angle <double> angled;
+typedef Point3<int16 > point3i;
+typedef Point4<float > point4f;
+typedef Point4<float > vec4   ;
+typedef Point4<float > point4d;
+typedef Angle <float > anglef ;
+typedef Angle <double> angled ;
 
 // ====================================================
 
@@ -58,7 +58,7 @@ struct Point2 final
 
     template <typename U>
     constexpr Point2 (U x_, U y_) noexcept
-    : x (T (x_)), y (T (y_))
+    : x (T (x_)),  y (T (y_))
     { }
 };
 
@@ -126,15 +126,15 @@ struct Rect final
     inline Rect () noexcept = default;
 
     constexpr Rect (value_type x, value_type y, u16 width, u16 height) noexcept
-    : left (x),
-      top  (y),
-      right  (static_cast<value_type> (x + width)),
+    : left   (x),
+      top    (y),
+      right  (static_cast<value_type> (x + width )),
       bottom (static_cast<value_type> (y + height))
     { }
 
     constexpr Rect (point2u size) noexcept
-    : left (),
-      top  (),
+    : left   (),
+      top    (),
       right  (static_cast<value_type> (size.x)),
       bottom (static_cast<value_type> (size.y))
     { }
@@ -148,8 +148,8 @@ struct Rect final
     constexpr point2u size () const noexcept
     { return { width (), height () }; }
 
-    inline void setWidth (u16 uWidth) noexcept
-    { right = static_cast<value_type> (left + uWidth); }
+    inline void setWidth  (u16 uWidth ) noexcept
+    { right  = static_cast<value_type> (left + uWidth); }
 
     inline void setHeight (u16 uHeight) noexcept
     { bottom = static_cast<value_type> (top + uHeight); }
@@ -162,8 +162,8 @@ struct Rect final
 
     constexpr bool intersects (Rect const& gObj) const noexcept
     {
-        return (right > gObj.left  and bottom > gObj.top) or
-                (left < gObj.right and top    < gObj.bottom);
+        return (right > gObj.left  and bottom > gObj.top   ) or
+               (left  < gObj.right and top    < gObj.bottom);
     }
 
     constexpr bool contains (point2i gPoint) const noexcept

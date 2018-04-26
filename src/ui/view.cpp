@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,50 +49,50 @@ inline shared_window createRenderable (View* pParentObj, Rect const& gRect, u32 
 
 void View::registerEvents ()
 {
-    connect (event_type::emit ().mouseMove,
-             [](event_type::window_type wnd, point2u pos)
+    connect (EventQueue::emit ().mouseMove,
+             [](EventQueue::window_type wnd, point2u pos)
     {
         Internal::map ()[wnd]->mouseMoved (pos);
     });
 
-    connect (event_type::emit ().mousePress,
-             [](event_type::window_type wnd, event_type::MouseButtonData data)
+    connect (EventQueue::emit ().mousePress,
+             [](EventQueue::window_type wnd, event_type::MButtonData data)
     {
         Internal::map ()[wnd]->mousePressed (data);
     });
 
-    connect (event_type::emit ().mouseRelease,
-             [](event_type::window_type wnd, event_type::MouseButtonData data)
+    connect (EventQueue::emit ().mouseRelease,
+             [](EventQueue::window_type wnd, event_type::MButtonData data)
     {
         Internal::map ()[wnd]->mouseReleased (data);
     });
 
-    connect (event_type::emit ().winPaint,
-             [](event_type::window_type wnd, event_type::PaintData data)
+    connect (EventQueue::emit ().winPaint,
+             [](EventQueue::window_type wnd, event_type::PaintData data)
     {
         Internal::map ()[wnd]->paint (data.region);
     });
 
-    connect (event_type::emit ().winFocus,
-             [](event_type::window_type wnd, bool state)
+    connect (EventQueue::emit ().winFocus,
+             [](EventQueue::window_type wnd, bool state)
     {
         Internal::map ()[wnd]->onFocus (state);
     });
 
-    connect (event_type::emit ().winSize,
-             [](event_type::window_type wnd, point2u size)
+    connect (EventQueue::emit ().winSize,
+             [](EventQueue::window_type wnd, point2u size)
     {
         Internal::map ()[wnd]->size (size);
     });
 
-    connect (event_type::emit ().winVisible,
-             [](event_type::window_type wnd, bool state)
+    connect (EventQueue::emit ().winVisible,
+             [](EventQueue::window_type wnd, bool state)
     {
         Internal::map ()[wnd]->onShow (state);
     });
 
-    connect (event_type::emit ().winProperty,
-             [](event_type::window_type wnd, event_type::PropertyData data)
+    connect (EventQueue::emit ().winProperty,
+             [](EventQueue::window_type wnd, event_type::PropertyData data)
     {
         switch (data.prop)
         {
@@ -145,7 +145,7 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
         IDisplayQueue::primary ()->
                 set_window_events (*m_pRenderable,
                                      event_type::Key     |
-                                     event_type::Pointer |
+                                     event_type::Mouse |
                                      event_type::Window);
     }
 
@@ -388,11 +388,11 @@ void View::mouseMoved (point2u)
 {
 }
 
-void View::mousePressed (event_type::MouseButtonData const&)
+void View::mousePressed (event_type::MButtonData const&)
 {
 }
 
-void View::mouseReleased (event_type::MouseButtonData const&)
+void View::mouseReleased (event_type::MButtonData const&)
 {
 }
 

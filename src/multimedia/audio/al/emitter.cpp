@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 namespace cppual { namespace Audio { namespace AL {
 
-inline static int convertEmitterType (Audio::EmitType eType) noexcept
+inline int convertEmitterType (Audio::EmitType eType) noexcept
 {
     switch (eType)
     {
@@ -39,7 +39,7 @@ inline static int convertEmitterType (Audio::EmitType eType) noexcept
     return 0;
 }
 
-inline static Audio::EmitType convertEmitterType (int nType) noexcept
+inline Audio::EmitType convertEmitterType (int nType) noexcept
 {
     switch (nType)
     {
@@ -69,7 +69,7 @@ SoundEmitter& SoundEmitter::operator = (SoundEmitter const& gObj) noexcept
 EmitType SoundEmitter::getType () const noexcept
 {
     int nType = 0;
-    if (id ()) alGetSourcei (id (), AL::CurrentEmitterType, &nType);
+    if (id ())   alGetSourcei (id (), AL::CurrentEmitterType, &nType);
     return convertEmitterType (nType);
 }
 

@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,10 @@
 
 namespace cppual { namespace Ui {
 
-Layout::Layout ()
-: m_gViewList (),
-  m_pOwner (),
-  m_uNumRows (),
+Layout::Layout  ()
+: m_gViewList   (),
+  m_pOwner      (),
+  m_uNumRows    (),
   m_uNumColumns ()
 {
 }

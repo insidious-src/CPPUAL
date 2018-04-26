@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,18 +33,30 @@ namespace cppual { namespace Audio { namespace AL {
 
 namespace { // optimize for internal unit usage
 
-struct Internal final : NonConstructible
+class Initializer final
 {
-    static mutex       listenerMutex;
-    static atomic_bool listenerIsMute;
-    static float       listenerVolume;
+public:
+    mutex       listenerMutex;
+    atomic_bool listenerIsMute;
+    float       listenerVolume;
+
+private:
+    explicit
+    Initializer () noexcept
+    : listenerMutex (), listenerIsMute (), listenerVolume (1.0f)
+    { }
+
+    friend
+    Initializer& get () noexcept;
 };
 
-mutex       Internal::listenerMutex;
-atomic_bool Internal::listenerIsMute { false };
-float       Internal::listenerVolume = 1.0f;
+inline Initializer& get () noexcept
+{
+    static Initializer internal;
+    return internal;
+}
 
-} // anonymous
+} // anonymous namespace
 
 // ====================================================
 
@@ -107,46 +119,46 @@ void Listener::setVolume (float fValue) noexcept
     if (fValue <= .0f)
     {
         alListenerf (AL::Volume, fValue);
-        Internal::listenerIsMute.store (true);
+        get ().listenerIsMute.store (true);
     }
     else
     {
-        if (!Internal::listenerIsMute.load (std::memory_order_relaxed))
+        if (!get ().listenerIsMute.load (std::memory_order_relaxed))
         {
             alListenerf (AL::Volume, fValue);
         }
 
-        Internal::listenerMutex.lock ();
-        Internal::listenerVolume = fValue;
-        Internal::listenerMutex.unlock ();
+        get ().listenerMutex.lock ();
+        get ().listenerVolume = fValue;
+        get ().listenerMutex.unlock ();
     }
 }
 
 float Listener::volume () noexcept
 {
-    lock_guard<mutex> gLock (Internal::listenerMutex);
-    return Internal::listenerVolume;
+    lock_guard<mutex> gLock (get ().listenerMutex);
+    return get ().listenerVolume;
 }
 
 bool Listener::isMute () noexcept
 {
-    return Internal::listenerIsMute.load ();
+    return get ().listenerIsMute.load ();
 }
 
 void Listener::mute () noexcept
 {
-    if (Internal::listenerIsMute.load (std::memory_order_acquire)) return;
+    if (get ().listenerIsMute.load (std::memory_order_acquire)) return;
     alListenerf (AL::Volume, .0f);
-    Internal::listenerIsMute.store (true, std::memory_order_release);
+    get ().listenerIsMute.store (true, std::memory_order_release);
 }
 
 void Listener::unmute () noexcept
 {
-    if (!Internal::listenerIsMute.load (std::memory_order_acquire)) return;
-    Internal::listenerMutex.lock ();
-    alListenerf (AL::Volume, Internal::listenerVolume);
-    Internal::listenerMutex.unlock ();
-    Internal::listenerIsMute.store (false, std::memory_order_release);
+    if (!get ().listenerIsMute.load (std::memory_order_acquire)) return;
+    get ().listenerMutex.lock ();
+    alListenerf (AL::Volume, get ().listenerVolume);
+    get ().listenerMutex.unlock ();
+    get ().listenerIsMute.store (false, std::memory_order_release);
 }
 
 } } } // namespace Audio

@@ -19,9 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define API_EXPORT
+#define  API_EXPORT
 #include <cppual/ui/display.h>
-#include <EGL/egl.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
@@ -29,36 +28,30 @@
 
 namespace cppual { namespace Ui {
 
-class WlBackend final : public IDisplay
+class SHARED_API WlBackend final : public IDisplay
 {
 public:
     WlBackend () = delete;
-    WlBackend (cchar*) noexcept;
-    ~WlBackend () noexcept;
 
-    Connection native () const noexcept { return m_pDisplay; }
-    string     name () const { return string (); }
-    Connection gl () const noexcept { return m_pEGLDisplay; }
-    uint       screenCount () const noexcept { return m_nScreenCount; }
+    string_type name        () const noexcept { return m_gName;        }
+    uint        screenCount () const noexcept { return m_nScreenCount; }
+
+    void flush () noexcept
+    { ::wl_display_flush (native<wl_display> ()); }
+
+    ~WlBackend () noexcept
+    { if (native ()) ::wl_display_disconnect (native<wl_display> ()); }
+
+    WlBackend (cchar* pName) noexcept
+    : IDisplay       (::wl_display_connect (pName), nullptr),
+      m_nScreenCount (),
+      m_gName        (pName)
+    { }
 
 private:
-    wl_display* m_pDisplay;
-    void*       m_pEGLDisplay;
     uint        m_nScreenCount;
+    string_type m_gName;
 };
-
-// ====================================================
-
-WlBackend::WlBackend (cchar* pName) noexcept
-: m_pDisplay (wl_display_connect (pName)),
-  m_pEGLDisplay (),
-  m_nScreenCount ()
-{ }
-
-WlBackend::~WlBackend () noexcept
-{
-    if (m_pDisplay) wl_display_disconnect (m_pDisplay);
-}
 
 } } // namespace Graphics
 

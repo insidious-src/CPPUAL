@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,8 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-HeapAllocator::HeapAllocator (size_type uSize)
-: m_uNumAlloc (),
-  m_gOwner (*this),
+HeapPool::HeapPool (size_type uSize)
+: m_gOwner (*this),
   m_pBegin (uSize >= sizeof (FreeBlock) ? ::operator new (uSize) : nullptr),
   m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
   m_pFreeBlocks (reinterpret_cast<FreeBlock*> (m_pBegin)),
@@ -41,9 +40,8 @@ HeapAllocator::HeapAllocator (size_type uSize)
     }
 }
 
-HeapAllocator::HeapAllocator (Allocator& pOwner, size_type uSize)
-: m_uNumAlloc (),
-  m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
+HeapPool::HeapPool (Repository& pOwner, size_type uSize)
+: m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pBegin (&m_gOwner != this ?
                              (uSize >= sizeof (FreeBlock) ?
                                   static_cast<pointer> (pOwner.allocate (
@@ -61,9 +59,8 @@ HeapAllocator::HeapAllocator (Allocator& pOwner, size_type uSize)
     }
 }
 
-//HeapAllocator::HeapAllocator (string& gName, size_type uSize)
+//HeapPool::HeapPool (string& gName, size_type uSize)
 //: m_gSharedName (std::move (gName)),
-//  m_uNumAlloc (),
 //  m_gOwner (*this),
 //  m_pBegin (uSize >= sizeof (FreeBlock) ? new (gName) u8[uSize] : nullptr),
 //  m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
@@ -77,15 +74,15 @@ HeapAllocator::HeapAllocator (Allocator& pOwner, size_type uSize)
 //    }
 //}
 
-HeapAllocator::~HeapAllocator ()
+HeapPool::~HeapPool ()
 {
     if (m_pBegin == nullptr) return;
 
-    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
-    else if (!m_bIsMemShared) ::operator delete (m_pBegin);
+    if      (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
+    else if (!m_bIsMemShared) ::operator delete     (m_pBegin);
 }
 
-void* HeapAllocator::allocate (size_type uSize, align_type uAlign) noexcept
+void* HeapPool::do_allocate (size_type uSize, align_type uAlign) noexcept
 {
     static_assert (sizeof (Header) >= sizeof (FreeBlock), "Header is not big enough!");
     if (!m_pBegin or !uSize) return nullptr;
@@ -137,7 +134,6 @@ void* HeapAllocator::allocate (size_type uSize, align_type uAlign) noexcept
         pHeader->size   = uSize + uAdjust;
         pHeader->adjust = uAdjust;
 
-        ++m_uNumAlloc;
         return reinterpret_cast<void*> (uAlignedAddr);
     }
 
@@ -145,7 +141,7 @@ void* HeapAllocator::allocate (size_type uSize, align_type uAlign) noexcept
     return nullptr;
 }
 
-void HeapAllocator::deallocate (void* p, size_type uSize)
+void HeapPool::do_deallocate (void* p, size_type uSize, align_type)
 {
     if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
 
@@ -216,38 +212,31 @@ void HeapAllocator::deallocate (void* p, size_type uSize)
         pBlock->next      = m_pFreeBlocks;
         m_pFreeBlocks     = pBlock;
     }
-
-    --m_uNumAlloc;
 }
 
-void HeapAllocator::clear () noexcept
+void HeapPool::clear () noexcept
 {
-    m_pFreeBlocks        = reinterpret_cast<FreeBlock*> (m_pBegin);
-    m_pFreeBlocks->size = size ();
+    m_pFreeBlocks       = reinterpret_cast<FreeBlock*> (m_pBegin);
+    m_pFreeBlocks->size = capacity ();
     m_pFreeBlocks->next = nullptr;
-    m_uNumAlloc         = 0;
 }
 
 // =========================================================
+// List Allocator
+// =========================================================
 
-struct ListAllocator::Header
+inline ListPool::Header* header (void* p) noexcept
 {
-    ListAllocator::size_type size;
-    Header*                  next;
-};
-
-inline ListAllocator::Header* header (void* p) noexcept
-{
-    return reinterpret_cast<ListAllocator::Header*>
-            (reinterpret_cast<uptr> (p) - sizeof (ListAllocator::Header));
+    return reinterpret_cast<ListPool::Header*>
+            (reinterpret_cast<uptr> (p) - sizeof (ListPool::Header));
 }
 
-inline void* forward (ListAllocator::Header*    const hdr,
-                      ListAllocator::Header*    const prev_hdr,
-                      ListAllocator::size_type  const size,
-                      ListAllocator::align_type const align) noexcept
+inline void* forward (ListPool::Header*    const hdr,
+                      ListPool::Header*    const prev_hdr,
+                      ListPool::size_type  const size,
+                      ListPool::align_type const align) noexcept
 {
-    typedef ListAllocator::Header Header;
+    typedef ListPool::Header Header;
 
     // get aligned address from header pointer
     void* ptr = nextAlignedAddr (hdr, align);
@@ -262,13 +251,13 @@ inline void* forward (ListAllocator::Header*    const hdr,
     return ptr;
 }
 
-inline ListAllocator::Header* find (ListAllocator::Header*          hdr,
-                                    ListAllocator::Header*&         prev_hdr,
-                                    ListAllocator::size_type  const size,
-                                    ListAllocator::align_type const align) noexcept
+inline ListPool::Header* find (ListPool::Header*          hdr,
+                               ListPool::Header*&         prev_hdr,
+                               ListPool::size_type  const size,
+                               ListPool::align_type const align) noexcept
 {
-    typedef ListAllocator::Header       Header;
-    typedef ListAllocator::math_pointer pointer;
+    typedef ListPool::Header       Header;
+    typedef ListPool::math_pointer pointer;
 
     for (Header* pCurHeader = hdr; pCurHeader;
          prev_hdr = pCurHeader, pCurHeader = pCurHeader->next)
@@ -285,28 +274,26 @@ inline ListAllocator::Header* find (ListAllocator::Header*          hdr,
 
 // =========================================================
 
-ListAllocator::ListAllocator (size_type uSize)
-: m_pBegin (uSize >= sizeof (Header) + sizeof (size_type) ? ::operator new (uSize) : nullptr),
-  m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
+ListPool::ListPool (size_type uSize)
+: m_pBegin (uSize > sizeof (Header) ? ::operator new (uSize + sizeof (Header)) : nullptr),
+  m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize + sizeof (Header)) : nullptr),
   m_pFirstFreeBlock (static_cast<Header*> (m_pBegin)),
-  m_uNumAlloc (),
   m_gOwner (*this),
   m_bIsMemShared ()
 {
     if (m_pFirstFreeBlock != nullptr)
     {
-        m_pFirstFreeBlock->size = distance (m_pEnd, m_pBegin);
+        m_pFirstFreeBlock->size = capacity () - sizeof (Header);
         m_pFirstFreeBlock->next = nullptr;
     }
 }
 
-ListAllocator::ListAllocator (Allocator& pOwner, size_type uSize)
-: m_pBegin (uSize >= sizeof (Header) + sizeof (size_type) and uSize <= pOwner.max_size () ?
+ListPool::ListPool (Repository& pOwner, size_type uSize)
+: m_pBegin (uSize > sizeof (Header) and uSize <= pOwner.max_size () ?
                 static_cast<pointer> (pOwner.allocate (uSize, alignof (Header))) :
                 nullptr),
   m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
   m_pFirstFreeBlock (static_cast<Header*> (m_pBegin)),
-  m_uNumAlloc (),
   m_gOwner (m_pBegin ? pOwner : *this),
   m_bIsMemShared (&m_gOwner != this ? m_gOwner.is_shared () : false)
 {
@@ -317,15 +304,15 @@ ListAllocator::ListAllocator (Allocator& pOwner, size_type uSize)
     }
 }
 
-ListAllocator::~ListAllocator ()
+ListPool::~ListPool ()
 {
     if (m_pBegin == nullptr) return;
 
-    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
+    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
     else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
-void ListAllocator::defragment () noexcept
+void ListPool::defragment () noexcept
 {
     for (Header* pCurHeader = m_pFirstFreeBlock; pCurHeader;
          pCurHeader = pCurHeader->next)
@@ -342,7 +329,7 @@ void ListAllocator::defragment () noexcept
     }
 }
 
-void* ListAllocator::allocate (size_type uSize, align_type uAlign) noexcept
+void* ListPool::do_allocate (size_type uSize, align_type uAlign) noexcept
 {
     if (m_pFirstFreeBlock and uSize)
     {
@@ -350,38 +337,31 @@ void* ListAllocator::allocate (size_type uSize, align_type uAlign) noexcept
         Header* pTargetHeader = find (m_pFirstFreeBlock, pPrevHeader, uSize, uAlign);
 
         if (pTargetHeader)
-        {
-            ++m_uNumAlloc;
             return forward (pTargetHeader, pPrevHeader, uSize, uAlign);
-        }
     }
 
     // couldn't find free block large enough!
     return nullptr;
 }
 
-void ListAllocator::deallocate (void* p, size_type uSize)
+void ListPool::do_deallocate (void* p, size_type uSize, align_type)
 {
     if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
-    if (!m_uNumAlloc) throw std::logic_error ("already freed");
 
     Header* pHeader = header (p);
 
     if (pHeader->size < uSize) throw std::length_error ("deallocate size doesn't match");
     uSize = pHeader->size;
-
-    --m_uNumAlloc;
 }
 
-void ListAllocator::clear () noexcept
+void ListPool::clear () noexcept
 {
-    m_pFirstFreeBlock        = static_cast<Header*> (static_cast<void*> (m_pBegin));
+    m_pFirstFreeBlock       = static_cast<Header*> (static_cast<void*> (m_pBegin));
     m_pFirstFreeBlock->size = distance (m_pEnd, m_pBegin);
     m_pFirstFreeBlock->next = nullptr;
-    m_uNumAlloc             = 0;
 }
 
-Allocator::size_type ListAllocator::max_size () const noexcept
+ListPool::size_type ListPool::max_size () const noexcept
 {
     size_type uMaxSize = 0;
 

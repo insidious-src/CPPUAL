@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,17 +30,16 @@ using std::basic_string;
 using std::u16string;
 using std::u32string;
 using std::wstring;
-using std::string;
 
 namespace cppual { namespace Network {
 
-class Uri final
+class Uri
 {
 public:
-    typedef string::value_type          value_type;
+    typedef std::string::value_type     value_type;
     typedef value_type const*           const_pointer;
     typedef std::size_t                 size_type;
-    typedef string                      string_type;
+    typedef std::string                 string_type;
     typedef string_type::const_iterator iterator;
     typedef string_type::const_iterator const_iterator;
 
@@ -49,14 +48,14 @@ public:
     inline Uri (Uri const&) = default;
     inline Uri& operator = (Uri&&) = default;
 
-    bool isValid () const;
+    bool isValid    () const;
     bool isAbsolute () const;
 
     inline const_iterator begin () const noexcept
     { return m_gUri.begin (); }
 
-    inline const_iterator end () const noexcept
-    { return m_gUri.end (); }
+    inline const_iterator end   () const noexcept
+    { return m_gUri.end   (); }
 
     inline string_type protocol () const noexcept
     { return m_gUri.substr (0, m_uProtEnd); }
@@ -86,19 +85,19 @@ public:
     { return m_gUri.c_str (); }
 
     inline operator string_type const& () const noexcept
-    { return m_gUri; }
+    { return m_gUri;          }
 
-    inline string toString () const
-    { return string (); }
+    inline string_type toString () const
+    { return string_type ();  }
 
     inline wstring toWString () const
-    { return wstring (); }
+    { return wstring ();      }
 
     inline u16string toU16string () const
-    { return u16string (); }
+    { return u16string ();    }
 
     inline u32string toU32string () const
-    { return u32string (); }
+    { return u32string ();    }
 
     void swap (Uri& gObj) noexcept
     {
@@ -123,9 +122,9 @@ bool operator <= (Uri const& lhs, Uri const& rhs);
 bool operator >  (Uri const& lhs, Uri const& rhs);
 bool operator >= (Uri const& lhs, Uri const& rhs);
 
-std::ostream&  operator << (std::ostream& os, Uri const& u);
+std::ostream & operator << (std::ostream & os, Uri const& u);
 std::wostream& operator << (std::wostream& os, Uri const& u);
-std::istream&  operator >> (std::istream& os, Uri& u);
+std::istream & operator >> (std::istream & os, Uri& u);
 std::wistream& operator >> (std::wistream& os, Uri& u);
 
 } } // namespace Network

@@ -23,6 +23,7 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
+#define  API_EXPORT
 #include "xinput.h"
 #include "xsurface.h"
 #include "xbackend.h"
@@ -58,7 +59,7 @@ shared_window XFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* 
 using cppual::Ui::Platform::XFactory;
 using cppual::Ui::Platform::shared_manager;
 
-extern "C" int module_main (shared_manager& instance)
+extern "C" int plugin_main (shared_manager& instance)
 {
     instance.reset (new XFactory);
     return instance == nullptr;

@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,7 @@ namespace cppual { namespace Ui {
 
 ProxyRenderable::ProxyRenderable (shared_window const& pParent, Rect const& gRect) noexcept
 : IWindow (pParent != nullptr ? pParent->connection () : nullptr,
-            pParent != nullptr ? pParent->id () : Element (nullptr),
-            ResourceType::Surface),
+           pParent != nullptr ? pParent->id () : Element (nullptr)),
   m_pParent (pParent),
   m_gRect (gRect),
   m_bIsVisible ()

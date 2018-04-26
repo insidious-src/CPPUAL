@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,20 +35,20 @@ class View
 public:
     typedef Input::Event                         event_type;
     typedef Graphics::Element                    window_type;
-    typedef Memory::GenericPolicy<View*>         allocator_type;
+    typedef Memory::Allocator<View*>         allocator_type;
     typedef CircularQueue<View*, allocator_type> container;
     typedef std::size_t                          size_type;
 
     typedef typename
     container::iterator iterator;
 
-    typedef typename
-    Signal<void(window_type, point2u)>
-    ::slot_type mouse_move_conn;
+//    typedef typename
+//    Signal<void(window_type, point2u)>
+//    ::slot_type mouse_move_conn;
 
-    typedef typename
-    Signal<void(window_type, event_type::MButtonData)>
-    ::slot_type mouse_btn_conn;
+//    typedef typename
+//    Signal<void(window_type, event_type::MButtonData)>
+//    ::slot_type mouse_btn_conn;
 
     enum
     {
@@ -152,7 +152,7 @@ private:
 class Widget
 {
 public:
-    typedef Memory::GenericPolicy<Widget*>         allocator_type;
+    typedef Memory::Allocator<Widget*>         allocator_type;
     typedef CircularQueue<Widget*, allocator_type> container_type;
     typedef std::size_t                            size_type;
 

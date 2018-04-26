@@ -19,12 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/ui/queue.h>
-#include <cppual/input/pointer.h>
+#define  API_EXPORT
+#include "xinput.h"
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-#include "xinput.h"
+#include <cppual/ui/queue.h>
+#include <cppual/input/pointer.h>
 
 using std::string;
 using namespace cppual::Input;
@@ -46,19 +47,19 @@ inline u8 button (xcb_button uId) noexcept
     switch (uId)
     {
     case 1:
-        return Pointer::Left;
+        return Mouse::Left;
     case 2:
-        return Pointer::Middle;
+        return Mouse::Middle;
     case 3:
-        return Pointer::Right;
+        return Mouse::Right;
     case 6:
-        return Pointer::XButton1;
+        return Mouse::XButton1;
     case 7:
-        return Pointer::XButton2;
+        return Mouse::XButton2;
     case 8:
-        return Pointer::XButton3;
+        return Mouse::XButton3;
     case 9:
-        return Pointer::XButton4;
+        return Mouse::XButton4;
     default:
         return uId;
     }
@@ -145,14 +146,14 @@ struct XcbEvent final : xcb_generic_event_t
     constexpr XcbEvent (base_type const& base) noexcept : base_type (base)
     { }
 
-    constexpr auto type () const noexcept
+    constexpr u32 type () const noexcept
     { return response_type & ~0x80; }
 
     template <typename T>
     T const& cast () const noexcept
     { return reinterpret_cast<T const&> (*this); }
 
-    handle_type const window () const noexcept
+    handle_type window () const noexcept
     {
         switch (type ())
         {
@@ -197,13 +198,13 @@ struct XcbEvent final : xcb_generic_event_t
                                               { cast<btn_press_type> ().event_x,
                                                 cast<btn_press_type> ().event_y });
             }
-            break;
         case MouseRelease:
             if (cast<btn_release_type> ().detail == MouseWheelUp or
                 cast<btn_release_type> ().detail == MouseWheelDown)
             return Input::MouseReleaseEvent (button (cast<btn_release_type> ().detail),
                                             { cast<btn_release_type> ().event_x,
                                               cast<btn_release_type> ().event_y });
+            break;
         case MouseMove:
             return Input::PointerMoveEvent ({ cast<mouse_move_type> ().event_x,
               cast<mouse_move_type> ().event_y });
@@ -216,7 +217,6 @@ struct XcbEvent final : xcb_generic_event_t
                                             static_cast<int16> (cast<expose_type> ().y),
                                             cast<expose_type> ().width,
                                             cast<expose_type> ().height));
-            break;
         case Enter:
             return Input::StepEvent (true);
         case Leave:
@@ -254,6 +254,8 @@ struct XcbEvent final : xcb_generic_event_t
         default:
             return event_type (event_type::Null);
         }
+
+        return event_type (event_type::Null);
     }
 
     inline void operator ()() const
@@ -332,6 +334,7 @@ struct XcbEvent final : xcb_generic_event_t
             break;
         case Map:
             EventQueue::emit ().winVisible (cast<map_type> ().window, true);
+            break;
         case Unmap:
             EventQueue::emit ().winVisible (cast<unmap_type> ().window, false);
             break;
@@ -368,21 +371,18 @@ public:
     operator base_pointer () const noexcept
     { return m_handle; }
 
-    void operator ()() const
-    { this->operator ()(); }
-
-    pointer operator -> () const
-    { return reinterpret_cast<pointer> (m_handle); }
+    void    operator () () const { m_handle->operator ()(); }
+    pointer operator -> () const { return m_handle        ; }
 
     ~XcbEventPtr ()
     { ::free (m_handle); }
 
-    inline    XcbEventPtr ()                       noexcept = default;
-    constexpr XcbEventPtr (std::nullptr_t)         noexcept : m_handle ()          { }
-    constexpr XcbEventPtr (base_pointer pXcbEvent) noexcept : m_handle (pXcbEvent) { }
+    constexpr XcbEventPtr (base_pointer pXcbEvent) noexcept :
+    m_handle (static_cast<pointer> (pXcbEvent))
+    { }
 
 private:
-    base_pointer m_handle;
+    pointer m_handle { };
 };
 
 } // anonymous namespace
@@ -390,7 +390,7 @@ private:
 // ====================================================
 
 XQueue::XQueue ()
-: IDisplayQueue (IDisplay::instance ()->native ())
+: IDisplayQueue (IDisplay::primary ()->native ())
 { }
 
 bool XQueue::set_window_events (window_type const& window, mask_type gFlags) noexcept

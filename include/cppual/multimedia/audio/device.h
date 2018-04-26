@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ protected:
 
 };
 
-class PlaybackDevice : public Device
+class PlaybackDevice : public virtual Device
 {
 public:
     PlaybackDevice () noexcept;
@@ -75,7 +75,7 @@ public:
     ~PlaybackDevice () noexcept;
 };
 
-class CaptureDevice : public Device
+class CaptureDevice : public virtual Device
 {
 public:
     CaptureDevice  () noexcept;
@@ -114,12 +114,12 @@ public:
     void suspend () noexcept;
 
     static DistanceModel distanceModel () noexcept;
-    static void             setDistanceModel (DistanceModel model) noexcept;
-    static Context*         current () noexcept;
-    static string         label (StringQuery query) noexcept;
-    static void             setDopplerFactor (float factor) noexcept;
+    static void          setDistanceModel (DistanceModel model) noexcept;
+    static Context*      current () noexcept;
+    static string        label (StringQuery query) noexcept;
+    static void          setDopplerFactor (float factor) noexcept;
     static float         dopplerFactor () noexcept;
-    static void             setSpeedOfSound (float speed) noexcept;
+    static void          setSpeedOfSound (float speed) noexcept;
     static float         speedOfSound () noexcept;
     static Scenario      scenario () noexcept;
     static bool          setScenario (Scenario&) noexcept;

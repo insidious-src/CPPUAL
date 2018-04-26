@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ public:
         Paused
     };
 
-    Timeline (duration length, ratio_type speed = Timeline::Normal) noexcept
+    Timeline (duration length, ratio_type speed = Normal) noexcept
     : m_timer  (),
       m_length (length),
       m_state  (),
@@ -97,14 +97,13 @@ public:
 
     ratio_type speed () const noexcept
     {
-        auto   curspeed = m_speed.load (std::memory_order_relaxed);
-        return curspeed < 0 ? -(curspeed) : curspeed;
+        return m_speed.load (std::memory_order_relaxed);
     }
 
     void scale (ratio_type speed) noexcept
     {
-        if (speed == 0) stop ();
-        m_speed = speed;
+        if (speed == .0f) stop ();
+        else m_speed = speed;
     }
 
     void start (count_type loop_count = 1) noexcept

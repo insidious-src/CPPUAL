@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
 namespace cppual {
 
 template <typename T,
-          typename = Memory::AllocatorPolicy<Function<T> >
+          typename = Memory::Allocator<Function<T> >
           >
 class Signal;
 
 template <typename T,
-          typename = Memory::AllocatorPolicy<Function<T> >
+          typename = Memory::Allocator<Function<T> >
           >
 class ScopedConnection;
 
@@ -72,7 +72,7 @@ public:
                         (std::move (m_gSlots[i] (std::forward<Args> (args)...)));
         }
 
-        return std::move (collection);
+        return std::move (collection); // ?
     }
 
     Signal () noexcept
@@ -209,7 +209,7 @@ connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
     return gSignal.m_gSlots.cend ();
 }
 
-template <typename TClass,
+template <typename TClass  ,
           typename TRetType,
           typename... TArgs,
           typename Allocator

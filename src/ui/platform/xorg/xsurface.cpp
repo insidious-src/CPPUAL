@@ -19,17 +19,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define  API_EXPORT
+#include "xsurface.h"
+
+#if defined (OS_GNU_LINUX) or defined (OS_BSD)
+
 #include <memory>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xcb_icccm.h>
-#include "xsurface.h"
 
 namespace cppual { namespace Ui {
 
+namespace { namespace Xcb { // optimize for internal unit usage
+
 typedef xcb_connection_t display_type;
 typedef xcb_window_t     handle_type;
-
-namespace { namespace Xcb { // optimize for internal unit usage
 
 struct Window
 {
@@ -38,7 +42,7 @@ struct Window
 
     inline static Rect geometry (pointer display, value_type id)
     {
-        typedef std::auto_ptr<xcb_get_geometry_reply_t> geo_ptr;
+        typedef std::unique_ptr<xcb_get_geometry_reply_t> geo_ptr;
 
         geo_ptr pReply (xcb_get_geometry_reply (display.get<display_type> (),
                                                 xcb_get_geometry (display.
@@ -61,7 +65,7 @@ enum
 
 xcb_screen_t* screenHandle (Connection pDsp, u32& nScreen) noexcept
 {
-    static xcb_setup_t const* pSetup = xcb_get_setup (pDsp.get<display_type> ());
+    static xcb_setup_t const* pSetup = xcb_get_setup (pDsp.get<Xcb::display_type> ());
     static u32 nNum = static_cast<u32> (xcb_setup_roots_length (pSetup));
     xcb_screen_iterator_t it = xcb_setup_roots_iterator (pSetup);
 
@@ -75,20 +79,18 @@ xcb_screen_t* screenHandle (Connection pDsp, u32& nScreen) noexcept
 // =========================================================
 
 XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
-: IWindow (pDisplay,
-           xcb_generate_id (pDisplay->native ().get<display_type> ()),
-           ResourceType::Surface),
+: IWindow (pDisplay, xcb_generate_id (pDisplay->native<Xcb::display_type> ())),
   m_eFlags (WindowHints),
   m_pOwner ()
 {
     if (valid ())
     {
-        xcb_screen_t* pScreen = screenHandle (connection ()->native ().get<display_type> (),
+        xcb_screen_t* pScreen = screenHandle (connection ()->native<Xcb::display_type> (),
                                               nScreen);
 
-        xcb_create_window (connection ()->native ().get<display_type> (),
+        xcb_create_window (connection ()->native<Xcb::display_type> (),
                            XCB_COPY_FROM_PARENT,
-                           id ().get<handle_type> (),
+                           id ().get<Xcb::handle_type> (),
                            pScreen->root,
                            gRect.left,
                            gRect.top,
@@ -117,8 +119,8 @@ void XWindow::setGeometry (Rect const& gRect)
         static_cast<u32> (gRect.bottom - gRect.top)
     };
 
-    xcb_configure_window (connection ()->native ().get<display_type> (),
-                          id ().get<handle_type> (),
+    xcb_configure_window (connection ()->native<Xcb::display_type> (),
+                          id ().get<Xcb::handle_type> (),
                           XcbResize, uRect);
 }
 
@@ -126,8 +128,8 @@ void XWindow::raise ()
 {
     static constexpr cu32 uMode[] = { XCB_STACK_MODE_ABOVE };
 
-    xcb_configure_window (connection ()->native ().get<display_type> (),
-                          id ().get<handle_type> (),
+    xcb_configure_window (connection ()->native<Xcb::display_type> (),
+                          id ().get<Xcb::handle_type> (),
                           XcbStack,
                           uMode);
 }
@@ -136,8 +138,8 @@ void XWindow::lower ()
 {
     static constexpr cu32 uMode[] = { XCB_STACK_MODE_BELOW };
 
-    xcb_configure_window (connection ()->native ().get<display_type> (),
-                          id ().get<handle_type> (),
+    xcb_configure_window (connection ()->native<Xcb::display_type> (),
+                          id ().get<Xcb::handle_type> (),
                           XcbStack, uMode);
 }
 
@@ -146,12 +148,11 @@ void XWindow::setOwner (shared_window const& pParent)
     static u32 dump;
     Rect       rect = geometry ();
 
-    xcb_reparent_window (connection ()->native ().get<display_type> (),
-                         id ().get<handle_type> (),
+    xcb_reparent_window (connection ()->native<Xcb::display_type> (),
+                         id ().get<Xcb::handle_type> (),
                          pParent != nullptr ?
-                                        pParent->id ().get<handle_type> () :
-                                        screenHandle (connection ()->native ().
-                                                      get<display_type> (),
+                                        pParent->id ().get<Xcb::handle_type> () :
+                                        screenHandle (connection ()->native<Xcb::display_type> (),
                                                       dump)->root,
                          rect.left, rect.top);
 }
@@ -160,25 +161,25 @@ void XWindow::move (point2i gPos)
 {
     cu32 uPoint[2] = { static_cast<u32> (gPos.x), static_cast<u32> (gPos.y) };
 
-    xcb_configure_window (connection ()->native ().get<display_type> (),
-                          id ().get<handle_type> (),
+    xcb_configure_window (connection ()->native<Xcb::display_type> (),
+                          id ().get<Xcb::handle_type> (),
                           XcbMove, uPoint);
 }
 
 void XWindow::map ()
 {
-    xcb_map_window (connection ()->native ().get<display_type> (),
-                    id ().get<handle_type> ());
+    xcb_map_window (connection ()->native<Xcb::display_type> (),
+                    id ().get<Xcb::handle_type> ());
 
-    xcb_flush (connection ()->native ().get<display_type> ());
+    xcb_flush (connection ()->native<Xcb::display_type> ());
 }
 
 void XWindow::unmap ()
 {
-    xcb_unmap_window (connection ()->native ().get<display_type> (),
-                      id ().get<handle_type> ());
+    xcb_unmap_window (connection ()->native<Xcb::display_type> (),
+                      id ().get<Xcb::handle_type> ());
 
-    xcb_flush (connection ()->native ().get<display_type> ());
+    xcb_flush (connection ()->native<Xcb::display_type> ());
 }
 
 void XWindow::setFlags (WindowFlags) noexcept
@@ -187,13 +188,12 @@ void XWindow::setFlags (WindowFlags) noexcept
 
 bool XWindow::isMapped () const
 {
-    typedef std::auto_ptr<xcb_get_window_attributes_reply_t> attrib_ptr;
+    typedef std::unique_ptr<xcb_get_window_attributes_reply_t> attrib_ptr;
 
     attrib_ptr pReply (xcb_get_window_attributes_reply (
-                           connection ()->native ().get<display_type> (),
-                           xcb_get_window_attributes (connection ()->native ().
-                                                      get<display_type> (),
-                                                      id ().get<handle_type> ()),
+                           connection ()->native<Xcb::display_type> (),
+                           xcb_get_window_attributes (connection ()->native<Xcb::display_type> (),
+                                                      id ().get<Xcb::handle_type> ()),
                            nullptr));
     return pReply->map_state;
 }
@@ -216,9 +216,9 @@ string XWindow::title () const noexcept
 
 void XWindow::setTitle (string const& gTitle) noexcept
 {
-     xcb_change_property (connection ()->native ().get<display_type> (),
+     xcb_change_property (connection ()->native<Xcb::display_type> (),
                           XCB_PROP_MODE_REPLACE,
-                          id ().get<handle_type> (),
+                          id ().get<Xcb::handle_type> (),
                           XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8,
                           static_cast<u32> (gTitle.length ()), gTitle.c_str ());
 }
@@ -291,3 +291,5 @@ void XWindow::flash (uint) noexcept
 }
 
 } } //Ui
+
+#endif // OS_GNU_LINUX or OS_BSD

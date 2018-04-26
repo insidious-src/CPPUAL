@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@
 #include <cppual/flags.h>
 #include <cppual/memory/allocator.h>
 
-using std::string;
-
 namespace cppual { namespace Graphics {
 
 class Font
@@ -38,11 +36,11 @@ public:
     enum Style
     {
         Undecorated = 0,
-        Italic        = 1 << 0,
+        Italic      = 1 << 0,
         Bold        = 1 << 1,
-        Underlined    = 1 << 2,
-        Overlined    = 1 << 3,
-        Erased        = 1 << 4
+        Underlined  = 1 << 2,
+        Overlined   = 1 << 3,
+        Erased      = 1 << 4
     };
 
     enum class SubPixel : unsigned char
@@ -55,7 +53,8 @@ public:
     };
 
     typedef std::size_t                              size_type;
-    typedef Memory::GenericPolicy<uint>              allocator_type;
+    typedef std::string                              string_type;
+    typedef Memory::Allocator<uint>                  allocator_type;
     typedef std::vector<uint, allocator_type>        vector_type;
     typedef BitSet<Font::Style>                      Styles;
     typedef struct { u8 spacing, size, lineHeight; } Format;
@@ -63,7 +62,7 @@ public:
     class Atlas
     {
     public:
-        Atlas (string const& name);
+        Atlas  (string_type const& name);
         ~Atlas ();
 
         Atlas () noexcept
@@ -73,8 +72,8 @@ public:
         friend class Font;
 
     private:
-        string m_gName;
-        void*  m_pFace;
+        string_type m_gName;
+        void*       m_pFace;
     };
 
     Font ();
@@ -90,11 +89,11 @@ public:
           bool anti_alias = true,
           SubPixel        = SubPixel::None);
 
-    SubPixel subPixelRendering ();
-    bool     isAntiAliased () const;
-    int      kerning () const;
+    SubPixel subPixelRendering  ();
+    bool     isAntiAliased      () const;
+    int      kerning            () const;
+    void     setKerning      (int);
     void     glyph (size_type idx) const;
-    void     setKerning (int);
 
 private:
     vector_type m_gPixels;

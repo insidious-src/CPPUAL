@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,31 +30,35 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class PageAllocator final : public Allocator, NonCopyable
+class PageAllocator final : public Repository, NonCopyable
 {
 public:
     PageAllocator (size_type size);
-    PageAllocator (Allocator* allocator, size_type size);
+    PageAllocator (Repository* allocator, size_type size);
     //PageAllocator (string&& shared_name, size_type size);
-
-    void* allocate (size_type size, align_type align) noexcept;
-    void  deallocate (void* p, size_type size) noexcept;
-    void  clear () noexcept;
+    void clear    () noexcept;
 
     inline size_type count () const noexcept
     { return 0; }
 
-    inline size_type size () const noexcept
+    inline size_type capacity () const noexcept
     { return 0; }
 
     inline size_type max_size () const noexcept
     { return 0; }
+
+private:
+    void* do_allocate   (size_type size, align_type align)  noexcept;
+    void  do_deallocate (void* p, size_type size, align_type align) ;
+
+    bool  do_is_equal   (memory_resource const& gObj) const noexcept
+    { return &gObj == this; }
 };
 
 // =========================================================
 
 template <typename T>
-using PagePolicy = AllocatorPolicy<T, Allocator>;
+using PagePolicy = Allocator<T, Repository>;
 
 } } // Memory
 

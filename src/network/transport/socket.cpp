@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #ifdef OS_STD_UNIX
 #   include <errno.h>
 #   include <fcntl.h>
+#   include <unistd.h>
 #   include <arpa/inet.h>
 #   include <netinet/tcp.h>
 #elif defined OS_WINDOWS
@@ -49,22 +50,20 @@ struct SocketFlag
     };
 };
 
-socket_id const TransportSocket::sm_nInvalid = -1;
-
 TransportSocket::TransportSocket (SocketType eProt) noexcept
 : m_nId (create (eProt)),
-  m_eProtocol (eProt),
+  m_eProtocol   (eProt),
   m_bIsBlocking (true)
 {
     initSocket ();
 }
 
 TransportSocket::TransportSocket (TransportSocket&& gObj) noexcept
-: m_nId (gObj.m_nId),
-  m_eProtocol (gObj.m_eProtocol),
+: m_nId         (gObj.m_nId),
+  m_eProtocol   (gObj.m_eProtocol),
   m_bIsBlocking (gObj.m_bIsBlocking)
 {
-    gObj.m_nId = nullSocket ();
+    gObj.m_nId = nullSocket;
 }
 
 TransportSocket& TransportSocket::operator = (TransportSocket&& gObj) noexcept
@@ -72,13 +71,13 @@ TransportSocket& TransportSocket::operator = (TransportSocket&& gObj) noexcept
     m_nId         = gObj.m_nId;
     m_eProtocol   = gObj.m_eProtocol;
     m_bIsBlocking = gObj.m_bIsBlocking;
-    gObj.m_nId    = nullSocket ();
+    gObj.m_nId    = nullSocket;
     return *this;
 }
 
 void TransportSocket::setBlocking (bool bBlock) noexcept
 {
-    if (m_nId != nullSocket ())
+    if (m_nId != nullSocket)
     {
 #       ifdef OS_STD_UNIX
         int nStatus = ::fcntl (id (), F_GETFL);
@@ -108,15 +107,15 @@ void TransportSocket::replaceFromId (socket_id nId) noexcept
 void TransportSocket::close () noexcept
 {
 #   ifdef OS_STD_UNIX
-    if (id () != nullSocket ()) ::close (id ());
+    if (id () != nullSocket) ::close (id ());
 #   elif defined OS_WINDOWS
-    if (id () != nullSocket ()) ::closesocket (id ());
+    if (id () != nullSocket) ::closesocket (id ());
 #   endif
 }
 
 void TransportSocket::initSocket () noexcept
 {
-    if (id () != nullSocket ())
+    if (id () != nullSocket)
     {
         if (m_eProtocol == SocketType::Tcp)
         {

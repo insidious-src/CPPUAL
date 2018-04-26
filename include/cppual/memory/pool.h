@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,65 +25,60 @@
 
 #include <cppual/memory/allocator.h>
 #include <cppual/memory/shared.h>
+#include <cppual/memory/mop.h>
 
 using std::string;
 
 namespace cppual { namespace Memory {
 
-class PoolAllocator final : public Allocator, NonCopyable
+class MonotonicPool final : public Repository, NonCopyable
 {
 public:
-    void* allocate   (size_type blk_count, align_type align) noexcept override;
-    void  deallocate (void* p, size_type size) override;
-
     // local memory
-    PoolAllocator (size_type  blk_count,
+    MonotonicPool (size_type  blk_count,
                    size_type  blk_size,
                    align_type blk_align);
 
     // nested allocators
-    PoolAllocator (Allocator& allocator,
+    MonotonicPool (Repository& allocator,
                    size_type   blk_count,
                    size_type   blk_size,
                    align_type  blk_align);
 
     // shared memory
-    PoolAllocator (SharedObject& shared_obj,
+    MonotonicPool (SharedObject& shared_obj,
                    size_type     blk_count,
                    size_type     blk_size,
                    align_type    blk_align);
 
-    ~PoolAllocator ();
-    void clear () noexcept;
+    ~MonotonicPool ();
+    void clear     () noexcept;
 
-    size_type blockSize  () const noexcept { return m_uBlkSize; }
+    size_type blockSize  () const noexcept { return m_uBlkSize ; }
     size_type blockAlign () const noexcept { return m_uBlkAlign; }
-    size_type blockCount () const noexcept { return m_uBlkNum; }
+    size_type blockCount () const noexcept { return m_uBlkNum  ; }
 
-    bool is_equal (Allocator const& gObj) const noexcept
-    { return &gObj == &m_gOwner; }
+    bool is_equal (Repository const& gObj) const noexcept
+    { return &gObj == &m_gOwner;                   }
 
     size_type max_size () const noexcept
     { return m_pBegin != nullptr ? m_uBlkSize : 0; }
 
-    size_type count () const noexcept
-    { return m_uNumAlloc; }
-
-    size_type size () const noexcept
+    size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
-                                       static_cast<math_pointer> (m_pBegin));
+        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd  ) -
+                                      (static_cast<math_pointer> (m_pBegin) +
+                                       alignAdjust (m_pBegin, m_uBlkAlign)));
     }
 
     bool is_shared () const noexcept
-    { return false;  }
+    { return false;    }
 
-    Allocator& owner () const noexcept
+    Repository& owner () const noexcept
     { return m_gOwner; }
 
 private:
-    size_type        m_uNumAlloc;
-    Allocator&       m_gOwner;
+    Repository&      m_gOwner;
     pointer const    m_pBegin;
     pointer const    m_pEnd;
     pointer*         m_pFreeList;
@@ -91,11 +86,16 @@ private:
     align_type const m_uBlkAlign;
     size_type        m_uBlkNum;
 
-    void initialize () noexcept;
+    void  initialize    ()                                  noexcept;
+    void* do_allocate   (size_type size, align_type align)  noexcept;
+    void  do_deallocate (void* p, size_type size, align_type align) ;
+
+    bool  do_is_equal   (memory_resource const& gObj) const noexcept
+    { return &gObj == &m_gOwner; }
 };
 
 template <class T>
-using PoolPolicy = AllocatorPolicy <T, PoolAllocator>;
+using MonotonicAllocator = Allocator <T, MonotonicPool>;
 
 } } // namespace Memory
 

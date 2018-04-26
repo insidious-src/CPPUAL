@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,8 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-StackedAllocator::StackedAllocator (size_type uSize)
+StackedPool::StackedPool (size_type uSize)
 : //m_gSharedName (),
-  m_uNumAlloc (),
   m_gOwner (*this),
   m_pCurMarker (uSize > 0 ? ::operator new (uSize) : nullptr),
   m_pBegin (m_pCurMarker),
@@ -36,9 +35,8 @@ StackedAllocator::StackedAllocator (size_type uSize)
   m_bIsMemShared ()
 { }
 
-StackedAllocator::StackedAllocator (Allocator& pOwner, size_type uSize)
+StackedPool::StackedPool (Repository& pOwner, size_type uSize)
 : //m_gSharedName (),
-  m_uNumAlloc (),
   m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pCurMarker (&m_gOwner != this ?
                              (uSize > 0 ?
@@ -53,9 +51,8 @@ StackedAllocator::StackedAllocator (Allocator& pOwner, size_type uSize)
 { }
 
 // not implemented
-//StackedAllocator::StackedAllocator (string& gName, size_type uSize)
+//StackedPool::StackedPool (string& gName, size_type uSize)
 //: m_gSharedName (std::move (gName)),
-//  m_uNumAlloc (),
 //  m_gOwner (*this),
 //  m_pCurMarker (m_pBegin),
 //  m_pBegin (uSize > 0 ? new (gName) u8[uSize] : nullptr),
@@ -63,15 +60,15 @@ StackedAllocator::StackedAllocator (Allocator& pOwner, size_type uSize)
 //  m_bIsMemShared (true)
 //{ }
 
-StackedAllocator::~StackedAllocator ()
+StackedPool::~StackedPool ()
 {
     if (m_pBegin == nullptr) return;
 
-    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
+    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
     else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
-void* StackedAllocator::allocate (size_type uBytes, align_type uAlign) noexcept
+void* StackedPool::do_allocate (size_type uBytes, align_type uAlign) noexcept
 {
     // check whether there is enough space to allocate
     if (!m_pBegin or !uBytes) return nullptr;
@@ -83,11 +80,10 @@ void* StackedAllocator::allocate (size_type uBytes, align_type uAlign) noexcept
 
     // shift the marker to the next available address
     // and increment the allocation count
-    ++m_uNumAlloc;
     return m_pCurMarker = pNewMarker;
 }
 
-void StackedAllocator::deallocate (void* p, size_type uSize)
+void StackedPool::do_deallocate (void* p, size_type uSize, align_type)
 {
     if ((static_cast<math_pointer> (p) + uSize) != m_pCurMarker)
         throw std::out_of_range ("pointer doesn't match the last element");
@@ -95,20 +91,12 @@ void StackedAllocator::deallocate (void* p, size_type uSize)
     // shift the marker to the end of the previous allocated block
     // and decrement the allocation count
     m_pCurMarker = p;
-    --m_uNumAlloc;
-}
-
-void StackedAllocator::clear () noexcept
-{
-    m_pCurMarker = m_pBegin;
-    m_uNumAlloc  = 0;
 }
 
 // =========================================================
 
-DStackedAllocator::DStackedAllocator (size_type uSize, size_type uHint)
+DStackedPool::DStackedPool (size_type uSize, size_type uHint)
 : //m_gSharedName (),
-  m_uNumAlloc (),
   m_gOwner (*this),
   m_pTopMarker (uSize > 0 ? ::operator new[] (uSize) : nullptr),
   m_pBottomMarker (m_pTopMarker != nullptr ? static_cast<math_pointer> (m_pTopMarker) + uSize :
@@ -119,11 +107,10 @@ DStackedAllocator::DStackedAllocator (size_type uSize, size_type uHint)
   m_bIsMemShared ()
 { }
 
-DStackedAllocator::DStackedAllocator (Allocator& pOwner,
-                                      size_type   uSize,
-                                      size_type   uHint)
+DStackedPool::DStackedPool (Repository& pOwner,
+                            size_type   uSize,
+                            size_type   uHint)
 : //m_gSharedName (),
-  m_uNumAlloc (),
   m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pTopMarker (&m_gOwner != this ?
                                  (uSize > 0 ?
@@ -139,11 +126,10 @@ DStackedAllocator::DStackedAllocator (Allocator& pOwner,
   m_bIsMemShared (&m_gOwner != this ? m_gOwner.is_shared () : true)
 { }
 
-//DStackedAllocator::DStackedAllocator (string&   gName,
+//DStackedPool::DStackedPool (string&   gName,
 //                                      size_type uSize,
 //                                      size_type uHint)
 //: m_gSharedName (std::move (gName)),
-//  m_uNumAlloc (),
 //  m_gOwner (*this),
 //  m_pTopMarker (uSize > 0 ? new (gName) u8[uSize] : nullptr),
 //  m_pBottomMarker (m_pTopMarker != nullptr ? m_pTopMarker + uSize : nullptr),
@@ -153,15 +139,15 @@ DStackedAllocator::DStackedAllocator (Allocator& pOwner,
 //  m_bIsMemShared (true)
 //{ }
 
-DStackedAllocator::~DStackedAllocator ()
+DStackedPool::~DStackedPool ()
 {
     if (m_pBegin == nullptr) return;
 
-    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, size ());
+    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
     else if (!m_bIsMemShared) delete[] static_cast<math_pointer> (m_pBegin);
 }
 
-void* DStackedAllocator::allocate (size_type uBytes, align_type uAlign) noexcept
+void* DStackedPool::do_allocate (size_type uBytes, align_type uAlign) noexcept
 {
     // check whether there is enough space to allocate
     if (!m_pBegin or !uBytes) return nullptr;
@@ -171,36 +157,22 @@ void* DStackedAllocator::allocate (size_type uBytes, align_type uAlign) noexcept
 
     if (pNewTopMarker > m_pBottomMarker) return nullptr;
 
-    ++m_uNumAlloc;
-
     return uBytes < m_uHint ?
                 m_pTopMarker = pNewTopMarker :
                                m_pBottomMarker = static_cast<math_pointer> (m_pBottomMarker) -
                                                  alignAdjust (m_pTopMarker, uAlign) - uBytes;
 }
 
-void DStackedAllocator::deallocate (void* p, size_type uBytes)
+void DStackedPool::do_deallocate (void* p, size_type uBytes, align_type)
 {
     // if the pointer belongs to the top side
     if ((static_cast<math_pointer> (p) + (uBytes = alignedSize (uBytes))) == m_pTopMarker)
-    {
         m_pTopMarker = p;
-        --m_uNumAlloc;
-    }
     // if the pointer belongs to the bottom side
     else if (p == m_pBottomMarker)
-    {
         m_pBottomMarker = static_cast<math_pointer> (p) + uBytes;
-        --m_uNumAlloc;
-    }
-    else throw std::out_of_range ("pointer doesn't match the last element is both markers");
-}
-
-void DStackedAllocator::clear () noexcept
-{
-    m_pTopMarker    = m_pBegin;
-    m_pBottomMarker = m_pEnd;
-    m_uNumAlloc     = 0;
+    else
+        throw std::out_of_range ("pointer doesn't match the last element is both markers");
 }
 
 } } // namespace Memory

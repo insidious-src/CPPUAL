@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,13 @@
 
 #include <iostream>
 #include <cppual/memory/static.h>
-#include <cppual/process/module.h>
+#include <cppual/process/plugin.h>
 #include <cppual/gfx/gl/runtime.h>
 #include "gldef.h"
 
+using cppual::Memory::StaticPool     ;
 using cppual::Memory::StaticAllocator;
-using cppual::Memory::StaticPolicy;
-using namespace std::string_literals;
+using namespace std::string_literals ;
 
 namespace cppual { namespace Graphics { namespace GL {
 
@@ -35,9 +35,9 @@ namespace {
 
 struct Internal
 {
-    typedef Process::Module                                 module_type;
-    typedef StaticAllocator<sizeof (module_type)>           allocator_type;
-    typedef StaticPolicy<module_type, sizeof (module_type)> policy_type;
+    typedef Process::DynLoader                                 module_type   ;
+    typedef StaticPool<sizeof (module_type)>                   allocator_type;
+    typedef StaticAllocator<module_type, sizeof (module_type)> policy_type   ;
 
     inline Internal () : allocator (), instance ()
     { /*Driver::load ("libGL"s);*/ }
@@ -46,7 +46,7 @@ struct Internal
     { /*Driver::unload ();*/ }
 
     allocator_type allocator;
-    module_type*   instance;
+    module_type*   instance ;
 
 } internal;
 
@@ -77,7 +77,7 @@ bool Driver::load (string const& gName)
 void Driver::unload ()
 {
     if (!internal.instance) return;
-    internal.instance->~Module ();
+    internal.instance->~DynLoader ();
     Internal::policy_type (internal.allocator).deallocate (internal.instance, 1);
     internal.instance = nullptr;
 }

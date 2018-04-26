@@ -1,5 +1,8 @@
 find_package(PackageHandleStandardArgs)
 
+set(HEADER_FILES  Vulkan/vulkan.h vulkan/vulkan.h)
+set(LIBRARY_NAMES vk Vulkan vulkan vulkan-1)
+
 set(VULKAN_VERSION_STRING "1.0.5")
 set(VULKAN_VERSION_MAJOR 1)
 set(VULKAN_VERSION_MINOR 0)
@@ -8,7 +11,7 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES .dll .so)
 
 find_path(VULKAN_INCLUDE_DIR
   NAMES
-    Vulkan/vulkan.h vulkan/vulkan.h
+    HEADER_FILES
   PATHS
     ENV AMDAPPSDKROOT
     ENV INTELOCLSDKROOT
@@ -26,7 +29,8 @@ find_path(_VULKAN_CPP_INCLUDE_DIR vulkan/spirv.hpp Vulkan/spirv.hpp DOC "Include
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
     find_library(VULKAN_LIBRARY
-      NAMES vk Vulkan vulkan vulkan-1
+      NAMES
+        LIBRARY_NAMES
       HINTS
         ENV AMDAPPSDKROOT
         ENV INTELOCLSDKROOT
@@ -41,7 +45,8 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         lib/Win32)
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
     find_library(VULKAN_LIBRARY
-      NAMES vk Vulkan vulkan vulkan-1
+      NAMES
+        LIBRARY_NAMES
       HINTS
         ENV AMDAPPSDKROOT
         ENV INTELOCLSDKROOT
@@ -67,7 +72,7 @@ if(VULKAN_FOUND AND NOT TARGET Vulkan::Library)
         set_target_properties(Vulkan::Library PROPERTIES
                 IMPORTED_LOCATION "${VULKAN_LIBRARY}"
                 INTERFACE_INCLUDE_DIRECTORIES "${VULKAN_INCLUDE_DIR}"
-		)
+        )
 endif()
 
 mark_as_advanced(VULKAN_LIBRARY VULKAN_INCLUDE_DIR)

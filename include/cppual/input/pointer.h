@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@
 namespace cppual { namespace Input {
 
 struct Touch;
-struct Pointer;
+struct Mouse;
 
-class PointerEvent
+class MouseEvent
 {
 public:
     typedef u16 size_type;
@@ -101,10 +101,10 @@ private:
 
 // =========================================================
 
-class PointerQueue : NonConstructible
+class MouseQueue : NonConstructible
 {
 public:
-    typedef PointerEvent event_type;
+    typedef MouseEvent event_type;
 
     static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
@@ -121,9 +121,9 @@ public:
 
 // =========================================================
 
-struct Pointer
+struct Mouse
 {
-    typedef PointerQueue queue_type;
+    typedef MouseQueue queue_type;
 
     enum
     {

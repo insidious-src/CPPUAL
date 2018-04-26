@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public:
         DirectAccess
     };
 
-    Texture () noexcept;
+    Texture  () noexcept;
     ~Texture () noexcept;
     static void setState (State type, bool state) noexcept;
     //bool loadTexture2D (RasterImage const& image, bool gen_mipmap = false);

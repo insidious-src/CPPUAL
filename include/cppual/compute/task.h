@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,9 +55,9 @@ public:
         Running
     };
 
-    HostQueue (HostQueue&&);
-    HostQueue (HostQueue const&);
-    HostQueue& operator = (HostQueue&&);
+    HostQueue (HostQueue&&                 );
+    HostQueue (HostQueue const&            );
+    HostQueue& operator = (HostQueue&&     );
     HostQueue& operator = (HostQueue const&);
 
     HostQueue () noexcept
@@ -86,6 +86,12 @@ public:
     {
         read_lock gLock (m_gQueueMutex);
         return m_uNumAssigned;
+    }
+
+    size_type numFinished () const
+    {
+        read_lock gLock (m_gQueueMutex);
+        return m_uNumCompleted;
     }
 
     State state () const
@@ -153,7 +159,7 @@ public:
     { return state () == HostQueue::Running and empty (); }
 
     void reuse ()
-    { if (!valid ()) return ThreadPool::reserve (*this); }
+    { if (!valid ()) ThreadPool::reserve (*this); }
 
     inline bool get (T& value)
     {

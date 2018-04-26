@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,18 +28,18 @@
 
 namespace cppual { namespace Audio { namespace AL {
 
-class SoundStreamRecorder final : public NonCopyable
+class SoundStreamRecorder : public NonCopyable
 {
 public:
     SoundStreamRecorder () = delete;
-    explicit SoundStreamRecorder (CaptureDevice&) noexcept;
-    static bool isAvailable () noexcept;
+    explicit    SoundStreamRecorder (CaptureDevice&) noexcept;
+    static bool isAvailable         () noexcept;
 
-    bool record () noexcept;
-    void stop () noexcept;
+    bool record     () noexcept;
+    void stop       () noexcept;
     void setSamples (int samples) noexcept;
 
-    inline CaptureDevice& getCaptureDevice () noexcept { return m_gDevice; }
+    inline CaptureDevice& getCaptureDevice () noexcept { return m_gDevice;  }
     inline int            getSamples () const noexcept { return m_nSamples; }
 
 private:

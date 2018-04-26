@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ using std::deque;
 
 namespace cppual { namespace Compute {
 
-namespace { namespace Internal { // optimize for internal unit usage
+namespace { // optimize for internal unit usage
 
 struct ThreadPoolInitializer
 {
@@ -69,7 +69,7 @@ inline ThreadPoolInitializer& pool () noexcept
     return thread_pool;
 }
 
-} } // anonymous namespace Internal
+} // anonymous namespace
 
 // =========================================================
 
@@ -114,15 +114,14 @@ void HostQueue::operator ()()
 
             m_gTaskCond.wait (gReadLock, [&]
             {
-                return HostQueue::Running > m_eState or
-                        !m_gTaskQueue.empty ();
+                return Running > m_eState or !m_gTaskQueue.empty ();
             });
 
             // process a task if there is one scheduled,
             // otherwise return if the execution state
             // requires it
-            if (HostQueue::Interrupted == m_eState or
-                (m_gTaskQueue.empty () and HostQueue::Inactive == m_eState))
+            if (Interrupted == m_eState or
+                (m_gTaskQueue.empty () and Inactive == m_eState))
                 break;
 
             run = std::move (m_gTaskQueue.front ());
@@ -153,13 +152,15 @@ bool ThreadPool::reserve (HostQueue& gTaskQueue, size_type uAddThreads, bool bDe
 {
     if (uAddThreads == 0) return false;
 
-    // add threads to the container and initialize them
-    write_lock gLock (Internal::pool ().threadMutex);
 
+    write_lock gLock (pool ().threadMutex);
+
+    // add threads to the container and initialize them
     while (uAddThreads--)
     {
-        Internal::pool ().threads.emplace_back (thread (gTaskQueue));
-        if (bDetached) Internal::pool ().threads.back ().detach ();
+        // add and initialize a thread with HostQueue::operator ()
+        pool ().threads.emplace_back (thread (gTaskQueue));
+        if (bDetached) pool ().threads.back ().detach ();
     }
 
     return true;
@@ -209,8 +210,8 @@ void HostQueue::quit (bool bInterrupt) noexcept
     {
         read_lock gLock (m_gQueueMutex);
 
-        if (m_eState != HostQueue::Running) return;
-        m_eState = bInterrupt ? HostQueue::Interrupted : HostQueue::Inactive;
+        if (m_eState != Running) return;
+        m_eState = bInterrupt ? Interrupted : Inactive;
     }
 
     // wake all threads to check the execution state

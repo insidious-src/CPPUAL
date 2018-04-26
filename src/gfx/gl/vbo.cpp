@@ -3,7 +3,7 @@
  * Author: Kurec
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,12 +118,12 @@ void* VertexBuffer::mapBufferToMemory (AccessMode eMode) noexcept
 {
     if (!m_bIsUploaded) return nullptr;
     return IDeviceContext::current ()->version () < 3 ?
-                glMapBuffer (getBufferType (m_eType), getAccessMode (eMode)) :
-                glMapBufferARB (getBufferType (m_eType), getAccessMode (eMode));
+                glMapBuffer    (getBufferType (m_eType), getAccessMode (eMode)) :
+                glMapBufferARB (getBufferType (m_eType), getAccessMode (eMode)) ;
 }
 
-void* VertexBuffer::mapSubBufferToMemory (ptrdiff     uOffset,
-                                          ptrdiff     uLen,
+void* VertexBuffer::mapSubBufferToMemory (ptrdiff    uOffset,
+                                          ptrdiff    uLen,
                                           GLMapFlags gAccesFlags) noexcept
 {
     if (!m_bIsUploaded) return nullptr;
@@ -152,7 +152,7 @@ void VertexBuffer::upload (UsageType eUsage)
     if (id ())
     {
         glBufferData (getBufferType (m_eType),
-                      (ptrdiff) m_gData.size (),
+                      static_cast<ptrdiff> (m_gData.size ()),
                       &m_gData[0],
                       getUsageType (eUsage));
 
