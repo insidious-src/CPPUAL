@@ -191,7 +191,7 @@ public:
 
 private:
     template<class Out, class In>
-    constexpr Out direct_cast (In in) noexcept
+    constexpr Out direct_cast (In in) const noexcept
     {
         typedef union { Out out; In in; } cast_union;
 
@@ -203,7 +203,7 @@ private:
     }
 
     template<class Out, class In>
-    constexpr Out unsafe_direct_cast (In in) noexcept
+    constexpr Out unsafe_direct_cast (In in) const noexcept
     {
         typedef union { Out out; In in; } cast_union;
         return cast_union (in).out;

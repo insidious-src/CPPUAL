@@ -89,8 +89,8 @@ public:
 
     friend class CircularIterator<buf_type const>;
 
-    constexpr elem_type& operator *  () { return   get ()[m_uPos];  }
-    constexpr elem_type* operator -> () { return &(get ()[m_uPos]); }
+    constexpr elem_type& operator *  () const { return   get ()[m_uPos];  }
+    constexpr elem_type* operator -> () const { return &(get ()[m_uPos]); }
 
     constexpr CircularIterator () noexcept
     : m_pBuf (0), m_uPos (0)
@@ -132,7 +132,7 @@ public:
         return tmp;
     }
 
-    constexpr self_type operator + (difference_type n) const
+    inline self_type operator + (difference_type n) const
     {
         self_type tmp (*this);
         tmp.m_uPos += n;
@@ -145,7 +145,7 @@ public:
         return *this;
     }
 
-    constexpr self_type operator - (difference_type n) const
+    inline self_type operator - (difference_type n) const
     {
         self_type tmp (*this);
         tmp.m_uPos -= n;
