@@ -2,21 +2,21 @@ find_package(PackageHandleStandardArgs)
 
 set(GL_HEADER_FILES GL/gl.h GL/glew.h)
 set(GL_LIBRARY_NAMES GL opengl32)
-set(GL_LIBRARY_NAMES64 opengl64 GL_LIBRARY_NAMES)
+set(GL_LIBRARY_NAMES64 opengl64 ${GL_LIBRARY_NAMES})
 
-find_path(GL_INCLUDE_DIR NAMES GL_HEADER_FILES
+find_path(GL_INCLUDE_DIR NAMES ${GL_HEADER_FILES}
             PATHS ${CMAKE_SOURCE_DIR}
             PATH_SUFFIXES include external/include
             )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         find_library(GL_LIBRARY
-                        NAMES GL_LIBRARY_NAMES
+                        NAMES ${GL_LIBRARY_NAMES}
                         PATH_SUFFIXES lib32 lib
                         )
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
         find_library(GL_LIBRARY
-                        NAMES GL_LIBRARY_NAMES64
+                        NAMES ${GL_LIBRARY_NAMES64}
                         PATH_SUFFIXES lib lib64
                         )
 endif()

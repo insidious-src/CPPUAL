@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <cstddef>
-#include <cppual/text.h>
+#include <cppual/mstring.h>
 
 using cppual::Text::string;
 

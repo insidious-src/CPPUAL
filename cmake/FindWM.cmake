@@ -3,20 +3,30 @@ find_package(PackageHandleStandardArgs)
 set(HEADER_FILES  wayland-client-protocol.h winuser.h)
 set(LIBRARY_NAMES wayland-client user32)
 
-find_path(WM_INCLUDE_DIR HEADER_FILES
-        PATHS ${CMAKE_SOURCE_DIR}
-        PATH_SUFFIXES include external/include
+find_path(WM_INCLUDE_DIR 
+        NAMES
+                ${HEADER_FILES}
+        PATHS
+                ${CMAKE_SOURCE_DIR}
+        PATH_SUFFIXES
+                include external/include
         )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "BSD")
     if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-            find_library(WM_LEGACY_LIBRARY xcb-icccm
-                    PATH_SUFFIXES lib32 lib
-                    )
+            find_library(WM_LEGACY_LIBRARY
+                NAMES
+                        xcb-icccm
+                PATH_SUFFIXES
+                        lib32 lib
+                )
     elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-            find_library(WM_LEGACY_LIBRARY xcb-icccm
-                    PATH_SUFFIXES lib lib64
-                    )
+            find_library(WM_LEGACY_LIBRARY
+                NAMES
+                        xcb-icccm
+                PATH_SUFFIXES
+                        lib lib64
+                )
     endif()
 
         find_package_handle_standard_args(WM_LEGACY REQUIRED_VARS WM_LEGACY_LIBRARY WM_INCLUDE_DIR)
@@ -32,12 +42,12 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "BSD"
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         find_library(WM_LIBRARY
-                        NAMES LIBRARY_NAMES
+                        NAMES ${LIBRARY_NAMES}
                         PATH_SUFFIXES lib32 lib
                         )
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
         find_library(WM_LIBRARY
-                        NAMES LIBRARY_NAMES
+                        NAMES ${LIBRARY_NAMES}
                         PATH_SUFFIXES lib lib64
                         )
 endif()

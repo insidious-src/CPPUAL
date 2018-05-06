@@ -4,19 +4,20 @@ set(HEADER_FILES GL/glew.h)
 set(LIBRARY_NAMES GLEW glew32 glew glew32s)
 set(LIBRARY_NAMES64 GLEW glew64 glew glew64s)
 
-find_path(GLEW_INCLUDE_DIR HEADER_FILES
+find_path(GLEW_INCLUDE_DIR
+            NAMES ${HEADER_FILES}
             HINTS ${CMAKE_SOURCE_DIR}/external/include
             )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         find_library(GLEW_LIBRARY
-                NAMES LIBRARY_NAMES
+                NAMES ${LIBRARY_NAMES}
                 PATHS ${CMAKE_SOURCE_DIR}/external
                 PATH_SUFFIX bin/x86 lib32 lib
                 )
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
         find_library(GLEW_LIBRARY
-                NAMES LIBRARY_NAMES64
+                NAMES ${LIBRARY_NAMES64}
                 PATHS ${CMAKE_SOURCE_DIR}/external
                 PATH_SUFFIX bin/x86_64 lib lib64
                 )

@@ -11,7 +11,9 @@ if(NOT WIN32)
     find_package(PkgConfig)
     pkg_check_modules(PKG_EGL QUIET egl)
 
-        find_path(EGL_INCLUDE_DIR EGL_HEADER_FILES
+        find_path(EGL_INCLUDE_DIR
+            NAMES
+                ${EGL_HEADER_FILES}
             HINTS
                 ${PKG_EGL_INCLUDE_DIRS}
             PATH_SUFFIXES
@@ -22,20 +24,23 @@ if(NOT WIN32)
 
 else()
 
-    find_path(EGL_INCLUDE_DIR EGL_HEADER_FILES
+    find_path(EGL_INCLUDE_DIR 
+        NAMES ${EGL_HEADER_FILES}
         PATHS ${CMAKE_SOURCE_DIR}
         PATH_SUFFIXES external/include
         )
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-        find_library(EGL_LIBRARY EGL_LIBRARY_NAMES
+        find_library(EGL_LIBRARY
+            NAMES ${EGL_LIBRARY_NAMES}
             PATHS ${CMAKE_SOURCE_DIR}
-                        PATH_SUFFIXES bin/x86 external/bin/x86
+            PATH_SUFFIXES bin/x86 external/bin/x86
             )
     elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        find_library(EGL_LIBRARY EGL_LIBRARY_NAMES
+        find_library(EGL_LIBRARY
+            NAMES ${EGL_LIBRARY_NAMES}
             PATHS ${CMAKE_SOURCE_DIR}
-                        PATH_SUFFIXES bin/x86_64 external/bin/x86_64
+            PATH_SUFFIXES bin/x86_64 external/bin/x86_64
             )
         endif()
 

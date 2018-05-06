@@ -4,18 +4,18 @@ set(HEADER_FILES     winsock.h winsock2.h arpa/inet.h sys/socket.h)
 set(LIBRARY_NAMES    ws2_32 rt wsock32)
 set(LIBRARY_SUFFIXES include/freetype2 include/freetype)
 
-find_path(SOCKETS_INCLUDE_DIR NAMES HEADER_FILES
+find_path(SOCKETS_INCLUDE_DIR NAMES ${HEADER_FILES}
         PATHS ${CMAKE_SOURCE_DIR}/external/include
         )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         find_library(SOCKETS_LIBRARY
-                     NAMES LIBRARY_NAMES
+                     NAMES ${LIBRARY_NAMES}
                      PATH_SUFFIXES lib32 lib
                      )
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
         find_library(SOCKETS_LIBRARY
-                     NAMES LIBRARY_NAMES
+                     NAMES ${LIBRARY_NAMES}
                      PATH_SUFFIXES lib lib64
                      )
 endif()

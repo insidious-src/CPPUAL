@@ -3,20 +3,21 @@ find_package(PackageHandleStandardArgs)
 set(HEADER_FILES  sndfile.h)
 set(LIBRARY_NAMES sndfile sndfile-1)
 
-find_path(SNDFILE_INCLUDE_DIR HEADER_FILES
+find_path(SNDFILE_INCLUDE_DIR
+    NAMES ${HEADER_FILES}
     PATH_SUFFIXES external/include include
     PATHS ${CMAKE_SOURCE_DIR}
     )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
     find_library(SNDFILE_LIBRARY
-            NAMES LIBRARY_NAMES
+            NAMES ${LIBRARY_NAMES}
             PATH_SUFFIXES lib32 lib external/bin/x86
             PATHS ${CMAKE_SOURCE_DIR}
             )
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
     find_library(SNDFILE_LIBRARY
-            NAMES LIBRARY_NAMES
+            NAMES ${LIBRARY_NAMES}
             PATH_SUFFIXES lib lib64 external/bin/x86_64
             PATHS ${CMAKE_SOURCE_DIR}
             )

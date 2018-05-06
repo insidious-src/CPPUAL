@@ -35,7 +35,7 @@ class View
 public:
     typedef Input::Event                         event_type;
     typedef Graphics::Element                    window_type;
-    typedef Memory::Allocator<View*>         allocator_type;
+    typedef Memory::Allocator<View*>             allocator_type;
     typedef CircularQueue<View*, allocator_type> container;
     typedef std::size_t                          size_type;
 

@@ -4,7 +4,7 @@ set(HEADER_FILES     AL/al.h OpenAL/al.h)
 set(LIBRARY_NAMES    OpenAL al openal OpenAL32 soft_oal)
 set(LIBRARY_NAMES64  OpenAL al openal OpenAL64 soft_oal)
 
-find_path(OPENAL_INCLUDE_DIR NAMES HEADER_FILES
+find_path(OPENAL_INCLUDE_DIR NAMES ${HEADER_FILES}
   HINTS
   ENV OPENALDIR
   PATH_SUFFIXES external/include include
@@ -20,7 +20,7 @@ find_path(OPENAL_INCLUDE_DIR NAMES HEADER_FILES
 )
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
     find_library(OPENAL_LIBRARY
-        NAMES LIBRARY_NAMES
+        NAMES ${LIBRARY_NAMES}
         HINTS ENV OPENALDIR
         PATH_SUFFIXES lib32 lib lib/Win32 libs/Win32 external/bin/x86
         PATHS
@@ -35,7 +35,7 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         )
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
     find_library(OPENAL_LIBRARY
-        NAMES LIBRARY_NAMES64
+        NAMES ${LIBRARY_NAMES64}
         HINTS ENV OPENALDIR
         PATH_SUFFIXES lib lib64 lib/Win64 libs/Win64 external/bin/x86_64
         PATHS
