@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2016 insidious
@@ -93,11 +93,11 @@ private:
     typedef FlagSet<Texture::State, u8> States;
 
     PixelFormat  m_gFormat;
-    point2i         m_gSize;
+    point2i      m_gSize;
     uint         m_uSampleId;
     TexMinFilter m_eMin;
     TexMagFilter m_eMag;
-    States         m_gStates;
+    States       m_gStates;
 };
 
 } } // Graphics

@@ -1,9 +1,10 @@
 project("C++ UAL")
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.9)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
 
 include(cmake/CompilerConfig.cmake  REQUIRED)
 include(cmake/ToolChainConfig.cmake REQUIRED)
@@ -109,11 +110,13 @@ add_library(cppual-compute SHARED
     src/memory/devmemory.cpp
     include/cppual/compute/devtask.h
     src/compute/devtask.cpp
-#	src/compute/context.cpp
-#	include/cppual/compute/context.h
+#   src/compute/context.cpp
+#   include/cppual/compute/context.h
     include/cppual/compute/pll_ops.h
     src/compute/task.cpp
     include/cppual/compute/task.h
+    src/compute/thread.cpp
+    include/cppual/compute/thread.h
     )
 
 #add_library(cppual-db SHARED

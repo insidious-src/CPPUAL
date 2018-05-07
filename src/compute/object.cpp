@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/compute/device.h>
+#include <cppual/compute/object.h>
 
 namespace cppual { namespace Compute {
 

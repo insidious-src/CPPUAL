@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -39,8 +39,8 @@ struct BatchConfig
 
     BatchConfig (unsigned uRenderTypeIn, int iPriorityIn, unsigned uTextureIdIn)
     : uRenderType (uRenderTypeIn),
-      iPriority (iPriorityIn),
-      uTextureId (uTextureIdIn)
+      iPriority   (iPriorityIn),
+      uTextureId  (uTextureIdIn)
     { }
 
     bool operator == (BatchConfig const& other) const

@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious

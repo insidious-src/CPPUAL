@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -32,12 +32,12 @@ using std::string;
 namespace cppual { namespace Audio {
 
 Sound::Sound (Sound&& gObj) noexcept
-: m_gBuffer (gObj.m_gBuffer),
-  m_pSndDesc (gObj.m_pSndDesc),
-  m_nSampleCount (gObj.m_nSampleCount),
-  m_nSampleRate (gObj.m_nSampleRate),
+: m_gBuffer       (gObj.m_gBuffer)      ,
+  m_pSndDesc      (gObj.m_pSndDesc)     ,
+  m_nSampleCount  (gObj.m_nSampleCount) ,
+  m_nSampleRate   (gObj.m_nSampleRate)  ,
   m_nChannelCount (gObj.m_nChannelCount),
-  m_gFlags (gObj.m_gFlags)
+  m_gFlags        (gObj.m_gFlags)
 {
     gObj.m_nSampleCount = gObj.m_nChannelCount = gObj.m_nSampleRate = 0;
     gObj.m_pSndDesc     = nullptr;

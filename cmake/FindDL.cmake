@@ -1,7 +1,5 @@
 find_package(PackageHandleStandardArgs)
 
-set(CMAKE_FIND_LIBRARY_SUFFIXES .dll .so)
-
 find_path(DL_INCLUDE_DIR
         NAMES
                 dlfcn.h libloaderapi.h

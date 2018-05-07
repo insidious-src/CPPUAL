@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -23,7 +23,7 @@
 #include <cppual/memory/devmemory.h>
 #include <cppual/compute/device.h>
 
-void* operator new (std::size_t size, MemoryChunk& obj, std::size_t align)
+void* operator new (std::size_t /* size */, MemoryChunk& /* obj */, std::size_t /* align */)
 {
     using namespace cppual::Memory;
 

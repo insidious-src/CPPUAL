@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -34,7 +34,7 @@ struct ThreadPoolInitializer
 {
     typedef HostQueue::mutex_type mutex_type;
     typedef HostQueue::write_lock write_lock;
-    typedef HostQueue::read_lock  read_lock;
+    typedef HostQueue::read_lock  read_lock ;
 
     ~ThreadPoolInitializer ();
 
@@ -44,7 +44,7 @@ struct ThreadPoolInitializer
     { }
 
     mutex_type    threadMutex;
-    deque<thread> threads;
+    deque<thread> threads    ;
 
 };
 
@@ -85,7 +85,7 @@ public:
 
     ~Assign ()
     {
-        // RAII lock
+        // isolation brackets
         {
             m_queue.m_gQueueMutex.lock ();
             --m_queue.m_uNumAssigned;

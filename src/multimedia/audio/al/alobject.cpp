@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -66,7 +66,7 @@ AudioObject::AudioObject (AudioObject const& gObj) noexcept
 }
 
 AudioObject::AudioObject (AudioObject&& gObj) noexcept
-: m_uObjId (gObj.m_uObjId),
+: m_uObjId   (gObj.m_uObjId),
   m_eObjType (gObj.m_eObjType)
 {
     gObj.m_uObjId = 0;
@@ -77,8 +77,10 @@ AudioObject& AudioObject::operator = (AudioObject&& gObj) noexcept
     if (this != &gObj)
     {
         reset ();
-        m_uObjId   = gObj.m_uObjId;
-        m_eObjType = gObj.m_eObjType;
+
+        m_uObjId      = gObj.m_uObjId;
+        m_eObjType    = gObj.m_eObjType;
+
         gObj.m_uObjId = 0;
     }
 
@@ -90,6 +92,7 @@ AudioObject& AudioObject::operator = (AudioObject const& gObj) noexcept
     if (this != &gObj and m_eObjType != gObj.m_eObjType)
     {
         reset ();
+        
         m_uObjId   = generateObject (gObj.m_eObjType);
         m_eObjType = gObj.m_eObjType;
     }

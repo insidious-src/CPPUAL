@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -37,6 +37,14 @@ namespace { // optimize for internal unit usage
 //{
 //    return false;
 //}
+
+enum Result
+{
+    ResultSuccess,
+    ErrorInvalid ,
+    ErrorDenied  ,
+    ErrorUnknown
+};
 
 } // anonymous
 

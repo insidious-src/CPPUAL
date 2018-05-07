@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -36,7 +36,7 @@ void    setOrientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) no
 point3f orientationAt () noexcept;
 point3f orientationUp () noexcept;
 void    setVolume (float value) noexcept;
-float    volume () noexcept;
+float   volume () noexcept;
 bool    isMute () noexcept;
 void    mute () noexcept;
 void    unmute () noexcept;

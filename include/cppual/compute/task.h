@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -19,8 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_PROCESS_THREAD_POOL
-#define CPPUAL_PROCESS_THREAD_POOL
+#ifndef CPPUAL_PROCESS_TASK
+#define CPPUAL_PROCESS_TASK
 #ifdef __cplusplus
 
 #include <deque>
@@ -224,4 +224,4 @@ private:
 } } // namespace Concurency
 
 #endif // __cplusplus
-#endif // CPPUAL_PROCESS_THREAD_POOL
+#endif // CPPUAL_PROCESS_TASK

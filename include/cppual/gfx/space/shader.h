@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2016 insidious
@@ -74,12 +74,12 @@ class Shader : public Binary
 public:
     enum Type
     {
-        Vertex           = 1 << 0,
+        Vertex         = 1 << 0,
         Fragment       = 1 << 1,
         Geometry       = 1 << 2,
-        TessControl       = 1 << 3,
+        TessControl    = 1 << 3,
         TessEvaluation = 1 << 4,
-        Compute           = 1 << 5,
+        Compute        = 1 << 5,
         Atomic         = 1 << 6
     };
 
@@ -90,17 +90,17 @@ public:
     Shader (Shader&&) noexcept;
     Shader& operator = (Shader&&) noexcept;
 
-    string log ();
+    string log  ();
     bool   load (string const& str, LoadFrom mode = LoadFrom::File);
     bool   compile () noexcept;
 
-    inline string const&  source () const noexcept { return m_gSource; }
-    inline Shader::Type type () const noexcept { return m_eType; }
+    inline string const& source () const noexcept { return m_gSource; }
+    inline Shader::Type  type   () const noexcept { return m_eType  ; }
 
-    inline bool    isLoaded () const noexcept
+    inline bool isLoaded () const noexcept
     { return m_gStates.hasFlag (Shader::IsLoaded); }
 
-    inline bool    isCompiled () const noexcept
+    inline bool isCompiled () const noexcept
     { return m_gStates.hasFlag (Shader::IsCompiled); }
 
 private:

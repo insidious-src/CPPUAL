@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -72,9 +72,8 @@ public:
         Native,
         OpenCL,
         Vulkan,
-        //CUDA,
-        D3D12,
-        //Metal
+        //D3D12,
+        Metal
     };
 
     enum class IL : unsigned char
@@ -82,7 +81,6 @@ public:
         None,
         GLSL,
         SPIRV,
-        //CUDA,
         HLIL
     };
 

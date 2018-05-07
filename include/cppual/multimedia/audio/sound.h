@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -72,11 +72,11 @@ enum class SoundQuality : unsigned char
 class Sound
 {
 public:
-    typedef std::array<double, BufferLength> buffer_type;
-    typedef double                           value_type;
-    typedef double*                          pointer;
+    typedef std::array<double, BufferLength> buffer_type  ;
+    typedef double                           value_type   ;
+    typedef double*                          pointer      ;
     typedef double const*                    const_pointer;
-    typedef int64                            size_type;
+    typedef int64                            size_type    ;
 
     enum Attribute
     {

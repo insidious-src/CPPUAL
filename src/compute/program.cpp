@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -21,6 +21,7 @@
 
 #include <cppual/compute/program.h>
 #include "backend.h"
+#include "backend/opencl.h"
 
 namespace cppual { namespace Compute {
 
@@ -37,11 +38,11 @@ inline Program::pointer createProgramFromSource (Behaviour const& context, vecto
 
         auto sources = source.front ().c_str ();
 
-//        return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
-//                                            static_cast<uint> (source.size ()),
-//                                            &sources,
-//                                            sizes,
-//                                            nullptr);
+       /* return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
+                                           static_cast<uint> (source.size ()),
+                                           &sources,
+                                           sizes,
+                                           nullptr); */
     }
 
     return nullptr;

@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -152,10 +152,10 @@ class StaticMatrix
 public:
     static_assert (1 < C or 1 < R, "Ivalid number of dimensions!");
 
-    typedef T               value_type;
+    typedef T               value_type   ;
     typedef T const*        const_pointer;
-    typedef array<T, C * R> array_type;
-    typedef u16             size_type;
+    typedef array<T, C * R> array_type   ;
+    typedef u16             size_type    ;
 
     StaticMatrix<C, R, T>& identity ()
     { return *this; }

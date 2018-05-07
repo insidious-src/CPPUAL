@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -58,10 +58,10 @@ public:
     static bool isExtensionSupported (string const& name) noexcept;
     bool        isExtensionPresent   (string const& name) noexcept;
 
-    inline DeviceType type () const noexcept { return m_eType; }
-    inline string     name () const noexcept { return m_gDeviceName; }
-    inline void*      object () noexcept { return m_pDevObj; }
-    inline bool       isValid () const noexcept { return m_pDevObj; }
+    inline DeviceType type    () const noexcept { return m_eType      ; }
+    inline string     name    () const noexcept { return m_gDeviceName; }
+    inline void*      object  ()       noexcept { return m_pDevObj    ; }
+    inline bool       isValid () const noexcept { return m_pDevObj    ; }
 
 protected:
     string     m_gDeviceName;
@@ -71,8 +71,8 @@ protected:
     inline
     AudioDevice (string const& gName, void* pObj, DeviceType eType) noexcept
     : m_gDeviceName (std::move (gName)),
-      m_pDevObj (pObj),
-      m_eType (eType)
+      m_pDevObj     (pObj),
+      m_eType       (eType)
     { }
 };
 
@@ -87,7 +87,7 @@ public:
 class CaptureDevice final : public AudioDevice
 {
 public:
-    CaptureDevice () noexcept;
+    CaptureDevice  () noexcept;
     ~CaptureDevice () noexcept;
 
     CaptureDevice (string const& name,
@@ -96,11 +96,11 @@ public:
                    SoundQuality  quality = SoundQuality::Low) noexcept;
 
     SoundQuality quality () const noexcept { return m_eQuality; }
-    OutputFormat format () const noexcept { return m_eFormat; }
+    OutputFormat format  () const noexcept { return m_eFormat ; }
 
 private:
     SoundQuality m_eQuality;
-    OutputFormat m_eFormat;
+    OutputFormat m_eFormat ;
 };
 
 // ====================================================
@@ -121,17 +121,17 @@ public:
     void suspend () noexcept;
 
     static DistanceModel distanceModel () noexcept;
-    static void             setDistanceModel (DistanceModel model) noexcept;
+    static void          setDistanceModel (DistanceModel model) noexcept;
     static Instance*     current () noexcept;
-    static string         label (StringQuery query) noexcept;
-    static ext_list         extensions () noexcept;
-    static void             setDopplerFactor (float factor) noexcept;
+    static string        label (StringQuery query) noexcept;
+    static ext_list      extensions () noexcept;
+    static void          setDopplerFactor (float factor) noexcept;
     static float         dopplerFactor () noexcept;
-    static void             setSpeedOfSound (float speed) noexcept;
+    static void          setSpeedOfSound (float speed) noexcept;
     static float         speedOfSound () noexcept;
 
     inline PlaybackDevice& device  () const noexcept { return m_gDevice; }
-    inline bool               isValid () const noexcept { return m_pDevContext; }
+    inline bool            isValid () const noexcept { return m_pDevContext; }
 
 private:
     PlaybackDevice& m_gDevice;

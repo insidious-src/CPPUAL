@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -35,7 +35,7 @@ public:
     static_assert (std::is_enum<T>::value, "T is not an enumeration!");
 
     typedef T                                      enum_type;
-    typedef u16                                    size_type;
+    typedef ulong_t                                size_type;
     typedef typename std::underlying_type<T>::type value_type;
 
     constexpr BitSet () noexcept = default;

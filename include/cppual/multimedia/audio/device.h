@@ -1,6 +1,6 @@
 /*
  * Product: C++ Unified Abstraction Library
- * Author: Kurec
+ * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
@@ -56,8 +56,8 @@ public:
     static bool isExtensionSupported (string const& name) noexcept;
     bool        isExtensionPresent   (string const& name) noexcept;
 
-    inline Type   type () const noexcept { return m_eType; }
-    inline string name () const noexcept { return m_gDeviceName; }
+    inline Type   type    () const noexcept { return m_eType                ; }
+    inline string name    () const noexcept { return m_gDeviceName          ; }
     inline bool   isValid () const noexcept { return m_eType != Device::Null; }
 
 protected:
@@ -70,8 +70,8 @@ protected:
 class PlaybackDevice : public virtual Device
 {
 public:
-    PlaybackDevice () noexcept;
-    PlaybackDevice (string const& name) noexcept;
+    PlaybackDevice  () noexcept;
+    PlaybackDevice  (string const& name) noexcept;
     ~PlaybackDevice () noexcept;
 };
 
