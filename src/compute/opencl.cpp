@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "backend.h"
 
 using std::vector;
-using cppual::Memory::StackedAllocator;
+using cppual::Memory::StackedPool;
 using cppual::Memory::StackedPolicy;
 
 namespace cppual { namespace Compute {
@@ -35,7 +35,7 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 struct Initializer
 {
-    typedef StackedAllocator                            allocator_type;
+    typedef StackedPool                                 allocator_type;
     typedef StackedPolicy<CL::device_type>              device_policy;
     typedef std::vector<CL::device_type, device_policy> device_vector;
 

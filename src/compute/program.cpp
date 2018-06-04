@@ -20,7 +20,7 @@
  */
 
 #include <cppual/compute/program.h>
-#include "backend.h"
+#include "backend_iface.h"
 #include "backend/opencl.h"
 
 namespace cppual { namespace Compute {

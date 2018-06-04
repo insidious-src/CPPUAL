@@ -26,7 +26,7 @@
 #include <cppual/types.h>
 #include <cppual/memory/stack.h>
 #include <cppual/compute/device.h>
-#include "../backend.h"
+#include "../backend_iface.h"
 
 using std::vector;
 using cppual::Memory::StackedPool;

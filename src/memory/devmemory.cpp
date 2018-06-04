@@ -23,28 +23,28 @@
 #include <cppual/memory/devmemory.h>
 #include <cppual/compute/device.h>
 
-void* operator new (std::size_t /* size */, MemoryChunk& /* obj */, std::size_t /* align */)
+void* operator new (std::size_t /* size */, MemoryChunk& obj, std::size_t /* align */)
 {
     using namespace cppual::Memory;
 
-//    if (!obj.device ().valid ()) throw memory_source_not_available ();
+    if (!obj.device ().valid ()) throw memory_source_not_available ();
 
-//    ::VkDeviceMemory mem_obj = nullptr;
+    ::VkDeviceMemory mem_obj = nullptr;
 
-//    ::VkMemoryAllocateInfo nfo =
-//    {
-//        size,
-//        align ? align : size,
-//        0,
-//        1,
-//        { 0 },
-//        0
-//    };
+    // ::VkMemoryAllocateInfo nfo =
+    // {
+    //     size,
+    //     align ? align : size,
+    //     0,
+    //     1,
+    //     { 0 },
+    //     0
+    // };
 
-//    if (::vkAllocateMemory (obj.device ().handle<::VkDevice> (), &nfo, &mem_obj))
-//        throw std::bad_alloc ();
-//    return mem_obj;
-    return nullptr;
+    // if (::vkAllocateMemory (obj.device ().handle<::VkDevice> (), &nfo, mem_obj))
+    //     throw std::bad_alloc ();
+        
+    return mem_obj;
 }
 
 void operator delete (void* ptr, MemoryChunk& obj)

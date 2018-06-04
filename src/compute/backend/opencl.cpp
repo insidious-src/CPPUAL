@@ -22,7 +22,7 @@
 #include <cstring>
 
 #include "opencl.h"
-#include "../backend.h"
+#include "../backend_iface.h"
 
 namespace cppual { namespace Compute { namespace CL {
 

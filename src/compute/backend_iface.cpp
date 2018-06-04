@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "backend.h"
+#include "backend_iface.h"
 
 namespace cppual { namespace Compute {
 

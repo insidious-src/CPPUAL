@@ -22,7 +22,7 @@
 #include <cppual/compute/platform.h>
 #include <iostream>
 #include <cstring>
-#include "backend.h"
+#include "backend_iface.h"
 
 namespace cppual { namespace Compute {
 
