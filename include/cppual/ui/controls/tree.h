@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,34 +22,37 @@
 #ifndef CPPUAL_UI_TREE_H_
 #define CPPUAL_UI_TREE_H_
 
-#include <cppual/vector.h>
-#include <cppual/string/dstring.h>
-#include <cppual/ui/widget.h>
+#include <vector>
+#include <cppual/ui/skin.h>
 
 namespace cppual { namespace Ui {
 
-class CTreeView : public View
+class TreeView : public SkinnableView
 {
 protected:
-    typedef struct SNodeList { string strNodeName; CVector<SNodeList> vChildNodeList; } NodeList;
-    byte m_nTreeType;
-    CVector<NodeList> m_vNodeList;
+    typedef struct NodeList_T
+    { string strNodeName; std::vector<NodeList_T> gChildNodeList; }
+    NodeList;
 
-    virtual void OnPaint ();
-    virtual void OnNodeClick ();
+    byte                  m_nTreeType;
+    std::vector<NodeList> m_gNodeList;
+
+    virtual void onPaint ();
+    virtual void onNodeClick ();
 
 public:
-    string& GetNodeName (uint, uint);
-    int Find (const string&);
-    bool InsertNode (const string&, uint);
-    bool Remove (uint);
+    string& nodeName   (uint, uint);
+    int     find       (const string&);
+    bool    insertNode (const string&, uint);
+    bool    remove     (uint);
 
-    CTreeView () : m_nTreeType (), m_vNodeList () { }
+    TreeView () : m_nTreeType (), m_gNodeList ()
+    { }
 
-    void SetType (byte nTreeType)
+    void setType (byte nTreeType)
     {
         m_nTreeType = nTreeType;
-        Update ();
+        refresh ();
     }
 };
 

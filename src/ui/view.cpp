@@ -47,72 +47,12 @@ inline shared_window createRenderable (View* pParentObj, Rect const& gRect, u32 
 
 // =========================================================
 
-void View::registerEvents ()
-{
-    connect (EventQueue::emit ().mouseMove,
-             [](EventQueue::window_type wnd, point2u pos)
-    {
-        Internal::map ()[wnd]->mouseMoved (pos);
-    });
-
-    connect (EventQueue::emit ().mousePress,
-             [](EventQueue::window_type wnd, event_type::MButtonData data)
-    {
-        Internal::map ()[wnd]->mousePressed (data);
-    });
-
-    connect (EventQueue::emit ().mouseRelease,
-             [](EventQueue::window_type wnd, event_type::MButtonData data)
-    {
-        Internal::map ()[wnd]->mouseReleased (data);
-    });
-
-    connect (EventQueue::emit ().winPaint,
-             [](EventQueue::window_type wnd, event_type::PaintData data)
-    {
-        Internal::map ()[wnd]->paint (data.region);
-    });
-
-    connect (EventQueue::emit ().winFocus,
-             [](EventQueue::window_type wnd, bool state)
-    {
-        Internal::map ()[wnd]->onFocus (state);
-    });
-
-    connect (EventQueue::emit ().winSize,
-             [](EventQueue::window_type wnd, point2u size)
-    {
-        Internal::map ()[wnd]->size (size);
-    });
-
-    connect (EventQueue::emit ().winVisible,
-             [](EventQueue::window_type wnd, bool state)
-    {
-        Internal::map ()[wnd]->onShow (state);
-    });
-
-    connect (EventQueue::emit ().winProperty,
-             [](EventQueue::window_type wnd, event_type::PropertyData data)
-    {
-        switch (data.prop)
-        {
-        case 0:
-            Internal::map ()[wnd]->onMinMaxSize (point2u ());
-            break;
-        default:
-            break;
-        }
-    });
-}
-
-// =========================================================
-
 View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type const& gAtor)
 : m_gChildrenList (10, gAtor),
   m_gMinSize { 0, 0 },
   m_gMaxSize { 0, 0 },
   m_pRenderable (Internal::createRenderable (pParentObj, gRect, nScreen)),
-  m_pParentObj (),
+  m_pParentObj  (),
   m_gStateFlags ()
 {
     if (m_pRenderable == nullptr or !m_pRenderable->valid ())
@@ -126,7 +66,61 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 
         if (!bRegEvents)
         {
-            registerEvents ();
+            connect (EventQueue::emit ().mouseMove,
+             [](EventQueue::window_type wnd, point2u pos)
+            {
+                Internal::map ()[wnd]->mouseMoved (pos);
+            });
+
+            connect (EventQueue::emit ().mousePress,
+                    [](EventQueue::window_type wnd, event_type::MButtonData data)
+            {
+                Internal::map ()[wnd]->mousePressed (data);
+            });
+
+            connect (EventQueue::emit ().mouseRelease,
+                    [](EventQueue::window_type wnd, event_type::MButtonData data)
+            {
+                Internal::map ()[wnd]->mouseReleased (data);
+            });
+
+            connect (EventQueue::emit ().winPaint,
+                    [](EventQueue::window_type wnd, event_type::PaintData data)
+            {
+                Internal::map ()[wnd]->paint (data.region);
+            });
+
+            connect (EventQueue::emit ().winFocus,
+                    [](EventQueue::window_type wnd, bool state)
+            {
+                Internal::map ()[wnd]->onFocus (state);
+            });
+
+            connect (EventQueue::emit ().winSize,
+                    [](EventQueue::window_type wnd, point2u size)
+            {
+                Internal::map ()[wnd]->size (size);
+            });
+
+            connect (EventQueue::emit ().winVisible,
+                    [](EventQueue::window_type wnd, bool state)
+            {
+                Internal::map ()[wnd]->onShow (state);
+            });
+
+            connect (EventQueue::emit ().winProperty,
+                    [](EventQueue::window_type wnd, event_type::PropertyData data)
+            {
+                switch (data.prop)
+                {
+                case 0:
+                    Internal::map ()[wnd]->onMinMaxSize (point2u ());
+                    break;
+                default:
+                    break;
+                }
+            });
+
             bRegEvents = true;
         }
 
@@ -161,19 +155,6 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
     m_gStateFlags = View::Valid | View::Enabled;
 }
 
-View::View (View&& gObj) noexcept
-: m_gChildrenList (std::move (gObj.m_gChildrenList)),
-  m_gMinSize (gObj.m_gMinSize),
-  m_gMaxSize (gObj.m_gMaxSize),
-  m_pRenderable (std::move (gObj.m_pRenderable)),
-  m_gItFromParent (std::move (gObj.m_gItFromParent)),
-  m_pParentObj (gObj.m_pParentObj),
-  m_gStateFlags (gObj.m_gStateFlags)
-{
-    if (m_pParentObj) *m_gItFromParent = this;
-    gObj.invalidate ();
-}
-
 View::View (View const& gObj) noexcept
 : View (gObj.m_pParentObj,
         gObj.m_pRenderable->geometry (),
@@ -184,25 +165,6 @@ View::View (View const& gObj) noexcept
         if (!gObj.isEnabled ()) disable ();
         if (!gObj.isHidden  ()) show ();
     }
-}
-
-View& View::operator = (View&& gObj) noexcept
-{
-    if (this == &gObj) return *this;
-
-    m_gMinSize      = gObj.m_gMinSize;
-    m_gMaxSize      = gObj.m_gMaxSize;
-    m_pParentObj    = gObj.m_pParentObj;
-    m_gStateFlags   = gObj.m_gStateFlags;
-    m_gStateFlags   = gObj.m_gStateFlags;
-    m_gItFromParent = std::move (gObj.m_gItFromParent);
-    m_gChildrenList = std::move (gObj.m_gChildrenList);
-    m_pRenderable   = std::move (gObj.m_pRenderable);
-
-    if (m_pParentObj) *m_gItFromParent = this;
-
-    gObj.invalidate ();
-    return *this;
 }
 
 View& View::operator = (View const& gObj) noexcept
@@ -238,7 +200,7 @@ void View::destroyChildren ()
 
 void View::destroyResources ()
 {
-    Element uId = m_pRenderable->id ();
+    window_type uId = m_pRenderable->id ();
 
     // destroy all child virtual surfaces
     destroyChildren ();

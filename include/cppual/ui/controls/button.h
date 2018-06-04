@@ -48,7 +48,7 @@ protected:
 class PushButton : public AbstractButton
 {
 public:
-    bool create (View* parent, string const& text);
+    PushButton (View* parent, string const& text);
     void press ();
     void release ();
 
@@ -68,7 +68,7 @@ private:
 class RadioBox : public AbstractButton
 {
 public:
-    bool create (View* parent, string const& text, bool selected = false);
+    RadioBox (View* parent, string const& text, bool selected = false);
     void select ();
     void clear ();
 
@@ -95,9 +95,9 @@ enum class CheckState : unsigned char
 class CheckBox : public AbstractButton
 {
 public:
-    bool create (View*         parent,
-                 string const& text,
-                 CheckState    state = CheckState::Unchecked);
+    CheckBox (View*         parent,
+              string const& text  ,
+              CheckState    state = CheckState::Unchecked);
 
     void setCheckState (CheckState);
 
@@ -108,7 +108,7 @@ private:
     CheckState m_eCheckState;
 
     void onPaint (Rect const&);
-    void onSize (point2u);
+    void onSize  (point2u);
     void onFocus (bool);
 };
 

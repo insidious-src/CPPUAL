@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #ifndef CPPUAL_UI_PROGRESS_H_
 #define CPPUAL_UI_PROGRESS_H_
 
+#include <cppual/signal.h>
 #include <cppual/ui/skin.h>
 
 namespace cppual { namespace Ui {
@@ -37,12 +38,12 @@ public:
     void increment ();
     void decrement ();
 
-    bool create (View*     parent,
-                 Rect const& rect,
-                 int         value =   0,
-                 int         min   =   0,
-                 int         max   = 100,
-                 int         step  =   1);
+    Progress (View*     parent,
+              Rect const& rect,
+              int         value =   0,
+              int         min   =   0,
+              int         max   = 100,
+              int         step  =   1);
 
     enum ProgressFlag
     {
@@ -50,27 +51,27 @@ public:
         ShowValue = 1 << 1
     };
 
-    typedef FlagSet<ProgressFlag, u8> ProgressFlags;
+    typedef BitSet<ProgressFlag> ProgressFlags;
 
-    inline int getValue () const noexcept { return m_nValue; }
-    inline int getMinValue () const noexcept { return m_nMin; }
-    inline int getMaxValue () const noexcept { return m_nMax; }
-    inline int getStep () const noexcept { return m_nStep; }
+    inline int getValue    () const noexcept { return m_nValue; }
+    inline int getMinValue () const noexcept { return m_nMin  ; }
+    inline int getMaxValue () const noexcept { return m_nMax  ; }
+    inline int getStep     () const noexcept { return m_nStep ; }
 
     inline bool isMarquee () const noexcept
-    { return m_eProgressFlags.hasFlag (Progress::Marquee); }
+    { return m_eProgressFlags.test (Progress::Marquee); }
 
     inline bool isValueVisible () const noexcept
-    { return m_eProgressFlags.hasFlag (Progress::ShowValue); }
+    { return m_eProgressFlags.test (Progress::ShowValue); }
 
-    Signal<void(int)> signalValueChanged;
+    Signal<void(int)> valueChanged;
 
 private:
     int           m_nValue, m_nMin, m_nMax, m_nStep;
     ProgressFlags m_eProgressFlags;
 
     void onPaint ();
-    void onSize (Rect const&);
+    void onSize  (Rect const&);
 };
 
 } } // Ui

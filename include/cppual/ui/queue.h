@@ -31,22 +31,20 @@
 #include <cppual/ui/window.h>
 #include <cppual/input/event.h>
 
-using std::atomic_bool;
-using std::shared_ptr;
-
 namespace cppual { namespace Ui {
 
 class   IDisplayQueue;
-typedef shared_ptr<IDisplayQueue> shared_queue;
+typedef std::shared_ptr<IDisplayQueue> shared_queue;
 
 // =========================================================
 
 class IDisplayQueue : public NonCopyableVirtual
 {
 public:
-    typedef Input::Event             event_type;
-    typedef IWindow                  window_type;
-    typedef BitSet<event_type::Type> mask_type;
+    typedef Input::Event             event_type     ;
+    typedef Graphics::Connection     connection_type;
+    typedef IPlatformWindow          window_type    ;
+    typedef BitSet<event_type::Type> mask_type      ;
 
     virtual bool set_window_events (window_type const&, mask_type)         = 0;
     virtual bool pop_front         (event_type& receiver, bool wait)       = 0;
@@ -59,16 +57,16 @@ public:
     static IDisplayQueue* primary          () noexcept;
     static bool           hasValidInstance () noexcept;
 
-    Connection display () const noexcept { return m_display; }
-    bool       valid   () const noexcept { return m_display; }
+    connection_type display () const noexcept { return m_display; }
+    bool            valid   () const noexcept { return m_display; }
 
 protected:
-    constexpr IDisplayQueue (Connection display) noexcept
+    constexpr IDisplayQueue (connection_type display) noexcept
     : m_display (display)
     { }
 
 private:
-    Connection m_display;
+    connection_type m_display;
 };
 
 // =========================================================
@@ -76,8 +74,9 @@ private:
 class EventQueue : public NonCopyable
 {
 public:
-    typedef IDisplayQueue::event_type event_type;
-    typedef Graphics::Element         window_type;
+    typedef IDisplayQueue::event_type event_type  ;
+    typedef Graphics::Element         window_type ;
+    typedef std::atomic_bool          bool_type   ;
     typedef View                      control_type;
 
     struct Signals final : NonCopyable
@@ -136,8 +135,8 @@ public:
     { return polling.load (); }
 
 private:
-    IDisplayQueue* queue;
-    atomic_bool    polling;
+    IDisplayQueue* queue  ;
+    bool_type      polling;
 };
 
 } } // namespace Input

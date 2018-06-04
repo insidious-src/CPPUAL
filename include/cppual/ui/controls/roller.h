@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,11 @@
 #ifndef CPPUAL_UI_ROLLER_H_
 #define CPPUAL_UI_ROLLER_H_
 
-#include <cppual/ui/widget.h>
+#include <cppual/ui/skin.h>
 
 namespace cppual { namespace Ui {
 
-class CRoller : public View
+class Roller : public SkinnableView
 {
 
 };

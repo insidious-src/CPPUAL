@@ -55,7 +55,7 @@ public:
     { if (!m_bIsPlaying.load ()) m_fSpeed = fSpeed; }
 
 protected:
-    IWindow*    m_pObject;
+    IPlatformWindow*    m_pObject;
     float       m_fSpeed;
     atomic_bool m_bIsPlaying;
 };

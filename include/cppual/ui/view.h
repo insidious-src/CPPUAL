@@ -56,9 +56,7 @@ public:
         DefaultHeight = 600
     };
 
-    View (View&&) noexcept;
     View (View const&) noexcept;
-    View& operator = (View&&) noexcept;
     View& operator = (View const&) noexcept;
     ~View ();
 
@@ -82,10 +80,10 @@ public:
     void setFocus ();
     void killFocus ();
 
-    inline weak_window renderable () const noexcept { return m_pRenderable; }
-    inline IWindow*    renderable_unsafe () const noexcept { return m_pRenderable.get (); }
-    inline point2u     minimumSize () const noexcept { return m_gMinSize; }
-    inline point2u     maximumSize () const noexcept { return m_gMaxSize; }
+    inline weak_window      renderable () const noexcept { return m_pRenderable; }
+    inline IPlatformWindow* renderable_unsafe () const noexcept { return m_pRenderable.get (); }
+    inline point2u          minimumSize () const noexcept { return m_gMinSize; }
+    inline point2u          maximumSize () const noexcept { return m_gMaxSize; }
 
     inline bool valid () const noexcept
     { return m_gStateFlags.test (View::Valid); }
@@ -136,7 +134,6 @@ private:
     void mouseReleased (event_type::MButtonData const&);
     void destroyResources ();
     void invalidate () noexcept;
-    static void registerEvents ();
 
 private:
     container     m_gChildrenList;
@@ -152,9 +149,9 @@ private:
 class Widget
 {
 public:
-    typedef Memory::Allocator<Widget*>         allocator_type;
+    typedef Memory::Allocator<Widget*>             allocator_type;
     typedef CircularQueue<Widget*, allocator_type> container_type;
-    typedef std::size_t                            size_type;
+    typedef std::size_t                            size_type     ;
 
     void destroy ();
     void show ();

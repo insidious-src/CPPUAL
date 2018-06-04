@@ -24,15 +24,15 @@
 namespace cppual { namespace Ui {
 
 ProxyRenderable::ProxyRenderable (shared_window const& pParent, Rect const& gRect) noexcept
-: IWindow (pParent != nullptr ? pParent->connection () : nullptr,
-           pParent != nullptr ? pParent->id () : Element (nullptr)),
+: IPlatformWindow (pParent != nullptr ? pParent->connection () : nullptr,
+           pParent != nullptr ? pParent->id () : Graphics::Element (nullptr)),
   m_pParent (pParent),
   m_gRect (gRect),
   m_bIsVisible ()
 {
 }
 
-ProxyRenderable::ProxyRenderable (IWindow*) noexcept
+ProxyRenderable::ProxyRenderable (IPlatformWindow*) noexcept
 {
 }
 
@@ -40,7 +40,7 @@ ProxyRenderable::ProxyRenderable (ProxyRenderable const&) noexcept
 {
 }
 
-ProxyRenderable& ProxyRenderable::operator = (IWindow*) noexcept
+ProxyRenderable& ProxyRenderable::operator = (IPlatformWindow*) noexcept
 {
     return *this;
 }

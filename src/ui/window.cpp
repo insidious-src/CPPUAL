@@ -60,13 +60,13 @@ WindowAdapter::WindowAdapter (Widget&     widget,
         connect (EventQueue::emit ().keyPress,
                  [](EventQueue::window_type wnd, event_type::KeyData data)
         {
-            Internal::map ()[wnd]->keyPress (data);
+            Internal::map ()[wnd]->keyPressed (data);
         });
 
         connect (EventQueue::emit ().keyRelease,
                  [](EventQueue::window_type wnd, event_type::KeyData data)
         {
-            Internal::map ()[wnd]->keyRelease (data);
+            Internal::map ()[wnd]->keyReleased (data);
         });
 
         connect (EventQueue::emit ().mouseMove,
@@ -130,10 +130,9 @@ WindowAdapter::WindowAdapter (Widget&     widget,
     m_pPlatformWnd->setTitle (widget.name ());
 }
 
-bool WindowAdapter::setIcon (Icon const& gIcon)
+void WindowAdapter::setIcon (Icon const& gIcon)
 {
     m_pIcon = gIcon;
-    return false;
 }
 
 void WindowAdapter::restore ()
@@ -150,47 +149,28 @@ void WindowAdapter::resize (point2u gSize)
     m_pMainWidget->setSize (gSize);
 }
 
-WindowAdapter::WindowAdapter (WindowAdapter&& gObj)
-: m_pPlatformWnd (gObj.m_pPlatformWnd),
-  m_pMainWidget  (gObj.m_pMainWidget),
-  m_pIcon        (gObj.m_pIcon)
-{
-    gObj.m_pPlatformWnd = nullptr;
-    gObj.m_pMainWidget  = nullptr;
-    gObj.m_pIcon        = Icon ();
-}
-
-WindowAdapter& WindowAdapter::operator = (WindowAdapter&& gObj)
-{
-    if (this != &gObj)
-    {
-        m_pPlatformWnd = gObj.m_pPlatformWnd;
-        m_pMainWidget  = gObj.m_pMainWidget;
-        m_pIcon        = gObj.m_pIcon;
-
-        gObj.m_pPlatformWnd = nullptr;
-        gObj.m_pMainWidget  = nullptr;
-        gObj.m_pIcon        = Icon ();
-    }
-
-    return *this;
-}
-
 // =========================================================
 
-Window::Window (View*, Rect const&, string const&, Window::image_type*, u32)
+Window::Window (View* parent,
+                Rect const& rect,
+                string const&,
+                Window::image_type*,
+                u32 screen)
+: View(parent, rect, screen)
 {
+}
 
+Window::Window ()
+: View()
+{
 }
 
 Window::~Window ()
 {
-
 }
 
 void Window::showInTaskbar (bool)
 {
-
 }
 
 } } // namespace Ui

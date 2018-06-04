@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include <cppual/ui/controls/abslider.h>
 #include <cppual/common.h>
+#include <cppual/signal.h>
 
 namespace cppual { namespace Ui {
 
@@ -37,7 +38,7 @@ public:
         DoubleSidedExtra
     };
 
-    bool create (View*, Orientation = Orientation::Vertical);
+    ScrollBar (View*, Orientation = Orientation::Vertical);
     void setArrowStyle (Arrows);
     void setRange (int min, int max);
     void setPosition (int);
@@ -49,16 +50,15 @@ public:
     inline Arrows getArrowStyle () const noexcept
     { return m_eArrows; }
 
-    Signal<void(int)> signalHorizChanged;
-    Signal<void(int)> signalVertChanged;
+    Signal<void(int)> positionChanged;
 
 private:
     Arrows      m_eArrows;
     Orientation m_eOrientation;
 
-    void onPaint ();
+    void onPaint  ();
     void onEnable (bool);
-    void onSize (Rect const&);
+    void onSize   (Rect const&);
 };
 
 } } // Ui

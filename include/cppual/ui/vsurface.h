@@ -28,14 +28,14 @@
 
 namespace cppual { namespace Ui {
 
-class ProxyRenderable final : public IWindow
+class ProxyRenderable final : public IPlatformWindow
 {
 public:
     ProxyRenderable () = delete;
-    ProxyRenderable (IWindow*) noexcept;
+    ProxyRenderable (IPlatformWindow*) noexcept;
     ProxyRenderable (ProxyRenderable const&) noexcept;
     ProxyRenderable (shared_window const& owner, Rect const& rect) noexcept;
-    ProxyRenderable& operator = (IWindow*) noexcept;
+    ProxyRenderable& operator = (IPlatformWindow*) noexcept;
     ProxyRenderable& operator = (ProxyRenderable const&) noexcept;
 
     string title () const noexcept { return string (); }

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #ifndef CPPUAL_UI_TEXT_H_
 #define CPPUAL_UI_TEXT_H_
 
+#include <cppual/signal.h>
 #include <cppual/ui/skin.h>
 
 namespace cppual { namespace Ui {
@@ -36,25 +37,27 @@ enum class TextFormat : unsigned char
 class Label : public SkinnableView
 {
 public:
-    Label () { }
+    typedef std::string string_type;
+
+    Label  () { }
     ~Label () { }
 
-    void setText (string const&);
+    void setText   (string_type const&);
     void setFormat (TextFormat);
 
-    bool create (View*       parent,
-                 string const& text,
-                 Rect const&   rect,
-                 TextFormat    format = TextFormat::Plain);
+    Label (View*            parent,
+           string_type const& text,
+           Rect        const& rect,
+           TextFormat       format = TextFormat::Plain);
 
     inline TextFormat getFormat () const noexcept { return m_eFormat; }
-    inline string     getText () const noexcept { return m_gText; }
+    inline string_type getText   () const noexcept { return m_gText  ; }
 
-    Signal<void()> signalTextChanged;
+    Signal<void()> textChanged;
 
 private:
-    string     m_gText;
-    TextFormat m_eFormat;
+    string_type m_gText;
+    TextFormat  m_eFormat;
 
     void onPaint (Rect const&);
     void onEnable (bool);

@@ -32,13 +32,6 @@
 #include <cppual/gfx/dsp_details.h>
 #include <cppual/ui/display.h>
 
-using std::thread;
-using std::string;
-using std::shared_ptr;
-using std::weak_ptr;
-using cppual::Graphics::Element;
-using cppual::Graphics::Connection;
-
 namespace cppual { namespace Ui {
 
 enum WindowFlag
@@ -57,25 +50,28 @@ enum WindowFlag
     ToolHints   = ThinFrame
 };
 
-class   IWindow;
-typedef shared_ptr<IWindow> shared_window;
-typedef weak_ptr  <IWindow> weak_window;
-typedef BitSet <WindowFlag> WindowFlags;
+class   IPlatformWindow;
+typedef std::shared_ptr<IPlatformWindow> shared_window;
+typedef std::weak_ptr  <IPlatformWindow> weak_window  ;
+typedef BitSet         <WindowFlag     > WindowFlags  ;
 
 // ====================================================
 
-class IWindow : public Resource <IDisplay*, Element>
+class IPlatformWindow : public Resource <IDisplay*, Graphics::Element>
 {
 public:
-    using Resource<IDisplay*, Element>::Resource;
+    using Resource<IDisplay*, Graphics::Element>::Resource;
 
     typedef shared_window const& const_pointer;
-    typedef std::size_t          size_type;
+    typedef std::size_t          size_type    ;
+    typedef std::string          string_type  ;
+
+    virtual ~IPlatformWindow () { }
 
     virtual weak_window owner () const = 0;
     virtual WindowFlags flags () const = 0;
-    virtual string      title () const = 0;
-    virtual void        setTitle (string const&) = 0;
+    virtual string_type title () const = 0;
+    virtual void        setTitle (string_type const&) = 0;
     virtual void        setShaded (bool) = 0;
     virtual bool        isShaded () = 0;
     virtual void        setModal (bool) = 0;
@@ -99,11 +95,11 @@ public:
     virtual void        map () = 0;
     virtual void        unmap () = 0;
 
-    thread::id thread_id () const noexcept
+    std::thread::id thread_id () const noexcept
     { return m_thread; }
 
 private:
-    thread::id m_thread { std::this_thread::get_id () };
+    std::thread::id m_thread { std::this_thread::get_id () };
 };
 
 } } // namespace Ui

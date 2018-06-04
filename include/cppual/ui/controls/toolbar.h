@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,6 @@
 #include <cppual/ui/skin.h>
 #include <cppual/ui/groups.h>
 #include <cppual/common.h>
-
-using cppual::Text::string;
 
 namespace cppual { namespace Ui {
 
@@ -57,7 +55,7 @@ public:
         Floatable   = 1 << 5
     };
 
-    typedef FlagSet<ToolFlag, u8>     ToolFlags;
+    typedef BitSet<ToolFlag>        ToolFlags   ;
     typedef std::vector<ViewGroup*> group_vector;
 
     point2i iconSize () const;
@@ -90,22 +88,22 @@ public:
     { return m_eOrientation; }
 
     inline bool isMovable () const noexcept
-    { return m_eToolFlags.hasFlag (ToolBar::Movable); }
+    { return m_eToolFlags.test (ToolBar::Movable); }
 
     inline bool isDraggable () const noexcept
-    { return m_eToolFlags.hasFlag (ToolBar::Draggable); }
+    { return m_eToolFlags.test (ToolBar::Draggable); }
 
     inline bool isFloatable () const noexcept
-    { return m_eToolFlags.hasFlag (ToolBar::Floatable); }
+    { return m_eToolFlags.test (ToolBar::Floatable); }
 
     inline bool isAutoHide () const noexcept
-    { return m_eToolFlags.hasFlag (ToolBar::AutoHide); }
+    { return m_eToolFlags.test (ToolBar::AutoHide); }
 
     inline bool hasHotTracking () const noexcept
-    { return m_eToolFlags.hasFlag (ToolBar::HotTracking); }
+    { return m_eToolFlags.test (ToolBar::HotTracking); }
 
     inline bool hasSplitter () const noexcept
-    { return m_eToolFlags.hasFlag (ToolBar::Splitter); }
+    { return m_eToolFlags.test (ToolBar::Splitter); }
 
     inline size_type getGroupCount () const noexcept
     { return m_gGroups.size (); }
@@ -113,30 +111,30 @@ public:
     inline ViewGroup* getGroup (size_type uId) const noexcept
     { return m_gGroups[uId]; }
 
-    Signal<void()> signalClick;
-    Signal<void()> signalDoubleClick;
-    Signal<void()> signalRClick;
-    Signal<void()> signalChildResized;
-    Signal<void()> signalGroupAdded;
-    Signal<void()> signalGroupRemoved;
-    Signal<void()> signalBeginDrag;
-    Signal<void()> signalEndDrag;
-    Signal<void()> signalChevronPushed;
-    Signal<void()> signalHeightChanged;
-    Signal<void()> signalSplitterDrag;
-    Signal<void()> signalOrientationChanged;
+    Signal<void()> clicked;
+    Signal<void()> doubleClicked;
+    Signal<void()> rightClicked;
+    Signal<void()> childResized;
+    Signal<void()> groupAdded;
+    Signal<void()> groupRemoved;
+    Signal<void()> dragBegun;
+    Signal<void()> dragEnded;
+    Signal<void()> chevronPushed;
+    Signal<void()> heightChanged;
+    Signal<void()> splitterDragging;
+    Signal<void()> orientationChanged;
 
 private:
-    group_vector  m_gGroups;
-    ToolButton    m_eButtonType;
-    ToolFlags     m_eToolFlags;
-    Orientation m_eOrientation;
+    group_vector m_gGroups;
+    ToolButton   m_eButtonType;
+    ToolFlags    m_eToolFlags;
+    Orientation  m_eOrientation;
 
-    void onPaint ();
-    void onEnable (bool);
-    void onSize (Rect const&);
-    void onMove (Rect const&);
-    void onGotFocus ();
+    void onPaint       ();
+    void onEnable      (bool);
+    void onSize        (Rect const&);
+    void onMove        (Rect const&);
+    void onGotFocus    ();
     void onFocusKilled ();
 };
 

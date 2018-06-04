@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,36 +21,25 @@
 
 #include <cppual/ui/controls/label.h>
 
-using std::string;
-
 namespace cppual { namespace Ui {
 
-bool Label::create (View*       pParent,
-                    string const& gText,
-                    Rect const&   gRect,
-                    TextFormat)
-{
-    if (pParent and !pParent->valid ()) pParent = nullptr;
-
-    if (createView (pParent, gRect, pParent ?
-                      pParent->renderable_unsafe ()->screen () :
-                      0))
-    {
-        m_gText = gText;
-        return true;
-    }
-
-    return false;
-}
+Label::Label (View*            pParent,
+              string_type const& gText,
+              Rect const&        gRect,
+              TextFormat)
+: SkinnableView(pParent, gRect, pParent ?
+                pParent->renderable_unsafe ()->screen () : 0),
+  m_gText(gText)
+{ }
 
 void Label::setText (string const& gText)
 {
     m_gText = gText;
 
-    if (isValid ())
+    if (valid ())
     {
-        onPaint ();
-        signalTextChanged.notify ();
+        refresh ();
+        textChanged();
     }
 }
 
@@ -60,15 +49,15 @@ void Label::setFormat (TextFormat eFormat)
     {
         m_eFormat = eFormat;
 
-        if (isValid ())
+        if (valid ())
         {
-            onPaint ();
-            signalTextChanged.notify ();
+            refresh();
+            textChanged();
         }
     }
 }
 
-void Label::onPaint ()
+void Label::onPaint (Rect const&)
 {
 }
 
@@ -76,7 +65,7 @@ void Label::onEnable (bool)
 {
 }
 
-void Label::onSize (Rect const&)
+void Label::onSize (point2u)
 {
 }
 

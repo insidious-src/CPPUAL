@@ -21,6 +21,7 @@
 
 #include <cppual/ui/skin.h>
 #include <cppual/ui/queue.h>
+#include <functional>
 
 using std::placeholders::_1;
 
@@ -30,7 +31,7 @@ bool ISkin::setDefault (ISkin* pSkin) noexcept
 {
     if (!pSkin) return false;
 
-    EventQueue::emit ().winPaint (Element (),
+    EventQueue::emit ().winPaint (window_type (),
                                   Input::PaintEvent (Rect ()).data ().paint);
     return true;
 }

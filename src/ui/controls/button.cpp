@@ -35,9 +35,8 @@ AbstractButton::~AbstractButton () noexcept
 
 // =========================================================
 
-bool PushButton::create (View*, string const&)
+PushButton::PushButton (View*, string const&)
 {
-    return true;
 }
 
 void PushButton::press ()
@@ -71,9 +70,8 @@ void PushButton::onFocus (bool)
 
 // =========================================================
 
-bool RadioBox::create (View*, string const&, bool)
+RadioBox::RadioBox (View*, string const&, bool)
 {
-    return false;
 }
 
 void RadioBox::select ()
@@ -98,9 +96,8 @@ void RadioBox::onFocus (bool)
 
 // =========================================================
 
-bool CheckBox::create (View*, string const&, CheckState)
+CheckBox::CheckBox (View*, string const&, CheckState)
 {
-    return false;
 }
 
 void CheckBox::setCheckState (CheckState)

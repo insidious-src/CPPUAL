@@ -26,8 +26,6 @@
 #include <cppual/ui/layout.h>
 #include <cppual/ui/controls/button.h>
 
-using std::vector;
-
 namespace cppual { namespace Ui {
 
 enum class MenuItemType : unsigned char
@@ -46,6 +44,24 @@ enum class MenuItemType : unsigned char
 class PopupMenu : public SkinnableView
 {
 public:
+    union ItemData
+    {
+        Command  * action ;
+        CheckBox * check  ;
+        RadioBox * radio  ;
+        PopupMenu* subMenu;
+    };
+
+    class MenuItem
+    {
+        ItemData     data;
+        MenuItemType type;
+        friend class PopupMenu;
+    };
+
+    typedef std::vector<MenuItem*> vector_type;
+    typedef std::string            string_type;
+
     PopupMenu ();
     PopupMenu (PopupMenu&&);
     PopupMenu (PopupMenu const&);
@@ -70,34 +86,19 @@ public:
     void         setPosition (point2i);
     void         setGroupName (int group_pos, string const&);
 
-    static size_type defaultDelay ();
+    static size_type defaultDelay    ();
     static void      setDefaultDelay (size_type ms);
 
     inline size_type itemCount () const noexcept
     { return m_gItemList.size (); }
 
 private:
-    union ItemData
-    {
-        Command*   action;
-        CheckBox*  check;
-        RadioBox*  radio;
-        PopupMenu* subMenu;
-    };
-
-    class MenuItem final
-    {
-//        ItemData     data;
-//        MenuItemType type;
-        friend class PopupMenu;
-    };
-
     void onPaint (Rect const&);
     void onFocusKilled ();
     void onKeyPress (u8);
     void onKeyRelease (u8);
 
-    vector<MenuItem*> m_gItemList;
+    vector_type m_gItemList;
 
 };
 

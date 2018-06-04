@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,8 @@
 #define CPPUAL_UI_COMBO_H_
 
 #include <cppual/ui/skin.h>
-#include <cppual/ui/action.h>
+#include <cppual/ui/cmd.h>
 
-using cppual::Text::string;
 
 namespace cppual { namespace Ui {
 
@@ -40,13 +39,13 @@ public:
 
     uint getItemCount ();
     int  getCurItemIdx ();
-    bool addItem (ActionItem*, int pos = -1);
+    bool addItem (Command*, int pos = -1);
     bool removeItem (int pos);
     bool isEditable () const;
     void setEditable (bool);
     void setTextLimit (size_type max_chars_shown);
     void setDropListWidth (int);
-    void setItemIcon (int, IImage*);
+    void setItemIcon (int, Icon*);
     void setItemText (int, string const&);
     void setItemDesc (int, string const&);
     void setItemHeight (int);
@@ -56,28 +55,28 @@ public:
 
     bool addItem (string const&   text,
                   string const&   desc,
-                  IImage* icon = nullptr,
+                  Icon*           icon = nullptr,
                   int             pos  = -1);
 
-    Signal<void(int)>  signalItemIdxChanged;
-    Signal<void(int)>  signalItemAdded;
-    Signal<void(int)>  signalItemRemoved;
-    Signal<void(int)>  signalItemTextChanged;
-    Signal<void(int)>  signalItemIconChanged;
-    Signal<void(int)>  signalItemDescChanged;
-    Signal<void()>     signalDoubleClick;
-    Signal<void(bool)> signalDropDown;
+    Signal<void(int)>  itemIdxChanged;
+    Signal<void(int)>  itemAdded;
+    Signal<void(int)>  itemRemoved;
+    Signal<void(int)>  itemTextChanged;
+    Signal<void(int)>  itemIconChanged;
+    Signal<void(int)>  itemDescChanged;
+    Signal<void()>     doubleClicked;
+    Signal<void(bool)> droppedDown;
 
 private:
-    void onCreate ();
-    void onShow (bool);
-    void onPaint ();
-    void onEnable (bool);
-    void onSize (Rect const&);
-    void onGotFocus ();
+    void onCreate      ();
+    void onShow        (bool);
+    void onPaint       ();
+    void onEnable      (bool);
+    void onSize        (Rect const&);
+    void onGotFocus    ();
     void onFocusKilled ();
-    void onKeyPress (int);
-    void onKeyRelease (int);
+    void onKeyPress    (int);
+    void onKeyRelease  (int);
 };
 
 } } // Ui

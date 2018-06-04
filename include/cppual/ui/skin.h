@@ -78,7 +78,8 @@ class ISkin : public NonCopyableVirtual
 {
 public:
     typedef Graphics::Font::Format font_format;
-    typedef Graphics::Image        image_type;
+    typedef Graphics::Image        image_type ;
+    typedef Graphics::Element      window_type;
 
     virtual image_type* getIcon (IconGroup     group,
                                  string const& icon_name,
@@ -143,7 +144,7 @@ protected:
     virtual bool onCreatePost () { return true; }
 
 private:
-    void onCreate ();
+    void onCreate   ();
     void changeSkin ();
 };
 

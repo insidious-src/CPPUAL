@@ -22,6 +22,7 @@
 #include <cppual/ui/composite.h>
 #include <cppual/ui/frame.h>
 #include <cppual/mstring.h>
+#include <functional>
 
 using std::string;
 using std::bind;
@@ -30,30 +31,38 @@ using std::placeholders::_1;
 namespace cppual { namespace Ui {
 
 FrameView::FrameView () noexcept
-: m_gCloseBtn (),
-  m_gMaxBtn (),
-  m_gMinBtn (),
-  m_gHelpBtn (),
-  m_gSysMenu (),
-  m_gTitle (),
+: m_gCloseBtn (this, ""),
+  m_gMaxBtn   (this, ""),
+  m_gMinBtn   (this, ""),
+  m_gHelpBtn  (this, ""),
+  m_gSysMenu  (),
+  m_gTitle    (),
   m_gIconRect (),
   m_gFrameBtnsRect (),
-  m_pIcon (),
-  m_pTarget (),
-  m_gFrameFlags (),
-  m_gMouseStates (),
-  m_gHoldingEdges (),
-  m_eVisibility ()
+  m_pIcon          (),
+  m_pTarget        (),
+  m_gFrameFlags    (),
+  m_gMouseStates   (),
+  m_gHoldingEdges  (),
+  m_eVisibility    ()
 {
 }
 
 FrameView::FrameView (FrameView&& gObj) noexcept
-: SkinnableView (gObj)
+: SkinnableView (gObj),
+  m_gCloseBtn (this, ""),
+  m_gMaxBtn   (this, ""),
+  m_gMinBtn   (this, ""),
+  m_gHelpBtn  (this, "")
 {
 }
 
 FrameView::FrameView (FrameView const& gObj) noexcept
-: SkinnableView (gObj)
+: SkinnableView (gObj),
+  m_gCloseBtn (this, ""),
+  m_gMaxBtn   (this, ""),
+  m_gMinBtn   (this, ""),
+  m_gHelpBtn  (this, "")
 {
 }
 
@@ -138,27 +147,25 @@ FrameView::FrameView (View*       pParent,
                       image_type* pIcon,
                       WindowFlags gFlags)
 : SkinnableView (pParent, calcFrameSize (gTargetRect)),
-  m_gCloseBtn (),
-  m_gMaxBtn (),
-  m_gMinBtn (),
-  m_gHelpBtn (),
-  m_gSysMenu (),
-  m_gTitle (gLabel),
+  m_gCloseBtn (this, ""),
+  m_gMaxBtn   (this, ""),
+  m_gMinBtn   (this, ""),
+  m_gHelpBtn  (this, ""),
+  m_gSysMenu  (),
+  m_gTitle    (gLabel),
   m_gIconRect (),
   m_gFrameBtnsRect (),
-  m_pIcon (pIcon),
-  m_pTarget (),
-  m_gFrameFlags (gFlags),
-  m_gMouseStates (),
-  m_gHoldingEdges (),
-  m_eVisibility ()
+  m_pIcon          (pIcon),
+  m_pTarget        (),
+  m_gFrameFlags    (gFlags),
+  m_gMouseStates   (),
+  m_gHoldingEdges  (),
+  m_eVisibility    ()
 {
     if (valid ())
     {
-        m_gCloseBtn.create (this, string ());
-        m_gMinBtn.create (this, string ());
-        if (gFlags.test (Maximize)) m_gMaxBtn.create (this, string ());
-        if (gFlags.test (Help)) m_gHelpBtn.create (this, string ());
+        if (!gFlags.test (Maximize)) m_gMaxBtn.hide();
+        if (!gFlags.test (Help)) m_gHelpBtn.hide();
         if (pIcon) setIcon (pIcon);
         m_gTitle = std::forward<string> (gLabel);
 

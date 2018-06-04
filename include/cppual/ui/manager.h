@@ -31,19 +31,20 @@
 namespace cppual { namespace Ui { namespace Platform {
 
 struct  Factory;
-typedef shared_ptr<Factory> shared_manager;
+typedef std::shared_ptr<Factory> shared_manager;
 
 // =========================================================
 
 struct Factory : public NonCopyableVirtual
 {
-    typedef Process::DynLoader plugin_type;
+    typedef Process::DynLoader    plugin_type;
+    typedef IDisplay::string_type string_type;
 
     virtual shared_window createWindow (Rect const& rect,
                                         u32         screen  = 0,
                                         IDisplay*   display = IDisplay::primary ()) = 0;
 
-    virtual shared_display connectDisplay (cchar* name = nullptr) = 0;
+    virtual shared_display connectDisplay (string_type const& name = string_type()) = 0;
     virtual shared_queue   createQueueInstance () = 0;
 
     static plugin_type& plugin   ();

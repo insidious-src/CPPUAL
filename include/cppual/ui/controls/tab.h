@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,10 @@
 #ifndef CPPUAL_UI_TAB_H_
 #define CPPUAL_UI_TAB_H_
 
+#include <cppual/signal.h>
 #include <cppual/ui/skin.h>
 
-using cppual::Text::string;
+using cppual::Graphics::Icon;
 
 namespace cppual { namespace Ui {
 
@@ -47,10 +48,10 @@ public:
         ShowIcons
     };
 
-    typedef FlagSet<TabFlag, u8> TabFlags;
+    typedef BitSet<TabFlag> TabFlags;
 
-    bool create (View* parent, Rect const&);
-    bool addTab (string const&, IImage* = nullptr, int pos = -1);
+    TabBar (View* parent, Rect const&);
+    bool addTab (string const&, Icon* = nullptr, int pos = -1);
     bool removeTab (int pos);
     bool moveTab (int pos, int new_pos);
     bool isMovable () const;
@@ -62,15 +63,15 @@ public:
     void setDraggable (bool);
     void setRemovable (bool);
     void setTabLabel (int pos, string const& text);
-    void setTabIcon (int pos, IImage*);
+    void setTabIcon (int pos, Icon*);
     void setAddButtonFlags ();
     void setCloseButtonFlags ();
     void enableCloseButton (bool);
     void enableAddButton (bool);
 
-    Signal<void(int)> signalTabIdxChanged;
-    Signal<void(int)> signalTabAddded;
-    Signal<void(int)> signalTabRemoved;
+    Signal<void(int)> tabIdxChanged;
+    Signal<void(int)> tabAddded;
+    Signal<void(int)> tabRemoved;
 
 private:
     TabFlags m_gTabFlags;
@@ -100,9 +101,9 @@ public:
 
 private:
     TabBar m_TabBar;
-    function<void(int)> m_gSlotTabIdx;
-    function<void(int)> m_gSlotAddTab;
-    function<void(int)> m_gSlotRemoveTab;
+    //function<void(int)> m_gSlotTabIdx;
+    //function<void(int)> m_gSlotAddTab;
+    //function<void(int)> m_gSlotRemoveTab;
 
     void onTabIdxChange (int);
     void onAddTab (int);

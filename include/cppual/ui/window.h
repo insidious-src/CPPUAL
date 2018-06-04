@@ -89,21 +89,18 @@ private:
 class WindowAdapter : public NonCopyableVirtual
 {
 public:
-    typedef Input::Event                           event_type;
-    typedef std::size_t                            size_type;
-    typedef Memory::Allocator<Widget*>         allocator_type;
-    typedef CircularQueue<Widget*, allocator_type> container;
-    typedef typename container::iterator           iterator;
-
-    WindowAdapter (WindowAdapter&&);
-    WindowAdapter& operator = (WindowAdapter&&);
+    typedef Input::Event                           event_type    ;
+    typedef std::size_t                            size_type     ;
+    typedef Memory::Allocator<Widget*>             allocator_type;
+    typedef CircularQueue<Widget*, allocator_type> container     ;
+    typedef typename container::iterator           iterator      ;
 
     WindowAdapter (Widget&     main_widget,
                    WindowFlags flags  = WindowHints,
                    Icon const& icon   = Icon (),
                    u32         screen = 0);
 
-    bool setIcon (Icon const&);
+    void setIcon (Icon const&);
     void restore ();
 
     void close ()
@@ -127,8 +124,8 @@ public:
     void maximize ()
     { if (m_pPlatformWnd) m_pPlatformWnd->setMaximized (true); }
 
-    Signal<void(event_type::KeyData)> keyPress;
-    Signal<void(event_type::KeyData)> keyRelease;
+    Signal<void(event_type::KeyData)> keyPressed ;
+    Signal<void(event_type::KeyData)> keyReleased;
 
 protected:
     virtual bool onClose        () { return true; }
@@ -147,8 +144,8 @@ private:
 
 private:
     shared_window m_pPlatformWnd;
-    Widget*       m_pMainWidget;
-    Icon          m_pIcon;
+    Widget*       m_pMainWidget ;
+    Icon          m_pIcon       ;
 };
 
 } } // namespace Ui

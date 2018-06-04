@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,40 +22,41 @@
 #ifndef CPPUAL_UI_CONTAINER_H_
 #define CPPUAL_UI_CONTAINER_H_
 
+#include <cppual/ui/skin.h>
 #include <cppual/ui/layout.h>
 
 namespace cppual { namespace Ui {
 
-class CContainer : public View
+class Container : public SkinnableView
 {
 protected:
     uint m_uBorderSize;
 
 public:
-    void SetBorderSize (uint);
-    void SetPadding (uint);
-    bool Create (View*, const Rect&, uint = 0U);
+    void setBorderSize (uint);
+    void setPadding (uint);
+    Container (View*, const Rect&, uint = 0U);
 
-    uint GetBorderSize () const { return m_uBorderSize; }
-    uint GetPadding () const { return 0U; }
+    uint borderSize () const { return m_uBorderSize; }
+    uint padding () const { return 0U; }
 };
 
-class CAdvTable : public CContainer
+class AdvTable : public Container
 {
 protected:
     uint m_uNumColumns, m_uNumRows;
     Layout m_cTableLayout;
 
 public:
-    void SetNumColumns (uint);
-    void SetNumRows (uint);
-    void SetItemRect (const Rect&);
-    bool AddView (View*, uint, uint, uint = 1U, uint = 1U);
-    bool RemoveView (View*);
-    bool Create (View*, const Rect&, uint, uint, uint = 0U);
+    void setNumColumns (uint);
+    void setNumRows (uint);
+    void setItemRect (const Rect&);
+    bool addView (View*, uint, uint, uint = 1U, uint = 1U);
+    bool removeView (View*);
+    AdvTable (View*, const Rect&, uint, uint, uint = 0U);
 
-    uint GetNumColumns () const { return m_uNumColumns; }
-    uint GetNumRows () const { return m_uNumRows; }
+    uint numColumns () const { return m_uNumColumns; }
+    uint numRows    () const { return m_uNumRows; }
 };
 
 } } // Ui
