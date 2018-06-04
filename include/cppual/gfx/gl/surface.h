@@ -31,6 +31,7 @@ namespace cppual { namespace Graphics { namespace GL {
 class Config;
 class Surface;
 class Context;
+class ContextMutex;
 
 struct bad_match       : public std::logic_error { using std::logic_error::logic_error; };
 struct bad_display     : public std::logic_error { using std::logic_error::logic_error; };
@@ -49,10 +50,10 @@ struct not_initialized : public std::logic_error { using std::logic_error::logic
 class Config
 {
 public:
-    typedef void*                           pointer;
-    typedef int32                           int_type;
-    typedef pointer  Config::*              safe_bool;
-    typedef typename IResource::controller  controller;
+    typedef void*                           pointer    ;
+    typedef int32                           int_type   ;
+    typedef pointer  Config::*              safe_bool  ;
+    typedef typename IResource::controller  controller ;
     typedef typename IResource::format_type format_type;
 
     enum
@@ -130,9 +131,9 @@ constexpr bool operator != (Config const& lh, Config const& rh) noexcept
 class Surface : public IPixelSurface
 {
 public:
-    typedef Config const* conf_pointer;
+    typedef Config const* conf_pointer  ;
     typedef Config const& conf_reference;
-    typedef void*         pointer;
+    typedef void*         pointer       ;
 
     Surface (Surface const&);
     Surface (Surface&&) noexcept = default;
@@ -197,12 +198,12 @@ public:
     { return GFXVersion { 3, 0 }; }
 
 private:
-    conf_pointer  m_pConf;
-    void*         m_pGC;
+    conf_pointer  m_pConf      ;
+    void*         m_pGC        ;
     pointer       m_pDrawTarget;
     const_pointer m_pReadTarget;
-    Context*      m_pShared;
-    GFXVersion    m_nVersion;
+    Context*      m_pShared    ;
+    GFXVersion    m_nVersion   ;
 };
 
 // ====================================================
@@ -228,7 +229,7 @@ public:
     void unlock ()
     {
         m_context.release ();
-        m_mutex  .unlock  ();
+        m_mutex.unlock    ();
     }
 
 private:

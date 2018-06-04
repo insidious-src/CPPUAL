@@ -54,7 +54,7 @@ struct Point2 final
     T x, y;
     static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
 
-    Point2 () noexcept = default;
+    constexpr Point2 () noexcept = default;
 
     template <typename U>
     constexpr Point2 (U x_, U y_) noexcept
@@ -217,10 +217,10 @@ struct Angle final
     T radians;
 
     static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
-    inline Angle () noexcept = default;
+    constexpr Angle () noexcept = default;
 
     template <typename U>
-    inline Angle (Angle<U> const& gObj) noexcept
+    constexpr Angle (Angle<U> const& gObj) noexcept
     : radians (T (gObj.radians))
     { }
 };

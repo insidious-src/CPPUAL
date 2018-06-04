@@ -54,10 +54,10 @@ enum class ColorName : unsigned char
 enum class ColorType : unsigned char
 {
     TrueType,
-    Direct,
-    Pseudo,
-    Static,
-    Grey,
+    Direct  ,
+    Pseudo  ,
+    Static  ,
+    Grey    ,
     StaticGrey
 };
 
