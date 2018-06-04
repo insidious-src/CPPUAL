@@ -36,7 +36,7 @@ class KeyEvent
 {
 public:
     typedef u8  size_type;
-    typedef u8  key_type;
+    typedef u8  key_type ;
     typedef u16 mask_type;
 
     enum Type
@@ -251,7 +251,7 @@ struct Keyboard
         CodeF23 = 114,
         CodeF24 = 115,
 
-        CodeEexecute = 116,
+        CodeExecute = 116,
         CodeHelp = 117,
         CodeMenu = 118,
         CodeSelect = 119,

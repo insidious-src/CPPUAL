@@ -107,7 +107,7 @@ struct Joystick : NonCopyableVirtual
     {
         MaxCount    = 16,
         ButtonCount = 32,
-        AxisCount    =  8
+        AxisCount   =  8
     };
 
     enum class Axis : unsigned char

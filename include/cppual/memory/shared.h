@@ -53,28 +53,28 @@ public:
     typedef std::size_t size_type;
     typedef u16         offset;
 
-    SharedObject (string const&, Mode = Mode::CreateOrOpen, State = State::ReadWrite);
+    SharedObject  (string const&, Mode = Mode::CreateOrOpen, State = State::ReadWrite);
     ~SharedObject () noexcept;
     bool truncate (size_type mem_size) noexcept;
 
-    inline State  state   () const noexcept { return m_eState; }
-    inline Mode   mode    () const noexcept { return m_eMode; }
-    inline int    id      () const noexcept { return m_nId; }
+    inline State  state   () const noexcept { return m_eState   ; }
+    inline Mode   mode    () const noexcept { return m_eMode    ; }
+    inline int    id      () const noexcept { return m_nId      ; }
     inline bool   isValid () const noexcept { return m_nId != -1; }
-    inline string name    () const noexcept { return m_gName; }
+    inline string name    () const noexcept { return m_gName    ; }
 
     inline SharedObject () noexcept
-    : m_gName (),
-      m_eMode (),
+    : m_gName  (),
+      m_eMode  (),
       m_eState (),
-      m_nId (-1)
+      m_nId    (-1)
     { }
 
 private:
-    string m_gName;
-    Mode   m_eMode;
+    string m_gName ;
+    Mode   m_eMode ;
     State  m_eState;
-    int    m_nId;
+    int    m_nId   ;
 };
 
 class SharedRegion final : public NonCopyable
@@ -106,9 +106,9 @@ public:
     { return pOffset + m_pRegion; }
 
 private:
-    SharedObject& m_gObject;
-    void*         m_pRegion;
-    size_type     m_uSize;
+    SharedObject& m_gObject  ;
+    void*         m_pRegion  ;
+    size_type     m_uSize    ;
     bool          m_bWritable;
 };
 
