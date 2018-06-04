@@ -69,7 +69,7 @@ private:
     void* do_allocate   (size_type capacity, align_type align) noexcept;
     void  do_deallocate (void* p, size_type capacity, align_type align);
 
-    bool  do_is_equal   (memory_resource const& gObj)    const noexcept
+    bool  do_is_equal   (std::memory_resource const& gObj)    const noexcept
     { return &gObj == &m_gOwner; }
 };
 
@@ -131,7 +131,7 @@ private:
     void* do_allocate   (size_type capacity, align_type align) noexcept;
     void  do_deallocate (void* p, size_type capacity, align_type align);
 
-    bool  do_is_equal   (memory_resource const& gObj)    const noexcept
+    bool  do_is_equal   (std::memory_resource const& gObj)    const noexcept
     { return &gObj == &m_gOwner; }
 };
 

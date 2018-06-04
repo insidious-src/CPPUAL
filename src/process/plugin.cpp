@@ -47,10 +47,9 @@ constexpr const char* lib_ext () noexcept
 
 DynLoader::DynLoader (string_type   pPath,
                       bool          bAttach,
-                      ResolvePolicy eResolve,
-                      Flags         gFlags) noexcept
+                      ResolvePolicy eResolve) noexcept
 : m_pHandle  (),
-  m_gLibPath (gFlags.test (AddExt) ? pPath + lib_ext () : pPath),
+  m_gLibPath (pPath + lib_ext ()),
   m_eResolve (eResolve)
 {
     if (bAttach) attach ();

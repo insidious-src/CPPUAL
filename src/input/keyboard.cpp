@@ -22,7 +22,8 @@
 #include <cppual/input/keyboard.h>
 
 #ifdef   OS_WINDOWS
-#include <windows.h>
+#   include <windows.h>
+#endif // OS_WINDOWS
 
 namespace cppual { namespace Input {
 
@@ -47,5 +48,3 @@ bool KeyQueue::pop_front (event_type&, bool) noexcept
 }
 
 } } // namespace Input
-
-#endif // OS_WINDOWS

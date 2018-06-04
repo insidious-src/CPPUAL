@@ -50,7 +50,7 @@ bool IDisplay::hasValidInstance () noexcept
     return backend () != nullptr;
 }
 
-bool IDisplay::primary (cchar* pDevName)
+bool IDisplay::primary (string_type const& pDevName)
 {
     static bool bConnected = false;
 
@@ -61,7 +61,7 @@ bool IDisplay::primary (cchar* pDevName)
     return backend () != nullptr;
 }
 
-IDisplay::pointer IDisplay::connect (cchar* pDevName)
+IDisplay::pointer IDisplay::connect (string_type const& pDevName)
 {
     if (backend () != nullptr and backend ()->name () == pDevName)
         return backend ();

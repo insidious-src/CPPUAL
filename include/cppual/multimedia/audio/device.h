@@ -43,6 +43,7 @@ class Device : public NonCopyable
 {
 public:
     typedef std::size_t size_type;
+    typedef std::string string_type;
 
     enum Type
     {
@@ -51,19 +52,19 @@ public:
         Capture
     };
 
-    Device (string const&, Type);
+    Device(string_type const &, Type);
 
-    static bool isExtensionSupported (string const& name) noexcept;
-    bool        isExtensionPresent   (string const& name) noexcept;
+    static bool isExtensionSupported(string_type const &name) noexcept;
+    bool        isExtensionPresent  (string_type const &name) noexcept;
 
-    inline Type   type    () const noexcept { return m_eType                ; }
-    inline string name    () const noexcept { return m_gDeviceName          ; }
-    inline bool   isValid () const noexcept { return m_eType != Device::Null; }
+    inline Type        type () const noexcept { return m_eType                ; }
+    inline string_type name () const noexcept { return m_gDeviceName          ; }
+    inline bool     isValid () const noexcept { return m_eType != Device::Null; }
 
 protected:
-    string    m_gDeviceName;
-    size_type m_uId;
-    Type      m_eType;
+    string_type m_gDeviceName;
+    size_type   m_uId;
+    Type        m_eType;
 
 };
 
@@ -71,7 +72,7 @@ class PlaybackDevice : public virtual Device
 {
 public:
     PlaybackDevice  () noexcept;
-    PlaybackDevice  (string const& name) noexcept;
+    PlaybackDevice  (string_type const &name) noexcept;
     ~PlaybackDevice () noexcept;
 };
 
@@ -80,10 +81,10 @@ class CaptureDevice : public virtual Device
 public:
     CaptureDevice  () noexcept;
     ~CaptureDevice () noexcept;
-    bool busy () noexcept;
+    bool busy      () noexcept;
 
-    CaptureDevice (string const&,
-                   uint         = 22050,
+    CaptureDevice (string_type const&,
+                   uint = 22050,
                    SoundQuality = SoundQuality::Low,
                    OutputFormat = OutputFormat::Stereo) noexcept;
 
@@ -100,6 +101,8 @@ private:
 class Context
 {
 public:
+    typedef std::string string_type;
+
     Context () = delete;
     Context (PlaybackDevice& device, bool make_current = false) noexcept;
     ~Context () noexcept;
@@ -116,7 +119,7 @@ public:
     static DistanceModel distanceModel () noexcept;
     static void          setDistanceModel (DistanceModel model) noexcept;
     static Context*      current () noexcept;
-    static string        label (StringQuery query) noexcept;
+    static string_type   label(StringQuery query) noexcept;
     static void          setDopplerFactor (float factor) noexcept;
     static float         dopplerFactor () noexcept;
     static void          setSpeedOfSound (float speed) noexcept;

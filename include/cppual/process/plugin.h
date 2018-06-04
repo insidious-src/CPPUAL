@@ -40,20 +40,12 @@ public:
     typedef std::string   string_type;
     typedef Handle        handle_type;
 
-    enum Flag
-    {
-        AbsolutePath = 1 << 0, // explicitly provide full path
-        AddExt       = 1 << 1  // add library extension (ex. ".so" or ".dll")
-    };
-
     enum class ResolvePolicy : unsigned char
     {
         Static,    // use as data file or load as static library
         Immediate, // resolve everything ot load
         Lazy       // don't resolve any object or function references
     };
-
-    typedef BitSet<DynLoader::Flag> Flags;
 
     DynLoader () = default;
     DynLoader (DynLoader&&) = default;
@@ -63,8 +55,7 @@ public:
 
     DynLoader (string_type   path,
                bool          attach = true,
-               ResolvePolicy policy = ResolvePolicy::Lazy,
-               Flags         flags  = AddExt) noexcept;
+               ResolvePolicy policy = ResolvePolicy::Lazy) noexcept;
 
     string_type   path        () const noexcept { return m_gLibPath; }
     void*         handle      () const noexcept { return m_pHandle;  }

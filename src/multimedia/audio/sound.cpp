@@ -97,7 +97,7 @@ int Sound::openReadOnly (cvoid*, size_type) noexcept
     return false;
 }
 
-int Sound::openWritable (string const&, int, int) noexcept
+int Sound::openWritable (string_type const&, int, int) noexcept
 {
     close ();
     m_gFlags = Sound::Read | Sound::Write;
@@ -106,7 +106,7 @@ int Sound::openWritable (string const&, int, int) noexcept
     return false;
 }
 
-bool Sound::save (string const& gFileName) noexcept
+bool Sound::save (string_type const& gFileName) noexcept
 {
     if (m_pSndDesc)
     {

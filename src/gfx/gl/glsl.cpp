@@ -79,6 +79,8 @@ inline static uint getShaderType (Shader::Type eType) noexcept
         return GL::ComputeShaderARB;
     case Shader::Fragment:
         return GL::FragmentShaderARB;
+    default:
+        return GL::FragmentShaderARB;
     }
 }
 

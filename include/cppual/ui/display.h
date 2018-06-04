@@ -26,6 +26,7 @@
 #include <memory>
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/dsp_details.h>
+#include <string>
 
 namespace cppual { namespace Ui {
 
@@ -40,7 +41,7 @@ class IDisplay : public NonCopyableVirtual
 public:
     typedef Graphics::Connection handle_type;
     typedef std::string          string_type;
-    typedef shared_display       pointer;
+    typedef shared_display       pointer    ;
 
     IDisplay () noexcept = default;
 
@@ -50,8 +51,8 @@ public:
 
     static  IDisplay*   primary          ();
     static  bool        hasValidInstance () noexcept;
-    static  bool        primary          (cchar*);
-    static  pointer     connect          (cchar*);
+    static  bool        primary          (string_type const&);
+    static  pointer     connect          (string_type const&);
 
     handle_type native () const noexcept { return m_native; }
     handle_type legacy () const noexcept { return m_legacy; }

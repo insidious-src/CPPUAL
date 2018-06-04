@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ public:
         Atomic         = 1 << 6
     };
 
-    typedef FlagSet<Shader::Type, u8> Types;
+    typedef BitSet<Shader::Type> Types;
 
     Shader () = default;
     Shader (Shader::Type type) noexcept;
@@ -98,10 +98,10 @@ public:
     inline Shader::Type  type   () const noexcept { return m_eType  ; }
 
     inline bool isLoaded () const noexcept
-    { return m_gStates.hasFlag (Shader::IsLoaded); }
+    { return m_gStates.test (Shader::IsLoaded); }
 
     inline bool isCompiled () const noexcept
-    { return m_gStates.hasFlag (Shader::IsCompiled); }
+    { return m_gStates.test (Shader::IsCompiled); }
 
 private:
     enum State
@@ -110,7 +110,7 @@ private:
         IsCompiled = 1 << 1
     };
 
-    typedef FlagSet<Shader::State, u8> States;
+    typedef BitSet<Shader::State> States;
 
     string       m_gSource;
     States       m_gStates;
@@ -199,8 +199,8 @@ struct AtomicShader final : public Shader
     : Shader (Shader::Atomic)
     { }
 
-    inline FragmentShader (string const& gString,
-                           LoadFrom      eMode = LoadFrom::File)
+    inline AtomicShader (string const& gString,
+                         LoadFrom      eMode = LoadFrom::File)
     : Shader (Shader::Fragment)
     { load (gString, eMode); }
 };
@@ -216,7 +216,7 @@ public:
         BinaryAvailable = 1 << 1
     };
 
-    typedef FlagSet<SLProgram::State, u8> States;
+    typedef BitSet<SLProgram::State> States;
 
     SLProgram () noexcept;
     SLProgram (string const& binary_name) noexcept;
@@ -241,7 +241,7 @@ public:
     { return m_uShaderCount; }
 
     inline bool isLinked () const noexcept
-    { return m_gStates.hasFlag (SLProgram::IsLinked); }
+    { return m_gStates.test (SLProgram::IsLinked); }
 
     inline int attribute (string const& gName)
     { return m_gAttribLocList[gName]; }
@@ -250,19 +250,19 @@ public:
     { return m_gUniformLocList[gName]; }
 
     inline bool hasFragmentShader () const noexcept
-    { return m_gShaderTypes.hasFlag (Shader::Fragment); }
+    { return m_gShaderTypes.test (Shader::Fragment); }
 
     inline bool hasVertexShader () const noexcept
-    { return m_gShaderTypes.hasFlag (Shader::Vertex); }
+    { return m_gShaderTypes.test (Shader::Vertex); }
 
     inline bool hasComputeShader () const noexcept
-    { return m_gShaderTypes.hasFlag (Shader::Compute); }
+    { return m_gShaderTypes.test (Shader::Compute); }
 
     inline bool hasTessControlShader () const noexcept
-    { return m_gShaderTypes.hasFlag (Shader::TessControl); }
+    { return m_gShaderTypes.test (Shader::TessControl); }
 
     inline bool hasTessEvaluationShader () const noexcept
-    { return m_gShaderTypes.hasFlag (Shader::TessEvaluation); }
+    { return m_gShaderTypes.test (Shader::TessEvaluation); }
 
 private:
     map<string, int> m_gAttribLocList, m_gUniformLocList;

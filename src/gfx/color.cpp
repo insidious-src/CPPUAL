@@ -45,6 +45,8 @@ Color getColorFromName (ColorName eName) noexcept
         return { 0, 0, 0 };
     case ColorName::Black:
         return { 0, 0, 0 };
+    default:
+        return { 0, 0, 0 };
     }
 }
 

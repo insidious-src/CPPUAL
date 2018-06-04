@@ -27,7 +27,7 @@ namespace cppual { namespace System {
 
 string SystemInfoQuery::label (QueryCategory, uint)
 {
-    return std::move (string ());
+    return string ();
 }
 
 int SystemInfoQuery::value (QueryCategory, uint)

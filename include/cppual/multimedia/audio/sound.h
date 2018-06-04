@@ -29,8 +29,6 @@
 #include <cppual/flags.h>
 #include <cppual/multimedia/audio/format.h>
 
-using std::string;
-
 namespace cppual { namespace Audio {
 
 enum
@@ -77,6 +75,7 @@ public:
     typedef double*                          pointer      ;
     typedef double const*                    const_pointer;
     typedef int64                            size_type    ;
+    typedef std::string                      string_type  ;
 
     enum Attribute
     {
@@ -101,13 +100,13 @@ public:
     Sound& operator = (Sound&&) noexcept;
     ~Sound () noexcept;
 
-    string attribute (Attribute) const noexcept;
-    int    openReadOnly (string const& file) noexcept;
-    int    openReadOnly (cvoid* data, size_type byte_size) noexcept;
-    int    openWritable (string const& file, int channels, int sample_rate) noexcept;
-    bool   save (string const& file) noexcept;
-    void   seek (std::chrono::seconds time_pos) noexcept;
-    void   close () noexcept;
+    string_type attribute (Attribute) const noexcept;
+    int  openReadOnly (string_type const& file) noexcept;
+    int  openReadOnly (cvoid* data, size_type byte_size) noexcept;
+    int  openWritable (string_type const& file, int channels, int sample_rate) noexcept;
+    bool save  (string_type const& file) noexcept;
+    void seek  (std::chrono::seconds time_pos) noexcept;
+    void close () noexcept;
 
     const_pointer data         () const noexcept { return m_gBuffer.data ();     }
     size_type     sampleCount  () const noexcept { return m_nSampleCount;        }
@@ -125,17 +124,17 @@ public:
     { return m_gFlags.test (Sound::Write); }
 
     Sound () noexcept
-    : m_gBuffer (),
-      m_pSndDesc (),
-      m_nSampleCount (),
-      m_nSampleRate (),
+    : m_gBuffer       (),
+      m_pSndDesc      (),
+      m_nSampleCount  (),
+      m_nSampleRate   (),
       m_nChannelCount (),
       m_gFlags (nullptr)
     { }
 
 protected:
-    virtual int  onOpen () { return true; }
-    virtual void onSave (string const&) { }
+    virtual int  onOpen  () { return true; }
+    virtual void onSave  (string_type const &) {}
     virtual void onClose () { }
 
 private:

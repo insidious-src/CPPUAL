@@ -30,17 +30,17 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 } } // anonymous namespace Internal
 
-Device::Device (string const&, Type)
+Device::Device (string_type const&, Type)
 {
 
 }
 
-bool Device::isExtensionSupported (string const&) noexcept
+bool Device::isExtensionSupported (string_type const&) noexcept
 {
     return false;
 }
 
-bool Device::isExtensionPresent (string const&) noexcept
+bool Device::isExtensionPresent (string_type const&) noexcept
 {
     return false;
 }
