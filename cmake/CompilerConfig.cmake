@@ -25,8 +25,9 @@ macro(CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
    set(CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 endmacro(CHECK_CXX_COMPILER_FLAG)
 
-set(CMAKE_CXX_FLAGS "-pipe -mtune=native -Wall -Wextra -pedantic -Wpointer-arith -Wcast-align -Wwrite-strings -Wredundant-decls -Winline -Wuninitialized -Wconversion -fshort-enums")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fmessage-length=0 -fno-rtti -DNDEBUG")
+set(CMAKE_CXX_FLAGS "-pipe -mtune=native -Wall -Wextra -pedantic -Wpointer-arith -Wcast-align -Wwrite-strings -Wredundant-decls -Winline -Wuninitialized -Wconversion")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fmessage-length=0 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -fmessage-length=0 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -fmessage-length=0 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-s")
@@ -46,4 +47,4 @@ else()
 endif()
 
 # use optimized instruction set
-add_definitions(-msse -msse2 -mavx)
+add_definitions(-msse -msse2)

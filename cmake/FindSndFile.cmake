@@ -5,7 +5,7 @@ set(LIBRARY_NAMES sndfile sndfile-1)
 
 find_path(SNDFILE_INCLUDE_DIR
     NAMES ${HEADER_FILES}
-    PATH_SUFFIXES external/include include
+    PATH_SUFFIXES include external/include
     PATHS ${CMAKE_SOURCE_DIR}
     )
 

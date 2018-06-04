@@ -16,14 +16,14 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "BSD")
     if(CMAKE_SIZEOF_VOID_P EQUAL 4)
             find_library(WM_LEGACY_LIBRARY
                 NAMES
-                        xcb-icccm
+                        xcb-icccm X11-xcb X11
                 PATH_SUFFIXES
                         lib32 lib
                 )
     elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
             find_library(WM_LEGACY_LIBRARY
                 NAMES
-                        xcb-icccm
+                        xcb-icccm X11-xcb X11
                 PATH_SUFFIXES
                         lib lib64
                 )
