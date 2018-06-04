@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ namespace cppual { namespace Ui {
 namespace { namespace Xcb { // optimize for internal unit usage
 
 typedef xcb_connection_t display_type;
-typedef xcb_window_t     handle_type;
+typedef xcb_window_t     handle_type ;
 
 struct Window
 {
-    typedef Element    value_type;
-    typedef Connection pointer;
+    typedef Graphics::Element    value_type;
+    typedef Graphics::Connection pointer;
 
     inline static Rect geometry (pointer display, value_type id)
     {
@@ -63,7 +63,7 @@ enum
     XcbStack  = XCB_CONFIG_WINDOW_STACK_MODE
 };
 
-xcb_screen_t* screenHandle (Connection pDsp, u32& nScreen) noexcept
+xcb_screen_t* screenHandle (Graphics::Connection pDsp, u32& nScreen) noexcept
 {
     static xcb_setup_t const* pSetup = xcb_get_setup (pDsp.get<Xcb::display_type> ());
     static u32 nNum = static_cast<u32> (xcb_setup_roots_length (pSetup));
@@ -79,7 +79,7 @@ xcb_screen_t* screenHandle (Connection pDsp, u32& nScreen) noexcept
 // =========================================================
 
 XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
-: IWindow (pDisplay, xcb_generate_id (pDisplay->native<Xcb::display_type> ())),
+: IPlatformWindow (pDisplay, xcb_generate_id (pDisplay->native<Xcb::display_type> ())),
   m_eFlags (WindowHints),
   m_pOwner ()
 {

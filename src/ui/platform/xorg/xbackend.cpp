@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,9 +50,9 @@ inline XDisplay::handle_type get_connection (cchar* pName) noexcept
 
 } } // anonymous namespace Xcb
 
-XDisplay::XDisplay (cchar* pName) noexcept
-: IDisplay (Xcb::get_connection (pName), Xcb::x11_connection (pName)),
-  m_gName  (native () ? pName : nullptr)
+XDisplay::XDisplay (string_type const& name) noexcept
+: IDisplay (Xcb::get_connection (name.c_str()), Xcb::x11_connection (name.c_str())),
+  m_gName  (native () ? name : nullptr)
 {
     if (!native ()) return;
 
@@ -62,7 +62,7 @@ XDisplay::XDisplay (cchar* pName) noexcept
     if (::xcb_connection_has_error (native<Xcb::display_type> ()))
     {
         std::cout << "error when connecting to display: "
-                  << pName << std::endl;
+                  << name << std::endl;
     }
 }
 

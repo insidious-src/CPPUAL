@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 namespace cppual { namespace Ui {
 
-class DECL_EXPORT Win32Window final : public IWindow
+class DECL_EXPORT Win32Window final : public IPlatformWindow
 {
 public:
     Win32Window  (Rect const& rect, u32 screen, IDisplay* display);

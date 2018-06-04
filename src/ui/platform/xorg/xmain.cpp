@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,13 +33,13 @@ namespace cppual { namespace Ui { namespace Platform {
 struct XFactory final : Factory
 {
     shared_queue   createQueueInstance ();
-    shared_display connectDisplay      (cchar*);
+    shared_display connectDisplay      (string_type const&);
     shared_window  createWindow        (Rect const&, u32, IDisplay*);
 };
 
-shared_display XFactory::connectDisplay (cchar* pDeviceName)
+shared_display XFactory::connectDisplay (string_type const& name)
 {
-    return shared_display (new XDisplay (pDeviceName));
+    return shared_display (new XDisplay (name));
 }
 
 shared_queue XFactory::createQueueInstance ()

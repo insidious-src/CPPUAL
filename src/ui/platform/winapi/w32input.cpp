@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2016 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -163,7 +163,7 @@ Win32Queue::Win32Queue () noexcept
 {
 }
 
-bool Win32Queue::set_window_events (IWindow const&, mask_type)
+bool Win32Queue::set_window_events (IPlatformWindow const&, mask_type)
 {
     return false;
 }
@@ -191,7 +191,7 @@ bool Win32Queue::pop_front (event_type& event, bool wait)
     return true;
 }
 
-int Win32Queue::poll (IWindow const& window, atomic_bool& polling)
+int Win32Queue::poll (IPlatformWindow const& window, atomic_bool& polling)
 {
     Win32Event event;
 

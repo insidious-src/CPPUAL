@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,23 +27,24 @@
 #include <wayland-client-protocol.h>
 
 using cppual::Graphics::PixelFormat;
+using cppual::Graphics::Element;
 
 namespace cppual { namespace Ui {
 
-class WlSurface final : public IWindow
+class WlSurface final : public IPlatformWindow
 {
 public:
     WlSurface () = delete;
-    WlSurface (Rect const&, IWindow*, u32, PixelFormat const&) noexcept;
+    WlSurface (Rect const&, IPlatformWindow*, u32, PixelFormat const&) noexcept;
     ~WlSurface () noexcept;
 
-    bool isMapped () const noexcept;
-    void setOwner (const_pointer) noexcept;
-    void move (point2i) noexcept;
+    bool isMapped    () const noexcept;
+    void setOwner    (const_pointer) noexcept;
+    void move        (point2i) noexcept;
     void setGeometry (Rect const&) noexcept;
     void raise () noexcept;
     void lower () noexcept;
-    void map () noexcept;
+    void map   () noexcept;
     void unmap () noexcept;
 
     IDisplay*   display  () const noexcept { return m_pDisplay;    }
@@ -86,7 +87,7 @@ private:
 // ====================================================
 
 WlSurface::WlSurface (Rect const&        gRect,
-                      IWindow*           pParent,
+                      IPlatformWindow*           pParent,
                       u32                nScreen,
                       PixelFormat const& gFormat) noexcept
 : m_gFormat     (gFormat),

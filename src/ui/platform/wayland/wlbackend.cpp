@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2015 insidious
+ * Copyright (C) 2012 - 2018 insidious
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,16 +31,14 @@ namespace cppual { namespace Ui {
 class SHARED_API WlBackend final : public IDisplay
 {
 public:
-    WlBackend () = delete;
+    WlBackend  () = delete;
+    ~WlBackend () noexcept;
 
     string_type name        () const noexcept { return m_gName;        }
     uint        screenCount () const noexcept { return m_nScreenCount; }
 
     void flush () noexcept
     { ::wl_display_flush (native<wl_display> ()); }
-
-    ~WlBackend () noexcept
-    { if (native ()) ::wl_display_disconnect (native<wl_display> ()); }
 
     WlBackend (cchar* pName) noexcept
     : IDisplay       (::wl_display_connect (pName), nullptr),
@@ -52,6 +50,9 @@ private:
     uint        m_nScreenCount;
     string_type m_gName;
 };
+
+WlBackend::~WlBackend () noexcept
+{ if (native ()) ::wl_display_disconnect (native<wl_display> ()); }
 
 } } // namespace Graphics
 
