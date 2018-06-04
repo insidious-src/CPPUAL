@@ -34,8 +34,8 @@ class BitSet
 public:
     static_assert (std::is_enum<T>::value, "T is not an enumeration!");
 
-    typedef T                                      enum_type;
-    typedef ulong_t                                size_type;
+    typedef T                                      enum_type ;
+    typedef ulong_t                                size_type ;
     typedef typename std::underlying_type<T>::type value_type;
 
     constexpr BitSet () noexcept = default;
