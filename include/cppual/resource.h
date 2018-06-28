@@ -57,7 +57,7 @@ class Handle
 public:
     typedef void* pointer;
 
-    inline    Handle () noexcept = default;
+    constexpr Handle () noexcept = default;
     constexpr Handle (pointer handle) noexcept : m_handle (handle) { }
     constexpr Handle (std::nullptr_t) noexcept : m_handle ()       { }
     inline    Handle (Handle&&) noexcept         = default;
@@ -79,7 +79,7 @@ public:
     constexpr bool operator == (Handle const&, std::nullptr_t) noexcept;
 
 private:
-    pointer m_handle;
+    pointer m_handle { };
 };
 
 constexpr bool operator == (Handle const& conn1, Handle const& conn2) noexcept
@@ -103,20 +103,16 @@ public:
     typedef ID         value_type;
     typedef Controller controller;
 
+    constexpr Resource () noexcept = default;
     Resource (Resource const&) = delete;
     Resource& operator = (Resource const&) = delete;
-    ~Resource () { }
+    virtual ~Resource () { }
 
-    controller   connection () const noexcept { return m_pCon; }
-    value_type   id         () const noexcept { return m_id; }
-    bool         valid      () const noexcept { return m_id; }
+    constexpr controller   connection () const noexcept { return m_pCon; }
+    constexpr value_type   id         () const noexcept { return m_id  ; }
+    constexpr bool         valid      () const noexcept { return m_id  ; }
 
-    Resource () noexcept
-    : m_pCon (),
-      m_id   ()
-    { }
-
-    Resource (controller pCon, value_type id) noexcept
+    constexpr Resource (controller pCon, value_type id) noexcept
     : m_pCon (pCon),
       m_id   (id)
     { }
@@ -126,8 +122,8 @@ public:
                                        Resource<Controller_, ID_> const&);
 
 private:
-    controller m_pCon;
-    value_type m_id;
+    controller m_pCon { };
+    value_type m_id   { };
 };
 
 // =========================================================
@@ -139,18 +135,15 @@ public:
     typedef ID   value_type;
     typedef void controller;
 
+    constexpr Resource () noexcept = default;
     Resource (Resource const&) = delete;
     Resource& operator = (Resource const&) = delete;
-    ~Resource () { }
+    virtual ~Resource () { }
 
-    value_type id    () const noexcept { return m_id; }
-    bool       valid () const noexcept { return m_id; }
+    constexpr value_type id    () const noexcept { return m_id; }
+    constexpr bool       valid () const noexcept { return m_id; }
 
-    Resource () noexcept
-    : m_id   ()
-    { }
-
-    Resource (value_type id) noexcept
+    constexpr Resource (value_type id) noexcept
     : m_id   (id)
     { }
 
@@ -159,7 +152,7 @@ public:
                                        Resource<void, ID_> const&);
 
 private:
-    value_type m_id;
+    value_type m_id { };
 };
 
 // =========================================================
@@ -179,7 +172,7 @@ constexpr bool operator == (Resource<Controller, ID> const& gObj1,
                             Resource<Controller, ID> const& gObj2)
 {
     return gObj1.m_pCon == gObj2.m_pCon and gObj1.m_id == gObj2.m_id and
-            gObj1.m_eResType == gObj2.m_eResType;
+           gObj1.m_eResType == gObj2.m_eResType;
 }
 
 template <class Controller, class ID>

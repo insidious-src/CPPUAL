@@ -133,6 +133,11 @@ add_library(cppual-dom SHARED
     "include/cppual/dom/xml.h"
     "include/cppual/dom/cmdline.h"
     "include/cppual/dom/dom.h"
+    "include/cppual/dom/csv.h"
+    "src/dom/csv.cpp"
+    "include/cppual/dom/json.h"
+    "src/dom/json.cpp"
+
     )
 
 # transparent network facilities
@@ -232,6 +237,8 @@ add_library(cppual-gfx SHARED
     "include/cppual/gfx/draw.h"
     "src/gfx/font.cpp"
     "include/cppual/gfx/font.h"
+    "src/gfx/formats/bmp.cpp"
+    "include/cppual/gfx/formats/bmp.h"
     )
 
 # OpenGL/ES library

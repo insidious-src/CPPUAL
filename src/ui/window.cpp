@@ -34,7 +34,7 @@ typedef std::unordered_map<uptr, WindowAdapter*> map_type;
 
 inline map_type& map ()
 {
-    static map_type views_map (5);
+    static map_type views_map (10);
     return views_map;
 }
 

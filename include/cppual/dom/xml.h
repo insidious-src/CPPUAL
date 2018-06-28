@@ -33,7 +33,7 @@ namespace cppual {
 class Xml final
 {
 public:
-    typedef std::size_t    size_type;
+    typedef std::size_t size_type;
 
     inline Xml () = default;
     string getAttrib (string const&, string const&);

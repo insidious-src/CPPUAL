@@ -32,7 +32,7 @@ namespace cppual { namespace Ui {
 namespace { namespace Xcb { // optimize for internal unit usage
 
 typedef ::xcb_connection_t display_type;
-typedef ::Display          legacy_type;
+typedef ::Display          legacy_type ;
 
 inline XDisplay::handle_type x11_connection (cchar* pName) noexcept
 {
@@ -40,7 +40,8 @@ inline XDisplay::handle_type x11_connection (cchar* pName) noexcept
     static cchar*                pCachedName = "";
 
     return pDisplay and pName == pCachedName ?
-                pDisplay : pDisplay = ::XOpenDisplay (pCachedName = pName);
+                                 pDisplay :
+                                 pDisplay = ::XOpenDisplay (pCachedName = pName);
 }
 
 inline XDisplay::handle_type get_connection (cchar* pName) noexcept

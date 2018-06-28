@@ -32,7 +32,7 @@ namespace cppual { namespace Ui {
 
 class   IDisplay;
 typedef std::shared_ptr<IDisplay> shared_display;
-typedef std::weak_ptr  <IDisplay> weak_display;
+typedef std::weak_ptr  <IDisplay> weak_display  ;
 
 // ====================================================
 
@@ -43,7 +43,7 @@ public:
     typedef std::string          string_type;
     typedef shared_display       pointer    ;
 
-    IDisplay () noexcept = default;
+    constexpr IDisplay () noexcept = default;
 
     virtual string_type name             () const = 0;
     virtual uint        screenCount      () const = 0;
@@ -66,7 +66,7 @@ public:
     { return m_legacy.get<U> (); }
 
 protected:
-    IDisplay (handle_type native, handle_type legacy) noexcept
+    constexpr IDisplay (handle_type native, handle_type legacy) noexcept
     : m_native (native), m_legacy (legacy)
     { }
 

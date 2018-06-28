@@ -32,7 +32,7 @@ typedef std::unordered_map<uptr, View*> map_type;
 
 inline map_type& map ()
 {
-    static map_type views_map (7);
+    static map_type views_map (10);
     return views_map;
 }
 
@@ -173,13 +173,13 @@ View& View::operator = (View const& gObj) noexcept
 
     if (gObj.valid ())
     {
-//        if (createView (gObj.m_pParentObj,
-//                        gObj.m_pRenderable->geometry (),
-//                        gObj.m_pRenderable->screen ()))
-//        {
-//            if (!gObj.isEnabled ()) disable ();
-//            if (!gObj.isHidden  ()) show ();
-//        }
+        if (Internal::createRenderable (gObj.m_pParentObj,
+                                        gObj.m_pRenderable->geometry (),
+                                        gObj.m_pRenderable->screen   ()))
+        {
+            if (!gObj.isEnabled ()) disable ();
+            if (!gObj.isHidden  ()) show    ();
+        }
     }
 
     return *this;

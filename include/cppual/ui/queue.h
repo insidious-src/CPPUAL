@@ -28,8 +28,8 @@
 #include <memory>
 #include <cppual/flags.h>
 #include <cppual/noncopyable.h>
-#include <cppual/ui/window.h>
 #include <cppual/input/event.h>
+#include <cppual/ui/window.h>
 
 namespace cppual { namespace Ui {
 
@@ -51,8 +51,6 @@ public:
     virtual int  poll              (window_type const&, atomic_bool& poll) = 0;
     virtual void send              (window_type const&, event_type const&) = 0;
     virtual void post              (window_type const&, event_type const&) = 0;
-
-    virtual ~IDisplayQueue () = 0;
 
     static IDisplayQueue* primary          () noexcept;
     static bool           hasValidInstance () noexcept;

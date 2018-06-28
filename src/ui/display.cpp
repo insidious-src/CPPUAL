@@ -41,7 +41,7 @@ inline shared_display& backend () noexcept
 
 IDisplay* IDisplay::primary ()
 {
-    if (backend () == nullptr) primary (nullptr);
+    if (backend () == nullptr) primary ("");
     return backend ().get ();
 }
 

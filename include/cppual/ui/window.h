@@ -39,9 +39,7 @@ public:
     typedef Graphics::Image image_type;
 
     Window ();
-    Window (Window&&);
     Window (Window const&);
-    Window& operator = (Window&&);
     Window& operator = (Window const&);
     ~Window ();
 
@@ -63,7 +61,7 @@ public:
             u32           screen = 0);
 
     inline FrameView*  frame () noexcept { return m_gFrame; }
-    inline image_type* icon () const noexcept { return m_pIcon; }
+    inline image_type* icon  () const noexcept { return m_pIcon; }
     inline bool        isFullscreen () const noexcept { return m_bIsFullScreen; }
 
     inline bool isMinimized () const noexcept
