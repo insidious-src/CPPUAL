@@ -285,7 +285,8 @@ private:
     void _pop_back ()
     {
         // --back++
-        allocator_type::destroy (&m_pArray[m_uEndPos = normalize (--m_uEndPos)]);
+        allocator_type::destroy (&m_pArray[m_uEndPos]);
+        m_uEndPos = normalize (--m_uEndPos);
     }
 
     size_type normalize (size_type uIdx) const noexcept
