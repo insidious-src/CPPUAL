@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include <unordered_map>
 #include <cppual/ui/manager.h>
 #include <cppual/ui/vsurface.h>
@@ -138,9 +139,9 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 
         IDisplayQueue::primary ()->
                 set_window_events (*m_pRenderable,
-                                     event_type::Key     |
-                                     event_type::Mouse |
-                                     event_type::Window);
+                                    event_type::Key   |
+                                    event_type::Mouse |
+                                    event_type::Window);
     }
 
     if (pParentObj)
@@ -399,11 +400,91 @@ void View::refresh ()
     }
 }
 
+void View::onDestroy()
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onDestroy()\n";
+#   endif
+}
+
+void View::onShow(bool)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onShow(bool)\n";
+#   endif
+}
+
+void View::onPaint(Rect const&)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onPaint(Rect const&)\n";
+#   endif
+}
+
+void View::onEnable(bool)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onEnable(bool)\n";
+#   endif
+}
+
+void View::onSize(point2u)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onSize(point2u)\n";
+#   endif
+}
+
+void View::onMove(point2i)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onMove(point2i)\n";
+#   endif
+}
+
+void View::onBeginSizeMove(Rect const&)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onBeginSizeMove(Rect const&)\n";
+#   endif
+}
+
+void View::onEndSizeMove(Rect const&)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onEndSizeMove(Rect const&)\n";
+#   endif
+}
+
+void View::onMinMaxSize(point2u)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onMinMaxSize(point2u)\n";
+#   endif
+}
+
+void View::onFocus(bool)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onFocus(bool)\n";
+#   endif
+}
+
+void View::onParentSize(point2u)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onParentSize(point2u)\n";
+#   endif
+}
+
 // =========================================================
+
+Widget::~Widget()
+{
+}
 
 void Widget::setSize(point2u)
 {
-
 }
 
 void Widget::move (point2u gPoint)

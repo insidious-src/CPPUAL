@@ -191,6 +191,14 @@ add_library(cppual-input SHARED
     "include/cppual/input/joysticks/joy_wheel.h"
     )
 
+# mqtt client implementation
+add_library(cppual-mqtt SHARED
+    "include/cppual/mqtt/client.h"
+    "src/mqtt/client.cpp"
+    "include/cppual/mqtt/message.h"
+    "src/mqtt/message.cpp"
+    )
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # graphical user interface - platform Xorg

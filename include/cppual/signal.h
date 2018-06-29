@@ -30,12 +30,12 @@
 namespace cppual {
 
 template <typename T,
-          typename = Memory::Allocator<Function<T> >
+          typename = Memory::Allocator< Function<T> >
           >
 class Signal;
 
 template <typename T,
-          typename = Memory::Allocator<Function<T> >
+          typename = Memory::Allocator< Function<T> >
           >
 class ScopedConnection;
 

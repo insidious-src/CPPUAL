@@ -103,8 +103,8 @@ public:
         return event_signals;
     }
 
-    EventQueue () noexcept
-    : queue    (IDisplayQueue::primary ()),
+    EventQueue (IDisplayQueue* display_queue = IDisplayQueue::primary ()) noexcept
+    : queue    (display_queue),
       polling  ()
     { }
 

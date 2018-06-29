@@ -58,7 +58,7 @@ public:
 
     View (View const&) noexcept;
     View& operator = (View const&) noexcept;
-    ~View ();
+    virtual ~View ();
 
     View (View*       parent,
           Rect const& rect,
@@ -105,17 +105,17 @@ public:
     { }
 
 protected:
-    virtual void onDestroy () { }
-    virtual void onShow (bool) { }
-    virtual void onPaint (Rect const&) { }
-    virtual void onEnable (bool) { }
-    virtual void onSize (point2u) { }
-    virtual void onMove (point2i) { }
-    virtual void onBeginSizeMove (Rect const&) { }
-    virtual void onEndSizeMove (Rect const&) { }
-    virtual void onMinMaxSize (point2u) { }
-    virtual void onFocus (bool) { }
-    virtual void onParentSize (point2u) { }
+    virtual void onDestroy ();
+    virtual void onShow (bool);
+    virtual void onPaint (Rect const&);
+    virtual void onEnable (bool);
+    virtual void onSize (point2u);
+    virtual void onMove (point2i);
+    virtual void onBeginSizeMove (Rect const&);
+    virtual void onEndSizeMove (Rect const&);
+    virtual void onMinMaxSize (point2u);
+    virtual void onFocus (bool);
+    virtual void onParentSize (point2u);
 
 private:
     enum StateFlag
@@ -171,6 +171,8 @@ public:
     Widget (Widget*     parent,
             Rect const& rect,
             allocator_type const& = allocator_type ());
+
+    virtual ~Widget ();
 
     point2u minimumSize () const noexcept { return m_gMinSize; }
     point2u maximumSize () const noexcept { return m_gMaxSize; }

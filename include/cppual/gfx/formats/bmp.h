@@ -51,9 +51,6 @@ union RGB
     constexpr RGB binary () const noexcept
     { return { idx[Blue], idx[Green], idx[Red] }; }
 
-    constexpr bool operator == (RGB const& obj) const noexcept
-    { return red == obj.red && green == obj.green && blue == obj.blue; }
-
     constexpr byte const& operator [] (size_type i) const noexcept
     { return idx[i]; }
 
@@ -61,14 +58,17 @@ union RGB
     byte& operator [] (size_type i) noexcept { return idx[i]; }
 };
 
+constexpr bool operator == (RGB const& objlh, RGB const& objrh) noexcept
+{ return objlh.red == objrh.red && objlh.green == objrh.green && objlh.blue == objrh.blue; }
+
 // ===============================================
 
 class BitmapStream : public std::fstream
 {
 public:
-    typedef std::size_t            size_type;
-    typedef std::streamsize        streamsize;
-    typedef std::unique_ptr<RGB[]> pointer_type;
+    typedef std::size_t            size_type   ;
+    typedef std::streamsize        streamsize  ;
+    typedef std::unique_ptr<RGB[]> pointer     ;
     using   base                 = std::fstream;
 
     enum class Type : u16
@@ -145,7 +145,6 @@ public:
         if (!is_open () && create) open (path, in | out | binary | trunc);
         if ( good    ())  _parse_header ();
     }
-
 
     inline BitmapStream& operator = (BitmapStream& obj)
     {

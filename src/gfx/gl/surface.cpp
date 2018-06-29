@@ -398,7 +398,9 @@ Config::Config (controller dsp, format_type gFormat)
     m_eFeatures = EGL::convertExtensions (m_pDisplay);
     m_gFormat   = toFormat ();
 
+#   ifdef DEBUG_MODE
     std::cout << eglQueryString (display (), EGL::Extensions) << std::endl;
+#   endif
 }
 
 PixelFormat Config::toFormat () const
@@ -489,7 +491,7 @@ void Config::print ()
 
 // ====================================================
 
-Surface::Surface (Config const& gConf, point2u size, Type type, value_type owner)
+Surface::Surface (Config const& gConf, point2u size, value_type owner, Type type)
 : m_pConf   (&gConf),
   m_pHandle (EGL::createSurface (gConf, size, type, owner)),
   m_pOwner  (m_pHandle ? owner : value_type ()),

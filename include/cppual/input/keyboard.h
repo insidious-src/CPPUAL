@@ -25,6 +25,7 @@
 
 #include <cppual/types.h>
 #include <cppual/noncopyable.h>
+#include <cppual/input/event.h>
 
 namespace cppual { namespace Input {
 
@@ -32,68 +33,68 @@ struct Keyboard;
 
 // =========================================================
 
-class KeyEvent
-{
-public:
-    typedef u8  size_type;
-    typedef u8  key_type ;
-    typedef u16 mask_type;
+//class KeyEvent
+//{
+//public:
+//    typedef u8  size_type;
+//    typedef u8  key_type ;
+//    typedef u16 mask_type;
 
-    enum Type
-    {
-        Release,
-        Press
-    };
+//    enum Type
+//    {
+//        Release,
+//        Press
+//    };
 
-    struct Data
-    {
-        size_type id;
-        key_type  key;
-        mask_type mask;
-    };
+//    struct Data
+//    {
+//        size_type id;
+//        key_type  key;
+//        mask_type mask;
+//    };
 
-    inline KeyEvent () noexcept = default;
-    constexpr Data const& data  () const noexcept { return m_gData;  }
-    constexpr Type        state () const noexcept { return m_eState; }
+//    inline KeyEvent () noexcept = default;
+//    constexpr Data const& data  () const noexcept { return m_gData;  }
+//    constexpr Type        state () const noexcept { return m_eState; }
 
-    constexpr KeyEvent (size_type uId, key_type uKey, mask_type uMask, Type eType) noexcept
-    : m_gData  { uId, uKey, uMask },
-      m_eState (eType)
-    { }
+//    constexpr KeyEvent (size_type uId, key_type uKey, mask_type uMask, Type eType) noexcept
+//    : m_gData  { uId, uKey, uMask },
+//      m_eState (eType)
+//    { }
 
-private:
-    Data m_gData;
-    Type m_eState;
-};
+//private:
+//    Data m_gData;
+//    Type m_eState;
+//};
 
-// =========================================================
+//// =========================================================
 
-struct KeyPressEvent : public KeyEvent
-{
-    inline KeyPressEvent () noexcept = default;
+//struct KeyPressEvent : public KeyEvent
+//{
+//    inline KeyPressEvent () noexcept = default;
 
-    constexpr KeyPressEvent (size_type uId, key_type uKey, mask_type uMask) noexcept
-    : KeyEvent (uId, uKey, uMask, Press)
-    { }
-};
+//    constexpr KeyPressEvent (size_type uId, key_type uKey, mask_type uMask) noexcept
+//    : KeyEvent (uId, uKey, uMask, Press)
+//    { }
+//};
 
-// =========================================================
+//// =========================================================
 
-struct KeyReleaseEvent : public KeyEvent
-{
-    inline KeyReleaseEvent () noexcept = default;
+//struct KeyReleaseEvent : public KeyEvent
+//{
+//    inline KeyReleaseEvent () noexcept = default;
 
-    constexpr KeyReleaseEvent (size_type uId, key_type uKey, mask_type uMask) noexcept
-    : KeyEvent (uId, uKey, uMask, Release)
-    { }
-};
+//    constexpr KeyReleaseEvent (size_type uId, key_type uKey, mask_type uMask) noexcept
+//    : KeyEvent (uId, uKey, uMask, Release)
+//    { }
+//};
 
 // =========================================================
 
 class KeyQueue : NonConstructible
 {
 public:
-    typedef KeyEvent event_type;
+    typedef KeyPressEvent event_type;
 
     static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };

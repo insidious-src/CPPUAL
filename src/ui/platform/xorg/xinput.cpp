@@ -27,9 +27,6 @@
 #include <cppual/ui/queue.h>
 #include <cppual/input/pointer.h>
 
-using std::string;
-using namespace cppual::Input;
-
 namespace cppual { namespace Ui {
 
 namespace {
@@ -47,19 +44,19 @@ inline u8 button (xcb_button uId) noexcept
     switch (uId)
     {
     case 1:
-        return Mouse::Left;
+        return Input::Mouse::Left;
     case 2:
-        return Mouse::Middle;
+        return Input::Mouse::Middle;
     case 3:
-        return Mouse::Right;
+        return Input::Mouse::Right;
     case 6:
-        return Mouse::XButton1;
+        return Input::Mouse::XButton1;
     case 7:
-        return Mouse::XButton2;
+        return Input::Mouse::XButton2;
     case 8:
-        return Mouse::XButton3;
+        return Input::Mouse::XButton3;
     case 9:
-        return Mouse::XButton4;
+        return Input::Mouse::XButton4;
     default:
         return uId;
     }

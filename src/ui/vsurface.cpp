@@ -83,4 +83,9 @@ void VirtualBuffer::move (point2u) noexcept
 {
 }
 
+void VirtualBuffer::unmap () noexcept
+{
+
+}
+
 } } // namespace Ui

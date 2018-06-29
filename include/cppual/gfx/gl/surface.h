@@ -137,7 +137,7 @@ public:
 
     Surface (Surface const&);
     Surface (Surface&&) noexcept = default;
-    Surface (Config const&, point2u size, Type type, value_type owner = value_type ());
+    Surface (Config const&, point2u size, value_type owner, Type type = Type::Drawable);
     Surface& operator = (Surface&&) noexcept;
     ~Surface () noexcept;
 
