@@ -36,7 +36,8 @@ namespace cppual { namespace Ui {
 class Window : public View
 {
 public:
-    typedef Graphics::Image image_type;
+    typedef Graphics::Image image_type ;
+    typedef std::string     string_type;
 
     Window ();
     Window (Window const&);
@@ -44,9 +45,8 @@ public:
     ~Window ();
 
     bool setIcon (image_type*);
-    void setTitle (string const&);
-    void goFullscreen ();
-    void exitFullscreen ();
+    void setTitle (string_type const&);
+    void setFullscreen (bool);
     void flash (ushort);
     void showInTaskbar (bool);
     void restore ();
@@ -54,11 +54,13 @@ public:
     void maximize ();
     void close ();
 
-    Window (View*         parent,
-            Rect   const& rect,
-            string const& title,
-            image_type*   icon   = nullptr,
-            u32           screen = 0);
+    Window (View*              parent,
+            Rect   const&      rect,
+            string_type const& title,
+            image_type*        icon   = nullptr,
+            u32                screen = 0);
+
+    string_type title () const;
 
     inline FrameView*  frame () noexcept { return m_gFrame; }
     inline image_type* icon  () const noexcept { return m_pIcon; }

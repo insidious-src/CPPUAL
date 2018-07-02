@@ -171,8 +171,7 @@ template <class Controller, class ID>
 constexpr bool operator == (Resource<Controller, ID> const& gObj1,
                             Resource<Controller, ID> const& gObj2)
 {
-    return gObj1.m_pCon == gObj2.m_pCon and gObj1.m_id == gObj2.m_id and
-           gObj1.m_eResType == gObj2.m_eResType;
+    return gObj1.m_pCon == gObj2.m_pCon and gObj1.m_id == gObj2.m_id;
 }
 
 template <class Controller, class ID>

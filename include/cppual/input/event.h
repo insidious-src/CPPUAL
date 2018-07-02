@@ -71,7 +71,8 @@ public:
         Step             = 1 << 19,
         Size             = 1 << 20,
         Visibility       = 1 << 21,
-        Property         = 1 << 22
+        Property         = 1 << 22,
+        Destroy          = 1 << 23
     };
 
     enum
@@ -79,9 +80,9 @@ public:
         Key       = KeyPressed    | KeyReleased,
         Mouse     = MButtonDown   | MButtonUp     | PointerMove | MWheelStep,
         Touch     = TouchPress    | TouchRelease  | TouchMove,
-        Joystick  = JoyConnect    | JoyDisconnect | JoyButtonPress | JoyButtonRelease |
+        Joystick  = JoyConnect    | JoyDisconnect | JoyButtonPress | JoyButtonRelease   |
                     JoyMove       | JoyTrigger    | JoyTrackMove,
-        Window    = Paint | Focus | Size          | Visibility     | Property,
+        Window    = Paint | Focus | Size          | Visibility     | Property | Destroy | Step,
         All       = Key   | Mouse | Touch         | Window         | SystemMessage
     };
 

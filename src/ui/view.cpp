@@ -122,6 +122,12 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
                 }
             });
 
+            connect (EventQueue::emit ().winDestroy,
+                    [](EventQueue::window_type wnd)
+            {
+                Internal::map ()[wnd]->onDestroy ();
+            });
+
             bRegEvents = true;
         }
 

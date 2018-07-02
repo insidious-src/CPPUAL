@@ -95,6 +95,7 @@ public:
         Signal<void(window_type, bool)>                     winStep;
         Signal<void(window_type, event_type::PropertyData)> winProperty;
         Signal<void(window_type, bool)>                     winVisible;
+        Signal<void(window_type)>                           winDestroy;
     };
 
     static Signals& emit ()

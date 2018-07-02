@@ -153,11 +153,12 @@ void WindowAdapter::resize (point2u gSize)
 
 Window::Window (View* parent,
                 Rect const& rect,
-                string const&,
+                string const& title,
                 Window::image_type*,
                 u32 screen)
 : View(parent, rect, screen)
 {
+    setTitle(title);
 }
 
 Window::Window ()
@@ -169,8 +170,23 @@ Window::~Window ()
 {
 }
 
+void Window::setTitle (string_type const& strTitle)
+{
+    renderable_unsafe ()->setTitle (strTitle);
+}
+
+void Window::setFullscreen(bool bFullscreen)
+{
+    renderable_unsafe ()->setFullscreen (bFullscreen);
+}
+
 void Window::showInTaskbar (bool)
 {
+}
+
+Window::string_type Window::title () const
+{
+    return renderable_unsafe ()->title ();
 }
 
 } } // namespace Ui
