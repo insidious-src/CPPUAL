@@ -35,6 +35,7 @@ class SHARED_API XWindow final : public IPlatformWindow
 public:
     XWindow () = delete;
     XWindow (Rect const& rect, u32 screen, IDisplay* display) noexcept;
+    ~XWindow() noexcept;
 
     string title () const noexcept;
     void   setTitle (string const&) noexcept;

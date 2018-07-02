@@ -210,6 +210,10 @@ add_library(cppual-ui-xorg MODULE
     "src/ui/platform/xorg/xsurface.h"
     "src/ui/platform/xorg/xinput.cpp"
     "src/ui/platform/xorg/xinput.h"
+    "src/ui/platform/xorg/xcb_def.h"
+    "src/ui/platform/xorg/xcb_event.h"
+    "src/ui/platform/xorg/xcb_window.h"
+    "src/ui/platform/xorg/xcb_iterator.h"
     )
 
 # graphical user interface - platform Wayland
