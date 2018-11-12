@@ -34,25 +34,27 @@ namespace cppual { namespace Ui {
 class WlSurface final : public IPlatformWindow
 {
 public:
-    WlSurface () = delete;
-    WlSurface (Rect const&, IPlatformWindow*, u32, PixelFormat const&) noexcept;
-    ~WlSurface () noexcept;
+    WlSurface  () = delete;
+    ~WlSurface () noexcept { }
 
-    bool isMapped    () const noexcept;
-    void setOwner    (const_pointer) noexcept;
-    void move        (point2i) noexcept;
-    void setGeometry (Rect const&) noexcept;
-    void raise () noexcept;
-    void lower () noexcept;
-    void map   () noexcept;
-    void unmap () noexcept;
+    WlSurface (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
+    : IPlatformWindow(pDisplay, nullptr),
+      m_gRect        (gRect),
+      m_uScreen      (nScreen)
+    { }
 
-    IDisplay*   display  () const noexcept { return m_pDisplay;    }
-    Element     handle   () const noexcept { return m_pViewHandle; }
-    PixelFormat format   () const noexcept { return m_gFormat;     }
-    weak_window owner    () const noexcept { return m_pParent;     }
-    Rect        geometry () const noexcept { return m_gRect;       }
-    u32         screen   () const noexcept { return 0;             }
+    bool isMapped    () const noexcept { return false; }
+    void setOwner    (const_pointer) noexcept { }
+    void move        (point2i) noexcept { }
+    void setGeometry (Rect const&) noexcept { }
+    void raise () noexcept { }
+    void lower () noexcept { }
+    void map   () noexcept { }
+    void unmap () noexcept { }
+
+    weak_window owner    () const noexcept { return weak_window(); }
+    Rect        geometry () const noexcept { return m_gRect      ; }
+    u32         screen   () const noexcept { return m_uScreen    ; }
 
     WindowFlags flags () const { return WindowFlags (); }
     void setFlags (WindowFlags) { }
@@ -76,61 +78,9 @@ public:
     void flash (uint) { }
 
 private:
-    PixelFormat   m_gFormat;
-    shared_window m_pParent;
-    Rect          m_gRect;
-    IDisplay*     m_pDisplay;
-    wl_surface*   m_pViewHandle;
-    u32           m_uScreen;
+    Rect m_gRect;
+    u32  m_uScreen;
 };
-
-// ====================================================
-
-WlSurface::WlSurface (Rect const&        gRect,
-                      IPlatformWindow*           pParent,
-                      u32                nScreen,
-                      PixelFormat const& gFormat) noexcept
-: m_gFormat     (gFormat),
-  m_pParent     (pParent),
-  m_gRect       (gRect),
-  m_pDisplay    (),
-  m_pViewHandle (),
-  m_uScreen     (nScreen)
-{
-}
-
-WlSurface::~WlSurface () noexcept
-{
-}
-
-
-void WlSurface::setGeometry (Rect const&) noexcept
-{
-}
-
-void WlSurface::raise () noexcept
-{
-}
-
-void WlSurface::lower () noexcept
-{
-}
-
-void WlSurface::map () noexcept
-{
-}
-
-void WlSurface::unmap () noexcept
-{
-}
-
-void WlSurface::setOwner (const_pointer) noexcept
-{
-}
-
-void WlSurface::move (point2i) noexcept
-{
-}
 
 } } // namespace Ui
 

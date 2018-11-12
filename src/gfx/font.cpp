@@ -28,21 +28,21 @@ namespace cppual { namespace Graphics {
 
 namespace { namespace FreeType { // optimize for internal unit usage
 
-typedef FT_Library   font_library;
-typedef FT_Face      font_face;
-typedef FT_GlyphSlot font_glyph;
-typedef FT_List      font_list;
-typedef FT_ListNode  font_listnode;
+typedef ::FT_Library   library_pointer ;
+typedef ::FT_Face      face_pointer    ;
+typedef ::FT_GlyphSlot glyph_pointer   ;
+typedef ::FT_List      list_pointer    ;
+typedef ::FT_ListNode  listnode_pointer;
 
-inline font_library init () noexcept
+inline library_pointer init () noexcept
 {
-    font_library lib;
-    return FT_Init_FreeType (&lib) == 0 ? lib : nullptr;
+    library_pointer lib;
+    return ::FT_Init_FreeType (&lib) == 0 ? lib : nullptr;
 }
 
-inline font_library instance () noexcept
+inline library_pointer instance () noexcept
 {
-    static const font_library lib = init ();
+    static const library_pointer lib = init ();
     return lib;
 }
 
@@ -54,17 +54,17 @@ Font::Atlas::Atlas (string_type const& gName)
 : m_gName (gName),
   m_pFace ()
 {
-    FreeType::font_face tmp_handle;
+    FreeType::face_pointer tmp_handle;
 
-    if (FT_New_Face (FreeType::instance (), gName.c_str (), 0, &tmp_handle))
-        std::cout << "Couldn't load font " << gName << std::endl;
+    if (::FT_New_Face (FreeType::instance (), gName.c_str (), 0, &tmp_handle))
+        std::cerr << "Couldn't load font " << gName << std::endl;
     else
         m_pFace = tmp_handle;
 }
 
 Font::Atlas::~Atlas ()
 {
-    if (m_pFace) FT_Done_Face (static_cast<FreeType::font_face> (m_pFace));
+    if (m_pFace) ::FT_Done_Face (static_cast<FreeType::face_pointer> (m_pFace));
 }
 
 // =========================================================

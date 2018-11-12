@@ -30,11 +30,11 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class PageAllocator final : public Repository, NonCopyable
+class PageAllocator final : public MemoryResource, NonCopyable
 {
 public:
     PageAllocator (size_type size);
-    PageAllocator (Repository* allocator, size_type size);
+    PageAllocator (MemoryResource* allocator, size_type size);
     //PageAllocator (string&& shared_name, size_type size);
     void clear    () noexcept;
 
@@ -58,7 +58,7 @@ private:
 // =========================================================
 
 template <typename T>
-using PagePolicy = Allocator<T, Repository>;
+using PagePolicy = Allocator<T, MemoryResource>;
 
 } } // Memory
 

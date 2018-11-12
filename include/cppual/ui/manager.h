@@ -37,7 +37,8 @@ typedef std::shared_ptr<Factory> shared_manager;
 
 struct Factory : public NonCopyableVirtual
 {
-    typedef Process::DynLoader    plugin_type;
+    typedef Process::PluginManager<Factory> manager_type;
+
     typedef IDisplay::string_type string_type;
 
     virtual shared_window createWindow (Rect const& rect,
@@ -47,7 +48,6 @@ struct Factory : public NonCopyableVirtual
     virtual shared_display connectDisplay (string_type const& name = string_type()) = 0;
     virtual shared_queue   createQueueInstance () = 0;
 
-    static plugin_type& plugin   ();
     static Factory*     instance ();
     static bool         hasValidInstance () noexcept;
 };

@@ -41,7 +41,6 @@ public:
     float       listenerVolume;
 
 private:
-    explicit
     Initializer () noexcept
     : listenerMutex (), listenerIsMute (), listenerVolume (1.0f)
     { }

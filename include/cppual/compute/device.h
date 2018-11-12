@@ -67,16 +67,16 @@ public:
         Native      = 1 << 1  // supoorts execution of native functions
     };
 
-    enum class Backend : unsigned char
+    enum class Backend : byte
     {
         Native,
         OpenCL,
         Vulkan,
-        //D3D12,
+        D3D12,
         Metal
     };
 
-    enum class IL : unsigned char
+    enum class IL : byte
     {
         None,
         GLSL,
@@ -84,7 +84,7 @@ public:
         HLIL
     };
 
-    enum class Info : unsigned char
+    enum class Info : byte
     {
         Name,
         Board,

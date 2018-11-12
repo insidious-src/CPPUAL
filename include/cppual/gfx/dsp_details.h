@@ -70,6 +70,8 @@ private:
     value_type m_handle;
 };
 
+// =========================================================
+
 template <>
 constexpr u32 Element::get<u32> () const noexcept
 { return static_cast<u32> (m_handle); }
@@ -87,6 +89,10 @@ constexpr bool operator == (Element const& elem1, Element const& elem2) noexcept
 
 constexpr bool operator != (Element const& elem1, Element const& elem2) noexcept
 { return !(elem1 == elem2); }
+
+// =========================================================
+
+static_assert (std::is_pod<Element>::value, "Graphics::Element is not POD");
 
 } } // namespace Graphics
 

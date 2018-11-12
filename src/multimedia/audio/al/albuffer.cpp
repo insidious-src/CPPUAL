@@ -120,13 +120,13 @@ namespace cppual { namespace Audio { namespace AL {
 // ====================================================
 
 SoundBuffer::SoundBuffer () noexcept
-: AudioObject (ObjectType::Buffer),
+: Object (ObjectType::Buffer),
   m_gSources (),
   m_pContext (Instance::current ())
 { }
 
 SoundBuffer::SoundBuffer (SoundBuffer&& gObj) noexcept
-: AudioObject (gObj),
+: Object (gObj),
   m_gSources (std::move (gObj.m_gSources)),
   m_pContext (Instance::current ())
 {
@@ -135,7 +135,7 @@ SoundBuffer::SoundBuffer (SoundBuffer&& gObj) noexcept
 }
 
 SoundBuffer::SoundBuffer (SoundBuffer const& gObj) noexcept
-: AudioObject (gObj),
+: Object (gObj),
   Sound (),
   m_gSources (),
   m_pContext (Instance::current ())

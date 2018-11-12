@@ -26,10 +26,11 @@ namespace cppual { namespace Graphics {
 
 namespace { namespace Internal {
 
-typedef Process::PluginManager<IDrawable2D> manager2d_type;
-typedef Process::PluginManager<IDrawable3D> manager3d_type;
-typedef IDeviceContext                      context_type;
-typedef IDeviceContext*                     context_pointer;
+typedef Process::PluginManager<IDrawable2D>    manager2d_type;
+typedef Process::PluginManager<IDrawable3D>    manager3d_type;
+typedef Process::PluginManager<IDeviceContext> manager_context_type;
+typedef IDeviceContext                         context_type;
+typedef IDeviceContext*                        context_pointer;
 
 inline context_pointer& current () noexcept
 {
@@ -49,6 +50,12 @@ inline manager3d_type& manager3D () noexcept
     return drawable_mgr;
 }
 
+inline manager_context_type& managerContext() noexcept
+{
+    static manager_context_type context_mgr;
+    return context_mgr;
+}
+
 } } // anonymous namespace Internal
 
 // ====================================================
@@ -64,8 +71,8 @@ void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
     {
         if (Internal::current () and
                 pContext         and
-                Internal::current ()->device () != pContext->device ())
-            Internal::current ()->release ();
+                Internal::current ()->device  () != pContext->device ())
+                Internal::current ()->release ();
 
         Internal::current () = pContext;
     }
@@ -73,14 +80,59 @@ void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
 
 // ====================================================
 
-IDrawable2D* DrawableFactory::create2D (string const& gName)
+shared_drawable2d DrawableFactory::create2D (string const& gName)
 {
     return Internal::manager2D ().construct (gName);
 }
 
-IDrawable3D* DrawableFactory::create3D (string const& gName)
+shared_drawable3d DrawableFactory::create3D (string const& gName)
 {
     return Internal::manager3D ().construct (gName);
+}
+
+shared_context ContextFactory::create (string const& gName)
+{
+    return Internal::managerContext().construct (gName);
+}
+
+//bool ContextFactory::load(string const& module_path)
+//{
+//    return Internal::managerContext().load_plugin(module_path);
+//}
+
+// ====================================================
+
+cppual::Graphics::IResource::~IResource()
+{
+
+}
+
+// ====================================================
+
+cppual::Graphics::IDrawable2D::~IDrawable2D()
+{
+
+}
+
+// ====================================================
+
+cppual::Graphics::IDrawable3D::~IDrawable3D()
+{
+
+}
+
+// ====================================================
+
+cppual::Graphics::ITransformable2D::~ITransformable2D()
+{
+
+}
+
+// ====================================================
+
+cppual::Graphics::ITransformable3D::~ITransformable3D()
+{
+
 }
 
 } } // namespace Graphics

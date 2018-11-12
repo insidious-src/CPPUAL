@@ -31,7 +31,7 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class MonotonicPool final : public Repository, NonCopyable
+class MonotonicPool final : public MemoryResource, NonCopyable
 {
 public:
     // local memory
@@ -40,7 +40,7 @@ public:
                    align_type blk_align);
 
     // nested allocators
-    MonotonicPool (Repository& allocator,
+    MonotonicPool (MemoryResource& allocator,
                    size_type   blk_count,
                    size_type   blk_size,
                    align_type  blk_align);
@@ -58,7 +58,7 @@ public:
     size_type blockAlign () const noexcept { return m_uBlkAlign; }
     size_type blockCount () const noexcept { return m_uBlkNum  ; }
 
-    bool is_equal (Repository const& gObj) const noexcept
+    bool is_equal (MemoryResource const& gObj) const noexcept
     { return &gObj == &m_gOwner;                   }
 
     size_type max_size () const noexcept
@@ -74,11 +74,11 @@ public:
     bool is_shared () const noexcept
     { return false;    }
 
-    Repository& owner () const noexcept
+    MemoryResource& owner () const noexcept
     { return m_gOwner; }
 
 private:
-    Repository&      m_gOwner;
+    MemoryResource&      m_gOwner;
     pointer const    m_pBegin;
     pointer const    m_pEnd;
     pointer*         m_pFreeList;

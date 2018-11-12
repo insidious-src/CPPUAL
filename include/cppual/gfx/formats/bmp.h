@@ -23,9 +23,11 @@
 #define CPPUAL_BITMAP_H_
 #ifdef __cplusplus
 
+#include <cppual/types.h>
+#include <cppual/gfx/color.h>
+
 #include <memory>
 #include <fstream>
-#include <cppual/types.h>
 
 namespace cppual {
 
@@ -35,41 +37,14 @@ namespace cppual {
  * So every byte is divided by 8. RGB=(0,0,8) is used in MK4 to define BLACK.
  */
 
-// ===============================================
-
-union RGB
-{
-    typedef enum { Red, Green, Blue, Count } Index    ;
-    typedef std::size_t                      size_type;
-
-    byte idx[Count];
-    byte red, green, blue;
-
-    RGB () = default;
-
-    // right to left in binary mode
-    constexpr RGB binary () const noexcept
-    { return { idx[Blue], idx[Green], idx[Red] }; }
-
-    constexpr byte const& operator [] (size_type i) const noexcept
-    { return idx[i]; }
-
-    constexpr RGB (byte r, byte g, byte b) noexcept : idx { r, g, b } { }
-    byte& operator [] (size_type i) noexcept { return idx[i]; }
-};
-
-constexpr bool operator == (RGB const& objlh, RGB const& objrh) noexcept
-{ return objlh.red == objrh.red && objlh.green == objrh.green && objlh.blue == objrh.blue; }
-
-// ===============================================
-
 class BitmapStream : public std::fstream
 {
 public:
-    typedef std::size_t            size_type   ;
-    typedef std::streamsize        streamsize  ;
-    typedef std::unique_ptr<RGB[]> pointer     ;
-    using   base                 = std::fstream;
+    typedef std::size_t                 size_type   ;
+    typedef std::streamsize             streamsize  ;
+    typedef Graphics::RGBColor          rgb_type    ;
+    typedef std::unique_ptr<rgb_type[]> pointer     ;
+    using   base                      = std::fstream;
 
     enum class Type : u16
     {
@@ -119,7 +94,7 @@ public:
         u32         colors; // number of colors -> 4 bytes
         u32         importantColors; // important colors -> 4 bytes
 
-        constexpr u32 absolute_width  () const noexcept
+        constexpr u32 absolute_width () const noexcept
         { return static_cast<u32> (width);  }
 
         constexpr u32 absolute_height () const noexcept
@@ -131,13 +106,17 @@ public:
         constexpr size_type image_size_calc () const noexcept
         { return row_size_calc () * absolute_height (); }
 
-        constexpr size_type row_size_calc   () const noexcept
+        constexpr size_type row_size_calc () const noexcept
         {
-            return (sizeof (RGB) * 8 * absolute_width () + 31) / 8;
+            return (sizeof (rgb_type) * 8 * absolute_width () + 31) / 8;
         }
     };
 
-    BitmapStream (const char* path, bool create = false)
+    BitmapStream  () = delete;
+    ~BitmapStream ();
+
+
+    BitmapStream (cchar* path, bool create = false)
     : base (path, in | out | binary),
       m_infoHeader { },
       m_header     { }
@@ -180,10 +159,7 @@ public:
     Header     const& header () const noexcept { return m_header;     }
     InfoHeader const& info   () const noexcept { return m_infoHeader; }
 
-    ~BitmapStream();
-
-    size_type replace (RGB const target_color, RGB const new_color);
-    BitmapStream      () = delete;
+    size_type replace (rgb_type const target_color, rgb_type const new_color);
 
 private:
     void _parse_header ();
@@ -195,7 +171,6 @@ private:
 
 // ===============================================
 
-static_assert (sizeof (RGB                     ) ==  3, "RGB is not 24-bit!"          );
 static_assert (sizeof (BitmapStream::Header    ) == 14, "Header must be 14 bytes!"    );
 static_assert (sizeof (BitmapStream::InfoHeader) == 40, "InfoHeader must be 40 bytes!");
 

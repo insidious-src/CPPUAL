@@ -23,7 +23,7 @@
 
 namespace cppual { namespace Graphics {
 
-Color getColorFromName (ColorName eName) noexcept
+Color colorFromName (ColorName eName) noexcept
 {
     switch (eName)
     {
@@ -43,14 +43,12 @@ Color getColorFromName (ColorName eName) noexcept
         return { 0, 0, 0 };
     case ColorName::Orange:
         return { 0, 0, 0 };
-    case ColorName::Black:
-        return { 0, 0, 0 };
     default:
         return { 0, 0, 0 };
     }
 }
 
-Color getColorFromHexValue (u8) noexcept
+Color colorFromHexValue (u8) noexcept
 {
     return Color ();
 }

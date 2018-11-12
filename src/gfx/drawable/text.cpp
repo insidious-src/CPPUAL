@@ -19,10 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <ft2build.h>
-#include <freetype.h>
-#include <iostream>
 #include <cppual/gfx/drawable/text.h>
+#include <iostream>
 #include "../gl/gldef.h"
 
 namespace cppual { namespace Graphics {
@@ -32,7 +30,7 @@ Label2D::Label2D ()
 {
 }
 
-Label2D::Label2D (string const& gName, Font& gFont)
+Label2D::Label2D (string_type const& gName, Font& gFont)
 : m_pFont (&gFont),
   m_gText ( gName)
 {

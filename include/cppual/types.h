@@ -83,8 +83,29 @@ class bigunsigned
 
 };
 
-typedef bigsigned<128>   int128;
-typedef bigunsigned<128> u128;
+typedef bigsigned  <128> int128;
+typedef bigunsigned<128> u128  ;
+
+template<class Out, class In>
+union cast_union
+{
+    Out out;
+    In  in;
+
+    cast_union () = delete;
+    constexpr cast_union (In in_t) noexcept : in (in_t) { }
+};
+
+template<class Out, class In>
+constexpr Out direct_cast (In in) noexcept
+{
+    static_assert (sizeof (In) == sizeof (Out), "cannot use direct_cast");
+    return cast_union<Out, In>(in).out;
+}
+
+template<class Out, class In>
+inline Out unsafe_direct_cast (In in) noexcept
+{ return cast_union<Out, In>(in).out; }
 
 } // cppual
 

@@ -23,12 +23,16 @@
 #define CPPUAL_PROCESS_TASK
 #ifdef __cplusplus
 
-#include <deque>
-#include <shared_mutex>
-#include <condition_variable>
+#include <cppual/concepts.h>
 #include <cppual/functional.h>
 #include <cppual/circular_queue.h>
+#include <cppual/unbound_matrix.h>
 #include <cppual/types.h>
+
+#include <deque>
+#include <vector>
+#include <shared_mutex>
+#include <condition_variable>
 
 using std::shared_lock;
 using std::lock_guard;
@@ -40,12 +44,12 @@ namespace cppual { namespace Compute {
 class HostQueue
 {
 public:
-    typedef condition_variable_any   cv_type;
-    typedef Function<void()>         call_type;
-    typedef fu16                     size_type;
+    typedef condition_variable_any   cv_type   ;
+    typedef Function<void()>         call_type ;
+    typedef fu16                     size_type ;
     typedef shared_timed_mutex       mutex_type;
     typedef lock_guard<mutex_type>   write_lock;
-    typedef shared_lock<mutex_type>  read_lock;
+    typedef shared_lock<mutex_type>  read_lock ;
     typedef CircularQueue<call_type> queue_type;
 
     enum State
@@ -130,8 +134,8 @@ namespace ThreadPool
 {
     typedef HostQueue::mutex_type mutex_type;
     typedef HostQueue::write_lock write_lock;
-    typedef HostQueue::read_lock  read_lock;
-    typedef HostQueue::size_type  size_type;
+    typedef HostQueue::read_lock  read_lock ;
+    typedef HostQueue::size_type  size_type ;
 
     bool reserve (HostQueue& task_queue,
                   size_type  assign_num_threads = 1,
@@ -147,6 +151,8 @@ class HostTask : private HostQueue
 public:
     static_assert (!std::is_void<T>::value, "T = void ... use std::async instead");
 
+    typedef T value_type;
+
     void when_any () { whenAnyFinish (); }
     void when_all () { whenAllFinish (); }
     void finish   () { quit (false);     }
@@ -161,33 +167,33 @@ public:
     void reuse ()
     { if (!valid ()) ThreadPool::reserve (*this); }
 
-    inline bool get (T& value)
+    inline bool get (value_type& value)
     {
         if (!ready ()) return false;
         value = std::move (m_value);
         return true;
     }
 
-    inline T operator ()()
+    inline value_type operator ()()
     {
         when_all ();
         return m_value;
     }
 
     template <class X, typename... Args>
-    HostTask (T (X::* fn)(Args...), X* obj, Args... args)
+    HostTask (value_type (X::* fn)(Args...), X* obj, Args... args) : HostTask ()
     { then (fn, obj, std::forward<Args> (args)...); }
 
     template <typename... Args>
-    HostTask (T (fn)(Args...), Args&&... args)
+    HostTask (value_type (fn)(Args...), Args&&... args) : HostTask ()
     { then (fn, std::forward<Args> (args)...); }
 
     template <typename Callable, typename... Args>
-    HostTask (Callable&& fn, Args&&... args)
+    HostTask (Callable&& fn, Args&&... args) : HostTask ()
     { then (std::forward<Callable> (fn), std::forward<Args> (args)...); }
 
     template <class X, typename... Args>
-    HostTask& then (T (X::* fn)(Args...), X* obj, Args&&... args)
+    HostTask& then (value_type (X::* fn)(Args...), X* obj, Args&&... args)
     {
         schedule (call_type ([=]
         {
@@ -197,7 +203,7 @@ public:
     }
 
     template <typename... Args>
-    HostTask& then (T (fn)(Args...), Args&&... args)
+    HostTask& then (value_type (fn)(Args...), Args&&... args)
     {
         schedule (call_type ([=]
         {
@@ -207,7 +213,7 @@ public:
     }
 
     template <typename U, typename... Args>
-    HostTask& then (U&& closure, Args&&... args)
+    HostTask& then (CallableType<U>&& closure, Args&&... args)
     {
         schedule (call_type ([=]
         {
@@ -218,7 +224,102 @@ public:
     }
 
 private:
-    T m_value;
+    value_type m_value;
+};
+
+// =========================================================
+
+template <typename T>
+class UnboundTask : private HostQueue
+{
+public:
+    static_assert (!std::is_void<T>::value, "T = void ... use std::async instead");
+
+    typedef T                value_type ;
+    typedef std::vector<T>   vector_type;
+    typedef UnboundMatrix<T> matrix_type;
+
+    template <typename F>
+    using fn_vector_type = std::vector<Function<F>>;
+
+    void when_any () { whenAnyFinish (); }
+    void when_all () { whenAllFinish (); }
+    void finish   () { quit (false);     }
+    bool valid    () const noexcept { return !assigned (); }
+
+    UnboundTask ()
+    { ThreadPool::reserve (*this); }
+
+    bool ready () const
+    { return state () == HostQueue::Running and empty (); }
+
+    void reuse ()
+    { if (!valid ()) ThreadPool::reserve (*this); }
+
+    inline bool get (vector_type& value)
+    {
+        if (!ready ()) return false;
+        value = std::move (m_values);
+        return true;
+    }
+
+    inline value_type operator ()()
+    {
+        when_all ();
+        return m_values;
+    }
+
+    template <class X>
+    UnboundTask (fn_vector_type<value_type (X::*)()> const& functions) : UnboundTask ()
+    { then (functions); }
+
+    UnboundTask (fn_vector_type<value_type (*)()> const& functions) : UnboundTask ()
+    { then (functions); }
+
+    template <typename Callable>
+    UnboundTask (fn_vector_type<Callable&&> const& functions) : UnboundTask ()
+    { then (functions); }
+
+    template <class X>
+    UnboundTask& then (fn_vector_type<value_type (X::*)()> const& functions)
+    {
+        schedule (call_type ([=]
+        {
+            matrix_type matrix;
+
+            m_values = std::move (matrix.process (functions));
+        }));
+
+        return *this;
+    }
+
+    UnboundTask& then (fn_vector_type<value_type (*)()> const& functions)
+    {
+        schedule (call_type ([=]
+        {
+            matrix_type matrix;
+
+            m_values = std::move (matrix.process (functions));
+        }));
+
+        return *this;
+    }
+
+    template <typename U>
+    UnboundTask& then (fn_vector_type<CallableType<U>&&> const& functions)
+    {
+        schedule (call_type ([=]
+        {
+            matrix_type matrix;
+
+            m_values = std::move (matrix.process (functions));
+        }));
+
+        return *this;
+    }
+
+private:
+    vector_type m_values;
 };
 
 } } // namespace Concurency

@@ -77,15 +77,4 @@ void ProxyRenderable::move (point2i gPos) noexcept
     }
 }
 
-// =========================================================
-
-void VirtualBuffer::move (point2u) noexcept
-{
-}
-
-void VirtualBuffer::unmap () noexcept
-{
-
-}
-
 } } // namespace Ui

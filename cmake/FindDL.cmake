@@ -1,10 +1,10 @@
 find_package(PackageHandleStandardArgs)
 
+set(DL_LIBRARIES dl libpsapi.dll psapi.dll psapi)
+
 find_path(DL_INCLUDE_DIR
         NAMES
                 dlfcn.h libloaderapi.h
-        PATHS
-                ${CMAKE_SOURCE_DIR}
         PATH_SUFFIXES
                 include external/include
         )
@@ -12,20 +12,16 @@ find_path(DL_INCLUDE_DIR
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         find_library(DL_LIBRARY
                 NAMES
-                        dl psapi
+                        ${DL_LIBRARIES}
                 PATH_SUFFIXES
-                        lib32 lib
-                PATHS
-                        ${CMAKE_SOURCE_DIR}
+                        bin lib32 lib
                 )
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
         find_library(DL_LIBRARY
                 NAMES
-                        dl psapi
+                        ${DL_LIBRARIES}
                 PATH_SUFFIXES
-                        lib lib64
-                PATHS
-                        ${CMAKE_SOURCE_DIR}
+                        bin lib lib64
                 )
 endif()
 

@@ -28,6 +28,7 @@
 #include <cppual/meta.h>
 #include <cppual/types.h>
 #include <cppual/concepts.h>
+#include <cppual/memory/allocator.h>
 
 namespace cppual {
 
@@ -42,22 +43,23 @@ template <typename T = char, class TAlloc = std::allocator<T>>
 class String : TAlloc
 {
 public:
-    typedef std::size_t size_type      ;
-    typedef T           value_type     ;
-    typedef T*          pointer        ;
-    typedef T const*    const_pointer  ;
-    typedef T&          reference      ;
-    typedef T const&    const_reference;
+    typedef std::size_t                   size_type      ;
+    typedef T                             value_type     ;
+    typedef T*                            pointer        ;
+    typedef T const*                      const_pointer  ;
+    typedef T&                            reference      ;
+    typedef T const&                      const_reference;
+    typedef Memory::AllocatorType<TAlloc> allocator_type ;
 
     constexpr String () noexcept = default;
-    String<T, TAlloc> substr (size_type begin_pos, size_type end_pos);
+    String substr (size_type begin_pos, size_type end_pos);
 
-    constexpr const_pointer c_str         () const noexcept { return  m_gBuffer.data    ; }
-    constexpr const_pointer data          () const noexcept { return  m_gBuffer.data    ; }
-    constexpr size_type     length        () const noexcept { return  m_uLength         ; }
-    constexpr size_type     size          () const noexcept { return  m_gBuffer.capacity; }
-    constexpr bool          empty         () const noexcept { return !m_uLength         ; }
-    constexpr TAlloc        get_allocator () const noexcept { return *this              ; }
+    constexpr const_pointer  c_str         () const noexcept { return  m_gBuffer.data    ; }
+    constexpr const_pointer  data          () const noexcept { return  m_gBuffer.data    ; }
+    constexpr size_type      length        () const noexcept { return  m_uLength         ; }
+    constexpr size_type      size          () const noexcept { return  m_gBuffer.capacity; }
+    constexpr bool           empty         () const noexcept { return !m_uLength         ; }
+    constexpr allocator_type get_allocator () const noexcept { return *this              ; }
 
     inline String& operator = (T const* pText) noexcept
     { return assignToString (*this, pText, std::strlen (pText)); }
@@ -75,27 +77,27 @@ public:
     { if (m_gBuffer.data) this->TAlloc::deallocate (m_gBuffer.data, 0); }
 
     inline explicit String (pointer       pText,
-                                TAlloc const& gAtor = TAlloc ()) noexcept
-    : TAlloc (gAtor),
+                            TAlloc const& gAtor = TAlloc ()) noexcept
+    : allocator_type (gAtor),
       m_gBuffer ()
     { copyToString (*this, pText, std::strlen (pText)); }
 
     constexpr String (TAlloc const& gAtor) noexcept
-    : TAlloc    (gAtor),
-      m_gBuffer ()     ,
+    : allocator_type (gAtor),
+      m_gBuffer (),
       m_uLength ()
     { }
 
     inline String (pointer pText) noexcept
-    : TAlloc (), m_gBuffer { pText, std::strlen (pText) }
+    : allocator_type (), m_gBuffer { pText, std::strlen (pText) }
     { m_uLength = m_gBuffer.capacity; }
 
     inline String (String<T, TAlloc> const& gObj) noexcept
-    : TAlloc (gObj), m_gBuffer ()
+    : allocator_type (gObj), m_gBuffer ()
     { copyToString (*this, gObj.m_gBuffer.data, gObj.m_uLength); }
 
     inline String (String<T, TAlloc>&& gObj) noexcept
-    : TAlloc (gObj),
+    : allocator_type (gObj),
       m_gBuffer (gObj.m_gBuffer),
       m_uLength (gObj.m_uLength)
     {
@@ -113,7 +115,7 @@ public:
     }
 
     constexpr String (std::nullptr_t) noexcept
-    : TAlloc (), m_gBuffer (), m_uLength ()
+    : allocator_type (), m_gBuffer (), m_uLength ()
     { }
 
     inline String& operator = (String<T, TAlloc>&& gObj) noexcept
@@ -134,34 +136,34 @@ public:
 
     template <typename U, class TAtor>
     friend void copyToString (String<U, TAtor>& copy_to,
-                              U const*              copy_from,
-                              size_type             length) noexcept;
+                              U const*          copy_from,
+                              size_type         length) noexcept;
 
     template <typename U, class TAtor>
     friend String<U, TAtor>& assignToString (String<U, TAtor>& assign_to,
-                                                 U const*              assign_from,
-                                                 size_type             length) noexcept;
+                                             U const*          assign_from,
+                                             size_type         length) noexcept;
 
     template <typename U, class TAtor>
     friend String<U, TAtor>& addToString (String<U, TAtor>& add_to,
-                                              U const*              add_from,
-                                              size_type             add_length) noexcept;
+                                          U const*          add_from,
+                                          size_type         add_length) noexcept;
 
     template <typename U, class TAtor>
     friend String<U, TAtor> operator + (String<U, TAtor> const& obj1,
-                                            String<U, TAtor> const& obj2) noexcept;
+                                        String<U, TAtor> const& obj2) noexcept;
 
     template <typename U, class TAtor>
     friend String<U, TAtor> operator + (String<U, TAtor> const& obj1,
-                                            U const*                    obj2) noexcept;
+                                        U const*                obj2) noexcept;
 
     template <typename U, class TAtor>
     friend String<U, TAtor>& operator += (String<U, TAtor>&       obj1,
-                                              String<U, TAtor> const& obj2) noexcept;
+                                          String<U, TAtor> const& obj2) noexcept;
 
     template <typename U, class TAtor>
     friend String<U, TAtor>& operator += (String<U, TAtor>& obj1,
-                                              U const*              obj2) noexcept;
+                                          U const*          obj2) noexcept;
 
     template <typename U, class TAtor>
     friend bool operator == (String<U, TAtor> const& obj1,
@@ -169,16 +171,16 @@ public:
 
     template <typename U, class TAtor>
     friend bool operator == (String<U, TAtor> const& obj1,
-                             U const*                    text2) noexcept;
+                             U const*                text2) noexcept;
 
 private:
-    Buffer<T> m_gBuffer;
-    size_type m_uLength;
+    Buffer<value_type> m_gBuffer;
+    size_type          m_uLength;
 };
 
 template <typename T, class TAlloc>
 String<T, TAlloc> String<T, TAlloc>::substr (size_type uBeginPos,
-                                                     size_type uEndPos)
+                                             size_type uEndPos)
 {
     typedef String<T, TAlloc> fstring;
 

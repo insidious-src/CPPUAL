@@ -23,8 +23,9 @@
 #define CPPUAL_GFX_EGL_SURFACE_H_
 #ifdef __cplusplus
 
-#include <mutex>
 #include <cppual/gfx/draw.h>
+
+#include <mutex>
 
 namespace cppual { namespace Graphics { namespace GL {
 
@@ -83,12 +84,11 @@ public:
     int_type id    () const;
     void     print ();
 
-    Config (controller  display = defaultDisplay (),
-            format_type format  = format_type::default2D ());
+    Config () = delete;
+    ~Config();
 
-    constexpr Config () noexcept
-    : m_pDisplay (), m_pCfg (), m_gFormat (), m_eFeatures ()
-    { }
+    Config (controller  display,
+            format_type format  = format_type::default2D ());
 
     constexpr Config (Config const&) noexcept = default;
     inline    Config& operator = (Config const&) noexcept = default;
@@ -101,9 +101,6 @@ public:
 
     constexpr explicit operator safe_bool () const noexcept
     { return m_pCfg ? &Config::m_pCfg : nullptr; }
-
-    constexpr static controller defaultDisplay  () noexcept
-    { return nullptr; }
 
     friend
     constexpr bool operator == (Config const& lh, Config const& rh) noexcept;
@@ -212,29 +209,32 @@ class ContextMutex
 {
 public:
     ContextMutex (Context& context) noexcept
-    : m_context  (context)
+    : m_context  (&context)
     { }
 
     void lock ()
     {
-        m_mutex  .lock   ();
-        m_context.assign ();
+        m_mutex.lock ();
+        m_context->assign ();
     }
 
     bool try_lock ()
     {
-        return m_mutex.try_lock () ? m_context.assign (), true : false;
+        if (!m_mutex.try_lock ()) return false;
+
+        m_context->assign ();
+        return true;
     }
 
     void unlock ()
     {
-        m_context.release ();
-        m_mutex.unlock    ();
+        m_context->release ();
+        m_mutex.unlock ();
     }
 
 private:
     std::mutex m_mutex  ;
-    Context&   m_context;
+    Context*   m_context;
 };
 
 } } } // namespace EGL

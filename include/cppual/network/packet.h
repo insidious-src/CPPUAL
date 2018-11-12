@@ -39,8 +39,11 @@ namespace cppual { namespace Network {
 class Packet
 {
 public:
-    typedef std::size_t size_type;
+    typedef std::size_t       size_type  ;
+    typedef std::vector<char> vector_type;
     typedef bool (Packet::* safe_bool)(size_type);
+
+    virtual ~Packet() { }
 
     bool operator == (Packet const&) const = delete;
     bool operator != (Packet const&) const = delete;
@@ -104,9 +107,9 @@ protected:
     virtual void   onReceive (cvoid* data, size_type size);
 
 private:
-    vector<char> m_gData;
-    size_type    m_uPos;
-    bool         m_bIsValid;
+    vector_type m_gData   ;
+    size_type   m_uPos    ;
+    bool        m_bIsValid;
 
     bool canExchange (size_type) noexcept;
 };

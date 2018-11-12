@@ -29,23 +29,19 @@ using std::string;
 
 namespace cppual { namespace Graphics { namespace GL { namespace Driver {
 
-enum StringQuery
+enum class StringQuery : byte
 {
     Renderer,
     Vendor,
-    Version
+    Version,
+    SLVersion
 };
 
-bool hasValidInstance () noexcept;
-bool load (string const&);
-void unload ();
-
 GFXVersion version ();
-GFXVersion glVersion ();
-GFXVersion glslVersion ();
-string     glLabel (StringQuery);
-bool       isVersionSupported (GFXVersion const&);
-bool       isExtensionSupported (string const&);
+GFXVersion slVersion ();
+string     label (StringQuery);
+bool       isExtensionSupported (string const& name);
+void       drawTestTriagle(float axis);
 
 } } } } // namespace Driver
 

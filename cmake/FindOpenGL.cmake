@@ -5,20 +5,28 @@ set(GL_LIBRARY_NAMES GL opengl32)
 set(GL_LIBRARY_NAMES64 opengl64 ${GL_LIBRARY_NAMES})
 
 find_path(GL_INCLUDE_DIR NAMES ${GL_HEADER_FILES}
-            PATHS ${CMAKE_SOURCE_DIR}
-            PATH_SUFFIXES include external/include
-            )
+          PATHS ${CMAKE_SOURCE_DIR}
+          PATH_SUFFIXES include external/include
+          )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         find_library(GL_LIBRARY
-                        NAMES ${GL_LIBRARY_NAMES}
-                        PATH_SUFFIXES lib32 lib
-                        )
+                     NAMES ${GL_LIBRARY_NAMES}
+                     PATH_SUFFIXES bin lib32 lib
+                     PATHS
+                        ${CMAKE_FIND_ROOT_PATH}
+                        /usr
+                     NO_DEFAULT_PATH
+                     )
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
         find_library(GL_LIBRARY
-                        NAMES ${GL_LIBRARY_NAMES64}
-                        PATH_SUFFIXES lib lib64
-                        )
+                     NAMES ${GL_LIBRARY_NAMES64}
+                     PATH_SUFFIXES bin lib lib64
+                     PATHS
+                        ${CMAKE_FIND_ROOT_PATH}
+                        /usr
+                     NO_DEFAULT_PATH
+                     )
 endif()
 
 find_package_handle_standard_args(OpenGL REQUIRED_VARS GL_LIBRARY GL_INCLUDE_DIR)

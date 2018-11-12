@@ -25,7 +25,7 @@ macro(CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
    set(CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 endmacro(CHECK_CXX_COMPILER_FLAG)
 
-set(CMAKE_CXX_FLAGS "-pipe -mtune=native -Wall -Wextra -pedantic -Wpointer-arith -Wcast-align -Wwrite-strings -Wredundant-decls -Winline -Wuninitialized -Wconversion")
+set(CMAKE_CXX_FLAGS "-pipe -Wall -Wextra -pedantic -Wpointer-arith -Wcast-align -Wwrite-strings -Wredundant-decls -Winline -Wuninitialized -Wconversion")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fmessage-length=0 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -fmessage-length=0 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -fmessage-length=0 -DNDEBUG")
@@ -34,17 +34,17 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-s")
 set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "-s")
 set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "-s")
 
-# ensure C++14 support
-CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
-CHECK_CXX_COMPILER_FLAG("-std=c++1y" COMPILER_SUPPORTS_CXX0X)
+# ensure C++17 support
+CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17)
+CHECK_CXX_COMPILER_FLAG("-std=c++1z" COMPILER_SUPPORTS_CXX0Z)
 
-if(COMPILER_SUPPORTS_CXX14)
-        add_definitions(-std=c++14)
-elseif(COMPILER_SUPPORTS_CXX0X)
-        add_definitions(-std=c++1y)
+if(COMPILER_SUPPORTS_CXX17)
+        add_definitions(-std=c++17)
+elseif(COMPILER_SUPPORTS_CXX0Z)
+        add_definitions(-std=c++1z)
 else()
-        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support.")
+        message(FATAL "The compiler ${CMAKE_CXX_COMPILER} has no C++17 support.")
 endif()
 
 # use optimized instruction set
-add_definitions(-msse -msse2)
+#add_definitions(-msse -msse2)

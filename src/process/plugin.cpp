@@ -55,6 +55,26 @@ DynLoader::DynLoader (string_type   pPath,
     if (bAttach) attach ();
 }
 
+DynLoader::DynLoader (DynLoader&& obj) noexcept
+: m_pHandle  (obj.m_pHandle),
+  m_gLibPath (std::move (obj.m_gLibPath))
+{
+    obj.m_pHandle = nullptr;
+}
+
+DynLoader& DynLoader::operator = (DynLoader&& obj) noexcept
+{
+    if (this != &obj)
+    {
+        m_pHandle  = obj.m_pHandle;
+        m_gLibPath = std::move (obj.m_gLibPath);
+
+        obj.m_pHandle = nullptr;
+    }
+
+    return *this;
+}
+
 bool DynLoader::attach () noexcept
 {
     if (m_pHandle) return true;

@@ -30,7 +30,7 @@ using std::string;
 
 namespace cppual { namespace System {
 
-enum class QueryCategory : unsigned char
+enum class QueryCategory : byte
 {
     Motherboard,
     CPU,

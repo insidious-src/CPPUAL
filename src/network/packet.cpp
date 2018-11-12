@@ -30,7 +30,7 @@ void Packet::append (cvoid* pData, size_type uSize) noexcept
     {
         std::size_t start = m_gData.size ();
         m_gData.reserve (start + uSize);
-        std::memcpy (&m_gData[start], pData, uSize);
+        std::copy(static_cast<cu8*>(pData), static_cast<cu8*>(pData) + uSize, &m_gData[start]);
     }
 }
 

@@ -38,7 +38,7 @@ inline Program::pointer createProgramFromSource (Behaviour const& context, vecto
 
         auto sources = source.front ().c_str ();
 
-       /* return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
+        /* return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
                                            static_cast<uint> (source.size ()),
                                            &sources,
                                            sizes,

@@ -40,7 +40,7 @@ HeapPool::HeapPool (size_type uSize)
     }
 }
 
-HeapPool::HeapPool (Repository& pOwner, size_type uSize)
+HeapPool::HeapPool (MemoryResource& pOwner, size_type uSize)
 : m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pBegin (&m_gOwner != this ?
                              (uSize >= sizeof (FreeBlock) ?
@@ -288,7 +288,7 @@ ListPool::ListPool (size_type uSize)
     }
 }
 
-ListPool::ListPool (Repository& pOwner, size_type uSize)
+ListPool::ListPool (MemoryResource& pOwner, size_type uSize)
 : m_pBegin (uSize > sizeof (Header) and uSize <= pOwner.max_size () ?
                 static_cast<pointer> (pOwner.allocate (uSize, alignof (Header))) :
                 nullptr),

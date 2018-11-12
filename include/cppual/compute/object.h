@@ -23,7 +23,6 @@
 #define CPPUAL_COMPUTE_OBJECT_H_
 #ifdef __cplusplus
 
-#include <type_traits>
 #include <cppual/types.h>
 #include <cppual/resource.h>
 

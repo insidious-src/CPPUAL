@@ -30,17 +30,17 @@ using std::atomic_uint;
 
 namespace cppual { namespace Audio { namespace AL {
 
-class AudioObject
+class Object
 {
 public:
-    AudioObject (ObjectType type) noexcept;
-    AudioObject (AudioObject&&) noexcept;
-    AudioObject (AudioObject const&) noexcept;
-    AudioObject& operator = (AudioObject&&) noexcept;
-    AudioObject& operator = (AudioObject const&) noexcept;
+    Object (ObjectType type) noexcept;
+    Object (Object&&) noexcept;
+    Object (Object const&) noexcept;
+    Object& operator = (Object&&) noexcept;
+    Object& operator = (Object const&) noexcept;
 
-    inline  AudioObject () noexcept : m_uObjId (), m_eObjType () { }
-    inline ~AudioObject () noexcept { reset (); }
+    inline  Object () noexcept : m_uObjId (), m_eObjType () { }
+    inline ~Object () noexcept { reset (); }
 
     inline ObjectType type    () const noexcept { return m_eObjType; }
     inline uint       id      () const noexcept { return m_uObjId;   }

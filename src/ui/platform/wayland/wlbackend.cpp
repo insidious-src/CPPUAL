@@ -28,31 +28,31 @@
 
 namespace cppual { namespace Ui {
 
-class SHARED_API WlBackend final : public IDisplay
+class SHARED_API WlDisplay final : public IDisplay
 {
 public:
-    WlBackend  () = delete;
-    ~WlBackend () noexcept;
+    WlDisplay () = delete;
+
+    ~WlDisplay () noexcept
+    { if (native ()) ::wl_display_disconnect (native<::wl_display> ()); }
+
 
     string_type name        () const noexcept { return m_gName;        }
     uint        screenCount () const noexcept { return m_nScreenCount; }
 
     void flush () noexcept
-    { ::wl_display_flush (native<wl_display> ()); }
+    { ::wl_display_flush (native<::wl_display> ()); }
 
-    WlBackend (cchar* pName) noexcept
-    : IDisplay       (::wl_display_connect (pName), nullptr),
+    WlDisplay (string_type const& strName) noexcept
+    : IDisplay       (::wl_display_connect (strName.c_str()), nullptr),
       m_nScreenCount (),
-      m_gName        (pName)
+      m_gName        (strName)
     { }
 
 private:
     uint        m_nScreenCount;
     string_type m_gName;
 };
-
-WlBackend::~WlBackend () noexcept
-{ if (native ()) ::wl_display_disconnect (native<wl_display> ()); }
 
 } } // namespace Graphics
 

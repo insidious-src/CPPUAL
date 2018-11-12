@@ -55,7 +55,7 @@ public:
     typedef Clock                      clock_type;
 
     PausableTimer () noexcept
-    : m_epoch  (clock_type::now ()), m_pause ()
+    : m_epoch (clock_type::now ()), m_pause ()
     { }
 
     void reset () noexcept

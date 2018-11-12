@@ -23,10 +23,11 @@
 #define CPPUAL_MEMORY_ALLOCATOR_H_
 #ifdef __cplusplus
 
+#include <cppual/compute/device.h>
+
 #include <limits>
 #include <memory>
 #include <experimental/memory_resource>
-#include <cppual/compute/device.h>
 
 namespace std    { using std::experimental::pmr::memory_resource; }
 
@@ -36,7 +37,7 @@ namespace cppual { namespace Memory {
 // Extend std::memory_resource for compute usage
 // =========================================================
 
-struct Repository : public std::memory_resource
+struct MemoryResource : public std::memory_resource
 {
     typedef std::size_t     align_type;
     typedef std::size_t     size_type;
@@ -53,8 +54,8 @@ struct Repository : public std::memory_resource
     virtual  device_type& device () const noexcept
     { return device_type::host   (); }
 
-    virtual  Repository& owner   () const noexcept
-    { return const_cast<Repository&> (*this); }
+    virtual  MemoryResource& owner () const noexcept
+    { return const_cast<MemoryResource&> (*this); }
 
     virtual  size_type  max_size () const
     { return std::numeric_limits<size_type>::max (); }
@@ -64,32 +65,32 @@ struct Repository : public std::memory_resource
 };
 
 // =========================================================
-// Repository Concept
+// MemoryResource Concept
 // =========================================================
 
 template <class T>
-struct is_repository_helper : public std::conditional
+struct is_memory_resource_helper : public std::conditional
         <
-         std::is_base_of<Repository, T>::value,
+         std::is_base_of<MemoryResource, T>::value,
          std::true_type, std::false_type
          >::type
 { };
 
 template <>
-struct is_repository_helper < std::memory_resource > : public std::true_type
+struct is_memory_resource_helper < std::memory_resource > : public std::true_type
 { };
 
 template <>
-struct is_repository_helper < Repository >           : public std::true_type
+struct is_memory_resource_helper < MemoryResource > : public std::true_type
 { };
 
 template <class T>
-struct is_repository : public is_repository_helper<T>
-{ static_assert (is_repository<T>::value, "invalid Repository object type!"); };
+struct is_memory_resource : public is_memory_resource_helper<T>
+{ static_assert (is_memory_resource<T>::value, "invalid Repository object type!"); };
 
 template <class T>
-using RepositoryType = typename
-std::enable_if<is_repository<T>::value, T>::type;
+using MemoryResourceType = typename
+std::enable_if<is_memory_resource<T>::value, T>::type;
 
 // =========================================================
 // Redefined allocator policy
@@ -99,17 +100,17 @@ template <typename T, class R = void>
 class Allocator
 {
 public:
-    typedef T                 value_type;
-    typedef T*                pointer;
-    typedef T const*          const_pointer;
-    typedef T &               reference;
-    typedef T const&          const_reference;
-    typedef RepositoryType<R> resource_type;
-    typedef std::size_t       size_type;
-    typedef std::ptrdiff_t    difference_type;
-    typedef std::false_type   propagate_on_container_copy_assignment;
-    typedef std::true_type    propagate_on_container_move_assignment;
-    typedef std::true_type    propagate_on_container_swap;
+    typedef T                     value_type;
+    typedef T*                    pointer;
+    typedef T const*              const_pointer;
+    typedef T &                   reference;
+    typedef T const&              const_reference;
+    typedef MemoryResourceType<R> resource_type;
+    typedef std::size_t           size_type;
+    typedef std::ptrdiff_t        difference_type;
+    typedef std::false_type       propagate_on_container_copy_assignment;
+    typedef std::true_type        propagate_on_container_move_assignment;
+    typedef std::true_type        propagate_on_container_swap;
 
     inline    Allocator (Allocator &&    )             noexcept = default;
     constexpr Allocator (Allocator const&)             noexcept = default;
@@ -196,7 +197,7 @@ struct Allocator <T, void> : std::allocator<T>
 { using std::allocator<T>::allocator; };
 
 template <typename T>
-using PolymorphicAllocator = Allocator<T, Repository>;
+using PolymorphicAllocator = Allocator<T, MemoryResource>;
 
 // =========================================================
 // Allocator Comparisons

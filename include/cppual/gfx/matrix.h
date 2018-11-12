@@ -27,6 +27,8 @@
 #include <array>
 #include <memory>
 #include <cppual/gfx/coord.h>
+#include <cppual/gfx/color.h>
+#include <cppual/memory/allocator.h>
 
 using std::array;
 using std::deque;
@@ -43,15 +45,15 @@ enum class MatrixType : unsigned char
 
 // =========================================================
 
-template <typename T, typename Allocator = std::allocator<T> >
+template <typename T, typename Alloc = std::allocator<T> >
 class DynamicMatrix
 {
 public:
-    typedef T                             value_type;
-    typedef T const*                      const_pointer;
-    typedef deque<T, Allocator>           array_type;
-    typedef Allocator                     allocator_type;
-    typedef typename Allocator::size_type size_type;
+    typedef T                                  value_type    ;
+    typedef T const*                           const_pointer ;
+    typedef Memory::AllocatorType<Alloc>       allocator_type;
+    typedef deque<T, allocator_type>           array_type    ;
+    typedef typename allocator_type::size_type size_type     ;
 
     DynamicMatrix<T>& identity ();
 
@@ -78,20 +80,20 @@ public:
 
     constexpr DynamicMatrix () noexcept
     : m_matrix (),
-      m_uCols (),
-      m_uRows ()
+      m_uCols  (),
+      m_uRows  ()
     { }
 
     DynamicMatrix (DynamicMatrix&& gObj) noexcept
     : m_matrix (std::move (gObj.m_matrix)),
-      m_uCols (gObj.m_uCols),
-      m_uRows (gObj.m_uRows)
+      m_uCols  (gObj.m_uCols),
+      m_uRows  (gObj.m_uRows)
     { }
 
     DynamicMatrix (DynamicMatrix const& gObj) noexcept
     : m_matrix (gObj.m_matrix),
-      m_uCols (gObj.m_uCols),
-      m_uRows (gObj.m_uRows)
+      m_uCols  (gObj.m_uCols),
+      m_uRows  (gObj.m_uRows)
     { }
 
     template <typename... Ts>
@@ -219,8 +221,8 @@ public:
     { }
 
     constexpr StaticMatrix (StaticMatrix<C, R, T> const& gObj) noexcept
-    : m_uCols  (gObj.m_uCols),
-      m_uRows  (gObj.m_uRows),
+    : m_uCols  (gObj.m_uCols ),
+      m_uRows  (gObj.m_uRows ),
       m_matrix (gObj.m_matrix)
     { }
 
@@ -232,8 +234,8 @@ public:
 
     template <typename... Ts>
     constexpr StaticMatrix (Ts... vals) noexcept
-    : m_uCols (C),
-      m_uRows (R),
+    : m_uCols  (C),
+      m_uRows  (R),
       m_matrix { vals... }
     { static_assert (sizeof... (vals) == size (), "Wrong number of initializers!"); }
 
@@ -311,7 +313,7 @@ private:
 
 // =========================================================
 
-class ViewMatrix : public Matrix4
+class ViewMatrix : public DynamicMatrix<RGBColor, Memory::PolymorphicAllocator<RGBColor>>
 {
 public:
     enum class Type : bool

@@ -24,64 +24,45 @@
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
 #define  API_EXPORT
-#include "xinput.h"
-#include "xsurface.h"
-#include "xbackend.h"
+#include "wlinput.h"
+#include "wlsurface.cpp"
+#include "wlbackend.cpp"
 
 namespace cppual { namespace Ui { namespace Platform {
 
-struct XFactory final : Factory
+struct WlFactory final : Factory
 {
     shared_queue   createQueueInstance ();
     shared_display connectDisplay      (string_type const&);
     shared_window  createWindow        (Rect const&, u32, IDisplay*);
 };
 
-shared_display XFactory::connectDisplay (string_type const& name)
+shared_display WlFactory::connectDisplay (string_type const& name)
 {
-    return shared_display (new XDisplay (name));
+    return shared_display (new WlDisplay (name));
 }
 
-shared_queue XFactory::createQueueInstance ()
+shared_queue WlFactory::createQueueInstance ()
 {
-    return shared_queue (new XQueue);
+    return shared_queue ();
 }
 
-shared_window XFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
+shared_window WlFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
 {
-    return shared_window (new XWindow (gRect, nScreen, pDisplay));
+    return shared_window (new WlSurface (gRect, nScreen, pDisplay));
 }
 
 } } } // namespace Platform
 
 // =========================================================
 
-using cppual::Process::PluginManager;
-using cppual::Ui::Platform::Factory ;
-using cppual::Ui::Platform::XFactory;
-using cppual::Process::Plugin       ;
+using cppual::Ui::Platform::WlFactory;
+using cppual::Ui::Platform::shared_manager;
 
-extern "C" Plugin plugin_main ()
+extern "C" int plugin_main (shared_manager& instance)
 {
-    Plugin plugin;
-
-    static const auto name     = "XFactory"       ;
-    static const auto desc     = "Xorg UI Factory";
-    static const auto provides = "Ui::Factory"    ;
-    static const auto iface    = "create_xfactory";
-
-    plugin.name     = name    ;
-    plugin.desc     = desc    ;
-    plugin.provides = provides;
-    plugin.version  = 100     ;
-    plugin.iface    = iface   ;
-
-    return plugin;
-}
-
-extern "C" Factory* create_xfactory ()
-{
-    return new XFactory;
+    instance.reset (new WlFactory);
+    return instance == nullptr;
 }
 
 #endif // OS_GNU_LINUX or OS_BSD

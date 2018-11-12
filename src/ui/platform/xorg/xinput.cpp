@@ -26,6 +26,7 @@
 
 #include <cppual/ui/queue.h>
 #include "xcb_event.h"
+#include "xsurface.h"
 
 namespace cppual { namespace Ui {
 
@@ -64,7 +65,7 @@ bool XQueue::set_window_events (window_type const& window, mask_type gFlags) noe
         if (gFlags.test (event_type::MButtonUp))   uMask |= XCB_EVENT_MASK_BUTTON_RELEASE;
         if (gFlags.test (event_type::Step))        uMask |= XCB_EVENT_MASK_ENTER_WINDOW |
                                                             XCB_EVENT_MASK_LEAVE_WINDOW;
-        if (gFlags.test (event_type::PointerMove)) uMask |= XCB_EVENT_MASK_POINTER_MOTION;
+        if (gFlags.test (event_type::MouseMove)) uMask |= XCB_EVENT_MASK_POINTER_MOTION;
 //        if (gFlags.test (event_type::KeyMap))      uMask |= XCB_EVENT_MASK_KEYMAP_STATE;
 //        if (gFlags.test (event_type::Paint))       uMask |= XCB_EVENT_MASK_EXPOSURE;
         if (gFlags.test (event_type::Visibility))  uMask |= XCB_EVENT_MASK_VISIBILITY_CHANGE;
@@ -85,24 +86,24 @@ bool XQueue::set_window_events (window_type const& window, mask_type gFlags) noe
 
 bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
 {
-    Xcb::EventPtr pEv (bWait ? ::xcb_wait_for_event (display ().get<Xcb::display_type> ()) :
+    Xcb::Event pEv (bWait ? ::xcb_wait_for_event (display ().get<Xcb::display_type> ()) :
                                ::xcb_poll_for_event (display ().get<Xcb::display_type> ()));
 
-    if (!pEv) return false;
-    gEvent = pEv->toEvent ();
+    if (!pEv.event ()) return false;
+    gEvent = pEv.toEvent ();
     return true;
 }
 
-int XQueue::poll (window_type const& window, atomic_bool& poll)
+int XQueue::poll (window_type const& window, bool_type& poll)
 {
-    while (poll.load (std::memory_order_relaxed))
+    while (poll)
     {
-        Xcb::EventPtr event (::xcb_wait_for_event (display ().get<Xcb::display_type> ()));
+        Xcb::Event event (::xcb_wait_for_event (display ().get<Xcb::display_type> ()));
 
-        if (!event or event->window () != window.id ().get<Xcb::handle_type> ())
+        if (!event.event () or event.window () != window.id ().get<Xcb::handle_type> ())
             continue;
 
-        event ();
+        event (static_cast<XWindow const&>(window).destroyPtr());
     }
 
     return 0;
@@ -110,12 +111,12 @@ int XQueue::poll (window_type const& window, atomic_bool& poll)
 
 void XQueue::send (window_type const& window, event_type const& event)
 {
-    Xcb::Event send_event = Xcb::Event::toXcbEvent (event);
+    Xcb::Event::base_type send_event = Xcb::Event::toXcbEvent (event);
 
     ::xcb_send_event (display ().get<Xcb::display_type> (),
                       false,
                       window.id ().get<Xcb::handle_type> (),
-                      send_event.type (),
+                      send_event.response_type & ~0x80,
                       reinterpret_cast<cchar*> (&send_event));
 
     ::xcb_flush (display ().get<Xcb::display_type> ());
@@ -123,12 +124,12 @@ void XQueue::send (window_type const& window, event_type const& event)
 
 void XQueue::post (window_type const& window, event_type const& event)
 {
-    Xcb::Event post_event = Xcb::Event::toXcbEvent (event);
+    Xcb::Event::base_type post_event = Xcb::Event::toXcbEvent (event);
 
     ::xcb_send_event (display ().get<Xcb::display_type> (),
                       false,
                       window.id ().get<Xcb::handle_type> (),
-                      post_event.type (),
+                      post_event.response_type & ~0x80,
                       reinterpret_cast<cchar*> (&post_event));
 
     ::xcb_flush (display ().get<Xcb::display_type> ());

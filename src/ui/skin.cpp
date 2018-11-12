@@ -31,8 +31,8 @@ bool ISkin::setDefault (ISkin* pSkin) noexcept
 {
     if (!pSkin) return false;
 
-    EventQueue::emit ().winPaint (window_type (),
-                                  Input::PaintEvent (Rect ()).data ().paint);
+    EventQueue::events ().winPaint (window_type (),
+                                    Input::PaintEvent (Rect ()).data ().paint);
     return true;
 }
 
@@ -86,13 +86,6 @@ void SkinnableView::setSkin (ISkin* pNewSkin) noexcept
 {
     m_pSkin = pNewSkin;
     if (valid ()) refresh ();
-}
-
-void SkinnableView::onCreate ()
-{
-    onCreatePost ();
-//    m_gConnSkin = std::move (connect (Platform::EventQueue::events.visual,
-//                                      this, &SkinnableView::changeSkin));
 }
 
 void SkinnableView::changeSkin ()

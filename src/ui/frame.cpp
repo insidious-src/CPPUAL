@@ -223,9 +223,9 @@ void FrameView::onMouseRightDown (point2i gPos)
 {
     m_gMouseStates += FrameView::MouseRightDown;
 
-    if (geometry ().contains (gPos) and
-            !m_gIconRect.contains (gPos) and
-            !m_gFrameBtnsRect.contains (gPos))
+    if (geometry ().contains (gPos)  and
+        !m_gIconRect.contains (gPos) and
+        !m_gFrameBtnsRect.contains (gPos))
     {
         m_gSysMenu.setPosition (gPos);
         m_gSysMenu.show ();

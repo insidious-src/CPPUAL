@@ -23,7 +23,7 @@
 #define CPPUAL_COORDINATES_H_
 #ifdef __cplusplus
 
-#include <type_traits>
+#include <cppual/concepts.h>
 #include <cppual/types.h>
 
 namespace cppual {
@@ -35,11 +35,13 @@ template <typename> struct Angle ;
 
 typedef Point2<int16 > point2i;
 typedef Point2<u16   > point2u;
+typedef Point2<u32   > point2u32;
 typedef Point2<float > point2f;
 typedef Point3<float > point3f;
 typedef Point3<float > vec3   ;
 typedef Point3<double> point3d;
 typedef Point3<int16 > point3i;
+typedef Point3<u32   > point3u32;
 typedef Point4<float > point4f;
 typedef Point4<float > vec4   ;
 typedef Point4<float > point4d;
@@ -51,8 +53,7 @@ typedef Angle <double> angled ;
 template <typename T>
 struct Point2 final
 {
-    T x, y;
-    static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
+    Arithmetic<T> x, y;
 
     constexpr Point2 () noexcept = default;
 
@@ -77,8 +78,7 @@ constexpr bool operator != (Point2<T> const& gObj1,
 template <typename T>
 struct Point3 final
 {
-    T x, y, z;
-    static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
+    Arithmetic<T> x, y, z;
 };
 
 template <typename T>
@@ -96,8 +96,7 @@ constexpr bool operator != (Point3<T> const& gObj1,
 template <typename T>
 struct Point4 final
 {
-    T x, y, z, w;
-    static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
+    Arithmetic<T> x, y, z, w;
 };
 
 template <typename T>
@@ -214,9 +213,8 @@ constexpr bool operator != (Rect const& gObj1, Rect const& gObj2) noexcept
 template <typename T>
 struct Angle final
 {
-    T radians;
+    Arithmetic<T> radians { };
 
-    static_assert (std::is_arithmetic<T>::value, "T must be arithmetic type");
     constexpr Angle () noexcept = default;
 
     template <typename U>

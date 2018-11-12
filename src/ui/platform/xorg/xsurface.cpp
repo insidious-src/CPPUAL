@@ -57,39 +57,51 @@ xcb_screen_t* screenHandle (Graphics::Connection pDsp, u32& nScreen) noexcept
 // =========================================================
 
 XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
-: IPlatformWindow (pDisplay, xcb_generate_id (pDisplay->native<Xcb::display_type> ())),
-  m_eFlags (WindowHints),
-  m_pOwner ()
+: IPlatformWindow (pDisplay, ::xcb_generate_id (pDisplay->native<Xcb::display_type> ())),
+  m_eFlags  (WindowHints),
+  m_uScreen (nScreen),
+  m_pDestroy(Xcb::internAtomHelper(connection ()->native<Xcb::display_type> (),
+                                   "WM_DELETE_WINDOW"))
 {
     if (valid ())
     {
-        xcb_screen_t* pScreen = screenHandle (connection ()->native<Xcb::display_type> (),
-                                              nScreen);
+        auto pScreen = screenHandle (connection ()->native<Xcb::display_type> (),
+                                     nScreen);
 
-        xcb_create_window (connection ()->native<Xcb::display_type> (),
-                           XCB_COPY_FROM_PARENT,
-                           id ().get<Xcb::handle_type> (),
-                           pScreen->root,
-                           gRect.left,
-                           gRect.top,
-                           gRect.width (),
-                           gRect.height (),
-                           1,
-                           XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                           pScreen->root_visual,
-                           0,
-                           nullptr);
+        ::xcb_create_window (connection ()->native<Xcb::display_type> (),
+                             XCB_COPY_FROM_PARENT,
+                             id ().get<Xcb::handle_type> (),
+                             pScreen->root,
+                             gRect.left,
+                             gRect.top,
+                             gRect.width (),
+                             gRect.height (),
+                             1,
+                             XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                             pScreen->root_visual,
+                             0,
+                             nullptr);
+
+        Xcb::intern_ptr reply (Xcb::internAtomHelper(connection ()->native<Xcb::display_type> (),
+                                                     "WM_PROTOCOLS", true));
+
+        ::xcb_change_property(connection ()->native<Xcb::display_type> (),
+                              XCB_PROP_MODE_REPLACE,
+                              id ().get<Xcb::handle_type> (),
+                              reply->atom, 4, 32, 1,
+                              &m_pDestroy.get<::xcb_intern_atom_reply_t> ()->atom);
     }
 }
 
 XWindow::~XWindow () noexcept
 {
     ::xcb_destroy_window (connection ()->native<Xcb::display_type> (), id ().get<Xcb::handle_type> ());
+    if (m_pDestroy) delete m_pDestroy.get<::xcb_intern_atom_reply_t> ();
 }
 
 Rect XWindow::geometry () const
 {
-    typedef std::unique_ptr<xcb_get_geometry_reply_t> geo_ptr;
+    typedef std::unique_ptr<::xcb_get_geometry_reply_t> geo_ptr;
 
     geo_ptr pReply (xcb_get_geometry_reply (connection ()->native<Xcb::display_type> (),
                                             xcb_get_geometry (connection ()->native<Xcb::display_type> (),
@@ -199,7 +211,7 @@ XWindow::string_type XWindow::title () const noexcept
                                                     connection ()->native<Xcb::display_type> (),
                                                     XCB_GET_PROPERTY_TYPE_ANY,
                                                     id ().get<Xcb::handle_type> (),
-                                                    XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 0, 0),
+                                                    XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 0, 255),
                                                nullptr));
 
     return string_type(static_cast<char*>     (::xcb_get_property_value       (pReply.get ())) ,
@@ -235,12 +247,11 @@ bool XWindow::isModal () noexcept
 
 void XWindow::setFullscreen (bool bFullscreen) noexcept
 {
-    typedef std::unique_ptr<::xcb_intern_atom_reply_t> intern_ptr;
 
-    intern_ptr atom_wm_state      (Xcb::internAtomHelper (connection ()->native<Xcb::display_type> (), false,
+    Xcb::intern_ptr atom_wm_state (Xcb::internAtomHelper (connection ()->native<Xcb::display_type> (),
                                                           "_NET_WM_STATE"));
-    intern_ptr atom_wm_fullscreen (Xcb::internAtomHelper (connection ()->native<Xcb::display_type> (), false,
-                                                          "_NET_WM_STATE_FULLSCREEN"));
+    Xcb::intern_ptr atom_wm_fullscreen (Xcb::internAtomHelper (connection ()->native<Xcb::display_type> (),
+                                                               "_NET_WM_STATE_FULLSCREEN"));
 
 
     ::xcb_change_property (connection ()->native<Xcb::display_type> (),

@@ -27,9 +27,9 @@ namespace cppual { namespace Ui {
 namespace {
 
 struct Internal { static std::atomic_bool compositing; };
-std::atomic_bool Internal::compositing (true);
+std::atomic_bool Internal::compositing (false);
 
-} // anonymous
+} // anonymous namespace
 
 
 void useInternalCompositor (bool bUse) noexcept
@@ -39,7 +39,7 @@ void useInternalCompositor (bool bUse) noexcept
 
 bool isUsingInternalCompositor () noexcept
 {
-    return Internal::compositing.load ();
+    return Internal::compositing.load (std::memory_order_relaxed);
 }
 
 } } // namespace Ui

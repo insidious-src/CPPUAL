@@ -1,41 +1,65 @@
+cmake_minimum_required(VERSION 3.1)
+
+if(ANDROID)
+    set(ANDROID_NDK "/opt/android-ndk")
+    set(QT_ANDROID_SDK_ROOT "/opt/android-sdk")
+    set(ANDROID_ABI "armeabi-v7a")
+    set(ANDROID_PLATFORM "android-28")
+    set(ANDROID_TOOLCHAIN_NAME "arm-linux-androideabi-4.9")
+    set(CMAKE_SYSROOT "${ANDROID_NDK}/platforms/${ANDROID_PLATFORM}/arch-arm")
+elseif(WIN32)
+    set(TOOLCHAIN_PREFIX "i686-w64-mingw32")
+    set(CMAKE_TOOLCHAIN_FILE "/usr/share/mingw/toolchain-${TOOLCHAIN_PREFIX}.cmake")
+elseif(WIN64)
+    set(TOOLCHAIN_PREFIX "x86_64-w64-mingw32")
+    set(CMAKE_TOOLCHAIN_FILE "/usr/share/mingw/toolchain-${TOOLCHAIN_PREFIX}.cmake")
+endif()
+
 project("C++ UAL")
-cmake_minimum_required(VERSION 2.9)
 
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-list   (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-include("cmake/CompilerConfig.cmake"  REQUIRED)
-include("cmake/ToolChainConfig.cmake" REQUIRED)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
 
-set(LIBRARY_OUTPUT_PATH
- "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+include(CompilerConfig  REQUIRED)
+
+if(ANDROID)
+    set(CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK}/build/cmake/android.toolchain.cmake" REQUIRED)
+    #include(AddQtAndroidApk REQUIRED)
+else()
+    #include(ToolChainConfig REQUIRED)
+endif()
 
 find_package(DL       REQUIRED) ## dynamic loading of libraries
 find_package(WM       REQUIRED) ## platform window manager
-find_package(OpenCL   REQUIRED) ## backup compute api
-find_package(Vulkan   REQUIRED) ## primary compute & graphics api
 find_package(Sockets  REQUIRED) ## network interface & interprocess
-find_package(EGL      REQUIRED) ## will be dropped at some point
-find_package(GLEW     REQUIRED) ## will be dropped at some point
-find_package(OpenGL   REQUIRED) ## will be dropped at some point
 find_package(OpenAL   REQUIRED) ## will be dropped at some point
 find_package(SndFile  REQUIRED) ## will be dropped at some point
 find_package(Freetype REQUIRED) ## will be dropped at some point
+find_package(GLEW     REQUIRED) ## will be dropped at some point
+find_package(OpenGL   REQUIRED) ## will be dropped at some point
+find_package(EGL      REQUIRED) ## will be dropped at some point
+find_package(OpenCL   REQUIRED) ## backup compute api
+find_package(Vulkan   REQUIRED) ## primary compute & graphics api
+
 
 include_directories(
-    "include"
-    "DL::Library"
-    "OpenCL::Library"
-    "Vulkan::Library"
-    "Sockets::Library"
-    "WM::Library"
-    "EGL::Library"
-    "GLEW::Library"
-    "OpenGL::Library"
-    "Freetype::Library"
-    "SndFile::Library"
-    "OpenAL::Library"
+    include
+    DL::Library
+    OpenCL::Library
+    Vulkan::Library
+    Sockets::Library
+    WM::Library
+    EGL::Library
+    GLEW::Library
+    OpenGL::Library
+    Freetype::Library
+    SndFile::Library
+    OpenAL::Library
     )
 
 
@@ -45,6 +69,7 @@ include_directories(
 add_library(cppual-host SHARED
     "include/cppual/functional.h"
     "include/cppual/bitfield.h"
+    "include/cppual/unbound_matrix.h"
     "include/cppual/flags.h"
     "include/cppual/signal.h"
     "include/cppual/object.h"
@@ -219,8 +244,12 @@ add_library(cppual-ui-xorg MODULE
 # graphical user interface - platform Wayland
 add_library(cppual-ui-wayland MODULE
     "src/ui/platform/wayland/wlbackend.cpp"
+    "src/ui/platform/wayland/wlbackend.h"
     "src/ui/platform/wayland/wlsurface.cpp"
+    "src/ui/platform/wayland/wlsurface.h"
     "src/ui/platform/wayland/wlinput.cpp"
+    "src/ui/platform/wayland/wlinput.h"
+    "src/ui/platform/wayland/wlmain.cpp"
     )
 
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -280,8 +309,14 @@ add_library(cppual-gl SHARED
     "include/cppual/gfx/gl/instance.h"
     )
 
+# gfx formats library
+add_library(cppual-gfx-formats MODULE
+    "include/cppual/gfx/formats/bmp.h"
+    "src/gfx/formats/bmp.cpp"
+    )
+
 # drawable objects library
-add_library(cppual-gfx-drawables SHARED
+add_library(cppual-gfx-drawables MODULE
     "include/cppual/gfx/drawable/shape.h"
     "src/gfx/drawable/image.cpp"
     "include/cppual/gfx/drawable/image.h"
@@ -435,9 +470,8 @@ add_library(cppual-ui-dialogs MODULE
 
 
 ### link targets
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(cppual-ui-xorg WM::LegacyLibrary X11-xcb X11)
+    target_link_libraries(cppual-ui-xorg WM::LegacyLibrary X11-xcb)
     target_link_libraries(cppual-ui-wayland WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(cppual-ui-win WM::Library)

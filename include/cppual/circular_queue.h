@@ -37,8 +37,7 @@ namespace cppual {
 template <typename T>
 struct expand_ratio
 {
-    static constexpr std::size_t value =
-            (sizeof (T*) / sizeof (T)) * (sizeof (T*) / 2);
+    static constexpr std::size_t value = sizeof (T*) / 2;
 };
 
 // ====================================================

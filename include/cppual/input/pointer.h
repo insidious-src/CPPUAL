@@ -31,49 +31,7 @@ namespace cppual { namespace Input {
 
 struct Touch;
 struct Mouse;
-
-class MouseEvent
-{
-public:
-    typedef u16 size_type;
-
-    enum class Type : unsigned char
-    {
-        Move,
-        Press,
-        Release,
-        Scroll
-    };
-
-    struct PointerData
-    {
-        size_type id;
-        point2i   pos;
-    };
-
-    struct ButtonData
-    {
-        size_type id;
-        point2i   pos;
-        u8        button;
-    };
-
-    struct WheelData
-    {
-        size_type id;
-        point2i   pos;
-        int32     delta;
-    };
-
-    union Data
-    {
-        PointerData pointer;
-        ButtonData  button;
-        WheelData   scroll;
-    };
-
-private:
-};
+struct MouseEvent;
 
 // =========================================================
 

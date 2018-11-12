@@ -42,7 +42,7 @@ MonotonicPool::MonotonicPool (size_type  uBlkCount,
     initialize ();
 }
 
-MonotonicPool::MonotonicPool (Repository& pOwner,
+MonotonicPool::MonotonicPool (MemoryResource& pOwner,
                               size_type   uBlkCount,
                               size_type   uBlkSize,
                               align_type  uBlkAlign)

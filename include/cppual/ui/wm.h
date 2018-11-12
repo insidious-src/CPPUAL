@@ -29,6 +29,7 @@
 #include <cppual/flags.h>
 #include <cppual/resource.h>
 #include <cppual/gfx/coord.h>
+#include <cppual/gfx/color.h>
 #include <cppual/gfx/dsp_details.h>
 #include <cppual/ui/display.h>
 
@@ -66,7 +67,7 @@ public:
     typedef std::size_t          size_type    ;
     typedef std::string          string_type  ;
 
-    virtual ~IPlatformWindow () { }
+    ~IPlatformWindow () { }
 
     virtual weak_window owner () const = 0;
     virtual WindowFlags flags () const = 0;

@@ -19,102 +19,152 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <cppual/memory/static.h>
-#include <cppual/process/plugin.h>
 #include <cppual/gfx/gl/runtime.h>
 #include "gldef.h"
 
-using cppual::Memory::StaticPool     ;
-using cppual::Memory::StaticAllocator;
-using namespace std::string_literals ;
+#include <algorithm>
+#include <vector>
+#include <cmath>
+#include <unordered_map>
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace Graphics { namespace GL { namespace Driver {
 
 namespace {
 
-struct Internal
+typedef std::unordered_map<GFXVersion, GFXVersion> version_map  ;
+typedef std::vector<std::string>                   string_vector;
+typedef std::size_t                                size_type    ;
+
+constexpr GLenum queryToGLEnum (StringQuery query) noexcept
 {
-    typedef Process::DynLoader                                 module_type   ;
-    typedef StaticPool<sizeof (module_type)>                   allocator_type;
-    typedef StaticAllocator<module_type, sizeof (module_type)> policy_type   ;
-
-    inline Internal () : allocator (), instance ()
-    { /*Driver::load ("libGL"s);*/ }
-
-    inline ~Internal () noexcept
-    { /*Driver::unload ();*/ }
-
-    allocator_type allocator;
-    module_type*   instance ;
-
-} internal;
-
-} // anonymous
-
-bool Driver::load (string const& gName)
-{
-    if (internal.instance) unload ();
-    Internal::policy_type gAtor (internal.allocator);
-
-    internal.instance = gAtor.allocate (1);
-    if (!internal.instance) return false;
-    gAtor.construct (internal.instance, gName.c_str ());
-
-    if (!internal.instance->is_attached ())
-    {
-        std::cout << "Failed to load OpenGL driver "
-                  << internal.instance->path () << std::endl;
-
-        unload ();
-        return false;
-    }
-
-    //internal.instance->get ("glAttachShader", internal.glAttachShader);
-    return false;
+    return query == StringQuery::Renderer ? Renderer :
+           query == StringQuery::Vendor   ? Vendor   :
+           query == StringQuery::Version  ? Version  : SLVersion;
 }
 
-void Driver::unload ()
+GFXVersion getGLVersion ()
 {
-    if (!internal.instance) return;
-    internal.instance->~DynLoader ();
-    Internal::policy_type (internal.allocator).deallocate (internal.instance, 1);
-    internal.instance = nullptr;
+    GLint major = GLint ();
+    GLint minor = GLint ();
+
+    ::glGetIntegerv (MajorVersion, &major);
+    ::glGetIntegerv (MinorVersion, &minor);
+
+    return GFXVersion { major, minor };
 }
 
-bool Driver::hasValidInstance () noexcept
+version_map getSLVersions ()
 {
-    return internal.instance;
+    version_map slVersions;
+
+    slVersions.reserve(12);
+    slVersions.emplace(GFXVersion(2, 0), GFXVersion(1, 10));
+    slVersions.emplace(GFXVersion(2, 1), GFXVersion(1, 20));
+    slVersions.emplace(GFXVersion(3, 0), GFXVersion(1, 30));
+    slVersions.emplace(GFXVersion(3, 1), GFXVersion(1, 40));
+    slVersions.emplace(GFXVersion(3, 2), GFXVersion(1, 50));
+    slVersions.emplace(GFXVersion(3, 3), GFXVersion(3, 30));
+    slVersions.emplace(GFXVersion(4, 0), GFXVersion(4, 00));
+    slVersions.emplace(GFXVersion(4, 1), GFXVersion(4, 10));
+    slVersions.emplace(GFXVersion(4, 2), GFXVersion(4, 20));
+    slVersions.emplace(GFXVersion(4, 3), GFXVersion(4, 30));
+    slVersions.emplace(GFXVersion(4, 4), GFXVersion(4, 40));
+    slVersions.emplace(GFXVersion(4, 5), GFXVersion(4, 50));
+
+    return slVersions;
 }
 
-GFXVersion Driver::version ()
+string_vector getGLExtensions ()
 {
-    return GFXVersion ();
+    GLint n = GLint ();
+
+    ::glGetIntegerv (GL_NUM_EXTENSIONS, &n);
+
+    string_vector extensions;
+
+    extensions.reserve(static_cast<size_type>(n));
+
+    for (auto i = 0U; i < static_cast<GLuint> (n); ++i)
+        extensions.push_back (reinterpret_cast<cchar*> (::glGetStringi (Extensions, i)));
+
+    return extensions;
 }
 
-GFXVersion Driver::glVersion ()
+string_vector getGLLabels ()
 {
-    return GFXVersion ();
+    string_vector labels;
+
+    labels.reserve(4);
+
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(queryToGLEnum(StringQuery::Renderer))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(queryToGLEnum(StringQuery::Vendor))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(queryToGLEnum(StringQuery::Version))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(queryToGLEnum(StringQuery::SLVersion))));
+
+    return labels;
 }
 
-GFXVersion Driver::glslVersion ()
+} // anonymous namespace
+
+GFXVersion version ()
 {
-    return GFXVersion ();
+    if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
+        throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
+
+    static const auto version = getGLVersion ();
+    return version;
 }
 
-string Driver::glLabel (StringQuery)
+GFXVersion slVersion ()
 {
-    return string ();
+    if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
+        throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
+
+    static auto versions = getSLVersions();
+    return versions[version()];
 }
 
-bool Driver::isVersionSupported (GFXVersion const&)
+string label (StringQuery query)
 {
-    return false;
+    if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
+        throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
+
+    static const auto labels = getGLLabels ();
+
+    return labels[static_cast<size_type>(query)];
 }
 
-bool Driver::isExtensionSupported (string const&)
+bool isExtensionSupported (string const& name)
 {
-    return false;
+    if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
+        throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
+
+    static auto extensions = getGLExtensions ();
+    auto        it         = std::find (extensions.begin(), extensions.end(), name);
+
+    return it != extensions.end();
 }
 
-} } } // namespace GL
+void drawTestTriagle(float fAxis)
+{
+    ::glClearColor (255.0f, 255.0f, 255.0f, 255.0f);
+    ::glClear (GL_COLOR_BUFFER_BIT);
+
+    ::glPushMatrix ();
+    ::glRotatef (fAxis, 0.0f, 0.0f, 1.0f);
+    ::glBegin (GL_TRIANGLES);
+
+    ::glColor3f (1.0f, 0.0f, 0.0f);
+    ::glVertex2f (0.0f, 1.0f);
+
+    ::glColor3f (0.0f, 1.0f, 0.0f);
+    ::glVertex2f (0.87f, -0.5f);
+
+    ::glColor3f (0.0f, 0.0f, 1.0f);
+    ::glVertex2f (-0.87f, -0.5f);
+
+    ::glEnd ();
+    ::glPopMatrix ();
+}
+
+} } } } // namespace Driver

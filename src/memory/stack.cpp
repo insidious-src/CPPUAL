@@ -35,7 +35,7 @@ StackedPool::StackedPool (size_type uSize)
   m_bIsMemShared ()
 { }
 
-StackedPool::StackedPool (Repository& pOwner, size_type uSize)
+StackedPool::StackedPool (MemoryResource& pOwner, size_type uSize)
 : //m_gSharedName (),
   m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pCurMarker (&m_gOwner != this ?
@@ -107,7 +107,7 @@ DStackedPool::DStackedPool (size_type uSize, size_type uHint)
   m_bIsMemShared ()
 { }
 
-DStackedPool::DStackedPool (Repository& pOwner,
+DStackedPool::DStackedPool (MemoryResource& pOwner,
                             size_type   uSize,
                             size_type   uHint)
 : //m_gSharedName (),

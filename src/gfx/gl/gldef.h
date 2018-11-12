@@ -92,6 +92,9 @@ enum
     Renderer                   = GL_RENDERER,
     Vendor                     = GL_VENDOR,
     Version                    = GL_VERSION,
+    MajorVersion               = GL_MAJOR_VERSION,
+    MinorVersion               = GL_MINOR_VERSION,
+    SLVersion                  = GL_SHADING_LANGUAGE_VERSION,
     Extensions                 = GL_EXTENSIONS,
     TRUE                       = GL_TRUE,
     FALSE                      = GL_FALSE

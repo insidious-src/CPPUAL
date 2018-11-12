@@ -141,10 +141,7 @@ protected:
     ISkin*     m_pSkin;
 
     virtual void onSkinChange () { }
-    virtual bool onCreatePost () { return true; }
-
 private:
-    void onCreate   ();
     void changeSkin ();
 };
 

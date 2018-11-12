@@ -27,9 +27,7 @@
 
 namespace cppual {
 
-//template <typename> class Disposable { };
-
-//enum class ResourceType : unsigned char
+//enum class ResourceType : byte
 //{
 //    Null = 0,
 //    Device,
@@ -81,6 +79,8 @@ public:
 private:
     pointer m_handle { };
 };
+
+// =========================================================
 
 constexpr bool operator == (Handle const& conn1, Handle const& conn2) noexcept
 { return conn1.m_handle == conn2.m_handle; }

@@ -25,6 +25,7 @@
 
 #include <cppual/types.h>
 #include <cppual/gfx/coord.h>
+#include <cppual/input/keyboard.h>
 #include <cppual/noncopyable.h>
 
 namespace cppual { namespace Input {
@@ -54,7 +55,7 @@ public:
         MButtonDown      = 1 <<  2,
         MButtonUp        = 1 <<  3,
         MWheelStep       = 1 <<  4,
-        PointerMove      = 1 <<  5,
+        MouseMove        = 1 <<  5,
         TouchPress       = 1 <<  6,
         TouchRelease     = 1 <<  7,
         TouchMove        = 1 <<  8,
@@ -72,13 +73,9 @@ public:
         Size             = 1 << 20,
         Visibility       = 1 << 21,
         Property         = 1 << 22,
-        Destroy          = 1 << 23
-    };
-
-    enum
-    {
+        Destroy          = 1 << 23,
         Key       = KeyPressed    | KeyReleased,
-        Mouse     = MButtonDown   | MButtonUp     | PointerMove | MWheelStep,
+        Mouse     = MButtonDown   | MButtonUp     | MouseMove | MWheelStep,
         Touch     = TouchPress    | TouchRelease  | TouchMove,
         Joystick  = JoyConnect    | JoyDisconnect | JoyButtonPress | JoyButtonRelease   |
                     JoyMove       | JoyTrigger    | JoyTrackMove,
@@ -88,13 +85,26 @@ public:
 
     struct KeyData
     {
-        u8 key;
+        Keyboard::Key key ;
+        u16           mask;
+
+        KeyData () noexcept = default;
+
+        constexpr KeyData (Keyboard::Key nKey, u16 uMask) noexcept
+        : key (nKey), mask (uMask)
+        { }
     };
 
     struct MButtonData
     {
-        point2u pos;
+        point2u pos   ;
         u8      button;
+
+        MButtonData () noexcept = default;
+
+        constexpr MButtonData (point2u gPos, u8 uBtn) noexcept
+        : pos (gPos), button (uBtn)
+        { }
     };
 
     struct MWheelData
@@ -118,22 +128,23 @@ public:
     struct JoyAxisData
     {
         size_type id;
-        u8        axis;
         int16     value;
+        u8        axis;
     };
 
     struct JoyTriggerData
     {
         size_type id;
-        u8        trigger;
         int16     threshold;
+        u8        trigger;
+
     };
 
     struct JoyTrackData
     {
         size_type id;
-        u8        track;
         point2i   pos;
+        u8        track;
     };
 
     struct JoyPlugData
@@ -169,14 +180,24 @@ public:
         point2u        size;
         bool           state;
         PropertyData   property;
+
+        Data () noexcept = default;
+
+        constexpr Data (KeyData const& gKeyData) noexcept
+        : keyCode (gKeyData)
+        { }
+
+        constexpr Data (MButtonData const& gKeyData) noexcept
+        : mouseButton (gKeyData)
+        { }
     };
 
     Event () noexcept = default;
     constexpr Data const& data () const noexcept { return m_data; }
-    constexpr Event::Type type () const noexcept { return m_type; }
+    constexpr Type        type () const noexcept { return m_type; }
 
-    constexpr Event (Type type) noexcept
-    : m_data (),
+    constexpr Event (Type type, Data const& data = Data()) noexcept
+    : m_data (data),
       m_type (type)
     { }
 
@@ -265,56 +286,70 @@ struct PropertyEvent : public Event
 
 // =========================================================
 
-struct KeyPressEvent : public Event
+struct KeyEvent : public Event
 {
-    KeyPressEvent (u8 nKey) noexcept
-    : Event       (Event::KeyPressed)
+    enum class Action : byte
     {
-        m_data.keyCode.key = nKey;
-    }
+        Press,
+        Release
+    };
+
+    constexpr KeyEvent (Keyboard::Key nKey, u16 uMask = 0, Action action = Action::Press) noexcept
+    : Event (action == Action::Press ? Event::KeyPressed : Event::KeyReleased, { KeyData (nKey, uMask) })
+    { }
 };
 
 // =========================================================
 
-struct KeyReleaseEvent : public Event
+struct KeyPressEvent : public KeyEvent
 {
-    KeyReleaseEvent (u8 nKey) noexcept
-    : Event         (Event::KeyReleased)
-    {
-        m_data.keyCode.key = nKey;
-    }
+    constexpr KeyPressEvent (Keyboard::Key nKey, u16 uMask = 0) noexcept
+    : KeyEvent (nKey, uMask, Action::Press)
+    { }
 };
 
 // =========================================================
 
-struct MousePressEvent : public Event
+struct KeyReleaseEvent : public KeyEvent
 {
-    MousePressEvent (u8 nBtn, point2u gPos) noexcept
-    : Event         (Event::MButtonDown)
-    {
-        m_data.mouseButton.button = nBtn;
-        m_data.mouseButton.pos    = gPos;
-    }
+    constexpr KeyReleaseEvent (Keyboard::Key nKey, u16 uMask = 0) noexcept
+    : KeyEvent (nKey, uMask, Action::Release)
+    { }
 };
 
 // =========================================================
 
-struct MouseReleaseEvent : public Event
+struct MouseEvent : public Event
 {
-    MouseReleaseEvent (u8 nBtn, point2u gPos) noexcept
-    : Event           (Event::MButtonUp)
-    {
-        m_data.mouseButton.button  = nBtn;
-        m_data.mouseButton.pos     = gPos;
-    }
+    constexpr MouseEvent (u8 nBtn, point2u gPos, bool press_or_release = true) noexcept
+    : Event (press_or_release ? Event::MButtonDown : Event::MButtonUp, { MButtonData (gPos, nBtn) })
+    { }
 };
 
 // =========================================================
 
-struct PointerMoveEvent : public Event
+struct MousePressEvent : public MouseEvent
 {
-    PointerMoveEvent (point2u gPos) noexcept
-    : Event          (Event::PointerMove)
+    constexpr MousePressEvent (u8 nBtn, point2u gPos) noexcept
+    : MouseEvent (nBtn, gPos, true)
+    { }
+};
+
+// =========================================================
+
+struct MouseReleaseEvent : public MouseEvent
+{
+    constexpr MouseReleaseEvent (u8 nBtn, point2u gPos) noexcept
+    : MouseEvent (nBtn, gPos, false)
+    { }
+};
+
+// =========================================================
+
+struct MouseMoveEvent : public Event
+{
+    MouseMoveEvent (point2u gPos) noexcept
+    : Event        (Event::MouseMove)
     {
         m_data.position = gPos;
     }
@@ -322,10 +357,10 @@ struct PointerMoveEvent : public Event
 
 // =========================================================
 
-struct ScrollEvent : public Event
+struct WheelEvent : public Event
 {
-    ScrollEvent (int32 nDelta, point2u gPos) noexcept
-    : Event     (Event::MWheelStep)
+    WheelEvent (int32 nDelta, point2u gPos) noexcept
+    : Event    (Event::MWheelStep)
     {
         m_data.wheel.delta = nDelta;
         m_data.wheel.pos   = gPos;

@@ -29,8 +29,8 @@
 
 namespace cppual { namespace Memory {
 
-template <Repository::size_type N>
-class StaticPool final : public Repository, NonCopyable
+template <MemoryResource::size_type N>
+class StaticPool final : public MemoryResource, NonCopyable
 {
 public:
     size_type capacity () const noexcept
@@ -56,7 +56,7 @@ private:
     { return &gObj == this; }
 };
 
-template <Repository::size_type N>
+template <MemoryResource::size_type N>
 inline void* StaticPool<N>::do_allocate (size_type n, align_type a)
 {
     pointer const pMarker    = nextAlignedAddr (m_pMarker, a);
@@ -68,7 +68,7 @@ inline void* StaticPool<N>::do_allocate (size_type n, align_type a)
     return      pMarker   ;
 }
 
-template <Repository::size_type N>
+template <MemoryResource::size_type N>
 inline void StaticPool<N>::do_deallocate (void* p, size_type n, align_type)
 {
     if (static_cast<math_pointer> (p) + n == m_pMarker)
@@ -77,7 +77,7 @@ inline void StaticPool<N>::do_deallocate (void* p, size_type n, align_type)
         throw std::out_of_range ("pointer doesn't match the last element allocated");
 }
 
-template <class T, Repository::size_type N>
+template <class T, MemoryResource::size_type N>
 using StaticAllocator = Allocator <T, StaticPool<N> >;
 
 } } // namespace Memory

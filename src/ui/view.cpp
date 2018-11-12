@@ -67,49 +67,61 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 
         if (!bRegEvents)
         {
-            connect (EventQueue::emit ().mouseMove,
+            connect (EventQueue::events ().mouseMove,
              [](EventQueue::window_type wnd, point2u pos)
             {
                 Internal::map ()[wnd]->mouseMoved (pos);
             });
 
-            connect (EventQueue::emit ().mousePress,
+            connect (EventQueue::events ().mousePress,
                     [](EventQueue::window_type wnd, event_type::MButtonData data)
             {
                 Internal::map ()[wnd]->mousePressed (data);
             });
 
-            connect (EventQueue::emit ().mouseRelease,
+            connect (EventQueue::events ().mouseRelease,
                     [](EventQueue::window_type wnd, event_type::MButtonData data)
             {
                 Internal::map ()[wnd]->mouseReleased (data);
             });
 
-            connect (EventQueue::emit ().winPaint,
+            connect (EventQueue::events ().scroll,
+                    [](EventQueue::window_type wnd, event_type::MWheelData data)
+            {
+                Internal::map ()[wnd]->mouseWheel (data);
+            });
+
+            connect (EventQueue::events ().winPaint,
                     [](EventQueue::window_type wnd, event_type::PaintData data)
             {
                 Internal::map ()[wnd]->paint (data.region);
             });
 
-            connect (EventQueue::emit ().winFocus,
+            connect (EventQueue::events ().winFocus,
                     [](EventQueue::window_type wnd, bool state)
             {
                 Internal::map ()[wnd]->onFocus (state);
             });
 
-            connect (EventQueue::emit ().winSize,
+            connect (EventQueue::events ().winSize,
                     [](EventQueue::window_type wnd, point2u size)
             {
                 Internal::map ()[wnd]->size (size);
             });
 
-            connect (EventQueue::emit ().winVisible,
+            connect (EventQueue::events ().winVisible,
                     [](EventQueue::window_type wnd, bool state)
             {
                 Internal::map ()[wnd]->onShow (state);
             });
 
-            connect (EventQueue::emit ().winProperty,
+            connect(EventQueue::events ().winStep,
+                    [](EventQueue::window_type wnd, bool state)
+            {
+                Internal::map()[wnd]->onEnterLeave(state);
+            });
+
+            connect (EventQueue::events ().winProperty,
                     [](EventQueue::window_type wnd, event_type::PropertyData data)
             {
                 switch (data.prop)
@@ -122,7 +134,7 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
                 }
             });
 
-            connect (EventQueue::emit ().winDestroy,
+            connect (EventQueue::events ().winDestroy,
                     [](EventQueue::window_type wnd)
             {
                 Internal::map ()[wnd]->onDestroy ();
@@ -165,12 +177,12 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 View::View (View const& gObj) noexcept
 : View (gObj.m_pParentObj,
         gObj.m_pRenderable->geometry (),
-        gObj.m_pRenderable->screen ())
+        gObj.m_pRenderable->screen   ())
 {
     if (gObj.valid ())
     {
         if (!gObj.isEnabled ()) disable ();
-        if (!gObj.isHidden  ()) show ();
+        if (!gObj.isHidden  ()) show    ();
     }
 }
 
@@ -355,14 +367,30 @@ void View::move (point2i gPoint)
 
 void View::mouseMoved (point2u)
 {
+#   ifdef DEBUG_MODE
+    std::cout << "View::mouseMoved(point2u)\n";
+#   endif
+}
+
+void View::mouseWheel (event_type::MWheelData const&)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::mouseWheel(event_type::MWheelData const&)\n";
+#   endif
 }
 
 void View::mousePressed (event_type::MButtonData const&)
 {
+#   ifdef DEBUG_MODE
+    std::cout << "View::mousePressed(event_type::MButtonData const&)\n";
+#   endif
 }
 
 void View::mouseReleased (event_type::MButtonData const&)
 {
+#   ifdef DEBUG_MODE
+    std::cout << "View::mouseReleased(event_type::MButtonData const&)\n";
+#   endif
 }
 
 void View::setFocus ()
@@ -448,6 +476,13 @@ void View::onMove(point2i)
 #   endif
 }
 
+void View::onEnterLeave(bool)
+{
+#   ifdef DEBUG_MODE
+    std::cout << "View::onEnterLeave(bool)\n";
+#   endif
+}
+
 void View::onBeginSizeMove(Rect const&)
 {
 #   ifdef DEBUG_MODE
@@ -481,56 +516,6 @@ void View::onParentSize(point2u)
 #   ifdef DEBUG_MODE
     std::cout << "View::onParentSize(point2u)\n";
 #   endif
-}
-
-// =========================================================
-
-Widget::~Widget()
-{
-}
-
-void Widget::setSize(point2u)
-{
-}
-
-void Widget::move (point2u gPoint)
-{
-    m_gBuffer.move (gPoint);
-    onMove (gPoint);
-}
-
-void Widget::setFocus ()
-{
-    onFocus (true);
-
-    if (m_gChildren.size ())
-        for (Widget* pChild : m_gChildren) pChild->setFocus ();
-}
-
-void Widget::killFocus ()
-{
-    onFocus (false);
-
-    if (m_gChildren.size ())
-        for (Widget* pChild : m_gChildren) pChild->killFocus ();
-}
-
-void Widget::enable ()
-{
-    onEnable (true);
-    for (Widget* pChild : m_gChildren) pChild->enable ();
-}
-
-void Widget::disable ()
-{
-    onEnable (false);
-    for (Widget* pChild : m_gChildren) pChild->disable ();
-}
-
-void Widget::refresh ()
-{
-    onPaint (geometry ());
-    for (Widget* pChild : m_gChildren) pChild->refresh ();
 }
 
 } } // namespace Ui

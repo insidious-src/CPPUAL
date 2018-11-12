@@ -30,18 +30,18 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class StackedPool final : Repository
+class StackedPool final : MemoryResource
 {
 public:
     StackedPool  (size_type capacity);
-    StackedPool  (Repository& allocator, size_type capacity);
+    StackedPool  (MemoryResource& allocator, size_type capacity);
     //StackedPool  (string& shared_name, size_type size);
     ~StackedPool ();
 
     void   clear  ()       noexcept {        m_pCurMarker = m_pBegin; }
     cvoid* marker () const noexcept { return m_pCurMarker;            }
 
-    bool is_equal (Repository const& gObj) const noexcept
+    bool is_equal (MemoryResource const& gObj) const noexcept
     { return &gObj == &m_gOwner; }
 
     size_type max_size () const noexcept
@@ -56,11 +56,11 @@ public:
                                        static_cast<math_pointer> (m_pBegin));
     }
 
-    Repository& owner     () const noexcept { return m_gOwner; }
+    MemoryResource& owner     () const noexcept { return m_gOwner; }
     bool        is_shared () const noexcept { return m_bIsMemShared; }
 
 private:
-    Repository&   m_gOwner;
+    MemoryResource&   m_gOwner;
     pointer       m_pCurMarker;
     pointer const m_pBegin;
     pointer const m_pEnd;
@@ -80,11 +80,11 @@ using StackedPolicy = Allocator <T, StackedPool>;
 
 // =========================================================
 
-class DStackedPool final : public Repository, NonCopyable
+class DStackedPool final : public MemoryResource, NonCopyable
 {
 public:
     DStackedPool  (size_type capacity, size_type marker_hint);
-    DStackedPool  (Repository& allocator, size_type capacity, size_type marker_hint);
+    DStackedPool  (MemoryResource& allocator, size_type capacity, size_type marker_hint);
     //DStackedPool  (string& shared, size_type size, size_type marker_hint);
     ~DStackedPool ();
 
@@ -98,7 +98,7 @@ public:
     bool is_shared () const noexcept
     { return m_bIsMemShared;  }
 
-    Repository& owner () const noexcept
+    MemoryResource& owner () const noexcept
     { return m_gOwner; }
 
     size_type max_size () const noexcept
@@ -120,7 +120,7 @@ public:
     }
 
 private:
-    Repository&   m_gOwner;
+    MemoryResource&   m_gOwner;
     pointer       m_pTopMarker;
     pointer       m_pBottomMarker;
     pointer const m_pBegin;

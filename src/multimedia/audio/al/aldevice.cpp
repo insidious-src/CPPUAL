@@ -118,6 +118,7 @@ inline int convertQuality (OutputFormat eFormat, SoundQuality eQuality) noexcept
         case SoundQuality::High:
             return AL::CH71_32;
         }
+        break;
     default:
         switch (eQuality)
         {

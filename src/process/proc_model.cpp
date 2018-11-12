@@ -19,9 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cppual/process/proc_model.h>
 #include <cstdlib>
 #include <stdexcept>
-#include <cppual/process/proc_model.h>
 
 #ifdef OS_STD_POSIX
 #    include <spawn.h>
@@ -29,7 +29,7 @@
 
 namespace cppual { namespace Process {
 
-process_handle ThisProcess::handle () noexcept
+process_handle This::handle () noexcept
 {
 #   ifdef OS_STD_POSIX
     return ::getpid ();
@@ -55,7 +55,7 @@ process_handle create (cchar* path, char* args[])
 
 int terminate (process_handle hProc)
 {
-    if (ThisProcess::handle () == hProc)
+    if (This::handle () == hProc)
         throw std::logic_error ("using terminate on current process");
 
 #   ifdef OS_STD_POSIX

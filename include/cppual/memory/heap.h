@@ -30,11 +30,11 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class HeapPool final : public Repository, NonCopyable
+class HeapPool final : public MemoryResource, NonCopyable
 {
 public:
     HeapPool   (size_type size);
-    HeapPool   (Repository& allocator, size_type size);
+    HeapPool   (MemoryResource& allocator, size_type size);
     //HeapPool   (string& shared_name, size_type size);
     ~HeapPool  ();
     void clear () noexcept;
@@ -51,14 +51,14 @@ public:
     bool is_shared () const noexcept
     { return m_bIsMemShared;  }
 
-    Repository& owner () const noexcept
+    MemoryResource& owner () const noexcept
     { return m_gOwner; }
 
 private:
     struct Header    { size_type size, adjust;          };
     struct FreeBlock { size_type size; FreeBlock* next; };
 
-    Repository&   m_gOwner;
+    MemoryResource&   m_gOwner;
     pointer const m_pBegin;
     pointer const m_pEnd;
     FreeBlock*    m_pFreeBlocks;
@@ -73,7 +73,7 @@ private:
 
 // =========================================================
 
-class ListPool final : public Repository, NonCopyable
+class ListPool final : public MemoryResource, NonCopyable
 {
 public:
     struct Header
@@ -83,7 +83,7 @@ public:
     };
 
     ListPool (size_type size);
-    ListPool (Repository& allocator, size_type size);
+    ListPool (MemoryResource& allocator, size_type size);
     //ListPool (string& shared_name, size_type size);
     ~ListPool ();
 
@@ -101,14 +101,14 @@ public:
     bool is_shared () const noexcept
     { return m_bIsMemShared;  }
 
-    Repository& owner () const noexcept
+    MemoryResource& owner () const noexcept
     { return m_gOwner; }
 
 private:
     pointer const m_pBegin;
     pointer const m_pEnd;
     Header*       m_pFirstFreeBlock;
-    Repository&   m_gOwner;
+    MemoryResource&   m_gOwner;
     cbool         m_bIsMemShared;
 
     void* do_allocate   (size_type size, align_type align)  noexcept;

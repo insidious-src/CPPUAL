@@ -65,7 +65,7 @@ inline Audio::SoundState convertEmitterState (int nState) noexcept
 // ====================================================
 
 SoundSource::SoundSource () noexcept
-: AudioObject   (ObjectType::Source),
+: Object        (ObjectType::Source),
   m_gMutex      (),
   m_pBuffer     (),
   m_uBufferSlot (),
@@ -73,7 +73,7 @@ SoundSource::SoundSource () noexcept
 { }
 
 SoundSource::SoundSource (SoundBuffer& gBuffer) noexcept
-: AudioObject   (ObjectType::Source),
+: Object        (ObjectType::Source),
   m_gMutex      (),
   m_pBuffer     (),
   m_uBufferSlot (gBuffer.m_gSources.size ()),
@@ -87,7 +87,7 @@ SoundSource::SoundSource (SoundBuffer& gBuffer) noexcept
 }
 
 SoundSource::SoundSource (SoundSource&& gObj) noexcept
-: AudioObject   (gObj),
+: Object        (gObj),
   m_gMutex      (),
   m_pBuffer     (gObj.m_pBuffer),
   m_uBufferSlot (gObj.m_uBufferSlot),
@@ -98,7 +98,7 @@ SoundSource::SoundSource (SoundSource&& gObj) noexcept
 }
 
 SoundSource::SoundSource (SoundSource const& gObj) noexcept
-: AudioObject   (gObj),
+: Object        (gObj),
   m_gMutex      (),
   m_pBuffer     (gObj.m_pBuffer),
   m_uBufferSlot (gObj.m_pBuffer ? gObj.m_pBuffer->m_gSources.size () : 0),

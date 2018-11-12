@@ -31,7 +31,7 @@ using std::mutex;
 
 namespace cppual { namespace Audio { namespace AL {
 
-class SoundSource : public AudioObject
+class SoundSource : public Object
 {
 public:
     typedef std::deque<SoundBuffer*> queue_type;

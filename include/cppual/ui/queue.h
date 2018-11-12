@@ -44,11 +44,14 @@ public:
     typedef Input::Event             event_type     ;
     typedef Graphics::Connection     connection_type;
     typedef IPlatformWindow          window_type    ;
+    typedef std::atomic_bool         bool_type      ;
     typedef BitSet<event_type::Type> mask_type      ;
+
+    ~IDisplayQueue();
 
     virtual bool set_window_events (window_type const&, mask_type)         = 0;
     virtual bool pop_front         (event_type& receiver, bool wait)       = 0;
-    virtual int  poll              (window_type const&, atomic_bool& poll) = 0;
+    virtual int  poll              (window_type const&, bool_type& poll)   = 0;
     virtual void send              (window_type const&, event_type const&) = 0;
     virtual void post              (window_type const&, event_type const&) = 0;
 
@@ -98,7 +101,7 @@ public:
         Signal<void(window_type)>                           winDestroy;
     };
 
-    static Signals& emit ()
+    static Signals& events ()
     {
         static Signals event_signals;
         return event_signals;
@@ -106,7 +109,7 @@ public:
 
     EventQueue (IDisplayQueue* display_queue = IDisplayQueue::primary ()) noexcept
     : queue    (display_queue),
-      polling  ()
+      polling  (true)
     { }
 
     int poll (control_type const& window)
@@ -124,14 +127,14 @@ public:
     void post (control_type const& window, event_type const& event)
     { queue->post (*window.renderable_unsafe (), event); }
 
-    void quit () noexcept
+    void quit ()
     { polling = false; }
 
     bool pop_front (event_type& receiver, bool wait)
     { return queue->pop_front (receiver, wait); }
 
     bool isPolling () const noexcept
-    { return polling.load (); }
+    { return polling; }
 
 private:
     IDisplayQueue* queue  ;

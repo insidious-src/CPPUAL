@@ -23,13 +23,16 @@
 #define CPPUAL_PROCESS_PLUGIN_H_
 #ifdef __cplusplus
 
+#include <cppual/types.h>
+#include <cppual/flags.h>
+#include <cppual/noncopyable.h>
+#include <cppual/resource.h>
+#include <cppual/concepts.h>
+#include <cppual/memory/allocator.h>
+
 #include <memory>
 #include <functional>
 #include <unordered_map>
-#include <cppual/types.h>
-#include <cppual/flags.h>
-#include <cppual/signal.h>
-#include <cppual/resource.h>
 
 namespace cppual { namespace Process {
 
@@ -40,7 +43,7 @@ public:
     typedef std::string   string_type;
     typedef Handle        handle_type;
 
-    enum class ResolvePolicy : unsigned char
+    enum class ResolvePolicy : byte
     {
         Static,    // use as data file or load as static library
         Immediate, // resolve everything ot load
@@ -48,8 +51,8 @@ public:
     };
 
     DynLoader () = default;
-    DynLoader (DynLoader&&) = default;
-    DynLoader& operator = (DynLoader&&) = default;
+    DynLoader (DynLoader&&) noexcept;
+    DynLoader& operator = (DynLoader&&) noexcept;
     bool attach () noexcept;
     void detach () noexcept;
 
@@ -86,11 +89,10 @@ public:
     template <typename TRet, typename... TArgs>
     TRet call (string_type pName, TArgs&&... args) const
     {
-        typedef TRet (* Func)(TArgs...);
-        function_type func = get_function (pName.c_str ());
+        auto fn = direct_cast<TRet(*)(TArgs...)> (get_function (pName.c_str ()));
 
-        if (!func) std::bad_function_call ();
-        return (*reinterpret_cast<Func> (func))(std::forward<TArgs> (args)...);
+        if (!fn) std::bad_function_call ();
+        return fn (std::forward<TArgs> (args)...);
     }
 
 private:
@@ -98,70 +100,106 @@ private:
     function_type get_function (string_type::const_pointer name) const noexcept;
 
 private:
-    handle_type       m_pHandle;
-    string_type const m_gLibPath;
-    ResolvePolicy     m_eResolve;
+    handle_type   m_pHandle ;
+    string_type   m_gLibPath;
+    ResolvePolicy m_eResolve;
 };
 
 // =========================================================
 
-struct Plugin
+extern "C" struct Plugin
 {
     cchar* name;
     cchar* provides;
     cchar* desc;
-    void * iface;
+    cchar* iface;
     int    version;
 };
 
-template <typename Interface,
-          typename Allocator =
-          std::allocator<std::pair<const string, std::pair<DynLoader, Plugin> > >
-          >
-class PluginManager
+template <typename Interface>
+class PluginManager : public NonCopyable
 {
 public:
-    typedef typename Allocator::size_type  size_type;
-    typedef typename Allocator::value_type pair_type;
-    typedef std::string                    key_type;
-    typedef std::string const              const_key;
-    typedef std::hash<key_type>            hash_type;
-    typedef std::equal_to<key_type>        equal_type;
-    typedef std::pair<DynLoader, Plugin>   value_type;
-    typedef Interface                      iface_type;
-    typedef Allocator                      allocator_type;
+    typedef Memory::PolymorphicAllocator
+    <std::pair<const std::string, std::pair<DynLoader, Plugin> > > allocator_type;
+
+    typedef typename allocator_type::size_type  size_type     ;
+    typedef typename allocator_type::value_type pair_type     ;
+    typedef std::string                         key_type      ;
+    typedef std::string const                   const_key     ;
+    typedef std::hash<key_type>                 hash_type     ;
+    typedef std::equal_to<key_type>             equal_type    ;
+    typedef Movable<DynLoader>                  loader_type   ;
+    typedef std::pair<loader_type, Plugin>      value_type    ;
+    typedef Interface                           iface_type    ;
+    typedef std::shared_ptr<iface_type>         shared_iface  ;
 
     typedef std::unordered_map
     <key_type, value_type, hash_type, equal_type, allocator_type> map_type;
 
+    constexpr static const auto plugin_main = "plugin_main";
+
+    constexpr
     PluginManager () = default;
-    PluginManager (const_key& plugins_dir, allocator_type& = allocator_type ());
-    PluginManager (PluginManager&&);
-    PluginManager& operator = (PluginManager&&);
+    PluginManager (PluginManager&&) = default;
+    PluginManager& operator = (PluginManager&&) = default;
 
-    bool load           (const_key& plugins_dir);
     bool load_plugin    (const_key& path);
-    bool is_registered  (const_key& name) noexcept;
-    void release_plugin (const_key& name);
+    bool is_registered  (const_key& path) const noexcept;
+    void release_plugin (const_key& path);
 
-    void release ()                { m_gPluginMap.clear ();        }
-    bool empty   () const noexcept { return m_gPluginMap.empty (); }
+    void release_all ()
+    { m_gPluginMap.clear(); }
 
-    DynLoader* plugin (const_key& plugin_name) const noexcept
-    { return &m_gPluginMap[plugin_name].first; }
+    bool empty () const noexcept
+    { return m_gPluginMap.empty (); }
 
-    key_type description (const_key& plugin_name) const noexcept
-    { return m_gPluginMap[plugin_name].second.desc; }
+    allocator_type get_allocator () const noexcept
+    { return m_gPluginMap.get_allocator (); }
 
-    int version (const_key& plugin_name) const noexcept
-    { return m_gPluginMap[plugin_name].second.version; }
+    loader_type* loader (const_key& plugin_path) const
+    { return &m_gPluginMap[plugin_path].first; }
 
-    iface_type* construct (const_key& plugin_name) const noexcept
-    { return static_cast<iface_type*> (m_gPluginMap[plugin_name].second.iface); }
+    Plugin plugin (const_key& plugin_path) const
+    { return m_gPluginMap[plugin_path].second; }
+
+    shared_iface construct (const_key& plugin_path) const
+    {
+        return shared_iface(m_gPluginMap[plugin_path].first.
+                            template call<iface_type*>(m_gPluginMap[plugin_path].second.iface));
+    }
+
+    PluginManager (allocator_type& ator)
+    : m_gPluginMap(ator)
+    { }
 
 private:
     mutable map_type m_gPluginMap;
 };
+
+template<typename Interface>
+bool PluginManager<Interface>::load_plugin (const_key& path)
+{
+    loader_type loader (path);
+
+    if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
+    Plugin plugin = loader.call<Plugin> (plugin_main);
+
+    m_gPluginMap.try_emplace (path, std::make_pair (std::move(loader), plugin));
+    return true;
+}
+
+template<typename Interface>
+bool PluginManager<Interface>::is_registered (const_key& path) const noexcept
+{
+    return m_gPluginMap.find (path) != m_gPluginMap.end ();
+}
+
+template<typename Interface>
+void PluginManager<Interface>::release_plugin (const_key& path)
+{
+    if (is_registered (path)) m_gPluginMap.erase (m_gPluginMap.find(path));
+}
 
 } } // namespace Process
 

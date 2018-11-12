@@ -38,17 +38,7 @@ public:
     typedef Memory::Allocator<View*>             allocator_type;
     typedef CircularQueue<View*, allocator_type> container;
     typedef std::size_t                          size_type;
-
-    typedef typename
-    container::iterator iterator;
-
-//    typedef typename
-//    Signal<void(window_type, point2u)>
-//    ::slot_type mouse_move_conn;
-
-//    typedef typename
-//    Signal<void(window_type, event_type::MButtonData)>
-//    ::slot_type mouse_btn_conn;
+    typedef typename container::iterator         iterator;
 
     enum
     {
@@ -105,12 +95,17 @@ public:
     { }
 
 protected:
+    virtual void mouseMoved (point2u);
+    virtual void mouseWheel (event_type::MWheelData const&);
+    virtual void mousePressed (event_type::MButtonData const&);
+    virtual void mouseReleased (event_type::MButtonData const&);
     virtual void onDestroy ();
     virtual void onShow (bool);
     virtual void onPaint (Rect const&);
     virtual void onEnable (bool);
     virtual void onSize (point2u);
     virtual void onMove (point2i);
+    virtual void onEnterLeave(bool);
     virtual void onBeginSizeMove (Rect const&);
     virtual void onEndSizeMove (Rect const&);
     virtual void onMinMaxSize (point2u);
@@ -129,9 +124,6 @@ private:
 
     void paint (Rect const&);
     void size (point2u);
-    void mouseMoved (point2u);
-    void mousePressed (event_type::MButtonData const&);
-    void mouseReleased (event_type::MButtonData const&);
     void destroyResources ();
     void invalidate () noexcept;
 
@@ -142,86 +134,6 @@ private:
     iterator      m_gItFromParent;
     View*         m_pParentObj;
     StateFlags    m_gStateFlags;
-};
-
-// =========================================================
-
-class Widget
-{
-public:
-    typedef Memory::Allocator<Widget*>             allocator_type;
-    typedef CircularQueue<Widget*, allocator_type> container_type;
-    typedef std::size_t                            size_type     ;
-
-    void destroy ();
-    void show ();
-    void hide ();
-    bool setParent (View* parent, point2i pos = point2i ());
-    void setGeometry (Rect const&);
-    void setSize (point2u);
-    void setMinimumSize (point2u);
-    void setMaximumSize (point2u);
-    void move (point2u);
-    void refresh ();
-    void enable ();
-    void disable ();
-    void setFocus ();
-    void killFocus ();
-
-    Widget (Widget*     parent,
-            Rect const& rect,
-            allocator_type const& = allocator_type ());
-
-    virtual ~Widget ();
-
-    point2u minimumSize () const noexcept { return m_gMinSize; }
-    point2u maximumSize () const noexcept { return m_gMaxSize; }
-
-    bool isEnabled () const noexcept
-    { return m_gStateFlags.test (Widget::Enabled); }
-
-    bool hasFocus () const noexcept
-    { return m_gStateFlags.test (Widget::HasFocus); }
-
-    bool isHidden () const noexcept
-    { return !m_gBuffer.isMapped (); }
-
-    Rect geometry () const noexcept
-    { return m_gBuffer.geometry (); }
-
-    string name () const noexcept
-    { return m_gName; }
-
-protected:
-    virtual void onDestroy () { }
-    virtual void onShow (bool) { }
-    virtual void onPaint (Rect const&) { }
-    virtual void onEnable (bool) { }
-    virtual void onSize (point2u) { }
-    virtual void onMove (point2u) { }
-    virtual void onBeginSizeMove (Rect const&) { }
-    virtual void onEndSizeMove (Rect const&) { }
-    virtual void onFocus (bool) { }
-    virtual void onParentSize (point2u) { }
-
-private:
-    enum StateFlag
-    {
-        HasFocus = 1 << 1,
-        Enabled  = 1 << 2
-    };
-
-    typedef BitSet<StateFlag> StateFlags;
-
-    void paint (Rect const&);
-
-private:
-    VirtualBuffer  m_gBuffer;
-    container_type m_gChildren;
-    Widget*        m_pParent;
-    string         m_gName;
-    point2u        m_gMinSize, m_gMaxSize;
-    StateFlags     m_gStateFlags;
 };
 
 } } // namespace Ui

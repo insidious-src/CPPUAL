@@ -26,17 +26,19 @@
 #include <cppual/types.h>
 #include <xcb/xcb.h>
 #include <string>
+#include <memory>
 #include "xcb_def.h"
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
 namespace cppual { namespace Ui { namespace Xcb {
 
-typedef std::string string_type;
+typedef std::string                                string_type;
+typedef std::unique_ptr<::xcb_intern_atom_reply_t> intern_ptr ;
 
 inline ::xcb_intern_atom_reply_t* internAtomHelper (display_type* conn,
-                                                    bool only_if_exists,
-                                                    string_type const& str)
+                                                    string_type const& str,
+                                                    bool only_if_exists = false)
 {
     ::xcb_intern_atom_cookie_t cookie = ::xcb_intern_atom (conn, only_if_exists,
                                                            static_cast<u16> (str.length()),

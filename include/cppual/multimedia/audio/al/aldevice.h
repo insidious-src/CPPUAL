@@ -79,8 +79,8 @@ protected:
 class PlaybackDevice final : public AudioDevice
 {
 public:
-    PlaybackDevice () noexcept;
-    PlaybackDevice (string const& name) noexcept;
+    PlaybackDevice  () noexcept;
+    PlaybackDevice  (string const& name) noexcept;
     ~PlaybackDevice () noexcept;
 };
 

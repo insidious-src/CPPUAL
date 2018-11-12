@@ -3,7 +3,7 @@ find_package(PackageHandleStandardArgs)
 set(HEADER_FILES  wayland-client-protocol.h winuser.h)
 set(LIBRARY_NAMES wayland-client user32)
 
-find_path(WM_INCLUDE_DIR 
+find_path(WM_INCLUDE_DIR
         NAMES
                 ${HEADER_FILES}
         PATHS
@@ -16,14 +16,14 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "BSD")
     if(CMAKE_SIZEOF_VOID_P EQUAL 4)
             find_library(WM_LEGACY_LIBRARY
                 NAMES
-                        xcb-icccm X11-xcb X11
+                        xcb-icccm X11-xcb
                 PATH_SUFFIXES
                         lib32 lib
                 )
     elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
             find_library(WM_LEGACY_LIBRARY
                 NAMES
-                        xcb-icccm X11-xcb X11
+                        xcb-icccm X11-xcb
                 PATH_SUFFIXES
                         lib lib64
                 )

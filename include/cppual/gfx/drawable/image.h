@@ -27,16 +27,15 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/memory/allocator.h>
 
-using std::string;
-using cppual::Memory::Allocator;
-using cppual::Memory::Repository;
-
+using cppual::Memory::MemoryResource;
 
 namespace cppual { namespace Graphics {
 
 class Image : public IDrawable2D, public ITransformable2D
 {
 public:
+    typedef std::string string_type;
+
     virtual VirtualBuffer* map () noexcept = 0;
     virtual bool           isLoaded () const noexcept = 0;
 };
@@ -44,19 +43,19 @@ public:
 // =========================================================
 
 /**
- * @class CRasterImage
+ * @class RasterImage
  * @brief Raster image parser for jpg, png, bmp, tga, gif
  */
 
-class RasterImage final : public Image, private Memory::Allocator<RasterImage, Repository>
+class RasterImage final : public Image, private Memory::Allocator<RasterImage, MemoryResource>
 {
 public:
     RasterImage  () = delete;
     ~RasterImage ();
     void draw (Transform2D const& info);
 
-    inline RasterImage (string const&      gPath,
-                        Repository&        pAtor,
+    inline RasterImage (string_type const& gPath,
+                        MemoryResource&        pAtor,
                         PixelFormat const& gFomat = PixelFormat (),
                         Color              gMask  = Color       ())
     : Allocator (pAtor),
@@ -82,17 +81,17 @@ private:
     Color         m_gColorMask;
     cbool         m_bIsLoaded ;
 
-    bool parseImage (string const&);
+    bool parseImage (string_type const&);
 };
 
 // =========================================================
 
 /**
- * @class CVectorImage
+ * @class VectorImage
  * @brief Vector image parser for svg
  */
 
-class VectorImage final : public Image, private Memory::Allocator<VectorImage, Repository>
+class VectorImage final : public Image, private Memory::Allocator<VectorImage, MemoryResource>
 {
 public:
     VectorImage  () = delete;
@@ -108,8 +107,8 @@ public:
     inline bool isLoaded () const noexcept
     { return m_bIsLoaded; }
 
-    inline VectorImage (string const&      gPath,
-                        Repository&        pAtor,
+    inline VectorImage (string_type const& gPath,
+                        MemoryResource&        pAtor,
                         PixelFormat const& gFomat = PixelFormat ())
     : Allocator (pAtor),
       m_gPixBuffer ({ 0, 0 },   gFomat),
@@ -120,7 +119,7 @@ private:
     VirtualBuffer m_gPixBuffer;
     cbool         m_bIsLoaded ;
 
-    bool parseImage (string const&);
+    bool parseImage (string_type const&);
 };
 
 // =========================================================
@@ -128,9 +127,11 @@ private:
 class Icon final
 {
 public:
+    typedef std::string string_type;
+
     Icon () { }
-    Icon (string const&) { }
-    bool load (string const&) { return false; }
+    Icon (string_type const&) { }
+    bool load (string_type const&) { return false; }
 };
 
 } } // Graphics

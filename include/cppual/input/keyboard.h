@@ -25,76 +25,18 @@
 
 #include <cppual/types.h>
 #include <cppual/noncopyable.h>
-#include <cppual/input/event.h>
 
 namespace cppual { namespace Input {
 
 struct Keyboard;
-
-// =========================================================
-
-//class KeyEvent
-//{
-//public:
-//    typedef u8  size_type;
-//    typedef u8  key_type ;
-//    typedef u16 mask_type;
-
-//    enum Type
-//    {
-//        Release,
-//        Press
-//    };
-
-//    struct Data
-//    {
-//        size_type id;
-//        key_type  key;
-//        mask_type mask;
-//    };
-
-//    inline KeyEvent () noexcept = default;
-//    constexpr Data const& data  () const noexcept { return m_gData;  }
-//    constexpr Type        state () const noexcept { return m_eState; }
-
-//    constexpr KeyEvent (size_type uId, key_type uKey, mask_type uMask, Type eType) noexcept
-//    : m_gData  { uId, uKey, uMask },
-//      m_eState (eType)
-//    { }
-
-//private:
-//    Data m_gData;
-//    Type m_eState;
-//};
-
-//// =========================================================
-
-//struct KeyPressEvent : public KeyEvent
-//{
-//    inline KeyPressEvent () noexcept = default;
-
-//    constexpr KeyPressEvent (size_type uId, key_type uKey, mask_type uMask) noexcept
-//    : KeyEvent (uId, uKey, uMask, Press)
-//    { }
-//};
-
-//// =========================================================
-
-//struct KeyReleaseEvent : public KeyEvent
-//{
-//    inline KeyReleaseEvent () noexcept = default;
-
-//    constexpr KeyReleaseEvent (size_type uId, key_type uKey, mask_type uMask) noexcept
-//    : KeyEvent (uId, uKey, uMask, Release)
-//    { }
-//};
+struct KeyEvent;
 
 // =========================================================
 
 class KeyQueue : NonConstructible
 {
 public:
-    typedef KeyPressEvent event_type;
+    typedef KeyEvent event_type;
 
     static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
@@ -111,7 +53,7 @@ struct Keyboard
         KeysAtOnceCount = 3
     };
 
-    enum class Lock : char
+    enum class Lock : byte
     {
         Caps,
         Num,
@@ -406,16 +348,16 @@ struct Keyboard
     enum Key
     {
         UndefinedKey = 0,
-        Num0 = '0',
-        Num1 = '1',
-        Num2 = '2',
-        Num3 = '3',
-        Num4 = '4',
-        Num5 = '5',
-        Num6 = '6',
-        Num7 = '7',
-        Num8 = '8',
-        Num9 = '9',
+        Zero = '0',
+        One = '1',
+        Two = '2',
+        Three = '3',
+        Four = '4',
+        Five = '5',
+        Six = '6',
+        Seven = '7',
+        Eight = '8',
+        Nine = '9',
         A = 'A',
         B = 'B',
         C = 'C',
@@ -457,7 +399,7 @@ struct Keyboard
         LParen = '(',
         RParen = ')',
         SemiColon = ';',
-        Color = ':',
+        Colon = ':',
         Comma = ',',
         Dot = '.',
         Quote = '\'',

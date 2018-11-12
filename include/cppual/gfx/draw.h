@@ -45,7 +45,7 @@ struct PixelFlag final
     };
 };
 
-enum class DeviceType : unsigned char
+enum class DeviceType : byte
 {
     Custom,
     Native,
@@ -57,7 +57,7 @@ enum class DeviceType : unsigned char
     Metal
 };
 
-enum class PolygonFace : unsigned char
+enum class PolygonFace : byte
 {
     Front,
     Back,
@@ -67,16 +67,30 @@ enum class PolygonFace : unsigned char
 struct  GFXVersion;
 struct  IDeviceContext;
 struct  IPixelSurface;
-typedef BitSet<PixelFlag::Type>         PixelFlags;
-typedef std::shared_ptr<IDeviceContext> shared_context;
-typedef std::shared_ptr<IPixelSurface>  shared_buffer;
-typedef std::weak_ptr  <IDeviceContext> weak_context;
-typedef std::weak_ptr  <IPixelSurface>  weak_buffer;
+struct  IDrawable2D;
+struct  IDrawable3D;
+typedef BitSet<PixelFlag::Type>         PixelFlags       ;
+typedef std::shared_ptr<IDeviceContext> shared_context   ;
+typedef std::shared_ptr<IPixelSurface>  shared_buffer    ;
+typedef std::shared_ptr<IDrawable2D>    shared_drawable2d;
+typedef std::shared_ptr<IDrawable3D>    shared_drawable3d;
+typedef std::weak_ptr  <IDeviceContext> weak_context     ;
+typedef std::weak_ptr  <IPixelSurface>  weak_buffer      ;
+typedef std::weak_ptr  <IDrawable2D>    weak_drawable2d  ;
+typedef std::weak_ptr  <IDrawable3D>    weak_drawable3d  ;
 
 // =========================================================
 
 struct GFXVersion
 {
+    constexpr GFXVersion () noexcept
+    : GFXVersion (0, 0)
+    { }
+
+    constexpr GFXVersion (int _major, int _minor) noexcept
+    : major(_major), minor(_minor)
+    { }
+
     int major, minor;
 };
 
@@ -84,9 +98,9 @@ struct GFXVersion
 
 struct PixelFormat final
 {
+    PixelFlags flags;
     u8         red, green, blue, alpha;
     u8         depth, stencil;
-    PixelFlags flags;
     ColorType  colorType;
 
     constexpr u8 bits () const noexcept
@@ -96,13 +110,13 @@ struct PixelFormat final
     {
         return
         {
-            8,
-            8,
-            8,
-            0,
-            0,
-            0,
             PixelFlag::Drawable | PixelFlag::Bitmap,
+            8,
+            8,
+            8,
+            0,
+            0,
+            0,
             ColorType::TrueType
         };
     }
@@ -111,13 +125,13 @@ struct PixelFormat final
     {
         return
         {
+            PixelFlag::Drawable | PixelFlag::Bitmap,
             8,
             8,
             8,
             8,
             24,
             0,
-            PixelFlag::Drawable | PixelFlag::Bitmap,
             ColorType::Direct
         };
     }
@@ -173,11 +187,11 @@ class Transform3D
 
 struct IResource
 {
-    typedef Connection  controller;
-    typedef Element     value_type;
+    typedef Connection  controller ;
+    typedef Element     value_type ;
     typedef PixelFormat format_type;
 
-    virtual ~IResource () { }
+    virtual ~IResource ();
 
     virtual controller  connection () const = 0;
     virtual format_type format     () const = 0;
@@ -191,7 +205,7 @@ struct IResource
 // Surface
 struct IPixelSurface : public IResource
 {
-    enum class Type : unsigned char
+    enum class Type : byte
     {
         Drawable,
         DoubleBuffer,
@@ -209,7 +223,7 @@ struct IPixelSurface : public IResource
 // Device
 struct IDeviceContext : public IResource
 {
-    typedef IPixelSurface*       pointer;
+    typedef IPixelSurface*       pointer      ;
     typedef IPixelSurface const* const_pointer;
 
     virtual pointer       drawable () const = 0;
@@ -234,7 +248,7 @@ struct IDrawable2D
     virtual DeviceType type () const noexcept    = 0;
     virtual void       draw (Transform2D const&) = 0;
 
-    virtual ~IDrawable2D () { }
+    virtual ~IDrawable2D ();
 };
 
 // =========================================================
@@ -244,30 +258,38 @@ struct IDrawable3D
     virtual DeviceType type () const noexcept    = 0;
     virtual void       draw (Transform3D const&) = 0;
 
-    virtual ~IDrawable3D () { }
+    virtual ~IDrawable3D ();
 };
 
 // =========================================================
 
 struct ITransformable2D
 {
-    virtual ~ITransformable2D () { }
+    virtual ~ITransformable2D ();
 };
 
 // =========================================================
 
 struct ITransformable3D
 {
-    virtual ~ITransformable3D () { }
+    virtual ~ITransformable3D ();
 };
 
 // ====================================================
 
 struct DrawableFactory
 {
-    static IDrawable2D* create2D (string const& name);
-    static IDrawable3D* create3D (string const& name);
-    static bool         load     (string const& module_path);
+    static shared_drawable2d create2D (string const& name);
+    static shared_drawable3d create3D (string const& name);
+    static bool              load     (string const& module_path);
+};
+
+// ====================================================
+
+struct ContextFactory
+{
+    static shared_context create (string const& name);
+    static bool           load   (string const& module_path);
 };
 
 // ====================================================
@@ -299,6 +321,24 @@ operator << (std::basic_ostream<CharT, Traits>& os, GFXVersion const& u)
 { return os << u.major << "." << u.minor; }
 
 } } // namespace Graphics
+
+namespace std {
+
+template <>
+struct hash<cppual::Graphics::GFXVersion>
+{
+    std::size_t operator()(const cppual::Graphics::GFXVersion& version) const
+    {
+
+        // Compute individual hash values for major,
+        // and minor and combine them using XOR
+        // and bit shifting
+
+        return ((hash<int>()(version.major) ^ (hash<int>()(version.minor) << 1)) >> 1);
+    }
+};
+
+}
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_DRAW_H_

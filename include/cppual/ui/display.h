@@ -44,6 +44,7 @@ public:
     typedef shared_display       pointer    ;
 
     constexpr IDisplay () noexcept = default;
+    ~IDisplay ();
 
     virtual string_type name             () const = 0;
     virtual uint        screenCount      () const = 0;

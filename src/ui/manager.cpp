@@ -24,70 +24,54 @@
 
 namespace cppual { namespace Ui { namespace Platform {
 
-namespace { namespace Internal { // optimize for internal unit usage
+namespace { // optimize for internal unit usage
 
-inline cchar* server () noexcept
+class Initializer final
 {
-#   if defined OS_GNU_LINUX or defined OS_BSD
-        return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" :
-                                                 "libcppual-ui-xorg"    ;
-#   elif defined OS_WINDOWS
-        return "libcppual-ui-win";
-#   endif
-}
+private:
+    Factory::manager_type mgr    ;
+    shared_manager        factory;
 
-struct Initializer
-{
-    Factory::plugin_type plg;
-    shared_manager       mgr;
+    inline cchar* display_server () noexcept
+    {
+    #   if defined OS_GNU_LINUX or defined OS_BSD
+            return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" :
+                                                     "libcppual-ui-xorg"    ;
+    #   elif defined OS_WINDOWS
+            return "libcppual-ui-win";
+    #   endif
+    }
 
-    inline Initializer () noexcept
-    : plg (server (), true, Process::DynLoader::ResolvePolicy::Lazy),
-      mgr ()
-    { }
+    inline static Initializer& platform () noexcept
+    {
+        static Initializer init;
+        return init;
+    }
+
+public:
+    inline Initializer ()
+    {
+        if (mgr.load_plugin(display_server())) factory = mgr.construct(display_server());
+    }
+
+    inline static shared_manager& instance () noexcept
+    {
+        return platform ().factory;
+    }
 };
 
-inline Initializer& platform () noexcept
-{
-    static Initializer init;
-    return init;
-}
-
-inline shared_manager& instance () noexcept
-{
-    return platform ().mgr;
-}
-
-inline Factory::plugin_type& plugin () noexcept
-{
-    return platform ().plg;
-}
-
-} } // anonymous namespace Internal
+} // anonymous namespace
 
 // ====================================================
 
 Factory* Factory::instance ()
 {
-    if (Internal::instance () == nullptr)
-    {
-        if (!Internal::plugin    ().contains  ("plugin_main") or
-             Internal::plugin    ().call<int> ("plugin_main", Internal::instance ()) or
-             Internal::instance  () == nullptr)
-            throw std::bad_alloc ();
-    }
-
-    return Internal::instance ().get ();
-}
-
-Factory::plugin_type& Factory::plugin ()
-{
-    return Internal::plugin ();
+    return Initializer::instance ().get ();
 }
 
 bool Factory::hasValidInstance () noexcept
 {
-    return Internal::instance () != nullptr;
+    return Initializer::instance () != nullptr;
 }
 
 } } } // namespace Platform

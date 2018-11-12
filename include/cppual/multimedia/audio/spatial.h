@@ -27,20 +27,20 @@
 
 namespace cppual { namespace Audio {
 
-enum class ObjectType : bool
+enum class ObjectType : byte
 {
     Buffer,
     Source
 };
 
-enum class EmitType : unsigned char
+enum class EmitType : byte
 {
     Undetermined,
     Static,
     Streaming
 };
 
-enum class DistanceModel : unsigned char
+enum class DistanceModel : byte
 {
     Plain,
     InverseDistance,

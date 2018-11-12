@@ -268,7 +268,7 @@ public:
 
 private:
     signal_type* m_signal;
-    slot_type    m_fn;
+    slot_type    m_fn    ;
 };
 
 } // cppual

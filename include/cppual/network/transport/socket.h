@@ -76,9 +76,9 @@ protected:
     void close () noexcept;
 
 private:
-    socket_id        m_nId;
-    SocketType       m_eProtocol;
-    bool             m_bIsBlocking;
+    socket_id  m_nId;
+    SocketType m_eProtocol;
+    bool       m_bIsBlocking;
 
     void initSocket () noexcept;
 };

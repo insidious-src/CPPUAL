@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <cstring>
+#include <cppual/types.h>
 #include <cppual/concepts.h>
 
 #ifdef DEBUG_MODE
@@ -70,7 +71,7 @@ struct SimplifyMemFunc <sizeof (AnyMemberFn)>
                         XFuncType    mFuncToBind,
                         AnyMemberFn& mFuncBound ) noexcept
     {
-        mFuncBound = reinterpret_cast<AnyMemberFn> (mFuncToBind)    ;
+        mFuncBound = direct_cast<AnyMemberFn> (mFuncToBind)    ;
         return reinterpret_cast<AnyObject*> (const_cast<X*> (pThis));
     }
 };
@@ -172,42 +173,18 @@ public:
 
     inline size_type hash () const noexcept
     {
-        return reinterpret_cast<size_type> (m_pObj) ^
-                unsafe_direct_cast<size_type> (m_fn);
+        return reinterpret_cast  <size_type> (m_pObj) ^
+               unsafe_direct_cast<size_type> (m_fn  ) ;
     }
 
     inline pointer object () const noexcept
     { return m_pObj; }
 
     inline TMemFunc getPtrFunction () const noexcept
-    { return reinterpret_cast<TMemFunc> (m_fn); }
+    { return direct_cast<TMemFunc> (m_fn); }
 
     inline TStaticFunc getStaticFunc () const noexcept
-    {
-        static_assert (sizeof (TStaticFunc) == sizeof (this),
-                       "Cannot use direct_cast");
-        return direct_cast<TStaticFunc> (this);
-    }
-
-private:
-    template<class Out, class In>
-    constexpr Out direct_cast (In in) const noexcept
-    {
-        typedef union { Out out; In in; } cast_union;
-
-        static_assert (sizeof (In) == sizeof (cast_union) and
-                       sizeof (In) == sizeof (Out),
-                       "cannot use direct_cast");
-
-        return cast_union (in).out;
-    }
-
-    template<class Out, class In>
-    constexpr Out unsafe_direct_cast (In in) const noexcept
-    {
-        typedef union { Out out; In in; } cast_union;
-        return cast_union (in).out;
-    }
+    { return direct_cast<TStaticFunc> (this); }
 
 private:
     pointer    m_pObj { nullptr };
@@ -239,7 +216,7 @@ public:
     {
         using FuncType = typename std::decay<Callable>::type;
 
-        if (HasCapture)
+        if constexpr (HasCapture)
         {
             new (m_storage.get ()) FuncType (std::forward<Callable> (mFunc));
             m_closure.bindMemFunc (m_storage.get (), &FuncType::operator ());

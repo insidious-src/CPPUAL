@@ -37,7 +37,7 @@ bool           running   (cchar*) noexcept;
 
 // =========================================================
 
-namespace ThisProcess {
+namespace This {
 
 process_handle handle () noexcept;
 

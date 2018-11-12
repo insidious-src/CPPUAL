@@ -22,11 +22,9 @@
 #include <cppual/multimedia/audio/al/alobject.h>
 #include "aldef.h"
 
-using std::atomic_uint;
-
 namespace cppual { namespace Audio { namespace AL {
 
-atomic_uint AudioObject::sm_uALObjCount { 0 };
+atomic_uint Object::sm_uALObjCount { 0 };
 
 // =========================================================
 
@@ -53,26 +51,26 @@ inline uint generateObject (ObjectType eType) noexcept
 
 // =========================================================
 
-AudioObject::AudioObject (ObjectType eType) noexcept
+Object::Object (ObjectType eType) noexcept
 : m_uObjId (generateObject (eType)), m_eObjType (eType)
 {
     if (m_uObjId) ++sm_uALObjCount;
 }
 
-AudioObject::AudioObject (AudioObject const& gObj) noexcept
+Object::Object (Object const& gObj) noexcept
 : m_uObjId (generateObject (gObj.m_eObjType)), m_eObjType (gObj.m_eObjType)
 {
     if (m_uObjId) ++sm_uALObjCount;
 }
 
-AudioObject::AudioObject (AudioObject&& gObj) noexcept
+Object::Object (Object&& gObj) noexcept
 : m_uObjId   (gObj.m_uObjId),
   m_eObjType (gObj.m_eObjType)
 {
     gObj.m_uObjId = 0;
 }
 
-AudioObject& AudioObject::operator = (AudioObject&& gObj) noexcept
+Object& Object::operator = (Object&& gObj) noexcept
 {
     if (this != &gObj)
     {
@@ -87,12 +85,12 @@ AudioObject& AudioObject::operator = (AudioObject&& gObj) noexcept
     return *this;
 }
 
-AudioObject& AudioObject::operator = (AudioObject const& gObj) noexcept
+Object& Object::operator = (Object const& gObj) noexcept
 {
     if (this != &gObj and m_eObjType != gObj.m_eObjType)
     {
         reset ();
-        
+
         m_uObjId   = generateObject (gObj.m_eObjType);
         m_eObjType = gObj.m_eObjType;
     }
@@ -100,7 +98,7 @@ AudioObject& AudioObject::operator = (AudioObject const& gObj) noexcept
     return *this;
 }
 
-void AudioObject::reset () noexcept
+void Object::reset () noexcept
 {
     if (!m_uObjId) return;
 
