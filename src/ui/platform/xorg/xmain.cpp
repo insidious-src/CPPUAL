@@ -73,7 +73,8 @@ extern "C" Plugin plugin_main ()
     plugin.name     = name    ;
     plugin.desc     = desc    ;
     plugin.provides = provides;
-    plugin.version  = 100     ;
+    plugin.verMajor = 1       ;
+    plugin.verMinor = 0       ;
     plugin.iface    = iface   ;
 
     return plugin;

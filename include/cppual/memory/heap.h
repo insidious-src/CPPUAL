@@ -30,13 +30,13 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class HeapPool final : public MemoryResource, NonCopyable
+class HeapResource final : public MemoryResource, NonCopyable
 {
 public:
-    HeapPool   (size_type size);
-    HeapPool   (MemoryResource& allocator, size_type size);
+    HeapResource   (size_type size);
+    HeapResource   (MemoryResource& allocator, size_type size);
     //HeapPool   (string& shared_name, size_type size);
-    ~HeapPool  ();
+    ~HeapResource  ();
     void clear () noexcept;
 
     size_type max_size () const noexcept
@@ -49,7 +49,7 @@ public:
     }
 
     bool is_shared () const noexcept
-    { return m_bIsMemShared;  }
+    { return m_bIsMemShared; }
 
     MemoryResource& owner () const noexcept
     { return m_gOwner; }
@@ -58,11 +58,11 @@ private:
     struct Header    { size_type size, adjust;          };
     struct FreeBlock { size_type size; FreeBlock* next; };
 
-    MemoryResource&   m_gOwner;
-    pointer const m_pBegin;
-    pointer const m_pEnd;
-    FreeBlock*    m_pFreeBlocks;
-    cbool         m_bIsMemShared;
+    MemoryResource& m_gOwner;
+    pointer const   m_pBegin;
+    pointer const   m_pEnd;
+    FreeBlock*      m_pFreeBlocks;
+    cbool           m_bIsMemShared;
 
     void* do_allocate   (size_type size, align_type align)  noexcept;
     void  do_deallocate (void* p, size_type size, align_type align) ;
@@ -73,7 +73,7 @@ private:
 
 // =========================================================
 
-class ListPool final : public MemoryResource, NonCopyable
+class ListResource final : public MemoryResource, NonCopyable
 {
 public:
     struct Header
@@ -82,10 +82,10 @@ public:
         Header*   next;
     };
 
-    ListPool (size_type size);
-    ListPool (MemoryResource& allocator, size_type size);
+    ListResource (size_type size);
+    ListResource (MemoryResource& allocator, size_type size);
     //ListPool (string& shared_name, size_type size);
-    ~ListPool ();
+    ~ListResource ();
 
     size_type max_size   () const noexcept;
     void      defragment () noexcept;
@@ -105,11 +105,11 @@ public:
     { return m_gOwner; }
 
 private:
-    pointer const m_pBegin;
-    pointer const m_pEnd;
-    Header*       m_pFirstFreeBlock;
-    MemoryResource&   m_gOwner;
-    cbool         m_bIsMemShared;
+    pointer const   m_pBegin;
+    pointer const   m_pEnd;
+    Header*         m_pFirstFreeBlock;
+    MemoryResource& m_gOwner;
+    cbool           m_bIsMemShared;
 
     void* do_allocate   (size_type size, align_type align)  noexcept;
     void  do_deallocate (void* p, size_type size, size_type align)  ;
@@ -121,10 +121,10 @@ private:
 // =========================================================
 
 template <class T>
-using HeapAllocator = Allocator <T, HeapPool>;
+using HeapAllocator = Allocator <T, HeapResource>;
 
 template <class T>
-using ListAllocator = Allocator <T, ListPool>;
+using ListAllocator = Allocator <T, ListResource>;
 
 } } // namespace Memory
 

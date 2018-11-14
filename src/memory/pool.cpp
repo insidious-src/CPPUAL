@@ -26,9 +26,9 @@ using namespace std;
 
 namespace cppual { namespace Memory {
 
-MonotonicPool::MonotonicPool (size_type  uBlkCount,
-                              size_type  uBlkSize,
-                              align_type uBlkAlign)
+MonotonicResource::MonotonicResource (size_type  uBlkCount,
+                                      size_type  uBlkSize,
+                                      align_type uBlkAlign)
 : m_gOwner    (*this),
   m_pBegin    (uBlkCount ? ::operator new (uBlkCount * uBlkSize) : nullptr),
   m_pEnd      (m_pBegin != nullptr ?
@@ -42,10 +42,10 @@ MonotonicPool::MonotonicPool (size_type  uBlkCount,
     initialize ();
 }
 
-MonotonicPool::MonotonicPool (MemoryResource& pOwner,
-                              size_type   uBlkCount,
-                              size_type   uBlkSize,
-                              align_type  uBlkAlign)
+MonotonicResource::MonotonicResource (MemoryResource& pOwner,
+                                      size_type   uBlkCount,
+                                      size_type   uBlkSize,
+                                      align_type  uBlkAlign)
 : m_gOwner ((uBlkCount * uBlkSize) > pOwner.max_size () ? *this : pOwner),
   m_pBegin (&m_gOwner != this ?
                              (uBlkCount and uBlkSize and uBlkAlign ?
@@ -80,7 +80,7 @@ MonotonicPool::MonotonicPool (MemoryResource& pOwner,
 //    initialize ();
 //}
 
-MonotonicPool::~MonotonicPool ()
+MonotonicResource::~MonotonicResource ()
 {
     if (m_pBegin == nullptr) return;
 
@@ -88,7 +88,7 @@ MonotonicPool::~MonotonicPool ()
     else ::operator delete (m_pBegin);
 }
 
-void MonotonicPool::initialize () noexcept
+void MonotonicResource::initialize () noexcept
 {
     if (m_pBegin)
     {
@@ -110,7 +110,7 @@ void MonotonicPool::initialize () noexcept
     }
 }
 
-void* MonotonicPool::do_allocate (size_type uSize, align_type uAlign) noexcept
+void* MonotonicResource::do_allocate (size_type uSize, align_type uAlign) noexcept
 {
     // check if size and alignment match with the ones from
     // the current pool instance
@@ -123,7 +123,7 @@ void* MonotonicPool::do_allocate (size_type uSize, align_type uAlign) noexcept
     return p;
 }
 
-void MonotonicPool::do_deallocate (void* p, size_type uSize, align_type)
+void MonotonicResource::do_deallocate (void* p, size_type uSize, align_type)
 {
     if (uSize != m_uBlkSize) throw std::length_error ("not equal to blocksize");
     if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
@@ -132,7 +132,7 @@ void MonotonicPool::do_deallocate (void* p, size_type uSize, align_type)
     m_pFreeList = reinterpret_cast<pointer*> (p);
 }
 
-void MonotonicPool::clear () noexcept
+void MonotonicResource::clear () noexcept
 {
     m_pFreeList = reinterpret_cast<pointer*> (static_cast<math_pointer> (m_pBegin) +
                                               alignAdjust (m_pBegin, m_uBlkAlign));

@@ -19,28 +19,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <unordered_map>
+#include <cppual/ui/view.h>
 #include <cppual/ui/manager.h>
 #include <cppual/ui/vsurface.h>
-#include <cppual/ui/view.h>
+
+#include <iostream>
+#include <unordered_map>
 
 namespace cppual { namespace Ui {
 
 namespace { namespace Internal {
 
-typedef std::unordered_map<uptr, View*> map_type;
+typedef Memory::PolymorphicAllocator<std::pair<const uptr, View*>> map_allocator;
+typedef Memory::PolymorphicAllocator<ProxyRenderable>              renderable_allocator;
+
+typedef std::unordered_map<
+                           uptr,
+                           View*,
+                           std::hash<uptr>,
+                           std::equal_to<uptr>,
+                           map_allocator
+                           >
+                           map_type;
 
 inline map_type& map ()
 {
-    static map_type views_map (10);
+    static map_type views_map (3);
     return views_map;
 }
 
 inline shared_window createRenderable (View* pParentObj, Rect const& gRect, u32 nScreen)
 {
-    return pParentObj ? shared_window (new ProxyRenderable (pParentObj->renderable ().lock (),
-                                                            gRect)) :
+    return pParentObj ? std::allocate_shared<ProxyRenderable> (renderable_allocator(),
+                                                               pParentObj->renderable ().lock (),
+                                                               gRect) :
                         Platform::Factory::instance ()->createWindow (gRect, nScreen);
 }
 
@@ -49,7 +61,7 @@ inline shared_window createRenderable (View* pParentObj, Rect const& gRect, u32 
 // =========================================================
 
 View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type const& gAtor)
-: m_gChildrenList (10, gAtor),
+: m_gChildrenList (gAtor),
   m_gMinSize { 0, 0 },
   m_gMaxSize { 0, 0 },
   m_pRenderable (Internal::createRenderable (pParentObj, gRect, nScreen)),

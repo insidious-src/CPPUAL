@@ -29,38 +29,38 @@
 #include <memory>
 #include <experimental/memory_resource>
 
-namespace std    { using std::experimental::pmr::memory_resource; }
-
 namespace cppual { namespace Memory {
+
+using namespace std::experimental::pmr;
 
 // =========================================================
 // Extend std::memory_resource for compute usage
 // =========================================================
 
-struct MemoryResource : public std::memory_resource
+struct MemoryResource : public memory_resource
 {
     typedef std::size_t     align_type;
     typedef std::size_t     size_type;
     typedef std::uint8_t*   math_pointer;
     typedef void*           pointer;
-    typedef const void*     const_pointer;
+    typedef cvoid*          const_pointer;
     typedef std::ptrdiff_t  difference_type;
     typedef Compute::Device device_type;
 
-    virtual  bool is_thread_safe () const noexcept { return false; }
-    virtual  bool is_lock_free   () const noexcept { return false; }
-    virtual  bool is_shared      () const noexcept { return false; }
+    virtual bool is_thread_safe () const noexcept { return false; }
+    virtual bool   is_lock_free () const noexcept { return false; }
+    virtual bool      is_shared () const noexcept { return false; }
 
-    virtual  device_type& device () const noexcept
-    { return device_type::host   (); }
+    virtual device_type& device () const noexcept
+    { return device_type::host (); }
 
-    virtual  MemoryResource& owner () const noexcept
+    virtual MemoryResource& owner () const noexcept
     { return const_cast<MemoryResource&> (*this); }
 
-    virtual  size_type  max_size () const
+    virtual size_type max_size () const
     { return std::numeric_limits<size_type>::max (); }
 
-    virtual  size_type capacity  () const
+    virtual size_type capacity () const
     { return std::numeric_limits<size_type>::max (); }
 };
 
@@ -77,7 +77,7 @@ struct is_memory_resource_helper : public std::conditional
 { };
 
 template <>
-struct is_memory_resource_helper < std::memory_resource > : public std::true_type
+struct is_memory_resource_helper < memory_resource > : public std::true_type
 { };
 
 template <>
@@ -93,10 +93,10 @@ using MemoryResourceType = typename
 std::enable_if<is_memory_resource<T>::value, T>::type;
 
 // =========================================================
-// Redefined allocator policy
+// Redefined allocator
 // =========================================================
 
-template <typename T, class R = void>
+template <typename T, class R = memory_resource>
 class Allocator
 {
 public:
@@ -143,11 +143,18 @@ public:
     static void destroy (U* p)
     { p->~U (); }
 
+    Allocator select_on_container_copy_construction() const
+    { return Allocator (); }
+
     constexpr resource_type* resource () const noexcept
     { return m_pAtor; }
 
     constexpr Allocator (resource_type& gAtor) noexcept
     : m_pAtor (&gAtor)
+    { }
+
+    constexpr Allocator () noexcept
+    : m_pAtor (static_cast<resource_type*>(get_default_resource()))
     { }
 
     template <class U>
@@ -176,8 +183,12 @@ template <typename T>
 struct is_allocator_helper < std::allocator<T> > : public std::true_type
 { };
 
+template <typename T>
+struct is_allocator_helper < polymorphic_allocator<T> > : public std::true_type
+{ };
+
 template <typename T, typename U>
-struct is_allocator_helper < Allocator <T, U> > : public std::true_type
+struct is_allocator_helper < Allocator<T, U> > : public std::true_type
 { };
 
 template <typename T>
@@ -191,10 +202,6 @@ std::enable_if<is_allocator<T>::value, T>::type;
 // =========================================================
 // Generic Declarations
 // =========================================================
-
-template <typename T>
-struct Allocator <T, void> : std::allocator<T>
-{ using std::allocator<T>::allocator; };
 
 template <typename T>
 using PolymorphicAllocator = Allocator<T, MemoryResource>;

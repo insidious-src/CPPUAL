@@ -50,12 +50,14 @@ BitmapStream::~BitmapStream()
 
 BitmapStream::size_type BitmapStream::replace (rgb_type const target_clr, rgb_type const new_clr)
 {
+    if (!valid()) return size_type ();
+
     pointer pixel_data      (new rgb_type[info ().pixel_count ()]);
-    auto    num_changes    = size_type    ();
-    auto    buffer_size    = info  ()  .pixel_count () * sizeof (rgb_type);
+    auto    num_changes    = size_type ();
+    auto    buffer_size    = info  ().pixel_count () * sizeof (rgb_type);
     auto    prev_seekg     = tellg ();
-    auto    bin_target_clr = target_clr.binary      ();
-    auto    bin_new_clr    = new_clr   .binary      ();
+    auto    bin_target_clr = target_clr.binary    ();
+    auto    bin_new_clr    = new_clr   .binary    ();
 
     // skip the whole header and read the pixel data
     seekg (header ().offset);

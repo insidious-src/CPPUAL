@@ -30,13 +30,13 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class StackedPool final : MemoryResource
+class StackedResource final : public MemoryResource, NonCopyable
 {
 public:
-    StackedPool  (size_type capacity);
-    StackedPool  (MemoryResource& allocator, size_type capacity);
-    //StackedPool  (string& shared_name, size_type size);
-    ~StackedPool ();
+    StackedResource  (size_type capacity);
+    StackedResource  (MemoryResource& allocator, size_type capacity);
+    //StackedResource  (string& shared_name, size_type size);
+    ~StackedResource ();
 
     void   clear  ()       noexcept {        m_pCurMarker = m_pBegin; }
     cvoid* marker () const noexcept { return m_pCurMarker;            }
@@ -56,39 +56,37 @@ public:
                                        static_cast<math_pointer> (m_pBegin));
     }
 
-    MemoryResource& owner     () const noexcept { return m_gOwner; }
+    MemoryResource& owner () const noexcept { return m_gOwner; }
     bool        is_shared () const noexcept { return m_bIsMemShared; }
 
 private:
-    MemoryResource&   m_gOwner;
-    pointer       m_pCurMarker;
-    pointer const m_pBegin;
-    pointer const m_pEnd;
-    cbool         m_bIsMemShared;
+    MemoryResource& m_gOwner;
+    pointer         m_pCurMarker;
+    pointer const   m_pBegin;
+    pointer const   m_pEnd;
+    cbool           m_bIsMemShared;
 
     void* do_allocate   (size_type capacity, align_type align) noexcept;
     void  do_deallocate (void* p, size_type capacity, align_type align);
 
-    bool  do_is_equal   (std::memory_resource const& gObj)    const noexcept
+    bool  do_is_equal   (memory_resource const& gObj) const noexcept
     { return &gObj == &m_gOwner; }
 };
 
 // =========================================================
 
 template <class T>
-using StackedPolicy = Allocator <T, StackedPool>;
+using StackedAllocator = Allocator <T, StackedResource>;
 
 // =========================================================
 
-class DStackedPool final : public MemoryResource, NonCopyable
+class DStackedResource final : public MemoryResource, NonCopyable
 {
 public:
-    DStackedPool  (size_type capacity, size_type marker_hint);
-    DStackedPool  (MemoryResource& allocator, size_type capacity, size_type marker_hint);
-    //DStackedPool  (string& shared, size_type size, size_type marker_hint);
-    ~DStackedPool ();
-
-
+    DStackedResource  (size_type capacity, size_type marker_hint);
+    DStackedResource  (MemoryResource& allocator, size_type capacity, size_type marker_hint);
+    //DStackedResource  (string& shared, size_type size, size_type marker_hint);
+    ~DStackedResource ();
 
     size_type hint () const noexcept { return m_uHint; }
     void      setHint (size_type uHint) noexcept { m_uHint = uHint; }
@@ -120,25 +118,25 @@ public:
     }
 
 private:
-    MemoryResource&   m_gOwner;
-    pointer       m_pTopMarker;
-    pointer       m_pBottomMarker;
-    pointer const m_pBegin;
-    size_type     m_uHint;
-    pointer const m_pEnd;
-    cbool         m_bIsMemShared;
+    MemoryResource& m_gOwner;
+    pointer         m_pTopMarker;
+    pointer         m_pBottomMarker;
+    pointer const   m_pBegin;
+    size_type       m_uHint;
+    pointer const   m_pEnd;
+    cbool           m_bIsMemShared;
 
     void* do_allocate   (size_type capacity, align_type align) noexcept;
     void  do_deallocate (void* p, size_type capacity, align_type align);
 
-    bool  do_is_equal   (std::memory_resource const& gObj)    const noexcept
+    bool  do_is_equal   (memory_resource const& gObj) const noexcept
     { return &gObj == &m_gOwner; }
 };
 
 // =========================================================
 
 template <class T>
-using DStackedPolicy = Allocator <T, DStackedPool>;
+using DStackedAllocator = Allocator <T, DStackedResource>;
 
 } } // namespace Memory
 

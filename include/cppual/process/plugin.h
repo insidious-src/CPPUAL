@@ -30,6 +30,7 @@
 #include <cppual/concepts.h>
 #include <cppual/memory/allocator.h>
 
+#include <cstring>
 #include <memory>
 #include <functional>
 #include <unordered_map>
@@ -113,18 +114,19 @@ extern "C" struct Plugin
     cchar* provides;
     cchar* desc;
     cchar* iface;
-    int    version;
+    int    verMajor;
+    int    verMinor;
 };
 
 template <typename Interface>
 class PluginManager : public NonCopyable
 {
 public:
-    typedef Memory::PolymorphicAllocator
+    typedef Memory::polymorphic_allocator
     <std::pair<const std::string, std::pair<DynLoader, Plugin> > > allocator_type;
 
-    typedef typename allocator_type::size_type  size_type     ;
     typedef typename allocator_type::value_type pair_type     ;
+    typedef std::size_t                         size_type     ;
     typedef std::string                         key_type      ;
     typedef std::string const                   const_key     ;
     typedef std::hash<key_type>                 hash_type     ;
@@ -139,7 +141,6 @@ public:
 
     constexpr static const auto plugin_main = "plugin_main";
 
-    constexpr
     PluginManager () = default;
     PluginManager (PluginManager&&) = default;
     PluginManager& operator = (PluginManager&&) = default;
@@ -185,7 +186,13 @@ bool PluginManager<Interface>::load_plugin (const_key& path)
     if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
     Plugin plugin = loader.call<Plugin> (plugin_main);
 
-    m_gPluginMap.try_emplace (path, std::make_pair (std::move(loader), plugin));
+    for (auto& pair : m_gPluginMap)
+    {
+        if (std::strcmp(pair.second.second.provides, plugin.provides) == 0)
+            return false;
+    }
+
+    m_gPluginMap.try_emplace (path, std::make_pair (std::move (loader), plugin));
     return true;
 }
 
@@ -198,7 +205,7 @@ bool PluginManager<Interface>::is_registered (const_key& path) const noexcept
 template<typename Interface>
 void PluginManager<Interface>::release_plugin (const_key& path)
 {
-    if (is_registered (path)) m_gPluginMap.erase (m_gPluginMap.find(path));
+    if (is_registered (path)) m_gPluginMap.erase (m_gPluginMap.find (path));
 }
 
 } } // namespace Process

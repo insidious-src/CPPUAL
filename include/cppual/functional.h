@@ -187,8 +187,8 @@ public:
     { return direct_cast<TStaticFunc> (this); }
 
 private:
-    pointer    m_pObj { nullptr };
-    value_type m_fn   { nullptr };
+    pointer    m_pObj { };
+    value_type m_fn   { };
 };
 
 // ====================================================

@@ -30,7 +30,7 @@
 namespace cppual { namespace Memory {
 
 template <MemoryResource::size_type N>
-class StaticPool final : public MemoryResource, NonCopyable
+class StaticResource final : public MemoryResource, NonCopyable
 {
 public:
     size_type capacity () const noexcept
@@ -42,8 +42,8 @@ public:
                                        static_cast<math_pointer> (m_pMarker));
     }
 
-    void      clear      () noexcept { m_pMarker = m_pBuffer;   }
-    constexpr StaticPool () noexcept : m_pMarker  (m_pBuffer) { }
+    void      clear          () noexcept { m_pMarker = m_pBuffer;   }
+    constexpr StaticResource () noexcept : m_pMarker  (m_pBuffer) { }
 
 private:
     pointer           m_pMarker;
@@ -57,7 +57,7 @@ private:
 };
 
 template <MemoryResource::size_type N>
-inline void* StaticPool<N>::do_allocate (size_type n, align_type a)
+inline void* StaticResource<N>::do_allocate (size_type n, align_type a)
 {
     pointer const pMarker    = nextAlignedAddr (m_pMarker, a);
     pointer const pNewMarker = static_cast<math_pointer> (pMarker) + n;
@@ -69,7 +69,7 @@ inline void* StaticPool<N>::do_allocate (size_type n, align_type a)
 }
 
 template <MemoryResource::size_type N>
-inline void StaticPool<N>::do_deallocate (void* p, size_type n, align_type)
+inline void StaticResource<N>::do_deallocate (void* p, size_type n, align_type)
 {
     if (static_cast<math_pointer> (p) + n == m_pMarker)
         m_pMarker = p;
@@ -78,7 +78,7 @@ inline void StaticPool<N>::do_deallocate (void* p, size_type n, align_type)
 }
 
 template <class T, MemoryResource::size_type N>
-using StaticAllocator = Allocator <T, StaticPool<N> >;
+using StaticAllocator = Allocator <T, StaticResource<N> >;
 
 } } // namespace Memory
 

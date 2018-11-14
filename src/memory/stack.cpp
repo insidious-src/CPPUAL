@@ -26,7 +26,7 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-StackedPool::StackedPool (size_type uSize)
+StackedResource::StackedResource (size_type uSize)
 : //m_gSharedName (),
   m_gOwner (*this),
   m_pCurMarker (uSize > 0 ? ::operator new (uSize) : nullptr),
@@ -35,7 +35,7 @@ StackedPool::StackedPool (size_type uSize)
   m_bIsMemShared ()
 { }
 
-StackedPool::StackedPool (MemoryResource& pOwner, size_type uSize)
+StackedResource::StackedResource (MemoryResource& pOwner, size_type uSize)
 : //m_gSharedName (),
   m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pCurMarker (&m_gOwner != this ?
@@ -60,7 +60,7 @@ StackedPool::StackedPool (MemoryResource& pOwner, size_type uSize)
 //  m_bIsMemShared (true)
 //{ }
 
-StackedPool::~StackedPool ()
+StackedResource::~StackedResource ()
 {
     if (m_pBegin == nullptr) return;
 
@@ -68,7 +68,7 @@ StackedPool::~StackedPool ()
     else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
-void* StackedPool::do_allocate (size_type uBytes, align_type uAlign) noexcept
+void* StackedResource::do_allocate (size_type uBytes, align_type uAlign) noexcept
 {
     // check whether there is enough space to allocate
     if (!m_pBegin or !uBytes) return nullptr;
@@ -83,7 +83,7 @@ void* StackedPool::do_allocate (size_type uBytes, align_type uAlign) noexcept
     return m_pCurMarker = pNewMarker;
 }
 
-void StackedPool::do_deallocate (void* p, size_type uSize, align_type)
+void StackedResource::do_deallocate (void* p, size_type uSize, align_type)
 {
     if ((static_cast<math_pointer> (p) + uSize) != m_pCurMarker)
         throw std::out_of_range ("pointer doesn't match the last element");
@@ -95,7 +95,7 @@ void StackedPool::do_deallocate (void* p, size_type uSize, align_type)
 
 // =========================================================
 
-DStackedPool::DStackedPool (size_type uSize, size_type uHint)
+DStackedResource::DStackedResource (size_type uSize, size_type uHint)
 : //m_gSharedName (),
   m_gOwner (*this),
   m_pTopMarker (uSize > 0 ? ::operator new[] (uSize) : nullptr),
@@ -107,7 +107,7 @@ DStackedPool::DStackedPool (size_type uSize, size_type uHint)
   m_bIsMemShared ()
 { }
 
-DStackedPool::DStackedPool (MemoryResource& pOwner,
+DStackedResource::DStackedResource (MemoryResource& pOwner,
                             size_type   uSize,
                             size_type   uHint)
 : //m_gSharedName (),
@@ -139,7 +139,7 @@ DStackedPool::DStackedPool (MemoryResource& pOwner,
 //  m_bIsMemShared (true)
 //{ }
 
-DStackedPool::~DStackedPool ()
+DStackedResource::~DStackedResource ()
 {
     if (m_pBegin == nullptr) return;
 
@@ -147,7 +147,7 @@ DStackedPool::~DStackedPool ()
     else if (!m_bIsMemShared) delete[] static_cast<math_pointer> (m_pBegin);
 }
 
-void* DStackedPool::do_allocate (size_type uBytes, align_type uAlign) noexcept
+void* DStackedResource::do_allocate (size_type uBytes, align_type uAlign) noexcept
 {
     // check whether there is enough space to allocate
     if (!m_pBegin or !uBytes) return nullptr;
@@ -163,7 +163,7 @@ void* DStackedPool::do_allocate (size_type uBytes, align_type uAlign) noexcept
                                                  alignAdjust (m_pTopMarker, uAlign) - uBytes;
 }
 
-void DStackedPool::do_deallocate (void* p, size_type uBytes, align_type)
+void DStackedResource::do_deallocate (void* p, size_type uBytes, align_type)
 {
     // if the pointer belongs to the top side
     if ((static_cast<math_pointer> (p) + (uBytes = alignedSize (uBytes))) == m_pTopMarker)

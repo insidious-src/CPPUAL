@@ -26,7 +26,7 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-HeapPool::HeapPool (size_type uSize)
+HeapResource::HeapResource (size_type uSize)
 : m_gOwner (*this),
   m_pBegin (uSize >= sizeof (FreeBlock) ? ::operator new (uSize) : nullptr),
   m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
@@ -40,7 +40,7 @@ HeapPool::HeapPool (size_type uSize)
     }
 }
 
-HeapPool::HeapPool (MemoryResource& pOwner, size_type uSize)
+HeapResource::HeapResource (MemoryResource& pOwner, size_type uSize)
 : m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
   m_pBegin (&m_gOwner != this ?
                              (uSize >= sizeof (FreeBlock) ?
@@ -74,7 +74,7 @@ HeapPool::HeapPool (MemoryResource& pOwner, size_type uSize)
 //    }
 //}
 
-HeapPool::~HeapPool ()
+HeapResource::~HeapResource ()
 {
     if (m_pBegin == nullptr) return;
 
@@ -82,7 +82,7 @@ HeapPool::~HeapPool ()
     else if (!m_bIsMemShared) ::operator delete     (m_pBegin);
 }
 
-void* HeapPool::do_allocate (size_type uSize, align_type uAlign) noexcept
+void* HeapResource::do_allocate (size_type uSize, align_type uAlign) noexcept
 {
     static_assert (sizeof (Header) >= sizeof (FreeBlock), "Header is not big enough!");
     if (!m_pBegin or !uSize) return nullptr;
@@ -141,7 +141,7 @@ void* HeapPool::do_allocate (size_type uSize, align_type uAlign) noexcept
     return nullptr;
 }
 
-void HeapPool::do_deallocate (void* p, size_type uSize, align_type)
+void HeapResource::do_deallocate (void* p, size_type uSize, align_type)
 {
     if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
 
@@ -167,8 +167,7 @@ void HeapPool::do_deallocate (void* p, size_type uSize, align_type)
 
         while (pFreeBlock != nullptr)
         {
-            if (reinterpret_cast<size_type> (pFreeBlock) + pFreeBlock->size
-                    == uBlockStart)
+            if (reinterpret_cast<size_type> (pFreeBlock) + pFreeBlock->size == uBlockStart)
             {
                 pFreeBlock->size += uBlockSize;
 
@@ -207,14 +206,14 @@ void HeapPool::do_deallocate (void* p, size_type uSize, align_type)
 
     if (!blockMerged)
     {
-        FreeBlock* pBlock = reinterpret_cast<FreeBlock*> (p) - pHeader->adjust;
+        FreeBlock* pBlock = reinterpret_cast<FreeBlock*> (reinterpret_cast<math_pointer>(p) - pHeader->adjust);
         pBlock->size      = uBlockSize;
         pBlock->next      = m_pFreeBlocks;
         m_pFreeBlocks     = pBlock;
     }
 }
 
-void HeapPool::clear () noexcept
+void HeapResource::clear () noexcept
 {
     m_pFreeBlocks       = reinterpret_cast<FreeBlock*> (m_pBegin);
     m_pFreeBlocks->size = capacity ();
@@ -225,18 +224,18 @@ void HeapPool::clear () noexcept
 // List Allocator
 // =========================================================
 
-inline ListPool::Header* header (void* p) noexcept
+inline ListResource::Header* header (void* p) noexcept
 {
-    return reinterpret_cast<ListPool::Header*>
-            (reinterpret_cast<uptr> (p) - sizeof (ListPool::Header));
+    return reinterpret_cast<ListResource::Header*>
+            (reinterpret_cast<uptr> (p) - sizeof (ListResource::Header));
 }
 
-inline void* forward (ListPool::Header*    const hdr,
-                      ListPool::Header*    const prev_hdr,
-                      ListPool::size_type  const size,
-                      ListPool::align_type const align) noexcept
+inline void* forward (ListResource::Header*    const hdr,
+                      ListResource::Header*    const prev_hdr,
+                      ListResource::size_type  const size,
+                      ListResource::align_type const align) noexcept
 {
-    typedef ListPool::Header Header;
+    typedef ListResource::Header Header;
 
     // get aligned address from header pointer
     void* ptr = nextAlignedAddr (hdr, align);
@@ -251,13 +250,13 @@ inline void* forward (ListPool::Header*    const hdr,
     return ptr;
 }
 
-inline ListPool::Header* find (ListPool::Header*          hdr,
-                               ListPool::Header*&         prev_hdr,
-                               ListPool::size_type  const size,
-                               ListPool::align_type const align) noexcept
+inline ListResource::Header* find (ListResource::Header*          hdr,
+                               ListResource::Header*&         prev_hdr,
+                               ListResource::size_type  const size,
+                               ListResource::align_type const align) noexcept
 {
-    typedef ListPool::Header       Header;
-    typedef ListPool::math_pointer pointer;
+    typedef ListResource::Header       Header;
+    typedef ListResource::math_pointer pointer;
 
     for (Header* pCurHeader = hdr; pCurHeader;
          prev_hdr = pCurHeader, pCurHeader = pCurHeader->next)
@@ -274,7 +273,7 @@ inline ListPool::Header* find (ListPool::Header*          hdr,
 
 // =========================================================
 
-ListPool::ListPool (size_type uSize)
+ListResource::ListResource (size_type uSize)
 : m_pBegin (uSize > sizeof (Header) ? ::operator new (uSize + sizeof (Header)) : nullptr),
   m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize + sizeof (Header)) : nullptr),
   m_pFirstFreeBlock (static_cast<Header*> (m_pBegin)),
@@ -288,7 +287,7 @@ ListPool::ListPool (size_type uSize)
     }
 }
 
-ListPool::ListPool (MemoryResource& pOwner, size_type uSize)
+ListResource::ListResource (MemoryResource& pOwner, size_type uSize)
 : m_pBegin (uSize > sizeof (Header) and uSize <= pOwner.max_size () ?
                 static_cast<pointer> (pOwner.allocate (uSize, alignof (Header))) :
                 nullptr),
@@ -304,7 +303,7 @@ ListPool::ListPool (MemoryResource& pOwner, size_type uSize)
     }
 }
 
-ListPool::~ListPool ()
+ListResource::~ListResource ()
 {
     if (m_pBegin == nullptr) return;
 
@@ -312,7 +311,7 @@ ListPool::~ListPool ()
     else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
-void ListPool::defragment () noexcept
+void ListResource::defragment () noexcept
 {
     for (Header* pCurHeader = m_pFirstFreeBlock; pCurHeader;
          pCurHeader = pCurHeader->next)
@@ -329,7 +328,7 @@ void ListPool::defragment () noexcept
     }
 }
 
-void* ListPool::do_allocate (size_type uSize, align_type uAlign) noexcept
+void* ListResource::do_allocate (size_type uSize, align_type uAlign) noexcept
 {
     if (m_pFirstFreeBlock and uSize)
     {
@@ -344,7 +343,7 @@ void* ListPool::do_allocate (size_type uSize, align_type uAlign) noexcept
     return nullptr;
 }
 
-void ListPool::do_deallocate (void* p, size_type uSize, align_type)
+void ListResource::do_deallocate (void* p, size_type uSize, align_type)
 {
     if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
 
@@ -354,14 +353,14 @@ void ListPool::do_deallocate (void* p, size_type uSize, align_type)
     uSize = pHeader->size;
 }
 
-void ListPool::clear () noexcept
+void ListResource::clear () noexcept
 {
     m_pFirstFreeBlock       = static_cast<Header*> (static_cast<void*> (m_pBegin));
     m_pFirstFreeBlock->size = distance (m_pEnd, m_pBegin);
     m_pFirstFreeBlock->next = nullptr;
 }
 
-ListPool::size_type ListPool::max_size () const noexcept
+ListResource::size_type ListResource::max_size () const noexcept
 {
     size_type uMaxSize = 0;
 

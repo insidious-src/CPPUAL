@@ -31,27 +31,27 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-class MonotonicPool final : public MemoryResource, NonCopyable
+class MonotonicResource final : public MemoryResource, NonCopyable
 {
 public:
     // local memory
-    MonotonicPool (size_type  blk_count,
-                   size_type  blk_size,
-                   align_type blk_align);
+    MonotonicResource (size_type  blk_count,
+                       size_type  blk_size,
+                       align_type blk_align);
 
     // nested allocators
-    MonotonicPool (MemoryResource& allocator,
-                   size_type   blk_count,
-                   size_type   blk_size,
-                   align_type  blk_align);
+    MonotonicResource (MemoryResource& allocator,
+                       size_type   blk_count,
+                       size_type   blk_size,
+                       align_type  blk_align);
 
     // shared memory
-    MonotonicPool (SharedObject& shared_obj,
-                   size_type     blk_count,
-                   size_type     blk_size,
-                   align_type    blk_align);
+    MonotonicResource (SharedObject& shared_obj,
+                       size_type     blk_count,
+                       size_type     blk_size,
+                       align_type    blk_align);
 
-    ~MonotonicPool ();
+    ~MonotonicResource ();
     void clear     () noexcept;
 
     size_type blockSize  () const noexcept { return m_uBlkSize ; }
@@ -78,7 +78,7 @@ public:
     { return m_gOwner; }
 
 private:
-    MemoryResource&      m_gOwner;
+    MemoryResource&  m_gOwner;
     pointer const    m_pBegin;
     pointer const    m_pEnd;
     pointer*         m_pFreeList;
@@ -95,7 +95,7 @@ private:
 };
 
 template <class T>
-using MonotonicAllocator = Allocator <T, MonotonicPool>;
+using MonotonicAllocator = Allocator <T, MonotonicResource>;
 
 } } // namespace Memory
 

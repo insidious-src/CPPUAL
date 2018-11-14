@@ -29,8 +29,8 @@
 #include "../backend_iface.h"
 
 using std::vector;
-using cppual::Memory::StackedPool;
-using cppual::Memory::StackedPolicy;
+using cppual::Memory::StackedResource;
+using cppual::Memory::StackedAllocator;
 
 namespace cppual { namespace Compute {
 
