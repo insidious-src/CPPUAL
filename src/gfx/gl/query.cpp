@@ -45,8 +45,6 @@ inline uint convertTargetType (Query::Type eType) noexcept
         return GL::Timestamp;
     case Query::Type::TransformFeedbackPrimitivesWritten:
         return GL::TransformFeedbackPrimitivesWritten;
-    case Query::Type::Undefined:
-        return 0;
     default:
         return 0;
     }

@@ -64,6 +64,8 @@ enum class PolygonFace : byte
     BothSides
 };
 
+// =========================================================
+
 struct  GFXVersion;
 struct  IDeviceContext;
 struct  IPixelSurface;
@@ -99,12 +101,12 @@ struct GFXVersion
 struct PixelFormat final
 {
     PixelFlags flags;
-    u8         red, green, blue, alpha;
-    u8         depth, stencil;
+    byte       red, green, blue, alpha;
+    byte       depth, stencil;
     ColorType  colorType;
 
-    constexpr u8 bits () const noexcept
-    { return u8 (red + green + blue + alpha); }
+    constexpr byte bits () const noexcept
+    { return byte (red + green + blue + alpha); }
 
     constexpr static PixelFormat default2D () noexcept
     {
@@ -220,7 +222,6 @@ struct IPixelSurface : public IResource
 
 // =========================================================
 
-// Device
 struct IDeviceContext : public IResource
 {
     typedef IPixelSurface*       pointer      ;
@@ -281,7 +282,6 @@ struct DrawableFactory
 {
     static shared_drawable2d create2D (string const& name);
     static shared_drawable3d create3D (string const& name);
-    static bool              load     (string const& module_path);
 };
 
 // ====================================================
@@ -289,7 +289,6 @@ struct DrawableFactory
 struct ContextFactory
 {
     static shared_context create (string const& name);
-    static bool           load   (string const& module_path);
 };
 
 // ====================================================
@@ -317,8 +316,8 @@ inline bool operator  != (GFXVersion const& gObj1, GFXVersion const& gObj2) noex
 
 template <typename CharT, typename Traits>
 std::basic_ostream<CharT, Traits>&
-operator << (std::basic_ostream<CharT, Traits>& os, GFXVersion const& u)
-{ return os << u.major << "." << u.minor; }
+operator << (std::basic_ostream<CharT, Traits>& stream, GFXVersion const& u)
+{ return stream << u.major << "." << u.minor; }
 
 } } // namespace Graphics
 
@@ -327,9 +326,8 @@ namespace std {
 template <>
 struct hash<cppual::Graphics::GFXVersion>
 {
-    std::size_t operator()(const cppual::Graphics::GFXVersion& version) const
+    std::size_t operator () (const cppual::Graphics::GFXVersion& version) const
     {
-
         // Compute individual hash values for major,
         // and minor and combine them using XOR
         // and bit shifting

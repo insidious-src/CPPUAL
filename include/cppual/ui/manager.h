@@ -48,8 +48,8 @@ struct Factory : public NonCopyableVirtual
     virtual shared_display connectDisplay (string_type const& name = string_type()) = 0;
     virtual shared_queue   createQueueInstance () = 0;
 
-    static Factory*     instance ();
-    static bool         hasValidInstance () noexcept;
+    static Factory* instance ();
+    static bool     hasValidInstance () noexcept;
 };
 
 } } } // namespace Platform

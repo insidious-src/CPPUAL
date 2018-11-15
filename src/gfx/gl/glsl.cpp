@@ -200,16 +200,15 @@ bool Shader::loadFromMemory (string const& gSource)
 {
     if (!id () or gSource.empty ()) return false;
 
+    string::const_pointer pBuffer =
+            m_gSource.assign (std::move (gSource)).c_str ();
+
     if (IDeviceContext::current ()->version () < 3)
     {
-        string::const_pointer pBuffer =
-                m_gSource.assign (std::move (gSource)).c_str ();
         glShaderSource (id (), 1, &pBuffer, nullptr);
     }
     else
     {
-        string::const_pointer pBuffer =
-                m_gSource.assign (std::move (gSource)).c_str ();
         glShaderSourceARB (id (), 1, &pBuffer, nullptr);
     }
 

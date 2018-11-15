@@ -80,28 +80,6 @@ void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
 
 // ====================================================
 
-shared_drawable2d DrawableFactory::create2D (string const& gName)
-{
-    return Internal::manager2D ().construct (gName);
-}
-
-shared_drawable3d DrawableFactory::create3D (string const& gName)
-{
-    return Internal::manager3D ().construct (gName);
-}
-
-shared_context ContextFactory::create (string const& gName)
-{
-    return Internal::managerContext().construct (gName);
-}
-
-//bool ContextFactory::load(string const& module_path)
-//{
-//    return Internal::managerContext().load_plugin(module_path);
-//}
-
-// ====================================================
-
 cppual::Graphics::IResource::~IResource()
 {
 
@@ -133,6 +111,23 @@ cppual::Graphics::ITransformable2D::~ITransformable2D()
 cppual::Graphics::ITransformable3D::~ITransformable3D()
 {
 
+}
+
+// ====================================================
+
+shared_drawable2d DrawableFactory::create2D (string const& gName)
+{
+    return Internal::manager2D ().construct (gName);
+}
+
+shared_drawable3d DrawableFactory::create3D (string const& gName)
+{
+    return Internal::manager3D ().construct (gName);
+}
+
+shared_context ContextFactory::create (string const& gName)
+{
+    return Internal::managerContext().construct (gName);
 }
 
 } } // namespace Graphics

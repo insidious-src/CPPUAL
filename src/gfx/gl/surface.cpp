@@ -498,17 +498,17 @@ Config::~Config ()
 
 // ====================================================
 
-Surface::Surface (Config const& gConf, point2u size, value_type owner, Type type)
+Surface::Surface (Config const& gConf, point2u size, value_type wnd, Type type)
 : m_pConf   (&gConf),
-  m_pHandle (EGL::createSurface (gConf, size, type, owner)),
-  m_pOwner  (m_pHandle ? owner : value_type ()),
+  m_pHandle (EGL::createSurface (gConf, size, type, wnd)),
+  m_pWnd    (m_pHandle ? wnd : value_type ()),
   m_eType   (type)
 { }
 
 Surface::Surface (Surface const& obj)
 : m_pConf   (obj.m_pConf),
-  m_pHandle (EGL::createSurface (*m_pConf, obj.size (), obj.m_eType, obj.m_pOwner)),
-  m_pOwner  (m_pHandle ? obj.m_pOwner : nullptr),
+  m_pHandle (EGL::createSurface (*m_pConf, obj.size (), obj.m_eType, obj.m_pWnd)),
+  m_pWnd    (m_pHandle ? obj.m_pWnd : nullptr),
   m_eType   (obj.m_eType)
 { }
 
@@ -519,11 +519,11 @@ Surface& Surface::operator = (Surface&& obj) noexcept
 
     m_pConf       = obj.m_pConf  ;
     m_pHandle     = obj.m_pHandle;
-    m_pOwner      = obj.m_pOwner ;
+    m_pWnd        = obj.m_pWnd   ;
 
     obj.m_pConf   = nullptr;
     obj.m_pHandle = nullptr;
-    obj.m_pOwner  = nullptr;
+    obj.m_pWnd    = nullptr;
 
     return *this;
 }

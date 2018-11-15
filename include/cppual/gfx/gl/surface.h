@@ -134,7 +134,7 @@ public:
 
     Surface (Surface const&);
     Surface (Surface&&) noexcept = default;
-    Surface (Config const&, point2u size, value_type owner, Type type = Type::Drawable);
+    Surface (Config const&, point2u size, value_type wnd, Type type = Type::Drawable);
     Surface& operator = (Surface&&) noexcept;
     ~Surface () noexcept;
 
@@ -152,7 +152,7 @@ public:
 private:
     conf_pointer m_pConf  ;
     pointer      m_pHandle;
-    value_type   m_pOwner ;
+    value_type   m_pWnd   ;
     Type         m_eType  ;
 };
 

@@ -105,6 +105,7 @@ add_library(cppual-host SHARED
 add_library(cppual-compute SHARED
     "include/cppual/memory/gc.h"
     "include/cppual/memory/allocator.h"
+    "src/memory/allocator.cpp"
     "include/cppual/memory/static.h"
     "include/cppual/memory/mop.h"
     "src/memory/stack.cpp"

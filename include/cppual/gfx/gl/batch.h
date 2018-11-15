@@ -80,8 +80,8 @@ public:
     bool   isBatchConfig (BatchConfig const&) const;
     bool   isEnoughRoom (uint uNumVertices) const;
 
-    void add (std::vector<GuiVertex> const& vVertices, BatchConfig const&);
-    void add (std::vector<GuiVertex> const& vVertices);
+    void add (std::vector<GuiVertex> const& vertices, BatchConfig const&);
+    void add (std::vector<GuiVertex> const& vertices);
     void render ();
 
 private:

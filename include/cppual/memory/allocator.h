@@ -86,7 +86,7 @@ struct is_memory_resource_helper < MemoryResource > : public std::true_type
 
 template <class T>
 struct is_memory_resource : public is_memory_resource_helper<T>
-{ static_assert (is_memory_resource<T>::value, "invalid Repository object type!"); };
+{ static_assert (is_memory_resource<T>::value, "invalid memory_resource object type!"); };
 
 template <class T>
 using MemoryResourceType = typename
@@ -101,7 +101,7 @@ class Allocator
 {
 public:
     typedef T                     value_type;
-    typedef T*                    pointer;
+    typedef T *                   pointer;
     typedef T const*              const_pointer;
     typedef T &                   reference;
     typedef T const&              const_reference;
@@ -171,11 +171,19 @@ private:
     resource_type* m_pAtor;
 };
 
+template <class T1, class T2>
+bool operator == (Allocator<T1> const& lhs, Allocator<T2> const& rhs) noexcept
+{ return *lhs.resource() == *rhs.resource(); }
+
+template <class T1, class T2>
+bool operator != (Allocator<T1> const& lhs, Allocator<T2> const& rhs) noexcept
+{ return *lhs.resource() != *rhs.resource(); }
+
 // =========================================================
 // Allocator Concept
 // =========================================================
 
-template <typename T>
+template <typename>
 struct is_allocator_helper : public std::false_type
 { };
 
@@ -193,7 +201,7 @@ struct is_allocator_helper < Allocator<T, U> > : public std::true_type
 
 template <typename T>
 struct is_allocator : public is_allocator_helper<T>
-{ };
+{ static_assert (is_allocator<T>::value, "invalid allocator object type!"); };
 
 template <typename T>
 using AllocatorType = typename

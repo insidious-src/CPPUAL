@@ -44,7 +44,7 @@ inline XDisplay::handle_type x11_connection (cchar* pName) noexcept
                                  pDisplay = ::XOpenDisplay (pCachedName = pName);
 }
 
-inline XDisplay::handle_type get_connection (cchar* pName) noexcept
+inline display_type* get_connection (cchar* pName) noexcept
 {
     return ::XGetXCBConnection (x11_connection (pName).get<legacy_type> ());
 }
