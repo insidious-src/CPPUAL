@@ -24,11 +24,9 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
-#include <cppual/flags.h>
 #include <cppual/noncopyable.h>
 #include <cppual/resource.h>
 #include <cppual/concepts.h>
-#include <cppual/memory/allocator.h>
 
 #include <cstring>
 #include <memory>
@@ -47,7 +45,7 @@ public:
     enum class ResolvePolicy : byte
     {
         Static,    // use as data file or load as static library
-        Immediate, // resolve everything ot load
+        Immediate, // resolve everything on load
         Lazy       // don't resolve any object or function references
     };
 
@@ -110,38 +108,44 @@ private:
 
 extern "C" struct Plugin
 {
-    cchar* name;
+    cchar* name    ;
     cchar* provides;
-    cchar* desc;
-    cchar* iface;
+    cchar* desc    ;
+    cchar* iface   ;
     int    verMajor;
     int    verMinor;
 };
 
-template <typename Interface>
+typedef std::pair<DynLoader, Plugin> plugin_pair;
+
+template <typename Interface,
+          typename Allocator = std::allocator
+          <std::pair<const std::string, plugin_pair > >,
+          typename = typename std::enable_if<
+              std::is_same<typename std::allocator_traits<Allocator>::value_type,
+                           std::pair<const std::string, plugin_pair>
+                           >{}>::type
+          >
 class PluginManager : public NonCopyable
 {
 public:
-    typedef Memory::polymorphic_allocator
-    <std::pair<const std::string, std::pair<DynLoader, Plugin> > > allocator_type;
-
-    typedef typename allocator_type::value_type pair_type     ;
-    typedef std::size_t                         size_type     ;
-    typedef std::string                         key_type      ;
-    typedef std::string const                   const_key     ;
-    typedef std::hash<key_type>                 hash_type     ;
-    typedef std::equal_to<key_type>             equal_type    ;
-    typedef Movable<DynLoader>                  loader_type   ;
-    typedef std::pair<loader_type, Plugin>      value_type    ;
-    typedef Interface                           iface_type    ;
-    typedef std::shared_ptr<iface_type>         shared_iface  ;
+    typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type;
+    typedef typename std::allocator_traits<Allocator>::size_type      size_type     ;
+    typedef typename std::allocator_traits<Allocator>::value_type     pair_type     ;
+    typedef std::string                                               key_type      ;
+    typedef std::string const                                         const_key     ;
+    typedef std::hash<key_type>                                       hash_type     ;
+    typedef std::equal_to<key_type>                                   equal_type    ;
+    typedef Movable<DynLoader>                                        loader_type   ;
+    typedef plugin_pair                                               value_type    ;
+    typedef Interface                                                 iface_type    ;
+    typedef std::shared_ptr<iface_type>                               shared_iface  ;
 
     typedef std::unordered_map
     <key_type, value_type, hash_type, equal_type, allocator_type> map_type;
 
     constexpr static const auto plugin_main = "plugin_main";
 
-    PluginManager () = default;
     PluginManager (PluginManager&&) = default;
     PluginManager& operator = (PluginManager&&) = default;
 
@@ -170,7 +174,7 @@ public:
                             template call<iface_type*>(m_gPluginMap[plugin_path].second.iface));
     }
 
-    PluginManager (allocator_type& ator)
+    PluginManager (allocator_type const& ator = allocator_type ())
     : m_gPluginMap(ator)
     { }
 
@@ -178,8 +182,8 @@ private:
     mutable map_type m_gPluginMap;
 };
 
-template<typename Interface>
-bool PluginManager<Interface>::load_plugin (const_key& path)
+template<typename Interface, typename Allocator, typename Requirement>
+bool PluginManager<Interface, Allocator, Requirement>::load_plugin (const_key& path)
 {
     loader_type loader (path);
 
@@ -196,14 +200,14 @@ bool PluginManager<Interface>::load_plugin (const_key& path)
     return true;
 }
 
-template<typename Interface>
-bool PluginManager<Interface>::is_registered (const_key& path) const noexcept
+template<typename Interface, typename Allocator, typename Requirement>
+bool PluginManager<Interface, Allocator, Requirement>::is_registered (const_key& path) const noexcept
 {
     return m_gPluginMap.find (path) != m_gPluginMap.end ();
 }
 
-template<typename Interface>
-void PluginManager<Interface>::release_plugin (const_key& path)
+template<typename Interface, typename Allocator, typename Requirement>
+void PluginManager<Interface, Allocator, Requirement>::release_plugin (const_key& path)
 {
     if (is_registered (path)) m_gPluginMap.erase (m_gPluginMap.find (path));
 }

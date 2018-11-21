@@ -27,13 +27,15 @@
 #include <atomic>
 #include <memory>
 #include <cppual/flags.h>
+#include <cppual/signal.h>
 #include <cppual/noncopyable.h>
 #include <cppual/input/event.h>
-#include <cppual/ui/window.h>
+#include <cppual/ui/view.h>
 
 namespace cppual { namespace Ui {
 
 class   IDisplayQueue;
+class   View;
 typedef std::shared_ptr<IDisplayQueue> shared_queue;
 
 // =========================================================
@@ -51,7 +53,7 @@ public:
 
     virtual bool set_window_events (window_type const&, mask_type)         = 0;
     virtual bool pop_front         (event_type& receiver, bool wait)       = 0;
-    virtual int  poll              (window_type const&, bool_type& poll)   = 0;
+    virtual int  poll              (bool_type& poll)                       = 0;
     virtual void send              (window_type const&, event_type const&) = 0;
     virtual void post              (window_type const&, event_type const&) = 0;
 
@@ -112,20 +114,17 @@ public:
       polling  (true)
     { }
 
-    int poll (control_type const& window)
+    int poll ()
     {
-        if (std::this_thread::get_id () != window.renderable_unsafe ()->thread_id ())
-            throw std::logic_error ("the window was created on a different thread");
-
         polling = true;
-        return queue->poll (*window.renderable_unsafe (), polling);
+        return queue->poll (polling);
     }
 
     void send (control_type const& window, event_type const& event)
-    { queue->send (*window.renderable_unsafe (), event); }
+    { queue->send (*window.renderable ().lock ().get (), event); }
 
     void post (control_type const& window, event_type const& event)
-    { queue->post (*window.renderable_unsafe (), event); }
+    { queue->post (*window.renderable ().lock ().get (), event); }
 
     void quit ()
     { polling = false; }

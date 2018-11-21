@@ -27,6 +27,7 @@
 #include <cppual/circular_queue.h>
 #include <cppual/ui/vsurface.h>
 #include <cppual/input/event.h>
+#include <cppual/memory/allocator.h>
 
 namespace cppual { namespace Ui {
 
@@ -95,21 +96,22 @@ public:
     { }
 
 protected:
-    virtual void mouseMoved (point2u);
-    virtual void mouseWheel (event_type::MWheelData const&);
-    virtual void mousePressed (event_type::MButtonData const&);
-    virtual void mouseReleased (event_type::MButtonData const&);
-    virtual void onDestroy ();
-    virtual void onShow (bool);
-    virtual void onPaint (Rect const&);
+    virtual void mouseMovedEvent (point2u);
+    virtual void mouseWheelEvent (event_type::MWheelData const&);
+    virtual void mousePressedEvent (event_type::MButtonData const&);
+    virtual void mouseReleasedEvent (event_type::MButtonData const&);
+    virtual void destroyEvent ();
+    virtual void showEvent (bool);
+    virtual void paintEvent (Rect const&);
+    virtual void sizeEvent (point2u);
+    virtual void moveEvent (point2i);
+    virtual void enterLeaveEvent(bool);
+    virtual void beginSizeMoveEvent (Rect const&);
+    virtual void endSizeMoveEvent (Rect const&);
+    virtual void minMaxSizeEvent (point2u);
+    virtual void focusEvent (bool);
+
     virtual void onEnable (bool);
-    virtual void onSize (point2u);
-    virtual void onMove (point2i);
-    virtual void onEnterLeave(bool);
-    virtual void onBeginSizeMove (Rect const&);
-    virtual void onEndSizeMove (Rect const&);
-    virtual void onMinMaxSize (point2u);
-    virtual void onFocus (bool);
     virtual void onParentSize (point2u);
 
 private:

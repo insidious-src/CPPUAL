@@ -93,8 +93,8 @@ public:
     { return m_eVisibility == Visibility::Maximized; }
 
 protected:
-    void onBeginSizeMove (Rect const&);
-    void onEndSizeMove (Rect const&);
+    void beginSizeMoveEvent (Rect const&);
+    void endSizeMoveEvent (Rect const&);
 
 private:
     PushButton  m_gCloseBtn;
@@ -113,9 +113,9 @@ private:
     Visibility  m_eVisibility;
 
     Rect calcFrameSize (Rect const& client_rect) noexcept;
-    void onShow (bool);
-    void onPaint (Rect const&);
-    void onSize (point2u);
+    void showEvent (bool);
+    void paintEvent (Rect const&);
+    void sizeEvent (point2u);
     void onMouseLeftDown (point2i);
     void onMouseLeftUp (point2i);
     void onMouseRightDown (point2i);

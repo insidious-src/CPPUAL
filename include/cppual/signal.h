@@ -23,19 +23,20 @@
 #define CPPUAL_SIGNAL_H_
 #ifdef __cplusplus
 
-#include <vector>
-#include <cppual/functional.h>
 #include <cppual/circular_queue.h>
+#include <cppual/functional.h>
+
+#include <vector>
 
 namespace cppual {
 
 template <typename T,
-          typename = Memory::Allocator< Function<T> >
+          typename = std::allocator< Function<T> >
           >
 class Signal;
 
 template <typename T,
-          typename = Memory::Allocator< Function<T> >
+          typename = std::allocator< Function<T> >
           >
 class ScopedConnection;
 
@@ -45,14 +46,16 @@ template <typename TRetType, typename... Args, typename Allocator>
 class Signal <TRetType(Args...), Allocator>
 {
 public:
-    typedef typename Allocator::value_type            value_type;
-    typedef typename Allocator::size_type             size_type;
-    typedef typename Allocator::reference             reference;
-    typedef typename Allocator::const_reference       const_reference;
-    typedef Memory::AllocatorType<Allocator>          allocator_type;
-    typedef CircularQueue<value_type, allocator_type> container_type;
-    typedef typename container_type::const_iterator   slot_type;
-    typedef std::vector<TRetType>                     collector_type;
+
+
+    typedef Allocator                                    allocator_type;
+    typedef DelegateType<typename Allocator::value_type> value_type;
+    typedef CircularQueue<value_type, allocator_type>    container_type;
+    typedef typename container_type::size_type           size_type;
+    typedef typename container_type::reference           reference;
+    typedef typename container_type::const_reference     const_reference;
+    typedef typename container_type::const_iterator      slot_type;
+    typedef std::vector<TRetType>                        collector_type;
 
     bool empty () const noexcept
     { return m_gSlots.empty (); }
@@ -91,7 +94,19 @@ public:
     friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
     connect (Signal<TRetType_(TArgs_...), Allocator_>&,
              Call&&,
-             bool);
+             bool,
+             LambdaNonCapturePtr<Call>);
+
+    template <typename Call,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (Signal<TRetType_(TArgs_...), Allocator_>&,
+             Call&&,
+             bool,
+             LambdaCapturePtr<Call>);
 
     template <typename TClass,
               typename TRetType_,
@@ -123,11 +138,11 @@ template <typename... Args, typename Allocator>
 class Signal <void(Args...), Allocator>
 {
 public:
+    typedef Allocator                                 allocator_type;
     typedef typename Allocator::value_type            value_type;
     typedef typename Allocator::size_type             size_type;
     typedef typename Allocator::reference             reference;
     typedef typename Allocator::const_reference       const_reference;
-    typedef Memory::AllocatorType<Allocator>          allocator_type;
     typedef CircularQueue<value_type, allocator_type> container_type;
     typedef typename container_type::const_iterator   slot_type;
     typedef void                                      collector_type;
@@ -160,7 +175,19 @@ public:
     friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
     connect (Signal<TRetType_(TArgs_...), Allocator_>&,
              Call&&,
-             bool);
+             bool,
+             LambdaNonCapturePtr<Call>);
+
+    template <typename Call,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (Signal<TRetType_(TArgs_...), Allocator_>&,
+             Call&&,
+             bool,
+             LambdaCapturePtr<Call>);
 
     template <typename TClass,
               typename TRetType_,
@@ -169,8 +196,17 @@ public:
               >
     friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
     connect (Signal<TRetType_(TArgs_...), Allocator_>&,
-             TRetType_ (TClass::*)(TArgs_...),
              ClassType<TClass>&,
+             TRetType_ (TClass::*)(TArgs_...),
+             bool);
+
+    template <typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (Signal<TRetType_(TArgs_...), Allocator_>&,
+             TRetType_ (*)(TArgs_...),
              bool);
 
     template <typename TClass,
@@ -197,7 +233,8 @@ inline
 typename Signal<TRetType(TArgs...), Allocator>::slot_type
 connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
          Call&& gFunc,
-         bool bTop = false)
+         bool bTop = false,
+         LambdaNonCapturePtr<Call> = nullptr)
 {
     if (bTop)
     {
@@ -206,7 +243,31 @@ connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
     }
 
     gSignal.m_gSlots.emplace_back (std::forward<Call> (gFunc));
-    return gSignal.m_gSlots.cend ();
+    return --gSignal.m_gSlots.cend ();
+}
+
+template <typename Call,
+          typename TRetType,
+          typename... TArgs,
+          typename Allocator
+          >
+inline
+typename Signal<TRetType(TArgs...), Allocator>::slot_type
+connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
+         Call&& gFunc,
+         bool bTop = false,
+         LambdaCapturePtr<Call> = nullptr)
+{
+    using AllocatorCallable = typename Allocator::template rebind<CallableType<Call>>::other;
+
+    if (bTop)
+    {
+        gSignal.m_gSlots.emplace_front (std::forward<Call> (gFunc), AllocatorCallable());
+        return gSignal.m_gSlots.cbegin ();
+    }
+
+    gSignal.m_gSlots.emplace_back (std::forward<Call> (gFunc), AllocatorCallable());
+    return --gSignal.m_gSlots.cend ();
 }
 
 template <typename TClass  ,
@@ -217,18 +278,38 @@ template <typename TClass  ,
 inline
 typename Signal<TRetType(TArgs...), Allocator>::slot_type
 connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
-         TRetType (TClass::* fn)(TArgs...),
          ClassType<TClass>& pObj,
+         TRetType (TClass::* fn)(TArgs...),
          bool bTop = false)
 {
     if (bTop)
     {
-        gSignal.m_gSlots.emplace_front (fn, &pObj);
+        gSignal.m_gSlots.emplace_front (&pObj, fn);
+        return --gSignal.m_gSlots.cbegin ();
+    }
+
+    gSignal.m_gSlots.emplace_back (&pObj, fn);
+    return --gSignal.m_gSlots.cend ();
+}
+
+template <typename TRetType,
+          typename... TArgs,
+          typename Allocator
+          >
+inline
+typename Signal<TRetType(TArgs...), Allocator>::slot_type
+connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
+         TRetType (* fn)(TArgs...),
+         bool bTop = false)
+{
+    if (bTop)
+    {
+        gSignal.m_gSlots.emplace_front (fn);
         return gSignal.m_gSlots.cbegin ();
     }
 
-    gSignal.m_gSlots.emplace_back (fn, &pObj);
-    return gSignal.m_gSlots.cend ();
+    gSignal.m_gSlots.emplace_back (fn);
+    return --gSignal.m_gSlots.cend ();
 }
 
 // =========================================================

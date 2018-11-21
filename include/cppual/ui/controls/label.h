@@ -59,9 +59,9 @@ private:
     string_type m_gText;
     TextFormat  m_eFormat;
 
-    void onPaint (Rect const&);
+    void paintEvent (Rect const&);
     void onEnable (bool);
-    void onSize (point2u);
+    void sizeEvent (point2u);
 };
 
 } } // Ui

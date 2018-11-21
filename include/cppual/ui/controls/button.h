@@ -58,9 +58,9 @@ public:
 private:
     bool m_bIsPushed;
 
-    void onPaint (Rect const&);
-    void onSize (point2u);
-    void onFocus (bool);
+    void paintEvent (Rect const&);
+    void sizeEvent (point2u);
+    void focusEvent (bool);
 };
 
 // =========================================================
@@ -78,9 +78,9 @@ public:
 private:
     bool m_bIsSelected;
 
-    void onPaint (Rect const&);
-    void onSize (point2u);
-    void onFocus (bool);
+    void paintEvent (Rect const&);
+    void sizeEvent (point2u);
+    void focusEvent (bool);
 };
 
 // =========================================================
@@ -107,9 +107,9 @@ public:
 private:
     CheckState m_eCheckState;
 
-    void onPaint (Rect const&);
-    void onSize  (point2u);
-    void onFocus (bool);
+    void paintEvent (Rect const&);
+    void sizeEvent  (point2u);
+    void focusEvent (bool);
 };
 
 } } // namespace Ui

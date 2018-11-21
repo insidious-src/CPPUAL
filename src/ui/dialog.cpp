@@ -60,7 +60,7 @@ void Dialog::onCreate ()
     onInit ();
 }
 
-void Dialog::onDestroy ()
+void Dialog::destroyEvent ()
 {
     onEnd ();
 

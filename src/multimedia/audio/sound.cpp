@@ -19,13 +19,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+#include <cppual/multimedia/audio/sound.h>
+#include <cppual/types.h>
 
 #include <string>
 #include <locale>
 #include <sndfile.h>
-#include <cppual/types.h>
-#include <cppual/multimedia/audio/sound.h>
 
 using std::string;
 
@@ -52,21 +51,21 @@ Sound& Sound::operator = (Sound&& gObj) noexcept
 
 Sound::~Sound () noexcept
 {
-    if (m_pSndDesc) sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+    if (m_pSndDesc) ::sf_close (static_cast<SNDFILE*> (m_pSndDesc));
 }
 
 int Sound::openReadOnly (string const& gFile) noexcept
 {
     close ();
 
-    SF_INFO gInfo { 0, 0, 0, 0, 0, 0 };
-    m_pSndDesc = sf_open (gFile.c_str (), 0, &gInfo);
+    ::SF_INFO gInfo { 0, 0, 0, 0, 0, 0 };
+    m_pSndDesc = ::sf_open (gFile.c_str (), 0, &gInfo);
 
     if (m_pSndDesc)
     {
         if (gInfo.channels > MaxChannels)
         {
-            sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+            ::sf_close (static_cast<SNDFILE*> (m_pSndDesc));
             return false;
         }
 
@@ -122,7 +121,7 @@ void Sound::close () noexcept
     if (m_pSndDesc)
     {
         onClose ();
-        sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+        ::sf_close (static_cast<SNDFILE*> (m_pSndDesc));
 
         m_nSampleCount = m_nSampleRate = m_nChannelCount = 0;
         m_gFlags = 0;
@@ -138,7 +137,7 @@ void Sound::seek (std::chrono::seconds) noexcept
 
 string Sound::attribute (Attribute eType) const noexcept
 {
-    return sf_get_string (static_cast<SNDFILE*> (m_pSndDesc), eType);
+    return ::sf_get_string (static_cast<::SNDFILE*> (m_pSndDesc), eType);
 }
 
 

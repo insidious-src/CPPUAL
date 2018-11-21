@@ -47,7 +47,7 @@ void PushButton::release ()
 {
 }
 
-void PushButton::onPaint (Rect const&)
+void PushButton::paintEvent (Rect const&)
 {
 //    Rect gBtnRect (getSurface ()->getRect ());
 //    IAbstractImage* pBackImage = m_pSkin->getImage (SkinElement::Button, 0);
@@ -60,11 +60,11 @@ void PushButton::onPaint (Rect const&)
     //    cPainter.DrawText (gBtnRect, &m_Label);
 }
 
-void PushButton::onSize (point2u)
+void PushButton::sizeEvent (point2u)
 {
 }
 
-void PushButton::onFocus (bool)
+void PushButton::focusEvent (bool)
 {
 }
 
@@ -82,15 +82,15 @@ void RadioBox::clear ()
 {
 }
 
-void RadioBox::onPaint (Rect const&)
+void RadioBox::paintEvent (Rect const&)
 {
 }
 
-void RadioBox::onSize (point2u)
+void RadioBox::sizeEvent (point2u)
 {
 }
 
-void RadioBox::onFocus (bool)
+void RadioBox::focusEvent (bool)
 {
 }
 
@@ -104,15 +104,15 @@ void CheckBox::setCheckState (CheckState)
 {
 }
 
-void CheckBox::onPaint (Rect const&)
+void CheckBox::paintEvent (Rect const&)
 {
 }
 
-void CheckBox::onSize (point2u)
+void CheckBox::sizeEvent (point2u)
 {
 }
 
-void CheckBox::onFocus (bool)
+void CheckBox::focusEvent (bool)
 {
 }
 

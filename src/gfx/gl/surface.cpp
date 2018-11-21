@@ -255,12 +255,14 @@ inline surface_pointer createDrawable (Config const&         gConf,
         nSurfaceAttribs[8] = EGL::NONE;
     }
     else
+    {
         nSurfaceAttribs[2] = EGL::NONE;
+    }
 
     surface_pointer pSurface = ::eglCreateWindowSurface (gConf.display (),
                                                          gConf,
                                                          uWndHandle.get<EGLNativeWindowType> (),
-                                                         &nSurfaceAttribs[0]);
+                                                         nSurfaceAttribs);
 
     if (!pSurface) error<Create> ();
     return pSurface;
@@ -549,9 +551,29 @@ point2u Surface::size () const noexcept
 // TODO: finish egl resizing
 void Surface::scale (point2u gSize)
 {
-    if (!m_pConf->features ().test (Config::ScalableSurface))
+    ::eglDestroySurface (config ().display (), m_pHandle);
+    m_pHandle = EGL::createSurface (config (), gSize, m_eType, m_pWnd);
+
+    if(IDeviceContext::current ())
     {
-        ::glViewport(0, 0, gSize.x, gSize.y);
+        auto drawable = IDeviceContext::current ()->drawable ();
+        auto readable = IDeviceContext::current ()->readable ();
+
+        if(drawable == this || readable == this)
+        {
+            if (!::eglMakeCurrent (config ().display (),
+                                   drawable != nullptr ?
+                                   drawable->handle ().get<EGL::surface_pointer> () : nullptr,
+                                   readable != nullptr ?
+                                   readable->handle ().get<EGL::surface_pointer> () : nullptr,
+                                   IDeviceContext::current()->handle().get<EGL::context_pointer>()))
+                EGL::error<EGL::MakeCurrent> ();
+            else
+            {
+                ::glScissor (0, 0, gSize.x, gSize.y);
+                ::glViewport (0, 0, gSize.x, gSize.y);
+            }
+        }
     }
 }
 

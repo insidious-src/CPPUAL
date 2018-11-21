@@ -90,7 +90,7 @@ template<class Out, class In>
 union cast_union
 {
     Out out;
-    In  in;
+    In  in ;
 
     cast_union () = delete;
     constexpr cast_union (In in_t) noexcept : in (in_t) { }

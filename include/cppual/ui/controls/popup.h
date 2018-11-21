@@ -93,7 +93,7 @@ public:
     { return m_gItemList.size (); }
 
 private:
-    void onPaint (Rect const&);
+    void paintEvent (Rect const&);
     void onFocusKilled ();
     void onKeyPress (u8);
     void onKeyRelease (u8);

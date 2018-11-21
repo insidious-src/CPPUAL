@@ -72,7 +72,7 @@ private:
     Ui::Window* m_pOwnerWnd;
 
     void onCreate  ();
-    void onDestroy ();
+    void destroyEvent ();
 };
 
 } } // namespace Ui

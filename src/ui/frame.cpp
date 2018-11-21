@@ -181,16 +181,16 @@ FrameView::FrameView (View*       pParent,
     }
 }
 
-void FrameView::onShow (bool bVisible)
+void FrameView::showEvent (bool bVisible)
 {
     if (!bVisible) m_gSysMenu.hide ();
 }
 
-void FrameView::onPaint (Rect const&)
+void FrameView::paintEvent (Rect const&)
 {
 }
 
-void FrameView::onSize (point2u)
+void FrameView::sizeEvent (point2u)
 {
 }
 
@@ -210,7 +210,7 @@ void FrameView::onMouseLeftDown (point2i gPos)
     }
     else
     {
-        onBeginSizeMove (geometry ());
+        beginSizeMoveEvent (geometry ());
     }
 }
 
@@ -262,11 +262,11 @@ void FrameView::onMouseMove (point2i)
     }
 }
 
-void FrameView::onBeginSizeMove (Rect const&)
+void FrameView::beginSizeMoveEvent (Rect const&)
 {
 }
 
-void FrameView::onEndSizeMove (Rect const&)
+void FrameView::endSizeMoveEvent (Rect const&)
 {
 }
 

@@ -57,7 +57,7 @@ void Label::setFormat (TextFormat eFormat)
     }
 }
 
-void Label::onPaint (Rect const&)
+void Label::paintEvent (Rect const&)
 {
 }
 
@@ -65,7 +65,7 @@ void Label::onEnable (bool)
 {
 }
 
-void Label::onSize (point2u)
+void Label::sizeEvent (point2u)
 {
 }
 

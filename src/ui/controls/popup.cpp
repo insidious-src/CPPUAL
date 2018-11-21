@@ -144,7 +144,7 @@ void PopupMenu::setDefaultDelay (size_type)
 {
 }
 
-void PopupMenu::onPaint (Rect const&)
+void PopupMenu::paintEvent (Rect const&)
 {
 }
 

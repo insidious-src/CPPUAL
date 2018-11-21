@@ -20,8 +20,48 @@
  */
 
 #include <cppual/memory/allocator.h>
+#include <new>
 
 namespace cppual { namespace Memory {
+
+namespace {
+
+class NewDeleteResource final : public MemoryResource
+{
+    void* do_allocate (size_type bytes, size_type alignment)
+    {
+        return ::operator new (bytes, static_cast<std::align_val_t>(alignment));
+    }
+
+    void do_deallocate (void* p, size_type bytes, size_type alignment)
+    {
+        ::operator delete (p, bytes, static_cast<std::align_val_t>(alignment));
+    }
+
+    bool do_is_equal (memory_resource const& rc) const noexcept
+    {
+        return this == &rc;
+    }
+};
+
+inline MemoryResource*& default_resource() noexcept
+{
+    static NewDeleteResource new_del_rc;
+    static MemoryResource* rc = &new_del_rc;
+    return rc;
+}
+
+} // anonymous namespace
+
+MemoryResource* get_default_resource()
+{
+    return default_resource();
+}
+
+void set_default_resource(MemoryResource& rc)
+{
+    default_resource() = &rc;
+}
 
 
 
