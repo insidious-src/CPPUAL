@@ -23,11 +23,12 @@
 #define CPPUAL_CIRCULAR_QUEUE_H_
 #ifdef __cplusplus
 
-#include <atomic>
 #include <cppual/concepts.h>
 #include <cppual/iterator.h>
 #include <cppual/noncopyable.h>
-#include <cppual/memory/allocator.h>
+
+#include <atomic>
+#include <memory>
 
 using std::atomic_size_t;
 using std::atomic_bool  ;
@@ -43,30 +44,32 @@ struct expand_ratio
 // ====================================================
 
 template <typename T,
-          typename Allocator = Memory::Allocator<T>,
+          typename Allocator = std::allocator<T>,
           bool     Atomic    = false
           >
 class CircularQueue : private Allocator
 {
 public:
-    typedef T                                     value_type            ;
-    typedef T*                                    pointer               ;
-    typedef T const*                              const_pointer         ;
-    typedef T&                                    reference             ;
-    typedef T const&                              const_reference       ;
-    typedef Memory::AllocatorType<Allocator>      allocator_type        ;
-    typedef typename Allocator::size_type         size_type             ;
-    typedef typename Allocator::size_type const   const_size            ;
-    typedef typename Allocator::difference_type   difference_type       ;
-    typedef CircularQueue<T, Allocator, Atomic>   self_type             ;
-    typedef CircularIterator<self_type>           iterator              ;
-    typedef CircularIterator<self_type const>     const_iterator        ;
-    typedef std::reverse_iterator<iterator>       reverse_iterator      ;
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef std::pair<pointer, size_type>         array_range           ;
-    typedef std::pair<const_pointer, size_type>   const_array_range     ;
+    typedef std::allocator_traits<Allocator>           allocator_traits      ;
+    typedef typename allocator_traits::allocator_type  allocator_type        ;
+    typedef T                                          value_type            ;
+    typedef T*                                         pointer               ;
+    typedef T const*                                   const_pointer         ;
+    typedef T&                                         reference             ;
+    typedef T const&                                   const_reference       ;
+    typedef typename allocator_traits::size_type       size_type             ;
+    typedef typename allocator_traits::size_type const const_size            ;
+    typedef typename allocator_traits::difference_type difference_type       ;
+    typedef CircularQueue<T, allocator_type, Atomic>   self_type             ;
+    typedef CircularIterator<self_type>                iterator              ;
+    typedef CircularIterator<self_type const>          const_iterator        ;
+    typedef std::reverse_iterator<iterator>            reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator>      const_reverse_iterator;
+    typedef std::pair<pointer, size_type>              array_range           ;
+    typedef std::pair<const_pointer, size_type>        const_array_range     ;
 
     enum { default_size = 10 };
+
     CircularQueue& operator = (CircularQueue const&);
     CircularQueue (CircularQueue&&) noexcept = default;
     void resize   (size_type new_capacity);
@@ -495,17 +498,18 @@ template <typename T, class Allocator>
 class CircularQueue <T, Allocator, true> : Allocator, NonCopyable
 {
 public:
-    typedef T                                   value_type;
-    typedef T*                                  pointer;
-    typedef T const*                            const_pointer;
-    typedef T&                                  reference;
-    typedef T const&                            const_reference;
-    typedef atomic_size_t                       atomic_size;
-    typedef Memory::AllocatorType<Allocator>    allocator_type;
-    typedef typename Allocator::size_type       size_type;
-    typedef typename Allocator::size_type const const_size;
-    typedef typename Allocator::difference_type difference_type;
-    typedef CircularQueue<T, Allocator, true>   self_type;
+    typedef std::allocator_traits<Allocator>           allocator_traits;
+    typedef typename allocator_traits::allocator_type  allocator_type  ;
+    typedef T                                          value_type      ;
+    typedef T*                                         pointer         ;
+    typedef T const*                                   const_pointer   ;
+    typedef T&                                         reference       ;
+    typedef T const&                                   const_reference ;
+    typedef atomic_size_t                              atomic_size     ;
+    typedef typename allocator_traits::size_type       size_type       ;
+    typedef typename allocator_traits::size_type const const_size      ;
+    typedef typename allocator_traits::difference_type difference_type ;
+    typedef CircularQueue<T, Allocator, true>          self_type       ;
 
     CircularQueue () noexcept;
 

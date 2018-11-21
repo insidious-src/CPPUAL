@@ -23,14 +23,13 @@
 #define CPPUAL_FAST_FUNC_H_
 #ifdef __cplusplus
 
-#include <memory>
-#include <cstring>
 #include <cppual/types.h>
 #include <cppual/concepts.h>
 
-#ifdef DEBUG_MODE
-    #include <functional>
-#endif
+#include <memory>
+#include <cstring>
+#include <functional>
+#include <tuple>
 
 namespace cppual {
 
@@ -46,6 +45,9 @@ using StaticFn = T (*)(Args...);
 
 template <typename T, typename... Args>
 using MemberFn = T (AnyObject::*)(Args...);
+
+template <typename T>
+struct function_traits;
 
 // ====================================================
 
@@ -74,6 +76,38 @@ struct SimplifyMemFunc <sizeof (AnyMemberFn)>
         mFuncBound = direct_cast<AnyMemberFn> (mFuncToBind)    ;
         return reinterpret_cast<AnyObject*> (const_cast<X*> (pThis));
     }
+};
+
+// ====================================================
+
+template <typename ReturnType, typename... Args>
+struct function_traits<ReturnType(*)(Args...)>
+{
+    // arity is the number of arguments
+    enum { arity = sizeof...(Args) };
+
+    typedef ReturnType result_type;
+
+    template <std::size_t i>
+    struct arg
+    {
+        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+    };
+};
+
+template <typename ClassType, typename ReturnType, typename... Args>
+struct function_traits<ReturnType(ClassType::*)(Args...) const>
+{
+    // arity is the number of arguments
+    enum { arity = sizeof...(Args) };
+
+    typedef ReturnType result_type;
+
+    template <std::size_t i>
+    struct arg
+    {
+        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+    };
 };
 
 // ====================================================
@@ -207,28 +241,52 @@ public:
     template <typename X>
     using mem_fn_type = T (X::*)(Args...);
 
-    // lambda constructor
+    // capture lambda constructor
     template <typename Callable,
-              bool HasCapture = sizeof (value_type) < sizeof (Callable)>
-    inline explicit Function (Callable&& mFunc)
-    : m_storage (HasCapture ? operator new (sizeof (Callable)) : nullptr,
-                 deleter<typename std::decay<Callable>::type>)
+              typename CallableObject = CallableType<Callable>,
+              typename Allocator      = std::allocator<CallableObject>,
+              typename =
+              typename std::enable_if<!std::is_same<Function, CallableObject>{}>::type
+              >
+    inline Function (Callable&& mFunc,
+                     Allocator ator = Allocator (),
+                     LambdaCapturePtr<Callable> = nullptr)
+    : m_storage (ator.allocate (1), [=](void* mPtr)
     {
-        using FuncType = typename std::decay<Callable>::type;
+        static_cast<Allocator> (ator).destroy (static_cast<CallableObject*> (mPtr));
+        static_cast<Allocator> (ator).deallocate (static_cast<CallableObject*> (mPtr), 1);
+    })
+    {
+        ator.construct (static_cast<CallableObject*> (m_storage.get ()), std::forward<Callable> (mFunc));
+        m_closure.bindMemFunc (m_storage.get (), &CallableObject::operator ());
+    }
 
-        if constexpr (HasCapture)
-        {
-            new (m_storage.get ()) FuncType (std::forward<Callable> (mFunc));
-            m_closure.bindMemFunc (m_storage.get (), &FuncType::operator ());
-        }
-        else
-            m_closure.bindMemFunc (&mFunc, &FuncType::operator ());
+    // callable constructor
+    template <typename Callable,
+              typename CallableObject = CallableType<Callable>,
+              typename =
+              typename std::enable_if<!std::is_same<Function, CallableObject>{}>::type>
+    inline Function (Callable&& mFunc,
+                     LambdaNonCapturePtr<Callable> = nullptr)
+    {
+        m_closure.bindMemFunc (&mFunc, &CallableObject::operator ());
+    }
+
+    template <typename Callable,
+              typename CallableObject = CallableType<Callable>,
+              typename =
+              typename std::enable_if<!std::is_same<Function, CallableObject>{}>::type
+              >
+    inline Function (Callable&& mFunc, storage_type&& storage)
+    : m_storage (std::move(storage))
+    {
+        m_closure.bindMemFunc (&mFunc, &CallableObject::operator ());
     }
 
     constexpr Function () noexcept = default;
     constexpr explicit Function (std::nullptr_t) noexcept { }
 
-    constexpr Function (Function const& mImpl)   noexcept
+    constexpr Function (Function const& mImpl) noexcept
     : m_closure { mImpl.m_closure },
       m_storage { mImpl.m_storage }
     { }
@@ -243,8 +301,8 @@ public:
     { bind (mFuncToBind); }
 
     // member function constructor
-    template <typename X, typename Y>
-    inline Function (mem_fn_type<X> mFuncToBind, Y* pThis) noexcept
+    template <typename X, typename Object>
+    inline Function (ObjectType<Object>* pThis, mem_fn_type<X> mFuncToBind) noexcept
     { bind (mFuncToBind, pThis); }
 
     inline Function& operator = (Function const& mImpl) noexcept
@@ -268,7 +326,7 @@ public:
         return *this;
     }
 
-    inline T operator () (Args... mArgs) const
+    inline T operator () (Args&&... mArgs) const
     {
         #ifdef DEBUG_MODE
         if (m_closure == nullptr) throw std::bad_function_call ();
@@ -304,7 +362,7 @@ public:
 private:
     template <typename U>
     inline static void deleter (void* mPtr)
-    { static_cast<U*> (mPtr)->~U (); operator delete (mPtr); }
+    { static_cast<U*> (mPtr)->~U (); }
 
     inline T invokeStaticFunc (Args... mArgs) const
     { return (*(m_closure.getStaticFunc ()))(std::forward<Args> (mArgs)...); }
@@ -312,14 +370,38 @@ private:
     inline void bind (static_fn_type mFuncToBind) noexcept
     { m_closure.bindStaticFunc (this, &Function::invokeStaticFunc, mFuncToBind); }
 
-    template<typename X, typename Y>
-    inline void bind (mem_fn_type<X> mFuncToBind, Y* pThis) noexcept
-    { m_closure.bindMemFunc (reinterpret_cast<const Y*> (pThis), mFuncToBind); }
+    template<typename X, typename Object>
+    inline void bind (mem_fn_type<X> mFuncToBind, Object* pThis) noexcept
+    { m_closure.bindMemFunc (reinterpret_cast<const Object*> (pThis), mFuncToBind); }
 
 private:
     closure_type m_closure;
     storage_type m_storage;
 };
+
+// ====================================================
+// Delegate Concept
+// ====================================================
+
+template <typename>
+struct is_delegate_helper : std::false_type
+{ };
+
+template <typename T>
+struct is_delegate_helper < std::function<T> > : std::true_type
+{ };
+
+template <typename T>
+struct is_delegate_helper < Function<T> > : std::true_type
+{ };
+
+template <typename T>
+struct is_delegate : is_delegate_helper<T>
+{ };
+
+template <typename T>
+using DelegateType = typename
+std::enable_if<is_delegate<T>::value, T>::type;
 
 } // cppual
 

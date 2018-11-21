@@ -31,7 +31,8 @@
 
 namespace cppual { namespace Memory {
 
-using namespace std::experimental::pmr;
+using std::experimental::pmr::memory_resource;
+using std::experimental::pmr::polymorphic_allocator;
 
 // =========================================================
 // Extend std::memory_resource for compute usage
@@ -41,7 +42,7 @@ struct MemoryResource : public memory_resource
 {
     typedef std::size_t     align_type;
     typedef std::size_t     size_type;
-    typedef std::uint8_t*   math_pointer;
+    typedef u8*             math_pointer;
     typedef void*           pointer;
     typedef cvoid*          const_pointer;
     typedef std::ptrdiff_t  difference_type;
@@ -63,6 +64,9 @@ struct MemoryResource : public memory_resource
     virtual size_type capacity () const
     { return std::numeric_limits<size_type>::max (); }
 };
+
+MemoryResource* get_default_resource();
+void            set_default_resource(MemoryResource&);
 
 // =========================================================
 // MemoryResource Concept
@@ -93,10 +97,10 @@ using MemoryResourceType = typename
 std::enable_if<is_memory_resource<T>::value, T>::type;
 
 // =========================================================
-// Redefined allocator
+// Redefined memory allocator
 // =========================================================
 
-template <typename T, class R = memory_resource>
+template <typename T, class R = MemoryResource>
 class Allocator
 {
 public:

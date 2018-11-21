@@ -44,11 +44,15 @@ struct is_char : std::integral_constant<bool, (is_char_helper<typename
 
 template <typename T>
 struct member_function_to_static
-{ typedef void type; };
+{ static_assert ("template parameter T is not member function"); };
+
+template <typename T, typename Object, typename... Args>
+struct member_function_to_static <T(Object::*)(Args...) const>
+{ using type = T(*)(Args...); };
 
 template <typename T, typename Object, typename... Args>
 struct member_function_to_static <T(Object::*)(Args...)>
-{ typedef T(* type)(Args...); };
+{ using type = T(*)(Args...); };
 
 } // cppual
 

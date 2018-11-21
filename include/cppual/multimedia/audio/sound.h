@@ -23,11 +23,13 @@
 #define CPPUAL_AUDIO_SOUND_H_
 #ifdef __cplusplus
 
+
+#include <cppual/flags.h>
+#include <cppual/multimedia/audio/format.h>
+
 #include <array>
 #include <chrono>
 #include <string>
-#include <cppual/flags.h>
-#include <cppual/multimedia/audio/format.h>
 
 namespace cppual { namespace Audio {
 
@@ -98,7 +100,7 @@ public:
 
     Sound (Sound&&) noexcept;
     Sound& operator = (Sound&&) noexcept;
-    ~Sound () noexcept;
+    virtual ~Sound () noexcept;
 
     string_type attribute (Attribute) const noexcept;
     int  openReadOnly (string_type const& file) noexcept;

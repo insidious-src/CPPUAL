@@ -49,10 +49,25 @@ std::enable_if<std::is_function<typename std::remove_pointer<T>::type>::value or
 std::is_member_function_pointer<T>::value, T>::type;
 
 template <typename T>
+using LambdaNonCapturePtr = typename
+std::enable_if<std::is_constructible
+<typename member_function_to_static<decltype(&std::decay<T>::type::operator())>::type, T>
+::value>::type*;
+
+template <typename T>
+using LambdaCapturePtr = typename
+std::enable_if<!std::is_constructible
+<typename member_function_to_static<decltype(&std::decay<T>::type::operator())>::type, T>
+::value>::type*;
+
+template <typename T>
 using CallableType = typename
 std::enable_if<std::is_constructible
 <typename member_function_to_static<decltype(&std::decay<T>::type::operator())>::type, T>
-::value, T>::type;
+::value or
+!std::is_constructible
+<typename member_function_to_static<decltype(&std::decay<T>::type::operator())>::type, T>
+::value, typename std::decay<T>::type>::type;
 
 // ====================================================
 

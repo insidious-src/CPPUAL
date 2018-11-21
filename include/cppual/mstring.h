@@ -23,12 +23,13 @@
 #define CPPUAL_TEXT_STRING_H_
 #ifdef __cplusplus
 
-#include <memory>
-#include <cstring>
+
 #include <cppual/meta.h>
 #include <cppual/types.h>
 #include <cppual/concepts.h>
-#include <cppual/memory/allocator.h>
+
+#include <memory>
+#include <cstring>
 
 namespace cppual {
 
@@ -39,17 +40,20 @@ struct Buffer
     std::size_t  capacity;
 };
 
-template <typename T = char, class TAlloc = std::allocator<T>>
-class String : TAlloc
+template <typename T      = char,
+          typename TAlloc = std::allocator<T>
+          >
+class String : public TAlloc
 {
 public:
-    typedef std::size_t                   size_type      ;
-    typedef T                             value_type     ;
-    typedef T*                            pointer        ;
-    typedef T const*                      const_pointer  ;
-    typedef T&                            reference      ;
-    typedef T const&                      const_reference;
-    typedef Memory::AllocatorType<TAlloc> allocator_type ;
+    typedef std::allocator_traits<TAlloc>             allocator_traits;
+    typedef typename allocator_traits::allocator_type allocator_type  ;
+    typedef typename allocator_traits::size_type      size_type       ;
+    typedef T                                         value_type      ;
+    typedef T*                                        pointer         ;
+    typedef T const*                                  const_pointer   ;
+    typedef T&                                        reference       ;
+    typedef T const&                                  const_reference ;
 
     constexpr String () noexcept = default;
     String substr (size_type begin_pos, size_type end_pos);
