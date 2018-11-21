@@ -59,9 +59,7 @@ xcb_screen_t* screenHandle (Graphics::Connection pDsp, u32& nScreen) noexcept
 XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
 : IPlatformWindow (pDisplay, ::xcb_generate_id (pDisplay->native<Xcb::display_type> ())),
   m_eFlags  (WindowHints),
-  m_uScreen (nScreen),
-  m_pDestroy(Xcb::internAtomHelper(connection ()->native<Xcb::display_type> (),
-                                   "WM_DELETE_WINDOW"))
+  m_uScreen (nScreen)
 {
     if (valid ())
     {
@@ -82,6 +80,9 @@ XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
                              0,
                              nullptr);
 
+        Xcb::intern_ptr destroyReply (Xcb::internAtomHelper(connection ()->native<Xcb::display_type> (),
+                                                            "WM_DELETE_WINDOW"));
+
         Xcb::intern_ptr reply (Xcb::internAtomHelper(connection ()->native<Xcb::display_type> (),
                                                      "WM_PROTOCOLS", true));
 
@@ -89,14 +90,14 @@ XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
                               XCB_PROP_MODE_REPLACE,
                               id ().get<Xcb::handle_type> (),
                               reply->atom, 4, 32, 1,
-                              &m_pDestroy.get<::xcb_intern_atom_reply_t> ()->atom);
+                              &destroyReply->atom);
     }
 }
 
 XWindow::~XWindow () noexcept
 {
     ::xcb_destroy_window (connection ()->native<Xcb::display_type> (), id ().get<Xcb::handle_type> ());
-    if (m_pDestroy) delete m_pDestroy.get<::xcb_intern_atom_reply_t> ();
+    //if (m_pDestroy) delete m_pDestroy.get<::xcb_intern_atom_reply_t> ();
 }
 
 Rect XWindow::geometry () const

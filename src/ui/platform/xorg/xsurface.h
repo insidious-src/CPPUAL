@@ -68,12 +68,10 @@ public:
     WindowFlags flags     () const noexcept { return m_eFlags     ; }
     weak_window owner     () const noexcept { return weak_window(); }
     u32         screen    () const noexcept { return m_uScreen    ; }
-    Handle      destroyPtr() const noexcept { return m_pDestroy   ; }
 
 private:
-    WindowFlags   m_eFlags  ;
-    u32           m_uScreen ;
-    Handle        m_pDestroy;
+    WindowFlags m_eFlags ;
+    u32         m_uScreen;
 
 
 };
