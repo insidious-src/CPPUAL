@@ -19,10 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <thread>
 #include <cppual/compute/thread.h>
-
-using std::atomic_size_t;
+#include <thread>
 
 namespace cppual { namespace Compute {
 

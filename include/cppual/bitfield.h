@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <type_traits>
+#include <cppual/meta.h>
 #include <cppual/types.h>
 
 namespace cppual {
@@ -49,7 +50,7 @@ class BitField
 {
 private:
     enum { Mask = (1u << Bits) - 1u };
-    typedef typename MinimumTypeHelper<Index + Bits>::type T;
+    typedef typename MinimumTypeHelper<Index + Bits>::type value_type;
 
 public:
     template <class U>
@@ -59,15 +60,15 @@ public:
         return *this;
     }
 
-    operator              T() const { return (m_value >> Index) & Mask;  }
-    explicit  operator bool() const { return  m_value & (Mask << Index); }
-    BitField& operator ++  ()       { return *this = *this + 1;          }
-    T         operator ++  (int)    { T r = *this; ++*this; return r;    }
-    BitField& operator --  ()       { return *this = *this - 1;          }
-    T         operator --  (int)    { T r = *this; --*this; return r;    }
+    operator      value_type() const { return (m_value >> Index) & Mask;  }
+    explicit   operator bool() const { return  m_value & (Mask << Index); }
+    BitField&  operator ++  ()       { return *this = *this + 1;          }
+    value_type operator ++  (int)    { value_type r = *this; ++*this; return r;    }
+    BitField&  operator --  ()       { return *this = *this - 1;          }
+    value_type operator --  (int)    { value_type r = *this; --*this; return r;    }
 
 private:
-    T m_value;
+    value_type m_value;
 };
 
 // =========================================================
@@ -82,7 +83,7 @@ private:
         Mask = 0x01
     };
 
-    typedef typename MinimumTypeHelper<Index + Bits>::type T;
+    typedef typename MinimumTypeHelper<Index + Bits>::type value_type;
 
 public:
     BitField& operator = (bool value)
@@ -95,13 +96,14 @@ public:
     { return m_value & (Mask << Index); }
 
 private:
-    T m_value;
+    value_type m_value;
 };
 
 // =========================================================
 
 // function to reverse bits of a number
-template <typename T>
+template <typename T,
+          typename = typename std::enable_if<is_integer<T>::value>::type>
 T reverseBits(T n)
 {
     T rev = 0;

@@ -227,6 +227,7 @@ private:
 
 // ====================================================
 
+//! reimplementation of impossibly fast delegates
 template <typename T, typename... Args>
 class Function <T(Args...)>
 {
@@ -243,44 +244,41 @@ public:
 
     // capture lambda constructor
     template <typename Callable,
-              typename CallableObject = CallableType<Callable>,
-              typename Allocator      = std::allocator<CallableObject>,
+              typename Allocator = std::allocator<CallableType<Callable>>,
               typename =
-              typename std::enable_if<!std::is_same<Function, CallableObject>{}>::type
+              typename std::enable_if<!std::is_same<Function, CallableType<Callable>>{}>::type
               >
     inline Function (Callable&& mFunc,
-                     Allocator ator = Allocator (),
+                     Allocator  ator = Allocator (),
                      LambdaCapturePtr<Callable> = nullptr)
     : m_storage (ator.allocate (1), [=](void* mPtr)
     {
-        static_cast<Allocator> (ator).destroy (static_cast<CallableObject*> (mPtr));
-        static_cast<Allocator> (ator).deallocate (static_cast<CallableObject*> (mPtr), 1);
+        static_cast<Allocator> (ator).destroy    (static_cast<CallableType<Callable>*> (mPtr));
+        static_cast<Allocator> (ator).deallocate (static_cast<CallableType<Callable>*> (mPtr), 1);
     })
     {
-        ator.construct (static_cast<CallableObject*> (m_storage.get ()), std::forward<Callable> (mFunc));
-        m_closure.bindMemFunc (m_storage.get (), &CallableObject::operator ());
+        ator.construct (static_cast<CallableType<Callable>*> (m_storage.get ()), std::forward<Callable> (mFunc));
+        m_closure.bindMemFunc (m_storage.get (), &CallableType<Callable>::operator ());
     }
 
     // callable constructor
     template <typename Callable,
-              typename CallableObject = CallableType<Callable>,
               typename =
-              typename std::enable_if<!std::is_same<Function, CallableObject>{}>::type>
+              typename std::enable_if<!std::is_same<Function, CallableType<Callable>>{}>::type>
     inline Function (Callable&& mFunc,
                      LambdaNonCapturePtr<Callable> = nullptr)
     {
-        m_closure.bindMemFunc (&mFunc, &CallableObject::operator ());
+        m_closure.bindMemFunc (&mFunc, &CallableType<Callable>::operator ());
     }
 
     template <typename Callable,
-              typename CallableObject = CallableType<Callable>,
               typename =
-              typename std::enable_if<!std::is_same<Function, CallableObject>{}>::type
+              typename std::enable_if<!std::is_same<Function, CallableType<Callable>>{}>::type
               >
     inline Function (Callable&& mFunc, storage_type&& storage)
     : m_storage (std::move(storage))
     {
-        m_closure.bindMemFunc (&mFunc, &CallableObject::operator ());
+        m_closure.bindMemFunc (&mFunc, &CallableType<Callable>::operator ());
     }
 
     constexpr Function () noexcept = default;
@@ -302,7 +300,7 @@ public:
 
     // member function constructor
     template <typename X, typename Object>
-    inline Function (ObjectType<Object>* pThis, mem_fn_type<X> mFuncToBind) noexcept
+    inline Function (Object* pThis, mem_fn_type<X> mFuncToBind) noexcept
     { bind (mFuncToBind, pThis); }
 
     inline Function& operator = (Function const& mImpl) noexcept

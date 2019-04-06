@@ -26,8 +26,6 @@
 #include <cstddef>
 #include <cppual/mstring.h>
 
-using cppual::Text::string;
-
 namespace cppual {
 
 class ItemModel

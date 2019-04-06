@@ -26,11 +26,6 @@
 #include <string>
 #include <cppual/network/uri_parts.h>
 
-using std::basic_string;
-using std::u16string;
-using std::u32string;
-using std::wstring;
-
 namespace cppual { namespace Network {
 
 class Uri
@@ -90,14 +85,14 @@ public:
     inline string_type toString () const
     { return string_type ();  }
 
-    inline wstring toWString () const
-    { return wstring ();      }
+    inline std::wstring toWString () const
+    { return std::wstring ();      }
 
-    inline u16string toU16string () const
-    { return u16string ();    }
+    inline std::u16string toU16string () const
+    { return std::u16string ();    }
 
-    inline u32string toU32string () const
-    { return u32string ();    }
+    inline std::u32string toU32string () const
+    { return std::u32string ();    }
 
     void swap (Uri& gObj) noexcept
     {

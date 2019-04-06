@@ -71,7 +71,8 @@ struct CPU final
         PhysicalCoresCount,
         LogicalCoresCount,
         SSE,
-        SIMD
+        SIMD,
+        AVX
     };
 };
 
@@ -90,7 +91,7 @@ struct GPU final
     };
 };
 
-struct SystemInfoQuery final
+struct InfoQuery final
 {
     static string label (QueryCategory category, uint query_id);
     static int    value (QueryCategory category, uint query_id);

@@ -29,6 +29,7 @@
 
 #include <atomic>
 #include <memory>
+#include <limits>
 
 using std::atomic_size_t;
 using std::atomic_bool  ;

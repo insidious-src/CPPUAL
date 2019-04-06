@@ -35,7 +35,7 @@ struct SHARED_API XQueue final : public IDisplayQueue
 {
     XQueue ();
     bool set_window_events (window_type const&, mask_type) noexcept;
-    bool pop_front         (event_type&, bool) noexcept;
+    bool pop_front         (bool) noexcept;
     int  poll              (bool_type&);
     void send              (window_type const&, event_type const&);
     void post              (window_type const&, event_type const&);

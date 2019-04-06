@@ -42,9 +42,57 @@ struct is_char : std::integral_constant<bool, (is_char_helper<typename
 
 // ====================================================
 
+template <typename>
+struct is_bool : std::false_type
+{ };
+
+template <>
+struct is_bool<bool> : std::true_type
+{ };
+
+// ====================================================
+
+template <typename>
+struct is_integer : std:: false_type
+{ };
+
+template <>
+struct is_integer<ushort> : std::true_type
+{ };
+
+template <>
+struct is_integer<uint> : std::true_type
+{ };
+
+template <>
+struct is_integer<ulong> : std::true_type
+{ };
+
+template <>
+struct is_integer<ulong64> : std::true_type
+{ };
+
+template <>
+struct is_integer<short> : std::true_type
+{ };
+
+template <>
+struct is_integer<int> : std::true_type
+{ };
+
+template <>
+struct is_integer<long> : std::true_type
+{ };
+
+template <>
+struct is_integer<long64> : std::true_type
+{ };
+
+// ====================================================
+
 template <typename T>
 struct member_function_to_static
-{ static_assert ("template parameter T is not member function"); };
+{ static_assert (std::is_same<T, T>::value, "template parameter T is not member function"); };
 
 template <typename T, typename Object, typename... Args>
 struct member_function_to_static <T(Object::*)(Args...) const>

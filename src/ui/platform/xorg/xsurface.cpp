@@ -102,7 +102,7 @@ XWindow::~XWindow () noexcept
 
 Rect XWindow::geometry () const
 {
-    typedef std::unique_ptr<::xcb_get_geometry_reply_t> geo_ptr;
+    typedef Xcb::handle_ptr<::xcb_get_geometry_reply_t> geo_ptr;
 
     geo_ptr pReply (xcb_get_geometry_reply (connection ()->native<Xcb::display_type> (),
                                             xcb_get_geometry (connection ()->native<Xcb::display_type> (),
@@ -191,7 +191,7 @@ void XWindow::setFlags (WindowFlags) noexcept
 
 bool XWindow::isMapped () const
 {
-    typedef std::unique_ptr<xcb_get_window_attributes_reply_t> attrib_ptr;
+    typedef Xcb::handle_ptr<xcb_get_window_attributes_reply_t> attrib_ptr;
 
     attrib_ptr pReply (::xcb_get_window_attributes_reply (
                             connection ()->native<Xcb::display_type> (),
@@ -205,7 +205,7 @@ bool XWindow::isMapped () const
 
 XWindow::string_type XWindow::title () const noexcept
 {
-    typedef std::unique_ptr<xcb_get_property_reply_t> prop_ptr;
+    typedef Xcb::handle_ptr<xcb_get_property_reply_t> prop_ptr;
 
     prop_ptr pReply (::xcb_get_property_reply (connection ()->native<Xcb::display_type> (),
                                                xcb_get_property (

@@ -47,7 +47,6 @@ public:
                                 Packet&  input_packet,
                                 Packet& output_packet) = 0;
 
-
     IProtocol* getUpperLayer () const { return m_pUpperProt; }
     IProtocol* getLowerLayer () const { return m_pLowerProt; }
 

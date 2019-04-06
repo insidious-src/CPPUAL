@@ -1,12 +1,16 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.6)
 
 if(ANDROID)
     set(ANDROID_NDK "/opt/android-ndk")
-    set(QT_ANDROID_SDK_ROOT "/opt/android-sdk")
-    set(ANDROID_ABI "armeabi-v7a")
-    set(ANDROID_PLATFORM "android-28")
-    set(ANDROID_TOOLCHAIN_NAME "arm-linux-androideabi-4.9")
-    set(CMAKE_SYSROOT "${ANDROID_NDK}/platforms/${ANDROID_PLATFORM}/arch-arm")
+    #set(ANDROID_SDK_ROOT "/opt/android-sdk")
+    set(ANDROID_ABI armeabi-v7a)
+    set(ANDROID_PLATFORM "android-16")
+    set(ANDROID_NATIVE_API_LEVEL 16)
+    set(ANDROID_TOOLCHAIN_MACHINE_NAME "arm-linux-androideabi")
+    set(ANDROID_STL c++_shared)
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/android.toolchain.cmake")
+elseif(IOS_PLATFORM)
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/ios.toolchain.cmake")
 elseif(WIN32)
     set(TOOLCHAIN_PREFIX "i686-w64-mingw32")
     set(CMAKE_TOOLCHAIN_FILE "/usr/share/mingw/toolchain-${TOOLCHAIN_PREFIX}.cmake")
@@ -87,7 +91,6 @@ add_library(cppual-host SHARED
     "include/cppual/types.h"
     "include/cppual/timeline.h"
     "include/cppual/noncopyable.h"
-    "src/memory/gc.cpp"
     "src/process/proc_model.cpp"
     "include/cppual/process/proc_model.h"
     "src/process/interproc.cpp"
@@ -103,7 +106,8 @@ add_library(cppual-host SHARED
 
  # device compute, memory (Vulkan, OpenCL, Serial)
 add_library(cppual-compute SHARED
-    "include/cppual/memory/gc.h"
+    "include/cppual/memory/system.h"
+    "src/memory/system.cpp"
     "include/cppual/memory/allocator.h"
     "src/memory/allocator.cpp"
     "include/cppual/memory/static.h"
@@ -229,6 +233,60 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # graphical user interface - platform Xorg
 add_library(cppual-ui-xorg MODULE
+    "include/cppual/ui/platforms/xcb/atom.hpp"
+    "include/cppual/ui/platforms/xcb/colormap.hpp"
+    "include/cppual/ui/platforms/xcb/connection.hpp"
+    "include/cppual/ui/platforms/xcb/core.hpp"
+    "include/cppual/ui/platforms/xcb/cursor.hpp"
+    "include/cppual/ui/platforms/xcb/drawable.hpp"
+    "include/cppual/ui/platforms/xcb/event.hpp"
+    "include/cppual/ui/platforms/xcb/font.hpp"
+    "include/cppual/ui/platforms/xcb/fontable.hpp"
+    "include/cppual/ui/platforms/xcb/gcontext.hpp"
+    "include/cppual/ui/platforms/xcb/generic/error.hpp"
+    "include/cppual/ui/platforms/xcb/generic/event.hpp"
+    "include/cppual/ui/platforms/xcb/generic/extension.hpp"
+    "include/cppual/ui/platforms/xcb/generic/factory.hpp"
+    "include/cppual/ui/platforms/xcb/generic/input_iterator_adapter.hpp"
+    "include/cppual/ui/platforms/xcb/generic/iterator_traits.hpp"
+    "include/cppual/ui/platforms/xcb/generic/reply_iterator.hpp"
+    "include/cppual/ui/platforms/xcb/generic/request.hpp"
+    "include/cppual/ui/platforms/xcb/generic/resource.hpp"
+    "include/cppual/ui/platforms/xcb/generic/signature.hpp"
+    "include/cppual/ui/platforms/xcb/generic.hpp"
+    "include/cppual/ui/platforms/xcb/pixmap.hpp"
+    "include/cppual/ui/platforms/xcb/proto/bigreq.hpp"
+    "include/cppual/ui/platforms/xcb/proto/composite.hpp"
+    "include/cppual/ui/platforms/xcb/proto/damage.hpp"
+    "include/cppual/ui/platforms/xcb/proto/dpms.hpp"
+    "include/cppual/ui/platforms/xcb/proto/dri2.hpp"
+    "include/cppual/ui/platforms/xcb/proto/dri3.hpp"
+    "include/cppual/ui/platforms/xcb/proto/glx.hpp"
+    "include/cppual/ui/platforms/xcb/proto/present.hpp"
+    "include/cppual/ui/platforms/xcb/proto/randr.hpp"
+    "include/cppual/ui/platforms/xcb/proto/record.hpp"
+    "include/cppual/ui/platforms/xcb/proto/render.hpp"
+    "include/cppual/ui/platforms/xcb/proto/res.hpp"
+    "include/cppual/ui/platforms/xcb/proto/screensaver.hpp"
+    "include/cppual/ui/platforms/xcb/proto/shape.hpp"
+    "include/cppual/ui/platforms/xcb/proto/shm.hpp"
+    "include/cppual/ui/platforms/xcb/proto/sync.hpp"
+    "include/cppual/ui/platforms/xcb/proto/x.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xc_misc.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xevie.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xf86dri.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xfixes.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xinerama.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xinput.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xkb.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xprint.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xselinux.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xtest.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xv.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xvmc.hpp"
+    "include/cppual/ui/platforms/xcb/valueparam.hpp"
+    "include/cppual/ui/platforms/xcb/window.hpp"
+    "include/cppual/ui/platforms/xcb/xcb.hpp"
     "src/ui/platform/xorg/xmain.cpp"
     "src/ui/platform/xorg/xbackend.cpp"
     "src/ui/platform/xorg/xbackend.h"

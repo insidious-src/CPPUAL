@@ -20,6 +20,7 @@
  */
 
 #include <cppual/process/plugin.h>
+
 #include <iostream>
 
 #ifdef OS_STD_POSIX
@@ -28,6 +29,7 @@
 #   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
 #endif
+
 namespace cppual { namespace Process {
 
 namespace { // optimize for internal unit usage

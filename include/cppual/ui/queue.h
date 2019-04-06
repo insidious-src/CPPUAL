@@ -52,7 +52,7 @@ public:
     ~IDisplayQueue();
 
     virtual bool set_window_events (window_type const&, mask_type)         = 0;
-    virtual bool pop_front         (event_type& receiver, bool wait)       = 0;
+    virtual bool pop_front         (bool wait)                             = 0;
     virtual int  poll              (bool_type& poll)                       = 0;
     virtual void send              (window_type const&, event_type const&) = 0;
     virtual void post              (window_type const&, event_type const&) = 0;
@@ -129,8 +129,8 @@ public:
     void quit ()
     { polling = false; }
 
-    bool pop_front (event_type& receiver, bool wait)
-    { return queue->pop_front (receiver, wait); }
+    bool pop_front (bool wait)
+    { return queue->pop_front (wait); }
 
     bool isPolling () const noexcept
     { return polling; }

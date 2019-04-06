@@ -19,35 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/memory/allocator.h>
-#include <new>
+#include <cppual/memory/heap.h>
 
 namespace cppual { namespace Memory {
 
 namespace {
 
-class NewDeleteResource final : public MemoryResource
-{
-    void* do_allocate (size_type bytes, size_type alignment)
-    {
-        return ::operator new (bytes, static_cast<std::align_val_t>(alignment));
-    }
-
-    void do_deallocate (void* p, size_type bytes, size_type alignment)
-    {
-        ::operator delete (p, bytes, static_cast<std::align_val_t>(alignment));
-    }
-
-    bool do_is_equal (memory_resource const& rc) const noexcept
-    {
-        return this == &rc;
-    }
-};
-
 inline MemoryResource*& default_resource() noexcept
 {
-    static NewDeleteResource new_del_rc;
-    static MemoryResource* rc = &new_del_rc;
+    static HeapResource heap(24320943);
+    static MemoryResource* rc = &heap;
     return rc;
 }
 
@@ -63,7 +44,4 @@ void set_default_resource(MemoryResource& rc)
     default_resource() = &rc;
 }
 
-
-
 } } // Memory
-

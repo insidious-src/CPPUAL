@@ -84,13 +84,14 @@ bool XQueue::set_window_events (window_type const& window, mask_type gFlags) noe
     return true;
 }
 
-bool XQueue::pop_front (event_type& gEvent, bool bWait) noexcept
+bool XQueue::pop_front (bool bWait) noexcept
 {
-    Xcb::Event pEv (bWait ? ::xcb_wait_for_event (display ().get<Xcb::display_type> ()) :
-                            ::xcb_poll_for_event (display ().get<Xcb::display_type> ()));
+    Xcb::Event event (bWait ? ::xcb_wait_for_event (display ().get<Xcb::display_type> ()) :
+                              ::xcb_poll_for_event (display ().get<Xcb::display_type> ()));
 
-    if (!pEv.get ()) return false;
-    gEvent = pEv.toEvent ();
+    if (!event.get ()) return false;
+
+    event (display());
     return true;
 }
 

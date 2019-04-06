@@ -24,7 +24,9 @@
 #ifdef __cplusplus
 
 #include <cppual/decl.h>
+
 #include <xcb/xcb_icccm.h>
+#include <memory>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
@@ -32,6 +34,14 @@ namespace cppual { namespace Ui { namespace Xcb {
 
 typedef xcb_connection_t display_type;
 typedef xcb_window_t     handle_type ;
+
+template <typename T>
+struct handle_ptr : public std::shared_ptr<T>
+{
+    inline handle_ptr(T* handle)
+    : std::shared_ptr<T> (handle, [](void* p) { std::free (p); })
+    { }
+};
 
 } } } // namespace Xcb
 

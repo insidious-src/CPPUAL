@@ -23,8 +23,9 @@
 #define CPPUAL_TYPES_H_
 #ifdef __cplusplus
 
-#include <cstdint>
 #include <cppual/decl.h>
+
+#include <cstdint>
 
 namespace cppual
 {

@@ -26,22 +26,31 @@
 #undef OS_STD_UNIX
 #undef OS_STD_POSIX
 #undef OS_STD_WINNT
-#undef OS_STD_MAC
+#undef OS_STD_APPLE
+#undef OS_STD_CYGWIN
+#undef OS_PLATFORM_MINGW
+#undef OS_PLATFORM_WIN_DESKTOP
+#undef OS_PLATFORM_WIN_PHONE
+#undef OS_PLATFORM_WIN_RT
+#undef OS_PLATFORM_WIN_STORE
 #undef OS_GNU_LINUX
 #undef OS_BSD
 #undef OS_ANDROID
 #undef OS_AIX
 #undef OS_SOLARIS
-#undef OS_IOS       // undefined
-#undef OS_LEOPARD_X // undefined
+#undef OS_IOS
+#undef OS_MACX
 #undef OS_WIN32
 #undef OS_WIN64
 #undef OS_WINDOWS
 #undef OS_PS3       // undefined
-#undef OS_PS4       // undefined
+#undef OS_PS4
 #undef OS_XBOX360   // undefined
 #undef OS_XBONE     // undefined
 #undef OS_WII_U     // undefined
+#undef OS_FREERT    // undefined
+#undef ARCH_64BITS
+#undef ARCH_32BITS
 #undef TXT
 #undef TXT_STD_ASCII
 #undef TXT_STD_UTF8
@@ -49,31 +58,54 @@
 #undef TXT_STD_UTF32
 #undef TXT_STD_OLD_UNICODE
 #undef DEBUG_MODE
+#undef UNUSED
+
+#ifdef __CYGWIN__
+#   define OS_STD_CYGWIN
+#endif // CYGWIN
 
 // operating system support verification & definitions
-#if defined (_WIN32) or defined (__WIN32) or defined (__WIN32__)
+#if defined (__WINDOWS__) or defined (__TOS_WIN__)
 #
-#   define OS_WIN32
-#   define OS_STD_WINNT
-#   define OS_WINDOWS OS_WIN32
-#   define OS_CURRENT OS_WINDOWS
+#   ifdef WINAPI_FAMILY
+#       if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
+#           define OS_PLATFORM_WIN_DESKTOP
+#       elif WINAPI_FAMILY == WINAPI_FAMILY_APP
+#           define OS_PLATFORM_WIN_RT
+#           define OS_PLATFORM_WIN_STORE
+#       elif WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+#           define OS_PLATFORM_WIN_PHONE
+#           define OS_PLATFORM_WIN_RT
+#       endif
+#   else
+#       define OS_PLATFORM_WIN_DESKTOP
+#   endif
 #
-#elif defined (_WIN64) or defined (__WIN64) or defined (__WIN64__)
+#   if defined (_WIN32) or defined (__WIN32) or defined (__WIN32__)
 #
-#   define OS_WIN64
-#   define OS_STD_WINNT
-#   define OS_WINDOWS OS_WIN64
-#   define OS_CURRENT OS_WINDOWS
+#       define OS_WIN32
+#       define OS_STD_WINNT
+#       define OS_WINDOWS OS_WIN32
+#       define OS_CURRENT OS_WINDOWS
+#
+#   elif defined (_WIN64) or defined (__WIN64) or defined (__WIN64__)
+#
+#       define OS_WIN64
+#       define OS_STD_WINNT
+#       define OS_WINDOWS OS_WIN64
+#       define OS_CURRENT OS_WINDOWS
+#   endif
 #
 #elif defined (__unix__) or defined (__unix)
 #
 #   define OS_STD_UNIX
 #
-#   if defined (__linux__) or defined (__linux)
+#   if defined (__linux__) or defined (__gnu_linux__)
 #       define OS_GNU_LINUX
 #       define OS_CURRENT OS_GNU_LINUX
 #       define OS_STD_POSIX
-#   elif defined (BSD)
+#   elif defined (BSD) or defined (__FreeBSD__) or defined (__NetBSD__) or defined (__OpenBSD__) or \
+    defined (__bsdi__) or defined (__DragonFly__)
 #       define OS_BSD
 #       define OS_CURRENT OS_BSD
 #       define OS_STD_POSIX
@@ -87,15 +119,36 @@
 #   elif (defined (__sun) or defined (__sun__)) and (defined (__SVR4) or defined (__SVR4__))
 #       define OS_SOLARIS
 #       define OS_CURRENT OS_SOLARIS
+#   elif defined(__ORBIS__)
+#       define OS_PS4
+#       define OS_CURRENT OS_PS4
+#       define OS_STD_POSIX
 #   endif
 #
-#elif defined (__APPLE__) and defined (__MACH__)
+#elif (defined (__APPLE__) and defined (__MACH__)) or defined(__APPLE_CC__) or defined(__APPLE_CPP__)
 #   define OS_STD_UNIX
-#   define OS_STD_MAC
+#   define OS_STD_APPLE
 #   define OS_STD_POSIX
+#   include "TargetConditionals.h"
+#   if defined (TARGET_OS_IPHONE) or defined (TARGET_IPHONE_SIMULATOR)
+#       define OS_IOS
+#       define OS_CURRENT OS_IOS
+#   elif defined(TARGET_OS_MAC)
+#       define OS_MACX
+#       define OS_CURRENT OS_MACX
+#   else
+#       error unknown apple operating system!
+#   endif
 #else
 #   error unsupported operating system!
 #endif // OS
+
+#if defined (__x86_64__) or defined (_M_AMD64) or defined (_M_X64) or defined (_AMD64_) or \
+    defined (__arm64__) or defined (__aarch64__)
+#  define ARCH_64BITS
+#else
+#  define ARCH_32BITS
+#endif // ARCH
 
 #undef PACKED
 #undef NOVTABLE
@@ -117,12 +170,11 @@
 #       define CDECL __cdecl
 #   endif // STDCALL and CDECL and FASTCALL
 #
-#elif defined (__GNUC__)
+#elif defined (__GNUC__) or defined (__clang__)
 #
 #   define PACKED __attribute__ ((__packed__))
 #   define NOVTABLE
 #   define DEPRECATED(msg) __attribute__ ((deprecated(msg)))
-//#   define FORCEINLINE __inline__
 #   define FORCEINLINE inline __attribute__((always_inline))
 #   define DECLSPEC_ALIGN(x) __attribute__((aligned(x)))
 #   if !defined (STDCALL) and !defined (FASTCALL) and !defined (CDECL)
@@ -136,8 +188,8 @@
 #   define PACKED
 #   define NOVTABLE
 #   define DEPRECATED(msg)
-#   define FORCEINLINE
-#   define DECLSPEC_ALIGN(x)
+#   define FORCEINLINE inline
+#   define DECLSPEC_ALIGN(x) alignas(x)
 #   if !defined (STDCALL) and !defined (FASTCALL) and !defined (CDECL)
 #       define STDCALL
 #       define FASTCALL
@@ -195,6 +247,8 @@
 #if __cplusplus < 201103L or (defined (_MSC_VER) and _MSC_VER < 1700)
 #   error this compiler does not support ISO C++11!
 #endif
+
+#define UNUSED(x) (void)x
 
 // character storage literals
 #ifdef __STD_UTF_8__

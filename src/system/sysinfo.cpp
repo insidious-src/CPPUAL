@@ -25,12 +25,12 @@ using std::string;
 
 namespace cppual { namespace System {
 
-string SystemInfoQuery::label (QueryCategory, uint)
+string InfoQuery::label (QueryCategory, uint)
 {
     return string ();
 }
 
-int SystemInfoQuery::value (QueryCategory, uint)
+int InfoQuery::value (QueryCategory, uint)
 {
     return 0;
 }

@@ -21,8 +21,6 @@
 
 #include <cppual/network/uri.h>
 
-using std::string;
-
 namespace cppual { namespace Network {
 
 } } // namespace Network

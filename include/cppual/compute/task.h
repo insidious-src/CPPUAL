@@ -181,8 +181,8 @@ public:
     }
 
     template <class X, typename... Args>
-    HostTask (value_type (X::* fn)(Args...), X* obj, Args... args) : HostTask ()
-    { then (fn, obj, std::forward<Args> (args)...); }
+    HostTask (X* obj, value_type (X::* fn)(Args...), Args&&... args) : HostTask ()
+    { then (obj, fn, std::forward<Args> (args)...); }
 
     template <typename... Args>
     HostTask (value_type (fn)(Args...), Args&&... args) : HostTask ()
@@ -193,7 +193,7 @@ public:
     { then (std::forward<Callable> (fn), std::forward<Args> (args)...); }
 
     template <class X, typename... Args>
-    HostTask& then (value_type (X::* fn)(Args...), X* obj, Args&&... args)
+    HostTask& then (X* obj, value_type (X::* fn)(Args...), Args&&... args)
     {
         schedule (call_type ([=]
         {
@@ -213,7 +213,7 @@ public:
     }
 
     template <typename U, typename... Args>
-    HostTask& then (CallableType<U>&& closure, Args&&... args)
+    HostTask& then (U&& closure, Args&&... args)
     {
         schedule (call_type ([=]
         {

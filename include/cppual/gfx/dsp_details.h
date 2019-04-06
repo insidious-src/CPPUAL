@@ -23,9 +23,10 @@
 #define CPPUAL_GFX_PLATFORM_DETAILS_H_
 #ifdef __cplusplus
 
-#include <type_traits>
 #include <cppual/types.h>
 #include <cppual/resource.h>
+
+#include <type_traits>
 
 namespace cppual { namespace Graphics {
 

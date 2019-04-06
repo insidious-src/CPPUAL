@@ -33,8 +33,8 @@
 
 namespace cppual { namespace Ui { namespace Xcb {
 
-typedef std::string                                string_type;
-typedef std::unique_ptr<::xcb_intern_atom_reply_t> intern_ptr ;
+typedef std::string                           string_type;
+typedef handle_ptr<::xcb_intern_atom_reply_t> intern_ptr ;
 
 inline ::xcb_intern_atom_reply_t* internAtomHelper (display_type* conn,
                                                     string_type const& str,

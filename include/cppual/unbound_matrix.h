@@ -23,6 +23,13 @@
 #define CPPUAL_UNBOUND_MATRIX_H_
 #ifdef __cplusplus
 
+#include <cppual/types.h>
+#include <cppual/signal.h>
+#include <cppual/concepts.h>
+#include <cppual/functional.h>
+#include <cppual/circular_queue.h>
+#include <cppual/reactive.h>
+
 #include <memory>
 #include <cstdint>
 #include <cstddef>
@@ -30,11 +37,6 @@
 #include <vector>
 #include <variant>
 #include <type_traits>
-#include <cppual/types.h>
-#include <cppual/signal.h>
-#include <cppual/concepts.h>
-#include <cppual/functional.h>
-#include <cppual/circular_queue.h>
 
 namespace cppual {
 
@@ -42,9 +44,6 @@ template <typename T, typename Allocator = std::allocator<T> >
 class UnboundMatrix
 {
 public:
-    template <typename F>
-    using fn_vector_type = std::vector< Function<F> >;
-
     typedef T                                value_type    ;
     typedef Allocator                        allocator_type;
     typedef T*                               pointer       ;
@@ -61,13 +60,13 @@ public:
         Subtract,
         Multiply,
         Divide,
+        Modulo,
         Power,
         Log,
         Root
     };
 
-    template <typename F>
-    vector_type process (fn_vector_type<F> functions);
+    void process ();
 
     constexpr size_type    size      () const noexcept { return rows () * cols (); }
     constexpr size_type    cols      () const noexcept { return m_uCols;           }
@@ -98,28 +97,28 @@ public:
     { }
 
     template <typename U>
-    U multiply (Arithmetic<U>, Arithmetic<U>);
+    Reactive<U> operator * (Reactive<U>); // multiply
 
     template <typename U>
-    U divide (Arithmetic<U>, Arithmetic<U>);
+    Reactive<U> operator / (Reactive<U>); // divide
 
     template <typename U>
-    U add (Arithmetic<U>, Arithmetic<U>);
+    Reactive<U> operator + (Reactive<U>); // add
 
     template <typename U>
-    U subtract (Arithmetic<U>, Arithmetic<U>);
+    Reactive<U> operator - (Reactive<U>); // subtract
 
     template <typename U>
-    U root (Arithmetic<U>, size_type);
+    Reactive<U> root (Reactive<U>, size_type);
 
     template <typename U>
-    U log (Arithmetic<U>);
+    Reactive<U> log (Reactive<U>);
 
     template <typename U>
-    U power (Arithmetic<U>, size_type);
+    Reactive<U> power (Reactive<U>, size_type);
 
 private:
-    array_type  m_matrix          ;
+    vector_type m_matrix          ;
     queue_type  m_instructionQueue;
     signal_type m_signal          ;
     size_type   m_uCols, m_uRows  ;

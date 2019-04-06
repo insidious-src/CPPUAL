@@ -45,7 +45,7 @@ enum class MatrixType : unsigned char
 
 // =========================================================
 
-template <typename T, typename Alloc = std::allocator<T> >
+template < typename T, typename Alloc = std::allocator<T> >
 class DynamicMatrix
 {
 public:

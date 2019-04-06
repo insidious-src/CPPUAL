@@ -163,6 +163,20 @@ inline void error <Create> ()
     }
 }
 
+template <>
+inline void error <Destroy> ()
+{
+    switch (::eglGetError ())
+    {
+    case BadDisplay:
+        throw bad_display ("invalid display handle");
+    case NotInitialized:
+        throw not_initialized ("EGL is NOT initialized for target display");
+    case BadSurface:
+        throw bad_surface ("invalid surface handle");
+    }
+}
+
 // ====================================================
 
 inline void initialize (display_pointer dsp)
@@ -517,7 +531,12 @@ Surface::Surface (Surface const& obj)
 Surface& Surface::operator = (Surface&& obj) noexcept
 {
     if (this == &obj) return *this;
-    if (m_pHandle) ::eglDestroySurface (config ().display (), m_pHandle);
+
+    if (m_pHandle)
+    {
+        if(!::eglDestroySurface (config ().display (), m_pHandle))
+            EGL::error<EGL::Destroy>();
+    }
 
     m_pConf       = obj.m_pConf  ;
     m_pHandle     = obj.m_pHandle;
@@ -530,9 +549,12 @@ Surface& Surface::operator = (Surface&& obj) noexcept
     return *this;
 }
 
-Surface::~Surface () noexcept
+Surface::~Surface ()
 {
-    if (m_pHandle) ::eglDestroySurface (config ().display (), m_pHandle);
+    if (!m_pHandle) return;
+
+    if(!::eglDestroySurface (config ().display (), m_pHandle))
+        EGL::error<EGL::Destroy>();
 }
 
 void Surface::flush ()
@@ -551,7 +573,9 @@ point2u Surface::size () const noexcept
 // TODO: finish egl resizing
 void Surface::scale (point2u gSize)
 {
-    ::eglDestroySurface (config ().display (), m_pHandle);
+    if(!::eglDestroySurface (config ().display (), m_pHandle))
+        EGL::error<EGL::Destroy>();
+
     m_pHandle = EGL::createSurface (config (), gSize, m_eType, m_pWnd);
 
     if(IDeviceContext::current ())
@@ -570,7 +594,7 @@ void Surface::scale (point2u gSize)
                 EGL::error<EGL::MakeCurrent> ();
             else
             {
-                ::glScissor (0, 0, gSize.x, gSize.y);
+                ::glScissor  (0, 0, gSize.x, gSize.y);
                 ::glViewport (0, 0, gSize.x, gSize.y);
             }
         }

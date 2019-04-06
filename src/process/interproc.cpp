@@ -20,7 +20,6 @@
  */
 
 #include <cppual/process/interproc.h>
-//#include <dbus-c++-1/dbus-c++/dbus.h>
 
 namespace cppual { namespace Process {
 

@@ -79,7 +79,7 @@ HeapResource::~HeapResource ()
     if (m_pBegin == nullptr) return;
 
     if      (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
-    else if (!m_bIsMemShared) ::operator delete     (m_pBegin);
+    else if (!m_bIsMemShared) ::operator delete (m_pBegin);
 }
 
 void* HeapResource::do_allocate (size_type uSize, align_type uAlign) noexcept
@@ -251,11 +251,11 @@ inline void* forward (ListResource::Header*    const hdr,
 }
 
 inline ListResource::Header* find (ListResource::Header*          hdr,
-                               ListResource::Header*&         prev_hdr,
-                               ListResource::size_type  const size,
-                               ListResource::align_type const align) noexcept
+                                   ListResource::Header*&         prev_hdr,
+                                   ListResource::size_type  const size,
+                                   ListResource::align_type const align) noexcept
 {
-    typedef ListResource::Header       Header;
+    typedef ListResource::Header       Header ;
     typedef ListResource::math_pointer pointer;
 
     for (Header* pCurHeader = hdr; pCurHeader;

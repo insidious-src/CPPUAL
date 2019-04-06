@@ -28,7 +28,6 @@
 #include <cppual/types.h>
 #include <cppual/noncopyable.h>
 
-using std::vector;
 using std::string;
 using std::wstring;
 using std::u16string;
@@ -47,6 +46,7 @@ public:
 
     bool operator == (Packet const&) const = delete;
     bool operator != (Packet const&) const = delete;
+
     void append (cvoid* data, size_type size_in_bytes) noexcept;
 
     Packet& operator >> (bool&)      noexcept;

@@ -24,6 +24,7 @@
 #include <cppual/ui/vsurface.h>
 
 #include <iostream>
+#include <exception>
 #include <unordered_map>
 
 namespace cppual { namespace Ui {

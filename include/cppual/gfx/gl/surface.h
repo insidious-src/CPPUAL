@@ -136,7 +136,7 @@ public:
     Surface (Surface&&) noexcept = default;
     Surface (Config const&, point2u size, value_type wnd, Type type = Type::Drawable);
     Surface& operator = (Surface&&) noexcept;
-    ~Surface () noexcept;
+    ~Surface ();
 
     point2u size  () const noexcept;
     void    scale (point2u size);

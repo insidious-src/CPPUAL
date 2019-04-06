@@ -43,8 +43,8 @@ public:
     inline    BitSet& operator = (BitSet const&) noexcept = default;
 
     void flip  (enum_type const eFlag) noexcept { m_flags ^= eFlag; }
-    void flip  () noexcept { m_flags ^= m_flags;       }
-    void reset () noexcept { m_flags  = value_type (); }
+    void flip  () noexcept { m_flags = m_flags ^ m_flags; }
+    void reset () noexcept { m_flags = value_type (); }
 
     constexpr operator value_type () const noexcept
     { return m_flags; }

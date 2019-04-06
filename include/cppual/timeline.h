@@ -27,9 +27,9 @@
 #include <cppual/types.h>
 #include <cppual/system/clock.h>
 
-using namespace std::chrono_literals;
-
 namespace cppual {
+
+using namespace std::chrono_literals;
 
 class Timeline
 {
@@ -103,7 +103,10 @@ public:
     void scale (ratio_type speed) noexcept
     {
         if (speed == .0f) stop ();
-        else m_speed = speed;
+        else
+        {
+            m_speed = speed;
+        }
     }
 
     void start (count_type loop_count = 1) noexcept
@@ -168,7 +171,7 @@ public:
 
             // get current position
             return !m_count or play_count < m_count ?
-                        duration (elapsed - (play_count * m_length.count ())):
+                        duration (elapsed - (play_count * m_length.count ())) :
                         duration ();
         }
     }

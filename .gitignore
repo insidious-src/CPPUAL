@@ -22,7 +22,6 @@ core
 bin/
 build*
 !core/
-tags
 .DS_Store
 .directory
 *.debug
@@ -75,3 +74,8 @@ CMakeLists.txt.user
 # --------
 *.dll
 *.exe
+
+# Sublime Text
+tags
+.tags*
+*.sublime-workspace
