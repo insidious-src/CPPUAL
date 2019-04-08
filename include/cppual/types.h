@@ -25,6 +25,7 @@
 
 #include <cppual/decl.h>
 
+#include <cstddef>
 #include <cstdint>
 
 namespace cppual

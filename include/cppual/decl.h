@@ -100,7 +100,7 @@
 #
 #   define OS_STD_UNIX
 #
-#   if defined (__linux__) or defined (__gnu_linux__)
+#   if (defined (__linux__) or defined (__gnu_linux__)) && !defined (__ANDROID__)
 #       define OS_GNU_LINUX
 #       define OS_CURRENT OS_GNU_LINUX
 #       define OS_STD_POSIX

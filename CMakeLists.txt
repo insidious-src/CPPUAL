@@ -1,13 +1,30 @@
 cmake_minimum_required(VERSION 3.6)
 
 if(ANDROID)
-    set(ANDROID_NDK "/opt/android-ndk")
+    if(NOT DEFINED ANDROID_NDK)
+        set(ANDROID_NDK "/opt/android-ndk")
+    endif()
     #set(ANDROID_SDK_ROOT "/opt/android-sdk")
-    set(ANDROID_ABI armeabi-v7a)
-    set(ANDROID_PLATFORM "android-16")
-    set(ANDROID_NATIVE_API_LEVEL 16)
-    set(ANDROID_TOOLCHAIN_MACHINE_NAME "arm-linux-androideabi")
-    set(ANDROID_STL c++_shared)
+    if(NOT DEFINED ANDROID_ABI)
+        set(ANDROID_ABI armeabi-v7a)
+    endif()
+    if(NOT DEFINED ANDROID_PLATFORM)
+        set(ANDROID_PLATFORM "android-16")
+    endif()
+    if(NOT DEFINED ANDROID_NATIVE_API_LEVEL)
+        set(ANDROID_NATIVE_API_LEVEL 16)
+    endif()
+    if(NOT DEFINED ANDROID_TOOLCHAIN_MACHINE_NAME)
+        set(ANDROID_TOOLCHAIN_MACHINE_NAME "arm-linux-androideabi")
+    endif()
+    if(NOT DEFINED ANDROID_STL)
+        set(ANDROID_STL c++_shared)
+    endif()
+
+    if(NOT DEFINED ANDROID_CPP_FEATURES)
+        set(ANDROID_CPP_FEATURES "exceptions rtti")
+    endif()
+
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/android.toolchain.cmake")
 elseif(IOS_PLATFORM)
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/ios.toolchain.cmake")
@@ -19,37 +36,30 @@ elseif(WIN64)
     set(CMAKE_TOOLCHAIN_FILE "/usr/share/mingw/toolchain-${TOOLCHAIN_PREFIX}.cmake")
 endif()
 
-project("C++ UAL")
+project("C++ UAL" LANGUAGES CXX)
 
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC OFF)
 
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
+#set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-include(CompilerConfig  REQUIRED)
-
-if(ANDROID)
-    set(CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK}/build/cmake/android.toolchain.cmake" REQUIRED)
-    #include(AddQtAndroidApk REQUIRED)
-else()
-    #include(ToolChainConfig REQUIRED)
-endif()
+#include(CompilerConfig REQUIRED)
 
 find_package(DL       REQUIRED) ## dynamic loading of libraries
 find_package(WM       REQUIRED) ## platform window manager
 find_package(Sockets  REQUIRED) ## network interface & interprocess
-find_package(OpenAL   REQUIRED) ## will be dropped at some point
-find_package(SndFile  REQUIRED) ## will be dropped at some point
-find_package(Freetype REQUIRED) ## will be dropped at some point
-find_package(GLEW     REQUIRED) ## will be dropped at some point
+find_package(OpenAL           ) ## will be dropped at some point
+find_package(SndFile          ) ## will be dropped at some point
+find_package(Freetype         ) ## will be dropped at some point
+find_package(GLEW             ) ## will be dropped at some point
 find_package(OpenGL   REQUIRED) ## will be dropped at some point
 find_package(EGL      REQUIRED) ## will be dropped at some point
-find_package(OpenCL   REQUIRED) ## backup compute api
-find_package(Vulkan   REQUIRED) ## primary compute & graphics api
-
+find_package(OpenCL           ) ## backup compute api
+find_package(Vulkan           ) ## primary compute & graphics api
 
 include_directories(
     include
@@ -104,7 +114,7 @@ add_library(cppual-host SHARED
     "include/cppual/system/clock.h"
     )
 
- # device compute, memory (Vulkan, OpenCL, Serial)
+# device compute, memory (Vulkan, OpenCL, Serial)
 add_library(cppual-compute SHARED
     "include/cppual/memory/system.h"
     "src/memory/system.cpp"
@@ -129,12 +139,8 @@ add_library(cppual-compute SHARED
     "src/compute/behaviour.cpp"
     "include/cppual/compute/object.h"
     "src/compute/object.cpp"
-    "src/compute/backend_iface.h"
+    "include/cppual/compute/backend_iface.h"
     "src/compute/backend_iface.cpp"
-    "src/compute/backend/vulkan.h"
-    "src/compute/backend/vulkan.cpp"
-    "src/compute/backend/opencl.h"
-    "src/compute/backend/opencl.cpp"
     "include/cppual/compute/platform.h"
     "include/cppual/compute/program.h"
     "src/compute/program.cpp"
@@ -152,6 +158,24 @@ add_library(cppual-compute SHARED
     "src/compute/thread.cpp"
     "include/cppual/compute/thread.h"
     )
+
+if(VULKAN_FOUND)
+
+add_library(cppual-compute-vulkan MODULE
+    "src/compute/backend/vulkan.h"
+    "src/compute/backend/vulkan.cpp"
+    )
+
+endif()
+
+if(OPENCL_FOUND)
+
+add_library(cppual-compute-opencl MODULE
+    "src/compute/backend/opencl.h"
+    "src/compute/backend/opencl.cpp"
+    )
+
+endif()
 
 #add_library(cppual-db SHARED
 #	"include/cppual/db/model.h"
@@ -227,6 +251,90 @@ add_library(cppual-mqtt SHARED
     "src/mqtt/client.cpp"
     "include/cppual/mqtt/message.h"
     "src/mqtt/message.cpp"
+    )
+
+if(SNDFILE_FOUND AND OPENAL_FOUND)
+
+# audio library (OpenAL, TrueAudio, Compute)
+add_library(cppual-audio SHARED
+    "src/multimedia/audio/sound.cpp"
+    "include/cppual/multimedia/audio/sound.h"
+    "src/multimedia/audio/spatial.cpp"
+    "include/cppual/multimedia/audio/spatial.h"
+    "src/multimedia/audio/format.cpp"
+    "include/cppual/multimedia/audio/format.h"
+    "src/multimedia/audio/device.cpp"
+    "include/cppual/multimedia/audio/device.h"
+    "src/multimedia/audio/buffer.cpp"
+    "include/cppual/multimedia/audio/buffer.h"
+    "src/multimedia/audio/source.cpp"
+    "include/cppual/multimedia/audio/source.h"
+    "src/multimedia/audio/emitter.cpp"
+    "include/cppual/multimedia/audio/emitter.h"
+    "src/multimedia/audio/playback.cpp"
+    "include/cppual/multimedia/audio/playback.h"
+    "src/multimedia/audio/listener.cpp"
+    "include/cppual/multimedia/audio/listener.h"
+    "src/multimedia/audio/record.cpp"
+    "include/cppual/multimedia/audio/record.h"
+    )
+
+# audio backend OpenAL
+add_library(cppual-audio-openal MODULE
+    "src/multimedia/audio/al/aldef.h"
+    "src/multimedia/audio/al/alobject.cpp"
+    "include/cppual/multimedia/audio/al/alobject.h"
+    "src/multimedia/audio/al/aldevice.cpp"
+    "include/cppual/multimedia/audio/al/aldevice.h"
+    "src/multimedia/audio/al/albuffer.cpp"
+    "include/cppual/multimedia/audio/al/albuffer.h"
+    "src/multimedia/audio/al/alsource.cpp"
+    "include/cppual/multimedia/audio/al/alsource.h"
+    "src/multimedia/audio/al/emitter.cpp"
+    "include/cppual/multimedia/audio/al/emitter.h"
+    "src/multimedia/audio/al/music.cpp"
+    "include/cppual/multimedia/audio/al/music.h"
+    "src/multimedia/audio/al/listener.cpp"
+    "include/cppual/multimedia/audio/al/listener.h"
+    "src/multimedia/audio/al/recorder.cpp"
+    "include/cppual/multimedia/audio/al/recorder.h"
+    )
+
+endif()
+
+# multimedia
+add_library(cppual-multimedia SHARED
+    "src/multimedia/media_mgr.cpp"
+    "include/cppual/multimedia/media_mgr.h"
+    "src/multimedia/media_sync.cpp"
+    "include/cppual/multimedia/media_sync.h"
+    )
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+# video acceleration api backend
+add_library(cppual-video-vaapi MODULE
+    "src/multimedia/video/backend/vaapi.cpp"
+    )
+
+# Xorg video backend
+add_library(cppual-video-xorg MODULE
+    "src/multimedia/video/backend/xvideo.cpp"
+    )
+
+endif()
+
+# compute video backend
+add_library(cppual-video-compute MODULE
+    "src/multimedia/video/backend/compute_video.cpp"
+    )
+
+# video library (VAAPI, XVideo, OpenGL)
+add_library(cppual-video SHARED
+    "src/multimedia/video/vfilter.cpp"
+    "include/cppual/multimedia/video/vfilter.h"
+    "src/multimedia/video/vequalizer.cpp"
+    "include/cppual/multimedia/video/vequalizer.h"
     )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -325,6 +433,8 @@ add_library(cppual-ui-win MODULE
     )
 endif()
 
+if(FREETYPE_FOUND AND GLEW_FOUND)
+
 # graphics drawing library
 add_library(cppual-gfx SHARED
     "include/cppual/gfx/dsp_details.h"
@@ -391,86 +501,6 @@ add_library(cppual-gfx-drawables MODULE
     "include/cppual/gfx/drawable/line.h"
     )
 
-# multimedia
-add_library(cppual-multimedia SHARED
-    "src/multimedia/media_mgr.cpp"
-    "include/cppual/multimedia/media_mgr.h"
-    "src/multimedia/media_sync.cpp"
-    "include/cppual/multimedia/media_sync.h"
-    )
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-# video acceleration api backend
-add_library(cppual-video-vaapi MODULE
-    "src/multimedia/video/backend/vaapi.cpp"
-    )
-
-# Xorg video backend
-add_library(cppual-video-xorg MODULE
-    "src/multimedia/video/backend/xvideo.cpp"
-    )
-
-endif()
-
-# compute video backend
-add_library(cppual-video-compute MODULE
-    "src/multimedia/video/backend/compute_video.cpp"
-    )
-
-# video library (VAAPI, XVideo, OpenGL)
-add_library(cppual-video SHARED
-    "src/multimedia/video/vfilter.cpp"
-    "include/cppual/multimedia/video/vfilter.h"
-    "src/multimedia/video/vequalizer.cpp"
-    "include/cppual/multimedia/video/vequalizer.h"
-    )
-
-# audio library (OpenAL, TrueAudio, Compute)
-add_library(cppual-audio SHARED
-    "src/multimedia/audio/sound.cpp"
-    "include/cppual/multimedia/audio/sound.h"
-    "src/multimedia/audio/spatial.cpp"
-    "include/cppual/multimedia/audio/spatial.h"
-    "src/multimedia/audio/format.cpp"
-    "include/cppual/multimedia/audio/format.h"
-    "src/multimedia/audio/device.cpp"
-    "include/cppual/multimedia/audio/device.h"
-    "src/multimedia/audio/buffer.cpp"
-    "include/cppual/multimedia/audio/buffer.h"
-    "src/multimedia/audio/source.cpp"
-    "include/cppual/multimedia/audio/source.h"
-    "src/multimedia/audio/emitter.cpp"
-    "include/cppual/multimedia/audio/emitter.h"
-    "src/multimedia/audio/playback.cpp"
-    "include/cppual/multimedia/audio/playback.h"
-    "src/multimedia/audio/listener.cpp"
-    "include/cppual/multimedia/audio/listener.h"
-    "src/multimedia/audio/record.cpp"
-    "include/cppual/multimedia/audio/record.h"
-    )
-
-# audio backend OpenAL
-add_library(cppual-audio-openal MODULE
-    "src/multimedia/audio/al/aldef.h"
-    "src/multimedia/audio/al/alobject.cpp"
-    "include/cppual/multimedia/audio/al/alobject.h"
-    "src/multimedia/audio/al/aldevice.cpp"
-    "include/cppual/multimedia/audio/al/aldevice.h"
-    "src/multimedia/audio/al/albuffer.cpp"
-    "include/cppual/multimedia/audio/al/albuffer.h"
-    "src/multimedia/audio/al/alsource.cpp"
-    "include/cppual/multimedia/audio/al/alsource.h"
-    "src/multimedia/audio/al/emitter.cpp"
-    "include/cppual/multimedia/audio/al/emitter.h"
-    "src/multimedia/audio/al/music.cpp"
-    "include/cppual/multimedia/audio/al/music.h"
-    "src/multimedia/audio/al/listener.cpp"
-    "include/cppual/multimedia/audio/al/listener.h"
-    "src/multimedia/audio/al/recorder.cpp"
-    "include/cppual/multimedia/audio/al/recorder.h"
-    )
-
 # graphical user interface
 add_library(cppual-ui SHARED
     "src/ui/manager.cpp"
@@ -527,6 +557,8 @@ add_library(cppual-ui-dialogs MODULE
     "include/cppual/ui/dialogs/wizarddlg.h"
     )
 
+endif()
+
 
 ### link targets
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -537,14 +569,29 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 target_link_libraries(cppual-host DL::Library)
-target_link_libraries(cppual-compute Vulkan::Library OpenCL::Library Sockets::Library)
-target_link_libraries(cppual-gfx cppual-compute Freetype::Library)
+target_link_libraries(cppual-compute Sockets::Library)
 target_link_libraries(cppual-network Sockets::Library)
-target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx GLEW::Library OpenGL::Library)
+
 target_link_libraries(cppual-video-compute cppual-compute)
-target_link_libraries(cppual-audio cppual-compute SndFile::Library)
-target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
-target_link_libraries(cppual-gl cppual-gfx EGL::Library GLEW::Library OpenGL::Library)
-target_link_libraries(cppual-ui cppual-gfx)
-target_link_libraries(cppual-ui-views cppual-ui)
-target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
+
+if(OPENCL_FOUND)
+    target_link_libraries(cppual-compute-opencl cppual-compute OpenCL::Library)
+endif()
+
+if(VULKAN_FOUND)
+    target_link_libraries(cppual-compute-vulkan cppual-compute Vulkan::Library)
+endif()
+
+if(SNDFILE_FOUND AND OPENAL_FOUND)
+    target_link_libraries(cppual-audio cppual-compute SndFile::Library)
+    target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
+endif()
+
+if(FREETYPE_FOUND AND GLEW_FOUND)
+    target_link_libraries(cppual-gfx cppual-compute Freetype::Library)
+    target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx)
+    target_link_libraries(cppual-gl cppual-gfx EGL::Library GLEW::Library OpenGL::Library)
+    target_link_libraries(cppual-ui cppual-gfx)
+    target_link_libraries(cppual-ui-views cppual-ui)
+    target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
+endif()

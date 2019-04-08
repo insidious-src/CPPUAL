@@ -23,8 +23,9 @@
 #define CPPUAL_PROCESS_MODEL_H_
 #ifdef __cplusplus
 
-#include <string>
 #include <cppual/process/details.h>
+
+#include <string>
 
 using std::string;
 

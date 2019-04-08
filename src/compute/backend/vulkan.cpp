@@ -19,14 +19,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <vector>
-#include <cstring>
-#include <type_traits>
-#include <vulkan/vulkan.h>
+#include <cppual/compute/backend_iface.h>
+
 #include <cppual/types.h>
 #include <cppual/memory/stack.h>
 #include <cppual/compute/device.h>
-#include "../backend_iface.h"
+
+#include <vulkan/vulkan.h>
+
+#include <vector>
+#include <cstring>
+#include <type_traits>
 
 using std::vector;
 using cppual::Memory::StackedResource;

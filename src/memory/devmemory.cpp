@@ -29,7 +29,7 @@ void* operator new (std::size_t /* size */, MemoryChunk& obj, std::size_t /* ali
 
     if (!obj.device ().valid ()) throw memory_source_not_available ();
 
-    ::VkDeviceMemory mem_obj = nullptr;
+    //::VkDeviceMemory mem_obj = nullptr;
 
     // ::VkMemoryAllocateInfo nfo =
     // {
@@ -43,8 +43,9 @@ void* operator new (std::size_t /* size */, MemoryChunk& obj, std::size_t /* ali
 
     // if (::vkAllocateMemory (obj.device ().handle<::VkDevice> (), &nfo, mem_obj))
     //     throw std::bad_alloc ();
-        
-    return mem_obj;
+
+    //return mem_obj;
+    return nullptr;
 }
 
 void operator delete (void* ptr, MemoryChunk& obj)
@@ -53,7 +54,7 @@ void operator delete (void* ptr, MemoryChunk& obj)
     const ::VkAllocationCallbacks* p = nullptr;
 
     if (!obj.device ().valid ()) throw memory_source_not_available ();
-    ::vkFreeMemory (obj.device ().handle<::VkDevice> (), static_cast<::VkDeviceMemory> (ptr), p);
+    //::vkFreeMemory (obj.device ().handle<::VkDevice> (), static_cast<::VkDeviceMemory> (ptr), p);
 }
 
 // =========================================================

@@ -19,10 +19,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstring>
 
 #include "opencl.h"
-#include "../backend_iface.h"
+
+#include <cppual/compute/backend_iface.h>
+
+#include <cstring>
 
 namespace cppual { namespace Compute { namespace CL {
 

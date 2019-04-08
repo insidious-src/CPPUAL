@@ -44,4 +44,9 @@ void set_default_resource(MemoryResource& rc)
     default_resource() = &rc;
 }
 
+MemoryResource::~MemoryResource()
+{
+
+}
+
 } } // Memory

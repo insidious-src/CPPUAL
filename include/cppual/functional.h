@@ -324,7 +324,7 @@ public:
         return *this;
     }
 
-    inline T operator () (Args&&... mArgs) const
+    inline T operator () (Args... mArgs) const
     {
         #ifdef DEBUG_MODE
         if (m_closure == nullptr) throw std::bad_function_call ();

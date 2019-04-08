@@ -23,9 +23,11 @@
 #define CPPUAL_MEMORY_SHARED_H_
 #ifdef __cplusplus
 
-#include <memory>
 #include <cppual/types.h>
 #include <cppual/noncopyable.h>
+
+#include <memory>
+#include <string>
 
 using std::string;
 

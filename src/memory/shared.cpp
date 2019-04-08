@@ -48,7 +48,7 @@ using std::string;
 
 namespace cppual { namespace Memory {
 
-#ifdef OS_STD_UNIX
+#if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
 
 inline int flags1 (State eState) noexcept
 {
@@ -74,15 +74,15 @@ SharedObject::SharedObject (string const& gName, Mode eMode, State eState)
 : m_gName (gName),
   m_eMode (eMode),
   m_eState (eState)
-#ifdef OS_STD_UNIX
-  , m_nId (shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u))
+#if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
+  , m_nId (::shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u))
 #endif
 { }
 
 SharedObject::~SharedObject () noexcept
 {
-#   ifdef OS_STD_UNIX
-    if (m_nId != -1) shm_unlink (m_gName.c_str ());
+#   if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
+    if (m_nId != -1) ::shm_unlink (m_gName.c_str ());
 #   endif
 }
 
@@ -101,9 +101,9 @@ SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
         if (gObj.mode () != Mode::Open) gObj.truncate (uSize);
 
 #       ifdef OS_STD_UNIX
-        m_pRegion = mmap (nullptr, uSize,
-                          bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
-                          MAP_SHARED, gObj.id (), 0);
+        m_pRegion = ::mmap (nullptr, uSize,
+                            bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
+                            MAP_SHARED, gObj.id (), 0);
 #       elif defined OS_WINDOWS
         bWritable = bWritable;
 #       endif
@@ -113,7 +113,7 @@ SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
 SharedRegion::~SharedRegion () noexcept
 {
 #   ifdef OS_STD_UNIX
-    if (m_pRegion) munmap (m_pRegion, m_uSize);
+    if (m_pRegion) ::munmap (m_pRegion, m_uSize);
 #   endif
 }
 

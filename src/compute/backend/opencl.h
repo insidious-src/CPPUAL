@@ -23,13 +23,15 @@
 #define CPPUAL_COMPUTE_BACKEND_OPENCL_H_
 #ifdef __cplusplus
 
-#include <vector>
-#include <CL/cl.h>
-#include <type_traits>
 #include <cppual/types.h>
 #include <cppual/resource.h>
 #include <cppual/memory/stack.h>
 #include <cppual/compute/device.h>
+
+#include <CL/cl.h>
+
+#include <vector>
+#include <type_traits>
 
 /*
  * API Typesafe Encapsulation Guide Lines

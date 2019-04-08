@@ -19,10 +19,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#include <cppual/gfx/font.h>
+
 #include <freetype2/ft2build.h>
 #include <freetype2/freetype/freetype.h>
-#include <cppual/gfx/font.h>
+
+#include <iostream>
 
 namespace cppual { namespace Graphics {
 

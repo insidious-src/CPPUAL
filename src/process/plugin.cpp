@@ -36,7 +36,7 @@ namespace { // optimize for internal unit usage
 
 constexpr const char* lib_ext () noexcept
 {
-#    if defined (OS_GNU_LINUX) or defined (OS_BSD)
+#    if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
     return ".so";
 #    elif defined (OS_STD_MAC)
     return ".dylib";

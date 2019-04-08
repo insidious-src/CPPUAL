@@ -27,19 +27,19 @@
 
 #include <limits>
 #include <memory>
-#include <experimental/memory_resource>
 
 namespace cppual { namespace Memory {
 
-using std::experimental::pmr::memory_resource;
-using std::experimental::pmr::polymorphic_allocator;
-
 // =========================================================
-// Extend std::memory_resource for compute usage
+// std::pmr::memory_resource replaced for compute usage
 // =========================================================
 
-struct MemoryResource : public memory_resource
+struct MemoryResource
 {
+protected:
+    static constexpr std::size_t max_align = alignof(std::max_align_t);
+
+public:
     typedef std::size_t     align_type;
     typedef std::size_t     size_type;
     typedef u8*             math_pointer;
@@ -47,6 +47,8 @@ struct MemoryResource : public memory_resource
     typedef cvoid*          const_pointer;
     typedef std::ptrdiff_t  difference_type;
     typedef Compute::Device device_type;
+
+    virtual ~MemoryResource();
 
     virtual bool is_thread_safe () const noexcept { return false; }
     virtual bool   is_lock_free () const noexcept { return false; }
@@ -63,7 +65,29 @@ struct MemoryResource : public memory_resource
 
     virtual size_type capacity () const
     { return std::numeric_limits<size_type>::max (); }
+
+    void* allocate(size_t bytes, size_t alignment = max_align)
+    { return do_allocate(bytes, alignment); }
+
+    void deallocate(void* p, size_t bytes, size_t alignment = max_align)
+    { return do_deallocate(p, bytes, alignment); }
+
+    bool is_equal(MemoryResource const& other) const noexcept
+    { return do_is_equal(other); }
+
+protected:
+    virtual void* do_allocate(size_t bytes, size_t alignment) = 0;
+    virtual void  do_deallocate(void* p, size_t bytes, size_t alignment) = 0;
+    virtual bool  do_is_equal(MemoryResource const& other) const noexcept = 0;
 };
+
+inline bool
+operator == (MemoryResource const& a, MemoryResource const& b) noexcept
+{ return &a == &b || a.is_equal(b); }
+
+inline bool
+operator != (MemoryResource const& a, MemoryResource const& b) noexcept
+{ return !(a == b); }
 
 MemoryResource* get_default_resource();
 void            set_default_resource(MemoryResource&);
@@ -78,10 +102,6 @@ struct is_memory_resource_helper : public std::conditional
          std::is_base_of<MemoryResource, T>::value,
          std::true_type, std::false_type
          >::type
-{ };
-
-template <>
-struct is_memory_resource_helper < memory_resource > : public std::true_type
 { };
 
 template <>
@@ -195,10 +215,6 @@ template <typename T>
 struct is_allocator_helper < std::allocator<T> > : public std::true_type
 { };
 
-template <typename T>
-struct is_allocator_helper < polymorphic_allocator<T> > : public std::true_type
-{ };
-
 template <typename T, typename U>
 struct is_allocator_helper < Allocator<T, U> > : public std::true_type
 { };
@@ -239,29 +255,25 @@ operator != (Allocator<T, A> const& x,
 template <class T, class A, class RAllocator>
 constexpr
 bool
-operator != (Allocator<T, A> const&,
-             RAllocator const&) noexcept
+operator != (Allocator<T, A> const&, RAllocator const&) noexcept
 { return true; }
 
 template <class T, class A, class RAllocator>
 constexpr
 bool
-operator == (Allocator<T, A> const&,
-             RAllocator const&) noexcept
+operator == (Allocator<T, A> const&, RAllocator const&) noexcept
 { return false; }
 
 template <class T, class U>
 constexpr
 bool
-operator != (Allocator<T, void> const&,
-             std::allocator<U> const&) noexcept
+operator != (Allocator<T, void> const&, std::allocator<U> const&) noexcept
 { return false; }
 
 template <class T, class U>
 constexpr
 bool
-operator == (Allocator<T, void> const&,
-             std::allocator<U> const&) noexcept
+operator == (Allocator<T, void> const&, std::allocator<U> const&) noexcept
 { return true; }
 
 } } // namespace Memory

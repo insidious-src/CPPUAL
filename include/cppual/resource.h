@@ -27,26 +27,26 @@
 
 namespace cppual {
 
-//enum class ResourceType : byte
-//{
-//    Null = 0,
-//    Device,
-//    Image,
-//    Font,
-//    Macro,
-//    Texture,
-//    Shader,
-//    Program,
-//    Query,
-//    Window,
-//    Surface,
-//    Buffer,
-//    Pixmap,
-//    Colormap,
-//    Cursor,
-//    GlyphCursor,
-//    Context
-//};
+enum class ResourceType : std::size_t
+{
+    Null,
+    Device,
+    Image,
+    Font,
+    Macro,
+    Texture,
+    Shader,
+    Program,
+    Query,
+    Window,
+    Surface,
+    Buffer,
+    Pixmap,
+    Colormap,
+    Cursor,
+    GlyphCursor,
+    Context
+};
 
 // =========================================================
 
@@ -144,7 +144,7 @@ public:
     constexpr bool       valid () const noexcept { return m_id; }
 
     constexpr Resource (value_type id) noexcept
-    : m_id   (id)
+    : m_id (id)
     { }
 
     template <class ID_>
@@ -160,7 +160,7 @@ private:
 template <class ID>
 constexpr bool operator == (Resource<void, ID> const& gObj1,
                             Resource<void, ID> const& gObj2)
-{ return gObj1.m_id == gObj2.m_id and gObj1.m_eResType == gObj2.m_eResType; }
+{ return gObj1.m_id == gObj2.m_id; }
 
 template <class ID>
 constexpr bool operator != (Resource<void, ID> const& gObj1,

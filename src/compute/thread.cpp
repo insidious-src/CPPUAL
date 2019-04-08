@@ -96,7 +96,7 @@ int MainThread::setPriority (ThreadPriority ePrio)
     {
         sched_param gParam;
         pthread_getschedparam (MainThread::Handle, &nPrio, &gParam);
-        nPrio = gParam.__sched_priority;
+        nPrio = gParam.sched_priority;
     }
         break;
     }
@@ -220,7 +220,7 @@ bool Thread::start (callable&      gFunc,
 void Thread::cancel ()
 {
 #ifdef OS_WINDOWS
-#elif defined (OS_STD_POSIX)
+#elif defined (OS_STD_POSIX) && !defined (OS_ANDROID)
     pthread_cancel (m_gId.m_handle);
 #endif
 }
@@ -285,7 +285,7 @@ int Thread::setPriority (ThreadPriority ePrio)
     {
         sched_param gParam;
         pthread_getschedparam (m_gId.m_handle, &nPrio, &gParam);
-        nPrio = gParam.__sched_priority;
+        nPrio = gParam.sched_priority;
     }
         break;
     }

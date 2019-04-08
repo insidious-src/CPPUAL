@@ -20,6 +20,7 @@
  */
 
 #include <cppual/gfx/gl/instance.h>
+
 #include "gldef.h"
 
 namespace cppual { namespace Graphics { namespace GL {

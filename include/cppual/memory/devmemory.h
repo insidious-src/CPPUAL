@@ -23,9 +23,10 @@
 #define CPPUAL_COMPUTE_MEMORY_H_
 #ifdef __cplusplus
 
-#include <stdexcept>
 #include <cppual/compute/object.h>
 #include <cppual/noncopyable.h>
+
+#include <new>
 
 namespace cppual { namespace Memory {
 

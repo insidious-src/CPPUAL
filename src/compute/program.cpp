@@ -20,14 +20,14 @@
  */
 
 #include <cppual/compute/program.h>
-#include "backend_iface.h"
-#include "backend/opencl.h"
+#include <cppual/compute/backend_iface.h>
+//#include "backend/opencl.h"
 
 namespace cppual { namespace Compute {
 
 namespace {
 
-inline Program::pointer createProgramFromSource (Behaviour const& context, vector<string> const& source)
+inline Program::pointer createProgramFromSource (Behaviour const& /*context*/, vector<string> const& source)
 {
     if (!source.empty ())
     {
