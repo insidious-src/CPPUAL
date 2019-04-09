@@ -49,17 +49,17 @@ set(CMAKE_AUTOMOC OFF)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 #include(CompilerConfig REQUIRED)
 
-find_package(DL       REQUIRED) ## dynamic loading of libraries
-find_package(WM       REQUIRED) ## platform window manager
-find_package(Sockets  REQUIRED) ## network interface & interprocess
-find_package(OpenAL           ) ## will be dropped at some point
-find_package(SndFile          ) ## will be dropped at some point
-find_package(Freetype         ) ## will be dropped at some point
-find_package(GLEW             ) ## will be dropped at some point
-find_package(OpenGL   REQUIRED) ## will be dropped at some point
-find_package(EGL      REQUIRED) ## will be dropped at some point
-find_package(OpenCL           ) ## backup compute api
-find_package(Vulkan           ) ## primary compute & graphics api
+find_package(DL            REQUIRED) ## dynamic loading of libraries
+find_package(WindowManager REQUIRED) ## platform window manager
+find_package(Sockets       REQUIRED) ## network interface & interprocess
+find_package(OpenAL                ) ## will be dropped at some point
+find_package(SndFile               ) ## will be dropped at some point
+find_package(Freetype              ) ## will be dropped at some point
+find_package(GLEW                  ) ## will be dropped at some point
+find_package(OpenGL        REQUIRED) ## will be dropped at some point
+find_package(EGL           REQUIRED) ## will be dropped at some point
+find_package(OpenCL                ) ## backup compute api
+find_package(Vulkan                ) ## primary compute & graphics api
 
 include_directories(
     include
