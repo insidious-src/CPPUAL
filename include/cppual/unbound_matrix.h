@@ -100,13 +100,31 @@ public:
     Reactive<U> operator * (Reactive<U>); // multiply
 
     template <typename U>
+    Reactive<U> operator *= (Reactive<U>); // multiply
+
+    template <typename U>
     Reactive<U> operator / (Reactive<U>); // divide
+
+    template <typename U>
+    Reactive<U> operator /= (Reactive<U>); // divide
 
     template <typename U>
     Reactive<U> operator + (Reactive<U>); // add
 
     template <typename U>
+    Reactive<U> operator += (Reactive<U>); // add
+
+    template <typename U>
     Reactive<U> operator - (Reactive<U>); // subtract
+
+    template <typename U>
+    Reactive<U> operator -= (Reactive<U>); // subtract
+
+    template <typename U>
+    Reactive<U> operator % (Reactive<U>); // modulo
+
+    template <typename U>
+    Reactive<U> operator %= (Reactive<U>); // modulo
 
     template <typename U>
     Reactive<U> root (Reactive<U>, size_type);

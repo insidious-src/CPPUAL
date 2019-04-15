@@ -28,6 +28,8 @@ if(ANDROID)
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/android.toolchain.cmake")
 elseif(IOS_PLATFORM)
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/ios.toolchain.cmake")
+elseif(OSXCROSS)
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/toolchain-x86_64-apple-darwin15.cmake")
 elseif(WIN32)
     set(TOOLCHAIN_PREFIX "i686-w64-mingw32")
     set(CMAKE_TOOLCHAIN_FILE "/usr/share/mingw/toolchain-${TOOLCHAIN_PREFIX}.cmake")
@@ -83,6 +85,8 @@ include_directories(
 add_library(cppual-host SHARED
     "include/cppual/functional.h"
     "include/cppual/bitfield.h"
+    "include/cppual/coroutines.h"
+    "include/cppual/fibers.h"
     "include/cppual/unbound_matrix.h"
     "include/cppual/flags.h"
     "include/cppual/signal.h"

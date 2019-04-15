@@ -48,12 +48,12 @@ private:
         return init;
     }
 
-public:
     inline Initializer ()
     {
         if (mgr.load_plugin(platform_name())) factory = mgr.construct(platform_name());
     }
 
+public:
     inline static shared_manager& instance () noexcept
     {
         return platform ().factory;
