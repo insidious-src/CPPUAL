@@ -28,6 +28,16 @@
 
 namespace cppual {
 
+template <typename... Args>
+struct Select
+{
+    template <typename C, typename R>
+    static constexpr auto Overload(R (C::* fn)(Args...)) noexcept -> decltype(fn)
+    { return fn; }
+};
+
+// ===================================================
+
 template <typename> struct is_char_helper : public std::false_type { };
 template <> struct is_char_helper<char>   : public std::true_type  { };
 template <> struct is_char_helper<uchar>  : public std::true_type  { };

@@ -33,12 +33,16 @@
 
 namespace cppual {
 
+// ====================================================
+
 template <typename T>
 struct Buffer
 {
     CharType<T>* data    ;
     std::size_t  capacity;
 };
+
+// ====================================================
 
 template <typename T      = char,
           typename TAlloc = std::allocator<T>
