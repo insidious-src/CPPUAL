@@ -24,24 +24,37 @@
 #ifdef __cplusplus
 
 #include <string>
-#include <fstream>
-
-using std::string;
-using std::fstream;
+#include <map>
+#include <list>
 
 namespace cppual {
+
+template <typename Key = char, typename Alloc = std::allocator<Key>>
+class Element
+{
+public:
+    static_assert (typeid (Key) == typeid (std::allocator_traits<Alloc>::value_type),
+                   "Key allocator mismatch!");
+
+    typedef std::basic_string<Key, std::char_traits<Key>, Alloc> string_type;
+
+    string_type name;
+    std::map<string_type, string_type, std::less<string_type> > attribs;
+    std::list<Element> children;
+};
 
 class DOMParser
 {
 public:
+    typedef std::string string_type;
+
     inline DOMParser () = default;
 
     inline
-    explicit DOMParser (string const& /*gSource*/,
-                        string const& gDelimBegin  = "<" ,
-                        string const& gDelimBegin2 = "</",
-                        string const& gDelimEnd    = "/>",
-                        string const& gDelimEnd2   =  ">")
+    explicit DOMParser (string_type const& gDelimBegin  = "<" ,
+                        string_type const& gDelimBegin2 = "</",
+                        string_type const& gDelimEnd    = "/>",
+                        string_type const& gDelimEnd2   =  ">")
     : m_gDelimBegin  (gDelimBegin ),
       m_gDelimBegin2 (gDelimBegin2),
       m_gDelimEnd    (gDelimEnd   ),
@@ -49,7 +62,7 @@ public:
     { }
 
 private:
-    string m_gDelimBegin, m_gDelimBegin2, m_gDelimEnd, m_gDelimEnd2;
+    string_type m_gDelimBegin, m_gDelimBegin2, m_gDelimEnd, m_gDelimEnd2;
 };
 
 } // cppual

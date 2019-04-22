@@ -57,8 +57,8 @@ string Xml::getAttrib (string const& /*gElem*/, string const& /*gAttrib*/)
 }
 
 void Xml::setAttrib (string const& /*gElem*/,
-                      string const& /*gAttrib*/,
-                      string const& /*gValue*/)
+                     string const& /*gAttrib*/,
+                     string const& /*gValue*/)
 {
     if (m_gFile.is_open ())
     {
@@ -94,8 +94,8 @@ void Xml::appendElement (string const& /*gParentElem*/, string const& /*gElem*/)
 }
 
 void Xml::insertElement (string const& /*gTargetElem*/,
-                          string const& /*gElem*/,
-                          bool /*bAfter*/)
+                         string const& /*gElem*/,
+                         bool /*bAfter*/)
 {
 }
 

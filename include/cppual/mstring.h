@@ -211,7 +211,7 @@ String<T, TAlloc> String<T, TAlloc>::substr (size_type uBeginPos,
 
 template <typename T, class TAlloc>
 void copyToString (String<T, TAlloc>&                    gObj,
-                   T const*                                  pFromText,
+                   T const*                              pFromText,
                    typename String<T, TAlloc>::size_type uLength) noexcept
 {
     if (pFromText)
@@ -233,8 +233,8 @@ constexpr T const* strend (T const* pBegin, std::size_t uLen) noexcept
 
 template <typename T, class TAlloc>
 String<T, TAlloc>& assignToString (String<T, TAlloc>&                    gObj,
-                                       T const*                                  pFromText,
-                                       typename String<T, TAlloc>::size_type uLength) noexcept
+                                   T const*                              pFromText,
+                                   typename String<T, TAlloc>::size_type uLength) noexcept
 {
     if (!pFromText) return gObj;
 
@@ -260,8 +260,8 @@ String<T, TAlloc>& assignToString (String<T, TAlloc>&                    gObj,
 
 template <typename T, class TAlloc>
 String<T, TAlloc>& addToString (String<T, TAlloc>& gObj,
-                                    T const*               pFromText,
-                                    std::size_t            uAddLength) noexcept
+                                T const*           pFromText,
+                                std::size_t        uAddLength) noexcept
 {
     typename String<T, TAlloc>::size_type const uLength =
              gObj.m_uLength + uAddLength;
@@ -325,26 +325,26 @@ bool operator != (String<T, TAlloc> const& lhObj,
 
 template <typename T, class TAlloc>
 bool operator != (String<T, TAlloc> const& lhObj,
-                  T const*                     pText2) noexcept
+                  T const*                 pText2) noexcept
 { return !(lhObj == pText2); }
 
 // ====================================================
 
 template <typename T, class TAlloc>
-inline String<T, TAlloc>& operator += (String<T, TAlloc>&        lhObj,
-                                           String<T, TAlloc> const& rhObj) noexcept
+inline String<T, TAlloc>& operator += (String<T, TAlloc>&       lhObj,
+                                       String<T, TAlloc> const& rhObj) noexcept
 { return addToString (lhObj, rhObj.m_gBuffer.data, rhObj.m_uLength); }
 
 template <typename T, class TAlloc>
 inline String<T, TAlloc>& operator += (String<T>& gObj,
-                                           T const*       pText) noexcept
+                                       T const*   pText) noexcept
 { return addToString (gObj, pText, std::strlen (pText)); }
 
 // ====================================================
 
 template <typename T, class TAlloc>
 inline String<T, TAlloc> operator + (String<T, TAlloc> const& lhObj,
-                                         String<T, TAlloc> const& rhObj) noexcept
+                                     String<T, TAlloc> const& rhObj) noexcept
 {
     String<T, TAlloc> gStr (lhObj);
     return addToString (gStr, rhObj.m_gBuffer.data, rhObj.m_uLength);
@@ -354,7 +354,7 @@ inline String<T, TAlloc> operator + (String<T, TAlloc> const& lhObj,
 
 template <typename T, class TAlloc>
 inline String<T, TAlloc> operator + (String<T, TAlloc> const& gObj,
-                                         T const*                      pText) noexcept
+                                     T const*                 pText) noexcept
 {
     String<T, TAlloc> gStr (gObj);
     return addToString (gStr, pText, std::strlen (pText));

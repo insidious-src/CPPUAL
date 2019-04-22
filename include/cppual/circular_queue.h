@@ -53,11 +53,11 @@ class CircularQueue : private Allocator
 public:
     typedef std::allocator_traits<Allocator>           allocator_traits      ;
     typedef typename allocator_traits::allocator_type  allocator_type        ;
-    typedef T                                          value_type            ;
-    typedef T*                                         pointer               ;
-    typedef T const*                                   const_pointer         ;
-    typedef T&                                         reference             ;
-    typedef T const&                                   const_reference       ;
+    typedef CopyConstructible<T>                       value_type            ;
+    typedef value_type*                                pointer               ;
+    typedef value_type const*                          const_pointer         ;
+    typedef value_type&                                reference             ;
+    typedef value_type const&                          const_reference       ;
     typedef typename allocator_traits::size_type       size_type             ;
     typedef typename allocator_traits::size_type const const_size            ;
     typedef typename allocator_traits::difference_type difference_type       ;

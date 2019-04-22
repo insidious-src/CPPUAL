@@ -84,6 +84,7 @@ include_directories(
 # process, modules
 add_library(cppual-host SHARED
     "include/cppual/functional.h"
+    "include/cppual/tuple.h"
     "include/cppual/tuple_iterator.h"
     "include/cppual/bitfield.h"
     "include/cppual/coroutines.h"

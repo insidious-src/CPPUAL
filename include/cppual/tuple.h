@@ -4,7 +4,7 @@
  * Description: This file is a part of CPPUAL.
  *
  * Copyright (C) 2012 - 2018 insidious
- *
+     *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -19,42 +19,58 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_CSV_H
-#define CPPUAL_CSV_H
+#ifndef CPPUAL_TUPLE_H_
+#define CPPUAL_TUPLE_H_
 #ifdef __cplusplus
 
-#include <string>
-#include <vector>
+#include <cppual/decl.h>
+
+#include <cstddef>
 
 namespace cppual {
 
-class CSVParser
+template <typename... Ts>
+class Tuple
 {
 public:
-    typedef std::string                           string_type;
-    typedef std::vector<std::vector<string_type>> vector_type;
-    typedef std::size_t                           size_type  ;
+    typedef std::size_t size_type;
 
-    bool append (string_type const& file_path);
+    Tuple();
 
-    CSVParser& operator += (string_type const& file_path)
-    { append(file_path); return *this; }
+    explicit Tuple(Ts const&...);
 
-    size_type lineCount () const noexcept
-    { return m_data.size(); }
+    template <typename... U>
+    explicit Tuple(U&&...);
 
-    size_type fieldCount () const noexcept
-    { return m_data.empty() ? size_type () : m_data[0].size(); }
+    Tuple(Tuple const&);
 
-    template <size_type N>
-    string_type get (size_type idx) const
-    { return m_data[idx][N]; }
+    Tuple(Tuple&&);
+
+    template <typename... U>
+    Tuple(Tuple<U...> const&);
+
+    template <typename... U>
+    Tuple(Tuple<U...>&&);
+
+    Tuple& operator=(const Tuple&);
+
+    Tuple& operator=(Tuple&&);
+
+    template <typename... U>
+    Tuple& operator=(const Tuple<U...>&);
+
+    template <typename... U>
+    Tuple& operator=(Tuple<U...>&&);
+
+    void swap(Tuple&);
+
+    static constexpr size_type size () { return sizeof...(Ts); }
 
 private:
-    vector_type m_data;
 };
 
-} // namespace cppual
+} // cppual
 
 #endif // __cplusplus
-#endif // CPPUAL_CSV_H
+#endif // CPPUAL_TUPLE_H_
+

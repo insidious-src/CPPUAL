@@ -30,7 +30,7 @@ using std::fstream;
 
 namespace cppual {
 
-class Xml final
+class Xml
 {
 public:
     typedef std::size_t size_type;
