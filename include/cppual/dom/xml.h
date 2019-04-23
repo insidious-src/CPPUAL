@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/dom/dom.h>
+#include <fstream>
 
 using std::string;
 using std::fstream;

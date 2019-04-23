@@ -53,7 +53,7 @@ class CircularQueue : private Allocator
 public:
     typedef std::allocator_traits<Allocator>           allocator_traits      ;
     typedef typename allocator_traits::allocator_type  allocator_type        ;
-    typedef CopyConstructible<T>                       value_type            ;
+    typedef T                                          value_type            ;
     typedef value_type*                                pointer               ;
     typedef value_type const*                          const_pointer         ;
     typedef value_type&                                reference             ;
@@ -134,7 +134,7 @@ public:
       m_uCapacity    (m_pArray ? m_uEndPos    + 1 : m_uBeginPos)
     {
         if (!gObj.empty () and !m_pArray) throw std::bad_array_new_length ();
-        std::copy (gObj.cbegin (), gObj.cend (), begin ());
+        std::copy (gObj.begin (), gObj.end (), begin ());
     }
 
     template <typename Iterator>
