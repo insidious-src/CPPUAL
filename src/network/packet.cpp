@@ -221,7 +221,7 @@ void Packet::onReceive (cvoid* pData, size_type uSize)
 
 bool Packet::canExchange (size_type uSize) noexcept
 {
-    return m_bIsValid = m_bIsValid and (m_uPos + uSize <= m_gData.size ());
+    return m_bIsValid and (m_uPos + uSize <= m_gData.size ());
 }
 
 } } // namespace Network
