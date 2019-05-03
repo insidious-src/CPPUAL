@@ -314,19 +314,19 @@ inline bool operator  == (GFXVersion const& gObj1, GFXVersion const& gObj2) noex
 inline bool operator  != (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
 { return (gObj1.major != gObj2.major or gObj1.minor != gObj2.minor); }
 
-template <typename CharT, typename Traits>
-std::basic_ostream<CharT, Traits>&
-operator << (std::basic_ostream<CharT, Traits>& stream, GFXVersion const& u)
-{ return stream << u.major << "." << u.minor; }
-
 } } // namespace Graphics
 
 namespace std {
 
+template <typename CharT, typename Traits>
+basic_ostream<CharT, Traits>&
+operator << (std::basic_ostream<CharT, Traits>& stream, cppual::Graphics::GFXVersion const& u)
+{ return stream << u.major << "." << u.minor; }
+
 template <>
 struct hash<cppual::Graphics::GFXVersion>
 {
-    std::size_t operator () (const cppual::Graphics::GFXVersion& version) const
+    size_t operator () (const cppual::Graphics::GFXVersion& version) const
     {
         // Compute individual hash values for major,
         // and minor and combine them using XOR

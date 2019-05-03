@@ -152,6 +152,6 @@ connection<>::connection(Parameters && ... parameters)
     m_root_window = screen_of_display(static_cast<core &>(*this).default_screen())->root;
 }
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_CONNECTION_HPP

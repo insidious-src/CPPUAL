@@ -45,25 +45,23 @@ GENERATE_HAS_MEMBER(second)
 // namespace iterator {
 
 template<typename Iterator>
-struct value_iterator_base {
+struct value_iterator_base
+{
     value_iterator_base(const Iterator & iterator)
         : m_iterator(iterator)
     {}
 
-    bool
-            operator==(const value_iterator_base & other)
+    bool operator==(const value_iterator_base & other)
     {
         return m_iterator == other.m_iterator;
     }
 
-    bool
-            operator!=(const value_iterator_base & other)
+    bool operator!=(const value_iterator_base & other)
     {
         return m_iterator != other.m_iterator;
     }
 
-    void
-            operator++(void)
+    void operator++(void)
     {
         ++m_iterator;
     }
@@ -145,7 +143,8 @@ struct value_iterator
 };
 
 template<typename T, bool B = true>
-struct value_type {
+struct value_type
+{
     typedef typename std::conditional<
     has_member_second<typename T::value_type>::value,
     typename T::value_type::second_type,
@@ -154,7 +153,8 @@ struct value_type {
 };
 
 template<typename T>
-struct value_type<T, false> {
+struct value_type<T, false>
+{
     typedef typename std::remove_const<
     typename std::remove_pointer<T>::type
     >::type type;

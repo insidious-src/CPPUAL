@@ -27,9 +27,10 @@ public:
     ReturnType
     operator()(Connection && c, Member && member, Parameter && ... parameter) const
     {
-        return ReturnType { std::forward<Member>(member)
-                    , std::forward<Connection>(c)
-                    , std::forward<Parameter>(parameter) ...
+        return ReturnType
+        {
+            std::forward<Member>(member),
+            std::forward<Parameter>(parameter) ...
         };
     }
 };
@@ -42,8 +43,10 @@ public:
     ReturnType
     operator()(Connection && c, Parameter && ... parameter) const
     {
-        return ReturnType { std::forward<Connection>(c)
-                    , std::forward<Parameter>(parameter) ...
+        return ReturnType
+        {
+            std::forward<Connection>(c),
+            std::forward<Parameter>(parameter) ...
         };
     }
 };

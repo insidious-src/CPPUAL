@@ -31,17 +31,17 @@ namespace cppual {
 
 using namespace std::chrono_literals;
 
-class Timeline
+class PasiveTimeline
 {
 public:
-    typedef Clock::PausableTimer<std::chrono::steady_clock> timer_type;
-    typedef std::chrono::milliseconds::rep                  rep;
-    typedef std::chrono::milliseconds                       duration;
+    typedef Clock::PausableTimer<std::chrono::steady_clock> timer_type  ;
+    typedef std::chrono::milliseconds::rep                  rep         ;
+    typedef std::chrono::milliseconds                       duration    ;
     typedef std::atomic<float>                              atomic_ratio;
     typedef std::atomic_uint_fast8_t                        atomic_state;
-    typedef ushort                                          count_type;
-    typedef float                                           ratio_type;
-    typedef u8                                              state_type;
+    typedef ushort                                          count_type  ;
+    typedef float                                           ratio_type  ;
+    typedef u8                                              state_type  ;
 
     constexpr static cfloat Instant       = 10.0f;
     constexpr static cfloat VeryFast      =  5.0f;
@@ -64,11 +64,12 @@ public:
         Paused
     };
 
-    Timeline (duration length, ratio_type speed = Normal) noexcept
-    : m_timer  (),
-      m_length (length),
-      m_state  (),
-      m_speed  (speed)
+    PasiveTimeline (duration length, ratio_type speed = Normal) noexcept
+    : m_timer      (),
+      m_length     (length),
+      m_state      (),
+      m_speed      (speed),
+      m_prev_speed (speed)
     { }
 
     duration length () const noexcept
@@ -81,19 +82,19 @@ public:
     { return time ().count () + (length ().count () / 60); }
 
     bool active () const noexcept
-    { return state () == Timeline::Active; }
+    { return state () == PasiveTimeline::Active; }
 
     void reverse () noexcept
     { m_speed = -(m_speed.load (std::memory_order_relaxed)); }
 
     void forward () noexcept
-    { if (m_speed < 0) m_speed = -(m_speed.load (std::memory_order_relaxed)); }
+    { if (m_speed < ratio_type()) m_speed = -(m_speed.load (std::memory_order_relaxed)); }
 
     void backward () noexcept
-    { if (m_speed > 0) m_speed = -(m_speed.load (std::memory_order_relaxed)); }
+    { if (m_speed > ratio_type()) m_speed = -(m_speed.load (std::memory_order_relaxed)); }
 
     void stop () noexcept
-    { m_state = Timeline::Inactive; }
+    { m_state = PasiveTimeline::Inactive; }
 
     ratio_type speed () const noexcept
     {
@@ -102,11 +103,8 @@ public:
 
     void scale (ratio_type speed) noexcept
     {
-        if (speed == .0f) stop ();
-        else
-        {
-            m_speed = speed;
-        }
+        m_prev_speed.store(m_speed.load(std::memory_order_relaxed));
+        m_speed = speed;
     }
 
     void start (count_type loop_count = 1) noexcept
@@ -114,7 +112,7 @@ public:
         stop ();
         m_count = loop_count;
         m_timer.reset ();
-        m_state = Timeline::Active;
+        m_state = PasiveTimeline::Active;
     }
 
     state_type state () const noexcept
@@ -123,12 +121,12 @@ public:
 
         switch (curstate)
         {
-        case Timeline::Active:
+        case PasiveTimeline::Active:
             if (!m_count or (normalize_elapsed () / m_length.count ()) < m_count)
-                return Timeline::Active;
+                return PasiveTimeline::Active;
 
-            m_state = Timeline::Inactive;
-            return Timeline::Inactive;
+            m_state = PasiveTimeline::Inactive;
+            return PasiveTimeline::Inactive;
         default:
             return curstate;
         }
@@ -136,14 +134,14 @@ public:
 
     void resume () noexcept
     {
-        if (m_state.load (std::memory_order_relaxed) != Timeline::Paused) return;
+        if (m_state.load (std::memory_order_relaxed) != PasiveTimeline::Paused) return;
         m_timer.resume ();
-        m_state = Timeline::Active;
+        m_state = PasiveTimeline::Active;
     }
 
     void pause () noexcept
     {
-        if (m_state.load (std::memory_order_relaxed) != Timeline::Active) return;
+        if (m_state.load (std::memory_order_relaxed) != PasiveTimeline::Active) return;
         m_timer.pause ();
 
         rep elapsed = normalize_elapsed ();
@@ -153,7 +151,7 @@ public:
         else
         {
             m_saved = duration (elapsed);
-            m_state = Timeline::Paused;
+            m_state = PasiveTimeline::Paused;
         }
     }
 
@@ -161,9 +159,9 @@ public:
     {
         switch (m_state.load (std::memory_order_relaxed))
         {
-        case Timeline::Inactive:
+        case PasiveTimeline::Inactive:
             return duration ();
-        case Timeline::Paused:
+        case PasiveTimeline::Paused:
             return m_saved;
         default:
             rep elapsed    = normalize_elapsed ();
@@ -179,8 +177,14 @@ public:
 private:
     rep normalize_elapsed () const noexcept
     {
-        return rep (ratio_type (m_timer.elapsed<duration> ().count ()) *
-                    m_speed.load (std::memory_order_relaxed));
+        auto       current_speed = m_prev_speed.load (std::memory_order_relaxed);
+        auto const max_speed     = m_speed.load (std::memory_order_relaxed);
+
+        if      (current_speed < max_speed) current_speed += Slowest;
+        else if (current_speed > max_speed) current_speed -= Slowest;
+        else     current_speed = max_speed;
+
+        return rep(ratio_type (m_timer.elapsed<duration> ().count ()) * current_speed);
     }
 
 private:
@@ -189,6 +193,7 @@ private:
     mutable atomic_state m_state;
     count_type           m_count;
     atomic_ratio         m_speed;
+    atomic_ratio         m_prev_speed;
 };
 
 } // namespace cppual
