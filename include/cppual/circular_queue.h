@@ -31,9 +31,6 @@
 #include <memory>
 #include <limits>
 
-using std::atomic_size_t;
-using std::atomic_bool  ;
-
 namespace cppual {
 
 template <typename T>
@@ -487,8 +484,8 @@ private:
     { return ++uIdx % N; }
 
 private:
-    atomic_size_t m_uReadPos, m_uWritePos;
-    T             m_Array[capacity ()];
+    std::atomic_size_t m_uReadPos, m_uWritePos;
+    T                  m_Array[capacity ()];
 };
 
 // ====================================================
@@ -506,7 +503,7 @@ public:
     typedef T const*                                   const_pointer   ;
     typedef T&                                         reference       ;
     typedef T const&                                   const_reference ;
-    typedef atomic_size_t                              atomic_size     ;
+    typedef std::atomic_size_t                         atomic_size     ;
     typedef typename allocator_traits::size_type       size_type       ;
     typedef typename allocator_traits::size_type const const_size      ;
     typedef typename allocator_traits::difference_type difference_type ;

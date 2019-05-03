@@ -46,7 +46,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC OFF)
 
-#set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 #include(CompilerConfig REQUIRED)
@@ -87,8 +87,8 @@ add_library(cppual-host SHARED
     "include/cppual/tuple.h"
     "include/cppual/tuple_iterator.h"
     "include/cppual/bitfield.h"
-    "include/cppual/coroutines.h"
-    "include/cppual/fibers.h"
+    "include/cppual/coroutines/coroutines.h"
+    "include/cppual/fibers/fibers.h"
     "include/cppual/unbound_matrix.h"
     "include/cppual/flags.h"
     "include/cppual/signal.h"
@@ -189,15 +189,39 @@ endif()
 
 # Document Object Model (xml, cmdargs, web)
 add_library(cppual-dom SHARED
-    "src/dom/xml.cpp"
-    "include/cppual/dom/xml.h"
     "include/cppual/dom/cmdline.h"
-    "include/cppual/dom/dom.h"
     "include/cppual/dom/csv.h"
     "src/dom/csv.cpp"
-    "include/cppual/dom/json.h"
-    "src/dom/json.cpp"
+    "include/cppual/dom/exceptions.h"
+    "include/cppual/dom/id_translator.h"
+    "include/cppual/dom/ini_parser.h"
+    "include/cppual/dom/json_parser.h"
+    "include/cppual/dom/ptree_fwd.h"
+    "include/cppual/dom/ptree_serialization.h"
+    "include/cppual/dom/ptree.h"
+    "include/cppual/dom/stream_translator.h"
+    "include/cppual/dom/string_path.h"
+    "include/cppual/dom/xml_parser.h"
 
+    "include/cppual/dom/json_parser/error.h"
+    "include/cppual/dom/json_parser/detail/narrow_encoding.h"
+    "include/cppual/dom/json_parser/detail/parser.h"
+    "include/cppual/dom/json_parser/detail/read.h"
+    "include/cppual/dom/json_parser/detail/standard_callbacks.h"
+    "include/cppual/dom/json_parser/detail/wide_encoding.h"
+    "include/cppual/dom/json_parser/detail/write.h"
+
+    "include/cppual/dom/detail/exception_implementation.h"
+    "include/cppual/dom/detail/file_parser_error.h"
+    "include/cppual/dom/detail/ptree_implementation.h"
+    "include/cppual/dom/detail/ptree_utils.h"
+    "include/cppual/dom/detail/rapidxml.h"
+    "include/cppual/dom/detail/xml_parser_error.h"
+    "include/cppual/dom/detail/xml_parser_flags.h"
+    "include/cppual/dom/detail/xml_parser_read_rapidxml.h"
+    "include/cppual/dom/detail/xml_parser_utils.h"
+    "include/cppual/dom/detail/xml_parser_write.h"
+    "include/cppual/dom/detail/xml_parser_writer_settings.h"
     )
 
 # transparent network facilities
