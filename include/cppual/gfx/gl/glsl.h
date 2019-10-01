@@ -23,12 +23,13 @@
 #define CPPUAL_GFX_GL_SL_H_
 #ifdef __cplusplus
 
-#include <string>
-#include <unordered_map>
 #include <cppual/flags.h>
 #include <cppual/common.h>
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/gl/glbase.h>
+
+#include <string>
+#include <unordered_map>
 
 using std::unordered_map;
 using std::string;

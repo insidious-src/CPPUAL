@@ -88,7 +88,7 @@ public:
     ~Config();
 
     Config (controller  display,
-            format_type format  = format_type::default2D ());
+            format_type format = format_type::default2D ());
 
     constexpr Config (Config const&) noexcept = default;
     inline    Config& operator = (Config const&) noexcept = default;
