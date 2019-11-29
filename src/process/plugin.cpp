@@ -34,24 +34,28 @@ namespace cppual { namespace Process {
 
 namespace { // optimize for internal unit usage
 
-constexpr const char* lib_ext () noexcept
+DynLoader::string_type format (DynLoader::string_type const& path) noexcept
 {
 #    if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
-    return ".so";
+    constexpr static const auto ext = ".so";
 #    elif defined (OS_STD_MAC)
-    return ".dylib";
+    constexpr static const auto ext = ".dylib";
 #    elif defined (OS_WINDOWS)
-    return ".dll";
+    constexpr static const auto ext = ".dll";
 #    endif
+
+    const auto pos = path.rfind(ext);
+
+    return pos != DynLoader::string_type::npos ? path : path.substr(pos) + ext;
 }
 
 } // anonymous namespace
 
-DynLoader::DynLoader (string_type   pPath,
+DynLoader::DynLoader (string_type   strPath,
                       bool          bAttach,
                       ResolvePolicy eResolve) noexcept
 : m_pHandle  (),
-  m_gLibPath (pPath + lib_ext ()),
+  m_gLibPath (format(strPath)),
   m_eResolve (eResolve)
 {
     if (bAttach) attach ();
