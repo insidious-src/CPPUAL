@@ -61,6 +61,8 @@ public:
                bool          attach = true,
                ResolvePolicy policy = ResolvePolicy::Lazy) noexcept;
 
+    static string_type extension () noexcept;
+
     string_type   path        () const noexcept { return m_gLibPath; }
     void*         handle      () const noexcept { return m_pHandle;  }
     ResolvePolicy policy      () const noexcept { return m_eResolve; }

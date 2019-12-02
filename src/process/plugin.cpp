@@ -34,19 +34,26 @@ namespace cppual { namespace Process {
 
 namespace { // optimize for internal unit usage
 
-DynLoader::string_type format (DynLoader::string_type const& path) noexcept
+static DynLoader::string_type ext() noexcept
 {
-#    if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
-    constexpr static const auto ext = ".so";
-#    elif defined (OS_STD_MAC)
-    constexpr static const auto ext = ".dylib";
-#    elif defined (OS_WINDOWS)
-    constexpr static const auto ext = ".dll";
-#    endif
+#   if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
+    return ".so";
+#   elif defined (OS_STD_MAC)
+    return ".dylib";
+#   elif defined (OS_WINDOWS)
+    return ".dll";
+#   else
+    return DynLoader::string_type();
+#   endif
+}
 
-    const auto pos = path.rfind(ext);
+static DynLoader::string_type format (DynLoader::string_type const& path) noexcept
+{
+    static const auto _ext = ext();
 
-    return pos != DynLoader::string_type::npos ? path : path.substr(pos) + ext;
+    const auto pos = path.rfind(_ext);
+
+    return pos != DynLoader::string_type::npos ? path : path.substr(pos) + _ext;
 }
 
 } // anonymous namespace
@@ -59,6 +66,11 @@ DynLoader::DynLoader (string_type   strPath,
   m_eResolve (eResolve)
 {
     if (bAttach) attach ();
+}
+
+DynLoader::string_type DynLoader::extension () noexcept
+{
+    return ext();
 }
 
 DynLoader::DynLoader (DynLoader&& obj) noexcept
