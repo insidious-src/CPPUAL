@@ -63,6 +63,14 @@ bool CSVParser::append(string_type const& strFilePath)
             string_type field;
 
             if (!getline (stream, field, ',')) break;
+
+            for (auto filter_idx = field.find_first_of('\"');
+                 filter_idx != string_type::npos;
+                 filter_idx  = field.find_first_of('\"'))
+            {
+                field = field.replace(filter_idx, 1, "");
+            }
+
             record.push_back (field);
         }
 
