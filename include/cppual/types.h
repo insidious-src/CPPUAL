@@ -68,6 +68,8 @@ typedef std::uint_fast64_t fu64;
 typedef const std::uint64_t cu64;
 typedef const std::uint_fast64_t cfu64;
 
+typedef std::intptr_t intptr;
+typedef const std::intptr_t cintptr;
 typedef std::uintptr_t uptr;
 typedef const std::uintptr_t cuptr;
 typedef std::ptrdiff_t ptrdiff;
