@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <vulkan/vulkan.h>
 #include <cppual/memory/devmemory.h>
 #include <cppual/compute/device.h>
 
