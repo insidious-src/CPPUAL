@@ -50,7 +50,7 @@ void* operator new (std::size_t /* size */, MemoryChunk& obj, std::size_t /* ali
 void operator delete (void* ptr, MemoryChunk& obj)
 {
     using namespace cppual::Memory;
-    const ::VkAllocationCallbacks* p = nullptr;
+    //const ::VkAllocationCallbacks* p = nullptr;
 
     if (!obj.device ().valid ()) throw memory_source_not_available ();
     //::vkFreeMemory (obj.device ().handle<::VkDevice> (), static_cast<::VkDeviceMemory> (ptr), p);
