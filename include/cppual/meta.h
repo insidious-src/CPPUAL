@@ -23,8 +23,10 @@
 #define CPPUAL_META_PROGRAMMING_H_
 #ifdef __cplusplus
 
-#include <type_traits>
 #include <cppual/decl.h>
+
+#include <type_traits>
+#include <tuple>
 
 namespace cppual {
 
@@ -35,6 +37,33 @@ struct Select
     static constexpr auto Overload(R (C::* fn)(Args...)) noexcept -> decltype(fn)
     { return fn; }
 };
+
+// ===================================================
+
+template <class... Args>
+struct type_list
+{
+    template <std::size_t N>
+    using type = typename std::tuple_element<N, std::tuple<Args...>>::type;
+};
+
+// ===================================================
+
+template <typename T, typename Tuple, std::size_t I = 0>
+struct tuple_ref_index;
+
+template <typename T, typename Base, typename... Tail, std::size_t I>
+struct tuple_ref_index<T, std::tuple<Base, Tail...>, I>
+    : std::conditional<std::is_base_of<Base, T>::value,
+                       std::integral_constant<std::size_t, I>,
+                       tuple_ref_index<T, std::tuple<Tail...>, I+1>
+                       >::type
+{ };
+
+template <typename Derived, typename... Bases>
+using base_from_derived =
+        typename std::tuple_element<tuple_ref_index<Derived, std::tuple<Bases...>>::value,
+                                                    std::tuple<Bases...>>::type;
 
 // ===================================================
 
