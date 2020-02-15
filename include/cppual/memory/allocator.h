@@ -31,7 +31,7 @@
 namespace cppual { namespace Memory {
 
 // =========================================================
-// std::pmr::memory_resource replaced for compute usage
+// std::memory_resource replaced for compute usage
 // =========================================================
 
 struct MemoryResource
@@ -81,6 +81,8 @@ protected:
     virtual bool  do_is_equal(MemoryResource const& other) const noexcept = 0;
 };
 
+// =========================================================
+
 inline bool
 operator == (MemoryResource const& a, MemoryResource const& b) noexcept
 { return &a == &b || a.is_equal(b); }
@@ -89,8 +91,12 @@ inline bool
 operator != (MemoryResource const& a, MemoryResource const& b) noexcept
 { return !(a == b); }
 
-MemoryResource* get_default_resource();
-void            set_default_resource(MemoryResource&);
+// =========================================================
+
+MemoryResource* new_delete_resource () noexcept;
+MemoryResource* null_memory_resource() noexcept;
+MemoryResource* get_default_resource() noexcept;
+void            set_default_resource(MemoryResource&) noexcept;
 
 // =========================================================
 // MemoryResource Concept
@@ -110,7 +116,7 @@ struct is_memory_resource_helper < MemoryResource > : public std::true_type
 
 template <class T>
 struct is_memory_resource : public is_memory_resource_helper<T>
-{ static_assert (is_memory_resource<T>::value, "invalid memory_resource object type!"); };
+{ };
 
 template <class T>
 using MemoryResourceType = typename
@@ -120,21 +126,24 @@ std::enable_if<is_memory_resource<T>::value, T>::type;
 // Redefined memory allocator
 // =========================================================
 
-template <typename T, class R = MemoryResource>
+template <typename T, typename R = MemoryResource>
 class Allocator
 {
 public:
-    typedef T                     value_type;
-    typedef T *                   pointer;
-    typedef T const*              const_pointer;
-    typedef T &                   reference;
-    typedef T const&              const_reference;
-    typedef MemoryResourceType<R> resource_type;
-    typedef std::size_t           size_type;
-    typedef std::ptrdiff_t        difference_type;
-    typedef std::false_type       propagate_on_container_copy_assignment;
-    typedef std::true_type        propagate_on_container_move_assignment;
-    typedef std::true_type        propagate_on_container_swap;
+    typedef T               value_type;
+    typedef T *             pointer;
+    typedef T const*        const_pointer;
+    typedef T &             reference;
+    typedef T const&        const_reference;
+    typedef R               resource_type;
+    typedef resource_type*  resource_pointer;
+    typedef std::size_t     size_type;
+    typedef std::ptrdiff_t  difference_type;
+    typedef std::false_type propagate_on_container_copy_assignment;
+    typedef std::true_type  propagate_on_container_move_assignment;
+    typedef std::true_type  propagate_on_container_swap;
+
+    static_assert (is_memory_resource<resource_type>::value, "invalid memory_resource object type!");
 
     inline    Allocator (Allocator &&    )             noexcept = default;
     constexpr Allocator (Allocator const&)             noexcept = default;
@@ -170,29 +179,29 @@ public:
     Allocator select_on_container_copy_construction() const
     { return Allocator (); }
 
-    constexpr resource_type* resource () const noexcept
-    { return m_pAtor; }
+    constexpr resource_pointer resource () const noexcept
+    { return m_pRc; }
 
-    constexpr Allocator (resource_type& gAtor) noexcept
-    : m_pAtor (&gAtor)
+    inline Allocator (resource_type& rc) noexcept
+    : m_pRc (&rc)
     { }
 
     constexpr Allocator () noexcept
-    : m_pAtor (static_cast<resource_type*>(get_default_resource()))
+    : m_pRc (get_default_resource())
     { }
 
     template <class U>
     constexpr
     explicit
-    Allocator (Allocator<U, resource_type> const& gObj) noexcept
-    : m_pAtor (gObj.m_pAtor)
+    Allocator (Allocator<U, resource_type> const& ator) noexcept
+    : m_pRc (ator.m_pRc)
     { }
 
     template <typename, class>
     friend class Allocator;
 
 private:
-    resource_type* m_pAtor;
+    resource_pointer m_pRc;
 };
 
 template <class T1, class T2>
