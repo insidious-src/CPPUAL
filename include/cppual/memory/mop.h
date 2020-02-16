@@ -23,8 +23,11 @@
 #define CPPUAL_MEMORY_OPERATIONS_H_
 #ifdef __cplusplus
 
-#include <cstddef>
 #include <cppual/types.h>
+#include <cppual/iterator.h>
+
+#include <cstddef>
+#include <cstring>
 
 namespace cppual { namespace Memory {
 
@@ -97,6 +100,30 @@ inline std::size_t alignAdjustmentHeader (cvoid*      addr,
     }
 
     return uAdjust;
+}
+
+template <typename InputIterator,
+          typename OutputIterator,
+          typename = typename std::enable_if<is_iterator<InputIterator>::value>::type,
+          typename = typename std::enable_if<is_iterator<InputIterator>::value>::type
+          >
+static void copy (InputIterator gBegin, InputIterator gEnd, OutputIterator gDst)
+{
+    while (gBegin != gEnd)
+        std::memcpy(&(*gDst++), &(*gBegin++),
+                    sizeof(typename std::iterator_traits<OutputIterator>::value_type));
+}
+
+template <typename InputIterator,
+          typename OutputIterator,
+          typename = typename std::enable_if<is_iterator<InputIterator>::value>::type,
+          typename = typename std::enable_if<is_iterator<InputIterator>::value>::type
+          >
+static void move (InputIterator gBegin, InputIterator gEnd, OutputIterator gDst)
+{
+    while (gBegin != gEnd)
+        std::memmove(&(*gDst++), &(*gBegin++),
+                     sizeof(typename std::iterator_traits<OutputIterator>::value_type));
 }
 
 } } // namespace Memory

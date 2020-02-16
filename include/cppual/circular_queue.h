@@ -26,6 +26,7 @@
 #include <cppual/concepts.h>
 #include <cppual/iterator.h>
 #include <cppual/noncopyable.h>
+#include <cppual/memory/mop.h>
 
 #include <atomic>
 #include <memory>
@@ -67,6 +68,8 @@ public:
     typedef std::pair<const_pointer, size_type>        const_array_range     ;
 
     enum { default_size = 10 };
+
+    constexpr const static size_type npos = size_type(-1);
 
     CircularQueue& operator = (CircularQueue const&);
     CircularQueue (CircularQueue&&) noexcept = default;
@@ -113,7 +116,7 @@ public:
       m_uBeginPos    (),
       m_uEndPos      (),
       m_uCapacity    (m_pArray ? uCapacity : size_type ())
-    { if (!uCapacity) throw std::bad_array_new_length  (); }
+    { if (!m_uCapacity) throw std::bad_array_new_length  (); }
 
     CircularQueue (allocator_type const& gAtor)
     : allocator_type (gAtor),
@@ -131,18 +134,22 @@ public:
       m_uCapacity    (m_pArray ? m_uEndPos    + 1 : m_uBeginPos)
     {
         if (!gObj.empty () and !m_pArray) throw std::bad_array_new_length ();
-        std::copy (gObj.begin (), gObj.end (), begin ());
+        Memory::copy (gObj.begin (), gObj.end (), begin ());
     }
 
-    template <typename Iterator>
-    CircularQueue (IteratorType<Iterator> gBegin, IteratorType<Iterator> gEnd,
+    template <typename Iterator,
+              typename = typename std::enable_if<is_iterator<Iterator>::value>::type
+              >
+    CircularQueue (Iterator gBegin, Iterator gEnd,
                    allocator_type const&  gAtor = allocator_type ())
     : allocator_type (gAtor),
       m_pArray       (allocator_type::allocate (diff (gEnd, gBegin) + 1)),
       m_uBeginPos    (),
       m_uEndPos      (m_pArray ? diff (gEnd, gBegin) : 0),
       m_uCapacity    (m_pArray ? m_uEndPos + 1 : 0)
-    { m_pArray ? std::copy (gBegin, gEnd, begin ()) : throw std::bad_array_new_length (); }
+    {
+        m_pArray ? Memory::copy (gBegin, gEnd, begin ()) : throw std::bad_array_new_length ();
+    }
 
     constexpr const_reverse_iterator crbegin () const
     { return const_reverse_iterator (end ()); }
@@ -159,8 +166,8 @@ public:
     constexpr size_type capacity () const noexcept
     { return m_uCapacity; }
 
-    constexpr size_type max_size () const noexcept
-    { return std::numeric_limits<size_type>::max (); }
+    inline size_type max_size () const noexcept
+    { return capacity() - size(); }
 
     array_range array_one () noexcept
     {
@@ -246,7 +253,7 @@ public:
         // --back++
         size_type uNewEnd = normalize (m_uEndPos + 1);
 
-        if (uNewEnd == m_uBeginPos) // full
+        if (uNewEnd == npos || uNewEnd == m_uBeginPos) // no storage allocated or full
         {
             resize (capacity () + expand_size ());
             uNewEnd = normalize (m_uEndPos + 1);
@@ -290,10 +297,10 @@ private:
     }
 
     size_type normalize (size_type uIdx) const noexcept
-    { return uIdx % capacity (); }
+    { return capacity() ? uIdx % capacity () : npos; }
 
     size_type index_to_subscript (size_type uIdx) const noexcept
-    { return (m_uBeginPos + uIdx) % capacity (); }
+    { return capacity() ? (m_uBeginPos + uIdx) % capacity () : npos; }
 
     constexpr size_type expand_size () const noexcept
     { return expand_ratio<value_type>::value + 1; }
@@ -329,18 +336,20 @@ CircularQueue<T, Allocator, Atomic>::operator = (CircularQueue const& gObj)
     else m_uBeginPos = size_type ();
 
     m_uEndPos = index_to_subscript (--new_size);
-    std::copy (gObj.cbegin (), gObj.cend (), begin ());
+    Memory::copy (gObj.cbegin (), gObj.cend (), begin ());
     return *this;
 }
 
 template <typename T, typename Allocator, bool Atomic>
 void CircularQueue<T, Allocator, Atomic>::resize (size_type uNewCapacity)
 {
-    self_type gObj (uNewCapacity, *this);
-    size_type uNewSize = size () > uNewCapacity ? uNewCapacity : size ();
+    if (size () > uNewCapacity) return;
 
-    std::copy (cbegin (), const_iterator (*this, uNewSize), gObj.begin ());
-    gObj.m_uEndPos = uNewSize - 1;
+    self_type gObj (uNewCapacity, *this);
+
+    Memory::move(cbegin (), const_iterator(*this, uNewCapacity), gObj.begin ());
+
+    gObj.m_uEndPos = uNewCapacity - 1;
     swap (gObj);
 }
 

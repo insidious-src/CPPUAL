@@ -28,13 +28,62 @@
 namespace cppual {
 
 template <typename T>
+class is_input_iterator : public
+        std::conditional<std::is_convertible<typename
+        std::iterator_traits<T>::iterator_category,
+        std::input_iterator_tag>::value, std::true_type, std::false_type>::type
+{ };
+
+template <typename T>
+class is_output_iterator : public
+        std::conditional<std::is_convertible<typename
+        std::iterator_traits<T>::iterator_category,
+        std::output_iterator_tag>::value, std::true_type, std::false_type>::type
+{ };
+
+template <typename T>
+class is_forward_iterator : public
+        std::conditional<std::is_convertible<typename
+        std::iterator_traits<T>::iterator_category,
+        std::forward_iterator_tag>::value, std::true_type, std::false_type>::type
+{ };
+
+template <typename T>
+class is_bidirectional_iterator : public
+        std::conditional<std::is_convertible<typename
+        std::iterator_traits<T>::iterator_category,
+        std::bidirectional_iterator_tag>::value, std::true_type, std::false_type>::type
+{ };
+
+template <typename T>
+class is_random_access_iterator : public
+        std::conditional<std::is_convertible<typename
+        std::iterator_traits<T>::iterator_category,
+        std::random_access_iterator_tag>::value, std::true_type, std::false_type>::type
+{ };
+
+template <typename T>
+class is_iterator : public
+        std::conditional<is_input_iterator<T>::value ||
+        is_output_iterator<T>::value                 ||
+        is_forward_iterator<T>::value                ||
+        is_bidirectional_iterator<T>::value          ||
+        is_random_access_iterator<T>::value, std::true_type, std::false_type>::type
+{ };
+
+// ====================================================
+
+template <typename T>
 using IteratorType = typename
 std::enable_if<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
 std::input_iterator_tag>::value or
 std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
-std::output_iterator_tag>::value, T>::type;
+std::output_iterator_tag>::value or
+std::is_convertible<typename
+std::iterator_traits<T>::iterator_category,
+std::bidirectional_iterator_tag>::value, T>::type;
 
 template <typename T>
 using OutputIterator = typename

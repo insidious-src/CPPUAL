@@ -136,7 +136,7 @@ public:
     typedef T &             reference;
     typedef T const&        const_reference;
     typedef R               resource_type;
-    typedef resource_type*  resource_pointer;
+    typedef R*              resource_pointer;
     typedef std::size_t     size_type;
     typedef std::ptrdiff_t  difference_type;
     typedef std::false_type propagate_on_container_copy_assignment;
@@ -182,7 +182,7 @@ public:
     constexpr resource_pointer resource () const noexcept
     { return m_pRc; }
 
-    inline Allocator (resource_type& rc) noexcept
+    constexpr explicit Allocator (resource_type& rc) noexcept
     : m_pRc (&rc)
     { }
 

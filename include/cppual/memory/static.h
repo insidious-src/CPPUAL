@@ -77,8 +77,9 @@ inline void StaticResource<N>::do_deallocate (void* p, size_type n, align_type)
         throw std::out_of_range ("pointer doesn't match the last element allocated");
 }
 
+//! static allocator using StaticResource (allocates memory on cpu stack)
 template <class T, MemoryResource::size_type N>
-using StaticAllocator = Allocator <T, StaticResource<N> >;
+using StaticAllocator = Allocator <T, StaticResource<N * sizeof (T)> >;
 
 } } // namespace Memory
 
