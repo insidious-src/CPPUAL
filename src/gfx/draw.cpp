@@ -26,11 +26,11 @@ namespace cppual { namespace Graphics {
 
 namespace { namespace Internal {
 
-typedef Process::PluginManager<IDrawable2D>    manager2d_type;
-typedef Process::PluginManager<IDrawable3D>    manager3d_type;
-typedef Process::PluginManager<IDeviceContext> manager_context_type;
-typedef IDeviceContext                         context_type;
-typedef IDeviceContext*                        context_pointer;
+typedef Process::PluginManager<IDrawable2D()>    manager2d_type;
+typedef Process::PluginManager<IDrawable3D()>    manager3d_type;
+typedef Process::PluginManager<IDeviceContext()> manager_context_type;
+typedef IDeviceContext                           context_type;
+typedef IDeviceContext*                          context_pointer;
 
 inline context_pointer& current () noexcept
 {

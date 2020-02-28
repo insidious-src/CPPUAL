@@ -130,7 +130,14 @@ template <typename Interface,
                            std::pair<const std::string, plugin_pair>
                            >{}>::type
           >
-class PluginManager : public NonCopyable
+class PluginManager;
+
+template <typename Ret,
+          typename... Args,
+          typename Allocator,
+          typename E
+          >
+class PluginManager<Ret(Args...), Allocator, E> : public NonCopyable
 {
 public:
     typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type;
@@ -142,7 +149,7 @@ public:
     typedef std::equal_to<key_type>                                   equal_type    ;
     typedef Movable<DynLoader>                                        loader_type   ;
     typedef plugin_pair                                               value_type    ;
-    typedef Interface                                                 iface_type    ;
+    typedef Ret                                                       iface_type    ;
     typedef std::shared_ptr<iface_type>                               shared_iface  ;
 
     typedef std::unordered_map
@@ -172,10 +179,11 @@ public:
     Plugin plugin (const_key& plugin_path) const
     { return m_gPluginMap[plugin_path].second; }
 
-    shared_iface construct (const_key& plugin_path) const
+    shared_iface construct (const_key& plugin_path, Args&&... args) const
     {
         return shared_iface(m_gPluginMap[plugin_path].first.
-                            template call<iface_type*>(m_gPluginMap[plugin_path].second.iface));
+                            template call<iface_type*>(m_gPluginMap[plugin_path].second.iface,
+                                                       std::forward<Args>(args)...));
     }
 
     PluginManager (allocator_type const& ator = allocator_type ())
