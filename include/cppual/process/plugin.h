@@ -29,7 +29,6 @@
 #include <cppual/concepts.h>
 
 #include <cstring>
-
 #include <string>
 #include <memory>
 #include <functional>
@@ -130,14 +129,7 @@ template <typename Interface,
                            std::pair<const std::string, plugin_pair>
                            >{}>::type
           >
-class PluginManager;
-
-template <typename Ret,
-          typename... Args,
-          typename Allocator,
-          typename E
-          >
-class PluginManager<Ret(Args...), Allocator, E> : public NonCopyable
+class PluginManager : public NonCopyable
 {
 public:
     typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type;
@@ -149,7 +141,7 @@ public:
     typedef std::equal_to<key_type>                                   equal_type    ;
     typedef Movable<DynLoader>                                        loader_type   ;
     typedef plugin_pair                                               value_type    ;
-    typedef Ret                                                       iface_type    ;
+    typedef Interface                                                 iface_type    ;
     typedef std::shared_ptr<iface_type>                               shared_iface  ;
 
     typedef std::unordered_map
@@ -159,10 +151,6 @@ public:
 
     PluginManager (PluginManager&&) = default;
     PluginManager& operator = (PluginManager&&) = default;
-
-    bool load_plugin    (const_key& path);
-    bool is_registered  (const_key& path) const noexcept;
-    void release_plugin (const_key& path);
 
     void release_all ()
     { m_gPluginMap.clear(); }
@@ -179,50 +167,46 @@ public:
     Plugin plugin (const_key& plugin_path) const
     { return m_gPluginMap[plugin_path].second; }
 
-    shared_iface construct (const_key& plugin_path, Args&&... args) const
+    shared_iface construct (const_key& plugin_path) const
     {
         return shared_iface(m_gPluginMap[plugin_path].first.
-                            template call<iface_type*>(m_gPluginMap[plugin_path].second.iface,
-                                                       std::forward<Args>(args)...));
+                            template call<iface_type*>(m_gPluginMap[plugin_path].second.iface));
     }
 
     PluginManager (allocator_type const& ator = allocator_type ())
     : m_gPluginMap(ator)
     { }
 
+    bool load_plugin (const_key& path)
+    {
+        loader_type loader (path);
+
+        if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
+        Plugin plugin = loader.call<Plugin> (plugin_main);
+
+        for (auto& pair : m_gPluginMap)
+        {
+            if (std::strcmp(pair.second.second.provides, plugin.provides) == 0)
+                return false;
+        }
+
+        m_gPluginMap.try_emplace (path, std::make_pair (std::move (loader), plugin));
+        return true;
+    }
+
+    bool is_registered (const_key& path) const noexcept
+    {
+        return m_gPluginMap.find (path) != m_gPluginMap.end ();
+    }
+
+    void release_plugin (const_key& path)
+    {
+        if (is_registered (path)) m_gPluginMap.erase (m_gPluginMap.find (path));
+    }
+
 private:
     mutable map_type m_gPluginMap;
 };
-
-template<typename Interface, typename Allocator, typename Requirement>
-bool PluginManager<Interface, Allocator, Requirement>::load_plugin (const_key& path)
-{
-    loader_type loader (path);
-
-    if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
-    Plugin plugin = loader.call<Plugin> (plugin_main);
-
-    for (auto& pair : m_gPluginMap)
-    {
-        if (std::strcmp(pair.second.second.provides, plugin.provides) == 0)
-            return false;
-    }
-
-    m_gPluginMap.try_emplace (path, std::make_pair (std::move (loader), plugin));
-    return true;
-}
-
-template<typename Interface, typename Allocator, typename Requirement>
-bool PluginManager<Interface, Allocator, Requirement>::is_registered (const_key& path) const noexcept
-{
-    return m_gPluginMap.find (path) != m_gPluginMap.end ();
-}
-
-template<typename Interface, typename Allocator, typename Requirement>
-void PluginManager<Interface, Allocator, Requirement>::release_plugin (const_key& path)
-{
-    if (is_registered (path)) m_gPluginMap.erase (m_gPluginMap.find (path));
-}
 
 } } // namespace Process
 

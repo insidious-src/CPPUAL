@@ -40,8 +40,8 @@ struct Factory : public NonCopyableVirtual
     typedef Memory::PolymorphicAllocator<std::pair
     <const std::string, Process::plugin_pair > > allocator_type;
 
-    typedef Process::PluginManager<Factory(), allocator_type> manager_type;
-    typedef IDisplay::string_type                             string_type ;
+    typedef Process::PluginManager<Factory, allocator_type> manager_type;
+    typedef IDisplay::string_type                           string_type ;
 
     virtual shared_window createWindow (Rect const& rect,
                                         u32         screen  = 0,

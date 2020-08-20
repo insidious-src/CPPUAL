@@ -26,6 +26,7 @@
 #include <vector>
 #include <cmath>
 #include <unordered_map>
+#include <stdexcept>
 
 namespace cppual { namespace Graphics { namespace GL { namespace Driver {
 

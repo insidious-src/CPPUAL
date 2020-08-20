@@ -21,6 +21,8 @@
 
 #include <cppual/memory/system.h>
 
+#include <cstdlib>
+
 #ifdef OS_STD_UNIX
 #    include <unistd.h>
 #    include <sys/mman.h>

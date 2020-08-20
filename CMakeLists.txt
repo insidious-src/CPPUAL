@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.6)
 if(ANDROID)
     if(NOT DEFINED ANDROID_NDK)
         set(ANDROID_NDK "/opt/android-ndk")
+        set(ANDROID_NDK_ROOT "/opt/android-ndk")
     endif()
     #set(ANDROID_SDK_ROOT "/opt/android-sdk")
     if(NOT DEFINED ANDROID_ABI)
@@ -25,7 +26,7 @@ if(ANDROID)
         set(ANDROID_CPP_FEATURES "exceptions rtti")
     endif()
 
-    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/android.toolchain.cmake")
+    set(CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK}/build/cmake/android.toolchain.cmake")
 elseif(IOS_PLATFORM)
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/ios.toolchain.cmake")
 elseif(OSXCROSS)
@@ -52,7 +53,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 #include(CompilerConfig REQUIRED)
 
 find_package(DL            REQUIRED) ## dynamic loading of libraries
-find_package(WindowManager REQUIRED) ## platform window manager
+find_package(WM            REQUIRED) ## platform window manager
 find_package(Sockets       REQUIRED) ## network interface & interprocess
 find_package(OpenAL                ) ## will be dropped at some point
 find_package(SndFile               ) ## will be dropped at some point
