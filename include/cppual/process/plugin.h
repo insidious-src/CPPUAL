@@ -111,12 +111,12 @@ private:
 
 extern "C" struct Plugin
 {
-    cchar* name    ;
-    cchar* provides;
-    cchar* desc    ;
-    cchar* iface   ;
-    int    verMajor;
-    int    verMinor;
+    cchar*  name    ;
+    cchar*  provides;
+    cchar*  desc    ;
+    cchar*  iface   ;
+    int     verMajor;
+    int     verMinor;
 };
 
 typedef std::pair<DynLoader, Plugin> plugin_pair;

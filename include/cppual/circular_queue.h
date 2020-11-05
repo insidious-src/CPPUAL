@@ -533,7 +533,7 @@ public:
 
     bool empty () const noexcept
     {
-        return m_uBeginPos.load (std::memory_order_relaxed) =
+        return m_uBeginPos.load (std::memory_order_relaxed) ==
                m_uEndPos  .load (std::memory_order_relaxed);
     }
 
