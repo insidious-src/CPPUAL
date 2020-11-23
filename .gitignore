@@ -3,6 +3,7 @@
 
 .vscode
 .clang_complete
+.ccls-cache
 *~
 *.autosave
 *.a

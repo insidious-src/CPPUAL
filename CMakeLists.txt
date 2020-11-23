@@ -46,14 +46,17 @@ set(PROJECT_VERSION_MINOR 0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC OFF)
+set(CMAKE_AUTORCC OFF)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-#include(CompilerConfig REQUIRED)
+include(CompilerConfig REQUIRED)
 
 find_package(DL            REQUIRED) ## dynamic loading of libraries
 find_package(WM            REQUIRED) ## platform window manager
+find_package(WMLegacy              ) ## platform window manager (xcb)
+find_package(X11                   ) ## platform window manager (X11-xcb)
 find_package(Sockets       REQUIRED) ## network interface & interprocess
 find_package(OpenAL                ) ## will be dropped at some point
 find_package(SndFile               ) ## will be dropped at some point
@@ -593,7 +596,7 @@ endif()
 
 ### link targets
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(cppual-ui-xorg WM::LegacyLibrary X11-xcb)
+    target_link_libraries(cppual-ui-xorg WMLegacy::Library X11::Library)
     target_link_libraries(cppual-ui-wayland WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(cppual-ui-win WM::Library)
