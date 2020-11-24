@@ -53,7 +53,7 @@ static DynLoader::string_type format (DynLoader::string_type const& path) noexce
 
     const auto pos = path.rfind(_ext);
 
-    return pos != DynLoader::string_type::npos ? path : path.substr(pos) + _ext;
+    return pos == DynLoader::string_type::npos ? path + _ext : path;
 }
 
 } // anonymous namespace
