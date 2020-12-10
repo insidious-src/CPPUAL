@@ -21,7 +21,9 @@
 *.*#
 core
 bin/
-build*
+build*/
+!core/
+tags
 !core/
 .DS_Store
 .directory
@@ -30,7 +32,7 @@ Makefile*
 *.prl
 *.app
 moc_*.cpp
-ui_*.h
+# ui_*.h
 qrc_*.cpp
 Thumbs.db
 *.res
@@ -75,6 +77,10 @@ CMakeLists.txt.user
 # --------
 *.dll
 *.exe
+
+# Project dirs
+.gradle
+.vscode
 
 # Sublime Text
 tags
