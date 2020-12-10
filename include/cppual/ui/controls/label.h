@@ -50,7 +50,7 @@ public:
            Rect        const& rect,
            TextFormat       format = TextFormat::Plain);
 
-    inline TextFormat getFormat () const noexcept { return m_eFormat; }
+    inline TextFormat  getFormat () const noexcept { return m_eFormat; }
     inline string_type getText   () const noexcept { return m_gText  ; }
 
     Signal<void()> textChanged;

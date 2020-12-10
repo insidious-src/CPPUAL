@@ -34,7 +34,7 @@ namespace cppual { namespace Ui {
 
 class SkinnableView;
 
-enum class SkinElement : char
+enum class SkinElement : unsigned char
 {
     Toolbar,
     Menu,
@@ -96,19 +96,6 @@ public:
 
     static ISkin* getDefault () noexcept;
     static bool   setDefault (ISkin* skin) noexcept;
-
-};
-
-// =========================================================
-
-class SkinEngine final : public NonCopyable
-{
-public:
-    SkinEngine (SkinnableView*) noexcept;
-    inline bool isValid () const noexcept { return m_pView; }
-
-private:
-    SkinnableView* m_pView;
 };
 
 // =========================================================
@@ -127,7 +114,6 @@ public:
 
     SkinnableView (View* pParent, Rect const& gRect, u32 uScreen = 0)
     : View (pParent, gRect, uScreen),
-      m_gSkinEngine (this),
       m_pSkin ()
     { }
 
@@ -137,10 +123,10 @@ public:
     { return m_pSkin; }
 
 protected:
-    SkinEngine m_gSkinEngine;
-    ISkin*     m_pSkin;
+    ISkin* m_pSkin;
 
     virtual void onSkinChange () { }
+
 private:
     void changeSkin ();
 };

@@ -43,29 +43,19 @@ ISkin* ISkin::getDefault () noexcept
 
 // =========================================================
 
-SkinEngine::SkinEngine (SkinnableView* pView) noexcept
-: m_pView (pView)
-{
-}
-
-// =========================================================
-
 SkinnableView::SkinnableView ()
-: m_gSkinEngine (this),
-  m_pSkin ()
+: m_pSkin ()
 {
 }
 
 SkinnableView::SkinnableView (SkinnableView&& gObj)
 : View (gObj),
-  m_gSkinEngine (this),
   m_pSkin (gObj.m_pSkin)
 {
 }
 
 SkinnableView::SkinnableView (SkinnableView const& gObj)
 : View (gObj),
-  m_gSkinEngine (this),
   m_pSkin (gObj.m_pSkin)
 {
 }
