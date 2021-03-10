@@ -234,6 +234,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::big_requests
+} } // namespace cppual::big_requests
 
 #endif // CPPUAL_BIG_REQUESTS_HPP

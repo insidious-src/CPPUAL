@@ -562,6 +562,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::screensaver
+} } // namespace cppual::screensaver
 
 #endif // CPPUAL_SCREENSAVER_HPP

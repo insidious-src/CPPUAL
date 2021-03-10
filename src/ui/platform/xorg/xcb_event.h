@@ -35,9 +35,9 @@
 #include "xcb_window.h"
 
 #include <xcb/xcb_icccm.h>
-#include <cppual/ui/platforms/xcb/xcb.hpp>
 
-namespace cppual { namespace Ui { namespace Xcb {
+
+namespace cppual { namespace Ui { namespace x {
 
 typedef ::xcb_button_t     button_type ;
 typedef ::xcb_keysym_t     keysym_type ;
@@ -379,7 +379,7 @@ public:
     constexpr pointer operator -> () const { return m_handle; }
 
     ~EventPtr ()
-    { ::free (m_handle); }
+    { std::free (m_handle); }
 
     inline EventPtr (base_type* pEvent) noexcept
     : m_handle (reinterpret_cast<pointer> (pEvent))
@@ -441,42 +441,42 @@ public:
 
     enum Type
     {
-        MousePress       = XCB_BUTTON_PRESS,
-        MouseRelease     = XCB_BUTTON_RELEASE,
-        MouseMove        = XCB_MOTION_NOTIFY,
-        KeyPress         = XCB_KEY_PRESS,
-        KeyRelease       = XCB_KEY_RELEASE,
-        KeyMapNotify     = XCB_KEYMAP_NOTIFY,
-        ChangeKbCtrl     = XCB_CHANGE_KEYBOARD_CONTROL,
-        GetKbCtrl        = XCB_GET_KEYBOARD_CONTROL,
-        Expose           = XCB_EXPOSE,
-        Enter            = XCB_ENTER_NOTIFY,
-        Leave            = XCB_LEAVE_NOTIFY,
-        FocusIn          = XCB_FOCUS_IN,
-        FocusOut         = XCB_FOCUS_OUT,
-        Size             = XCB_RESIZE_REQUEST,
-        Visibility       = XCB_VISIBILITY_NOTIFY,
-        Create           = XCB_CREATE_NOTIFY,
-        NoExposure       = XCB_NO_EXPOSURE,
-        GraphicsExposure = XCB_GRAPHICS_EXPOSURE,
-        Destroy          = XCB_DESTROY_NOTIFY,
-        Unmap            = XCB_UNMAP_NOTIFY,
-        Map              = XCB_MAP_NOTIFY,
-        MapRequest       = XCB_MAP_REQUEST,
-        ChangeParent     = XCB_REPARENT_NOTIFY,
-        Configure        = XCB_CONFIGURE_NOTIFY,
-        ConfigRequest    = XCB_CONFIGURE_REQUEST,
-        Gravity          = XCB_GRAVITY_NOTIFY,
-        Circulate        = XCB_CIRCULATE_NOTIFY,
-        CirculateRequest = XCB_CIRCULATE_REQUEST,
-        Property         = XCB_PROPERTY_NOTIFY,
-        SelectionClear   = XCB_SELECTION_CLEAR,
-        SelectionRequest = XCB_SELECTION_REQUEST,
-        Selection        = XCB_SELECTION_NOTIFY,
-        Colormap         = XCB_COLORMAP_NOTIFY,
-        ClientMessage    = XCB_CLIENT_MESSAGE,
-        Mapping          = XCB_MAPPING_NOTIFY,
-        GeGeneric        = XCB_GE_GENERIC
+        TMousePress       = XCB_BUTTON_PRESS,
+        TMouseRelease     = XCB_BUTTON_RELEASE,
+        TMouseMove        = XCB_MOTION_NOTIFY,
+        TKeyPress         = XCB_KEY_PRESS,
+        TKeyRelease       = XCB_KEY_RELEASE,
+        TKeyMapNotify     = XCB_KEYMAP_NOTIFY,
+        TChangeKbCtrl     = XCB_CHANGE_KEYBOARD_CONTROL,
+        TGetKbCtrl        = XCB_GET_KEYBOARD_CONTROL,
+        TExpose           = XCB_EXPOSE,
+        TEnter            = XCB_ENTER_NOTIFY,
+        TLeave            = XCB_LEAVE_NOTIFY,
+        TFocusIn          = XCB_FOCUS_IN,
+        TFocusOut         = XCB_FOCUS_OUT,
+        TSize             = XCB_RESIZE_REQUEST,
+        TVisibility       = XCB_VISIBILITY_NOTIFY,
+        TCreate           = XCB_CREATE_NOTIFY,
+        TNoExposure       = XCB_NO_EXPOSURE,
+        TGraphicsExposure = XCB_GRAPHICS_EXPOSURE,
+        TDestroy          = XCB_DESTROY_NOTIFY,
+        TUnmap            = XCB_UNMAP_NOTIFY,
+        TMap              = XCB_MAP_NOTIFY,
+        TMapRequest       = XCB_MAP_REQUEST,
+        TChangeParent     = XCB_REPARENT_NOTIFY,
+        TConfigure        = XCB_CONFIGURE_NOTIFY,
+        TConfigRequest    = XCB_CONFIGURE_REQUEST,
+        TGravity          = XCB_GRAVITY_NOTIFY,
+        TCirculate        = XCB_CIRCULATE_NOTIFY,
+        TCirculateRequest = XCB_CIRCULATE_REQUEST,
+        TProperty         = XCB_PROPERTY_NOTIFY,
+        TSelectionClear   = XCB_SELECTION_CLEAR,
+        TSelectionRequest = XCB_SELECTION_REQUEST,
+        TSelection        = XCB_SELECTION_NOTIFY,
+        TColormap         = XCB_COLORMAP_NOTIFY,
+        TClientMessage    = XCB_CLIENT_MESSAGE,
+        TMapping          = XCB_MAPPING_NOTIFY,
+        TGeGeneric        = XCB_GE_GENERIC
     };
 
     enum
@@ -499,43 +499,43 @@ public:
     {
         switch (type ())
         {
-        case MousePress:
+        case TMousePress:
             return get ()->mouseButton.event;
-        case MouseRelease:
+        case TMouseRelease:
             return get ()->mouseButton.event;
-        case MouseMove:
+        case TMouseMove:
             return get ()->mouseMove.event;
-        case KeyPress:
+        case TKeyPress:
             return get ()->key.event;
-        case KeyRelease:
+        case TKeyRelease:
             return get ()->key.event;
-        case Expose:
+        case TExpose:
             return get ()->paint.window;
-        case Size:
+        case TSize:
             return get ()->size.window;
-        case Property:
+        case TProperty:
             return get ()->property.window;
-        case Map:
+        case TMap:
             return get ()->map.window;
-        case Unmap:
+        case TUnmap:
             return get ()->unmap.window;
-        case Enter:
+        case TEnter:
             return get ()->step.event;
-        case Leave:
+        case TLeave:
             return get ()->step.event;
-        case FocusIn:
+        case TFocusIn:
             return get ()->focus.event;
-        case FocusOut:
+        case TFocusOut:
             return get ()->focus.event;
-        case Visibility:
+        case TVisibility:
             return get ()->visibility.window;
-        case Destroy:
+        case TDestroy:
             return get ()->destroy.window;
-        case ClientMessage:
+        case TClientMessage:
             return get ()->clientMessage.window;
-        //case ChangeParent:
-        //case Create:
-        //case MapRequest:
+        //case TChangeParent:
+        //case TCreate:
+        //case TMapRequest:
         default:
             return get ()->generic.pad[2];
         }
@@ -550,7 +550,7 @@ public:
     {
         switch (type ())
         {
-        case MousePress:
+        case TMousePress:
             switch (get ()->mouseButton.detail)
             {
             case MouseWheelUp:
@@ -564,63 +564,63 @@ public:
                                               { get ()->mouseButton.event_x,
                                                 get ()->mouseButton.event_y });
             }
-        case MouseRelease:
+        case TMouseRelease:
             if (get ()->mouseButton.detail == MouseWheelUp or
                 get ()->mouseButton.detail == MouseWheelDown)
             return Input::MouseReleaseEvent (button (get ()->mouseButton.detail),
                                             { get ()->mouseButton.event_x,
                                               get ()->mouseButton.event_y });
             break;
-        case MouseMove:
+        case TMouseMove:
             return Input::MouseMoveEvent ({ get ()->mouseMove.event_x,
               get ()->mouseMove.event_y });
-        case KeyPress:
+        case TKeyPress:
             return Input::KeyPressEvent ({ keyCode(get ()->key.detail), 0 });
-        case KeyRelease:
+        case TKeyRelease:
             return Input::KeyReleaseEvent ({ keyCode(get ()->key.detail), 0 });
-        case Expose:
+        case TExpose:
             return Input::PaintEvent (Rect (static_cast<int16> (get ()->paint.x),
                                             static_cast<int16> (get ()->paint.y),
                                             get ()->paint.width,
                                             get ()->paint.height));
-        case Enter:
+        case TEnter:
             return Input::StepEvent (true);
-        case Leave:
+        case TLeave:
             return Input::StepEvent (false);
-        case FocusIn:
+        case TFocusIn:
             return Input::FocusEvent (true);
-        case FocusOut:
+        case TFocusOut:
             return Input::FocusEvent (false);
-        case Size:
+        case TSize:
             return Input::SizeEvent ({ get ()->size.width,
                                        get ()->size.height });
-        case Property:
+        case TProperty:
             return Input::PropertyEvent (get ()->property.atom,
                                          get ()->property.state);
-        case Map:
+        case TMap:
             return Input::VisibilityEvent (true);
-        case Unmap:
+        case TUnmap:
             return Input::VisibilityEvent (false);
-        case Destroy:
+        case TDestroy:
             return event_type (event_type::Destroy);
-        case GraphicsExposure:
+        case TGraphicsExposure:
             return event_type (event_type::Null);
-        case NoExposure:
+        case TNoExposure:
             return event_type (event_type::Null);
-        case ChangeParent:
+        case TChangeParent:
             return event_type (event_type::Null);
-        case Mapping:
+        case TMapping:
             return event_type (event_type::Null);
-        case Configure:
+        case TConfigure:
             return event_type (event_type::Null);
-        case GetKbCtrl:
+        case TGetKbCtrl:
             return event_type (event_type::Null);
-        case ChangeKbCtrl:
+        case TChangeKbCtrl:
             return event_type (event_type::Null);
-        case ClientMessage:
+        case TClientMessage:
             {
-                Xcb::intern_ptr destroyReply (Xcb::internAtomHelper(connection.get<display_type>(),
-                                                                    "WM_DELETE_WINDOW"));
+                auto destroyReply = x::internAtomHelper(connection.get<display_type>(),
+                                                          "WM_DELETE_WINDOW");
 
                 if (get ()->clientMessage.data.data32[0] == destroyReply->atom)
                 {
@@ -643,7 +643,7 @@ public:
     {
         switch (type ())
         {
-        case MousePress:
+        case TMousePress:
             switch (get ()->mouseButton.detail)
             {
             case MouseWheelUp:
@@ -661,7 +661,7 @@ public:
                 break;
             }
             break;
-        case MouseRelease:
+        case TMouseRelease:
             switch (get ()->mouseButton.detail)
             {
             case MouseWheelUp:
@@ -674,15 +674,15 @@ public:
                 break;
             }
             break;
-        case MouseMove:
+        case TMouseMove:
             EventQueue::events ().mouseMove (window (),
             { get ()->mouseMove.event_x, get ()->mouseMove.event_y });
             break;
-        case KeyPress:
+        case TKeyPress:
             EventQueue::events ().keyPress (window (),
             { keyCode(get ()->key.detail), 0 });
             break;
-        case KeyRelease:
+        case TKeyRelease:
             EventQueue::events ().keyPress (window (),
             { keyCode(get ()->key.detail), 0 });
             break;
@@ -693,38 +693,38 @@ public:
               get ()->paint.width,
               get ()->paint.height) });
             break;
-        case Enter:
+        case TEnter:
             EventQueue::events ().winStep (window (), true);
             break;
-        case Leave:
+        case TLeave:
             EventQueue::events ().winStep (window (), false);
             break;
-        case FocusIn:
+        case TFocusIn:
             EventQueue::events ().winFocus (window (), true);
             break;
-        case FocusOut:
+        case TFocusOut:
             EventQueue::events ().winFocus (window (), false);
             break;
-        case Size:
+        case TSize:
             EventQueue::events ().winSize (window (),
             { get ()->size.width, get ()->size.height });
             break;
-        case Property:
+        case TProperty:
             EventQueue::events ().winProperty (window (),
             { get ()->property.atom, get ()->property.state });
             break;
-        case Map:
+        case TMap:
             EventQueue::events ().winVisible (window (), true);
             break;
-        case Unmap:
+        case TUnmap:
             EventQueue::events ().winVisible (window (), false);
             break;
-        case Destroy:
+        case TDestroy:
             EventQueue::events ().winDestroy (window ());
             break;
-        case ClientMessage:
+        case TClientMessage:
             {
-                Xcb::intern_ptr destroyReply (Xcb::internAtomHelper(connection.get<display_type>(),
+                x::intern_ptr destroyReply (x::internAtomHelper(connection.get<display_type>(),
                                                                     "WM_DELETE_WINDOW"));
 
                 if (get ()->clientMessage.data.data32[0] == destroyReply->atom)
@@ -733,23 +733,23 @@ public:
                 }
             }
             break;
-        case GraphicsExposure:
+        case TGraphicsExposure:
             break;
-        case NoExposure:
+        case TNoExposure:
             break;
-        case ChangeParent:
+        case TChangeParent:
             break;
-        case Mapping:
+        case TMapping:
             break;
-        case MapRequest:
+        case TMapRequest:
             break;
-        case Configure:
+        case TConfigure:
             break;
-        case GetKbCtrl:
+        case TGetKbCtrl:
             break;
-        case ChangeKbCtrl:
+        case TChangeKbCtrl:
             break;
-        case Visibility:
+        case TVisibility:
             break;
         default:
 #           ifdef DEBUG_MODE
@@ -763,7 +763,7 @@ private:
     EventPtr m_pEvent;
 };
 
-} } } // namespace Xcb
+} } } // namespace x
 
 #endif // OS_GNU_LINUX or OS_BSD
 #endif // __cplusplus

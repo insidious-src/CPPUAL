@@ -2318,6 +2318,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::xfixes
+} } // namespace cppual::xfixes
 
 #endif // CPPUAL_XFIXES_HPP

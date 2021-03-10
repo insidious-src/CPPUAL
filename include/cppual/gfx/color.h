@@ -74,20 +74,19 @@ union RGBColor
     {
         Red,
         Green,
-        Blue,
-        Count
+        Blue
     };
 
-    byte idx[Count];
+    byte idx[3];
     byte red, green, blue;
 
     RGBColor () noexcept = default;
 
-    // right to left in binary mode
+    //! right to left in binary mode
     constexpr RGBColor binary () const noexcept
     { return { idx[Blue], idx[Green], idx[Red] }; }
 
-    constexpr byte const& operator [] (size_type i) const noexcept
+    constexpr byte operator [] (size_type i) const noexcept
     { return idx[i]; }
 
     constexpr RGBColor (byte r, byte g, byte b) noexcept : idx { r, g, b } { }

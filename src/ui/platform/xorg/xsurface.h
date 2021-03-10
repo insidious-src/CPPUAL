@@ -65,9 +65,9 @@ public:
     void   unmap ();
     void   setFlags (WindowFlags) noexcept;
 
-    WindowFlags flags     () const noexcept { return m_eFlags     ; }
-    weak_window owner     () const noexcept { return weak_window(); }
-    u32         screen    () const noexcept { return m_uScreen    ; }
+    WindowFlags flags  () const noexcept { return m_eFlags     ; }
+    weak_window owner  () const noexcept { return weak_window(); }
+    u32         screen () const noexcept { return m_uScreen    ; }
 
 private:
     WindowFlags m_eFlags ;

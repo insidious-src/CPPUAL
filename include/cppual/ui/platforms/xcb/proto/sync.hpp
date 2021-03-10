@@ -1770,6 +1770,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::sync
+} } // namespace cppual::sync
 
 #endif // CPPUAL_SYNC_HPP

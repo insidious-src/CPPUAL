@@ -30,6 +30,6 @@ struct traits<cppual::fontable<Connection, Interfaces ...>>
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_FONTABLE_HPP

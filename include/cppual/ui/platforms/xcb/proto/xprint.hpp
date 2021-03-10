@@ -2205,6 +2205,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::x_print
+} } // namespace cppual::x_print
 
 #endif // CPPUAL_X_PRINT_HPP

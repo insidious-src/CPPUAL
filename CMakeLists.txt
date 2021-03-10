@@ -55,7 +55,7 @@ include(CompilerConfig REQUIRED)
 
 find_package(DL            REQUIRED) ## dynamic loading of libraries
 find_package(WM            REQUIRED) ## platform window manager
-find_package(WMLegacy              ) ## platform window manager (xcb)
+find_package(XCB COMPONENTS XCB ICCCM EWMH) ## platform window manager (Xcb)
 find_package(X11                   ) ## platform window manager (X11-xcb)
 find_package(Sockets       REQUIRED) ## network interface & interprocess
 find_package(OpenAL                ) ## will be dropped at some point
@@ -465,6 +465,7 @@ add_library(cppual-ui-win MODULE
     "src/ui/platform/winapi/w32input.h"
     "src/ui/platform/winapi/w32main.cpp"
     )
+
 endif()
 
 if(FREETYPE_FOUND AND GLEW_FOUND)
@@ -596,7 +597,7 @@ endif()
 
 ### link targets
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(cppual-ui-xorg WMLegacy::Library X11::Library)
+    target_link_libraries(cppual-ui-xorg XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
     target_link_libraries(cppual-ui-wayland WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(cppual-ui-win WM::Library)

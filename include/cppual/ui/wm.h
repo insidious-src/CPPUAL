@@ -67,8 +67,6 @@ public:
     typedef std::size_t          size_type    ;
     typedef std::string          string_type  ;
 
-    ~IPlatformWindow () { }
-
     virtual weak_window owner () const = 0;
     virtual WindowFlags flags () const = 0;
     virtual string_type title () const = 0;

@@ -629,6 +629,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::dpms
+} } // namespace cppual::dpms
 
 #endif // CPPUAL_DPMS_HPP

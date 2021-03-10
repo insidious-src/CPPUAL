@@ -30,6 +30,6 @@ struct traits<cppual::drawable<Connection, Interfaces ...>>
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_DRAWABLE_HPP

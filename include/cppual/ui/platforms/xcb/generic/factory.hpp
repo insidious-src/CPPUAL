@@ -25,7 +25,7 @@ class make_object_with_member
 public:
     template<typename Member, typename Connection, typename ... Parameter>
     ReturnType
-    operator()(Connection && c, Member && member, Parameter && ... parameter) const
+    operator()(Connection &&, Member && member, Parameter && ... parameter) const
     {
         return ReturnType
         {

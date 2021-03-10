@@ -618,6 +618,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::xevie
+} } // namespace cppual::xevie
 
 #endif // CPPUAL_XEVIE_HPP

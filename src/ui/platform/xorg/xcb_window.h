@@ -24,30 +24,97 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
-#include <xcb/xcb.h>
 #include <string>
 #include <memory>
-#include "xcb_def.h"
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-namespace cppual { namespace Ui { namespace Xcb {
+#include "xcb_def.h"
+#include "xcb_iterator.h"
 
-typedef std::string                           string_type;
-typedef handle_ptr<::xcb_intern_atom_reply_t> intern_ptr ;
+#include <xcb/xcb.h>
 
-inline ::xcb_intern_atom_reply_t* internAtomHelper (display_type* conn,
-                                                    string_type const& str,
-                                                    bool only_if_exists = false)
+namespace cppual { namespace Ui { namespace x {
+
+typedef std::string                                     string_type;
+typedef handle_ptr<::xcb_intern_atom_reply_t>           intern_ptr ;
+typedef handle_ptr<::xcb_get_property_reply_t>          prop_ptr   ;
+typedef handle_ptr<::xcb_get_geometry_reply_t>          geo_ptr    ;
+typedef handle_ptr<::xcb_get_window_attributes_reply_t> attrib_ptr ;
+
+enum
 {
-    ::xcb_intern_atom_cookie_t cookie = ::xcb_intern_atom (conn, only_if_exists,
-                                                           static_cast<u16> (str.length()),
-                                                           str.c_str());
+    Move   = XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+    Resize = Move | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+    Stack  = XCB_CONFIG_WINDOW_STACK_MODE
+};
 
-    return ::xcb_intern_atom_reply (conn, cookie, nullptr);
+// =========================================================
+
+inline intern_ptr internAtomHelper (display_type* conn,
+                                    string_type const& str,
+                                    bool only_if_exists = false)
+{
+    auto cookie = ::xcb_intern_atom (conn,
+                                     only_if_exists,
+                                     static_cast<u16> (str.length()),
+                                     str.c_str());
+
+    return intern_ptr(::xcb_intern_atom_reply (conn, cookie, nullptr));
 }
 
-} } } // namespace Xcb
+// =========================================================
+
+inline prop_ptr propAtomHelper (display_type* conn,
+                                handle_type   wnd_id,
+                                atom_type     property,
+                                atom_type     type)
+{
+    auto cookie = ::xcb_get_property(conn,
+                                     0, /* _delete */
+                                     wnd_id,
+                                     property,
+                                     type,
+                                     0,
+                                     sizeof(atom_type));
+
+    return prop_ptr(::xcb_get_property_reply(conn, cookie, nullptr));
+}
+
+// =========================================================
+
+inline geo_ptr geometryHelper (display_type* conn, handle_type wnd_id)
+{
+    auto cookie = ::xcb_get_geometry(conn, wnd_id);
+
+    return geo_ptr(::xcb_get_geometry_reply(conn, cookie, nullptr));
+}
+
+// =========================================================
+
+inline attrib_ptr attribHelper (display_type* conn, handle_type wnd_id)
+{
+    auto cookie = ::xcb_get_window_attributes (conn, wnd_id);
+
+    return attrib_ptr(::xcb_get_window_attributes_reply(conn, cookie, nullptr));
+}
+
+// =========================================================
+
+inline screen_type* screenHandle (display_type* conn, u32& screen) noexcept
+{
+    ::xcb_setup_t const* pSetup = ::xcb_get_setup (conn);
+    u32 nNum = static_cast<u32> (::xcb_setup_roots_length (pSetup));
+    ScreenForwardIterator it (*pSetup);
+
+    if (nNum < screen) screen = nNum - 1;
+    else nNum = screen;
+
+    for (u8 n = 1; n < screen; ++n) ++it;
+    return it->data;
+}
+
+} } } // namespace x
 
 #endif // OS_GNU_LINUX or OS_BSD
 #endif // __cplusplus

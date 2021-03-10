@@ -40,6 +40,6 @@ protected:
     std::shared_ptr<xcb_generic_event_t> m_event;
 }; // class event
 
-} } // namespace xpp::generic
+} } // namespace cppual::generic
 
 #endif // CPPUAL_GENERIC_EVENT_HPP

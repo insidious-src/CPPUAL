@@ -85,6 +85,6 @@ struct traits<cppual::window<Connection, Interfaces ...>>
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_WINDOW_HPP

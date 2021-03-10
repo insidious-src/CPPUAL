@@ -196,7 +196,7 @@ private:
 
 } // namespace event
 
-} // namespace xpp
+} // namespace cppual
 
 template<typename Event>
 void cppual::event::detail::dispatcher::dispatch(const Event & e)

@@ -29,7 +29,7 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-namespace cppual { namespace Ui { namespace Xcb {
+namespace cppual { namespace Ui { namespace x {
 
 class ScreenForwardIterator
 {
@@ -95,7 +95,7 @@ private:
     value_type m_gPos;
 };
 
-} } } // namespace Xcb
+} } } // namespace x
 
 #endif // OS_GNU_LINUX or OS_BSD
 #endif // __cplusplus

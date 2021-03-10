@@ -857,6 +857,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::dri3
+} } // namespace cppual::dri3
 
 #endif // CPPUAL_DRI3_HPP

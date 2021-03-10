@@ -2463,6 +2463,6 @@ class dispatcher
 } // namespace error
 
 
-} } // namespace xpp::render
+} } // namespace cppual::render
 
 #endif // CPPUAL_RENDER_HPP

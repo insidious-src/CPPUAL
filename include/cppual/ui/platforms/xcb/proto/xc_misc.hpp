@@ -422,6 +422,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::xc_misc
+} } // namespace cppual::xc_misc
 
 #endif // CPPUAL_XC_MISC_HPP

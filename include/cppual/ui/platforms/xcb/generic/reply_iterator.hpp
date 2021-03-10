@@ -371,6 +371,6 @@ public:
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_GENERIC_REPLY_ITERATOR_HPP

@@ -783,6 +783,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::shape
+} } // namespace cppual::shape
 
 #endif // CPPUAL_SHAPE_HPP

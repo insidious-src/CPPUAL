@@ -36,7 +36,7 @@ inline Program::pointer createProgramFromSource (Behaviour const& /*context*/, v
         for (vector<string>::size_type i = 0; i < source.size (); ++i)
             sizes[i] = source[i].size ();
 
-        auto sources = source.front ().c_str ();
+        //auto sources = source.front ().c_str ();
 
         /* return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
                                            static_cast<uint> (source.size ()),

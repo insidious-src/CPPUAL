@@ -29,6 +29,6 @@ struct traits<cppual::atom<Connection, Interfaces ...>>
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_ATOM_HPP

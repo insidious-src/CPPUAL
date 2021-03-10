@@ -109,6 +109,6 @@ struct traits<cppual::gcontext<Connection, Interfaces ...>>
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_GCONTEXT_HPP

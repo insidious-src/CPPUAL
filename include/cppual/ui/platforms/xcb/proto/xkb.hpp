@@ -2701,6 +2701,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::xkb
+} } // namespace cppual::xkb
 
 #endif // CPPUAL_XKB_HPP

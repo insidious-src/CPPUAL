@@ -812,6 +812,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::shm
+} } // namespace cppual::shm
 
 #endif // CPPUAL_SHM_HPP

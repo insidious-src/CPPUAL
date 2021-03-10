@@ -55,6 +55,11 @@ Window::~Window ()
 {
 }
 
+bool Window::setIcon(Window::image_type*)
+{
+    return false;
+}
+
 void Window::setTitle (string_type const& strTitle)
 {
     renderable_unsafe ()->setTitle (strTitle);
@@ -65,11 +70,36 @@ void Window::setFullscreen(bool bFullscreen)
     renderable_unsafe ()->setFullscreen (bFullscreen);
 }
 
-void Window::showInTaskbar (bool)
+void Window::flash(ushort)
+{
+
+}
+
+void Window::showInTaskbar(bool)
 {
 }
 
-Window::string_type Window::title () const
+void Window::restore()
+{
+
+}
+
+void Window::minimize()
+{
+
+}
+
+void Window::maximize()
+{
+
+}
+
+void Window::close()
+{
+
+}
+
+Window::string_type Window::title() const
 {
     return renderable_unsafe ()->title ();
 }

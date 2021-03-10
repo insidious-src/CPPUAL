@@ -334,6 +334,6 @@ class core
     }
 }; // class core
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_CORE_HPP

@@ -1090,6 +1090,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::xf86dri
+} } // namespace cppual::xf86dri
 
 #endif // CPPUAL_XF86DRI_HPP

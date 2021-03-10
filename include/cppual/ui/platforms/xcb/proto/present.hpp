@@ -1022,6 +1022,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::present
+} } // namespace cppual::present
 
 #endif // CPPUAL_PRESENT_HPP

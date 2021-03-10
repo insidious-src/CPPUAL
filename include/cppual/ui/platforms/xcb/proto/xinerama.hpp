@@ -716,6 +716,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::xinerama
+} } // namespace cppual::xinerama
 
 #endif // CPPUAL_XINERAMA_HPP

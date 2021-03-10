@@ -138,8 +138,8 @@ public:
     inline void erase () noexcept
     {
         if (!m_gBuffer.data or !m_uLength) return;
-        do m_gBuffer.data[--m_uLength] = '\0';
-        while (m_uLength);
+        m_gBuffer.data[0] = '\0';
+        m_uLength = 0;
     }
 
     template <typename U, class TAtor>
@@ -220,7 +220,9 @@ void copyToString (String<T, TAlloc>&                    gObj,
             return;
 
         std::copy (pFromText, pFromText + uLength, gObj.m_gBuffer.data);
-        gObj.m_gBuffer.capacity = gObj.m_uLength = --uLength;
+
+        gObj.m_gBuffer.data[--uLength] = '\0';
+        gObj.m_gBuffer.capacity = gObj.m_uLength = uLength;
     }
 }
 
@@ -228,7 +230,7 @@ void copyToString (String<T, TAlloc>&                    gObj,
 
 template <typename T>
 constexpr T const* strend (T const* pBegin, std::size_t uLen) noexcept
-{ return pBegin + (sizeof (T) * uLen) + sizeof (T); }
+{ return pBegin + uLen + sizeof (T); }
 
 
 template <typename T, class TAlloc>
@@ -253,6 +255,8 @@ String<T, TAlloc>& assignToString (String<T, TAlloc>&                    gObj,
     std::copy (pFromText, strend (pFromText, uLength),
                gObj.m_gBuffer.data);
     gObj.m_uLength = uLength;
+
+    gObj.m_gBuffer.data[uLength] = '\0';
     return gObj;
 }
 
@@ -282,8 +286,8 @@ String<T, TAlloc>& addToString (String<T, TAlloc>& gObj,
     }
 
     std::copy (pFromText,
-               pFromText + (sizeof (T) * ++uAddLength),
-               gObj.m_gBuffer.data + (sizeof (T) * gObj.m_uLength));
+               pFromText + ++uAddLength,
+               gObj.m_gBuffer.data + gObj.m_uLength);
 
     gObj.m_uLength = uLength;
     return gObj;

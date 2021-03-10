@@ -73,6 +73,6 @@ struct traits<cppual::pixmap<Connection, Interfaces ...>>
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_PIXMAP_HPP

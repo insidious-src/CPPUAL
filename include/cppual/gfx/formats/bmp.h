@@ -82,7 +82,7 @@ public:
         u32  offset; // offset to pixel data in bytes -> 4 bytes
     };
 
-    struct InfoHeader  // -- must be 40 bytes --
+    struct PACKED InfoHeader  // -- must be 40 bytes --
     {
         u32         size; // header size in bytes -> 4 bytes
         int32       width, height; // width / height of image -> 2 * 4 bytes

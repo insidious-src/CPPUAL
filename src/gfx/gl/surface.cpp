@@ -398,8 +398,8 @@ Config::Config (controller dsp, format_type gFormat)
         EGL_DEPTH_SIZE,      gFormat.depth,
         EGL_STENCIL_SIZE,    gFormat.stencil,
         EGL_SURFACE_TYPE,    gFormat.flags.test (PixelFlag::Drawable) ?
-                    EGL_WINDOW_BIT : 0 | gFormat.flags.test (PixelFlag::Palette) ?
-                        EGL_PBUFFER_BIT : 0 | gFormat.flags.test (PixelFlag::Bitmap) ?
+                    EGL_WINDOW_BIT : gFormat.flags.test (PixelFlag::Palette) ?
+                        EGL_PBUFFER_BIT : gFormat.flags.test (PixelFlag::Bitmap) ?
                             EGL_PIXMAP_BIT : 0,
         EGL_RENDERABLE_TYPE, EGL::api_bits (EGL::API::OpenGL),
         EGL::NONE

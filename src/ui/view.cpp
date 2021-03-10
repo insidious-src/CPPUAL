@@ -227,22 +227,22 @@ void View::destroyChildren ()
 {
     if (m_gChildrenList.empty ()) return;
 
-    for (View* pChild : m_gChildrenList) if (pChild != nullptr) pChild->destroy ();
+    for (auto pChild : m_gChildrenList) if (pChild != nullptr) pChild->destroy ();
     m_gChildrenList.clear ();
 }
 
 void View::destroyResources ()
 {
-    window_type uId = m_pRenderable->id ();
+    auto uId = m_pRenderable->id ();
 
-    // destroy all child virtual surfaces
+    //! destroy all child virtual surfaces
     destroyChildren ();
 
-    // if the object is a child then remove it from
-    // the parent
+    //! if the object is a child then remove it from
+    //! the parent
     if (m_pParentObj) *m_gItFromParent = nullptr;
 
-    // if the surface is unique it gets deleted
+    //! if the surface is unique it gets deleted
     m_pRenderable.reset ();
 
     Internal::map ().erase (uId);
@@ -307,14 +307,14 @@ bool View::setParent (View* pParentObj, point2i /*gPos*/)
 
         m_gItFromParent = std::move (pParentObj->m_gChildrenList.end ());
     }
-    // pParentObj is invalid and m_pParentObj is NOT nullptr
+    //! pParentObj is invalid and m_pParentObj is NOT nullptr
     else
     {
-        // recreate using physical surface
+        //! recreate using physical surface
         m_pRenderable = Platform::Factory::instance ()->
                         createWindow (m_pRenderable->geometry (),
-                                          m_pRenderable->screen (),
-                                          m_pRenderable->connection ());
+                                      m_pRenderable->screen (),
+                                      m_pRenderable->connection ());
         if (m_pRenderable == nullptr) return false;
 
         *m_gItFromParent = nullptr;
@@ -329,7 +329,7 @@ void View::paint (Rect const& gRect)
     paintEvent (gRect);
 
     if (m_gChildrenList.size ())
-        for (View* pChild : m_gChildrenList) pChild->paint (Rect ());
+        for (auto pChild : m_gChildrenList) pChild->paint (Rect ());
 }
 
 void View::size (point2u gSize)
@@ -337,7 +337,7 @@ void View::size (point2u gSize)
     sizeEvent (gSize);
 
     if (m_gChildrenList.size ())
-        for (View* pChild : m_gChildrenList) pChild->onParentSize (gSize);
+        for (auto pChild : m_gChildrenList) pChild->onParentSize (gSize);
 }
 
 void View::setGeometry (Rect const& gRect)
@@ -346,7 +346,7 @@ void View::setGeometry (Rect const& gRect)
     {
         Rect gNewRect (gRect);
 
-        // width
+        //! width
         if (gNewRect.width () < m_gMinSize.x)
         {
             gNewRect.right = static_cast<Rect::value_type> (gNewRect.left + m_gMinSize.x);
@@ -356,7 +356,7 @@ void View::setGeometry (Rect const& gRect)
             gNewRect.right = static_cast<Rect::value_type> (gNewRect.left + m_gMinSize.x);
         }
 
-        // height
+        //! height
         if (gNewRect.height () > m_gMinSize.y)
         {
             gNewRect.bottom = static_cast<Rect::value_type> (gNewRect.top + m_gMinSize.y);
@@ -382,28 +382,28 @@ void View::move (point2i gPoint)
 void View::mouseMovedEvent (point2u)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::mouseMoved(point2u)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::mouseWheelEvent (event_type::MWheelData const&)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::mouseWheel(event_type::MWheelData const&)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::mousePressedEvent (event_type::MButtonData const&)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::mousePressed(event_type::MButtonData const&)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::mouseReleasedEvent (event_type::MButtonData const&)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::mouseReleased(event_type::MButtonData const&)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
@@ -451,84 +451,84 @@ void View::refresh ()
 void View::destroyEvent()
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onDestroy()\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::showEvent(bool)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onShow(bool)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::paintEvent(Rect const&)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onPaint(Rect const&)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::onEnable(bool)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onEnable(bool)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::sizeEvent(point2u)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onSize(point2u)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::moveEvent(point2i)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onMove(point2i)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::enterLeaveEvent(bool)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onEnterLeave(bool)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::beginSizeMoveEvent(Rect const&)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onBeginSizeMove(Rect const&)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::endSizeMoveEvent(Rect const&)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onEndSizeMove(Rect const&)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::minMaxSizeEvent(point2u)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onMinMaxSize(point2u)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::focusEvent(bool)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onFocus(bool)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
 void View::onParentSize(point2u)
 {
 #   ifdef DEBUG_MODE
-    std::cout << "View::onParentSize(point2u)\n";
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 

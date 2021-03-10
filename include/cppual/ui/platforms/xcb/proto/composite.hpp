@@ -577,6 +577,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::composite
+} } // namespace cppual::composite
 
 #endif // CPPUAL_COMPOSITE_HPP

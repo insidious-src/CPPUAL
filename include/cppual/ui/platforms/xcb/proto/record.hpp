@@ -821,6 +821,6 @@ class dispatcher
 } // namespace error
 
 
-} } // namespace xpp::record
+} } // namespace cppual::record
 
 #endif // CPPUAL_RECORD_HPP

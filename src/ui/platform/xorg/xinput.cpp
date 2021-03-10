@@ -75,19 +75,19 @@ bool XQueue::set_window_events (window_type const& window, mask_type gFlags) noe
         if (gFlags.test (event_type::Focus))       uMask |= XCB_EVENT_MASK_FOCUS_CHANGE;
     }
 
-    ::xcb_change_window_attributes (display   ().get<Xcb::display_type> (),
-                                    window.id ().get<Xcb::handle_type>  (),
+    ::xcb_change_window_attributes (display   ().get<x::display_type> (),
+                                    window.id ().get<x::handle_type>  (),
                                     XCB_CW_EVENT_MASK,
                                     &uMask);
 
-    ::xcb_flush (display ().get<Xcb::display_type> ());
+    ::xcb_flush (display ().get<x::display_type> ());
     return true;
 }
 
 bool XQueue::pop_front (bool bWait) noexcept
 {
-    Xcb::Event event (bWait ? ::xcb_wait_for_event (display ().get<Xcb::display_type> ()) :
-                              ::xcb_poll_for_event (display ().get<Xcb::display_type> ()));
+    x::Event event (bWait ? ::xcb_wait_for_event (display ().get<x::display_type> ()) :
+                              ::xcb_poll_for_event (display ().get<x::display_type> ()));
 
     if (!event.get ()) return false;
 
@@ -99,7 +99,7 @@ int XQueue::poll (bool_type& poll)
 {
     while (poll)
     {
-        Xcb::Event event (::xcb_wait_for_event (display ().get<Xcb::display_type> ()));
+        x::Event event (::xcb_wait_for_event (display ().get<x::display_type> ()));
 
         if (!event.get ()) continue;
 
@@ -111,28 +111,28 @@ int XQueue::poll (bool_type& poll)
 
 void XQueue::send (window_type const& window, event_type const& event)
 {
-    Xcb::Event::base_type send_event = Xcb::Event::toXcbEvent (event);
+    x::Event::base_type send_event = x::Event::toXcbEvent (event);
 
-    ::xcb_send_event (display ().get<Xcb::display_type> (),
+    ::xcb_send_event (display ().get<x::display_type> (),
                       false,
-                      window.id ().get<Xcb::handle_type> (),
+                      window.id ().get<x::handle_type> (),
                       send_event.response_type & ~0x80,
                       reinterpret_cast<cchar*> (&send_event));
 
-    ::xcb_flush (display ().get<Xcb::display_type> ());
+    ::xcb_flush (display ().get<x::display_type> ());
 }
 
 void XQueue::post (window_type const& window, event_type const& event)
 {
-    Xcb::Event::base_type post_event = Xcb::Event::toXcbEvent (event);
+    x::Event::base_type post_event = x::Event::toXcbEvent (event);
 
-    ::xcb_send_event (display ().get<Xcb::display_type> (),
+    ::xcb_send_event (display ().get<x::display_type> (),
                       false,
-                      window.id ().get<Xcb::handle_type> (),
+                      window.id ().get<x::handle_type> (),
                       post_event.response_type & ~0x80,
                       reinterpret_cast<cchar*> (&post_event));
 
-    ::xcb_flush (display ().get<Xcb::display_type> ());
+    ::xcb_flush (display ().get<x::display_type> ());
 }
 
 } } // namespace Input

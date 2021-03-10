@@ -29,8 +29,6 @@
 #include <cppual/ui/view.h>
 #include <cppual/input/event.h>
 
-using cppual::Graphics::Icon;
-
 namespace cppual { namespace Ui {
 
 class Window : public View
@@ -64,7 +62,9 @@ public:
 
     inline FrameView*  frame () noexcept { return m_gFrame; }
     inline image_type* icon  () const noexcept { return m_pIcon; }
-    inline bool        isFullscreen () const noexcept { return m_bIsFullScreen; }
+
+    inline bool isFullscreen () const noexcept
+    { return renderable_unsafe()->isFullscreen(); }
 
     inline bool isMinimized () const noexcept
     { return m_gFrame->attached () == this and m_gFrame->isHidden (); }
@@ -81,7 +81,6 @@ protected:
 private:
     FrameView*  m_gFrame;
     image_type* m_pIcon;
-    bool        m_bIsFullScreen;
 };
 
 } } // namespace Ui

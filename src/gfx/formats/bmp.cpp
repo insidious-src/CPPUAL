@@ -25,21 +25,21 @@ namespace cppual {
 
 void BitmapStream::_parse_header ()
 {
-    // check header sizes
+    //! check header sizes
     seekg (0, end);
     if (static_cast<size_type> (tellg ()) <=
-                       sizeof  (Header  ) + sizeof (InfoHeader) - 1)
+                        sizeof (Header  ) + sizeof (InfoHeader) - 1)
         return;
 
-    // read Header
+    //! read Header
     seekg (0);
     read  (reinterpret_cast<char_type*> (&m_header),
-                                sizeof  (Header   ));
+                                 sizeof (Header   ));
 
-    // read InfoHeader
+    //! read InfoHeader
     if (header ().type == Type::BM)
         read (reinterpret_cast<char_type*> (&m_infoHeader),
-                                   sizeof  (InfoHeader   ));
+                                    sizeof (InfoHeader   ));
     else
         close ();
 }
@@ -56,15 +56,15 @@ BitmapStream::size_type BitmapStream::replace (rgb_type const target_clr, rgb_ty
     auto    num_changes    = size_type ();
     auto    buffer_size    = info  ().pixel_count () * sizeof (rgb_type);
     auto    prev_seekg     = tellg ();
-    auto    bin_target_clr = target_clr.binary    ();
-    auto    bin_new_clr    = new_clr   .binary    ();
+    auto    bin_target_clr = target_clr.binary ();
+    auto    bin_new_clr    = new_clr   .binary ();
 
-    // skip the whole header and read the pixel data
+    //! skip the whole header and read the pixel data
     seekg (header ().offset);
     read  (reinterpret_cast<char_type*> (pixel_data.get ()),
                 static_cast<streamsize> (buffer_size));
 
-    // read each row and while reading it replace each color cell
+    //! read each row and while reading it replace each color cell
     for (u32 row_idx = 0; row_idx < info ().absolute_height (); ++row_idx)
     {
         for (u32 cell_idx = 0; cell_idx < info ().absolute_width (); ++cell_idx)
@@ -79,10 +79,10 @@ BitmapStream::size_type BitmapStream::replace (rgb_type const target_clr, rgb_ty
         }
     }
 
-    // return to the beginning of the pixel data
+    //! return to the beginning of the pixel data
     seekg (prev_seekg);
 
-    // if there are any changes - write the data
+    //! if there are any changes - write the data
     if (num_changes)
     {
         auto prev_seekp = tellp ();

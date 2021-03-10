@@ -1996,6 +1996,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::selinux
+} } // namespace cppual::selinux
 
 #endif // CPPUAL_SELINUX_HPP

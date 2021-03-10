@@ -9220,6 +9220,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::glx
+} } // namespace cppual::glx
 
 #endif // CPPUAL_GLX_HPP

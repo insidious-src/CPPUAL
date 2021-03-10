@@ -4905,6 +4905,6 @@ class dispatcher
 } // namespace error
 
 
-} } // namespace xpp::randr
+} } // namespace cppual::randr
 
 #endif // CPPUAL_RANDR_HPP

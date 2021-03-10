@@ -584,6 +584,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::damage
+} } // namespace cppual::damage
 
 #endif // CPPUAL_DAMAGE_HPP

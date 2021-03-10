@@ -11608,6 +11608,6 @@ public:
 } // namespace error
 
 
-} } // namespace xpp::x
+} } // namespace cppual::x
 
 #endif // CPPUAL_X_HPP

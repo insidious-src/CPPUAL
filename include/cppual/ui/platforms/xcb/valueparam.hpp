@@ -45,6 +45,6 @@ class valueparam {
     std::map<uint32_t, uint32_t> m_values_map;
 };
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // X_VALUEPARAM_HPP

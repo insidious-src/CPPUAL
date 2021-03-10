@@ -1043,6 +1043,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::xvmc
+} } // namespace cppual::xvmc
 
 #endif // CPPUAL_XVMC_HPP

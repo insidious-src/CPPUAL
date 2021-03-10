@@ -138,6 +138,6 @@ operator<<(std::ostream & os,
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_GENERIC_RESOURCE_HPP

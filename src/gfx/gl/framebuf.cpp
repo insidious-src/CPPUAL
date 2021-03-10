@@ -20,8 +20,14 @@
  */
 
 #include <cppual/gfx/gl/framebuf.h>
+
 #include "gldef.h"
 
 namespace cppual { namespace Graphics { namespace GL {
+
+FrameBuffer::FrameBuffer() noexcept
+{
+
+}
 
 } } } // namespace GL

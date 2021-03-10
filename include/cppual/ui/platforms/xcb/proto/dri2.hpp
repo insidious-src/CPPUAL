@@ -1450,6 +1450,6 @@ class dispatcher
 } // namespace error
 
 
-} } // namespace xpp::dri2
+} } // namespace cppual::dri2
 
 #endif // CPPUAL_DRI2_HPP

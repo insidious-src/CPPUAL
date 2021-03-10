@@ -8163,6 +8163,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::input
+} } // namespace cppual::input
 
 #endif // CPPUAL_INPUT_HPP

@@ -125,6 +125,6 @@ protected:
     }
 };
 
-} } // namespace xpp::generic
+} } // namespace cppual::generic
 
 #endif // CPPUAL_GENERIC_REQUEST_HPP

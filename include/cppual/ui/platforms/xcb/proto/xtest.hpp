@@ -389,6 +389,6 @@ protected:
 } // namespace error
 
 
-} } // namespace xpp::test
+} } // namespace cppual::test
 
 #endif // CPPUAL_TEST_HPP

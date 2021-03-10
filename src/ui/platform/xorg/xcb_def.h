@@ -24,16 +24,30 @@
 #ifdef __cplusplus
 
 #include <cppual/decl.h>
+#include <cppual/types.h>
 
-#include <xcb/xcb_icccm.h>
 #include <memory>
+#include <cstdlib>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-namespace cppual { namespace Ui { namespace Xcb {
+#include <cppual/ui/platforms/xcb/xcb.hpp>
 
-typedef xcb_connection_t display_type;
-typedef xcb_window_t     handle_type ;
+#include <xcb/xcb_icccm.h>
+#include <X11/Xlib-xcb.h>
+
+namespace cppual { namespace Ui { namespace x {
+
+typedef ::xcb_connection_t display_type;
+typedef ::Display          legacy_type ;
+typedef ::xcb_screen_t     screen_type ;
+typedef ::xcb_window_t     handle_type ;
+typedef ::xcb_atom_t       atom_type   ;
+
+constexpr cu8 atom_format   = sizeof(atom_type) * 8;
+constexpr cu8 string_format = sizeof(char) * 8;
+
+// =========================================================
 
 template <typename T>
 struct handle_ptr : public std::shared_ptr<T>
@@ -43,7 +57,7 @@ struct handle_ptr : public std::shared_ptr<T>
     { }
 };
 
-} } } // namespace Xcb
+} } } // namespace x
 
 #endif // OS_GNU_LINUX or OS_BSD
 #endif // __cplusplus

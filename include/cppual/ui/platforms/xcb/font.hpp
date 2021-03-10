@@ -69,6 +69,6 @@ struct traits<cppual::font<Connection, Interfaces ...>>
 
 } // namespace generic
 
-} // namespace xpp
+} // namespace cppual
 
 #endif // CPPUAL_FONT_HPP
