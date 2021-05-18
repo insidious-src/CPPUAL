@@ -34,7 +34,7 @@ namespace cppual { namespace Graphics {
 class Image : public IDrawable2D, public ITransformable2D
 {
 public:
-    typedef std::string string_type;
+    typedef string string_type;
 
     virtual VirtualBuffer* map () noexcept = 0;
     virtual bool           isLoaded () const noexcept = 0;
@@ -127,7 +127,7 @@ private:
 class Icon final
 {
 public:
-    typedef std::string string_type;
+    typedef string string_type;
 
     Icon () { }
     Icon (string_type const&) { }

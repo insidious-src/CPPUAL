@@ -25,7 +25,7 @@
 
 #include <cppual/ui/skin.h>
 
-using std::string;
+using string;
 using cppual::Graphics::Font;
 
 namespace cppual { namespace Ui {

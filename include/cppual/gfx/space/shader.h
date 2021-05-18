@@ -31,7 +31,7 @@
 #include <cppual/gfx/draw.h>
 
 using std::map;
-using std::string;
+using string;
 
 namespace cppual { namespace Graphics {
 

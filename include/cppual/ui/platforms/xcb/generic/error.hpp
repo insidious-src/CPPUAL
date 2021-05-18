@@ -1,6 +1,8 @@
 #ifndef CPPUAL_GENERIC_ERROR_HPP
 #define CPPUAL_GENERIC_ERROR_HPP
 
+#include <cppual/string.h>
+
 #include <iostream> // shared_ptr
 #include <memory> // shared_ptr
 #include <xcb/xcb.h> // ::xcb_generic_error_t
@@ -84,8 +86,7 @@ protected:
     std::string
     get_error_description(xcb_generic_error_t * error) const
     {
-        return std::string(Derived::description())
-                + " (" + std::to_string(error->error_code) + ")";
+        return std::string(Derived::description()) + " (" + std::to_string(error->error_code) + ")";
     }
 
     std::shared_ptr<xcb_generic_error_t> m_error;

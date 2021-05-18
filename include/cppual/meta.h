@@ -27,6 +27,7 @@
 
 #include <type_traits>
 #include <tuple>
+#include <string>
 
 namespace cppual {
 
@@ -54,7 +55,7 @@ struct tuple_ref_index;
 
 template <typename T, typename Base, typename... Tail, std::size_t I>
 struct tuple_ref_index<T, std::tuple<Base, Tail...>, I>
-    : std::conditional<std::is_base_of<Base, T>::value,
+    : std::conditional<std::is_base_of<Base, T>::value || std::is_same<Base, T>::value,
                        std::integral_constant<std::size_t, I>,
                        tuple_ref_index<T, std::tuple<Tail...>, I+1>
                        >::type
@@ -92,7 +93,7 @@ struct is_bool<bool> : std::true_type
 // ====================================================
 
 template <typename>
-struct is_integer : std:: false_type
+struct is_integer : std::false_type
 { };
 
 template <>
@@ -129,6 +130,28 @@ struct is_integer<long64> : std::true_type
 
 // ====================================================
 
+template <typename T, typename Allocator = typename T::allocator_type>
+struct is_string : std::false_type
+{ };
+
+template <typename Allocator>
+struct is_string<std::basic_string<char, std::char_traits<char>, Allocator>> : std::true_type
+{ };
+
+template <typename Allocator>
+struct is_string<std::basic_string<char16, std::char_traits<char16>, Allocator>> : std::true_type
+{ };
+
+template <typename Allocator>
+struct is_string<std::basic_string<char32, std::char_traits<char32>, Allocator>> : std::true_type
+{ };
+
+template <typename Allocator>
+struct is_string<std::basic_string<wchar, std::char_traits<wchar>, Allocator>> : std::true_type
+{ };
+
+// ====================================================
+
 template <typename T>
 struct member_function_to_static
 { static_assert (std::is_same<T, T>::value, "template parameter T is not member function"); };
@@ -140,6 +163,14 @@ struct member_function_to_static <T(Object::*)(Args...) const>
 template <typename T, typename Object, typename... Args>
 struct member_function_to_static <T(Object::*)(Args...)>
 { using type = T(*)(Args...); };
+
+// ====================================================
+
+template <typename T, typename = typename std::enable_if<is_char<T>::value>::type>
+constexpr unsigned const_hash(T const* input)
+{
+    return *input ? static_cast<uint>(*input) + 33 * const_hash(input + 1) : 5381;
+}
 
 } // cppual
 

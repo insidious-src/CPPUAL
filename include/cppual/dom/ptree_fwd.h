@@ -50,8 +50,8 @@ namespace boost { namespace property_tree
         // Return true if the path contains a single element.
         bool Path::single() const;
 
-        // Dump as a std::string, for exception messages.
-        std::string Path::dump() const;
+        // Dump as a string, for exception messages.
+        string Path::dump() const;
     }
     concept PropertyTreeKey<class Key> {
         PropertyTreePath path;
@@ -85,21 +85,21 @@ namespace boost { namespace property_tree
 
     // Typedefs
 
-    /** Implements a path using a std::string as the key. */
-    typedef string_path<std::string, id_translator<std::string> > path;
+    /** Implements a path using a string as the key. */
+    typedef string_path<string, id_translator<string> > path;
 
     /**
-     * A property tree with std::string for key and data, and default
+     * A property tree with string for key and data, and default
      * comparison.
      */
-    typedef basic_ptree<std::string, std::string> ptree;
+    typedef basic_ptree<string, string> ptree;
 
     /**
-     * A property tree with std::string for key and data, and case-insensitive
+     * A property tree with string for key and data, and case-insensitive
      * comparison.
      */
-    typedef basic_ptree<std::string, std::string,
-                        detail::less_nocase<std::string> >
+    typedef basic_ptree<string, string,
+                        detail::less_nocase<string> >
         iptree;
 
 #ifndef BOOST_NO_STD_WSTRING

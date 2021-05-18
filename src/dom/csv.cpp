@@ -28,7 +28,7 @@ namespace cppual {
 
 bool CSVParser::append(string_type const& strFilePath)
 {
-    std::fstream file (strFilePath);
+    std::fstream file (strFilePath.c_str());
     string_type  line;
 
     if(!file.is_open ()) return false;
@@ -48,7 +48,7 @@ bool CSVParser::append(string_type const& strFilePath)
         if (line == "") continue;
 
         std::vector<string_type> record;
-        std::istringstream       stream (line);
+        istringstream       stream (line);
 
         // optimize memory allocation
         auto fieldCount = std::count (std::istreambuf_iterator<char> (stream),

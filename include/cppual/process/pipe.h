@@ -29,7 +29,7 @@
 #include <cppual/noncopyable.h>
 
 //using std::vector;
-//using std::string;
+//using string;
 //using std::wstring;
 //using std::u16string;
 //using std::u32string;

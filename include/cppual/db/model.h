@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <cstddef>
-#include <cppual/mstring.h>
+#include <cppual/string.h>
 
 namespace cppual {
 

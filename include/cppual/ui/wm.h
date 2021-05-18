@@ -65,7 +65,7 @@ public:
 
     typedef shared_window const& const_pointer;
     typedef std::size_t          size_type    ;
-    typedef std::string          string_type  ;
+    typedef string          string_type  ;
 
     virtual weak_window owner () const = 0;
     virtual WindowFlags flags () const = 0;

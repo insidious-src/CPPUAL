@@ -2,8 +2,8 @@
 #define CPPUAL_RENDER_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/render.h>
@@ -55,9 +55,9 @@ class pict_format
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RENDER_PICT_FORMAT");
+      return string("XCB_RENDER_PICT_FORMAT");
     }
 
   protected:
@@ -91,9 +91,9 @@ class picture
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RENDER_PICTURE");
+      return string("XCB_RENDER_PICTURE");
     }
 
   protected:
@@ -127,9 +127,9 @@ class pict_op
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RENDER_PICT_OP");
+      return string("XCB_RENDER_PICT_OP");
     }
 
   protected:
@@ -163,9 +163,9 @@ class glyph_set
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RENDER_GLYPH_SET");
+      return string("XCB_RENDER_GLYPH_SET");
     }
 
   protected:
@@ -199,9 +199,9 @@ class glyph
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RENDER_GLYPH");
+      return string("XCB_RENDER_GLYPH");
     }
 
   protected:
@@ -1223,7 +1223,7 @@ set_picture_filter(Connection && c, ::xcb_render_picture_t picture, uint16_t fil
 
 template<typename Connection>
 void
-set_picture_filter_checked(Connection && c, ::xcb_render_picture_t picture, const std::string & filter, uint32_t values_len, const ::xcb_render_fixed_t * values)
+set_picture_filter_checked(Connection && c, ::xcb_render_picture_t picture, const string & filter, uint32_t values_len, const ::xcb_render_fixed_t * values)
 {
   cppual::generic::check<Connection, cppual::render::error::dispatcher>(
       std::forward<Connection>(c),
@@ -1232,7 +1232,7 @@ set_picture_filter_checked(Connection && c, ::xcb_render_picture_t picture, cons
 
 template<typename Connection>
 void
-set_picture_filter(Connection && c, ::xcb_render_picture_t picture, const std::string & filter, uint32_t values_len, const ::xcb_render_fixed_t * values)
+set_picture_filter(Connection && c, ::xcb_render_picture_t picture, const string & filter, uint32_t values_len, const ::xcb_render_fixed_t * values)
 {
   ::xcb_render_set_picture_filter(std::forward<Connection>(c), picture, static_cast<uint16_t>(filter.length()), filter.c_str(), values_len, values);
 }

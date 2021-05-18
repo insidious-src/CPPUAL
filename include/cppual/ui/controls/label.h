@@ -37,7 +37,7 @@ enum class TextFormat : unsigned char
 class Label : public SkinnableView
 {
 public:
-    typedef std::string string_type;
+    typedef string string_type;
 
     Label  () { }
     ~Label () { }

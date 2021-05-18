@@ -27,7 +27,6 @@
 #include <cppual/gfx/font.h>
 #include <cppual/ui/view.h>
 
-using std::string;
 using cppual::Graphics::Color;
 
 namespace cppual { namespace Ui {

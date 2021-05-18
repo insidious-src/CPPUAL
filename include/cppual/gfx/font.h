@@ -23,10 +23,11 @@
 #define CPPUAL_GFX_FONT_H_
 #ifdef __cplusplus
 
+#include <cppual/flags.h>
+#include <cppual/string.h>
+
 #include <string>
 #include <vector>
-#include <cppual/flags.h>
-#include <cppual/memory/allocator.h>
 
 namespace cppual { namespace Graphics {
 
@@ -53,7 +54,7 @@ public:
     };
 
     typedef std::size_t                              size_type;
-    typedef std::string                              string_type;
+    typedef string                                   string_type;
     typedef Memory::Allocator<uint>                  allocator_type;
     typedef std::vector<uint, allocator_type>        vector_type;
     typedef BitSet<Font::Style>                      Styles;

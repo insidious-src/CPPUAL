@@ -23,10 +23,9 @@
 #define CPPUAL_MEMORY_HEAP_ALLOCATOR_H_
 #ifdef __cplusplus
 
+#include <cppual/string.h>
 #include <cppual/noncopyable.h>
 #include <cppual/memory/allocator.h>
-
-using std::string;
 
 namespace cppual { namespace Memory {
 

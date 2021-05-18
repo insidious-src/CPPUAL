@@ -159,7 +159,7 @@ Packet& Packet::operator >> (char* pData) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (std::string& gData) noexcept
+Packet& Packet::operator >> (string& gData) noexcept
 {
     // First extract string uLength
     u32 uLength = 0;
@@ -183,7 +183,7 @@ Packet& Packet::operator >> (wchar*) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (std::wstring&) noexcept
+Packet& Packet::operator >> (wstring&) noexcept
 {
     return *this;
 }
@@ -193,7 +193,7 @@ Packet& Packet::operator >> (char16*) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (std::u16string&) noexcept
+Packet& Packet::operator >> (u16string&) noexcept
 {
     return *this;
 }
@@ -203,7 +203,7 @@ Packet& Packet::operator >> (char32*) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (std::u32string&) noexcept
+Packet& Packet::operator >> (u32string&) noexcept
 {
     return *this;
 }

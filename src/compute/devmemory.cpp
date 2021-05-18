@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/memory/devmemory.h>
+#include <cppual/compute/devmemory.h>
 #include <cppual/compute/device.h>
 
 void* operator new (std::size_t /* size */, MemoryChunk& obj, std::size_t /* align */)

@@ -87,7 +87,7 @@ namespace boost { namespace property_tree { namespace xml_parser
                                typename Ptree::key_type::value_type> &stream,
                            Ptree &pt,
                            int flags,
-                           const std::string &filename)
+                           const string &filename)
     {
         typedef typename Ptree::key_type::value_type Ch;
         using namespace detail::rapidxml;

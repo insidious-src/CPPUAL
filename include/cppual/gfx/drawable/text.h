@@ -32,7 +32,7 @@ class Label2D final : public IDrawable2D, public ITransformable2D
 {
 public:
     using Styles = Font::Styles;
-    typedef std::string string_type;
+    typedef string string_type;
 
     Label2D ();
     Label2D (string_type const&, Font&);
@@ -42,11 +42,11 @@ public:
     Label2D& operator = (Label2D&&) noexcept;
     void draw (Transform2D const&);
 
-    DeviceType  type     ()              const noexcept { return DeviceType::GL; }
-    string_type text     ()              const noexcept { return m_gText;        }
-    Styles      style    ()              const noexcept { return m_gStyle;       }
-    void        setStyle (Styles gStyle)       noexcept { m_gStyle = gStyle;     }
-    void        setText  (string const& gText) noexcept { m_gText  = gText;      }
+    DeviceType  type     ()                   const noexcept { return DeviceType::GL; }
+    string_type text     ()                   const noexcept { return m_gText;        }
+    Styles      style    ()                   const noexcept { return m_gStyle;       }
+    void        setStyle (Styles gStyle)            noexcept { m_gStyle = gStyle;     }
+    void        setText  (string_type const& gText) noexcept { m_gText  = gText;      }
 
 private:
     Font*       m_pFont;
@@ -60,7 +60,7 @@ class Label3D final : public IDrawable3D, public ITransformable3D
 {
 public:
     using Styles = Font::Styles;
-    typedef std::string string_type;
+    typedef string string_type;
 
     Label3D ();
     Label3D (string_type const&, Font const& = Font ());
@@ -71,11 +71,11 @@ public:
     Label3D& operator = (Label3D&&) noexcept;
     void draw (Transform3D const&);
 
-    DeviceType  type     ()              const noexcept { return DeviceType::GL; }
-    string_type text     ()              const noexcept { return m_gText;        }
-    Styles      style    ()              const noexcept { return m_gStyle;       }
-    void        setStyle (Styles gStyle)       noexcept { m_gStyle = gStyle;     }
-    void        setText  (string const& gText) noexcept { m_gText  = gText;      }
+    DeviceType  type     ()                   const noexcept { return DeviceType::GL; }
+    string_type text     ()                   const noexcept { return m_gText;        }
+    Styles      style    ()                   const noexcept { return m_gStyle;       }
+    void        setStyle (Styles gStyle)            noexcept { m_gStyle = gStyle;     }
+    void        setText  (string_type const& gText) noexcept { m_gText  = gText;      }
 
 private:
     Font*       m_pFont;

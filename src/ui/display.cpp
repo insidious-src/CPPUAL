@@ -19,11 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string>
 #include <cppual/ui/manager.h>
-
-using std::string;
-using std::shared_ptr;
 
 namespace cppual { namespace Ui {
 

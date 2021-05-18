@@ -178,7 +178,7 @@ namespace boost { namespace property_tree { namespace xml_parser
     template<class Ptree>
     void write_xml_internal(std::basic_ostream<typename Ptree::key_type::value_type> &stream, 
                             const Ptree &pt,
-                            const std::string &filename,
+                            const string &filename,
                             const xml_writer_settings<typename Ptree::key_type> & settings)
     {
         typedef typename Ptree::key_type Str;

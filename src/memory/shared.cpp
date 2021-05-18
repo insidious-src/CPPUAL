@@ -44,8 +44,6 @@
 #    include <psapi.h>
 #endif
 
-using std::string;
-
 namespace cppual { namespace Memory {
 
 #if defined (OS_STD_UNIX) && !defined (OS_ANDROID)

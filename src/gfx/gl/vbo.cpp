@@ -19,8 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/vbo.h>
+#include <cppual/gfx/draw.h>
+
 #include "gldef.h"
 
 namespace cppual { namespace Graphics { namespace GL {

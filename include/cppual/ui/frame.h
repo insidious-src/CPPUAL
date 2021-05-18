@@ -25,6 +25,7 @@
 
 #include <cppual/ui/controls/popup.h>
 #include <cppual/ui/composite.h>
+#include <cppual/string.h>
 
 namespace cppual { namespace Ui {
 
@@ -74,7 +75,7 @@ public:
     void attach (View*);
     void detach ();
     void setIcon (image_type*);
-    void setLabel (string const&);
+    void setLabel (string_type const&);
     void setFlags (WindowFlags);
 
     FrameView (View*       parent,

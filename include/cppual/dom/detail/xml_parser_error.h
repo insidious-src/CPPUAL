@@ -20,8 +20,8 @@ namespace boost { namespace property_tree { namespace xml_parser
     class xml_parser_error: public file_parser_error
     {
     public:
-        xml_parser_error(const std::string &msg,
-                         const std::string &file,
+        xml_parser_error(const string &msg,
+                         const string &file,
                          unsigned long l):
             file_parser_error(msg, file, l)
         {

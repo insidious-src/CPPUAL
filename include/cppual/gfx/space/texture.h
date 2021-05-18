@@ -26,7 +26,7 @@
 #include <cppual/gfx/drawable/image.h>
 #include <cppual/gfx/draw.h>
 
-using std::string;
+using string;
 
 namespace cppual { namespace Graphics {
 

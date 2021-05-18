@@ -2,8 +2,8 @@
 #define CPPUAL_RECORD_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/record.h>
@@ -55,9 +55,9 @@ class bad_context
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RECORD_BAD_CONTEXT");
+      return string("XCB_RECORD_BAD_CONTEXT");
     }
 
   protected:

@@ -1,14 +1,15 @@
 #ifndef CPPUAL_GENERIC_REPLY_ITERATOR_HPP
 #define CPPUAL_GENERIC_REPLY_ITERATOR_HPP
 
+#include <cppual/ui/platforms/xcb/generic/factory.hpp>
+#include <cppual/ui/platforms/xcb/generic/signature.hpp>
+#include <cppual/ui/platforms/xcb/generic/iterator_traits.hpp>
+#include <cppual/string.h>
+
 #include <cstdlib> // size_t
 #include <memory>
 #include <stack>
 #include <xcb/xcb.h> // ::xcb_str_*
-
-#include <cppual/ui/platforms/xcb/generic/factory.hpp>
-#include <cppual/ui/platforms/xcb/generic/signature.hpp>
-#include <cppual/ui/platforms/xcb/generic/iterator_traits.hpp>
 
 #define NEXT_TEMPLATE \
   void (&Next)(XcbIterator *)
@@ -59,10 +60,10 @@ template<>
 class get<xcb_str_t>
 {
 public:
-    std::string
+    string
     operator()(xcb_str_t * const data)
     {
-        return std::string(xcb_str_name(data), static_cast<std::size_t>(xcb_str_name_length(data)));
+        return string(xcb_str_name(data), static_cast<std::size_t>(xcb_str_name_length(data)));
     }
 };
 

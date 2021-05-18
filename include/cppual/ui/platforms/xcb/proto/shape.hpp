@@ -2,8 +2,8 @@
 #define CPPUAL_SHAPE_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/shape.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SHAPE_NOTIFY");
+        return string("XCB_SHAPE_NOTIFY");
     }
 
     uint8_t first_event(void)

@@ -45,6 +45,7 @@ set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_AUTORCC OFF)
 
@@ -100,7 +101,9 @@ add_library(cppual-host SHARED
     "include/cppual/types.h"
     "include/cppual/error.h"
     "include/cppual/common.h"
-    "include/cppual/mstring.h"
+    "include/cppual/string.h"
+    "include/cppual/string_helper.h"
+    "include/cppual/math.h"
     "include/cppual/reactive.h"
     "include/cppual/simd.h"
     "include/cppual/meta.h"
@@ -122,10 +125,11 @@ add_library(cppual-host SHARED
     "src/system/sysinfo.cpp"
     "include/cppual/system/sysinfo.h"
     "include/cppual/system/clock.h"
+    "include/cppual/resource.h"
     )
 
-# device compute, memory (Vulkan, OpenCL, Serial)
-add_library(cppual-compute SHARED
+# memory management
+add_library(cppual-memory SHARED
     "include/cppual/memory/system.h"
     "src/memory/system.cpp"
     "include/cppual/memory/allocator.h"
@@ -142,7 +146,10 @@ add_library(cppual-compute SHARED
     "include/cppual/memory/page.h"
     "src/memory/page.cpp"
     "include/cppual/memory/shared.h"
-    "include/cppual/resource.h"
+    )
+
+# device compute, memory (Vulkan, OpenCL, Serial)
+add_library(cppual-compute SHARED
     "include/cppual/compute/bridge.h"
     "src/compute/bridge.cpp"
     "include/cppual/compute/behaviour.h"
@@ -156,8 +163,8 @@ add_library(cppual-compute SHARED
     "src/compute/program.cpp"
     "include/cppual/compute/device.h"
     "src/compute/device.cpp"
-    "include/cppual/memory/devmemory.h"
-    "src/memory/devmemory.cpp"
+    "include/cppual/compute/devmemory.h"
+    "src/compute/devmemory.cpp"
     "include/cppual/compute/devtask.h"
     "src/compute/devtask.cpp"
 #   "src/compute/context.cpp"
@@ -167,6 +174,49 @@ add_library(cppual-compute SHARED
     "include/cppual/compute/task.h"
     "src/compute/thread.cpp"
     "include/cppual/compute/thread.h"
+    )
+
+# json
+add_library(cppual-json SHARED
+    "include/cppual/json/error/en.h"
+    "include/cppual/json/error/error.h"
+    "include/cppual/json/msinttypes/inttypes.h"
+    "include/cppual/json/msinttypes/stdint.h"
+    "include/cppual/json/internal/biginteger.h"
+    "include/cppual/json/internal/clzll.h"
+    "include/cppual/json/internal/diyfp.h"
+    "include/cppual/json/internal/dtoa.h"
+    "include/cppual/json/internal/ieee754.h"
+    "include/cppual/json/internal/itoa.h"
+    "include/cppual/json/internal/meta.h"
+    "include/cppual/json/internal/pow10.h"
+    "include/cppual/json/internal/regex.h"
+    "include/cppual/json/internal/stack.h"
+    "include/cppual/json/internal/strfunc.h"
+    "include/cppual/json/internal/strtod.h"
+    "include/cppual/json/internal/swap.h"
+    "include/cppual/json/allocators.h"
+    "include/cppual/json/cursorstreamwrapper.h"
+    "include/cppual/json/document.h"
+    "include/cppual/json/encodedstream.h"
+    "include/cppual/json/encodings.h"
+    "include/cppual/json/filereadstream.h"
+    "include/cppual/json/filewritestream.h"
+    "include/cppual/json/fwd.h"
+    "include/cppual/json/istreamwrapper.h"
+    "include/cppual/json/rapidjson.h"
+    "include/cppual/json/memorybuffer.h"
+    "include/cppual/json/memorystream.h"
+    "include/cppual/json/ostreamwrapper.h"
+    "include/cppual/json/pointer.h"
+    "include/cppual/json/prettywriter.h"
+    "include/cppual/json/reader.h"
+    "include/cppual/json/schema.h"
+    "include/cppual/json/stream.h"
+    "include/cppual/json/stringbuffer.h"
+    "include/cppual/json/writer.h"
+    "include/cppual/json/json_adaptor.h"
+    "src/json/json_adaptor.cpp"
     )
 
 if(VULKAN_FOUND)
@@ -597,14 +647,14 @@ endif()
 
 ### link targets
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(cppual-ui-xorg XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
-    target_link_libraries(cppual-ui-wayland WM::Library)
+    target_link_libraries(cppual-ui-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
+    target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(cppual-ui-win WM::Library)
+    target_link_libraries(cppual-ui-win cppual-memory WM::Library)
 endif()
 
-target_link_libraries(cppual-host DL::Library)
-target_link_libraries(cppual-compute Sockets::Library)
+target_link_libraries(cppual-host cppual-memory DL::Library)
+target_link_libraries(cppual-compute cppual-memory Sockets::Library)
 target_link_libraries(cppual-network Sockets::Library)
 
 target_link_libraries(cppual-video-compute cppual-compute)

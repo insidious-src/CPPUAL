@@ -19,14 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/ui/composite.h>
 #include <cppual/ui/frame.h>
-#include <cppual/mstring.h>
-#include <functional>
+#include <cppual/ui/composite.h>
 
-using std::string;
-using std::bind;
-using std::placeholders::_1;
+#include <functional>
 
 namespace cppual { namespace Ui {
 
@@ -133,7 +129,7 @@ void FrameView::setIcon (image_type*)
 {
 }
 
-void FrameView::setLabel (string const&)
+void FrameView::setLabel (string_type const&)
 {
 }
 
@@ -141,11 +137,11 @@ void FrameView::setFlags (WindowFlags)
 {
 }
 
-FrameView::FrameView (View*       pParent,
-                      Rect const& gTargetRect,
-                      string&&    gLabel,
-                      image_type* pIcon,
-                      WindowFlags gFlags)
+FrameView::FrameView (View*         pParent,
+                      Rect const&   gTargetRect,
+                      string_type&& gLabel,
+                      image_type*   pIcon,
+                      WindowFlags   gFlags)
 : SkinnableView (pParent, calcFrameSize (gTargetRect)),
   m_gCloseBtn (this, ""),
   m_gMaxBtn   (this, ""),
@@ -167,7 +163,7 @@ FrameView::FrameView (View*       pParent,
         if (!gFlags.test (Maximize)) m_gMaxBtn.hide();
         if (!gFlags.test (Help)) m_gHelpBtn.hide();
         if (pIcon) setIcon (pIcon);
-        m_gTitle = std::forward<string> (gLabel);
+        m_gTitle = std::forward<string_type> (gLabel);
 
         if (m_gSysMenu.create ({ m_gIconRect.left, m_gIconRect.top }))
         {

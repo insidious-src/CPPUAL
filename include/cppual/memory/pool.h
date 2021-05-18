@@ -27,8 +27,6 @@
 #include <cppual/memory/shared.h>
 #include <cppual/memory/mop.h>
 
-using std::string;
-
 namespace cppual { namespace Memory {
 
 class MonotonicResource final : public MemoryResource, NonCopyable

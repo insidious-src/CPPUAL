@@ -21,8 +21,6 @@
 
 #include <cppual/memory/page.h>
 
-using std::string;
-
 namespace cppual { namespace Memory {
 
 

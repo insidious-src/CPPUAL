@@ -23,16 +23,14 @@
 #define CPPUAL_GFX_VERTEX_H_
 #ifdef __cplusplus
 
-#include <string>
-#include <vector>
 #include <cppual/flags.h>
 #include <cppual/common.h>
+#include <cppual/string.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/gl/buffer.h>
 
-using std::string;
-using std::vector;
+#include <vector>
 
 namespace cppual { namespace Graphics { namespace GL {
 
@@ -73,10 +71,10 @@ typedef BitSet<GLMapFlag::Type> GLMapFlags;
 class VertexBuffer final : public BufferObject
 {
 public:
-    typedef byte         value_type;
-    typedef vector<byte> vector_type;
-    typedef byte*        pointer;
-    typedef byte const*  const_pointer;
+    typedef byte              value_type;
+    typedef std::vector<byte> vector_type;
+    typedef byte*             pointer;
+    typedef byte const*       const_pointer;
 
     VertexBuffer () noexcept;
     VertexBuffer (size_type size) noexcept;

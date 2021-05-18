@@ -23,8 +23,6 @@
 #include <AL/alc.h>
 #include "aldef.h"
 
-using std::string;
-
 namespace cppual { namespace Audio { namespace AL {
 
 namespace { // optimize for internal unit usage

@@ -31,7 +31,7 @@
 
 namespace cppual {
 
-template <size_t LastBit>
+template <std::size_t LastBit>
 struct MinimumTypeHelper
 {
     typedef

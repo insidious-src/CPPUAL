@@ -23,12 +23,10 @@
 #define CPPUAL_NETWORK_UDP_H_
 #ifdef __cplusplus
 
-#include <string>
 #include <cppual/network/transport/socket.h>
 #include <cppual/network/address.h>
 #include <cppual/network/packet.h>
-
-using std::string;
+#include <cppual/string.h>
 
 namespace cppual { namespace Network {
 

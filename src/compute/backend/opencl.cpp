@@ -28,10 +28,10 @@
 
 namespace cppual { namespace Compute { namespace CL {
 
-std::string Platform::info (Info nfo)
+string Platform::info (Info nfo)
 {
     std::size_t n = 0;
-    std::string text;
+    string text;
 
     ::clGetPlatformInfo (handle (), nfo, 0, nullptr, &n);
     text.resize (n);

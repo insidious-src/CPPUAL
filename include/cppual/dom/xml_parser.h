@@ -49,7 +49,7 @@ namespace boost { namespace property_tree { namespace xml_parser
                   Ptree &pt,
                   int flags = 0)
     {
-        read_xml_internal(stream, pt, flags, std::string());
+        read_xml_internal(stream, pt, flags, string());
     }
 
     /**
@@ -70,7 +70,7 @@ namespace boost { namespace property_tree { namespace xml_parser
      * @param loc The locale to use when reading in the file contents.
      */
     template<class Ptree>
-    void read_xml(const std::string &filename,
+    void read_xml(const string &filename,
                   Ptree &pt,
                   int flags = 0,
                   const std::locale &loc = std::locale())
@@ -106,7 +106,7 @@ namespace boost { namespace property_tree { namespace xml_parser
                    > & settings = xml_writer_settings<
                                     typename Ptree::key_type>() )
     {
-        write_xml_internal(stream, pt, std::string(), settings);
+        write_xml_internal(stream, pt, string(), settings);
     }
 
     /**
@@ -121,7 +121,7 @@ namespace boost { namespace property_tree { namespace xml_parser
      *                 XML.
      */
     template<class Ptree>
-    void write_xml(const std::string &filename,
+    void write_xml(const string &filename,
                    const Ptree &pt,
                    const std::locale &loc = std::locale(),
                    const xml_writer_settings<

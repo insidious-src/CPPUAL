@@ -43,7 +43,7 @@ namespace boost { namespace property_tree { namespace json_parser
                    > &stream,
                    Ptree &pt)
     {
-        detail::read_json_internal(stream, pt, std::string());
+        detail::read_json_internal(stream, pt, string());
     }
 
     /**
@@ -62,7 +62,7 @@ namespace boost { namespace property_tree { namespace json_parser
      * @param loc The locale to use when reading in the file contents.
      */
     template<class Ptree>
-    void read_json(const std::string &filename,
+    void read_json(const string &filename,
                    Ptree &pt,
                    const std::locale &loc = std::locale())
     {
@@ -96,7 +96,7 @@ namespace boost { namespace property_tree { namespace json_parser
                     const Ptree &pt,
                     bool pretty = true)
     {
-        write_json_internal(stream, pt, std::string(), pretty);
+        write_json_internal(stream, pt, string(), pretty);
     }
 
     /**
@@ -114,7 +114,7 @@ namespace boost { namespace property_tree { namespace json_parser
      *               for backward compatibility.
      */
     template<class Ptree>
-    void write_json(const std::string &filename,
+    void write_json(const string &filename,
                     const Ptree &pt,
                     const std::locale &loc = std::locale(),
                     bool pretty = true)

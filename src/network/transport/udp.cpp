@@ -21,8 +21,6 @@
 
 #include <cppual/network/transport/udp.h>
 
-using std::string;
-
 namespace cppual { namespace Network {
 
 UdpStream::UdpStream () noexcept

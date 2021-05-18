@@ -2,8 +2,8 @@
 #define CPPUAL_GLX_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/glx.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_PBUFFER_CLOBBER");
+        return string("XCB_GLX_PBUFFER_CLOBBER");
     }
 
     uint8_t first_event(void)
@@ -134,9 +134,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BUFFER_SWAP_COMPLETE");
+        return string("XCB_GLX_BUFFER_SWAP_COMPLETE");
     }
 
     uint8_t first_event(void)
@@ -193,9 +193,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_GENERIC");
+        return string("XCB_GLX_GENERIC");
     }
 
 protected:
@@ -229,9 +229,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_CONTEXT");
+        return string("XCB_GLX_BAD_CONTEXT");
     }
 
 protected:
@@ -265,9 +265,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_CONTEXT_STATE");
+        return string("XCB_GLX_BAD_CONTEXT_STATE");
     }
 
 protected:
@@ -301,9 +301,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_DRAWABLE");
+        return string("XCB_GLX_BAD_DRAWABLE");
     }
 
 protected:
@@ -337,9 +337,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_PIXMAP");
+        return string("XCB_GLX_BAD_PIXMAP");
     }
 
 protected:
@@ -373,9 +373,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_CONTEXT_TAG");
+        return string("XCB_GLX_BAD_CONTEXT_TAG");
     }
 
 protected:
@@ -409,9 +409,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_CURRENT_WINDOW");
+        return string("XCB_GLX_BAD_CURRENT_WINDOW");
     }
 
 protected:
@@ -445,9 +445,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_RENDER_REQUEST");
+        return string("XCB_GLX_BAD_RENDER_REQUEST");
     }
 
 protected:
@@ -481,9 +481,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_LARGE_REQUEST");
+        return string("XCB_GLX_BAD_LARGE_REQUEST");
     }
 
 protected:
@@ -517,9 +517,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_UNSUPPORTED_PRIVATE_REQUEST");
+        return string("XCB_GLX_UNSUPPORTED_PRIVATE_REQUEST");
     }
 
 protected:
@@ -553,9 +553,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_FB_CONFIG");
+        return string("XCB_GLX_BAD_FB_CONFIG");
     }
 
 protected:
@@ -589,9 +589,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_PBUFFER");
+        return string("XCB_GLX_BAD_PBUFFER");
     }
 
 protected:
@@ -625,9 +625,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_CURRENT_DRAWABLE");
+        return string("XCB_GLX_BAD_CURRENT_DRAWABLE");
     }
 
 protected:
@@ -661,9 +661,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_BAD_WINDOW");
+        return string("XCB_GLX_BAD_WINDOW");
     }
 
 protected:
@@ -697,9 +697,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GLX_GLX_BAD_PROFILE_ARB");
+        return string("XCB_GLX_GLX_BAD_PROFILE_ARB");
     }
 
 protected:
@@ -1463,10 +1463,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             string(void)
     {
-        return std::string(xcb_glx_query_server_string_string(this->get().get()),
+        return string(xcb_glx_query_server_string_string(this->get().get()),
                            ::xcb_glx_query_server_string_string_length(this->get().get()));
     }
 
@@ -3855,10 +3855,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             string(void)
     {
-        return std::string(xcb_glx_get_string_string(this->get().get()),
+        return string(xcb_glx_get_string_string(this->get().get()),
                            ::xcb_glx_get_string_string_length(this->get().get()));
     }
 

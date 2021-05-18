@@ -36,7 +36,7 @@
 
 namespace cppual { namespace Ui { namespace x {
 
-typedef std::string                                     string_type;
+typedef string                                     string_type;
 typedef handle_ptr<::xcb_intern_atom_reply_t>           intern_ptr ;
 typedef handle_ptr<::xcb_get_property_reply_t>          prop_ptr   ;
 typedef handle_ptr<::xcb_get_geometry_reply_t>          geo_ptr    ;

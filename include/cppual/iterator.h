@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Product: C++ Unified Abstraction Library
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
@@ -49,7 +49,7 @@ class is_forward_iterator : public
 { };
 
 template <typename T>
-class is_bidirectional_iterator : public
+class is_BidirectionalIterator : public
         std::conditional<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
         std::bidirectional_iterator_tag>::value, std::true_type, std::false_type>::type
@@ -67,7 +67,7 @@ class is_iterator : public
         std::conditional<is_input_iterator<T>::value ||
         is_output_iterator<T>::value                 ||
         is_forward_iterator<T>::value                ||
-        is_bidirectional_iterator<T>::value          ||
+        is_BidirectionalIterator<T>::value           ||
         is_random_access_iterator<T>::value, std::true_type, std::false_type>::type
 { };
 
@@ -86,31 +86,31 @@ std::iterator_traits<T>::iterator_category,
 std::bidirectional_iterator_tag>::value, T>::type;
 
 template <typename T>
-using OutputIterator = typename
+using OutputIteratorType = typename
 std::enable_if<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
 std::output_iterator_tag>::value, T>::type;
 
 template <typename T>
-using InputIterator = typename
+using InputIteratorType = typename
 std::enable_if<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
 std::input_iterator_tag>::value, T>::type;
 
 template <typename T>
-using ForwardIterator = typename
+using ForwardIteratorType = typename
 std::enable_if<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
 std::forward_iterator_tag>::value>::type;
 
 template <typename T>
-using BidirectionalIterator = typename
+using BidirectionalIteratorType = typename
 std::enable_if<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
 std::bidirectional_iterator_tag>::value>::type;
 
 template <typename T>
-using RandomAccessIterator = typename
+using RandomAccessIteratorType = typename
 std::enable_if<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
 std::random_access_iterator_tag>::value>::type;
@@ -118,7 +118,7 @@ std::random_access_iterator_tag>::value>::type;
 // ====================================================
 
 template <typename T>
-class CircularIterator
+class BidirectionalIterator
 {
 public:
     typedef T                               buf_type;
@@ -129,32 +129,42 @@ public:
     typedef typename T::difference_type     difference_type;
     typedef typename T::size_type           size_type;
     typedef typename T::value_type          value_type;
-    typedef CircularIterator<T>             self_type;
+    typedef BidirectionalIterator<T>        self_type;
     typedef std::bidirectional_iterator_tag iterator_category;
 
     typedef typename std::conditional<std::is_const<buf_type>::value,
     value_type const, value_type>::type
     elem_type;
 
-    friend class CircularIterator<buf_type const>;
+    friend class BidirectionalIterator<buf_type const>;
 
     constexpr elem_type& operator *  () const { return   get ()[m_uPos];  }
     constexpr elem_type* operator -> () const { return &(get ()[m_uPos]); }
 
-    constexpr CircularIterator () noexcept
+    constexpr BidirectionalIterator () noexcept
     : m_pBuf (0), m_uPos (0)
     { }
 
-    constexpr CircularIterator (buf_type& b, size_type p) noexcept
+    constexpr BidirectionalIterator (buf_type& b, size_type p) noexcept
     : m_pBuf (&b), m_uPos (p)
     { }
 
     // Converting a non-const iterator to a const iterator
     constexpr
-    CircularIterator (CircularIterator<typename std::remove_const<buf_type>::type>
-                      const& other) noexcept
+    BidirectionalIterator (BidirectionalIterator<typename std::remove_const<buf_type>::type>
+                           const& other) noexcept
     : m_pBuf (other.m_pBuf), m_uPos (other.m_uPos)
     { }
+
+    inline
+    BidirectionalIterator& operator = (BidirectionalIterator<typename std::remove_const<buf_type>::type>
+                                       const& other) noexcept
+    {
+        m_pBuf = other.m_pBuf;
+        m_uPos = other.m_uPos;
+
+        return *this;
+    }
 
     inline self_type& operator ++ ()
     {
@@ -241,19 +251,13 @@ private:
 
 // =========================================================
 
-template <typename circular_buffer_iterator_t>
-constexpr
-circular_buffer_iterator_t
-operator + (const typename circular_buffer_iterator_t::difference_type &a,
-            const circular_buffer_iterator_t                           &b)
-{ return circular_buffer_iterator_t (a) + b; }
+template <typename Iterator>
+constexpr Iterator operator + (const typename Iterator::difference_type &a, Iterator const& b)
+{ return Iterator (a) + b; }
 
-template <typename circular_buffer_iterator_t>
-constexpr
-circular_buffer_iterator_t
-operator - (const typename circular_buffer_iterator_t::difference_type &a,
-            const circular_buffer_iterator_t                           &b)
-{ return circular_buffer_iterator_t (a) - b; }
+template <typename Iterator>
+constexpr Iterator operator - (const typename Iterator::difference_type &a, Iterator const& b)
+{ return Iterator (a) - b; }
 
 } // cppual
 

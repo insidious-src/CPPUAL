@@ -19,7 +19,7 @@ namespace boost { namespace property_tree
 
         // Helper for preparing what string in ptree_bad_path exception
         template<class P> inline
-        std::string prepare_bad_path_what(const std::string &what,
+        string prepare_bad_path_what(const string &what,
                                           const P &path)
         {
             return what + " (" + path.dump() + ")";
@@ -30,7 +30,7 @@ namespace boost { namespace property_tree
     ///////////////////////////////////////////////////////////////////////////
     // ptree_error
 
-    inline ptree_error::ptree_error(const std::string &w): 
+    inline ptree_error::ptree_error(const string &w): 
         std::runtime_error(w) 
     {
     }
@@ -43,7 +43,7 @@ namespace boost { namespace property_tree
     // ptree_bad_data
 
     template<class D> inline
-    ptree_bad_data::ptree_bad_data(const std::string &w, const D &d):
+    ptree_bad_data::ptree_bad_data(const string &w, const D &d):
         ptree_error(w), m_data(d)
     {
     }
@@ -62,7 +62,7 @@ namespace boost { namespace property_tree
     // ptree_bad_path
 
     template<class P> inline
-    ptree_bad_path::ptree_bad_path(const std::string &w, const P &p):
+    ptree_bad_path::ptree_bad_path(const string &w, const P &p):
         ptree_error(detail::prepare_bad_path_what(w, p)), m_path(p)
     {
 

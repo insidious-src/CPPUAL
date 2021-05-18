@@ -22,11 +22,9 @@
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/types.h>
 
-#include <string>
+
 #include <locale>
 #include <sndfile.h>
-
-using std::string;
 
 namespace cppual { namespace Audio {
 

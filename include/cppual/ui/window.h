@@ -35,7 +35,7 @@ class Window : public View
 {
 public:
     typedef Graphics::Image image_type ;
-    typedef std::string     string_type;
+    typedef string     string_type;
 
     Window ();
     Window (Window const&);

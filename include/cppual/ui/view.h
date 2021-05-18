@@ -28,6 +28,7 @@
 #include <cppual/ui/vsurface.h>
 #include <cppual/input/event.h>
 #include <cppual/memory/allocator.h>
+#include <cppual/string.h>
 
 namespace cppual { namespace Ui {
 
@@ -40,6 +41,7 @@ public:
     typedef CircularQueue<View*, allocator_type> container;
     typedef std::size_t                          size_type;
     typedef typename container::iterator         iterator;
+    typedef string                               string_type;
 
     enum
     {

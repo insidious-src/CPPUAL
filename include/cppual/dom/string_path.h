@@ -50,18 +50,18 @@ namespace boost { namespace property_tree
         }
 
         template <typename Sequence>
-        inline std::string dump_sequence(const Sequence &)
+        inline string dump_sequence(const Sequence &)
         {
             return "<undumpable sequence>";
         }
-        inline std::string dump_sequence(const std::string &s)
+        inline string dump_sequence(const string &s)
         {
             return s;
         }
 #ifndef BOOST_NO_STD_WSTRING
-        inline std::string dump_sequence(const std::wstring &s)
+        inline string dump_sequence(const std::wstring &s)
         {
-            return narrow<std::string>(s.c_str());
+            return narrow<string>(s.c_str());
         }
 #endif
     }
@@ -71,7 +71,7 @@ namespace boost { namespace property_tree
     /// the sequence's value type. The group of values is then passed to the
     /// translator to get a key.
     ///
-    /// If instantiated with std::string and id_translator\<std::string\>,
+    /// If instantiated with string and id_translator\<string\>,
     /// it accepts paths of the form "one.two.three.four".
     ///
     /// @tparam String Any Sequence. If the sequence does not support random-
@@ -125,7 +125,7 @@ namespace boost { namespace property_tree
         /// Get the separator used by this path.
         char_type separator() const { return m_separator; }
 
-        std::string dump() const {
+        string dump() const {
             return detail::dump_sequence(m_value);
         }
 

@@ -395,7 +395,9 @@ struct is_delegate_helper < Function<T> > : std::true_type
 
 template <typename T>
 struct is_delegate : is_delegate_helper<T>
-{ };
+{
+    static_assert (is_delegate_helper<T>::value, "NOT a functional type!");
+};
 
 template <typename T>
 using DelegateType = typename

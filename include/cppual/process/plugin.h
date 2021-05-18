@@ -27,9 +27,9 @@
 #include <cppual/noncopyable.h>
 #include <cppual/resource.h>
 #include <cppual/concepts.h>
+#include <cppual/string.h>
 
 #include <cstring>
-#include <string>
 #include <memory>
 #include <functional>
 #include <unordered_map>
@@ -40,8 +40,8 @@ class DynLoader : public NonCopyable
 {
 public:
     typedef int (DLCALL * function_type)();
-    typedef std::string   string_type;
-    typedef Handle        handle_type;
+    typedef string string_type;
+    typedef Handle handle_type;
 
     enum class ResolvePolicy : byte
     {
@@ -122,11 +122,10 @@ extern "C" struct Plugin
 typedef std::pair<DynLoader, Plugin> plugin_pair;
 
 template <typename Interface,
-          typename Allocator = std::allocator
-          <std::pair<const std::string, plugin_pair > >,
+          typename Allocator = Memory::Allocator <std::pair<const string, plugin_pair>>,
           typename = typename std::enable_if<
               std::is_same<typename std::allocator_traits<Allocator>::value_type,
-                           std::pair<const std::string, plugin_pair>
+                           std::pair<const string, plugin_pair>
                            >{}>::type
           >
 class PluginManager : public NonCopyable
@@ -135,8 +134,8 @@ public:
     typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type;
     typedef typename std::allocator_traits<Allocator>::size_type      size_type     ;
     typedef typename std::allocator_traits<Allocator>::value_type     pair_type     ;
-    typedef std::string                                               key_type      ;
-    typedef std::string const                                         const_key     ;
+    typedef string                                                    key_type      ;
+    typedef string const                                              const_key     ;
     typedef std::hash<key_type>                                       hash_type     ;
     typedef std::equal_to<key_type>                                   equal_type    ;
     typedef Movable<DynLoader>                                        loader_type   ;
@@ -170,7 +169,14 @@ public:
     shared_iface construct (const_key& plugin_path) const
     {
         return shared_iface(m_gPluginMap[plugin_path].first.
-                            template call<iface_type*>(m_gPluginMap[plugin_path].second.iface));
+                            template call<iface_type*>(m_gPluginMap[plugin_path].second.iface),
+                            [this](auto ptr)
+        {
+            typedef typename allocator_type::template rebind<iface_type>::other other_type;
+
+            auto alloc = other_type (m_gPluginMap.get_allocator());
+            alloc.deallocate(ptr, 1);
+        });
     }
 
     PluginManager (allocator_type const& ator = allocator_type ())

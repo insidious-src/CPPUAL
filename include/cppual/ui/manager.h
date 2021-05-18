@@ -38,7 +38,7 @@ typedef std::shared_ptr<Factory> shared_manager;
 struct Factory : public NonCopyableVirtual
 {
     typedef Memory::PolymorphicAllocator<std::pair
-    <const std::string, Process::plugin_pair > > allocator_type;
+    <const string, Process::plugin_pair > > allocator_type;
 
     typedef Process::PluginManager<Factory, allocator_type> manager_type;
     typedef IDisplay::string_type                           string_type ;

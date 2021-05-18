@@ -23,15 +23,15 @@
 #define CPPUAL_AUDIO_DEVICE_H_
 #ifdef __cplusplus
 
-#include <vector>
-#include <string>
+
 #include <cppual/noncopyable.h>
+#include <cppual/string.h>
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/multimedia/audio/spatial.h>
 #include <cppual/multimedia/audio/al/alobject.h>
 
-using std::vector;
-using std::string;
+#include <vector>
+#include <string>
 
 namespace cppual { namespace Audio { namespace AL {
 
@@ -108,7 +108,7 @@ private:
 class Instance final : public NonCopyable
 {
 public:
-    typedef vector<string> ext_list;
+    typedef std::vector<string> ext_list;
     Instance () = delete;
     Instance (PlaybackDevice& device, bool current = false) noexcept;
     ~Instance () noexcept;

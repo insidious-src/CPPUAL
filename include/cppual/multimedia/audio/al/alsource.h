@@ -23,11 +23,10 @@
 #define CPPUAL_AUDIO_SOURCE_H_
 #ifdef __cplusplus
 
-#include <mutex>
-#include <deque>
 #include <cppual/multimedia/audio/al/albuffer.h>
 
-using std::mutex;
+#include <mutex>
+#include <deque>
 
 namespace cppual { namespace Audio { namespace AL {
 
@@ -79,11 +78,11 @@ public:
     inline void         clear  ()       noexcept { m_gQueue.clear (); }
 
 protected:
-    queue_type    m_gQueue;
-    mutex mutable m_gMutex;
-    SoundBuffer*  m_pBuffer;
-    size_type     m_uBufferSlot;
-    float         m_fVolume;
+    queue_type         m_gQueue;
+    std::mutex mutable m_gMutex;
+    SoundBuffer*       m_pBuffer;
+    size_type          m_uBufferSlot;
+    float              m_fVolume;
 
     void onDetach () noexcept;
     friend class SoundBuffer;

@@ -22,8 +22,6 @@
 #include <cppual/memory/heap.h>
 #include <cppual/memory/mop.h>
 
-using std::string;
-
 namespace cppual { namespace Memory {
 
 HeapResource::HeapResource (size_type uSize)

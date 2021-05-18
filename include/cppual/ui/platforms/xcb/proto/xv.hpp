@@ -2,8 +2,8 @@
 #define CPPUAL_XV_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/xv.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XV_VIDEO_NOTIFY");
+        return string("XCB_XV_VIDEO_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -147,9 +147,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XV_PORT_NOTIFY");
+        return string("XCB_XV_PORT_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -219,9 +219,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XV_BAD_PORT");
+        return string("XCB_XV_BAD_PORT");
     }
 
 protected:
@@ -255,9 +255,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XV_BAD_ENCODING");
+        return string("XCB_XV_BAD_ENCODING");
     }
 
 protected:
@@ -291,9 +291,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XV_BAD_CONTROL");
+        return string("XCB_XV_BAD_CONTROL");
     }
 
 protected:

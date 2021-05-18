@@ -43,7 +43,7 @@ class Device : public NonCopyable
 {
 public:
     typedef std::size_t size_type;
-    typedef std::string string_type;
+    typedef string string_type;
 
     enum Type
     {
@@ -101,7 +101,7 @@ private:
 class Context
 {
 public:
-    typedef std::string string_type;
+    typedef string string_type;
 
     Context () = delete;
     Context (PlaybackDevice& device, bool make_current = false) noexcept;

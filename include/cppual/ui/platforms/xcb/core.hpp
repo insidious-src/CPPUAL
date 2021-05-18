@@ -1,18 +1,19 @@
 #ifndef CPPUAL_CORE_HPP
 #define CPPUAL_CORE_HPP
 
-#include <string>
+#include <cppual/string.h>
+
 #include <memory>
+
 #include <xcb/xcb.h>
 
 namespace cppual {
 
-class connection_error
-  : public std::runtime_error
+class connection_error : public std::runtime_error
 {
   public:
-    connection_error(uint8_t code, const std::string & description)
-      : std::runtime_error(description + "(" + std::to_string(code) + ")")
+    connection_error(uint8_t code, string const& description)
+      : std::runtime_error(to_std_string(description + '(' + to_string(code, description.get_allocator()) + ')'))
       , m_code(code)
       , m_description(description)
     {}
@@ -23,7 +24,7 @@ class connection_error
       return m_code;
     }
 
-    std::string
+    string
     description(void)
     {
       return m_description;
@@ -31,7 +32,7 @@ class connection_error
 
   protected:
     uint8_t m_code;
-    std::string m_description;
+    string m_description;
 };
 
 class core
@@ -44,7 +45,7 @@ class core
     std::shared_ptr<xcb_connection_t> m_c;
 
     shared_generic_event_ptr
-    dispatch(const std::string & producer, ::xcb_generic_event_t * event) const
+    dispatch(string const& producer, ::xcb_generic_event_t * event) const
     {
       if (event) {
         if (event->response_type == 0) {
@@ -56,7 +57,7 @@ class core
       }
 
       check_connection();
-      throw std::runtime_error(producer + " failed");
+      throw std::runtime_error(to_std_string(producer + " failed"));
     }
 
   public:
@@ -76,7 +77,7 @@ class core
 
     // ::xcb_connect (const char *displayname, int *screenp)
     explicit
-    core(const std::string & displayname = "")
+    core(const string & displayname = "")
       : core(xcb_connect, displayname.c_str(), &m_screen)
     {}
 
@@ -89,7 +90,7 @@ class core
     // ::xcb_connect_to_display_with_auth_info (
     //     const char *display, ::xcb_auth_info_t *auth, int *screen)
     explicit
-    core(const std::string & display, ::xcb_auth_info_t * auth)
+    core(const string & display, ::xcb_auth_info_t * auth)
       : core(xcb_connect_to_display_with_auth_info,
                    display.c_str(), auth, &m_screen)
     {}
@@ -267,17 +268,17 @@ class core
 
     // hostname, display, screen
     virtual
-    std::tuple<std::string, int, int>
-    parse_display(const std::string & name) const
+    std::tuple<string, int, int>
+    parse_display(const string & name) const
     {
       int screen = 0;
       int display = 0;
       char * host = NULL;
-      std::string hostname;
+      string hostname;
 
       ::xcb_parse_display(name.c_str(), &host, &display, &screen);
       if (host != NULL) {
-        hostname = std::string(host);
+        hostname = string(host);
       }
 
       return std::make_tuple(hostname, display, screen);

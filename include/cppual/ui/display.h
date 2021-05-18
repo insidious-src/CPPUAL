@@ -26,7 +26,7 @@
 #include <memory>
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/dsp_details.h>
-#include <string>
+#include <cppual/string.h>
 
 namespace cppual { namespace Ui {
 
@@ -40,7 +40,7 @@ class IDisplay : public NonCopyableVirtual
 {
 public:
     typedef Graphics::Connection handle_type;
-    typedef std::string          string_type;
+    typedef string               string_type;
     typedef shared_display       pointer    ;
 
     constexpr IDisplay () noexcept = default;

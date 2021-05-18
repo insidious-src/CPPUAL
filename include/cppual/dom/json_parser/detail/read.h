@@ -47,7 +47,7 @@ namespace boost { namespace property_tree {
     template <typename Iterator, typename Sentinel,
               typename Encoding, typename Callbacks>
     void read_json_internal(Iterator first, Sentinel last, Encoding& encoding,
-        Callbacks& callbacks, const std::string& filename)
+        Callbacks& callbacks, const string& filename)
     {
         BOOST_STATIC_ASSERT_MSG((boost::is_same<
             typename std::iterator_traits<Iterator>::value_type,
@@ -72,7 +72,7 @@ namespace boost { namespace property_tree {
     template <typename Ptree>
     void read_json_internal(
         std::basic_istream<typename Ptree::key_type::value_type> &stream,
-        Ptree &pt, const std::string &filename)
+        Ptree &pt, const string &filename)
     {
         typedef typename Ptree::key_type::value_type char_type;
         typedef standard_callbacks<Ptree> callbacks_type;

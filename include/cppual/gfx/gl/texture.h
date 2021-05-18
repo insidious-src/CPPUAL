@@ -25,8 +25,7 @@
 
 #include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/glbase.h>
-
-using std::string;
+#include <cppual/string.h>
 
 namespace cppual { namespace Graphics { namespace GL {
 

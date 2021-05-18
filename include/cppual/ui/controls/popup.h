@@ -60,7 +60,7 @@ public:
     };
 
     typedef std::vector<MenuItem*> vector_type;
-    typedef std::string            string_type;
+    typedef string            string_type;
 
     PopupMenu ();
     PopupMenu (PopupMenu&&);

@@ -23,12 +23,10 @@
 #define CPPUAL_COMPUTE_DEVICE_H_
 #ifdef __cplusplus
 
-#include <string>
 #include <cppual/flags.h>
+#include <cppual/string.h>
 #include <cppual/noncopyable.h>
 #include <cppual/compute/object.h>
-
-using std::string;
 
 namespace cppual { namespace Compute {
 

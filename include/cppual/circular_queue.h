@@ -26,7 +26,6 @@
 #include <cppual/concepts.h>
 #include <cppual/iterator.h>
 #include <cppual/noncopyable.h>
-#include <cppual/memory/mop.h>
 
 #include <atomic>
 #include <memory>
@@ -60,8 +59,8 @@ public:
     typedef typename allocator_traits::size_type const const_size            ;
     typedef typename allocator_traits::difference_type difference_type       ;
     typedef CircularQueue<T, allocator_type, Atomic>   self_type             ;
-    typedef CircularIterator<self_type>                iterator              ;
-    typedef CircularIterator<self_type const>          const_iterator        ;
+    typedef BidirectionalIterator<self_type>           iterator              ;
+    typedef BidirectionalIterator<self_type const>     const_iterator        ;
     typedef std::reverse_iterator<iterator>            reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator>      const_reverse_iterator;
     typedef std::pair<pointer, size_type>              array_range           ;
@@ -76,13 +75,11 @@ public:
     void resize   (size_type new_capacity);
     void erase    (const_iterator&);
 
-    constexpr const_pointer    data   () const noexcept { return m_pArray; }
+    inline    const_pointer    data   () const noexcept { return m_pArray; }
     inline    iterator         begin  () noexcept { return iterator (*this, 0); }
     inline    iterator         end    () noexcept { return iterator (*this, size ()); }
-    constexpr const_iterator   begin  () const noexcept { return const_iterator (*this, 0); }
-    constexpr const_iterator   end    () const noexcept { return const_iterator (*this, size ()); }
-    constexpr const_iterator   cbegin () const noexcept { return const_iterator (*this, 0); }
-    constexpr const_iterator   cend   () const noexcept { return const_iterator (*this, size ()); }
+    inline    const_iterator   cbegin () const noexcept { return const_iterator (*this, 0); }
+    inline    const_iterator   cend   () const noexcept { return const_iterator (*this, size ()); }
     inline    reverse_iterator rbegin () noexcept { return reverse_iterator (end ()); }
     inline    reverse_iterator rend   () noexcept { return reverse_iterator (begin ()); }
     constexpr const_reference  front  () const  { return m_pArray[m_uBeginPos]; }
@@ -109,14 +106,14 @@ public:
     }
 
     explicit
-    CircularQueue (size_type         uCapacity = default_size,
-                   allocator_type const& gAtor = allocator_type ())
+    CircularQueue (size_type             uCapacity = default_size,
+                   allocator_type const& gAtor     = allocator_type ())
     : allocator_type (gAtor),
       m_pArray       (allocator_type::allocate (uCapacity)),
       m_uBeginPos    (),
       m_uEndPos      (),
       m_uCapacity    (m_pArray ? uCapacity : size_type ())
-    { if (!m_uCapacity) throw std::bad_array_new_length  (); }
+    { if (!m_uCapacity) throw std::bad_array_new_length (); }
 
     CircularQueue (allocator_type const& gAtor)
     : allocator_type (gAtor),
@@ -134,7 +131,7 @@ public:
       m_uCapacity    (m_pArray ? m_uEndPos    + 1 : m_uBeginPos)
     {
         if (!gObj.empty () and !m_pArray) throw std::bad_array_new_length ();
-        Memory::copy (gObj.begin (), gObj.end (), begin ());
+        std::copy (gObj.cbegin (), gObj.cend (), begin ());
     }
 
     template <typename Iterator,
@@ -148,7 +145,7 @@ public:
       m_uEndPos      (m_pArray ? diff (gEnd, gBegin) : 0),
       m_uCapacity    (m_pArray ? m_uEndPos + 1 : 0)
     {
-        m_pArray ? Memory::copy (gBegin, gEnd, begin ()) : throw std::bad_array_new_length ();
+        m_pArray ? std::copy (gBegin, gEnd, begin ()) : throw std::bad_array_new_length ();
     }
 
     constexpr const_reverse_iterator crbegin () const
@@ -336,18 +333,18 @@ CircularQueue<T, Allocator, Atomic>::operator = (CircularQueue const& gObj)
     else m_uBeginPos = size_type ();
 
     m_uEndPos = index_to_subscript (--new_size);
-    Memory::copy (gObj.cbegin (), gObj.cend (), begin ());
+    std::copy (gObj.cbegin (), gObj.cend (), begin ());
     return *this;
 }
 
 template <typename T, typename Allocator, bool Atomic>
 void CircularQueue<T, Allocator, Atomic>::resize (size_type uNewCapacity)
 {
-    if (size () > uNewCapacity) return;
+    if (size () >= uNewCapacity) return;
 
     self_type gObj (uNewCapacity, *this);
 
-    Memory::move(cbegin (), const_iterator(*this, uNewCapacity), gObj.begin ());
+    std::move(cbegin (), const_iterator(*this, uNewCapacity), gObj.begin ());
 
     gObj.m_uEndPos = uNewCapacity - 1;
     swap (gObj);
@@ -438,7 +435,7 @@ public:
     { }
 
     template <typename Iterator>
-    UniformQueue  (InputIterator<Iterator> gBegin, InputIterator<Iterator> gEnd) noexcept
+    UniformQueue  (InputIteratorType<Iterator> gBegin, InputIteratorType<Iterator> gEnd) noexcept
     : m_uReadPos  (),
       m_uWritePos (size_type (gEnd - gBegin) > N ? N : size_type (gEnd - gBegin))
     { std::copy (gBegin, gBegin + m_uWritePos, m_Array); }

@@ -668,7 +668,7 @@ namespace boost { namespace property_tree
             return *o;
         }
         BOOST_PROPERTY_TREE_THROW(ptree_bad_data(
-            std::string("conversion of data to type \"") +
+            string("conversion of data to type \"") +
             typeid(Type).name() + "\" failed", data()));
     }
 
@@ -824,7 +824,7 @@ namespace boost { namespace property_tree
             data() = *o;
         } else {
             BOOST_PROPERTY_TREE_THROW(ptree_bad_data(
-                std::string("conversion of type \"") + typeid(Type).name() +
+                string("conversion of type \"") + typeid(Type).name() +
                 "\" to data failed", boost::any()));
         }
     }

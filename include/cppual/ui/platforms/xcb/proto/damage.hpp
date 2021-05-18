@@ -2,8 +2,8 @@
 #define CPPUAL_DAMAGE_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/damage.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_DAMAGE_NOTIFY");
+        return string("XCB_DAMAGE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -137,9 +137,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_DAMAGE_BAD_DAMAGE");
+        return string("XCB_DAMAGE_BAD_DAMAGE");
     }
 
 protected:

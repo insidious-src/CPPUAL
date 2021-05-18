@@ -45,8 +45,8 @@ namespace boost { namespace property_tree { namespace ini_parser
          * @param line The line in the given file where an error was
          *             encountered.
          */
-        ini_parser_error(const std::string &message,
-                         const std::string &filename,
+        ini_parser_error(const string &message,
+                         const string &filename,
                          unsigned long line)
             : file_parser_error(message, filename, line)
         {
@@ -155,7 +155,7 @@ namespace boost { namespace property_tree { namespace ini_parser
      * @param loc The locale to use when reading in the file contents.
      */
     template<class Ptree>
-    void read_ini(const std::string &filename, 
+    void read_ini(const string &filename, 
                   Ptree &pt,
                   const std::locale &loc = std::locale())
     {
@@ -302,7 +302,7 @@ namespace boost { namespace property_tree { namespace ini_parser
      * @param loc The locale to use when writing the file.
      */
     template<class Ptree>
-    void write_ini(const std::string &filename,
+    void write_ini(const string &filename,
                    const Ptree &pt,
                    int flags = 0,
                    const std::locale &loc = std::locale())

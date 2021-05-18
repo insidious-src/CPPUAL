@@ -26,7 +26,7 @@
 #endif
 #ifdef __cplusplus
 
-#include <cppual/mstring.h>
+#include <cppual/string.h>
 
 namespace cppual
 {

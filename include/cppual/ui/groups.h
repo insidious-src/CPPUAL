@@ -25,7 +25,7 @@
 #include <cppual/ui/view.h>
 #include <cppual/ui/cmd.h>
 
-using std::string;
+using string;
 
 namespace cppual { namespace Ui {
 

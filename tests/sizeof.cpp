@@ -261,7 +261,7 @@ struct pod_double {
 
 struct pod_string {
   int id = 2;
-  std::string m_string;
+  string m_string;
 };
 
 template<int OpCode>
@@ -465,7 +465,7 @@ void foo(int i, I j) {}
 int main(int argc, char ** argv)
 {
   int i = 42;
-  std::string s = "42";
+  string s = "42";
 
   pod_int pi;
   pod_double pd;

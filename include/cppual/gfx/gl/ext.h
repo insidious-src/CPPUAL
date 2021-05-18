@@ -23,10 +23,8 @@
 #define CPPUAL_GFX_GL_EXTENSION_H_
 #ifdef __cplusplus
 
-#include <string>
 #include <cppual/gfx/gl/glbase.h>
-
-using std::string;
+#include <cppual/string.h>
 
 namespace cppual { namespace Graphics { namespace GL {
 

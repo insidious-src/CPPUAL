@@ -23,7 +23,7 @@
 #define CPPUAL_MEMORY_ALLOCATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/compute/device.h>
+#include <cppual/types.h>
 
 #include <limits>
 #include <memory>
@@ -46,16 +46,12 @@ public:
     typedef void*           pointer;
     typedef cvoid*          const_pointer;
     typedef std::ptrdiff_t  difference_type;
-    typedef Compute::Device device_type;
 
     virtual ~MemoryResource();
 
     virtual bool is_thread_safe () const noexcept { return false; }
     virtual bool   is_lock_free () const noexcept { return false; }
     virtual bool      is_shared () const noexcept { return false; }
-
-    virtual device_type& device () const noexcept
-    { return device_type::host (); }
 
     virtual MemoryResource& owner () const noexcept
     { return const_cast<MemoryResource&> (*this); }
@@ -66,18 +62,18 @@ public:
     virtual size_type capacity () const
     { return std::numeric_limits<size_type>::max (); }
 
-    void* allocate(size_t bytes, size_t alignment = max_align)
+    void* allocate(size_type bytes, size_type alignment = max_align)
     { return do_allocate(bytes, alignment); }
 
-    void deallocate(void* p, size_t bytes, size_t alignment = max_align)
+    void deallocate(void* p, size_type bytes, size_type alignment = max_align)
     { return do_deallocate(p, bytes, alignment); }
 
     bool is_equal(MemoryResource const& other) const noexcept
     { return do_is_equal(other); }
 
 protected:
-    virtual void* do_allocate(size_t bytes, size_t alignment) = 0;
-    virtual void  do_deallocate(void* p, size_t bytes, size_t alignment) = 0;
+    virtual void* do_allocate(size_type bytes, size_type alignment) = 0;
+    virtual void  do_deallocate(void* p, size_type bytes, size_type alignment) = 0;
     virtual bool  do_is_equal(MemoryResource const& other) const noexcept = 0;
 };
 
@@ -150,6 +146,8 @@ public:
     inline    Allocator& operator = (Allocator &&    ) noexcept = default;
     inline    Allocator& operator = (Allocator const&) noexcept = default;
 
+    inline ~Allocator() { }
+
     template <class U>
     struct rebind { typedef Allocator<U, resource_type> other; };
 
@@ -169,7 +167,7 @@ public:
     { return std::addressof (x); }
 
     template<class U, typename... Args>
-    static void construct (U* p, Args&&... args)
+    static void construct (U* p, Args... args)
     { new (p) U (std::forward<Args> (args)...); }
 
     template <class U>
@@ -197,7 +195,7 @@ public:
     : m_pRc (ator.m_pRc)
     { }
 
-    template <typename, class>
+    template <typename, typename>
     friend class Allocator;
 
 private:

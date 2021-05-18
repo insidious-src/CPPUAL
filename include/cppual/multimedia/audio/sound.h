@@ -26,10 +26,10 @@
 
 #include <cppual/flags.h>
 #include <cppual/multimedia/audio/format.h>
+#include <cppual/string.h>
 
 #include <array>
 #include <chrono>
-#include <string>
 
 namespace cppual { namespace Audio {
 
@@ -77,7 +77,7 @@ public:
     typedef double*                          pointer      ;
     typedef double const*                    const_pointer;
     typedef int64                            size_type    ;
-    typedef std::string                      string_type  ;
+    typedef string                           string_type  ;
 
     enum Attribute
     {

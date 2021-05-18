@@ -2,8 +2,8 @@
 #define CPPUAL_PRESENT_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/present.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_PRESENT_GENERIC");
+        return string("XCB_PRESENT_GENERIC");
     }
 
     uint8_t first_event(void)
@@ -134,9 +134,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_PRESENT_CONFIGURE_NOTIFY");
+        return string("XCB_PRESENT_CONFIGURE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -216,9 +216,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_PRESENT_COMPLETE_NOTIFY");
+        return string("XCB_PRESENT_COMPLETE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -298,9 +298,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_PRESENT_IDLE_NOTIFY");
+        return string("XCB_PRESENT_IDLE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -406,9 +406,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_PRESENT_REDIRECT_NOTIFY");
+        return string("XCB_PRESENT_REDIRECT_NOTIFY");
     }
 
     uint8_t first_event(void)

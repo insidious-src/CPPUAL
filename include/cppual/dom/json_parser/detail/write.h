@@ -152,7 +152,7 @@ namespace boost { namespace property_tree { namespace json_parser
     template<class Ptree>
     void write_json_internal(std::basic_ostream<typename Ptree::key_type::value_type> &stream, 
                              const Ptree &pt,
-                             const std::string &filename,
+                             const string &filename,
                              bool pretty)
     {
         if (!verify_json(pt, 0))

@@ -2,8 +2,8 @@
 #define CPPUAL_INPUT_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/xinput.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_VALUATOR");
+        return string("XCB_INPUT_DEVICE_VALUATOR");
     }
 
     uint8_t first_event(void)
@@ -117,9 +117,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_KEY_PRESS");
+        return string("XCB_INPUT_DEVICE_KEY_PRESS");
     }
 
     uint8_t first_event(void)
@@ -212,9 +212,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_KEY_RELEASE");
+        return string("XCB_INPUT_DEVICE_KEY_RELEASE");
     }
 
     uint8_t first_event(void)
@@ -307,9 +307,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_BUTTON_PRESS");
+        return string("XCB_INPUT_DEVICE_BUTTON_PRESS");
     }
 
     uint8_t first_event(void)
@@ -402,9 +402,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_BUTTON_RELEASE");
+        return string("XCB_INPUT_DEVICE_BUTTON_RELEASE");
     }
 
     uint8_t first_event(void)
@@ -497,9 +497,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_MOTION_NOTIFY");
+        return string("XCB_INPUT_DEVICE_MOTION_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -592,9 +592,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_FOCUS_IN");
+        return string("XCB_INPUT_DEVICE_FOCUS_IN");
     }
 
     uint8_t first_event(void)
@@ -661,9 +661,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_FOCUS_OUT");
+        return string("XCB_INPUT_DEVICE_FOCUS_OUT");
     }
 
     uint8_t first_event(void)
@@ -730,9 +730,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_PROXIMITY_IN");
+        return string("XCB_INPUT_PROXIMITY_IN");
     }
 
     uint8_t first_event(void)
@@ -825,9 +825,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_PROXIMITY_OUT");
+        return string("XCB_INPUT_PROXIMITY_OUT");
     }
 
     uint8_t first_event(void)
@@ -920,9 +920,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_STATE_NOTIFY");
+        return string("XCB_INPUT_DEVICE_STATE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -972,9 +972,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_MAPPING_NOTIFY");
+        return string("XCB_INPUT_DEVICE_MAPPING_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -1024,9 +1024,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_CHANGE_DEVICE_NOTIFY");
+        return string("XCB_INPUT_CHANGE_DEVICE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -1076,9 +1076,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_KEY_STATE_NOTIFY");
+        return string("XCB_INPUT_DEVICE_KEY_STATE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -1128,9 +1128,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_BUTTON_STATE_NOTIFY");
+        return string("XCB_INPUT_DEVICE_BUTTON_STATE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -1180,9 +1180,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_PRESENCE_NOTIFY");
+        return string("XCB_INPUT_DEVICE_PRESENCE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -1232,9 +1232,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_PROPERTY_NOTIFY");
+        return string("XCB_INPUT_DEVICE_PROPERTY_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -1301,9 +1301,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_CHANGED");
+        return string("XCB_INPUT_DEVICE_CHANGED");
     }
 
     uint8_t first_event(void)
@@ -1353,9 +1353,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_KEY_PRESS");
+        return string("XCB_INPUT_KEY_PRESS");
     }
 
     uint8_t first_event(void)
@@ -1448,9 +1448,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_KEY_RELEASE");
+        return string("XCB_INPUT_KEY_RELEASE");
     }
 
     uint8_t first_event(void)
@@ -1543,9 +1543,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_BUTTON_PRESS");
+        return string("XCB_INPUT_BUTTON_PRESS");
     }
 
     uint8_t first_event(void)
@@ -1638,9 +1638,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_BUTTON_RELEASE");
+        return string("XCB_INPUT_BUTTON_RELEASE");
     }
 
     uint8_t first_event(void)
@@ -1733,9 +1733,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_MOTION");
+        return string("XCB_INPUT_MOTION");
     }
 
     uint8_t first_event(void)
@@ -1828,9 +1828,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_ENTER");
+        return string("XCB_INPUT_ENTER");
     }
 
     uint8_t first_event(void)
@@ -1923,9 +1923,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_LEAVE");
+        return string("XCB_INPUT_LEAVE");
     }
 
     uint8_t first_event(void)
@@ -2018,9 +2018,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_FOCUS_IN");
+        return string("XCB_INPUT_FOCUS_IN");
     }
 
     uint8_t first_event(void)
@@ -2113,9 +2113,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_FOCUS_OUT");
+        return string("XCB_INPUT_FOCUS_OUT");
     }
 
     uint8_t first_event(void)
@@ -2208,9 +2208,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_HIERARCHY");
+        return string("XCB_INPUT_HIERARCHY");
     }
 
     uint8_t first_event(void)
@@ -2260,9 +2260,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_PROPERTY");
+        return string("XCB_INPUT_PROPERTY");
     }
 
     uint8_t first_event(void)
@@ -2329,9 +2329,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_RAW_KEY_PRESS");
+        return string("XCB_INPUT_RAW_KEY_PRESS");
     }
 
     uint8_t first_event(void)
@@ -2381,9 +2381,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_RAW_KEY_RELEASE");
+        return string("XCB_INPUT_RAW_KEY_RELEASE");
     }
 
     uint8_t first_event(void)
@@ -2433,9 +2433,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_RAW_BUTTON_PRESS");
+        return string("XCB_INPUT_RAW_BUTTON_PRESS");
     }
 
     uint8_t first_event(void)
@@ -2485,9 +2485,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_RAW_BUTTON_RELEASE");
+        return string("XCB_INPUT_RAW_BUTTON_RELEASE");
     }
 
     uint8_t first_event(void)
@@ -2537,9 +2537,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_RAW_MOTION");
+        return string("XCB_INPUT_RAW_MOTION");
     }
 
     uint8_t first_event(void)
@@ -2589,9 +2589,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_TOUCH_BEGIN");
+        return string("XCB_INPUT_TOUCH_BEGIN");
     }
 
     uint8_t first_event(void)
@@ -2684,9 +2684,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_TOUCH_UPDATE");
+        return string("XCB_INPUT_TOUCH_UPDATE");
     }
 
     uint8_t first_event(void)
@@ -2779,9 +2779,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_TOUCH_END");
+        return string("XCB_INPUT_TOUCH_END");
     }
 
     uint8_t first_event(void)
@@ -2874,9 +2874,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_TOUCH_OWNERSHIP");
+        return string("XCB_INPUT_TOUCH_OWNERSHIP");
     }
 
     uint8_t first_event(void)
@@ -2969,9 +2969,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_RAW_TOUCH_BEGIN");
+        return string("XCB_INPUT_RAW_TOUCH_BEGIN");
     }
 
     uint8_t first_event(void)
@@ -3021,9 +3021,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_RAW_TOUCH_UPDATE");
+        return string("XCB_INPUT_RAW_TOUCH_UPDATE");
     }
 
     uint8_t first_event(void)
@@ -3073,9 +3073,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_RAW_TOUCH_END");
+        return string("XCB_INPUT_RAW_TOUCH_END");
     }
 
     uint8_t first_event(void)
@@ -3125,9 +3125,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_BARRIER_HIT");
+        return string("XCB_INPUT_BARRIER_HIT");
     }
 
     uint8_t first_event(void)
@@ -3220,9 +3220,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_BARRIER_LEAVE");
+        return string("XCB_INPUT_BARRIER_LEAVE");
     }
 
     uint8_t first_event(void)
@@ -3305,9 +3305,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE");
+        return string("XCB_INPUT_DEVICE");
     }
 
 protected:
@@ -3341,9 +3341,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_EVENT");
+        return string("XCB_INPUT_EVENT");
     }
 
 protected:
@@ -3377,9 +3377,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_MODE");
+        return string("XCB_INPUT_MODE");
     }
 
 protected:
@@ -3413,9 +3413,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_DEVICE_BUSY");
+        return string("XCB_INPUT_DEVICE_BUSY");
     }
 
 protected:
@@ -3449,9 +3449,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_INPUT_CLASS");
+        return string("XCB_INPUT_CLASS");
     }
 
 protected:
@@ -3496,7 +3496,7 @@ CookieFunction>
 
     static
             ::xcb_input_get_extension_version_cookie_t
-            cookie(xcb_connection_t * const c, const std::string & name)
+            cookie(xcb_connection_t * const c, const string & name)
     {
         return base::cookie(c, static_cast<uint16_t>(name.length()), name.c_str());
     }

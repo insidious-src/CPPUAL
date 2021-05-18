@@ -23,7 +23,8 @@
 #define CPPUAL_CSV_H
 #ifdef __cplusplus
 
-#include <string>
+#include <cppual/string.h>
+
 #include <vector>
 
 namespace cppual {
@@ -31,7 +32,7 @@ namespace cppual {
 class CSVParser
 {
 public:
-    typedef std::string                           string_type;
+    typedef string                                string_type;
     typedef std::vector<std::vector<string_type>> vector_type;
     typedef std::size_t                           size_type  ;
 

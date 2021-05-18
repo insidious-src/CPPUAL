@@ -24,9 +24,7 @@
 #ifdef __cplusplus
 
 #include <string>
-#include <cppual/decl.h>
-
-using std::string;
+#include <cppual/string.h>
 
 namespace cppual { namespace System {
 

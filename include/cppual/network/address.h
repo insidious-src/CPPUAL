@@ -23,9 +23,10 @@
 #define CPPUAL_NETWORK_ADDRESS_H_
 #ifdef __cplusplus
 
-#include <string>
-#include <cstring>
 #include <cppual/types.h>
+#include <cppual/string.h>
+
+#include <cstring>
 
 namespace cppual { namespace Network {
 
@@ -36,7 +37,7 @@ private:
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
 
 public:
-    typedef std::string string_type;
+    typedef string string_type;
 
     Address () noexcept = default;
     Address (string_type const&) noexcept;

@@ -25,6 +25,7 @@
 
 #include <cppual/ui/wm.h>
 #include <cppual/gfx/gl/texture.h>
+#include <cppual/string.h>
 
 namespace cppual { namespace Ui {
 

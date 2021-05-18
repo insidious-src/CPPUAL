@@ -33,7 +33,7 @@ namespace cppual { namespace Graphics { namespace GL { namespace Driver {
 namespace {
 
 typedef std::unordered_map<GFXVersion, GFXVersion> version_map  ;
-typedef std::vector<std::string>                   string_vector;
+typedef std::vector<string>                        string_vector;
 typedef std::size_t                                size_type    ;
 
 constexpr GLenum queryToGLEnum (StringQuery query) noexcept

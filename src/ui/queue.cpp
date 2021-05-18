@@ -22,8 +22,6 @@
 #include <cppual/ui/queue.h>
 #include <cppual/ui/manager.h>
 
-using std::string;
-
 namespace cppual { namespace Ui {
 
 namespace { namespace Internal { // optimize for internal unit usage

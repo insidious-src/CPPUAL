@@ -2,8 +2,8 @@
 #define CPPUAL_SYNC_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/sync.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SYNC_COUNTER_NOTIFY");
+        return string("XCB_SYNC_COUNTER_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -134,9 +134,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SYNC_ALARM_NOTIFY");
+        return string("XCB_SYNC_ALARM_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -193,9 +193,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SYNC_COUNTER");
+        return string("XCB_SYNC_COUNTER");
     }
 
 protected:
@@ -229,9 +229,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SYNC_ALARM");
+        return string("XCB_SYNC_ALARM");
     }
 
 protected:

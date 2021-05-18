@@ -2,8 +2,8 @@
 #define CPPUAL_X_PRINT_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/xprint.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_X_PRINT_NOTIFY");
+        return string("XCB_X_PRINT_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -134,9 +134,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_X_PRINT_ATTRIBUT_NOTIFY");
+        return string("XCB_X_PRINT_ATTRIBUT_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -193,9 +193,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_X_PRINT_BAD_CONTEXT");
+        return string("XCB_X_PRINT_BAD_CONTEXT");
     }
 
 protected:
@@ -229,9 +229,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_X_PRINT_BAD_SEQUENCE");
+        return string("XCB_X_PRINT_BAD_SEQUENCE");
     }
 
 protected:

@@ -21,8 +21,6 @@
 
 #include <cppual/system/sysinfo.h>
 
-using std::string;
-
 namespace cppual { namespace System {
 
 string InfoQuery::label (QueryCategory, uint)

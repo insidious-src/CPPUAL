@@ -20,10 +20,11 @@
  */
 
 #include <cppual/multimedia/audio/al/recorder.h>
+
 #include <AL/alc.h>
+
 #include "aldef.h"
 
-using std::string;
 
 namespace cppual { namespace Audio { namespace AL {
 

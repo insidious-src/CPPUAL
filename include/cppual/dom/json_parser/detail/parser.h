@@ -26,7 +26,7 @@ namespace boost { namespace property_tree {
         explicit source(Encoding& encoding) : encoding(encoding) {}
 
         template <typename Range>
-        void set_input(const std::string& filename, const Range& r)
+        void set_input(const string& filename, const Range& r)
         {
             this->filename = filename;
             cur = r.begin();
@@ -102,7 +102,7 @@ namespace boost { namespace property_tree {
         Encoding& encoding;
         Iterator cur;
         Sentinel end;
-        std::string filename;
+        string filename;
         int line;
         int offset;
     };
@@ -243,7 +243,7 @@ namespace boost { namespace property_tree {
         {}
 
         template <typename Range>
-        void set_input(const std::string& filename, const Range& r) {
+        void set_input(const string& filename, const Range& r) {
             src.set_input(filename, r);
         }
 

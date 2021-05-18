@@ -2,8 +2,8 @@
 #define CPPUAL_RANDR_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/randr.h>
@@ -65,9 +65,9 @@ class screen_change_notify
       return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RANDR_SCREEN_CHANGE_NOTIFY");
+      return string("XCB_RANDR_SCREEN_CHANGE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -147,9 +147,9 @@ class notify
       return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RANDR_NOTIFY");
+      return string("XCB_RANDR_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -189,9 +189,9 @@ class bad_output
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RANDR_BAD_OUTPUT");
+      return string("XCB_RANDR_BAD_OUTPUT");
     }
 
   protected:
@@ -225,9 +225,9 @@ class bad_crtc
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RANDR_BAD_CRTC");
+      return string("XCB_RANDR_BAD_CRTC");
     }
 
   protected:
@@ -261,9 +261,9 @@ class bad_mode
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RANDR_BAD_MODE");
+      return string("XCB_RANDR_BAD_MODE");
     }
 
   protected:
@@ -297,9 +297,9 @@ class bad_provider
       return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_RANDR_BAD_PROVIDER");
+      return string("XCB_RANDR_BAD_PROVIDER");
     }
 
   protected:
@@ -1349,7 +1349,7 @@ class create_mode
 
     static
     ::xcb_randr_create_mode_cookie_t
-    cookie(xcb_connection_t * const c, ::xcb_window_t window, ::xcb_randr_mode_info_t mode_info, const std::string & name)
+    cookie(xcb_connection_t * const c, ::xcb_window_t window, ::xcb_randr_mode_info_t mode_info, const string & name)
     {
       return base::cookie(c, window, mode_info, static_cast<uint32_t>(name.length()), name.c_str());
     }
@@ -2078,10 +2078,10 @@ class get_crtc_transform
     {}
 
 
-    std::string
+    string
     pending_filter_name(void)
     {
-      return std::string(xcb_randr_get_crtc_transform_pending_filter_name(this->get().get()),
+      return string(xcb_randr_get_crtc_transform_pending_filter_name(this->get().get()),
                          ::xcb_randr_get_crtc_transform_pending_filter_name_length(this->get().get()));
     }
 
@@ -2106,10 +2106,10 @@ class get_crtc_transform
     }
 
 
-    std::string
+    string
     current_filter_name(void)
     {
-      return std::string(xcb_randr_get_crtc_transform_current_filter_name(this->get().get()),
+      return string(xcb_randr_get_crtc_transform_current_filter_name(this->get().get()),
                          ::xcb_randr_get_crtc_transform_current_filter_name_length(this->get().get()));
     }
 
@@ -2597,10 +2597,10 @@ class get_provider_info
     }
 
 
-    std::string
+    string
     name(void)
     {
-      return std::string(xcb_randr_get_provider_info_name(this->get().get()),
+      return string(xcb_randr_get_provider_info_name(this->get().get()),
                          ::xcb_randr_get_provider_info_name_length(this->get().get()));
     }
 

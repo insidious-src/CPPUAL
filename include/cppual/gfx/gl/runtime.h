@@ -25,8 +25,6 @@
 
 #include <cppual/gfx/draw.h>
 
-using std::string;
-
 namespace cppual { namespace Graphics { namespace GL { namespace Driver {
 
 enum class StringQuery : byte

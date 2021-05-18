@@ -23,15 +23,14 @@
 #define CPPUAL_GFX_DRAW_H_
 #ifdef __cplusplus
 
-#include <string>
-#include <vector>
-#include <memory>
 #include <cppual/flags.h>
 #include <cppual/gfx/color.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/gfx/dsp_details.h>
+#include <cppual/string.h>
 
-using std::string;
+#include <vector>
+#include <memory>
 
 namespace cppual { namespace Graphics {
 
@@ -280,15 +279,19 @@ struct ITransformable3D
 
 struct DrawableFactory
 {
-    static shared_drawable2d create2D (string const& name);
-    static shared_drawable3d create3D (string const& name);
+    typedef string string_type;
+
+    static shared_drawable2d create2D (string_type const& name);
+    static shared_drawable3d create3D (string_type const& name);
 };
 
 // ====================================================
 
 struct ContextFactory
 {
-    static shared_context create (string const& name);
+    typedef string string_type;
+
+    static shared_context create (string_type const& name);
 };
 
 // ====================================================

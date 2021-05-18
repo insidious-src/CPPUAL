@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
+#include <cppual/string.h>
 #include <cppual/compute/device.h>
 
 namespace cppual { namespace Compute {

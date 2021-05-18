@@ -2,8 +2,8 @@
 #define CPPUAL_SELINUX_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/xselinux.h>
@@ -112,7 +112,7 @@ set_device_create_context(Connection && c, uint32_t context_len, const char * co
 
 template<typename Connection>
 void
-set_device_create_context_checked(Connection && c, const std::string & context)
+set_device_create_context_checked(Connection && c, const string & context)
 {
     cppual::generic::check<Connection, cppual::selinux::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -121,7 +121,7 @@ set_device_create_context_checked(Connection && c, const std::string & context)
 
 template<typename Connection>
 void
-set_device_create_context(Connection && c, const std::string & context)
+set_device_create_context(Connection && c, const string & context)
 {
     ::xcb_selinux_set_device_create_context(std::forward<Connection>(c), static_cast<uint32_t>(context.length()), context.c_str());
 }
@@ -154,10 +154,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_device_create_context_context(this->get().get()),
+        return string(xcb_selinux_get_device_create_context_context(this->get().get()),
                            ::xcb_selinux_get_device_create_context_context_length(this->get().get()));
     }
 
@@ -216,7 +216,7 @@ set_device_context(Connection && c, uint32_t device, uint32_t context_len, const
 
 template<typename Connection>
 void
-set_device_context_checked(Connection && c, uint32_t device, const std::string & context)
+set_device_context_checked(Connection && c, uint32_t device, const string & context)
 {
     cppual::generic::check<Connection, cppual::selinux::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -225,7 +225,7 @@ set_device_context_checked(Connection && c, uint32_t device, const std::string &
 
 template<typename Connection>
 void
-set_device_context(Connection && c, uint32_t device, const std::string & context)
+set_device_context(Connection && c, uint32_t device, const string & context)
 {
     ::xcb_selinux_set_device_context(std::forward<Connection>(c), device, static_cast<uint32_t>(context.length()), context.c_str());
 }
@@ -258,10 +258,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_device_context_context(this->get().get()),
+        return string(xcb_selinux_get_device_context_context(this->get().get()),
                            ::xcb_selinux_get_device_context_context_length(this->get().get()));
     }
 
@@ -320,7 +320,7 @@ set_window_create_context(Connection && c, uint32_t context_len, const char * co
 
 template<typename Connection>
 void
-set_window_create_context_checked(Connection && c, const std::string & context)
+set_window_create_context_checked(Connection && c, const string & context)
 {
     cppual::generic::check<Connection, cppual::selinux::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -329,7 +329,7 @@ set_window_create_context_checked(Connection && c, const std::string & context)
 
 template<typename Connection>
 void
-set_window_create_context(Connection && c, const std::string & context)
+set_window_create_context(Connection && c, const string & context)
 {
     ::xcb_selinux_set_window_create_context(std::forward<Connection>(c), static_cast<uint32_t>(context.length()), context.c_str());
 }
@@ -362,10 +362,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_window_create_context_context(this->get().get()),
+        return string(xcb_selinux_get_window_create_context_context(this->get().get()),
                            ::xcb_selinux_get_window_create_context_context_length(this->get().get()));
     }
 
@@ -434,10 +434,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_window_context_context(this->get().get()),
+        return string(xcb_selinux_get_window_context_context(this->get().get()),
                            ::xcb_selinux_get_window_context_context_length(this->get().get()));
     }
 
@@ -496,7 +496,7 @@ set_property_create_context(Connection && c, uint32_t context_len, const char * 
 
 template<typename Connection>
 void
-set_property_create_context_checked(Connection && c, const std::string & context)
+set_property_create_context_checked(Connection && c, const string & context)
 {
     cppual::generic::check<Connection, cppual::selinux::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -505,7 +505,7 @@ set_property_create_context_checked(Connection && c, const std::string & context
 
 template<typename Connection>
 void
-set_property_create_context(Connection && c, const std::string & context)
+set_property_create_context(Connection && c, const string & context)
 {
     ::xcb_selinux_set_property_create_context(std::forward<Connection>(c), static_cast<uint32_t>(context.length()), context.c_str());
 }
@@ -538,10 +538,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_property_create_context_context(this->get().get()),
+        return string(xcb_selinux_get_property_create_context_context(this->get().get()),
                            ::xcb_selinux_get_property_create_context_context_length(this->get().get()));
     }
 
@@ -600,7 +600,7 @@ set_property_use_context(Connection && c, uint32_t context_len, const char * con
 
 template<typename Connection>
 void
-set_property_use_context_checked(Connection && c, const std::string & context)
+set_property_use_context_checked(Connection && c, const string & context)
 {
     cppual::generic::check<Connection, cppual::selinux::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -609,7 +609,7 @@ set_property_use_context_checked(Connection && c, const std::string & context)
 
 template<typename Connection>
 void
-set_property_use_context(Connection && c, const std::string & context)
+set_property_use_context(Connection && c, const string & context)
 {
     ::xcb_selinux_set_property_use_context(std::forward<Connection>(c), static_cast<uint32_t>(context.length()), context.c_str());
 }
@@ -642,10 +642,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_property_use_context_context(this->get().get()),
+        return string(xcb_selinux_get_property_use_context_context(this->get().get()),
                            ::xcb_selinux_get_property_use_context_context_length(this->get().get()));
     }
 
@@ -714,10 +714,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_property_context_context(this->get().get()),
+        return string(xcb_selinux_get_property_context_context(this->get().get()),
                            ::xcb_selinux_get_property_context_context_length(this->get().get()));
     }
 
@@ -786,10 +786,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_property_data_context_context(this->get().get()),
+        return string(xcb_selinux_get_property_data_context_context(this->get().get()),
                            ::xcb_selinux_get_property_data_context_context_length(this->get().get()));
     }
 
@@ -932,7 +932,7 @@ set_selection_create_context(Connection && c, uint32_t context_len, const char *
 
 template<typename Connection>
 void
-set_selection_create_context_checked(Connection && c, const std::string & context)
+set_selection_create_context_checked(Connection && c, const string & context)
 {
     cppual::generic::check<Connection, cppual::selinux::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -941,7 +941,7 @@ set_selection_create_context_checked(Connection && c, const std::string & contex
 
 template<typename Connection>
 void
-set_selection_create_context(Connection && c, const std::string & context)
+set_selection_create_context(Connection && c, const string & context)
 {
     ::xcb_selinux_set_selection_create_context(std::forward<Connection>(c), static_cast<uint32_t>(context.length()), context.c_str());
 }
@@ -974,10 +974,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_selection_create_context_context(this->get().get()),
+        return string(xcb_selinux_get_selection_create_context_context(this->get().get()),
                            ::xcb_selinux_get_selection_create_context_context_length(this->get().get()));
     }
 
@@ -1036,7 +1036,7 @@ set_selection_use_context(Connection && c, uint32_t context_len, const char * co
 
 template<typename Connection>
 void
-set_selection_use_context_checked(Connection && c, const std::string & context)
+set_selection_use_context_checked(Connection && c, const string & context)
 {
     cppual::generic::check<Connection, cppual::selinux::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -1045,7 +1045,7 @@ set_selection_use_context_checked(Connection && c, const std::string & context)
 
 template<typename Connection>
 void
-set_selection_use_context(Connection && c, const std::string & context)
+set_selection_use_context(Connection && c, const string & context)
 {
     ::xcb_selinux_set_selection_use_context(std::forward<Connection>(c), static_cast<uint32_t>(context.length()), context.c_str());
 }
@@ -1078,10 +1078,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_selection_use_context_context(this->get().get()),
+        return string(xcb_selinux_get_selection_use_context_context(this->get().get()),
                            ::xcb_selinux_get_selection_use_context_context_length(this->get().get()));
     }
 
@@ -1150,10 +1150,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_selection_context_context(this->get().get()),
+        return string(xcb_selinux_get_selection_context_context(this->get().get()),
                            ::xcb_selinux_get_selection_context_context_length(this->get().get()));
     }
 
@@ -1222,10 +1222,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_selection_data_context_context(this->get().get()),
+        return string(xcb_selinux_get_selection_data_context_context(this->get().get()),
                            ::xcb_selinux_get_selection_data_context_context_length(this->get().get()));
     }
 
@@ -1378,10 +1378,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             context(void)
     {
-        return std::string(xcb_selinux_get_client_context_context(this->get().get()),
+        return string(xcb_selinux_get_client_context_context(this->get().get()),
                            ::xcb_selinux_get_client_context_context_length(this->get().get()));
     }
 

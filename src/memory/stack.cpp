@@ -22,8 +22,6 @@
 #include <cppual/memory/stack.h>
 #include <cppual/memory/mop.h>
 
-using std::string;
-
 namespace cppual { namespace Memory {
 
 StackedResource::StackedResource (size_type uSize)

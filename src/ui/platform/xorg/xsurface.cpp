@@ -200,7 +200,7 @@ XWindow::string_type XWindow::title () const noexcept
                        static_cast<size_type> (::xcb_get_property_value_length(reply.get ())));
 }
 
-void XWindow::setTitle (string const& gTitle) noexcept
+void XWindow::setTitle (string_type const& gTitle) noexcept
 {
      ::xcb_change_property (connection ()->native<x::display_type> (),
                             XCB_PROP_MODE_REPLACE,

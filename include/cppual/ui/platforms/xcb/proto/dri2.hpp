@@ -2,8 +2,8 @@
 #define CPPUAL_DRI2_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/dri2.h>
@@ -65,9 +65,9 @@ class buffer_swap_complete
       return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_DRI2_BUFFER_SWAP_COMPLETE");
+      return string("XCB_DRI2_BUFFER_SWAP_COMPLETE");
     }
 
     uint8_t first_event(void)
@@ -134,9 +134,9 @@ class invalidate_buffers
       return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-      return std::string("XCB_DRI2_INVALIDATE_BUFFERS");
+      return string("XCB_DRI2_INVALIDATE_BUFFERS");
     }
 
     uint8_t first_event(void)
@@ -260,10 +260,10 @@ class connect
     {}
 
 
-    std::string
+    string
     driver_name(void)
     {
-      return std::string(xcb_dri2_connect_driver_name(this->get().get()),
+      return string(xcb_dri2_connect_driver_name(this->get().get()),
                          ::xcb_dri2_connect_driver_name_length(this->get().get()));
     }
 
@@ -289,10 +289,10 @@ class connect
     }
 
 
-    std::string
+    string
     device_name(void)
     {
-      return std::string(xcb_dri2_connect_device_name(this->get().get()),
+      return string(xcb_dri2_connect_device_name(this->get().get()),
                          ::xcb_dri2_connect_device_name_length(this->get().get()));
     }
 

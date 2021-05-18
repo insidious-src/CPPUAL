@@ -19,9 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cppual/network/transport/socket.h>
+
 #include <cstring>
 #include <iostream>
-#include <cppual/network/transport/socket.h>
 
 #ifdef OS_STD_UNIX
 #   include <errno.h>

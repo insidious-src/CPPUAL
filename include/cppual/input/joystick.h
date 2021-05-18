@@ -23,12 +23,10 @@
 #define CPPUAL_DEVICES_JOYSTICK_H_
 #ifdef __cplusplus
 
-#include <string>
 #include <cppual/types.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/noncopyable.h>
-
-using std::string;
+#include <cppual/string.h>
 
 namespace cppual { namespace Input {
 

@@ -37,33 +37,33 @@ public:
     XWindow (Rect const& rect, u32 screen, IDisplay* display) noexcept;
     ~XWindow() noexcept;
 
-    string title () const noexcept;
-    void   setTitle (string const&) noexcept;
-    void   setShaded (bool) noexcept;
-    bool   isShaded () noexcept;
-    void   setModal (bool) noexcept;
-    bool   isModal () noexcept;
-    void   setFullscreen (bool) noexcept;
-    bool   isFullscreen () noexcept;
-    void   setMaximized (bool) noexcept;
-    bool   isMaximized () noexcept;
-    void   setMinimized (bool) noexcept;
-    bool   isMinimized () noexcept;
-    void   setVisibleInTaskbar (bool) noexcept;
-    bool   isVisibleInTaskbar () noexcept;
-    void   setVisibleInPager (bool) noexcept;
-    bool   isVisibleInPager () noexcept;
-    void   flash (uint) noexcept;
-    Rect   geometry () const;
-    bool   isMapped () const;
-    void   setOwner (const_pointer);
-    void   setGeometry (Rect const&);
-    void   raise ();
-    void   lower ();
-    void   move (point2i);
-    void   map ();
-    void   unmap ();
-    void   setFlags (WindowFlags) noexcept;
+    string_type title () const noexcept;
+    void        setTitle (string_type const&) noexcept;
+    void        setShaded (bool) noexcept;
+    bool        isShaded () noexcept;
+    void        setModal (bool) noexcept;
+    bool        isModal () noexcept;
+    void        setFullscreen (bool) noexcept;
+    bool        isFullscreen () noexcept;
+    void        setMaximized (bool) noexcept;
+    bool        isMaximized () noexcept;
+    void        setMinimized (bool) noexcept;
+    bool        isMinimized () noexcept;
+    void        setVisibleInTaskbar (bool) noexcept;
+    bool        isVisibleInTaskbar () noexcept;
+    void        setVisibleInPager (bool) noexcept;
+    bool        isVisibleInPager () noexcept;
+    void        flash (uint) noexcept;
+    Rect        geometry () const;
+    bool        isMapped () const;
+    void        setOwner (const_pointer);
+    void        setGeometry (Rect const&);
+    void        raise ();
+    void        lower ();
+    void        move (point2i);
+    void        map ();
+    void        unmap ();
+    void        setFlags (WindowFlags) noexcept;
 
     WindowFlags flags  () const noexcept { return m_eFlags     ; }
     weak_window owner  () const noexcept { return weak_window(); }
@@ -72,8 +72,6 @@ public:
 private:
     WindowFlags m_eFlags ;
     u32         m_uScreen;
-
-
 };
 
 } } // namespace Ui

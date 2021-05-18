@@ -2,8 +2,8 @@
 #define CPPUAL_X_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/xcb.h>
@@ -49,9 +49,9 @@ public:
         return XCB_KEY_PRESS;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_KEY_PRESS");
+        return string("XCB_KEY_PRESS");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -126,9 +126,9 @@ public:
         return XCB_KEY_RELEASE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_KEY_RELEASE");
+        return string("XCB_KEY_RELEASE");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -203,9 +203,9 @@ public:
         return XCB_BUTTON_PRESS;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_BUTTON_PRESS");
+        return string("XCB_BUTTON_PRESS");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -280,9 +280,9 @@ public:
         return XCB_BUTTON_RELEASE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_BUTTON_RELEASE");
+        return string("XCB_BUTTON_RELEASE");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -357,9 +357,9 @@ public:
         return XCB_MOTION_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_MOTION_NOTIFY");
+        return string("XCB_MOTION_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -434,9 +434,9 @@ public:
         return XCB_ENTER_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_ENTER_NOTIFY");
+        return string("XCB_ENTER_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -511,9 +511,9 @@ public:
         return XCB_LEAVE_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_LEAVE_NOTIFY");
+        return string("XCB_LEAVE_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -588,9 +588,9 @@ public:
         return XCB_FOCUS_IN;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_FOCUS_IN");
+        return string("XCB_FOCUS_IN");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -639,9 +639,9 @@ public:
         return XCB_FOCUS_OUT;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_FOCUS_OUT");
+        return string("XCB_FOCUS_OUT");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -690,9 +690,9 @@ public:
         return XCB_KEYMAP_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_KEYMAP_NOTIFY");
+        return string("XCB_KEYMAP_NOTIFY");
     }
 protected:
     Connection m_c;
@@ -724,9 +724,9 @@ public:
         return XCB_EXPOSE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_EXPOSE");
+        return string("XCB_EXPOSE");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -775,9 +775,9 @@ public:
         return XCB_GRAPHICS_EXPOSURE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GRAPHICS_EXPOSURE");
+        return string("XCB_GRAPHICS_EXPOSURE");
     }
 
     template<typename ReturnType = ::xcb_drawable_t, typename ... Parameter>
@@ -826,9 +826,9 @@ public:
         return XCB_NO_EXPOSURE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_NO_EXPOSURE");
+        return string("XCB_NO_EXPOSURE");
     }
 
     template<typename ReturnType = ::xcb_drawable_t, typename ... Parameter>
@@ -877,9 +877,9 @@ public:
         return XCB_VISIBILITY_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_VISIBILITY_NOTIFY");
+        return string("XCB_VISIBILITY_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -928,9 +928,9 @@ public:
         return XCB_CREATE_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_CREATE_NOTIFY");
+        return string("XCB_CREATE_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -992,9 +992,9 @@ public:
         return XCB_DESTROY_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_DESTROY_NOTIFY");
+        return string("XCB_DESTROY_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1056,9 +1056,9 @@ public:
         return XCB_UNMAP_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_UNMAP_NOTIFY");
+        return string("XCB_UNMAP_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1120,9 +1120,9 @@ public:
         return XCB_MAP_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_MAP_NOTIFY");
+        return string("XCB_MAP_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1184,9 +1184,9 @@ public:
         return XCB_MAP_REQUEST;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_MAP_REQUEST");
+        return string("XCB_MAP_REQUEST");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1248,9 +1248,9 @@ public:
         return XCB_REPARENT_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_REPARENT_NOTIFY");
+        return string("XCB_REPARENT_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1325,9 +1325,9 @@ public:
         return XCB_CONFIGURE_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_CONFIGURE_NOTIFY");
+        return string("XCB_CONFIGURE_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1402,9 +1402,9 @@ public:
         return XCB_CONFIGURE_REQUEST;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_CONFIGURE_REQUEST");
+        return string("XCB_CONFIGURE_REQUEST");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1479,9 +1479,9 @@ public:
         return XCB_GRAVITY_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GRAVITY_NOTIFY");
+        return string("XCB_GRAVITY_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1543,9 +1543,9 @@ public:
         return XCB_RESIZE_REQUEST;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_RESIZE_REQUEST");
+        return string("XCB_RESIZE_REQUEST");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1594,9 +1594,9 @@ public:
         return XCB_CIRCULATE_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_CIRCULATE_NOTIFY");
+        return string("XCB_CIRCULATE_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1658,9 +1658,9 @@ public:
         return XCB_CIRCULATE_REQUEST;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_CIRCULATE_REQUEST");
+        return string("XCB_CIRCULATE_REQUEST");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1722,9 +1722,9 @@ public:
         return XCB_PROPERTY_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_PROPERTY_NOTIFY");
+        return string("XCB_PROPERTY_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1786,9 +1786,9 @@ public:
         return XCB_SELECTION_CLEAR;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SELECTION_CLEAR");
+        return string("XCB_SELECTION_CLEAR");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1850,9 +1850,9 @@ public:
         return XCB_SELECTION_REQUEST;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SELECTION_REQUEST");
+        return string("XCB_SELECTION_REQUEST");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1953,9 +1953,9 @@ public:
         return XCB_SELECTION_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SELECTION_NOTIFY");
+        return string("XCB_SELECTION_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2043,9 +2043,9 @@ public:
         return XCB_COLORMAP_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_COLORMAP_NOTIFY");
+        return string("XCB_COLORMAP_NOTIFY");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2107,9 +2107,9 @@ public:
         return XCB_CLIENT_MESSAGE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_CLIENT_MESSAGE");
+        return string("XCB_CLIENT_MESSAGE");
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2171,9 +2171,9 @@ public:
         return XCB_MAPPING_NOTIFY;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_MAPPING_NOTIFY");
+        return string("XCB_MAPPING_NOTIFY");
     }
 protected:
     Connection m_c;
@@ -2205,9 +2205,9 @@ public:
         return XCB_GE_GENERIC;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_GE_GENERIC");
+        return string("XCB_GE_GENERIC");
     }
 protected:
     Connection m_c;
@@ -2231,9 +2231,9 @@ public:
         return XCB_REQUEST;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_REQUEST");
+        return string("XCB_REQUEST");
     }
 }; // class request
 } // namespace error
@@ -2254,9 +2254,9 @@ public:
         return XCB_VALUE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_VALUE");
+        return string("XCB_VALUE");
     }
 }; // class value
 } // namespace error
@@ -2277,9 +2277,9 @@ public:
         return XCB_WINDOW;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_WINDOW");
+        return string("XCB_WINDOW");
     }
 }; // class window
 } // namespace error
@@ -2300,9 +2300,9 @@ public:
         return XCB_PIXMAP;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_PIXMAP");
+        return string("XCB_PIXMAP");
     }
 }; // class pixmap
 } // namespace error
@@ -2323,9 +2323,9 @@ public:
         return XCB_ATOM;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_ATOM");
+        return string("XCB_ATOM");
     }
 }; // class atom
 } // namespace error
@@ -2346,9 +2346,9 @@ public:
         return XCB_CURSOR;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_CURSOR");
+        return string("XCB_CURSOR");
     }
 }; // class cursor
 } // namespace error
@@ -2369,9 +2369,9 @@ public:
         return XCB_FONT;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_FONT");
+        return string("XCB_FONT");
     }
 }; // class font
 } // namespace error
@@ -2392,9 +2392,9 @@ public:
         return XCB_MATCH;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_MATCH");
+        return string("XCB_MATCH");
     }
 }; // class match
 } // namespace error
@@ -2415,9 +2415,9 @@ public:
         return XCB_DRAWABLE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_DRAWABLE");
+        return string("XCB_DRAWABLE");
     }
 }; // class drawable
 } // namespace error
@@ -2438,9 +2438,9 @@ public:
         return XCB_ACCESS;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_ACCESS");
+        return string("XCB_ACCESS");
     }
 }; // class access
 } // namespace error
@@ -2461,9 +2461,9 @@ public:
         return XCB_ALLOC;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_ALLOC");
+        return string("XCB_ALLOC");
     }
 }; // class alloc
 } // namespace error
@@ -2484,9 +2484,9 @@ public:
         return XCB_COLORMAP;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_COLORMAP");
+        return string("XCB_COLORMAP");
     }
 }; // class colormap
 } // namespace error
@@ -2507,9 +2507,9 @@ public:
         return XCB_G_CONTEXT;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_G_CONTEXT");
+        return string("XCB_G_CONTEXT");
     }
 }; // class g_context
 } // namespace error
@@ -2530,9 +2530,9 @@ public:
         return XCB_ID_CHOICE;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_ID_CHOICE");
+        return string("XCB_ID_CHOICE");
     }
 }; // class id_choice
 } // namespace error
@@ -2553,9 +2553,9 @@ public:
         return XCB_NAME;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_NAME");
+        return string("XCB_NAME");
     }
 }; // class name
 } // namespace error
@@ -2576,9 +2576,9 @@ public:
         return XCB_LENGTH;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_LENGTH");
+        return string("XCB_LENGTH");
     }
 }; // class length
 } // namespace error
@@ -2599,9 +2599,9 @@ public:
         return XCB_IMPLEMENTATION;
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_IMPLEMENTATION");
+        return string("XCB_IMPLEMENTATION");
     }
 }; // class implementation
 } // namespace error
@@ -3122,7 +3122,7 @@ CookieFunction>
 
     static
             ::xcb_intern_atom_cookie_t
-            cookie(xcb_connection_t * const c, uint8_t only_if_exists, const std::string & name)
+            cookie(xcb_connection_t * const c, uint8_t only_if_exists, const string & name)
     {
         return base::cookie(c, only_if_exists, static_cast<uint16_t>(name.length()), name.c_str());
     }
@@ -3204,10 +3204,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             name(void)
     {
-        return std::string(xcb_get_atom_name_name(this->get().get()),
+        return string(xcb_get_atom_name_name(this->get().get()),
                            ::xcb_get_atom_name_name_length(this->get().get()));
     }
 
@@ -4397,7 +4397,7 @@ open_font(Connection && c, ::xcb_font_t fid, uint16_t name_len, const char * nam
 
 template<typename Connection>
 void
-open_font_checked(Connection && c, ::xcb_font_t fid, const std::string & name)
+open_font_checked(Connection && c, ::xcb_font_t fid, const string & name)
 {
     cppual::generic::check<Connection, cppual::x::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -4406,7 +4406,7 @@ open_font_checked(Connection && c, ::xcb_font_t fid, const std::string & name)
 
 template<typename Connection>
 void
-open_font(Connection && c, ::xcb_font_t fid, const std::string & name)
+open_font(Connection && c, ::xcb_font_t fid, const string & name)
 {
     ::xcb_open_font(std::forward<Connection>(c), fid, static_cast<uint16_t>(name.length()), name.c_str());
 }
@@ -4649,7 +4649,7 @@ CookieFunction>
 
     static
             ::xcb_list_fonts_cookie_t
-            cookie(xcb_connection_t * const c, uint16_t max_names, const std::string & pattern)
+            cookie(xcb_connection_t * const c, uint16_t max_names, const string & pattern)
     {
         return base::cookie(c, max_names, static_cast<uint16_t>(pattern.length()), pattern.c_str());
     }
@@ -4746,7 +4746,7 @@ CookieFunction>
 
     static
             ::xcb_list_fonts_with_info_cookie_t
-            cookie(xcb_connection_t * const c, uint16_t max_names, const std::string & pattern)
+            cookie(xcb_connection_t * const c, uint16_t max_names, const string & pattern)
     {
         return base::cookie(c, max_names, static_cast<uint16_t>(pattern.length()), pattern.c_str());
     }
@@ -4770,10 +4770,10 @@ CookieFunction>
     }
 
 
-    std::string
+    string
             name(void)
     {
-        return std::string(xcb_list_fonts_with_info_name(this->get().get()),
+        return string(xcb_list_fonts_with_info_name(this->get().get()),
                            ::xcb_list_fonts_with_info_name_length(this->get().get()));
     }
 
@@ -6015,7 +6015,7 @@ CookieFunction>
 
     static
             ::xcb_alloc_named_color_cookie_t
-            cookie(xcb_connection_t * const c, ::xcb_colormap_t cmap, const std::string & name)
+            cookie(xcb_connection_t * const c, ::xcb_colormap_t cmap, const string & name)
     {
         return base::cookie(c, cmap, static_cast<uint16_t>(name.length()), name.c_str());
     }
@@ -6341,7 +6341,7 @@ store_named_color(Connection && c, uint8_t flags, ::xcb_colormap_t cmap, uint32_
 
 template<typename Connection>
 void
-store_named_color_checked(Connection && c, uint8_t flags, ::xcb_colormap_t cmap, uint32_t pixel, const std::string & name)
+store_named_color_checked(Connection && c, uint8_t flags, ::xcb_colormap_t cmap, uint32_t pixel, const string & name)
 {
     cppual::generic::check<Connection, cppual::x::error::dispatcher>(
                 std::forward<Connection>(c),
@@ -6350,7 +6350,7 @@ store_named_color_checked(Connection && c, uint8_t flags, ::xcb_colormap_t cmap,
 
 template<typename Connection>
 void
-store_named_color(Connection && c, uint8_t flags, ::xcb_colormap_t cmap, uint32_t pixel, const std::string & name)
+store_named_color(Connection && c, uint8_t flags, ::xcb_colormap_t cmap, uint32_t pixel, const string & name)
 {
     ::xcb_store_named_color(std::forward<Connection>(c), flags, cmap, pixel, static_cast<uint16_t>(name.length()), name.c_str());
 }
@@ -6492,7 +6492,7 @@ CookieFunction>
 
     static
             ::xcb_lookup_color_cookie_t
-            cookie(xcb_connection_t * const c, ::xcb_colormap_t cmap, const std::string & name)
+            cookie(xcb_connection_t * const c, ::xcb_colormap_t cmap, const string & name)
     {
         return base::cookie(c, cmap, static_cast<uint16_t>(name.length()), name.c_str());
     }
@@ -6705,7 +6705,7 @@ CookieFunction>
 
     static
             ::xcb_query_extension_cookie_t
-            cookie(xcb_connection_t * const c, const std::string & name)
+            cookie(xcb_connection_t * const c, const string & name)
     {
         return base::cookie(c, static_cast<uint16_t>(name.length()), name.c_str());
     }

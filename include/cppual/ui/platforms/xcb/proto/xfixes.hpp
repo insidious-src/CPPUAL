@@ -2,8 +2,8 @@
 #define CPPUAL_XFIXES_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/xfixes.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XFIXES_SELECTION_NOTIFY");
+        return string("XCB_XFIXES_SELECTION_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -160,9 +160,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XFIXES_CURSOR_NOTIFY");
+        return string("XCB_XFIXES_CURSOR_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -232,9 +232,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XFIXES_BAD_REGION");
+        return string("XCB_XFIXES_BAD_REGION");
     }
 
 protected:
@@ -925,10 +925,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             name(void)
     {
-        return std::string(xcb_xfixes_get_cursor_name_name(this->get().get()),
+        return string(xcb_xfixes_get_cursor_name_name(this->get().get()),
                            ::xcb_xfixes_get_cursor_name_name_length(this->get().get()));
     }
 
@@ -1029,10 +1029,10 @@ CookieFunction>
     }
 
 
-    std::string
+    string
             name(void)
     {
-        return std::string(xcb_xfixes_get_cursor_image_and_name_name(this->get().get()),
+        return string(xcb_xfixes_get_cursor_image_and_name_name(this->get().get()),
                            ::xcb_xfixes_get_cursor_image_and_name_name_length(this->get().get()));
     }
 

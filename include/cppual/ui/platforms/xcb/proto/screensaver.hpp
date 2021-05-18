@@ -2,8 +2,8 @@
 #define CPPUAL_SCREENSAVER_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/screensaver.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SCREENSAVER_NOTIFY");
+        return string("XCB_SCREENSAVER_NOTIFY");
     }
 
     uint8_t first_event(void)

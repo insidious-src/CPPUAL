@@ -49,13 +49,6 @@ enum class Orientation : byte
 
 // ====================================================
 
-constexpr unsigned const_hash (cchar* input)
-{
-    return *input and *input != ' ' ?
-                                    static_cast<unsigned> (*input) + 33 * const_hash (input + 1) :
-                                    5381;
-}
-
 template <typename T>
 inline char* binaryToString (T value, char* str) noexcept
 {

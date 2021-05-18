@@ -2,8 +2,8 @@
 #define CPPUAL_SHM_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/shm.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SHM_COMPLETION");
+        return string("XCB_SHM_COMPLETION");
     }
 
     uint8_t first_event(void)
@@ -137,9 +137,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_SHM_BAD_SEG");
+        return string("XCB_SHM_BAD_SEG");
     }
 
 protected:

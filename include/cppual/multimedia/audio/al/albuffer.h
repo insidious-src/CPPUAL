@@ -23,13 +23,13 @@
 #define CPPUAL_AUDIO_BUFFER_H_
 #ifdef __cplusplus
 
-#include <vector>
+
 #include <cppual/common.h>
+#include <cppual/string.h>
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/multimedia/audio/al/aldevice.h>
 
-using std::vector;
-using std::string;
+#include <vector>
 
 namespace cppual { namespace Audio { namespace AL {
 
@@ -40,7 +40,7 @@ class SoundSource;
 class SoundBuffer : public Object, public Sound
 {
 public:
-    typedef vector<SoundSource*>        vector_type;
+    typedef std::vector<SoundSource*>   vector_type;
     typedef vector_type::const_iterator const_iterator;
     typedef std::size_t                 size_type;
     friend  class                       SoundSource;

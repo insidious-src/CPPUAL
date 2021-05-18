@@ -29,7 +29,7 @@ namespace boost { namespace property_tree
     public:
         /// Instantiate a ptree_error instance with the given message.
         /// @param what The message to associate with this error.
-        ptree_error(const std::string &what);
+        ptree_error(const string &what);
 
         ~ptree_error() throw();
     };
@@ -45,7 +45,7 @@ namespace boost { namespace property_tree
         /// @param what The message to associate with this error.
         /// @param data The value associated with this error that was the source
         ///             of the translation failure.
-        template<class T> ptree_bad_data(const std::string &what,
+        template<class T> ptree_bad_data(const string &what,
                                          const T &data);
 
         ~ptree_bad_data() throw();
@@ -67,7 +67,7 @@ namespace boost { namespace property_tree
         /// Instantiate a ptree_bad_path with the given message and path data.
         /// @param what The message to associate with this error.
         /// @param path The path that could not be found in the property_tree.
-        template<class T> ptree_bad_path(const std::string &what,
+        template<class T> ptree_bad_path(const string &what,
                                          const T &path);
 
         ~ptree_bad_path() throw();

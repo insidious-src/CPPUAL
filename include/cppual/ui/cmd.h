@@ -23,11 +23,10 @@
 #define CPPUAL_UI_ACTION_H_
 #ifdef __cplusplus
 
-#include <string>
 #include <cppual/signal.h>
 #include <cppual/gfx/drawable/image.h>
+#include <cppual/string.h>
 
-using std::string;
 using cppual::Graphics::Icon;
 
 namespace cppual { namespace Ui {

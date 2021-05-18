@@ -23,14 +23,15 @@
 #define CPPUAL_UI_QUEUE_H
 #ifdef __cplusplus
 
-#include <thread>
-#include <atomic>
-#include <memory>
 #include <cppual/flags.h>
 #include <cppual/signal.h>
 #include <cppual/noncopyable.h>
 #include <cppual/input/event.h>
 #include <cppual/ui/view.h>
+
+#include <thread>
+#include <atomic>
+#include <memory>
 
 namespace cppual { namespace Ui {
 

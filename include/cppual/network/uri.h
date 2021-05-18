@@ -23,18 +23,18 @@
 #define CPPUAL_NETWORK_URI_H_
 #ifdef __cplusplus
 
-#include <string>
 #include <cppual/network/uri_parts.h>
+#include <cppual/string.h>
 
 namespace cppual { namespace Network {
 
 class Uri
 {
 public:
-    typedef std::string::value_type     value_type;
+    typedef string::value_type     value_type;
     typedef value_type const*           const_pointer;
     typedef std::size_t                 size_type;
-    typedef std::string                 string_type;
+    typedef string                 string_type;
     typedef string_type::const_iterator iterator;
     typedef string_type::const_iterator const_iterator;
 

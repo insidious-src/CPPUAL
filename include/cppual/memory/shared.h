@@ -24,12 +24,10 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
+#include <cppual/string.h>
 #include <cppual/noncopyable.h>
 
 #include <memory>
-#include <string>
-
-using std::string;
 
 namespace cppual { namespace Memory {
 

@@ -2,8 +2,8 @@
 #define CPPUAL_XKB_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/xkb.h>
@@ -65,9 +65,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_NEW_KEYBOARD_NOTIFY");
+        return string("XCB_XKB_NEW_KEYBOARD_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -117,9 +117,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_MAP_NOTIFY");
+        return string("XCB_XKB_MAP_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -169,9 +169,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_STATE_NOTIFY");
+        return string("XCB_XKB_STATE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -221,9 +221,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_CONTROLS_NOTIFY");
+        return string("XCB_XKB_CONTROLS_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -273,9 +273,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_INDICATOR_STATE_NOTIFY");
+        return string("XCB_XKB_INDICATOR_STATE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -325,9 +325,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_INDICATOR_MAP_NOTIFY");
+        return string("XCB_XKB_INDICATOR_MAP_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -377,9 +377,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_NAMES_NOTIFY");
+        return string("XCB_XKB_NAMES_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -429,9 +429,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_COMPAT_MAP_NOTIFY");
+        return string("XCB_XKB_COMPAT_MAP_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -481,9 +481,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_BELL_NOTIFY");
+        return string("XCB_XKB_BELL_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -563,9 +563,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_ACTION_MESSAGE");
+        return string("XCB_XKB_ACTION_MESSAGE");
     }
 
     uint8_t first_event(void)
@@ -615,9 +615,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_ACCESS_X_NOTIFY");
+        return string("XCB_XKB_ACCESS_X_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -667,9 +667,9 @@ public:
         return opcode(extension->first_event);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_EXTENSION_DEVICE_NOTIFY");
+        return string("XCB_XKB_EXTENSION_DEVICE_NOTIFY");
     }
 
     uint8_t first_event(void)
@@ -709,9 +709,9 @@ public:
         return opcode(extension->first_error);
     }
 
-    static std::string description(void)
+    static string description(void)
     {
-        return std::string("XCB_XKB_KEYBOARD");
+        return string("XCB_XKB_KEYBOARD");
     }
 
 protected:

@@ -22,11 +22,8 @@
 #include <cppual/multimedia/audio/al/alsource.h>
 #include <cppual/multimedia/audio/format.h>
 #include <cppual/error.h>
-#include "aldef.h"
 
-using std::string;
-using std::ifstream;
-using std::ios_base;
+#include "aldef.h"
 
 namespace cppual { namespace Audio { namespace AL {
 

@@ -24,10 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/process/details.h>
-
-#include <string>
-
-using std::string;
+#include <cppual/string.h>
 
 namespace cppual { namespace Process {
 

@@ -24,8 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/ui/skin.h>
-
-using std::string;
+#include <cppual/string.h>
 
 namespace cppual { namespace Ui {
 

@@ -381,7 +381,7 @@ public:
 
     Platform () = delete;
 
-    std::string info          (Info  );
+    string info          (Info  );
     bool        has_extension (cchar*);
 
     static size_type count () noexcept

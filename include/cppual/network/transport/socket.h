@@ -23,16 +23,11 @@
 #define CPPUAL_NETWORK_TRANSPORT_H_
 #ifdef __cplusplus
 
-#include <string>
-#include <vector>
 #include <cppual/types.h>
+#include <cppual/string.h>
 #include <cppual/noncopyable.h>
 
-using std::vector;
-using std::string;
-using std::wstring;
-using std::u16string;
-using std::u32string;
+#include <vector>
 
 namespace cppual { namespace Network {
 

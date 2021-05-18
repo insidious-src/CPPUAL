@@ -2,8 +2,8 @@
 #define CPPUAL_XF86DRI_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
+#include <cppual/string.h>
 
-#include <string>
 #include <vector>
 
 #include <xcb/xf86dri.h>
@@ -186,10 +186,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             bus_id(void)
     {
-        return std::string(xcb_xf86dri_open_connection_bus_id(this->get().get()),
+        return string(xcb_xf86dri_open_connection_bus_id(this->get().get()),
                            ::xcb_xf86dri_open_connection_bus_id_length(this->get().get()));
     }
 
@@ -276,10 +276,10 @@ CookieFunction>
     {}
 
 
-    std::string
+    string
             client_driver_name(void)
     {
-        return std::string(xcb_xf86dri_get_client_driver_name_client_driver_name(this->get().get()),
+        return string(xcb_xf86dri_get_client_driver_name_client_driver_name(this->get().get()),
                            ::xcb_xf86dri_get_client_driver_name_client_driver_name_length(this->get().get()));
     }
 

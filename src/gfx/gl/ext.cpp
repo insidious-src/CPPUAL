@@ -25,7 +25,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 
-using std::string;
+using string;
 
 namespace cppual { namespace Graphics { namespace GL {
 

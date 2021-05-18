@@ -20,8 +20,8 @@ namespace boost { namespace property_tree { namespace json_parser
     class json_parser_error: public file_parser_error
     {
     public:
-        json_parser_error(const std::string &message, 
-                          const std::string &filename, 
+        json_parser_error(const string &message, 
+                          const string &filename, 
                           unsigned long line): 
             file_parser_error(message, filename, line)
         { 

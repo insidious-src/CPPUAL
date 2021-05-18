@@ -59,8 +59,8 @@ public:
     WindowFlags flags () const { return WindowFlags (); }
     void setFlags (WindowFlags) { }
 
-    string title () const { return string (); }
-    void setTitle (string const&) { }
+    string_type title () const { return string_type (); }
+    void setTitle (string_type const&) { }
     void setShaded (bool) { }
     bool isShaded () { return false; }
     void setModal (bool) { }

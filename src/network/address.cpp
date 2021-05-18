@@ -20,9 +20,8 @@
  */
 
 #include <cppual/network/address.h>
-#include <sstream>
 
-using std::string;
+#include <sstream>
 
 namespace cppual { namespace Network {
 
@@ -32,7 +31,7 @@ Address::Address (string_type const&) noexcept
 
 Address::string_type Address::toString () const noexcept
 {
-    std::stringstream output;
+    stringstream output;
 
     if (!isV4 ())
     {

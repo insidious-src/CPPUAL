@@ -22,12 +22,12 @@
 #include <cppual/gfx/gl/texture.h>
 #include <cppual/gfx/gl/ext.h>
 #include <cppual/func.h>
+
 #include <fstream>
 
 #define GL_GLEXT_PROTOTYPES
 #include "gldef.h"
 
-using std::string;
 using std::ios_base;
 using std::ifstream;
 
@@ -116,7 +116,7 @@ bool Texture::loadTexture2D (string const&      gFilePath,
                              bool               bGenMipMaps)
 {
     if (!id () or m_gStates.test (Texture::IsLoaded)) return false;
-    ifstream gFile (gFilePath, ios_base::binary);
+    ifstream gFile (gFilePath.c_str(), ios_base::binary);
     uint     uFormat;
 
     if (gFile.is_open ())

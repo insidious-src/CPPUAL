@@ -28,7 +28,7 @@
 #include <cppual/network/address.h>
 #include <cppual/network/transport/tcp.h>
 
-using std::string;
+using string;
 using std::vector;
 
 namespace cppual { namespace Network { namespace Ftp {

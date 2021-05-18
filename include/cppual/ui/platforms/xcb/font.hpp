@@ -3,6 +3,7 @@
 
 #include <cppual/ui/platforms/xcb/proto/x.hpp>
 #include <cppual/ui/platforms/xcb/generic/resource.hpp>
+#include <cppual/string.h>
 
 namespace cppual {
 
@@ -29,7 +30,7 @@ public:
     template<typename C>
     static
     font<Connection, Interfaces ...>
-    open(C && c, const std::string & name) noexcept
+    open(C && c, const string & name) noexcept
     {
         return font(std::forward<C>(c),
                     [&](const Connection & c, const ::xcb_font_t & font)
@@ -45,7 +46,7 @@ public:
     template<typename C>
     static
     font<Connection, Interfaces ...>
-    open_checked(C && c, const std::string & name)
+    open_checked(C && c, const string & name)
     {
         return font(std::forward<C>(c),
                     [&](const Connection & c, const ::xcb_font_t & font)

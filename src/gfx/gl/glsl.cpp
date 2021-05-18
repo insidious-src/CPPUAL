@@ -19,28 +19,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cppual/gfx/gl/glsl.h>
+#include <cppual/string.h>
+#include <cppual/gfx/draw.h>
+
+#include "gldef.h"
+
 #include <fstream>
 #include <algorithm>
 #include <iterator>
-#include <cppual/mstring.h>
-#include <cppual/gfx/draw.h>
-#include <cppual/gfx/gl/glsl.h>
-#include "gldef.h"
-
-using std::ios_base;
-using std::ifstream;
-using std::string;
 
 namespace cppual { namespace Graphics { namespace GL {
 
 namespace { // optimize for internal unit usage
 
-string syncReadFile (string const& gFilePath, ios_base::openmode eMode = ios_base::in)
-{
-    typedef string::size_type size_type;
+typedef string string_type;
 
-    ifstream gFile (gFilePath, eMode);
-    string   gContent;
+string_type syncReadFile (string_type const& gFilePath, std::ios_base::openmode eMode = std::ios::in)
+{
+    typedef string_type::size_type size_type;
+
+    std::ifstream gFile (gFilePath.c_str(), eMode);
+    string_type   gContent;
 
     if (gFile.is_open ())
     {
@@ -50,11 +50,11 @@ string syncReadFile (string const& gFilePath, ios_base::openmode eMode = ios_bas
 
         // copy to string
         {
-            std::istream_iterator<string::value_type> itCur (gFile);
+            std::istream_iterator<string_type::value_type> itCur (gFile);
 
             std::copy_n (itCur,
                          uSize,
-                         std::insert_iterator<string> (gContent, gContent.begin ()));
+                         std::insert_iterator<string_type> (gContent, gContent.begin ()));
         }
 
         gFile.close ();
@@ -129,28 +129,28 @@ Shader::Shader (Shader::Type eType) noexcept
   m_eType   (eType)
 { }
 
-string Shader::log ()
+Shader::string_type Shader::log ()
 {
-    if (!id ()) return string ();
+    if (!id ()) return string_type ();
 
-    string gLogString;
-    int       nLogLen;
+    string_type gLogString;
+    int         nLogLen   ;
 
     glGetShaderiv (id (), GL::LogLength, &nLogLen);
 
     if (nLogLen > 1)
     {
-        gLogString.resize  (static_cast<string::size_type> (nLogLen));
+        gLogString.resize  (static_cast<string_type::size_type> (nLogLen));
         glGetShaderInfoLog (id (), nLogLen, nullptr,  &gLogString[0]);
     }
 
     return gLogString;
 }
 
-bool Shader::loadFromFile (string const& gFile)
+bool Shader::loadFromFile (string_type const& gFile)
 {
     if (!id ()) return false;
-    string gContent (syncReadFile (gFile));
+    string_type gContent (syncReadFile (gFile));
 
     if (gContent.length ())
     {
@@ -158,12 +158,12 @@ bool Shader::loadFromFile (string const& gFile)
 
         if (IDeviceContext::current ()->version () < 3)
         {
-            string::const_pointer pBuffer = m_gSource.c_str ();
+            string_type::const_pointer pBuffer = m_gSource.c_str ();
             glShaderSource (id (), 1, &pBuffer, nullptr);
         }
         else
         {
-            string::const_pointer pBuffer = m_gSource.c_str ();
+            string_type::const_pointer pBuffer = m_gSource.c_str ();
             glShaderSourceARB (id (), 1, &pBuffer, nullptr);
         }
 
@@ -175,10 +175,10 @@ bool Shader::loadFromFile (string const& gFile)
     return false;
 }
 
-bool Shader::loadFromBinary (string const& gFile)
+bool Shader::loadFromBinary (string_type const& gFile)
 {
     if (!id ()) return false;
-    string gContent (syncReadFile (gFile, ios_base::binary));
+    string_type gContent (syncReadFile (gFile, std::ios::binary));
 
     if (gContent.length ())
     {
@@ -196,11 +196,11 @@ bool Shader::loadFromBinary (string const& gFile)
     return false;
 }
 
-bool Shader::loadFromMemory (string const& gSource)
+bool Shader::loadFromMemory (string_type const& gSource)
 {
     if (!id () or gSource.empty ()) return false;
 
-    string::const_pointer pBuffer =
+    string_type::const_pointer pBuffer =
             m_gSource.assign (std::move (gSource)).c_str ();
 
     if (IDeviceContext::current ()->version () < 3)
@@ -239,17 +239,17 @@ bool Shader::compile () noexcept
 
 SLProgram::SLProgram () noexcept
 : Object (ResourceType::Program),
-  m_gAttribLocList  (),
-  m_gUniformLocList (),
+  m_gAttribLocList  (map_type::allocator_type(*Memory::get_default_resource())),
+  m_gUniformLocList (map_type::allocator_type(*Memory::get_default_resource())),
   m_uShaderCount    (),
   m_gShaderTypes    (),
   m_gStates         ()
 { }
 
-SLProgram::SLProgram (string const& gBinaryName) noexcept
+SLProgram::SLProgram (string_type const& gBinaryName) noexcept
 : Object (ResourceType::Program),
-  m_gAttribLocList  (),
-  m_gUniformLocList (),
+  m_gAttribLocList  (map_type::allocator_type(*Memory::get_default_resource())),
+  m_gUniformLocList (map_type::allocator_type(*Memory::get_default_resource())),
   m_uShaderCount    (),
   m_gShaderTypes    (),
   m_gStates         ()
@@ -307,7 +307,7 @@ bool SLProgram::validate () noexcept
     return false;
 }
 
-int SLProgram::addAttribute (string const& gName)
+int SLProgram::addAttribute (string_type const& gName)
 {
     m_gAttribLocList[gName] = IDeviceContext::current ()->version () < 3 ?
                                   glGetAttribLocation    (id (), gName.c_str ()) :
@@ -315,7 +315,7 @@ int SLProgram::addAttribute (string const& gName)
     return m_gAttribLocList[gName];
 }
 
-int SLProgram::addUniform (string const& gName)
+int SLProgram::addUniform (string_type const& gName)
 {
     m_gUniformLocList[gName] = IDeviceContext::current ()->version () < 3 ?
                                    glGetUniformLocation    (id (), gName.c_str ()) :
@@ -333,10 +333,10 @@ void SLProgram::disable () noexcept
     if (m_gStates.test (SLProgram::IsLinked)) glUseProgram (0);
 }
 
-bool SLProgram::loadFromBinary (string const& gFile)
+bool SLProgram::loadFromBinary (string_type const& gFile)
 {
     if (!id ()) return false;
-    string gData (syncReadFile (gFile, ios_base::binary));
+    string_type gData (syncReadFile (gFile, std::ios::binary));
 
     if (gData.length ())
     {
@@ -486,12 +486,12 @@ bool SLProgram::isAttached (Shader const& gShader)
     return false;
 }
 
-string SLProgram::log ()
+SLProgram::string_type SLProgram::log ()
 {
-    if (!id ()) return string ();
+    if (!id ()) return string_type ();
 
-    string gLogString;
-    int       nLogLen;
+    string_type gLogString;
+    int         nLogLen   ;
 
     IDeviceContext::current ()->version () < 3 ?
                 glGetProgramiv    (id (), GL::LogLength, &nLogLen) :
@@ -499,7 +499,7 @@ string SLProgram::log ()
 
     if (nLogLen > 1)
     {
-        gLogString.reserve (static_cast<string::size_type> (nLogLen));
+        gLogString.reserve (static_cast<string_type::size_type> (nLogLen));
         glGetProgramInfoLog (id (), nLogLen, nullptr, &gLogString[0]);
     }
 
