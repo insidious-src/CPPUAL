@@ -160,7 +160,7 @@ public:
     Parser(string_type const& file, Type type = Type::Object);
 
     //! recreate document from file
-    bool createDocument(string_type const& file);
+    bool createDocument(string_type const& file, Type type = Type::Object);
 
     bool save(std::ofstream& stream);
 
@@ -183,6 +183,9 @@ public:
 
     template <typename T, typename>
     friend class Reference;
+
+private:
+    Type _M_type;
 };
 
 // ======================================================================
@@ -268,6 +271,12 @@ public:
 
     size_type size () const;
     bool      empty() const;
+
+    constexpr pointer operator -> () const
+    {
+        assert(_M_ref != nullptr && _M_ref->IsObject());
+        return _M_ref;
+    }
 
     inline Parser* parser () const noexcept
     {
@@ -368,6 +377,12 @@ public:
 
     size_type size () const;
     bool      empty() const;
+
+    constexpr pointer operator -> () const
+    {
+        assert(_M_ref != nullptr && _M_ref->IsArray());
+        return _M_ref;
+    }
 
     inline Parser* parser () const noexcept
     {
@@ -512,7 +527,7 @@ public:
         return *this;
     }
 
-    inline pointer ref() const
+    constexpr pointer ref() const
     {
         assert(_M_ref != nullptr);
         return _M_ref;
@@ -524,59 +539,58 @@ public:
     }
 
 protected:
-    inline ReferenceBase (TemplateObject*  owner ,
+    inline ReferenceBase (TemplateObject*     owner,
                           string_type  const& key,
                           default_type const& default_val = default_type ())
     : _M_ref(),
       _M_owner(*owner)
     {
-        if(owner->_M_ref->HasMember(key.c_str()))
-        {
-            _M_ref = &owner->operator[](key);
-        }
-        else
+        if(!(*owner)->HasMember(key.c_str()))
         {
             std::cout << "Json::"    << __func__ << ": invalid reference "
                       << key         << " with default value: "
                       << default_val << ". Trying to create a new one." << std::endl;
 
             //! try to obtain a valid reference
-            _M_ref = &owner->_M_ref->AddMember(Parser::StringRefType(key.c_str()),
-                                               json_type(default_type(default_val)),
-                                               owner->parser()->GetAllocator());
+            (*owner)->AddMember(json_type(key.c_str(),
+                                          static_cast<size_type>(key.size()),
+                                          owner->parser()->GetAllocator()).Move(),
+                                json_type(default_type(default_val)).Move(),
+                                owner->parser()->GetAllocator());
 
-            if(!_M_ref)
-            {
-                throw std::runtime_error("Json::Reference nullptr!");
-            }
+
+        }
+
+        _M_ref = &owner->operator[](key);
+
+        if(!_M_ref)
+        {
+            throw std::runtime_error("Json::Reference nullptr!");
         }
     }
 
-    inline ReferenceBase (TemplateArray* owner,
-                          size_type        idx,
+    inline ReferenceBase (TemplateArray*      owner,
+                          size_type           idx,
                           default_type const& default_val = default_type ())
     : _M_ref(),
       _M_owner(*owner)
     {
-        if (owner->size() > idx)
-        {
-            _M_ref = &owner->operator[](idx);
-        }
-        else
+        if (owner->size() <= idx)
         {
             std::cout << "Json::"    << __func__ << ": invalid reference index "
                       << idx         << " with default value: "
                       << default_val << ". Trying to create a new one." << std::endl;
 
             //! try to obtain a valid reference
-            _M_ref = &owner->_M_ref->PushBack(json_type(default_type(default_val)),
-                                              owner->parser()->GetAllocator());
+            (*owner)->PushBack(json_type(default_type(default_val)).Move(),
+                               owner->parser()->GetAllocator());
 
-            if(!_M_ref)
-            {
-                throw std::runtime_error("Json::Reference nullptr!");
-            }
+            idx = owner->size() - 1;
         }
+
+        _M_ref = &owner->operator[](idx);
+
+        if(!_M_ref) throw std::runtime_error("Json::Reference nullptr!");
     }
 
     inline pointer parentObjectRef() const
@@ -619,9 +633,10 @@ public:
                _M_ref != nullptr && !_M_ref->IsNull();
     }
 
-    inline rapidjson::Type type() const noexcept
+    constexpr rapidjson::Type type() const noexcept
     {
-        return ref()->GetType();
+        assert(_M_ref != nullptr);
+        return rapidjson::kStringType;
     }
 
     constexpr ReferenceBase () noexcept
@@ -660,62 +675,13 @@ public:
     }
 
 protected:
-    inline ReferenceBase (TemplateObject* owner ,
-                          string_type const& key,
-                          value_type  const& default_val = value_type ())
-    : _M_ref(),
-      _M_owner(*owner)
-    {
-        if (owner->_M_ref->HasMember(key.c_str()))
-        {
-            _M_ref = &owner->operator[](key);
-        }
-        else
-        {
-            std::cout << "Json::"    << __func__ << ": invalid reference "
-                      << key         << " with default value: "
-                      << default_val << ". Trying to create a new one." << std::endl;
+    ReferenceBase (TemplateObject*    owner,
+                   string_type const& key,
+                   value_type  const& default_val = value_type ());
 
-            //! try to obtain a valid reference
-            _M_ref = &owner->_M_ref->AddMember(Parser::StringRefType(key.c_str()),
-                                               json_type(default_val.c_str(),
-                                                         owner->parser()->GetAllocator()),
-                                               owner->parser()->GetAllocator());
-
-            if(!_M_ref)
-            {
-                throw std::runtime_error("Json::Reference nullptr!");
-            }
-        }
-    }
-
-    inline ReferenceBase (TemplateArray* owner,
-                          size_type idx,
-                          value_type const& default_val = value_type ())
-    : _M_ref(),
-      _M_owner(*owner)
-    {
-        if(owner->size() > idx)
-        {
-            _M_ref = &owner->operator[](idx);
-        }
-        else
-        {
-            std::cout << "Json::"    << __func__ << ": invalid reference index "
-                      << idx         << " with default value: "
-                      << default_val << ". Trying to create a new one." << std::endl;
-
-            //! try to obtain a valid reference
-            _M_ref = &owner->_M_ref->PushBack(json_type(default_val.c_str(),
-                                                        owner->parser()->GetAllocator()),
-                                              owner->parser()->GetAllocator());
-
-            if(!_M_ref)
-            {
-                throw std::runtime_error("Json::Reference nullptr!");
-            }
-        }
-    }
+    ReferenceBase (TemplateArray*    owner,
+                   size_type         idx,
+                   value_type const& default_val = value_type ());
 
     inline pointer parentObjectRef() const
     {
@@ -754,20 +720,20 @@ public:
     typedef typename reference_base::value_type   value_type    ;
     typedef typename reference_base::default_type default_type  ;
 
-    inline Reference (TemplateObject* owner,
+    inline Reference (TemplateObject*     owner,
                       string_type  const& name,
                       default_type const& default_val = default_type())
     : reference_base(owner, name, default_val)
     {
-        assert(this->_M_ref->IsNumber());
+        if (!this->_M_ref->IsNumber()) throw std::runtime_error("Reference is NOT Enum");
     }
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
+    inline Reference (TemplateArray*      owner,
+                      size_type           idx,
                       default_type const& default_val = default_type())
     : reference_base(owner, idx, default_val)
     {
-        assert(this->_M_ref->IsNumber());
+        if (!this->_M_ref->IsNumber()) throw std::runtime_error("Reference is NOT Enum");
     }
 
     inline Reference (Reference const& obj)
@@ -813,27 +779,17 @@ public:
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsBool());
-    }
+    Reference (TemplateObject*    owner,
+               string_type const& name,
+               value_type  const& default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsBool());
-    }
+    Reference (TemplateArray*    owner,
+               size_type         idx,
+               value_type const& default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
-    {
-        assert(_M_ref->IsBool());
-    }
+    { }
 
     inline operator value_type () const noexcept
     {
@@ -864,26 +820,19 @@ template <>
 class Reference<u16> : public ReferenceBase<u16>
 {
 public:
-    typedef ReferenceBase<u16>                   reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef ReferenceBase<u16>                    reference_base;
+    typedef typename reference_base::json_type    json_type     ;
+    typedef typename reference_base::string_type  string_type   ;
+    typedef typename reference_base::value_type   value_type    ;
+    typedef typename reference_base::default_type default_type  ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsUint() || _M_ref->IsNumber());
-    }
+    Reference (TemplateObject*      owner,
+               string_type   const& name,
+               value_type           default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsUint() || _M_ref->IsNumber());
-    }
+    Reference (TemplateArray* owner,
+               size_type      idx,
+               value_type     default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
@@ -918,26 +867,19 @@ template <>
 class Reference<int16> : public ReferenceBase<int16>
 {
 public:
-    typedef ReferenceBase<int16>                 reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef ReferenceBase<int16>                  reference_base;
+    typedef typename reference_base::json_type    json_type     ;
+    typedef typename reference_base::string_type  string_type   ;
+    typedef typename reference_base::value_type   value_type    ;
+    typedef typename reference_base::default_type default_type  ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsInt() || _M_ref->IsNumber());
-    }
+    Reference (TemplateObject*     owner,
+               string_type  const& name,
+               value_type          default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsInt() || _M_ref->IsNumber());
-    }
+    Reference (TemplateArray* owner,
+               size_type      idx,
+               value_type     default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
@@ -977,21 +919,13 @@ public:
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsUint() || _M_ref->IsNumber());
-    }
+    Reference (TemplateObject*    owner,
+               string_type const& name,
+               value_type         default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsUint() || _M_ref->IsNumber());
-    }
+    Reference (TemplateArray* owner,
+               size_type      idx,
+               value_type     default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
@@ -1031,21 +965,13 @@ public:
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsInt() || _M_ref->IsNumber());
-    }
+    Reference (TemplateObject*    owner,
+               string_type const& name,
+               value_type  const& default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsInt() || _M_ref->IsNumber());
-    }
+    Reference (TemplateArray* owner,
+               size_type idx,
+               value_type const& default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
@@ -1085,21 +1011,13 @@ public:
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsUint64() || _M_ref->IsNumber());
-    }
+    Reference (TemplateObject*    owner,
+               string_type const& name,
+               value_type  const& default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsUint64() || _M_ref->IsNumber());
-    }
+    Reference (TemplateArray*    owner,
+               size_type         idx,
+               value_type const& default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
@@ -1139,21 +1057,13 @@ public:
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsInt64() || _M_ref->IsNumber());
-    }
+    Reference (TemplateObject*    owner,
+               string_type const& name,
+               value_type  const& default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsInt64() || _M_ref->IsNumber());
-    }
+    Reference (TemplateArray*    owner,
+               size_type         idx,
+               value_type const& default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
@@ -1193,21 +1103,13 @@ public:
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsFloat() || _M_ref->IsNumber());
-    }
+    Reference (TemplateObject*    owner,
+               string_type const& name,
+               value_type  const& default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsFloat() || _M_ref->IsNumber());
-    }
+    Reference (TemplateArray*    owner,
+               size_type         idx,
+               value_type const& default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
@@ -1246,21 +1148,13 @@ class Reference<double> : public ReferenceBase<double>
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsDouble() || _M_ref->IsNumber());
-    }
+    Reference (TemplateObject*    owner,
+               string_type const& name,
+               value_type  const& default_val = value_type());
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsDouble() || _M_ref->IsNumber());
-    }
+    Reference (TemplateArray*    owner,
+               size_type         idx,
+               value_type const& default_val = value_type());
 
     inline Reference (Reference const& obj)
     : reference_base(obj)
@@ -1300,13 +1194,13 @@ public:
     typedef reference_base::string_type          string_type   ;
     typedef reference_base::value_type           value_type    ;
 
-    inline Reference (TemplateObject* owner,
-                      string_type const& name,
-                      value_type  const& default_val = value_type())
-    : reference_base(owner, name, default_val)
-    {
-        assert(_M_ref->IsString());
-    }
+    Reference (TemplateObject*    owner,
+               string_type const& name,
+               value_type  const& default_val = value_type());
+
+    Reference (TemplateArray*    owner,
+               size_type         idx,
+               value_type const& default_val = value_type());
 
     template <typename Processor,
               typename = typename std::enable_if<
@@ -1314,13 +1208,13 @@ public:
                   typename std::result_of<Processor()>::type
                   >::type
               >
-    inline Reference (TemplateObject* owner,
+    inline Reference (TemplateObject*    owner,
                       string_type const& name,
-                      Processor&& fn,
+                      Processor&&        fn,
                       value_type  const& default_val = value_type())
     : reference_base(owner, name, default_val)
     {
-        assert(_M_ref->IsString());
+        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
 
         connect(jsonStringInvoked, [fn](string_type& val)
         {
@@ -1334,14 +1228,14 @@ public:
                   typename std::result_of<Processor()>::type
                   >::type
               >
-    inline Reference (TemplateObject* owner,
+    inline Reference (TemplateObject*    owner,
                       string_type const& name,
-                      Processor&& fn,
+                      Processor&&        fn,
                       value_type  const& default_val = value_type(),
                       E = E())
     : reference_base(owner, name, default_val)
     {
-        assert(_M_ref->IsString());
+        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
 
         connect(jsonEnumInvoked, [fn](int& val)
         {
@@ -1349,27 +1243,19 @@ public:
         });
     }
 
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        assert(_M_ref->IsString());
-    }
-
     template <typename Processor,
               typename = typename std::enable_if<
                   std::is_same<typename std::result_of<Processor()>::type, value_type>::value,
                   typename std::result_of<Processor()>::type
                   >::type
               >
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      Processor&& fn,
+    inline Reference (TemplateArray*    owner,
+                      size_type         idx,
+                      Processor&&       fn,
                       value_type const& default_val = value_type())
     : reference_base(owner, idx, default_val)
     {
-        assert(_M_ref->IsString());
+        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
 
         connect(jsonStringInvoked, [fn](string_type& val)
         {
@@ -1383,14 +1269,14 @@ public:
                   typename std::result_of<Processor()>::type
                   >::type
               >
-    inline Reference (TemplateArray* owner,
-                      size_type idx,
-                      Processor&& fn,
+    inline Reference (TemplateArray*    owner,
+                      size_type         idx,
+                      Processor&&       fn,
                       value_type const& default_val = value_type(),
                       E = E())
     : reference_base(owner, idx, default_val)
     {
-        assert(_M_ref->IsString());
+        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
 
         connect(jsonEnumInvoked, [fn](int& val)
         {
@@ -1718,15 +1604,15 @@ private:
     void connections()
     {
         connect(appended, *this, &ValueArray::onIndexAppended);
-        connect(removed , *this, &ValueArray::onIndexRemoved);
-        connect(changed , *this, &ValueArray::onChanged);
+        connect(aboutToRemove, *this, &ValueArray::onIndexRemoved);
+        connect(changed, *this, &ValueArray::onChanged);
     }
 
     void disconnections()
     {
         disconnect(appended, function_type(this, &ValueArray::onIndexAppended));
-        disconnect(removed , function_p_type(this, &ValueArray::onIndexRemoved));
-        disconnect(changed , function_type(this, &ValueArray::onChanged));
+        disconnect(aboutToRemove, function_p_type(this, &ValueArray::onIndexRemoved));
+        disconnect(changed, function_type(this, &ValueArray::onChanged));
     }
 
 private:
@@ -1827,14 +1713,14 @@ private:
     void connections()
     {
         connect(appended, *this, &ValueArray::onIndexAppended);
-        connect(removed , *this, &ValueArray::onIndexRemoved);
+        connect(aboutToRemove , *this, &ValueArray::onIndexRemoved);
         connect(changed , *this, &ValueArray::onChanged);
     }
 
     void disconnections()
     {
         disconnect(appended, function_type(this, &ValueArray::onIndexAppended));
-        disconnect(removed , function_p_type(this, &ValueArray::onIndexRemoved));
+        disconnect(aboutToRemove , function_p_type(this, &ValueArray::onIndexRemoved));
         disconnect(changed , function_type(this, &ValueArray::onChanged));
     }
 
@@ -1962,6 +1848,9 @@ public:
     {
         return (*this)[key].first;
     }
+
+    Signal<void()> aboutToReset;
+    Signal<void()> afterReset  ;
 
 private:
     mutable json_map    _M_jsonDocs;
