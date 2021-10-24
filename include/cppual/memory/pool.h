@@ -56,7 +56,7 @@ public:
     size_type blockAlign () const noexcept { return m_uBlkAlign; }
     size_type blockCount () const noexcept { return m_uBlkNum  ; }
 
-    bool is_equal (MemoryResource const& gObj) const noexcept
+    bool is_equal (base_type const& gObj) const noexcept
     { return &gObj == &m_gOwner;                   }
 
     size_type max_size () const noexcept
@@ -88,7 +88,7 @@ private:
     void* do_allocate   (size_type size, align_type align)  noexcept;
     void  do_deallocate (void* p, size_type size, align_type align) ;
 
-    bool  do_is_equal   (MemoryResource const& gObj) const noexcept
+    bool  do_is_equal   (base_type const& gObj) const noexcept
     { return &gObj == &m_gOwner; }
 };
 

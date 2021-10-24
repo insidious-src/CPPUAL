@@ -59,6 +59,13 @@
 #undef TXT_STD_OLD_UNICODE
 #undef DEBUG_MODE
 #undef UNUSED
+#undef COMPILER_NAME
+#undef COMPILER_VERSION
+#undef STRINGIFY_HELPER
+#undef STRINGIFY
+
+#define STRINGIFY(S) STRINGIFY_HELPER(S)
+#define STRINGIFY_HELPER(S) #S
 
 #ifdef __CYGWIN__
 #   define OS_STD_CYGWIN
@@ -146,8 +153,10 @@
 #if defined (__x86_64__) or defined (_M_AMD64) or defined (_M_X64) or defined (_AMD64_) or \
     defined (__arm64__) or defined (__aarch64__)
 #  define ARCH_64BITS
+#  define ARCH_STR "64 bit"
 #else
 #  define ARCH_32BITS
+#  define ARCH_STR "32 bit"
 #endif // ARCH
 
 #undef PACKED
@@ -246,6 +255,30 @@
 
 #if __cplusplus < 201103L or (defined (_MSC_VER) and _MSC_VER < 1700)
 #   error this compiler does not support ISO C++11!
+#endif
+
+#if defined (__clang__)
+#
+#   define COMPILER_NAME "Clang"
+#   define COMPILER_VERSION \
+    STRINGIFY(__clang_major__) + '.' + STRINGIFY(__clang_minor__) + '.' + STRINGIFY(__clang_patchlevel__)
+#
+#elif defined (__GNUC__)
+#
+#   define COMPILER_NAME "GCC"
+#   define COMPILER_VERSION \
+    STRINGIFY(__GNUC__) + '.' + STRINGIFY(__GNUC_MINOR__) + '.' + STRINGIFY(__GNUC_PATCHLEVEL__)
+#
+#elif defined (_MSC_VER)
+#
+#   define COMPILER_NAME "MSVC"
+#   define COMPILER_VERSION STRINGIFY(_MSC_FULL_VER)
+#
+#else
+#
+#   define COMPILER_NAME "Unknown Compiler"
+#   define COMPILER_VERSION ""
+#
 #endif
 
 #define UNUSED(x) (void)x

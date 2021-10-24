@@ -1,22 +1,25 @@
 cmake_minimum_required(VERSION 3.6)
 
 if(ANDROID)
-    if(NOT DEFINED ANDROID_NDK)
-        set(ANDROID_NDK "/opt/android-ndk")
-        set(ANDROID_NDK_ROOT "/opt/android-ndk")
-    endif()
+    #if(NOT DEFINED ANDROID_NDK)
+    #    set(ANDROID_NDK "/opt/android-ndk")
+    #    set(ANDROID_NDK_ROOT "/opt/android-ndk")
+    #endif()
     #set(ANDROID_SDK_ROOT "/opt/android-sdk")
     if(NOT DEFINED ANDROID_ABI)
-        set(ANDROID_ABI armeabi-v7a)
+        set(ANDROID_ABI arm64-v8a)
     endif()
     if(NOT DEFINED ANDROID_PLATFORM)
-        set(ANDROID_PLATFORM "android-16")
+        set(ANDROID_PLATFORM "android-21")
     endif()
-    if(NOT DEFINED ANDROID_NATIVE_API_LEVEL)
-        set(ANDROID_NATIVE_API_LEVEL 16)
-    endif()
+    #if(NOT DEFINED ANDROID_NATIVE_API_LEVEL)
+    #    set(ANDROID_NATIVE_API_LEVEL 21)
+    #endif()
     if(NOT DEFINED ANDROID_TOOLCHAIN_MACHINE_NAME)
         set(ANDROID_TOOLCHAIN_MACHINE_NAME "arm-linux-androideabi")
+    endif()
+    if(NOT DEFINED ANDROID_TOOLCHAIN)
+        set(ANDROID_TOOLCHAIN "clang")
     endif()
     if(NOT DEFINED ANDROID_STL)
         set(ANDROID_STL c++_shared)
@@ -39,17 +42,16 @@ elseif(WIN64)
     set(CMAKE_TOOLCHAIN_FILE "/usr/share/mingw/toolchain-${TOOLCHAIN_PREFIX}.cmake")
 endif()
 
-project("C++ UAL" LANGUAGES CXX)
-
-set(PROJECT_VERSION_MAJOR 1)
-set(PROJECT_VERSION_MINOR 0)
+project("C++ UAL" VERSION 1.0.5 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_AUTORCC OFF)
 
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
+set(LIBRARY_OUTPUT_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(CompilerConfig REQUIRED)
@@ -132,8 +134,6 @@ add_library(cppual-host SHARED
 add_library(cppual-memory SHARED
     "include/cppual/memory/system.h"
     "src/memory/system.cpp"
-    "include/cppual/memory/allocator.h"
-    "src/memory/allocator.cpp"
     "include/cppual/memory/static.h"
     "include/cppual/memory/mop.h"
     "src/memory/stack.cpp"
@@ -146,6 +146,7 @@ add_library(cppual-memory SHARED
     "include/cppual/memory/page.h"
     "src/memory/page.cpp"
     "include/cppual/memory/shared.h"
+    "include/cppual/memory/allocator.h"
     )
 
 # device compute, memory (Vulkan, OpenCL, Serial)
@@ -651,11 +652,14 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(cppual-ui-win cppual-memory WM::Library)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+#    target_link_libraries(cppual-memory)
 endif()
 
-target_link_libraries(cppual-host cppual-memory DL::Library)
+target_link_libraries(cppual-host DL::Library)
 target_link_libraries(cppual-compute cppual-memory Sockets::Library)
-target_link_libraries(cppual-network Sockets::Library)
+target_link_libraries(cppual-network cppual-memory Sockets::Library)
+target_link_libraries(cppual-dom cppual-memory)
 
 target_link_libraries(cppual-video-compute cppual-compute)
 

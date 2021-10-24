@@ -62,7 +62,9 @@ ThreadPriority MainThread::priority ()
 
 int MainThread::setPriority (ThreadPriority ePrio)
 {
-#    ifdef OS_STD_POSIX
+    UNUSED(ePrio);
+
+#    if defined (OS_STD_POSIX) && !defined (OS_ANDROID)
 
     int nPrio = 0;
 
@@ -250,8 +252,9 @@ void Thread::detach ()
 
 int Thread::setPriority (ThreadPriority ePrio)
 {
+    UNUSED(ePrio);
 
-#    ifdef OS_STD_POSIX
+#    if defined (OS_STD_POSIX) && !defined (OS_ANDROID)
 
     int nPrio = 0;
 

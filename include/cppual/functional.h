@@ -120,8 +120,15 @@ public:
     typedef AnyObject*  pointer   ;
     typedef AnyMemberFn value_type;
 
-    constexpr Closure () noexcept = default;
-    constexpr explicit Closure (std::nullptr_t) noexcept { }
+    constexpr Closure () noexcept
+    : m_pObj (),
+      m_fn   ()
+    { }
+
+    constexpr explicit Closure (std::nullptr_t) noexcept
+    : m_pObj (),
+      m_fn   ()
+    { }
 
     constexpr Closure (Closure const& mClosure) noexcept
     : m_pObj { mClosure.m_pObj },
@@ -149,9 +156,11 @@ public:
 
     inline Closure& operator = (Closure&& mRhs) noexcept
     {
-        m_pObj = std::move (mRhs.m_pObj);
-        m_fn   = std::move (mRhs.m_fn  );
-        return * this                   ;
+        m_pObj = mRhs.m_pObj;
+        m_fn   = mRhs.m_fn  ;
+
+        mRhs = nullptr;
+        return * this;
     }
 
     template <class X, class XMemFunc>
@@ -174,10 +183,10 @@ public:
     }
 
     constexpr bool operator == (std::nullptr_t) const noexcept
-    { return m_fn == nullptr and m_pObj == nullptr; }
+    { return m_fn == nullptr || m_pObj == nullptr; }
 
     constexpr bool operator == (Closure const& mRhs) const noexcept
-    { return m_pObj == mRhs.m_pObj and m_fn == mRhs.m_fn; }
+    { return m_pObj == mRhs.m_pObj && m_fn == mRhs.m_fn; }
 
     constexpr bool operator == (TStaticFunc mPtr) const noexcept
     {
@@ -244,47 +253,57 @@ public:
 
     // capture lambda constructor
     template <typename Callable,
-              typename Allocator = std::allocator<CallableType<Callable>>,
+              typename Allocator = std::allocator<Callable>,
               typename =
-              typename std::enable_if<!std::is_same<Function, CallableType<Callable>>{}>::type
+              typename std::enable_if<!std::is_same<Function, typename std::decay<Callable>::type>{}>::type
               >
     inline Function (Callable&& mFunc,
-                     Allocator  ator = Allocator (),
+                     Allocator const& ator = Allocator(),
                      LambdaCapturePtr<Callable> = nullptr)
-    : m_storage (ator.allocate (1), [=](void* mPtr)
+    : m_storage (std::static_pointer_cast<void>(std::allocate_shared<Callable>(
+                     ator, std::forward<Callable> (mFunc))))
     {
-        static_cast<Allocator> (ator).destroy    (static_cast<CallableType<Callable>*> (mPtr));
-        static_cast<Allocator> (ator).deallocate (static_cast<CallableType<Callable>*> (mPtr), 1);
-    })
-    {
-        ator.construct (static_cast<CallableType<Callable>*> (m_storage.get ()), std::forward<Callable> (mFunc));
-        m_closure.bindMemFunc (m_storage.get (), &CallableType<Callable>::operator ());
+        using FuncType = typename std::decay<Callable>::type;
+
+        m_closure.bindMemFunc (static_cast<FuncType*>(m_storage.get ()), &FuncType::operator ());
     }
 
     // callable constructor
     template <typename Callable,
               typename =
-              typename std::enable_if<!std::is_same<Function, CallableType<Callable>>{}>::type>
+              typename std::enable_if<!std::is_same<Function, typename std::decay<Callable>::type>{}>::type>
     inline Function (Callable&& mFunc,
                      LambdaNonCapturePtr<Callable> = nullptr)
+    : m_storage ()
     {
-        m_closure.bindMemFunc (&mFunc, &CallableType<Callable>::operator ());
+        using FuncType = typename std::decay<Callable>::type;
+
+        m_closure.bindMemFunc (&mFunc, &FuncType::operator ());
     }
 
     template <typename Callable,
               typename =
-              typename std::enable_if<!std::is_same<Function, CallableType<Callable>>{}>::type
+              typename std::enable_if<!std::is_same<Function, typename std::decay<Callable>::type>{}>::type
               >
     inline Function (Callable&& mFunc, storage_type&& storage)
     : m_storage (std::move(storage))
     {
-        m_closure.bindMemFunc (&mFunc, &CallableType<Callable>::operator ());
+        using FuncType = typename std::decay<Callable>::type;
+
+        m_closure.bindMemFunc (&mFunc, &FuncType::operator ());
     }
 
-    constexpr Function () noexcept = default;
-    constexpr explicit Function (std::nullptr_t) noexcept { }
+    constexpr Function () noexcept
+    : m_closure (),
+      m_storage ()
+    { }
 
-    constexpr Function (Function const& mImpl) noexcept
+    constexpr explicit Function (std::nullptr_t) noexcept
+    : m_closure (),
+      m_storage ()
+    { }
+
+    constexpr Function (Function const& mImpl)
     : m_closure { mImpl.m_closure },
       m_storage { mImpl.m_storage }
     { }
@@ -296,24 +315,33 @@ public:
 
     // static function constructor
     inline Function (static_fn_type mFuncToBind) noexcept
+    : m_storage ()
     { bind (mFuncToBind); }
 
     // member function constructor
     template <typename X, typename Object>
     inline Function (Object* pThis, mem_fn_type<X> mFuncToBind) noexcept
+    : m_storage ()
     { bind (mFuncToBind, pThis); }
 
-    inline Function& operator = (Function const& mImpl) noexcept
+    inline Function& operator = (Function const& mImpl)
     {
         m_closure = mImpl.m_closure;
         m_storage = mImpl.m_storage;
         return *this;
     }
 
-    inline Function& operator = (Function&& mImpl) noexcept
+    inline Function& operator = (Function&& mImpl)
     {
         m_closure = std::move (mImpl.m_closure);
         m_storage = std::move (mImpl.m_storage);
+        return *this;
+    }
+
+    inline Function& operator = (std::nullptr_t) noexcept
+    {
+        m_closure = nullptr;
+        m_storage.reset();
         return *this;
     }
 
@@ -333,11 +361,18 @@ public:
                 (std::forward<Args> (mArgs)...);
     }
 
+    constexpr explicit operator bool () const noexcept
+    {
+        return m_closure != nullptr;
+    }
+
     constexpr bool operator == (std::nullptr_t) const noexcept
-    { return m_closure == nullptr; }
+    {
+        return m_closure == nullptr;
+    }
 
     constexpr bool operator == (Function const& mImpl) const noexcept
-    { return m_closure == mImpl.m_closure; }
+    { return m_closure == mImpl.m_closure && m_storage == mImpl.m_storage; }
 
     constexpr bool operator == (static_fn_type mFuncPtr) const noexcept
     { return m_closure == mFuncPtr; }
@@ -358,10 +393,6 @@ public:
     { return m_closure > mImpl.m_closure; }
 
 private:
-    template <typename U>
-    inline static void deleter (void* mPtr)
-    { static_cast<U*> (mPtr)->~U (); }
-
     inline T invokeStaticFunc (Args... mArgs) const
     { return (*(m_closure.getStaticFunc ()))(std::forward<Args> (mArgs)...); }
 
@@ -373,8 +404,8 @@ private:
     { m_closure.bindMemFunc (reinterpret_cast<const Object*> (pThis), mFuncToBind); }
 
 private:
-    closure_type m_closure;
-    storage_type m_storage;
+    closure_type m_closure { };
+    storage_type m_storage { };
 };
 
 // ====================================================

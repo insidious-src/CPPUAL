@@ -26,6 +26,7 @@
 #include <cppual/types.h>
 
 #include <limits>
+#include <cassert>
 #include <memory>
 
 namespace cppual { namespace Memory {
@@ -34,27 +35,29 @@ namespace cppual { namespace Memory {
 // std::memory_resource replaced for compute usage
 // =========================================================
 
-struct MemoryResource
+class MemoryResource
 {
 protected:
     static constexpr std::size_t max_align = alignof(std::max_align_t);
 
 public:
-    typedef std::size_t     align_type;
-    typedef std::size_t     size_type;
-    typedef u8*             math_pointer;
-    typedef void*           pointer;
-    typedef cvoid*          const_pointer;
-    typedef std::ptrdiff_t  difference_type;
+    typedef MemoryResource            base_type        ;
+    typedef base_type*&               pointer_reference;
+    typedef std::size_t               align_type       ;
+    typedef std::size_t               size_type        ;
+    typedef u8*                       math_pointer     ;
+    typedef void*                     pointer          ;
+    typedef cvoid*                    const_pointer    ;
+    typedef std::ptrdiff_t            difference_type  ;
 
-    virtual ~MemoryResource();
+    virtual ~MemoryResource() { }
 
     virtual bool is_thread_safe () const noexcept { return false; }
     virtual bool   is_lock_free () const noexcept { return false; }
     virtual bool      is_shared () const noexcept { return false; }
 
-    virtual MemoryResource& owner () const noexcept
-    { return const_cast<MemoryResource&> (*this); }
+    virtual base_type& owner () const noexcept
+    { return const_cast<base_type&> (*this); }
 
     virtual size_type max_size () const
     { return std::numeric_limits<size_type>::max (); }
@@ -66,7 +69,7 @@ public:
     { return do_allocate(bytes, alignment); }
 
     void deallocate(void* p, size_type bytes, size_type alignment = max_align)
-    { return do_deallocate(p, bytes, alignment); }
+    { do_deallocate(p, bytes, alignment); }
 
     bool is_equal(MemoryResource const& other) const noexcept
     { return do_is_equal(other); }
@@ -74,7 +77,74 @@ public:
 protected:
     virtual void* do_allocate(size_type bytes, size_type alignment) = 0;
     virtual void  do_deallocate(void* p, size_type bytes, size_type alignment) = 0;
-    virtual bool  do_is_equal(MemoryResource const& other) const noexcept = 0;
+    virtual bool  do_is_equal(base_type const& other) const noexcept = 0;
+
+private:
+    static pointer_reference default_resource_pointer() noexcept
+    {
+        static base_type* def_ptr = nullptr;
+        return def_ptr;
+    }
+
+    friend base_type* get_default_resource() noexcept;
+    friend void       set_default_resource(base_type&) noexcept;
+};
+
+// =========================================================
+
+class NewDeleteResource final : public MemoryResource
+{
+public:
+    using base_type::base_type;
+    using base_type::operator=;
+
+    bool is_thread_safe () const noexcept
+    {
+        return true;
+    }
+
+private:
+    void* do_allocate(size_type bytes, size_type alignment)
+    {
+        if (bytes > this->max_size()) throw std::bad_alloc();
+
+        if (alignment > max_align) return ::operator new(bytes, std::align_val_t(alignment));
+        return ::operator new(bytes);
+    }
+
+    void do_deallocate(void* p, size_type /*bytes*/, size_type alignment)
+    {
+        if (alignment > max_align) ::operator delete(p, std::align_val_t(alignment));
+        else ::operator delete(p);
+    }
+
+    bool do_is_equal(base_type const& other) const noexcept
+    {
+        return this == &other;
+    }
+};
+
+// =========================================================
+
+class NullResource final : public MemoryResource
+{
+public:
+    using base_type::base_type;
+    using base_type::operator=;
+
+private:
+    void* do_allocate(size_type /*bytes*/, size_type /*alignment*/)
+    {
+        throw std::bad_alloc();
+    }
+
+    void do_deallocate(void* /*p*/, size_type /*bytes*/, size_type /*alignment*/)
+    { }
+
+    bool do_is_equal(base_type const& other) const noexcept
+    {
+        return this == &other;
+    }
 };
 
 // =========================================================
@@ -89,30 +159,45 @@ operator != (MemoryResource const& a, MemoryResource const& b) noexcept
 
 // =========================================================
 
-MemoryResource* new_delete_resource () noexcept;
-MemoryResource* null_memory_resource() noexcept;
-MemoryResource* get_default_resource() noexcept;
-void            set_default_resource(MemoryResource&) noexcept;
+inline MemoryResource* new_delete_resource() noexcept
+{
+    static NewDeleteResource new_delete_resource;
+    return &new_delete_resource;
+}
+
+inline MemoryResource* null_memory_resource() noexcept
+{
+    static NullResource null_resource;
+    return &null_resource;
+}
+
+inline MemoryResource* get_default_resource() noexcept
+{
+    static MemoryResource::pointer_reference def_resource_ptr =
+            (MemoryResource::default_resource_pointer() = new_delete_resource());
+    return def_resource_ptr;
+}
+
+inline void set_default_resource(MemoryResource& res) noexcept
+{
+    MemoryResource::default_resource_pointer() = &res;
+}
 
 // =========================================================
 // MemoryResource Concept
 // =========================================================
 
 template <class T>
-struct is_memory_resource_helper : public std::conditional
-        <
-         std::is_base_of<MemoryResource, T>::value,
-         std::true_type, std::false_type
-         >::type
+struct is_memory_resource_helper : public std::is_base_of<MemoryResource, T>
 { };
 
 template <>
-struct is_memory_resource_helper < MemoryResource > : public std::true_type
+struct is_memory_resource_helper <MemoryResource> : public std::true_type
 { };
 
 template <class T>
 struct is_memory_resource : public is_memory_resource_helper<T>
-{ };
+{ static_assert (is_memory_resource<T>::value, "invalid memory resource object type!"); };
 
 template <class T>
 using MemoryResourceType = typename
@@ -139,7 +224,7 @@ public:
     typedef std::true_type  propagate_on_container_move_assignment;
     typedef std::true_type  propagate_on_container_swap;
 
-    static_assert (is_memory_resource<resource_type>::value, "invalid memory_resource object type!");
+    static_assert (is_memory_resource<resource_type>::value, "R is not derived from MemoryResource!");
 
     inline    Allocator (Allocator &&    )             noexcept = default;
     constexpr Allocator (Allocator const&)             noexcept = default;
@@ -184,7 +269,7 @@ public:
     : m_pRc (&rc)
     { }
 
-    constexpr Allocator () noexcept
+    inline Allocator () noexcept
     : m_pRc (get_default_resource())
     { }
 

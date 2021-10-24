@@ -52,15 +52,7 @@ public:
         PopupMenu* subMenu;
     };
 
-    class MenuItem
-    {
-        ItemData     data;
-        MenuItemType type;
-        friend class PopupMenu;
-    };
-
-    typedef std::vector<MenuItem*> vector_type;
-    typedef string            string_type;
+    typedef string string_type;
 
     PopupMenu ();
     PopupMenu (PopupMenu&&);
@@ -91,6 +83,15 @@ public:
 
     inline size_type itemCount () const noexcept
     { return m_gItemList.size (); }
+
+private:
+    struct MenuItem
+    {
+        ItemData     data;
+        MenuItemType type;
+    };
+
+    typedef std::vector<MenuItem*> vector_type;
 
 private:
     void paintEvent (Rect const&);

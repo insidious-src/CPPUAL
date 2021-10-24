@@ -239,8 +239,8 @@ bool Shader::compile () noexcept
 
 SLProgram::SLProgram () noexcept
 : Object (ResourceType::Program),
-  m_gAttribLocList  (map_type::allocator_type(*Memory::get_default_resource())),
-  m_gUniformLocList (map_type::allocator_type(*Memory::get_default_resource())),
+  m_gAttribLocList  (),
+  m_gUniformLocList (),
   m_uShaderCount    (),
   m_gShaderTypes    (),
   m_gStates         ()
@@ -248,8 +248,8 @@ SLProgram::SLProgram () noexcept
 
 SLProgram::SLProgram (string_type const& gBinaryName) noexcept
 : Object (ResourceType::Program),
-  m_gAttribLocList  (map_type::allocator_type(*Memory::get_default_resource())),
-  m_gUniformLocList (map_type::allocator_type(*Memory::get_default_resource())),
+  m_gAttribLocList  (),
+  m_gUniformLocList (),
   m_uShaderCount    (),
   m_gShaderTypes    (),
   m_gStates         ()

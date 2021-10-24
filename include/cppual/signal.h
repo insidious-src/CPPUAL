@@ -63,16 +63,25 @@ public:
     bool empty () const noexcept
     { return _M_slots.empty (); }
 
+    size_type size () const noexcept
+    { return _M_slots.size (); }
+
     const_iterator cbegin () const noexcept
     { return _M_slots.cbegin (); }
 
     iterator begin () noexcept
     { return _M_slots.begin (); }
 
+    const_iterator begin () const noexcept
+    { return _M_slots.begin (); }
+
     const_iterator cend () const noexcept
     { return _M_slots.cend (); }
 
     iterator end () noexcept
+    { return _M_slots.end (); }
+
+    const_iterator end () const noexcept
     { return _M_slots.end (); }
 
     // emit signal to connected slots
@@ -85,7 +94,7 @@ public:
 
         collection.reserve (size);
 
-        for (auto i = 0; i < size; ++i)
+        for (size_type i = 0U; i < _M_slots.size(); ++i)
         {
             if (_M_slots[i] != nullptr)
                 collection.emplace_back
@@ -104,7 +113,7 @@ public:
 
         collection.reserve (size);
 
-        for (auto i = 0; i < size; ++i)
+        for (size_type i = 0U; i < _M_slots.size(); ++i)
         {
             if (_M_slots[i] != nullptr)
                 collection.emplace_back
@@ -121,6 +130,26 @@ public:
     Signal (allocator_type const& gAlloc) noexcept
     : _M_slots (gAlloc)
     { }
+
+    template <typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (Signal<TRetType_(TArgs_...), Allocator_>&,
+             typename Signal<TRetType_(TArgs_...), Allocator_>::const_reference,
+             bool);
+
+    template <typename Call,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (Signal<TRetType_(TArgs_...), Allocator_>&,
+             Call&&,
+             bool,
+             LambdaNonCapturePtr<Call>);
 
     template <typename Call,
               typename TRetType_,
@@ -172,6 +201,16 @@ public:
     disconnect (Signal<TRetType_(TArgs_...), Allocator_>&,
                 typename Signal<TRetType_(TArgs_...), Allocator_>::const_reference);
 
+    template <typename TClass,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend void
+    disconnect (Signal<TRetType_(TArgs_...), Allocator_>&,
+                ClassType<TClass>&,
+                TRetType_ (TClass::*)(TArgs_...));
+
 private:
     container_type _M_slots;
 };
@@ -199,10 +238,16 @@ public:
     bool empty () const noexcept
     { return _M_slots.empty (); }
 
+    size_type size () const noexcept
+    { return _M_slots.size (); }
+
     const_iterator cbegin () const noexcept
     { return _M_slots.cbegin (); }
 
     iterator begin () noexcept
+    { return _M_slots.begin (); }
+
+    const_iterator begin () const noexcept
     { return _M_slots.begin (); }
 
     const_iterator cend () const noexcept
@@ -211,20 +256,19 @@ public:
     iterator end () noexcept
     { return _M_slots.end (); }
 
+    const_iterator end () const noexcept
+    { return _M_slots.end (); }
+
     // emit signal to connected slots
     void operator () (Args... args)
     {
-        auto size = _M_slots.size ();
-
-        for (auto i = 0U; i < size; ++i)
+        for (size_type i = 0U; i < _M_slots.size(); ++i)
             if (_M_slots[i] != nullptr) _M_slots[i] (std::forward<Args> (args)...);
     }
 
     void operator () (Args... args) const
     {
-        auto size = _M_slots.size ();
-
-        for (auto i = 0U; i < size; ++i)
+        for (size_type i = 0U; i < _M_slots.size(); ++i)
             if (_M_slots[i] != nullptr) _M_slots[i] (std::forward<Args> (args)...);
     }
 
@@ -235,6 +279,15 @@ public:
     Signal (allocator_type const& gAlloc) noexcept
     : _M_slots (gAlloc)
     { }
+
+    template <typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename Signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (Signal<TRetType_(TArgs_...), Allocator_>&,
+             typename Signal<TRetType_(TArgs_...), Allocator_>::const_reference,
+             bool);
 
     template <typename Call,
               typename TRetType_,
@@ -295,11 +348,40 @@ public:
     disconnect (Signal<TRetType_(TArgs_...), Allocator_>&,
                 typename Signal<TRetType_(TArgs_...), Allocator_>::const_reference);
 
+    template <typename TClass,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend void
+    disconnect (Signal<TRetType_(TArgs_...), Allocator_>&,
+                ClassType<TClass>&,
+                TRetType_ (TClass::*)(TArgs_...));
+
 private:
     container_type _M_slots;
 };
 
 // =========================================================
+
+template <typename TRetType,
+          typename... TArgs,
+          typename Allocator
+          >
+typename Signal<TRetType(TArgs...), Allocator>::slot_type
+connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
+         typename Signal<TRetType(TArgs...), Allocator>::const_reference val,
+         bool bTop = false)
+{
+    if (bTop)
+    {
+        gSignal._M_slots.push_front (val);
+        return gSignal._M_slots.cbegin ();
+    }
+
+    gSignal._M_slots.push_back (val);
+    return --gSignal._M_slots.cend ();
+}
 
 template <typename Call,
           typename TRetType,
@@ -335,15 +417,13 @@ connect (Signal<TRetType(TArgs...), Allocator>& gSignal,
          bool bTop = false,
          LambdaCapturePtr<Call> = nullptr)
 {
-    using AllocatorCallable = typename Allocator::template rebind<CallableType<Call>>::other;
-
     if (bTop)
     {
-        gSignal._M_slots.emplace_front (std::forward<Call> (gFunc), AllocatorCallable());
+        gSignal._M_slots.emplace_front (std::forward<Call> (gFunc));
         return gSignal._M_slots.cbegin ();
     }
 
-    gSignal._M_slots.emplace_back (std::forward<Call> (gFunc), AllocatorCallable());
+    gSignal._M_slots.emplace_back (std::forward<Call> (gFunc));
     return --gSignal._M_slots.cend ();
 }
 
@@ -398,8 +478,13 @@ template <typename TRetType,
 inline
 void
 disconnect (Signal<TRetType(TArgs...), Allocator>& gSignal,
-            typename Signal<TRetType(TArgs...), Allocator>::slot_type& gConn)
-{ gSignal._M_slots.erase (gConn); }
+            typename Signal<TRetType(TArgs...), Allocator>::slot_type& it)
+{
+    if (it != gSignal.end())
+    {
+        gSignal._M_slots.erase(it);
+    }
+}
 
 template <typename TRetType,
           typename... TArgs,
@@ -410,9 +495,33 @@ void
 disconnect (Signal<TRetType(TArgs...), Allocator>& gSignal,
             typename Signal<TRetType(TArgs...), Allocator>::const_reference fn)
 {
-    auto it = std::find(gSignal.cbegin(), gSignal.cend(), fn);
+    auto it = std::find(gSignal.begin(), gSignal.end(), fn);
 
-    if (it != gSignal.cend()) gSignal._M_slots.erase (it);
+    if (it != gSignal.end())
+    {
+        gSignal._M_slots.erase(it);
+    }
+}
+
+template <typename TClass  ,
+          typename TRetType,
+          typename... TArgs,
+          typename Allocator
+          >
+inline
+void
+disconnect (Signal<TRetType(TArgs...), Allocator>& gSignal,
+            ClassType<TClass>& pObj,
+            TRetType (TClass::* fn)(TArgs...))
+{
+    using value_type = typename Signal<TRetType(TArgs...), Allocator>::value_type;
+
+    auto it = std::find(gSignal.begin(), gSignal.end(), value_type(&pObj, fn));
+
+    if (it != gSignal.end())
+    {
+        gSignal._M_slots.erase(it);
+    }
 }
 
 // =========================================================

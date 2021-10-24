@@ -220,7 +220,7 @@ public:
 
     typedef std::unordered_map<string_type, int,
                                std::hash<string_type>, std::equal_to<string_type>,
-                               Memory::Allocator<std::pair<string_type, int>>> map_type;
+                               Memory::Allocator<std::pair<const string_type, int>>> map_type;
 
     typedef BitSet<SLProgram::State> States;
 

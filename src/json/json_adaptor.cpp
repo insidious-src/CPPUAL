@@ -25,7 +25,7 @@ Parser::Parser(string_type const& file_path, Type type)
 
     file.seekg(0, std::ios::end);
 
-    const std::ptrdiff_t size = file.tellg();
+    auto const size = file.tellg();
 
     file.seekg(std::ios::beg);
 
@@ -75,7 +75,7 @@ bool Parser::createDocument(string_type const& file_path, Type type)
 
     file.seekg(0, std::ios::end);
 
-    const std::ptrdiff_t size = file.tellg();
+    auto const size = file.tellg();
 
     file.seekg(std::ios::beg);
 
@@ -96,23 +96,6 @@ bool Parser::createDocument(string_type const& file_path, Type type)
             _M_type = Type::Object;
         }
     }
-
-    /*if (type == Type::Array)
-    {
-        if (IsNull())
-        {
-            SetArray();
-            _M_type = Type::Array;
-        }
-    }
-    else
-    {
-        if(IsArray())
-        {
-            SetObject();
-            _M_type = Type::Object;
-        }
-    }*/
 
     if (!IsArray() && !IsObject()) _M_type = Type::Null;
 
@@ -180,7 +163,6 @@ TemplateObject::TemplateObject(Parser& _parser, string_type const& _category)
 : _M_owner(),
   _M_parser(&_parser),
   _M_ref(),
-  _M_ownerfn(),
   _M_category(_category),
   _M_index(npos)
 {
@@ -192,7 +174,6 @@ TemplateObject::TemplateObject(Parser& _parser, size_type _index)
 : _M_owner(),
   _M_parser(&_parser),
   _M_ref(),
-  _M_ownerfn(),
   _M_category(),
   _M_index(_index)
 {
@@ -204,7 +185,6 @@ TemplateObject::TemplateObject(TemplateObject* _owner, string_type const& _categ
 : _M_owner(*_owner),
   _M_parser(_owner->parser()),
   _M_ref(),
-  _M_ownerfn(),
   _M_category(_category),
   _M_index(npos)
 {
@@ -216,7 +196,6 @@ TemplateObject::TemplateObject(TemplateArray* _owner, size_type _idx)
 : _M_owner(*_owner),
   _M_parser(_owner->parser()),
   _M_ref(),
-  _M_ownerfn(),
   _M_category(),
   _M_index(_idx)
 {
@@ -228,7 +207,6 @@ TemplateObject::TemplateObject(TemplateObject const& obj)
 : _M_owner(obj._M_owner),
   _M_parser(obj._M_parser),
   _M_ref(obj._M_ref),
-  _M_ownerfn(obj._M_ownerfn),
   _M_category(obj._M_category),
   _M_index(obj._M_index)
 {
@@ -239,7 +217,6 @@ TemplateObject::TemplateObject(TemplateObject&& obj)
 : _M_owner(obj._M_owner),
   _M_parser(obj._M_parser),
   _M_ref(obj._M_ref),
-  _M_ownerfn(obj._M_ownerfn),
   _M_category(obj._M_category),
   _M_index(obj._M_index)
 {
@@ -255,7 +232,6 @@ TemplateObject& TemplateObject::operator = (TemplateObject const& obj)
 
     _M_parser   = obj._M_parser;
     _M_ref      = obj._M_ref;
-    _M_ownerfn  = obj._M_ownerfn;
     _M_category = obj._M_category;
     _M_index    = obj._M_index;
     _M_owner    = obj._M_owner;
@@ -275,7 +251,6 @@ TemplateObject& TemplateObject::operator = (TemplateObject&& obj)
 
     _M_parser   = obj._M_parser;
     _M_ref      = obj._M_ref;
-    _M_ownerfn  = obj._M_ownerfn;
     _M_category = obj._M_category;
     _M_index    = obj._M_index;
     _M_owner    = obj._M_owner;
@@ -290,6 +265,7 @@ TemplateObject& TemplateObject::operator = (TemplateObject&& obj)
 
 TemplateObject::~TemplateObject()
 {
+    disconnections();
 }
 
 TemplateObject::const_reference TemplateObject::operator [] (string_type const& key) const
@@ -328,19 +304,19 @@ void TemplateObject::disconnections()
 {
     if (!_M_owner)
     {
-        disconnect(_M_parser->changed, function_type(this, &TemplateObject::onParserDataChanged));
-        disconnect(_M_parser->aboutToSave, function_type(this, &TemplateObject::onAboutToSave));
+        disconnect(_M_parser->changed, *this, &TemplateObject::onParserDataChanged);
+        disconnect(_M_parser->aboutToSave, *this, &TemplateObject::onAboutToSave);
     }
     else if (_M_owner.type() == Parser::Type::Object)
     {
-        disconnect(_M_owner.object()->changed, function_type(this, &TemplateObject::onObjectChanged));
-        disconnect(_M_owner.object()->aboutToSave, function_type(this, &TemplateObject::onAboutToSave));
+        disconnect(_M_owner.object()->changed, *this, &TemplateObject::onObjectChanged);
+        disconnect(_M_owner.object()->aboutToSave, *this, &TemplateObject::onAboutToSave);
     }
     else if (_M_owner.type() == Parser::Type::Array)
     {
-        disconnect(_M_owner.array()->changed, function_type(this, &TemplateObject::onArrayChanged));
-        disconnect(_M_owner.array()->removed, function_p_type(this, &TemplateObject::onRemoved));
-        disconnect(_M_owner.array()->aboutToSave, function_type(this, &TemplateObject::onAboutToSave));
+        disconnect(_M_owner.array()->changed, *this, &TemplateObject::onArrayChanged);
+        disconnect(_M_owner.array()->removed, *this, &TemplateObject::onRemoved);
+        disconnect(_M_owner.array()->aboutToSave, *this, &TemplateObject::onAboutToSave);
     }
 }
 
@@ -350,14 +326,12 @@ void TemplateObject::invalidate()
 
     disconnections();
 
-    _M_parser   = nullptr;
     _M_ref      = nullptr;
-    _M_ownerfn  = function_type();
     _M_category = string_type();
     _M_index    = npos;
     _M_owner    = TemplateOwner();
 
-    changed();
+    invalidated();
 }
 
 void TemplateObject::assignFromParserObject()
@@ -438,7 +412,6 @@ void TemplateObject::assignFromArray()
                                    _M_parser->GetAllocator());
 
         _M_index = parentArrayRef()->Size() - 1;
-
     }
 
     _M_ref = &(*_M_owner.array())[_M_index];
@@ -461,17 +434,31 @@ bool TemplateObject::empty() const
 
 TemplateObject::pointer TemplateObject::parentObjectRef() const
 {
+    assert(_M_owner.object()->_M_ref != nullptr);
     return _M_owner.object()->_M_ref;
 }
 
 TemplateObject::pointer TemplateObject::parentArrayRef() const
 {
+    assert(_M_owner.array()->_M_ref != nullptr);
     return _M_owner.array()->_M_ref;
 }
 
 void TemplateObject::onParserDataChanged()
 {
+    switch (_M_parser->type())
+    {
+    case Parser::Type::Array:
+        assignFromParserArray();
+        break;
+    case Parser::Type::Object:
+        assignFromParserObject();
+        break;
+    default:
+        break;
+    }
 
+    changed();
 }
 
 void TemplateObject::onAboutToSave()
@@ -481,18 +468,20 @@ void TemplateObject::onAboutToSave()
 
 void TemplateObject::onObjectChanged()
 {
-    if (!(*_M_owner.object()))
+    if (!(*_M_owner.object())) invalidate();
+    else
     {
-        invalidate();
+        assignFromObject();
         changed();
     }
 }
 
 void TemplateObject::onArrayChanged()
 {
-    if (!(*_M_owner.array()))
+    if (!(*_M_owner.array())) invalidate();
+    else
     {
-        invalidate();
+        assignFromArray();
         changed();
     }
 }
@@ -500,8 +489,6 @@ void TemplateObject::onArrayChanged()
 void TemplateObject::onRemoved(size_type idx)
 {
     if (_M_index == idx) invalidate();
-
-    changed();
 }
 
 // ======================================================================
@@ -510,7 +497,6 @@ TemplateArray::TemplateArray(Parser& _parser, string_type const& _category)
 : _M_owner(),
   _M_parser(&_parser),
   _M_ref(),
-  _M_ownerfn(),
   _M_category(_category),
   _M_index(npos)
 {
@@ -522,7 +508,6 @@ TemplateArray::TemplateArray(Parser& _parser, size_type _index)
 : _M_owner(),
   _M_parser(&_parser),
   _M_ref(),
-  _M_ownerfn(),
   _M_category(),
   _M_index(_index)
 {
@@ -534,7 +519,6 @@ TemplateArray::TemplateArray(TemplateObject* _owner, string_type const& _categor
 : _M_owner(*_owner),
   _M_parser(_owner->parser()),
   _M_ref(),
-  _M_ownerfn(),
   _M_category(_category),
   _M_index(npos)
 {
@@ -546,7 +530,6 @@ TemplateArray::TemplateArray(TemplateArray* _owner, size_type _idx)
 : _M_owner(*_owner),
   _M_parser(_owner->parser()),
   _M_ref(),
-  _M_ownerfn(),
   _M_category(),
   _M_index(_idx)
 {
@@ -558,7 +541,6 @@ TemplateArray::TemplateArray(TemplateArray const& obj)
 : _M_owner(obj._M_owner),
   _M_parser(obj._M_parser),
   _M_ref(obj._M_ref),
-  _M_ownerfn(obj._M_ownerfn),
   _M_category(obj._M_category),
   _M_index(obj._M_index)
 
@@ -570,7 +552,6 @@ TemplateArray::TemplateArray(TemplateArray&& obj)
 : _M_owner(obj._M_owner),
   _M_parser(obj._M_parser),
   _M_ref(obj._M_ref),
-  _M_ownerfn(obj._M_ownerfn),
   _M_category(obj._M_category),
   _M_index(obj._M_index)
 {
@@ -586,7 +567,6 @@ TemplateArray& TemplateArray::operator = (TemplateArray const& obj)
 
     _M_parser   = obj._M_parser;
     _M_ref      = obj._M_ref;
-    _M_ownerfn  = obj._M_ownerfn;
     _M_category = obj._M_category;
     _M_index    = obj._M_index;
     _M_owner    = obj._M_owner;
@@ -606,7 +586,6 @@ TemplateArray& TemplateArray::operator = (TemplateArray&& obj)
 
     _M_parser   = obj._M_parser;
     _M_ref      = obj._M_ref;
-    _M_ownerfn  = obj._M_ownerfn;
     _M_category = obj._M_category;
     _M_index    = obj._M_index;
     _M_owner    = obj._M_owner;
@@ -621,6 +600,7 @@ TemplateArray& TemplateArray::operator = (TemplateArray&& obj)
 
 TemplateArray::~TemplateArray()
 {
+    disconnections();
 }
 
 TemplateArray::const_reference TemplateArray::operator [] (size_type idx) const
@@ -659,19 +639,19 @@ void TemplateArray::disconnections()
 {
     if (!_M_owner)
     {
-        disconnect(_M_parser->changed, function_type(this, &TemplateArray::onParserDataChanged));
-        disconnect(_M_parser->aboutToSave, function_type(this, &TemplateArray::onAboutToSave));
+        disconnect(_M_parser->changed, *this, &TemplateArray::onParserDataChanged);
+        disconnect(_M_parser->aboutToSave, *this, &TemplateArray::onAboutToSave);
     }
     else if (_M_owner.type() == Parser::Type::Object)
     {
-        disconnect(_M_owner.object()->changed, function_type(this, &TemplateArray::onObjectChanged));
-        disconnect(_M_owner.object()->aboutToSave, function_type(this, &TemplateArray::onAboutToSave));
+        disconnect(_M_owner.object()->changed, *this, &TemplateArray::onObjectChanged);
+        disconnect(_M_owner.object()->aboutToSave, *this, &TemplateArray::onAboutToSave);
     }
     else if (_M_owner.type() == Parser::Type::Array)
     {
-        disconnect(_M_owner.array()->changed, function_type(this, &TemplateArray::onArrayChanged));
-        disconnect(_M_owner.array()->removed, function_p_type(this, &TemplateArray::onRemoved));
-        disconnect(_M_owner.array()->aboutToSave, function_type(this, &TemplateArray::onAboutToSave));
+        disconnect(_M_owner.array()->changed, *this, &TemplateArray::onArrayChanged);
+        disconnect(_M_owner.array()->removed, *this, &TemplateArray::onRemoved);
+        disconnect(_M_owner.array()->aboutToSave, *this, &TemplateArray::onAboutToSave);
     }
 }
 
@@ -681,14 +661,12 @@ void TemplateArray::invalidate()
 
     disconnections();
 
-    _M_parser   = nullptr;
     _M_ref      = nullptr;
-    _M_ownerfn  = function_type();
     _M_category = string_type();
     _M_index    = npos;
     _M_owner    = TemplateOwner();
 
-    changed();
+    invalidated();
 }
 
 void TemplateArray::assignFromParserObject()
@@ -789,19 +767,61 @@ bool TemplateArray::empty() const
     return _M_ref->Empty();
 }
 
+void TemplateArray::append()
+{
+    assert(_M_ref != nullptr);
+
+    aboutToAppend();
+    _M_ref->PushBack(value_type(rapidjson::kNullType), _M_parser->GetAllocator());
+    appended();
+}
+
+void TemplateArray::remove(size_type idx)
+{
+    assert(_M_ref != nullptr);
+    assert(_M_ref->Size() > idx);
+
+    aboutToRemove(idx);
+    _M_ref->Erase(&(*this)[idx]);
+    removed(idx);
+}
+
+void TemplateArray::clear()
+{
+    if (empty()) return;
+
+    aboutToClear();
+    _M_ref->Clear();
+    cleared();
+}
+
 TemplateArray::pointer TemplateArray::parentObjectRef() const
 {
+    assert(_M_owner.object()->_M_ref != nullptr);
     return _M_owner.object()->_M_ref;
 }
 
 TemplateArray::pointer TemplateArray::parentArrayRef() const
 {
+    assert(_M_owner.array()->_M_ref != nullptr);
     return _M_owner.array()->_M_ref;
 }
 
 void TemplateArray::onParserDataChanged()
 {
+    switch (_M_parser->type())
+    {
+    case Parser::Type::Array:
+        assignFromParserArray();
+        break;
+    case Parser::Type::Object:
+        assignFromParserObject();
+        break;
+    default:
+        break;
+    }
 
+    changed();
 }
 
 void TemplateArray::onAboutToSave()
@@ -811,18 +831,20 @@ void TemplateArray::onAboutToSave()
 
 void TemplateArray::onObjectChanged()
 {
-    if (!(*_M_owner.object()))
+    if (!(*_M_owner.object())) invalidate();
+    else
     {
-        invalidate();
+        assignFromObject();
         changed();
     }
 }
 
 void TemplateArray::onArrayChanged()
 {
-    if (!(*_M_owner.array()))
+    if (!(*_M_owner.array())) invalidate();
+    else
     {
-        invalidate();
+        assignFromArray();
         changed();
     }
 }
@@ -830,44 +852,46 @@ void TemplateArray::onArrayChanged()
 void TemplateArray::onRemoved(size_type idx)
 {
     if (_M_index == idx) invalidate();
-
-    changed();
 }
 
 // ======================================================================
 
-ReferenceBase<Parser::string_type>::ReferenceBase (TemplateObject* owner ,
+ReferenceBase<Parser::string_type>::ReferenceBase (TemplateObject*    owner,
                                                    string_type const& key,
                                                    value_type  const& default_val)
 : _M_ref(),
   _M_owner(*owner)
 {
-    if (!(*owner)->HasMember(key.c_str()))
+    _M_fn = func_type([def_key = key, def = default_val](self_type* ptr)
     {
-        std::cout << "Json::"    << __func__ << ": invalid reference "
-                  << key         << " with default value: "
-                  << default_val << ". Trying to create a new one." << std::endl;
+        if(def_key.empty()) return;
 
-        json_type key_json  ;
-        json_type value_json;
+        if (!(*ptr->_M_owner.object())->HasMember(def_key.c_str()))
+        {
+            std::cout << "Json::" << __func__ << ": invalid reference "
+                      << def_key  << " with default value: "
+                      << def      << ". Trying to create a new one." << std::endl;
 
-        key_json.SetString(key.c_str(),
-                           static_cast<size_type>(key.size()),
-                           owner->parser()->GetAllocator());
+            //! try to obtain a valid reference
+            (*ptr->_M_owner.object())->AddMember(json_type(def_key.c_str(),
+                                                 static_cast<size_type>(def_key.size()),
+                                                 ptr->_M_owner.object()->parser()->GetAllocator()).Move(),
+                                                 json_type(def.c_str(),
+                                                 static_cast<size_type>(def.size()),
+                                                 ptr->_M_owner.object()->parser()->GetAllocator()).Move(),
+                                                 ptr->_M_owner.object()->parser()->GetAllocator());
+        }
 
-        value_json.SetString(default_val.c_str(),
-                             static_cast<size_type>(default_val.size()),
-                             owner->parser()->GetAllocator());
+        ptr->_M_ref = &(ptr->_M_owner.object()->operator[](def_key));
 
-        //! try to obtain a valid reference
-        (*owner)->AddMember(key_json.Move(),
-                            value_json.Move(),
-                            owner->parser()->GetAllocator());
-    }
+        if(!ptr->_M_ref)
+        {
+            throw std::runtime_error("json reference is nullptr!");
+        }
+    });
 
-    _M_ref = &owner->operator[](key);
-
-    if(!_M_ref) throw std::runtime_error("Json::Reference nullptr!");
+    _M_fn(this);
+    connections();
 }
 
 ReferenceBase<Parser::string_type>::ReferenceBase (TemplateArray* owner,
@@ -876,24 +900,65 @@ ReferenceBase<Parser::string_type>::ReferenceBase (TemplateArray* owner,
 : _M_ref(),
   _M_owner(*owner)
 {
-    if(owner->size() <= idx)
+    _M_fn = func_type([idx, def = default_val](self_type* ptr)
     {
-        std::cout << "Json::"    << __func__ << ": invalid reference index "
-                  << idx         << " with default value: "
-                  << default_val << ". Trying to create a new one." << std::endl;
+        auto new_idx = idx;
 
-        //! try to obtain a valid reference
-        (*owner)->PushBack(json_type(default_val.c_str(),
-                                     static_cast<size_type>(default_val.size()),
-                                     owner->parser()->GetAllocator()),
-                           owner->parser()->GetAllocator());
+        if (ptr->_M_owner.array()->size() <= idx)
+        {
+            std::cout << "Json::" << __func__ << ": invalid reference index "
+                      << idx      << " with default value: "
+                      << def      << ". Trying to create a new one." << std::endl;
 
-        idx = owner->size() - 1;
+            //! try to obtain a valid reference
+            (*ptr->_M_owner.array())->PushBack(json_type(def.c_str(),
+                                               static_cast<size_type>(def.size()),
+                                               ptr->_M_owner.array()->parser()->GetAllocator()).Move(),
+                                               ptr->_M_owner.array()->parser()->GetAllocator());
+
+            new_idx = (*ptr->_M_owner.array()).size() - 1;
+        }
+
+        ptr->_M_ref = &(ptr->_M_owner.array()->operator[](new_idx));
+
+        if(!ptr->_M_ref)
+        {
+            throw std::runtime_error("json reference is nullptr!");
+        }
+    });
+
+    _M_fn(this);
+    connections();
+}
+
+void cppual::Json::ReferenceBase<Parser::string_type>::connections()
+{
+    if (_M_owner.type() == Parser::Type::Object)
+    {
+        connect(_M_owner.object()->changed, *this, &ReferenceBase::assign);
     }
+    else if (_M_owner.type() == Parser::Type::Array)
+    {
+        connect(_M_owner.array()->changed, *this, &ReferenceBase::assign);
+    }
+}
 
-    _M_ref = &owner->operator[](idx);
+void cppual::Json::ReferenceBase<Parser::string_type>::disconnections()
+{
+    if (_M_owner.type() == Parser::Type::Object)
+    {
+        disconnect(_M_owner.object()->changed, *this, &ReferenceBase::assign);
+    }
+    else if (_M_owner.type() == Parser::Type::Array)
+    {
+        disconnect(_M_owner.array()->changed, *this, &ReferenceBase::assign);
+    }
+}
 
-    if(!_M_ref) throw std::runtime_error("Json::Reference nullptr!");
+void cppual::Json::ReferenceBase<Parser::string_type>::assign()
+{
+    if(_M_fn != nullptr) _M_fn(this);
+    changed();
 }
 
 // ======================================================================
@@ -903,7 +968,11 @@ Reference<bool>::Reference(TemplateObject*    owner,
                            value_type const&  default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!_M_ref->IsBool()) throw std::runtime_error("Reference is NOT a bool");
+    if (!ref()->IsBool())
+    {
+        std::cerr << "json reference value is not a bool! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<bool>::Reference(TemplateArray*    owner,
@@ -911,7 +980,11 @@ Reference<bool>::Reference(TemplateArray*    owner,
                            value_type const& default_val)
     : reference_base(owner, idx, default_val)
 {
-    if (!_M_ref->IsBool()) throw std::runtime_error("Reference is NOT a bool");
+    if (!ref()->IsBool())
+    {
+        std::cerr << "json reference value is not a bool! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -921,7 +994,11 @@ Reference<u16>::Reference(TemplateObject*    owner,
                           value_type         default_val)
 : reference_base(owner, name, static_cast<default_type>(default_val))
 {
-    if (!_M_ref->IsUint()) throw std::runtime_error("Reference is NOT an uint16");
+    if (!ref()->IsUint())
+    {
+        std::cerr << "json reference value is not an uint! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<u16>::Reference(TemplateArray* owner,
@@ -929,7 +1006,11 @@ Reference<u16>::Reference(TemplateArray* owner,
                           value_type     default_val)
 : reference_base(owner, idx, static_cast<default_type>(default_val))
 {
-    if (!_M_ref->IsUint()) throw std::runtime_error("Reference is NOT an uint16");
+    if (!ref()->IsUint())
+    {
+        std::cerr << "json reference value is not an uint! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -939,7 +1020,11 @@ Reference<int16>::Reference (TemplateObject*     owner,
                              value_type          default_val)
 : reference_base(owner, name, static_cast<default_type>(default_val))
 {
-    if (!_M_ref->IsInt()) throw std::runtime_error("Reference is NOT an int16");
+    if (!ref()->IsInt())
+    {
+        std::cerr << "json reference value is not a int! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<int16>::Reference (TemplateArray* owner,
@@ -947,7 +1032,11 @@ Reference<int16>::Reference (TemplateArray* owner,
                              value_type     default_val)
 : reference_base(owner, idx, static_cast<default_type>(default_val))
 {
-    if (!_M_ref->IsInt()) throw std::runtime_error("Reference is NOT an int16");
+    if (!ref()->IsInt())
+    {
+        std::cerr << "json reference value is not a int! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -957,7 +1046,11 @@ Reference<uint>::Reference (TemplateObject*    owner,
                             value_type         default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!_M_ref->IsUint()) throw std::runtime_error("Reference is NOT an uint");
+    if (!ref()->IsUint())
+    {
+        std::cerr << "json reference value is not an uint! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<uint>::Reference (TemplateArray* owner,
@@ -965,7 +1058,11 @@ Reference<uint>::Reference (TemplateArray* owner,
                             value_type     default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!_M_ref->IsUint()) throw std::runtime_error("Reference is NOT an uint");
+    if (!ref()->IsUint())
+    {
+        std::cerr << "json reference value is not an uint! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -975,7 +1072,11 @@ Reference<int>::Reference (TemplateObject*    owner,
                            value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!_M_ref->IsInt()) throw std::runtime_error("Reference is NOT an int");
+    if (!ref()->IsInt())
+    {
+        std::cerr << "json reference value is not a int! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<int>::Reference (TemplateArray*    owner,
@@ -983,7 +1084,11 @@ Reference<int>::Reference (TemplateArray*    owner,
                            value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!_M_ref->IsInt()) throw std::runtime_error("Reference is NOT an int");
+    if (!ref()->IsInt())
+    {
+        std::cerr << "json reference value is not a int! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -993,7 +1098,11 @@ Reference<u64>::Reference (TemplateObject*    owner,
                            value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!_M_ref->IsUint64()) throw std::runtime_error("Reference is NOT an uint64");
+    if (!ref()->IsUint64())
+    {
+        std::cerr << "json reference value is not an u64! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<u64>::Reference (TemplateArray*    owner,
@@ -1001,7 +1110,11 @@ Reference<u64>::Reference (TemplateArray*    owner,
                            value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!_M_ref->IsUint64()) throw std::runtime_error("Reference is NOT an uint64");
+    if (!ref()->IsUint64())
+    {
+        std::cerr << "json reference value is not an u64! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -1011,7 +1124,11 @@ Reference<int64>::Reference (TemplateObject*    owner,
                              value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!_M_ref->IsInt64()) throw std::runtime_error("Reference is NOT an int64");
+    if (!ref()->IsInt64())
+    {
+        std::cerr << "json reference value is not a int64! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<int64>::Reference (TemplateArray*    owner,
@@ -1019,7 +1136,11 @@ Reference<int64>::Reference (TemplateArray*    owner,
                              value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!_M_ref->IsInt64()) throw std::runtime_error("Reference is NOT an int64");
+    if (!ref()->IsInt64())
+    {
+        std::cerr << "json reference value is not a int64! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -1029,7 +1150,11 @@ Reference<float>::Reference (TemplateObject*    owner,
                              value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!_M_ref->IsNumber()) throw std::runtime_error("Reference is NOT a Float");
+    if (!ref()->IsNumber())
+    {
+        std::cerr << "json reference value is not a float! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<float>::Reference (TemplateArray*    owner,
@@ -1037,7 +1162,11 @@ Reference<float>::Reference (TemplateArray*    owner,
                              value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!_M_ref->IsNumber()) throw std::runtime_error("Reference is NOT a Float");
+    if (!ref()->IsNumber())
+    {
+        std::cerr << "json reference value is not a float! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -1047,7 +1176,11 @@ Reference<double>::Reference (TemplateObject*    owner,
                               value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!_M_ref->IsDouble()) throw std::runtime_error("Reference is NOT a Double");
+    if (!ref()->IsDouble())
+    {
+        std::cerr << "json reference value is not a double! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<double>::Reference (TemplateArray*    owner,
@@ -1055,7 +1188,11 @@ Reference<double>::Reference (TemplateArray*    owner,
                               value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!_M_ref->IsDouble()) throw std::runtime_error("Reference is NOT a Double");
+    if (!ref()->IsDouble())
+    {
+        std::cerr << "json reference value is not a double! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
@@ -1065,7 +1202,11 @@ Reference<Parser::string_type>::Reference (TemplateObject*    owner,
                                            value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    //if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a String");
+    if (!ref()->IsString())
+    {
+        std::cerr << "json reference value is not a string! type: "
+                  << type() << std::endl;
+    }
 }
 
 Reference<Parser::string_type>::Reference (TemplateArray*    owner,
@@ -1073,12 +1214,16 @@ Reference<Parser::string_type>::Reference (TemplateArray*    owner,
                                            value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    //if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a String");
+    if (!ref()->IsString())
+    {
+        std::cerr << "json reference value is not a string! type: "
+                  << type() << std::endl;
+    }
 }
 
 // ======================================================================
 
-Factory::Factory(std::initializer_list<file_pair> json_files)
+Factory::Factory(std::initializer_list<file_tuple> json_files)
 {
     _M_jsonDocs.reserve(json_files.size());
 
@@ -1088,11 +1233,12 @@ Factory::Factory(std::initializer_list<file_pair> json_files)
         {
             std::fstream file;
 
-            file.open(item.second.c_str(), std::ios::out | std::ios::app);
+            file.open(std::get<1>(item).c_str(), std::ios::out | std::ios::app);
         }
 
-        _M_jsonDocs.emplace(item.first, std::make_pair(item.second,
-                                                       json_ptr(new Parser(item.second))));
+        _M_jsonDocs.emplace(std::get<0>(item), std::make_pair(std::get<1>(item),
+                                                              json_ptr(new Parser(std::get<1>(item),
+                                                                                  std::get<2>(item)))));
     }
 }
 
@@ -1100,15 +1246,47 @@ void Factory::reset()
 {
     aboutToReset();
 
-    _M_objects.clear();
-    _M_arrays.clear();
+    /*for (auto& item : _M_objects)
+    {
+        item.second.clear();
+    }
+
+    for (auto& item : _M_arrays)
+    {
+        item.second.clear();
+    }*/
 
     for (auto& item : _M_jsonDocs)
     {
-        item.second.second.reset(new Parser(item.second.first));
+        item.second.second->createDocument(item.second.first);
     }
 
     afterReset();
+}
+
+void Factory::reset(size_type key)
+{
+    aboutToResetDoc(key);
+
+    auto it_obj_type   = _M_objects.find(key);
+    auto it_array_type = _M_arrays.find(key);
+
+    if (it_obj_type != _M_objects.end())
+    {
+        it_obj_type->second.clear();
+    }
+
+    if (it_array_type != _M_arrays.end())
+    {
+        it_array_type->second.clear();
+    }
+
+    for (auto& item : _M_jsonDocs)
+    {
+        item.second.second->createDocument(item.second.first);
+    }
+
+    afterResetDoc(key);
 }
 
 bool Factory::save(size_type key)
@@ -1137,6 +1315,40 @@ void Factory::save()
 
         json.second.second->save(file);
     }
+}
+
+Factory::generic_object_ptr Factory::getObject(size_type type, size_type key) const
+{
+    auto const it_type = _M_objects.find(type);
+
+    if (it_type != _M_objects.end())
+    {
+        auto const it_key = _M_objects[type].find(key);
+
+        if (it_key != _M_objects[type].end())
+        {
+            return it_key->second;
+        }
+    }
+
+    return generic_object_ptr();
+}
+
+Factory::generic_array_ptr Factory::getArray(size_type type, size_type key) const
+{
+    auto const it_type = _M_arrays.find(type);
+
+    if (it_type != _M_arrays.end())
+    {
+        auto const it_key = _M_arrays[type].find(key);
+
+        if (it_key != _M_arrays[type].end())
+        {
+            return it_key->second;
+        }
+    }
+
+    return generic_array_ptr();
 }
 
 } } // namespace Json

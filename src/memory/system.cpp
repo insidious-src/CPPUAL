@@ -22,6 +22,7 @@
 #include <cppual/memory/system.h>
 
 #include <cstdlib>
+#include <assert.h>
 
 #ifdef OS_STD_UNIX
 #    include <unistd.h>
@@ -292,12 +293,6 @@ std::size_t workingSize ()
 #define SET_THREAD_LOCAL(NAME, VALUE) NAME = VALUE
 #endif
 
-#ifdef ENABLE_ASSERTS
-#  include <assert.h>
-#else
-#  define assert(x)
-#endif
-
 // Build time configurable limits
 
 // Presets, if none is defined it will default to performance priority
@@ -348,11 +343,6 @@ std::size_t workingSize ()
 #ifndef ENABLE_STATISTICS
 //! Enable statistics collection
 #define ENABLE_STATISTICS         0
-#endif
-
-#ifndef ENABLE_ASSERTS
-//! Enable asserts
-#define ENABLE_ASSERTS            0
 #endif
 
 //! Memory page size

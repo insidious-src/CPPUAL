@@ -194,26 +194,26 @@ public:
     inline self_type operator + (difference_type n) const
     {
         self_type tmp (*this);
-        tmp.m_uPos += n;
+        tmp.m_uPos += static_cast<size_type>(n >= 0 ? n : -n);
         return tmp;
     }
 
     inline self_type& operator += (difference_type n)
     {
-        m_uPos += n;
+        m_uPos += static_cast<size_type>(n >= 0 ? n : -n);
         return *this;
     }
 
     inline self_type operator - (difference_type n) const
     {
         self_type tmp (*this);
-        tmp.m_uPos -= n;
+        tmp.m_uPos -= static_cast<size_type>(n >= 0 ? n : -n);
         return tmp;
     }
 
     inline self_type& operator -= (difference_type n)
     {
-        m_uPos -= n;
+        m_uPos -= static_cast<size_type>(n >= 0 ? n : -n);
         return *this;
     }
 

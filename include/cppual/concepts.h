@@ -32,10 +32,6 @@ using FundamentalType = typename
 std::enable_if<std::is_fundamental<T>::value, T>::type;
 
 template <typename T>
-using LiteralType = typename
-std::enable_if<std::is_literal_type<T>::value, T>::type;
-
-template <typename T>
 using IntegralType = typename
 std::enable_if<std::is_integral<T>::value, T>::type;
 
