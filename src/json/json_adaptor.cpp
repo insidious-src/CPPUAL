@@ -23,7 +23,7 @@ Parser::Parser(string_type const& file_path, Type type)
 
     if (!file.is_open()) return;
 
-    file.seekg(0, std::ios::end);
+    file.seekg(std::ios::beg, std::ios::end);
 
     auto const size = file.tellg();
 
@@ -47,25 +47,40 @@ Parser::Parser(string_type const& file_path, Type type)
         }
     }
 
-    /*if (type == Type::Array)
+    if (!IsArray() && !IsObject()) _M_type = Type::Null;
+}
+
+Parser::Parser(std::istream& data, Type type)
+: rapidjson::Document(),
+  _M_type (type)
+{
+    data.seekg(std::ios::beg, std::ios::end);
+
+    auto const size = data.tellg();
+
+    data.seekg(std::ios::beg);
+
+    rapidjson::IStreamWrapper stream(data);
+
+    ParseStream(stream);
+
+    if (HasParseError() || !size)
     {
-        if (IsNull())
+        if (type == Type::Array)
         {
             SetArray();
             _M_type = Type::Array;
         }
-    }
-    else
-    {
-        if(IsArray())
+        else
         {
             SetObject();
             _M_type = Type::Object;
         }
-    }*/
+    }
 
     if (!IsArray() && !IsObject()) _M_type = Type::Null;
 }
+
 
 bool Parser::createDocument(string_type const& file_path, Type type)
 {
@@ -73,7 +88,7 @@ bool Parser::createDocument(string_type const& file_path, Type type)
 
     if(!file.is_open()) return false;
 
-    file.seekg(0, std::ios::end);
+    file.seekg(std::ios::beg, std::ios::end);
 
     auto const size = file.tellg();
 
@@ -104,21 +119,14 @@ bool Parser::createDocument(string_type const& file_path, Type type)
     return true;
 }
 
-bool Parser::save(std::ofstream& stream)
+bool Parser::save(std::ostream& stream)
 {
-    if(stream.is_open())
-    {
-        aboutToSave();
+    aboutToSave();
 
-        rapidjson::OStreamWrapper wrapper(stream);
-        rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(wrapper);
+    rapidjson::OStreamWrapper wrapper(stream);
+    rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(wrapper);
 
-        base_type::Accept(writer);
-
-        return true;
-    }
-
-    return false;
+    return base_type::Accept(writer);
 }
 
 Parser::Type Parser::type() const
@@ -970,7 +978,7 @@ Reference<bool>::Reference(TemplateObject*    owner,
 {
     if (!ref()->IsBool())
     {
-        std::cerr << "json reference value is not a bool! type: "
+        std::cerr << "json reference " << name << " value is not a bool! type: "
                   << type() << std::endl;
     }
 }
@@ -982,7 +990,7 @@ Reference<bool>::Reference(TemplateArray*    owner,
 {
     if (!ref()->IsBool())
     {
-        std::cerr << "json reference value is not a bool! type: "
+        std::cerr << "json reference value with index " << idx << " is not a bool! type: "
                   << type() << std::endl;
     }
 }
@@ -996,7 +1004,7 @@ Reference<u16>::Reference(TemplateObject*    owner,
 {
     if (!ref()->IsUint())
     {
-        std::cerr << "json reference value is not an uint! type: "
+        std::cerr << "json reference " << name << " value is not an uint! type: "
                   << type() << std::endl;
     }
 }
@@ -1008,7 +1016,7 @@ Reference<u16>::Reference(TemplateArray* owner,
 {
     if (!ref()->IsUint())
     {
-        std::cerr << "json reference value is not an uint! type: "
+        std::cerr << "json reference value with index " << idx << " is not an uint! type: "
                   << type() << std::endl;
     }
 }
@@ -1022,7 +1030,7 @@ Reference<int16>::Reference (TemplateObject*     owner,
 {
     if (!ref()->IsInt())
     {
-        std::cerr << "json reference value is not a int! type: "
+        std::cerr << "json reference " << name << " value is not a int! type: "
                   << type() << std::endl;
     }
 }
@@ -1034,7 +1042,7 @@ Reference<int16>::Reference (TemplateArray* owner,
 {
     if (!ref()->IsInt())
     {
-        std::cerr << "json reference value is not a int! type: "
+        std::cerr << "json reference value with index " << idx << " is not a int! type: "
                   << type() << std::endl;
     }
 }
@@ -1048,7 +1056,7 @@ Reference<uint>::Reference (TemplateObject*    owner,
 {
     if (!ref()->IsUint())
     {
-        std::cerr << "json reference value is not an uint! type: "
+        std::cerr << "json reference " << name << " value is not an uint! type: "
                   << type() << std::endl;
     }
 }
@@ -1060,7 +1068,7 @@ Reference<uint>::Reference (TemplateArray* owner,
 {
     if (!ref()->IsUint())
     {
-        std::cerr << "json reference value is not an uint! type: "
+        std::cerr << "json reference value with index " << idx << " is not an uint! type: "
                   << type() << std::endl;
     }
 }
@@ -1074,7 +1082,7 @@ Reference<int>::Reference (TemplateObject*    owner,
 {
     if (!ref()->IsInt())
     {
-        std::cerr << "json reference value is not a int! type: "
+        std::cerr << "json reference " << name << " value is not a int! type: "
                   << type() << std::endl;
     }
 }
@@ -1086,7 +1094,7 @@ Reference<int>::Reference (TemplateArray*    owner,
 {
     if (!ref()->IsInt())
     {
-        std::cerr << "json reference value is not a int! type: "
+        std::cerr << "json reference value with index " << idx << " is not a int! type: "
                   << type() << std::endl;
     }
 }
@@ -1100,7 +1108,7 @@ Reference<u64>::Reference (TemplateObject*    owner,
 {
     if (!ref()->IsUint64())
     {
-        std::cerr << "json reference value is not an u64! type: "
+        std::cerr << "json reference " << name << " value is not an u64! type: "
                   << type() << std::endl;
     }
 }
@@ -1112,7 +1120,7 @@ Reference<u64>::Reference (TemplateArray*    owner,
 {
     if (!ref()->IsUint64())
     {
-        std::cerr << "json reference value is not an u64! type: "
+        std::cerr << "json reference value with index " << idx << " is not an u64! type: "
                   << type() << std::endl;
     }
 }
@@ -1126,7 +1134,7 @@ Reference<int64>::Reference (TemplateObject*    owner,
 {
     if (!ref()->IsInt64())
     {
-        std::cerr << "json reference value is not a int64! type: "
+        std::cerr << "json reference " << name << " value is not a int64! type: "
                   << type() << std::endl;
     }
 }
@@ -1138,7 +1146,7 @@ Reference<int64>::Reference (TemplateArray*    owner,
 {
     if (!ref()->IsInt64())
     {
-        std::cerr << "json reference value is not a int64! type: "
+        std::cerr << "json reference value with index " << idx << " is not a int64! type: "
                   << type() << std::endl;
     }
 }
@@ -1150,9 +1158,9 @@ Reference<float>::Reference (TemplateObject*    owner,
                              value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!ref()->IsNumber())
+    if (!ref()->IsFloat())
     {
-        std::cerr << "json reference value is not a float! type: "
+        std::cerr << "json reference " << name << " value is not a float! type: "
                   << type() << std::endl;
     }
 }
@@ -1162,9 +1170,9 @@ Reference<float>::Reference (TemplateArray*    owner,
                              value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!ref()->IsNumber())
+    if (!ref()->IsFloat())
     {
-        std::cerr << "json reference value is not a float! type: "
+        std::cerr << "json reference value with index " << idx << " is not a float! type: "
                   << type() << std::endl;
     }
 }
@@ -1178,7 +1186,7 @@ Reference<double>::Reference (TemplateObject*    owner,
 {
     if (!ref()->IsDouble())
     {
-        std::cerr << "json reference value is not a double! type: "
+        std::cerr << "json reference " << name << " value is not a double! type: "
                   << type() << std::endl;
     }
 }
@@ -1190,7 +1198,7 @@ Reference<double>::Reference (TemplateArray*    owner,
 {
     if (!ref()->IsDouble())
     {
-        std::cerr << "json reference value is not a double! type: "
+        std::cerr << "json reference value with index " << idx << " is not a double! type: "
                   << type() << std::endl;
     }
 }
@@ -1204,7 +1212,7 @@ Reference<Parser::string_type>::Reference (TemplateObject*    owner,
 {
     if (!ref()->IsString())
     {
-        std::cerr << "json reference value is not a string! type: "
+        std::cerr << "json reference " << name << " value is not a string! type: "
                   << type() << std::endl;
     }
 }
@@ -1216,7 +1224,7 @@ Reference<Parser::string_type>::Reference (TemplateArray*    owner,
 {
     if (!ref()->IsString())
     {
-        std::cerr << "json reference value is not a string! type: "
+        std::cerr << "json reference value with index " << idx << " is not a string! type: "
                   << type() << std::endl;
     }
 }

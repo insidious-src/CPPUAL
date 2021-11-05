@@ -156,7 +156,8 @@ class ValuesArray;
 
 template <typename T,
           typename A = std::allocator<T>,
-          typename   = typename std::enable_if<std::is_base_of<TemplateObject, T>::value>::type
+          typename   = typename std::enable_if<std::is_base_of<TemplateObject, T>::value ||
+                                               std::is_base_of<TemplateArray , T>::value>::type
           >
 class ObjectsArray;
 
@@ -188,10 +189,13 @@ public:
     //! construct from file
     Parser(string_type const& file, Type type = Type::Object);
 
+    //! construct from memory
+    Parser(std::istream& data, Type type = Type::Object);
+
     //! recreate document from file
     bool createDocument(string_type const& file, Type type = Type::Object);
 
-    bool save(std::ofstream& stream);
+    bool save(std::ostream& stream);
 
     Type      type() const;
     size_type size() const;
@@ -1267,6 +1271,7 @@ public:
 template <>
 class Reference<double> : public ReferenceBase<double>
 {
+public:
     typedef ReferenceBase<double>                reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
@@ -1670,6 +1675,17 @@ public:
                   string_type const&    category,
                   allocator_type const& ator = allocator_type())
     : TemplateArray (owner, category),
+      allocator_type(ator)
+    {
+        for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
+
+        connections ();
+    }
+
+    ObjectsArray (TemplateArray*        owner,
+                  size_type             id,
+                  allocator_type const& ator = allocator_type())
+    : TemplateArray (owner, id),
       allocator_type(ator)
     {
         for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
