@@ -34,7 +34,7 @@
 #        include <sys/sysctl.h>
 #    endif
 #elif defined (OS_WINDOWS)
-#    include <Windows.h>
+#    include <windows.h>
 #endif
 
 namespace cppual { namespace Input {

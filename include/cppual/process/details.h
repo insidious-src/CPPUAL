@@ -31,7 +31,7 @@
 #   include <errno.h>
 #   include <signal.h>
 #elif defined (OS_WINDOWS)
-#   include <Windows.h>
+#   include <windows.h>
 #endif
 
 namespace cppual { namespace Process {
@@ -53,7 +53,7 @@ typedef pthread_mutex_t mutex_object;
 typedef pid_t           process_handle;
 #elif defined (OS_WINDOWS)
 //typedef DWORD  thread_id;
-typedef HANDLE thread_handle;
+typedef DWORD  thread_handle;
 typedef HANDLE mutex_object;
 typedef HANDLE process_handle;
 #endif

@@ -132,7 +132,8 @@ void ThisThread::exit ()
 int ThisThread::sleepFor (uint uMillisec)
 {
 #ifdef OS_WINDOWS
-    return Sleep (uMillisec);
+    Sleep (uMillisec);
+    return static_cast<int>(uMillisec);
 #elif defined (OS_STD_POSIX)
     return usleep (uMillisec * 1000);
 #endif

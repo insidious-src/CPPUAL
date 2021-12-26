@@ -163,7 +163,7 @@ class ObjectsArray;
 
 //======================================================
 
-class Parser : protected rapidjson::Document
+class SHARED_API Parser : protected rapidjson::Document
 {
 public:
     typedef rapidjson::Document                   base_type      ;
@@ -223,7 +223,7 @@ private:
 
 // ======================================================================
 
-class TemplateOwner
+class SHARED_API TemplateOwner
 {
 public:
     constexpr TemplateOwner() noexcept
@@ -284,7 +284,7 @@ private:
 
 // ======================================================================
 
-class TemplateObject
+class SHARED_API TemplateObject
 {
 public:
     typedef Parser::size_type                               size_type      ;
@@ -396,7 +396,7 @@ private:
 
 //======================================================
 
-class TemplateArray
+class SHARED_API TemplateArray
 {
 public:
     typedef Parser::size_type                               size_type      ;
@@ -727,7 +727,7 @@ private:
 // ======================================================================
 
 template <>
-class ReferenceBase<Parser::string_type>
+class SHARED_API ReferenceBase<Parser::string_type>
 {
 public:
     typedef ReferenceBase<Parser::string_type> self_type  ;
@@ -891,7 +891,7 @@ public:
 //======================================================
 
 template <>
-class Reference<bool> : public ReferenceBase<bool>
+class SHARED_API Reference<bool> : public ReferenceBase<bool>
 {
 public:
     typedef ReferenceBase<bool>                  reference_base;
@@ -938,7 +938,7 @@ public:
 //======================================================
 
 template <>
-class Reference<u16> : public ReferenceBase<u16>
+class SHARED_API Reference<u16> : public ReferenceBase<u16>
 {
 public:
     typedef ReferenceBase<u16>                    reference_base;
@@ -986,7 +986,7 @@ public:
 //======================================================
 
 template <>
-class Reference<int16> : public ReferenceBase<int16>
+class SHARED_API Reference<int16> : public ReferenceBase<int16>
 {
 public:
     typedef ReferenceBase<int16>                  reference_base;
@@ -1034,7 +1034,7 @@ public:
 //======================================================
 
 template <>
-class Reference<uint> : public ReferenceBase<uint>
+class SHARED_API Reference<uint> : public ReferenceBase<uint>
 {
 public:
     typedef ReferenceBase<uint>                  reference_base;
@@ -1081,7 +1081,7 @@ public:
 //======================================================
 
 template <>
-class Reference<int> : public ReferenceBase<int>
+class SHARED_API Reference<int> : public ReferenceBase<int>
 {
 public:
     typedef ReferenceBase<int>                   reference_base;
@@ -1128,7 +1128,7 @@ public:
 //======================================================
 
 template <>
-class Reference<u64> : public ReferenceBase<u64>
+class SHARED_API Reference<u64> : public ReferenceBase<u64>
 {
 public:
     typedef ReferenceBase<u64>                   reference_base;
@@ -1175,7 +1175,7 @@ public:
 //======================================================
 
 template <>
-class Reference<int64> : public ReferenceBase<int64>
+class SHARED_API Reference<int64> : public ReferenceBase<int64>
 {
 public:
     typedef ReferenceBase<int64>                 reference_base;
@@ -1222,7 +1222,7 @@ public:
 //======================================================
 
 template <>
-class Reference<float> : public ReferenceBase<float>
+class SHARED_API Reference<float> : public ReferenceBase<float>
 {
 public:
     typedef ReferenceBase<float>                 reference_base;
@@ -1269,7 +1269,7 @@ public:
 //======================================================
 
 template <>
-class Reference<double> : public ReferenceBase<double>
+class SHARED_API Reference<double> : public ReferenceBase<double>
 {
 public:
     typedef ReferenceBase<double>                reference_base;
@@ -1316,7 +1316,7 @@ public:
 //======================================================
 
 template <>
-class Reference<Parser::string_type> : public ReferenceBase<Parser::string_type>
+class SHARED_API Reference<Parser::string_type> : public ReferenceBase<Parser::string_type>
 {
 public:
     typedef ReferenceBase<Parser::string_type>   reference_base;
@@ -1991,7 +1991,7 @@ private:
 
 // ======================================================================
 
-class Factory
+class SHARED_API Factory
 {
 public:
     template<typename T>

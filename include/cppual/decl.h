@@ -63,6 +63,9 @@
 #undef COMPILER_VERSION
 #undef STRINGIFY_HELPER
 #undef STRINGIFY
+#undef DECL_EXPORT
+#undef DECL_IMPORT
+#undef DECL_HIDDEN
 
 #define STRINGIFY(S) STRINGIFY_HELPER(S)
 #define STRINGIFY_HELPER(S) #S
@@ -72,7 +75,7 @@
 #endif // CYGWIN
 
 // operating system support verification & definitions
-#if defined (__WINDOWS__) or defined (__TOS_WIN__)
+#if defined (__WINDOWS__) or defined (__TOS_WIN__) or defined (__WIN32__) or defined (__WIN64__)
 #
 #   ifdef WINAPI_FAMILY
 #       if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
@@ -87,20 +90,21 @@
 #   else
 #       define OS_PLATFORM_WIN_DESKTOP
 #   endif
+
+#   if defined (_WIN64) or defined (__WIN64) or defined (__WIN64__)
 #
-#   if defined (_WIN32) or defined (__WIN32) or defined (__WIN32__)
+#       define OS_WIN64
+#       define OS_STD_WINNT
+#       define OS_WINDOWS OS_WIN64
+#       define OS_CURRENT OS_WINDOWS
+#
+#   elif defined (_WIN32) or defined (__WIN32) or defined (__WIN32__)
 #
 #       define OS_WIN32
 #       define OS_STD_WINNT
 #       define OS_WINDOWS OS_WIN32
 #       define OS_CURRENT OS_WINDOWS
 #
-#   elif defined (_WIN64) or defined (__WIN64) or defined (__WIN64__)
-#
-#       define OS_WIN64
-#       define OS_STD_WINNT
-#       define OS_WINDOWS OS_WIN64
-#       define OS_CURRENT OS_WINDOWS
 #   endif
 #
 #elif defined (__unix__) or defined (__unix)
@@ -187,9 +191,15 @@
 #   define FORCEINLINE inline __attribute__((always_inline))
 #   define DECLSPEC_ALIGN(x) __attribute__((aligned(x)))
 #   if !defined (STDCALL) and !defined (FASTCALL) and !defined (CDECL)
-#       define STDCALL  __attribute__((stdcall))
-#       define FASTCALL __attribute__((fastcall))
-#       define CDECL
+#       if defined (__WIN64__) or defined(__WIN32__)
+#           define STDCALL  __stdcall
+#           define FASTCALL __fastcall
+#           define CDECL
+#       else
+#           define STDCALL  __attribute__((stdcall))
+#           define FASTCALL __attribute__((fastcall))
+#           define CDECL
+#       endif
 #   endif // STDCALL and CDECL and FASTCALL
 #
 #else
@@ -209,18 +219,18 @@
 
 #if !defined (DECL_EXPORT) and !defined (DECL_IMPORT) and !defined (DECL_HIDDEN)
 #
-#   ifdef __GNUC__
+#   if defined (__WIN32__) or defined (__WIN64__)
+#       define DECL_EXPORT __declspec(dllexport)
+#       define DECL_IMPORT __declspec(dllimport)
+#       define DECL_HIDDEN
+#   elif (defined (__GNUC__))
 #       define DECL_EXPORT __attribute__((visibility("default")))
 #       define DECL_IMPORT __attribute__((visibility("default")))
 #       define DECL_HIDDEN __attribute__((visibility("hidden")))
-#   elif defined (_MSC_VER)
-#        define DECL_EXPORT __declspec(dllexport)
-#        define DECL_IMPORT __declspec(dllimport)
-#        define DECL_HIDDEN
 #   else
-#        define DECL_IMPORT
-#        define DECL_EXPORT
-#        define DECL_HIDDEN
+#       define DECL_IMPORT
+#       define DECL_EXPORT
+#       define DECL_HIDDEN
 #   endif
 #
 #endif // DECL_EXPORT, DECL_IMPORT and DECL_HIDDEN
@@ -394,11 +404,13 @@ typedef long long long_t;
 typedef const long long clong_t;
 typedef unsigned long long ulong_t;
 typedef const unsigned long long culong_t;
+typedef long long call_ret_t;
 #else
 typedef long long_t;
 typedef const long clong_t;
 typedef unsigned long ulong_t;
 typedef const unsigned long culong_t;
+typedef int call_ret_t;
 #endif
 
 // floating point typedefs

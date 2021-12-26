@@ -66,7 +66,7 @@ find_package(SndFile               ) ## will be dropped at some point
 find_package(Freetype              ) ## will be dropped at some point
 find_package(GLEW                  ) ## will be dropped at some point
 find_package(OpenGL        REQUIRED) ## will be dropped at some point
-find_package(EGL           REQUIRED) ## will be dropped at some point
+find_package(EGL                   ) ## will be dropped at some point
 find_package(OpenCL                ) ## backup compute api
 find_package(Vulkan                ) ## primary compute & graphics api
 
@@ -219,6 +219,7 @@ add_library(cppual-json SHARED
     "include/cppual/json/json_adaptor.h"
     "src/json/json_adaptor.cpp"
     )
+target_compile_definitions(cppual-json PRIVATE -DAPI_EXPORT)
 
 if(VULKAN_FOUND)
 
@@ -422,104 +423,7 @@ add_library(cppual-video SHARED
     "include/cppual/multimedia/video/vequalizer.h"
     )
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-# graphical user interface - platform Xorg
-add_library(cppual-ui-xorg MODULE
-    "include/cppual/ui/platforms/xcb/atom.hpp"
-    "include/cppual/ui/platforms/xcb/colormap.hpp"
-    "include/cppual/ui/platforms/xcb/connection.hpp"
-    "include/cppual/ui/platforms/xcb/core.hpp"
-    "include/cppual/ui/platforms/xcb/cursor.hpp"
-    "include/cppual/ui/platforms/xcb/drawable.hpp"
-    "include/cppual/ui/platforms/xcb/event.hpp"
-    "include/cppual/ui/platforms/xcb/font.hpp"
-    "include/cppual/ui/platforms/xcb/fontable.hpp"
-    "include/cppual/ui/platforms/xcb/gcontext.hpp"
-    "include/cppual/ui/platforms/xcb/generic/error.hpp"
-    "include/cppual/ui/platforms/xcb/generic/event.hpp"
-    "include/cppual/ui/platforms/xcb/generic/extension.hpp"
-    "include/cppual/ui/platforms/xcb/generic/factory.hpp"
-    "include/cppual/ui/platforms/xcb/generic/input_iterator_adapter.hpp"
-    "include/cppual/ui/platforms/xcb/generic/iterator_traits.hpp"
-    "include/cppual/ui/platforms/xcb/generic/reply_iterator.hpp"
-    "include/cppual/ui/platforms/xcb/generic/request.hpp"
-    "include/cppual/ui/platforms/xcb/generic/resource.hpp"
-    "include/cppual/ui/platforms/xcb/generic/signature.hpp"
-    "include/cppual/ui/platforms/xcb/generic.hpp"
-    "include/cppual/ui/platforms/xcb/pixmap.hpp"
-    "include/cppual/ui/platforms/xcb/proto/bigreq.hpp"
-    "include/cppual/ui/platforms/xcb/proto/composite.hpp"
-    "include/cppual/ui/platforms/xcb/proto/damage.hpp"
-    "include/cppual/ui/platforms/xcb/proto/dpms.hpp"
-    "include/cppual/ui/platforms/xcb/proto/dri2.hpp"
-    "include/cppual/ui/platforms/xcb/proto/dri3.hpp"
-    "include/cppual/ui/platforms/xcb/proto/glx.hpp"
-    "include/cppual/ui/platforms/xcb/proto/present.hpp"
-    "include/cppual/ui/platforms/xcb/proto/randr.hpp"
-    "include/cppual/ui/platforms/xcb/proto/record.hpp"
-    "include/cppual/ui/platforms/xcb/proto/render.hpp"
-    "include/cppual/ui/platforms/xcb/proto/res.hpp"
-    "include/cppual/ui/platforms/xcb/proto/screensaver.hpp"
-    "include/cppual/ui/platforms/xcb/proto/shape.hpp"
-    "include/cppual/ui/platforms/xcb/proto/shm.hpp"
-    "include/cppual/ui/platforms/xcb/proto/sync.hpp"
-    "include/cppual/ui/platforms/xcb/proto/x.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xc_misc.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xevie.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xf86dri.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xfixes.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xinerama.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xinput.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xkb.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xprint.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xselinux.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xtest.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xv.hpp"
-    "include/cppual/ui/platforms/xcb/proto/xvmc.hpp"
-    "include/cppual/ui/platforms/xcb/valueparam.hpp"
-    "include/cppual/ui/platforms/xcb/window.hpp"
-    "include/cppual/ui/platforms/xcb/xcb.hpp"
-    "src/ui/platform/xorg/xmain.cpp"
-    "src/ui/platform/xorg/xbackend.cpp"
-    "src/ui/platform/xorg/xbackend.h"
-    "src/ui/platform/xorg/xsurface.cpp"
-    "src/ui/platform/xorg/xsurface.h"
-    "src/ui/platform/xorg/xinput.cpp"
-    "src/ui/platform/xorg/xinput.h"
-    "src/ui/platform/xorg/xcb_def.h"
-    "src/ui/platform/xorg/xcb_event.h"
-    "src/ui/platform/xorg/xcb_window.h"
-    "src/ui/platform/xorg/xcb_iterator.h"
-    )
-
-# graphical user interface - platform Wayland
-add_library(cppual-ui-wayland MODULE
-    "src/ui/platform/wayland/wlbackend.cpp"
-    "src/ui/platform/wayland/wlbackend.h"
-    "src/ui/platform/wayland/wlsurface.cpp"
-    "src/ui/platform/wayland/wlsurface.h"
-    "src/ui/platform/wayland/wlinput.cpp"
-    "src/ui/platform/wayland/wlinput.h"
-    "src/ui/platform/wayland/wlmain.cpp"
-    )
-
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-
-# graphical user interface - platform Windows
-add_library(cppual-ui-win MODULE
-    "src/ui/platform/winapi/w32window.cpp"
-    "src/ui/platform/winapi/w32window.h"
-    "src/ui/platform/winapi/w32backend.cpp"
-    "src/ui/platform/winapi/w32backend.h"
-    "src/ui/platform/winapi/w32input.cpp"
-    "src/ui/platform/winapi/w32input.h"
-    "src/ui/platform/winapi/w32main.cpp"
-    )
-
-endif()
-
-if(FREETYPE_FOUND AND GLEW_FOUND)
+if(FREETYPE_FOUND AND OPENGL_FOUND AND GLEW_FOUND AND EGL_FOUND)
 
 # graphics drawing library
 add_library(cppual-gfx SHARED
@@ -643,6 +547,103 @@ add_library(cppual-ui-dialogs MODULE
     "include/cppual/ui/dialogs/wizarddlg.h"
     )
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+# graphical user interface - platform Xorg
+add_library(cppual-ui-xorg MODULE
+    "include/cppual/ui/platforms/xcb/atom.hpp"
+    "include/cppual/ui/platforms/xcb/colormap.hpp"
+    "include/cppual/ui/platforms/xcb/connection.hpp"
+    "include/cppual/ui/platforms/xcb/core.hpp"
+    "include/cppual/ui/platforms/xcb/cursor.hpp"
+    "include/cppual/ui/platforms/xcb/drawable.hpp"
+    "include/cppual/ui/platforms/xcb/event.hpp"
+    "include/cppual/ui/platforms/xcb/font.hpp"
+    "include/cppual/ui/platforms/xcb/fontable.hpp"
+    "include/cppual/ui/platforms/xcb/gcontext.hpp"
+    "include/cppual/ui/platforms/xcb/generic/error.hpp"
+    "include/cppual/ui/platforms/xcb/generic/event.hpp"
+    "include/cppual/ui/platforms/xcb/generic/extension.hpp"
+    "include/cppual/ui/platforms/xcb/generic/factory.hpp"
+    "include/cppual/ui/platforms/xcb/generic/input_iterator_adapter.hpp"
+    "include/cppual/ui/platforms/xcb/generic/iterator_traits.hpp"
+    "include/cppual/ui/platforms/xcb/generic/reply_iterator.hpp"
+    "include/cppual/ui/platforms/xcb/generic/request.hpp"
+    "include/cppual/ui/platforms/xcb/generic/resource.hpp"
+    "include/cppual/ui/platforms/xcb/generic/signature.hpp"
+    "include/cppual/ui/platforms/xcb/generic.hpp"
+    "include/cppual/ui/platforms/xcb/pixmap.hpp"
+    "include/cppual/ui/platforms/xcb/proto/bigreq.hpp"
+    "include/cppual/ui/platforms/xcb/proto/composite.hpp"
+    "include/cppual/ui/platforms/xcb/proto/damage.hpp"
+    "include/cppual/ui/platforms/xcb/proto/dpms.hpp"
+    "include/cppual/ui/platforms/xcb/proto/dri2.hpp"
+    "include/cppual/ui/platforms/xcb/proto/dri3.hpp"
+    "include/cppual/ui/platforms/xcb/proto/glx.hpp"
+    "include/cppual/ui/platforms/xcb/proto/present.hpp"
+    "include/cppual/ui/platforms/xcb/proto/randr.hpp"
+    "include/cppual/ui/platforms/xcb/proto/record.hpp"
+    "include/cppual/ui/platforms/xcb/proto/render.hpp"
+    "include/cppual/ui/platforms/xcb/proto/res.hpp"
+    "include/cppual/ui/platforms/xcb/proto/screensaver.hpp"
+    "include/cppual/ui/platforms/xcb/proto/shape.hpp"
+    "include/cppual/ui/platforms/xcb/proto/shm.hpp"
+    "include/cppual/ui/platforms/xcb/proto/sync.hpp"
+    "include/cppual/ui/platforms/xcb/proto/x.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xc_misc.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xevie.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xf86dri.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xfixes.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xinerama.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xinput.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xkb.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xprint.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xselinux.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xtest.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xv.hpp"
+    "include/cppual/ui/platforms/xcb/proto/xvmc.hpp"
+    "include/cppual/ui/platforms/xcb/valueparam.hpp"
+    "include/cppual/ui/platforms/xcb/window.hpp"
+    "include/cppual/ui/platforms/xcb/xcb.hpp"
+    "src/ui/platform/xorg/xmain.cpp"
+    "src/ui/platform/xorg/xbackend.cpp"
+    "src/ui/platform/xorg/xbackend.h"
+    "src/ui/platform/xorg/xsurface.cpp"
+    "src/ui/platform/xorg/xsurface.h"
+    "src/ui/platform/xorg/xinput.cpp"
+    "src/ui/platform/xorg/xinput.h"
+    "src/ui/platform/xorg/xcb_def.h"
+    "src/ui/platform/xorg/xcb_event.h"
+    "src/ui/platform/xorg/xcb_window.h"
+    "src/ui/platform/xorg/xcb_iterator.h"
+    )
+
+# graphical user interface - platform Wayland
+add_library(cppual-ui-wayland MODULE
+    "src/ui/platform/wayland/wlbackend.cpp"
+    "src/ui/platform/wayland/wlbackend.h"
+    "src/ui/platform/wayland/wlsurface.cpp"
+    "src/ui/platform/wayland/wlsurface.h"
+    "src/ui/platform/wayland/wlinput.cpp"
+    "src/ui/platform/wayland/wlinput.h"
+    "src/ui/platform/wayland/wlmain.cpp"
+    )
+
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+# graphical user interface - platform Windows
+add_library(cppual-ui-win MODULE
+    "src/ui/platform/winapi/w32window.cpp"
+    "src/ui/platform/winapi/w32window.h"
+    "src/ui/platform/winapi/w32backend.cpp"
+    "src/ui/platform/winapi/w32backend.h"
+    "src/ui/platform/winapi/w32input.cpp"
+    "src/ui/platform/winapi/w32input.h"
+    "src/ui/platform/winapi/w32main.cpp"
+    )
+
+endif()
+
 endif()
 
 
@@ -650,7 +651,7 @@ endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(cppual-ui-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
     target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND GLEW_FOUND AND EGL_FOUND)
     target_link_libraries(cppual-ui-win cppual-memory WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 #    target_link_libraries(cppual-memory)
@@ -676,7 +677,7 @@ if(SNDFILE_FOUND AND OPENAL_FOUND)
     target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
 endif()
 
-if(FREETYPE_FOUND AND GLEW_FOUND)
+if(FREETYPE_FOUND AND OPENGL_FOUND AND GLEW_FOUND AND EGL_FOUND)
     target_link_libraries(cppual-gfx cppual-compute Freetype::Library)
     target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx)
     target_link_libraries(cppual-gl cppual-gfx EGL::Library GLEW::Library OpenGL::Library)

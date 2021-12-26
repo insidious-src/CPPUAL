@@ -39,7 +39,7 @@ namespace cppual { namespace Process {
 class DynLoader : public NonCopyable
 {
 public:
-    typedef int (DLCALL * function_type)();
+    typedef call_ret_t (DLCALL * function_type)();
     typedef string string_type;
     typedef Handle handle_type;
 
