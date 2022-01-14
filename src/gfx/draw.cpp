@@ -117,17 +117,17 @@ cppual::Graphics::ITransformable3D::~ITransformable3D()
 
 shared_drawable2d DrawableFactory::create2D (string_type const& gName)
 {
-    return Internal::manager2D ().construct (gName);
+    return Internal::manager2D ().plugin (gName).interface ();
 }
 
 shared_drawable3d DrawableFactory::create3D (string_type const& gName)
 {
-    return Internal::manager3D ().construct (gName);
+    return Internal::manager3D ().plugin (gName).interface ();
 }
 
 shared_context ContextFactory::create (string_type const& gName)
 {
-    return Internal::managerContext().construct (gName);
+    return Internal::managerContext().plugin (gName).interface ();
 }
 
 } } // namespace Graphics

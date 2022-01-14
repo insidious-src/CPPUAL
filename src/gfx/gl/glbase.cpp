@@ -95,7 +95,7 @@ Object::Object (uint uShaderType)
 
 Object::~Object () noexcept
 {
-    uint uId = id ();
+    uint uId = handle ();
 
     if (uId)
     {

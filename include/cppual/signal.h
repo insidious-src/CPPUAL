@@ -27,35 +27,51 @@
 #include <cppual/functional.h>
 
 #include <vector>
+#include <memory>
 
 namespace cppual {
 
+// =========================================================
+
+template <typename T>
+using SignalAllocator = std::allocator< Function<T> >;
+
 template <typename T,
-          typename = std::allocator< Function<T> >
+          typename Allocator = SignalAllocator<T>
+          >
+using SignalQueue = CircularQueue<T, Allocator>;
+
+// =========================================================
+
+template <typename T,
+          typename = SignalAllocator<T>
           >
 class Signal;
 
 template <typename T,
-          typename = std::allocator< Function<T> >
+          typename = SignalAllocator<T>
           >
 class ScopedConnection;
 
 // =========================================================
 
-template <typename TRetType, typename... Args, typename Allocator>
-class Signal <TRetType(Args...), Allocator>
+template <typename T, typename... Args, typename Allocator>
+class Signal <T(Args...), Allocator>
 {
 public:
     typedef Allocator                                    allocator_type;
     typedef DelegateType<typename Allocator::value_type> value_type;
-    typedef CircularQueue<value_type, allocator_type>    container_type;
+    typedef SignalQueue<value_type, allocator_type>      container_type;
     typedef typename container_type::size_type           size_type;
     typedef typename container_type::reference           reference;
     typedef typename container_type::const_reference     const_reference;
     typedef typename container_type::iterator            iterator;
     typedef typename container_type::const_iterator      const_iterator;
     typedef typename container_type::const_iterator      slot_type;
-    typedef std::vector<TRetType>                        collector_type;
+    typedef ScopedConnection<T(Args...), Allocator>      scoped_connection_type;
+
+    template <typename CollectorAllocator>
+    using collector_type = std::vector<T, CollectorAllocator>;
 
     void clear () noexcept
     { _M_slots.clear (); }
@@ -84,36 +100,21 @@ public:
     const_iterator end () const noexcept
     { return _M_slots.end (); }
 
-    // emit signal to connected slots
-    collector_type operator () (Args... args)
+    //! emit signal to connected slots
+    template <typename CollectorAllocator = std::allocator<T> >
+    collector_type<CollectorAllocator> operator () (Args... args) const
     {
-        collector_type collection;
+        static_assert (std::is_same<typename CollectorAllocator::value_type, T>::value,
+                       "allocator value type is not the same as the return type");
+
+        collector_type<CollectorAllocator> collection;
         size_type size = _M_slots.size ();
 
         if (size == 0) return std::move (collection);
 
         collection.reserve (size);
 
-        for (size_type i = 0U; i < _M_slots.size(); ++i)
-        {
-            if (_M_slots[i] != nullptr)
-                collection.emplace_back
-                        (std::move (_M_slots[i] (std::forward<Args> (args)...)));
-        }
-
-        return std::move (collection);
-    }
-
-    collector_type operator () (Args... args) const
-    {
-        collector_type collection;
-        size_type size = _M_slots.size ();
-
-        if (size == 0) return std::move (collection);
-
-        collection.reserve (size);
-
-        for (size_type i = 0U; i < _M_slots.size(); ++i)
+        for (size_type i = 0U; i < size; ++i)
         {
             if (_M_slots[i] != nullptr)
                 collection.emplace_back
@@ -223,14 +224,15 @@ class Signal <void(Args...), Allocator>
 public:
     typedef Allocator                                    allocator_type;
     typedef DelegateType<typename Allocator::value_type> value_type;
+    typedef SignalQueue<value_type, allocator_type>      container_type;
     typedef typename Allocator::size_type                size_type;
     typedef typename Allocator::reference                reference;
     typedef typename Allocator::const_reference          const_reference;
-    typedef CircularQueue<value_type, allocator_type>    container_type;
     typedef typename container_type::iterator            iterator;
     typedef typename container_type::const_iterator      const_iterator;
     typedef typename container_type::const_iterator      slot_type;
     typedef void                                         collector_type;
+    typedef ScopedConnection<void(Args...), Allocator>   scoped_connection_type;
 
     void clear () noexcept
     { _M_slots.clear (); }
@@ -259,13 +261,7 @@ public:
     const_iterator end () const noexcept
     { return _M_slots.end (); }
 
-    // emit signal to connected slots
-    void operator () (Args... args)
-    {
-        for (size_type i = 0U; i < _M_slots.size(); ++i)
-            if (_M_slots[i] != nullptr) _M_slots[i] (std::forward<Args> (args)...);
-    }
-
+    //! emit signal to connected slots
     void operator () (Args... args) const
     {
         for (size_type i = 0U; i < _M_slots.size(); ++i)
@@ -531,26 +527,263 @@ class ScopedConnection <T(TArgs...), Allocator>
 {
 public:
     typedef Signal<T(TArgs...), Allocator>   signal_type;
-    typedef typename signal_type::slot_type  slot_type;
-    typedef typename signal_type::value_type value_type;
+    typedef signal_type&                     reference  ;
+    typedef signal_type*                     pointer    ;
+    typedef typename signal_type::value_type value_type ;
 
     ScopedConnection () = delete;
-    ScopedConnection (ScopedConnection&&) = default;
+    ScopedConnection (ScopedConnection&&) noexcept = default;
 
-    inline ScopedConnection (signal_type& gSignal,
-                             value_type&& gFunc,
-                             bool         bTop = false)
+    //! move constructor
+    inline ScopedConnection (reference gSignal, value_type&& gFunc, bool bTop = false)
     : _M_signal (&gSignal),
-      _M_fn (std::move (connect (gSignal, std::forward<value_type> (gFunc), bTop)))
-    { }
+      _M_fn (std::forward<value_type> (gFunc))
+    {
+        connect (gSignal, _M_fn, bTop);
+    }
+
+    //! copy constructor
+    inline ScopedConnection (reference gSignal, value_type const& gFunc, bool bTop = false)
+    : _M_signal (&gSignal),
+      _M_fn (gFunc)
+    {
+        connect (gSignal, _M_fn, bTop);
+    }
+
+    //! non capture lambda constructor
+    template <typename Call>
+    inline ScopedConnection (reference gSignal,
+                             Call&& fn,
+                             bool bTop = false,
+                             LambdaNonCapturePtr<Call> = nullptr)
+    : _M_signal (&gSignal),
+      _M_fn (std::forward<Call> (fn))
+    {
+        connect (gSignal, _M_fn, bTop);
+    }
+
+    //! capture lambda constructor
+    template <typename Call>
+    inline ScopedConnection (reference gSignal,
+                             Call&& fn,
+                             bool bTop = false,
+                             LambdaCapturePtr<Call> = nullptr)
+    : _M_signal (&gSignal),
+      _M_fn (std::forward<Call> (fn))
+    {
+        connect (gSignal, _M_fn, bTop);
+    }
+
+    //! member function constructor
+    template <typename TClass>
+    inline ScopedConnection (reference gSignal,
+                             ClassType<TClass>& pObj,
+                             T (TClass::* fn)(TArgs...),
+                             bool bTop = false)
+    : _M_signal (&gSignal),
+      _M_fn (&pObj, fn)
+    {
+        connect (gSignal, _M_fn, bTop);
+    }
+
+    //! static function constructor
+    inline ScopedConnection (reference gSignal, T (* fn)(TArgs...), bool bTop = false)
+    : _M_signal (&gSignal),
+      _M_fn (fn)
+    {
+        connect (gSignal, _M_fn, bTop);
+    }
 
     inline ~ScopedConnection ()
-    { if (_M_fn != nullptr) disconnect (*_M_signal, _M_fn); }
+    {
+        if (_M_fn != nullptr && _M_signal != nullptr) disconnect (*_M_signal, _M_fn);
+    }
 
 private:
-    signal_type* _M_signal;
-    slot_type    _M_fn    ;
+    pointer    _M_signal;
+    value_type _M_fn    ;
 };
+
+// =========================================================
+
+template <typename T,
+          typename... TArgs,
+          typename Allocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+make_shared_scoped_connection (Signal<T(TArgs...), Allocator>& signal,
+                               typename Signal<T(TArgs...), Allocator>::value_type&& fn,
+                               bool top = false)
+{
+    return new ScopedConnection<T(TArgs...), Allocator>(signal, fn, top);
+}
+
+template <typename Call,
+          typename T,
+          typename... TArgs,
+          typename Allocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+make_shared_scoped_connection (Signal<T(TArgs...), Allocator>& signal,
+                               Call&& fn,
+                               bool top = false,
+                               LambdaNonCapturePtr<Call> = nullptr)
+{
+    return new ScopedConnection<T(TArgs...), Allocator>(signal, std::forward<Call>(fn), top);
+}
+
+template <typename Call,
+          typename T,
+          typename... TArgs,
+          typename Allocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+make_shared_scoped_connection (Signal<T(TArgs...), Allocator>& signal,
+                               Call&& fn,
+                               bool top = false,
+                               LambdaCapturePtr<Call> = nullptr)
+{
+    return new ScopedConnection<T(TArgs...), Allocator>(signal, std::forward<Call>(fn), top);
+}
+
+template <typename T,
+          typename... TArgs,
+          typename Allocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+make_shared_scoped_connection (Signal<T(TArgs...), Allocator>& signal,
+                               typename Signal<T(TArgs...), Allocator>::const_reference fn,
+                               bool top = false)
+{
+    return new ScopedConnection<T(TArgs...), Allocator>(signal, fn, top);
+}
+
+template <typename TClass,
+          typename T,
+          typename... TArgs,
+          typename Allocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+make_shared_scoped_connection (Signal<T(TArgs...), Allocator>& signal,
+                               ClassType<TClass>& pObj,
+                               T (TClass::* fn)(TArgs...),
+                               bool top = false)
+{
+    return new ScopedConnection<T(TArgs...), Allocator>(signal, pObj, fn, top);
+}
+
+template <typename T,
+          typename... TArgs,
+          typename Allocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+make_shared_scoped_connection (Signal<T(TArgs...), Allocator>& signal,
+                               T (* fn)(TArgs...),
+                               bool top = false)
+{
+    return new ScopedConnection<T(TArgs...), Allocator>(signal, fn, top);
+}
+
+// =========================================================
+
+template <typename T,
+          typename... TArgs,
+          typename Allocator,
+          typename SharedAllocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+allocate_shared_scoped_connection (SharedAllocator alloc,
+                                   Signal<T(TArgs...), Allocator>& signal,
+                                   typename Signal<T(TArgs...), Allocator>::value_type&& fn,
+                                   bool top = false)
+{
+    return std::allocate_shared (alloc,
+                                 std::move(ScopedConnection<T(TArgs...), Allocator>(signal, fn, top)));
+}
+
+template <typename Call,
+          typename T,
+          typename... TArgs,
+          typename Allocator,
+          typename SharedAllocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+allocate_shared_scoped_connection (SharedAllocator alloc,
+                                   Signal<T(TArgs...), Allocator>& signal,
+                                   Call&& fn,
+                                   bool top = false,
+                                   LambdaNonCapturePtr<Call> = nullptr)
+{
+    return std::allocate_shared (alloc,
+                                 std::move(ScopedConnection<T(TArgs...), Allocator>
+                                           (signal, std::forward<Call>(fn), top)));
+}
+
+template <typename Call,
+          typename T,
+          typename... TArgs,
+          typename Allocator,
+          typename SharedAllocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+allocate_shared_scoped_connection (SharedAllocator alloc,
+                                   Signal<T(TArgs...), Allocator>& signal,
+                                   Call&& fn,
+                                   bool top = false,
+                                   LambdaCapturePtr<Call> = nullptr)
+{
+    return std::allocate_shared (alloc,
+                                 std::move(ScopedConnection<T(TArgs...), Allocator>
+                                           (signal, std::forward<Call>(fn), top)));
+}
+
+template <typename T,
+          typename... TArgs,
+          typename Allocator,
+          typename SharedAllocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+allocate_shared_scoped_connection (SharedAllocator alloc,
+                                   Signal<T(TArgs...), Allocator>& signal,
+                                   typename Signal<T(TArgs...), Allocator>::const_reference fn,
+                                   bool top = false)
+{
+    return std::allocate_shared (alloc,
+                                 std::move(ScopedConnection<T(TArgs...), Allocator>(signal, fn, top)));
+}
+
+template <typename TClass,
+          typename T,
+          typename... TArgs,
+          typename Allocator,
+          typename SharedAllocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+allocate_shared_scoped_connection (SharedAllocator alloc,
+                                   Signal<T(TArgs...), Allocator>& signal,
+                                   ClassType<TClass>& pObj,
+                                   T (TClass::* fn)(TArgs...),
+                                   bool top = false)
+{
+    return std::allocate_shared (alloc,
+                                 std::move(ScopedConnection<T(TArgs...), Allocator>
+                                           (signal, pObj, fn, top)));
+}
+
+template <typename T,
+          typename... TArgs,
+          typename Allocator,
+          typename SharedAllocator
+          >
+std::shared_ptr<ScopedConnection<T(TArgs...), Allocator> >
+allocate_shared_scoped_connection (SharedAllocator alloc,
+                                   Signal<T(TArgs...), Allocator>& signal,
+                                   T (* fn)(TArgs...),
+                                   bool top = false)
+{
+    return std::allocate_shared (alloc,
+                                 std::move(ScopedConnection<T(TArgs...), Allocator>(signal, fn, top)));
+}
 
 } // cppual
 

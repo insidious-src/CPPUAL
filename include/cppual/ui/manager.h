@@ -27,6 +27,7 @@
 #include <cppual/ui/display.h>
 #include <cppual/ui/queue.h>
 #include <cppual/ui/wm.h>
+#include <cppual/string.h>
 
 namespace cppual { namespace Ui { namespace Platform {
 
@@ -37,11 +38,8 @@ typedef std::shared_ptr<Factory> shared_manager;
 
 struct Factory : public NonCopyableVirtual
 {
-    typedef Memory::PolymorphicAllocator<std::pair
-    <const string, Process::plugin_pair > > allocator_type;
-
-    typedef Process::PluginManager<Factory, allocator_type> manager_type;
-    typedef IDisplay::string_type                           string_type ;
+    typedef Process::PluginManager<Factory> manager_type;
+    typedef string                          string_type ;
 
     virtual shared_window createWindow (Rect const& rect,
                                         u32         screen  = 0,
@@ -50,8 +48,8 @@ struct Factory : public NonCopyableVirtual
     virtual shared_display connectDisplay (string_type const& name = string_type()) = 0;
     virtual shared_queue   createQueueInstance () = 0;
 
-    static Factory* instance ();
-    static bool     hasValidInstance () noexcept;
+    static shared_manager instance ();
+    static bool           hasValidInstance () noexcept;
 };
 
 } } } // namespace Platform

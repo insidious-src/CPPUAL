@@ -76,7 +76,7 @@ u64 Query::get64 () noexcept
     if (m_bHasQuery)
     {
         u64 uResult;
-        glGetQueryObjectui64v (id (), GL::QueryResult, &uResult);
+        glGetQueryObjectui64v (handle (), GL::QueryResult, &uResult);
         return uResult;
     }
 
@@ -88,7 +88,7 @@ uint Query::get () noexcept
     if (m_bHasQuery)
     {
         uint uResult;
-        glGetQueryObjectuiv (id (), GL::QueryResult, &uResult);
+        glGetQueryObjectuiv (handle (), GL::QueryResult, &uResult);
         return uResult;
     }
 
@@ -100,7 +100,7 @@ bool Query::isReady () noexcept
     if (m_bHasQuery)
     {
         int nReady;
-        glGetQueryObjectiv (id (), GL::QueryResult, &nReady);
+        glGetQueryObjectiv (handle (), GL::QueryResult, &nReady);
         return nReady;
     }
 
@@ -109,19 +109,19 @@ bool Query::isReady () noexcept
 
 void Query::beginQuery (Query::Type eType) noexcept
 {
-    if (id () and !m_bHasQuery)
+    if (handle () and !m_bHasQuery)
     {
         m_eType = eType;
-        glBeginQuery (convertTargetType (eType), id ());
+        glBeginQuery (convertTargetType (eType), handle ());
     }
 }
 
 void Query::beginQueryIndexed (Query::Type eType, uint uIdx) noexcept
 {
-    if (id () and !m_bHasQuery)
+    if (handle () and !m_bHasQuery)
     {
         m_eType = eType;
-        glBeginQueryIndexed (convertTargetType (eType), uIdx, id ());
+        glBeginQueryIndexed (convertTargetType (eType), uIdx, handle ());
     }
 }
 
@@ -132,10 +132,10 @@ void Query::endQuery () noexcept
 
 void Query::queryCounter (Query::Type eType) noexcept
 {
-    if (id () and !m_bHasQuery)
+    if (handle () and !m_bHasQuery)
     {
         m_eType = eType;
-        glQueryCounter (id (), convertTargetType (eType));
+        glQueryCounter (handle (), convertTargetType (eType));
     }
 }
 

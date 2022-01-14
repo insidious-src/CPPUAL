@@ -47,7 +47,7 @@ XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
 
         ::xcb_create_window (connection ()->native<x::display_type> (),
                              XCB_COPY_FROM_PARENT,
-                             id ().get<x::handle_type> (),
+                             handle ().get<x::handle_type> (),
                              pScreen->root,
                              gRect.left,
                              gRect.top,
@@ -68,7 +68,7 @@ XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
 
         ::xcb_change_property(connection ()->native<x::display_type> (),
                               XCB_PROP_MODE_REPLACE,
-                              id ().get<x::handle_type> (),
+                              handle ().get<x::handle_type> (),
                               protoReply->atom,
                               4,
                               x::atom_format,
@@ -79,13 +79,13 @@ XWindow::XWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
 
 XWindow::~XWindow () noexcept
 {
-    ::xcb_destroy_window (connection ()->native<x::display_type> (), id ().get<x::handle_type> ());
+    ::xcb_destroy_window (connection ()->native<x::display_type> (), handle ().get<x::handle_type> ());
 }
 
 Rect XWindow::geometry () const
 {
     auto reply = x::geometryHelper(connection ()->native<x::display_type> (),
-                                     id ().get<x::handle_type> ());
+                                     handle ().get<x::handle_type> ());
 
 
     return Rect (reply->x, reply->y, reply->width, reply->height);
@@ -102,7 +102,7 @@ void XWindow::setGeometry (Rect const& gRect)
     };
 
     ::xcb_configure_window (connection ()->native<x::display_type> (),
-                            id ().get<x::handle_type> (),
+                            handle ().get<x::handle_type> (),
                             x::Resize,
                             uRect);
 }
@@ -112,7 +112,7 @@ void XWindow::raise ()
     static constexpr cu32 uMode[] = { XCB_STACK_MODE_ABOVE };
 
     ::xcb_configure_window (connection ()->native<x::display_type> (),
-                            id ().get<x::handle_type> (),
+                            handle ().get<x::handle_type> (),
                             x::Stack,
                             uMode);
 }
@@ -122,7 +122,7 @@ void XWindow::lower ()
     static constexpr cu32 uMode[] = { XCB_STACK_MODE_BELOW };
 
     ::xcb_configure_window (connection ()->native<x::display_type> (),
-                            id ().get<x::handle_type> (),
+                            handle ().get<x::handle_type> (),
                             x::Stack,
                             uMode);
 }
@@ -133,9 +133,9 @@ void XWindow::setOwner (shared_window const& pParent)
     Rect rect = geometry ();
 
     ::xcb_reparent_window (connection ()->native<x::display_type> (),
-                           id ().get<x::handle_type> (),
+                           handle ().get<x::handle_type> (),
                            pParent != nullptr ?
-                                            pParent->id ().get<x::handle_type> () :
+                                            pParent->handle ().get<x::handle_type> () :
                                             x::screenHandle (connection ()->native<x::display_type> (),
                                                                dump)->root,
                            rect.left, rect.top);
@@ -146,7 +146,7 @@ void XWindow::move (point2i gPos)
     cu32 uPoint[2] = { static_cast<u32> (gPos.x), static_cast<u32> (gPos.y) };
 
     ::xcb_configure_window (connection ()->native<x::display_type> (),
-                            id ().get<x::handle_type> (),
+                            handle ().get<x::handle_type> (),
                             x::Move,
                             uPoint);
 }
@@ -154,7 +154,7 @@ void XWindow::move (point2i gPos)
 void XWindow::map ()
 {
     ::xcb_map_window (connection ()->native<x::display_type> (),
-                      id ().get<x::handle_type> ());
+                      handle ().get<x::handle_type> ());
 
     ::xcb_flush (connection ()->native<x::display_type> ());
 }
@@ -162,7 +162,7 @@ void XWindow::map ()
 void XWindow::unmap ()
 {
     ::xcb_unmap_window (connection ()->native<x::display_type> (),
-                        id ().get<x::handle_type> ());
+                        handle ().get<x::handle_type> ());
 
     ::xcb_flush (connection ()->native<x::display_type> ());
 }
@@ -174,7 +174,7 @@ void XWindow::setFlags (WindowFlags) noexcept
 bool XWindow::isMapped () const
 {
     auto reply = x::attribHelper(connection ()->native<x::display_type> (),
-                                   id ().get<x::handle_type> ());
+                                   handle ().get<x::handle_type> ());
 
     return reply->map_state;
 }
@@ -185,7 +185,7 @@ XWindow::string_type XWindow::title () const noexcept
 {
     auto cookie = ::xcb_get_property (connection ()->native<x::display_type> (),
                                       XCB_GET_PROPERTY_TYPE_ANY,
-                                      id ().get<x::handle_type> (),
+                                      handle ().get<x::handle_type> (),
                                       XCB_ATOM_WM_NAME,
                                       XCB_ATOM_STRING,
                                       0,
@@ -204,7 +204,7 @@ void XWindow::setTitle (string_type const& gTitle) noexcept
 {
      ::xcb_change_property (connection ()->native<x::display_type> (),
                             XCB_PROP_MODE_REPLACE,
-                            id ().get<x::handle_type> (),
+                            handle ().get<x::handle_type> (),
                             XCB_ATOM_WM_NAME,
                             XCB_ATOM_STRING,
                             x::string_format,
@@ -241,7 +241,7 @@ void XWindow::setFullscreen (bool bFullscreen) noexcept
     {
         ::xcb_change_property (connection ()->native<x::display_type> (),
                                XCB_PROP_MODE_REPLACE,
-                               id ().get<x::handle_type> (),
+                               handle ().get<x::handle_type> (),
                                atom_wm_state->atom,
                                XCB_ATOM_ATOM,
                                x::atom_format,
@@ -251,7 +251,7 @@ void XWindow::setFullscreen (bool bFullscreen) noexcept
     else
     {
         ::xcb_delete_property (connection ()->native<x::display_type> (),
-                               id ().get<x::handle_type> (),
+                               handle ().get<x::handle_type> (),
                                atom_wm_state->atom);
     }
 
@@ -268,7 +268,7 @@ bool XWindow::isFullscreen () noexcept
                                                     "_NET_WM_STATE_FULLSCREEN");
 
     auto fullscreen_prop = x::propAtomHelper(connection ()->native<x::display_type> (),
-                                               id ().get<x::handle_type> (),
+                                               handle ().get<x::handle_type> (),
                                                atom_wm_state->atom,
                                                XCB_ATOM_ATOM);
 

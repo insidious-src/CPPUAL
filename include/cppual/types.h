@@ -108,7 +108,7 @@ constexpr Out direct_cast (In in) noexcept
 }
 
 template<class Out, class In>
-inline Out unsafe_direct_cast (In in) noexcept
+constexpr Out unsafe_direct_cast (In in) noexcept
 { return cast_union<Out, In>(in).out; }
 
 } // cppual

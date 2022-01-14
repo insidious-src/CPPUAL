@@ -38,7 +38,7 @@ void copy (T begin, T end, T dst, DeviceQueue& queue)
 {
 }
 
-} } // namespace Concurency
+} } // namespace Compute
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_OPERATIONS_H_

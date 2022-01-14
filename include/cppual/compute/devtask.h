@@ -29,7 +29,7 @@
 
 namespace cppual { namespace Compute {
 
-class DeviceQueue : public Object<Resource::Queue>
+class DeviceQueue : public Object<ObjectType::Queue>
 {
 public:
     enum EngineType

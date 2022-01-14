@@ -19,12 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <unordered_map>
 #include <cppual/ui/window.h>
 #include <cppual/ui/manager.h>
-
-using std::make_pair;
-using std::unordered_map;
 
 namespace cppual { namespace Ui {
 
@@ -38,7 +34,7 @@ namespace { namespace Internal {
 
 Window::Window (View* parent,
                 Rect const& rect,
-                string const& title,
+                string_type const& title,
                 Window::image_type*,
                 u32 screen)
 : View(parent, rect, screen)
@@ -46,13 +42,25 @@ Window::Window (View* parent,
     setTitle(title);
 }
 
+
+
 Window::Window ()
+: View()
+{
+}
+
+Window::Window(Window const&)
 : View()
 {
 }
 
 Window::~Window ()
 {
+}
+
+Window& Window::operator = (Window const&)
+{
+    return *this;
 }
 
 bool Window::setIcon(Window::image_type*)

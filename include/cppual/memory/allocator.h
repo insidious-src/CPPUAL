@@ -41,14 +41,18 @@ protected:
     static constexpr std::size_t max_align = alignof(std::max_align_t);
 
 public:
-    typedef MemoryResource            base_type        ;
-    typedef base_type*&               pointer_reference;
-    typedef std::size_t               align_type       ;
-    typedef std::size_t               size_type        ;
-    typedef u8*                       math_pointer     ;
-    typedef void*                     pointer          ;
-    typedef cvoid*                    const_pointer    ;
-    typedef std::ptrdiff_t            difference_type  ;
+    typedef MemoryResource            base_type             ;
+    typedef base_type*                base_pointer          ;
+    typedef base_type&                base_reference        ;
+    typedef base_type const&          base_const_reference  ;
+    typedef base_type*&               base_pointer_reference;
+    typedef base_type**               base_double_pointer   ;
+    typedef std::size_t               align_type            ;
+    typedef std::size_t               size_type             ;
+    typedef u8*                       math_pointer          ;
+    typedef void*                     pointer               ;
+    typedef cvoid*                    const_pointer         ;
+    typedef std::ptrdiff_t            difference_type       ;
 
     virtual ~MemoryResource() { }
 
@@ -56,8 +60,8 @@ public:
     virtual bool   is_lock_free () const noexcept { return false; }
     virtual bool      is_shared () const noexcept { return false; }
 
-    virtual base_type& owner () const noexcept
-    { return const_cast<base_type&> (*this); }
+    virtual base_reference owner () const noexcept
+    { return const_cast<base_reference> (*this); }
 
     virtual size_type max_size () const
     { return std::numeric_limits<size_type>::max (); }
@@ -80,14 +84,14 @@ protected:
     virtual bool  do_is_equal(base_type const& other) const noexcept = 0;
 
 private:
-    static pointer_reference default_resource_pointer() noexcept
+    static base_double_pointer default_resource_pointer() noexcept
     {
-        static base_type* def_ptr = nullptr;
-        return def_ptr;
+        static base_pointer def_ptr = nullptr;
+        return &def_ptr;
     }
 
-    friend base_type* get_default_resource() noexcept;
-    friend void       set_default_resource(base_type&) noexcept;
+    friend base_pointer get_default_resource() noexcept;
+    friend void         set_default_resource(base_reference) noexcept;
 };
 
 // =========================================================
@@ -126,29 +130,6 @@ private:
 
 // =========================================================
 
-class NullResource final : public MemoryResource
-{
-public:
-    using base_type::base_type;
-    using base_type::operator=;
-
-private:
-    void* do_allocate(size_type /*bytes*/, size_type /*alignment*/)
-    {
-        throw std::bad_alloc();
-    }
-
-    void do_deallocate(void* /*p*/, size_type /*bytes*/, size_type /*alignment*/)
-    { }
-
-    bool do_is_equal(base_type const& other) const noexcept
-    {
-        return this == &other;
-    }
-};
-
-// =========================================================
-
 inline bool
 operator == (MemoryResource const& a, MemoryResource const& b) noexcept
 { return &a == &b || a.is_equal(b); }
@@ -165,22 +146,17 @@ inline MemoryResource* new_delete_resource() noexcept
     return &new_delete_resource;
 }
 
-inline MemoryResource* null_memory_resource() noexcept
-{
-    static NullResource null_resource;
-    return &null_resource;
-}
-
 inline MemoryResource* get_default_resource() noexcept
 {
-    static MemoryResource::pointer_reference def_resource_ptr =
-            (MemoryResource::default_resource_pointer() = new_delete_resource());
-    return def_resource_ptr;
+    static MemoryResource::base_double_pointer def_resource_ptr =
+            &(*MemoryResource::default_resource_pointer() = new_delete_resource());
+    return *def_resource_ptr;
 }
 
 inline void set_default_resource(MemoryResource& res) noexcept
 {
-    MemoryResource::default_resource_pointer() = &res;
+    if (*MemoryResource::default_resource_pointer() == nullptr) get_default_resource();
+    *MemoryResource::default_resource_pointer() = &res;
 }
 
 // =========================================================
@@ -237,10 +213,13 @@ public:
     struct rebind { typedef Allocator<U, resource_type> other; };
 
     void deallocate (pointer p, size_type n)
-    { resource ()->deallocate (p, n * sizeof (T)); }
+    { resource ()->deallocate (p, n * sizeof (value_type)); }
 
     pointer allocate (size_type n, cvoid* = nullptr)
-    { return static_cast<pointer> (resource ()->allocate (sizeof (T) * n, alignof (T))); }
+    {
+        return static_cast<pointer> (resource ()->allocate (sizeof (value_type) * n,
+                                                            alignof(value_type)));
+    }
 
     size_type max_size () const noexcept
     { return resource ()->max_size () / sizeof (T); }
@@ -251,41 +230,42 @@ public:
     static const_pointer address (const_reference x) noexcept
     { return std::addressof (x); }
 
-    template<class U, typename... Args>
-    static void construct (U* p, Args... args)
-    { new (p) U (std::forward<Args> (args)...); }
+    template <typename... Args>
+    static void construct (pointer p, Args... args)
+    { ::new (p) value_type (std::forward<Args> (args)...); }
 
-    template <class U>
-    static void destroy (U* p)
-    { p->~U (); }
+    static void destroy (pointer p)
+    { p->~value_type (); }
 
     Allocator select_on_container_copy_construction() const
     { return Allocator (); }
 
     constexpr resource_pointer resource () const noexcept
-    { return m_pRc; }
+    { return _M_pRc; }
 
     constexpr explicit Allocator (resource_type& rc) noexcept
-    : m_pRc (&rc)
+    : _M_pRc (&rc)
     { }
 
     inline Allocator () noexcept
-    : m_pRc (get_default_resource())
+    : _M_pRc (get_default_resource())
     { }
 
     template <class U>
     constexpr
     explicit
     Allocator (Allocator<U, resource_type> const& ator) noexcept
-    : m_pRc (ator.m_pRc)
+    : _M_pRc (ator._M_pRc)
     { }
 
     template <typename, typename>
     friend class Allocator;
 
 private:
-    resource_pointer m_pRc;
+    resource_pointer _M_pRc;
 };
+
+// =========================================================
 
 template <class T1, class T2>
 bool operator == (Allocator<T1> const& lhs, Allocator<T2> const& rhs) noexcept
@@ -304,11 +284,11 @@ struct is_allocator_helper : public std::false_type
 { };
 
 template <typename T>
-struct is_allocator_helper < std::allocator<T> > : public std::true_type
+struct is_allocator_helper < Allocator<T, MemoryResource> > : public std::true_type
 { };
 
 template <typename T, typename U>
-struct is_allocator_helper < Allocator<T, U> > : public std::true_type
+struct is_allocator_helper < Allocator<T, U> > : public std::is_base_of<MemoryResource, U>
 { };
 
 template <typename T>

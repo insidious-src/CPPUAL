@@ -26,9 +26,6 @@
 
 #include <wayland-client-protocol.h>
 
-using cppual::Graphics::PixelFormat;
-using cppual::Graphics::Element;
-
 namespace cppual { namespace Ui {
 
 class WlSurface final : public IPlatformWindow

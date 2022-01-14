@@ -23,10 +23,9 @@
 #define CPPUAL_AUDIO_BASE_H_
 #ifdef __cplusplus
 
-#include <atomic>
 #include <cppual/multimedia/audio/spatial.h>
 
-using std::atomic_uint;
+#include <atomic>
 
 namespace cppual { namespace Audio { namespace AL {
 
@@ -39,20 +38,20 @@ public:
     Object& operator = (Object&&) noexcept;
     Object& operator = (Object const&) noexcept;
 
-    inline  Object () noexcept : m_uObjId (), m_eObjType () { }
-    inline ~Object () noexcept { reset (); }
+    inline   Object () noexcept : m_uObjId (), m_eObjType () { }
+    virtual ~Object () noexcept { reset (); }
 
-    inline ObjectType type    () const noexcept { return m_eObjType; }
-    inline uint       id      () const noexcept { return m_uObjId;   }
-    inline bool       isValid () const noexcept { return m_uObjId;   }
+    inline ObjectType type  () const noexcept { return m_eObjType; }
+    inline uint       id    () const noexcept { return m_uObjId;   }
+    inline bool       valid () const noexcept { return m_uObjId;   }
 
     inline static uint count () noexcept
     { return sm_uALObjCount.load (std::memory_order_consume); }
 
 private:
-    static atomic_uint sm_uALObjCount;
-    uint                m_uObjId;
-    ObjectType          m_eObjType;
+    static std::atomic_uint sm_uALObjCount;
+    uint                     m_uObjId     ;
+    ObjectType               m_eObjType   ;
 
     void reset () noexcept;
 };

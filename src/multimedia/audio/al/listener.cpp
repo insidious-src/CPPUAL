@@ -19,15 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <mutex>
-#include <atomic>
 #include <cppual/noncopyable.h>
 #include <cppual/multimedia/audio/al/listener.h>
-#include "aldef.h"
 
-using std::mutex;
-using std::atomic_bool;
-using std::lock_guard;
+#include <mutex>
+#include <atomic>
+
+#include "aldef.h"
 
 namespace cppual { namespace Audio { namespace AL {
 
@@ -36,9 +34,9 @@ namespace { // optimize for internal unit usage
 class Initializer final
 {
 public:
-    mutex       listenerMutex;
-    atomic_bool listenerIsMute;
-    float       listenerVolume;
+    std::mutex       listenerMutex;
+    std::atomic_bool listenerIsMute;
+    float            listenerVolume;
 
 private:
     Initializer () noexcept
@@ -63,53 +61,53 @@ void Listener::reset () noexcept
 {
     int nOrient[6] { 0, 0, -1, 0, 1, 0 };
 
-    alListener3i (AL::Position,  0, 0, 0);
-    alListener3i (AL::Velocity,  0, 0, 0);
-    alListener3i (AL::Direction, 0, 0, 0);
-    alListeneriv (AL::Orientation, nOrient);
+    ::alListener3i (AL::Position,  0, 0, 0);
+    ::alListener3i (AL::Velocity,  0, 0, 0);
+    ::alListener3i (AL::Direction, 0, 0, 0);
+    ::alListeneriv (AL::Orientation, nOrient);
 }
 
 void Listener::setPosition (point3f const& gPos) noexcept
 {
-    alListenerfv (AL::Position, &gPos.x);
+    ::alListenerfv (AL::Position, &gPos.x);
 }
 
 point3f Listener::position () noexcept
 {
     point3f gValue;
-    alGetListenerfv (AL::Position, &gValue.x);
+    ::alGetListenerfv (AL::Position, &gValue.x);
     return gValue;
 }
 
 void Listener::setVelocity (point3f const& gVelocity) noexcept
 {
-    alListenerfv (AL::Velocity, &gVelocity.x);
+    ::alListenerfv (AL::Velocity, &gVelocity.x);
 }
 
 point3f Listener::velocity () noexcept
 {
     point3f gValue;
-    alGetListenerfv (AL::Velocity, &gValue.x);
+    ::alGetListenerfv (AL::Velocity, &gValue.x);
     return gValue;
 }
 
 void Listener::setOrientation (point3f const& gAt, point3f const& gUp) noexcept
 {
     float fOrient[] { gAt.x, gAt.y, gAt.z, gUp.x, gUp.y, gUp.z };
-    alListenerfv (AL::Orientation, &fOrient[0]);
+    ::alListenerfv (AL::Orientation, &fOrient[0]);
 }
 
 point3f Listener::orientationAt () noexcept
 {
     float fOrient[6];
-    alGetListenerfv (AL::Orientation, &fOrient[0]);
+    ::alGetListenerfv (AL::Orientation, &fOrient[0]);
     return { fOrient[0], fOrient[1], fOrient[2] };
 }
 
 point3f Listener::orientationUp () noexcept
 {
     float fOrient[6];
-    alGetListenerfv (AL::Orientation, &fOrient[0]);
+    ::alGetListenerfv (AL::Orientation, &fOrient[0]);
     return { fOrient[3], fOrient[4], fOrient[5] };
 }
 
@@ -117,14 +115,14 @@ void Listener::setVolume (float fValue) noexcept
 {
     if (fValue <= .0f)
     {
-        alListenerf (AL::Volume, fValue);
+        ::alListenerf (AL::Volume, fValue);
         get ().listenerIsMute.store (true);
     }
     else
     {
         if (!get ().listenerIsMute.load (std::memory_order_relaxed))
         {
-            alListenerf (AL::Volume, fValue);
+            ::alListenerf (AL::Volume, fValue);
         }
 
         get ().listenerMutex.lock ();
@@ -135,7 +133,7 @@ void Listener::setVolume (float fValue) noexcept
 
 float Listener::volume () noexcept
 {
-    lock_guard<mutex> gLock (get ().listenerMutex);
+    std::lock_guard<std::mutex> gLock (get ().listenerMutex);
     return get ().listenerVolume;
 }
 
@@ -147,7 +145,7 @@ bool Listener::isMute () noexcept
 void Listener::mute () noexcept
 {
     if (get ().listenerIsMute.load (std::memory_order_acquire)) return;
-    alListenerf (AL::Volume, .0f);
+    ::alListenerf (AL::Volume, .0f);
     get ().listenerIsMute.store (true, std::memory_order_release);
 }
 
@@ -155,7 +153,7 @@ void Listener::unmute () noexcept
 {
     if (!get ().listenerIsMute.load (std::memory_order_acquire)) return;
     get ().listenerMutex.lock ();
-    alListenerf (AL::Volume, get ().listenerVolume);
+    ::alListenerf (AL::Volume, get ().listenerVolume);
     get ().listenerMutex.unlock ();
     get ().listenerIsMute.store (false, std::memory_order_release);
 }

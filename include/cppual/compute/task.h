@@ -34,23 +34,18 @@
 #include <shared_mutex>
 #include <condition_variable>
 
-using std::shared_lock;
-using std::lock_guard;
-using std::condition_variable_any;
-using std::shared_timed_mutex;
-
 namespace cppual { namespace Compute {
 
 class HostQueue
 {
 public:
-    typedef condition_variable_any   cv_type   ;
-    typedef Function<void()>         call_type ;
-    typedef fu16                     size_type ;
-    typedef shared_timed_mutex       mutex_type;
-    typedef lock_guard<mutex_type>   write_lock;
-    typedef shared_lock<mutex_type>  read_lock ;
-    typedef CircularQueue<call_type> queue_type;
+    typedef std::condition_variable_any  cv_type   ;
+    typedef Function<void()>             call_type ;
+    typedef fu16                         size_type ;
+    typedef std::shared_timed_mutex      mutex_type;
+    typedef std::lock_guard<mutex_type>  write_lock;
+    typedef std::shared_lock<mutex_type> read_lock ;
+    typedef CircularQueue<call_type>     queue_type;
 
     enum State
     {
@@ -64,13 +59,7 @@ public:
     HostQueue& operator = (HostQueue&&     );
     HostQueue& operator = (HostQueue const&);
 
-    HostQueue () noexcept
-    : m_gQueueMutex   (),
-      m_gTaskQueue    (),
-      m_uNumAssigned  (),
-      m_uNumCompleted (),
-      m_gTaskCond     ()
-    { }
+    HostQueue () noexcept = default;
 
     bool schedule (call_type const&);
     void quit     (bool interrupt = false) noexcept;
@@ -113,7 +102,7 @@ public:
     // remove all tasks from the queue
     void clear ()
     {
-        read_lock gLock (m_gQueueMutex);
+        write_lock gLock (m_gQueueMutex);
         m_gTaskQueue.clear ();
     }
 
@@ -123,8 +112,8 @@ private:
     mutable mutex_type m_gQueueMutex;
     queue_type         m_gTaskQueue;
     State              m_eState { HostQueue::Inactive };
-    size_type          m_uNumAssigned;
-    size_type          m_uNumCompleted;
+    size_type          m_uNumAssigned { };
+    size_type          m_uNumCompleted { };
     cv_type            m_gTaskCond;
 };
 
@@ -144,7 +133,7 @@ namespace ThreadPool
 
 // =========================================================
 
-// host continuation task
+//! host continuation task
 template <typename T>
 class HostTask : private HostQueue
 {
@@ -158,7 +147,7 @@ public:
     void finish   () { quit (false);     }
     bool valid    () const noexcept { return !assigned (); }
 
-    HostTask ()
+    HostTask () : m_value ()
     { ThreadPool::reserve (*this); }
 
     bool ready () const
@@ -199,6 +188,7 @@ public:
         {
             m_value = std::move ((obj->*fn)(std::forward<Args> (args)...));
         }));
+
         return *this;
     }
 
@@ -209,6 +199,7 @@ public:
         {
             m_value = std::move (fn (std::forward<Args> (args)...));
         }));
+
         return *this;
     }
 
@@ -220,6 +211,7 @@ public:
             m_value = std::move
                       (closure.U::operator () (std::forward<Args> (args)...));
         }));
+
         return *this;
     }
 

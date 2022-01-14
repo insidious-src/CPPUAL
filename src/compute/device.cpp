@@ -82,9 +82,7 @@ namespace { // optimize for internal unit usage
 //    return value;
 //}
 
-}
-
-// anonymous
+} // anonymous namespace
 
 // =========================================================
 
@@ -143,40 +141,10 @@ Device& Device::host () noexcept
 //    return std::move (text);
 //}
 
-//bool Device::available (cchar* feature)
-//{
-//    if (m_uNumUnits)
-//    {
-//        static size_type       uSize = 0;
-//        const  CL::device_type dev   = CL::handle (m_eType, m_uPlatformId, m_uId);
-
-//        if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
-//                               0, nullptr, &uSize) != CL_SUCCESS or !uSize)
-//            return false;
-
-//        char text[uSize];
-
-//        if (::clGetDeviceInfo (dev, CL::PlatformExtensions,
-//                               uSize, text, nullptr) != CL_SUCCESS)
-//            return false;
-
-//        text[--uSize] = 0;
-//        text[--uSize] = 0;
-
-//        for (cchar* pEnd = ::strchr (text, ' '), *pBegin = text; ;
-//             pEnd = ::strchr (pBegin = ++pEnd, ' '))
-//        {
-//            if (!pEnd) return !::strcmp (pBegin, feature) ? true : false;
-//            else
-//            {
-//                text[pEnd - text] = 0;
-//                if (!::strcmp (pBegin, feature)) return true;
-//            }
-//        }
-//    }
-
-//    return false;
-//}
+bool Device::available (std::string const& /*feature*/)
+{
+    return false;
+}
 
 //Device::uint_type Device::dimensions () const
 //{

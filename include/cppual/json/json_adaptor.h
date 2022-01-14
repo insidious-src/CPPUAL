@@ -1346,9 +1346,9 @@ public:
     {
         if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
 
-        connect(jsonStringInvoked, [fn](string_type& val)
+        connect(jsonStringInvoked, [func = fn](string_type& val)
         {
-            val = fn ();
+            val = func ();
         });
     }
 
@@ -1367,9 +1367,9 @@ public:
     {
         if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
 
-        connect(jsonEnumInvoked, [fn](int& val)
+        connect(jsonEnumInvoked, [func = fn](int& val)
         {
-            val = fn ();
+            val = func ();
         });
     }
 
@@ -1387,9 +1387,9 @@ public:
     {
         if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
 
-        connect(jsonStringInvoked, [fn](string_type& val)
+        connect(jsonStringInvoked, [func = fn](string_type& val)
         {
-            val = fn ();
+            val = func ();
         });
     }
 
@@ -1408,9 +1408,9 @@ public:
     {
         if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
 
-        connect(jsonEnumInvoked, [fn](int& val)
+        connect(jsonEnumInvoked, [func = fn](int& val)
         {
-            val = fn ();
+            val = func ();
         });
     }
 

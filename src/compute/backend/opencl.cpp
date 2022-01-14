@@ -22,11 +22,59 @@
 
 #include "opencl.h"
 
-#include <cppual/compute/backend_iface.h>
-
 #include <cstring>
+#include <memory>
 
 namespace cppual { namespace Compute { namespace CL {
+
+// =========================================================
+
+namespace { // optimize for internal unit usage
+
+} // anonymous namespace
+
+// =========================================================
+
+
+
+// =========================================================
+
+ObjectHandle<device_type>::~ObjectHandle () noexcept
+{
+    if (handle ()) ::clReleaseDevice (handle ());
+}
+
+ObjectHandle<context_type>::~ObjectHandle () noexcept
+{
+    if (handle ()) ::clReleaseContext (handle ());
+}
+
+ObjectHandle<kernel_type>::~ObjectHandle () noexcept
+{
+    if (handle ()) ::clReleaseKernel (handle ());
+}
+
+ObjectHandle<program_type>::~ObjectHandle () noexcept
+{
+    if (handle ()) ::clReleaseProgram (handle ());
+}
+
+ObjectHandle<queue_type>::~ObjectHandle () noexcept
+{
+    if (handle ()) ::clReleaseCommandQueue (handle ());
+}
+
+ObjectHandle<memory_type>::~ObjectHandle () noexcept
+{
+    if (handle ()) ::clReleaseMemObject (handle ());
+}
+
+ObjectHandle<event_type>::~ObjectHandle () noexcept
+{
+    if (handle ()) ::clReleaseEvent (handle ());
+}
+
+// =========================================================
 
 string Platform::info (Info nfo)
 {
@@ -43,35 +91,78 @@ string Platform::info (Info nfo)
 
 // =========================================================
 
-bool Platform::has_extension (cchar* pFeature)
+bool Platform::has_extension (string_type const& feature)
 {
     std::size_t uSize;
 
     if (::clGetPlatformInfo (handle (), PlatformExtensions,
-                             0, nullptr, &uSize) != CL_SUCCESS or !uSize)
+                             0, nullptr, &uSize) != Success or !uSize)
         return false;
 
-    char text[uSize]; // VLA
+    auto text = string_type(uSize, 0);
 
     if (::clGetPlatformInfo (handle (), PlatformExtensions,
-                             uSize, &text[0], nullptr) != CL_SUCCESS)
+                             uSize, &text[0], nullptr) != Success)
         return false;
 
     text[--uSize] = 0;
     text[--uSize] = 0;
 
-    for (cchar* pEnd = ::strchr (text, ' '), *pBegin = text; ;
-         pEnd = ::strchr (pBegin = ++pEnd, ' '))
-    {
-        if (!pEnd) return !::strcmp (pBegin, pFeature) ? true : false;
-        else
-        {
-            text[pEnd - text] = 0;
-            if (!::strcmp (pBegin, pFeature)) return true;
-        }
-    }
+    auto const pos = text.find(feature);
 
-    // return false;
+    return pos != string_type::npos;
+}
+
+// =========================================================
+
+Device::size_type Device::cache () const noexcept
+{
+    size_type value;
+
+    if (::clGetDeviceInfo (handle(), CacheSize, sizeof (size_type), &value, nullptr) != Success)
+        return size_type();
+
+    return value;
+}
+
+Device::size_type Device::cacheLine () const noexcept
+{
+    u32 value;
+
+    if (::clGetDeviceInfo (handle(), CacheLineSize, sizeof (u32), &value, nullptr) != Success)
+        return u32();
+
+    return value;
+}
+
+Device::size_type Device::localMemory () const noexcept
+{
+    size_type value;
+
+    if (::clGetDeviceInfo (handle(), LocalMemSize, sizeof (size_type), &value, nullptr) != Success)
+        return size_type();
+
+    return value;
+}
+
+Device::size_type Device::constMemory () const noexcept
+{
+    size_type value;
+
+    if (::clGetDeviceInfo (handle(), ConstMemSize, sizeof (size_type), &value, nullptr) != Success)
+        return size_type();
+
+    return value;
+}
+
+Device::size_type Device::globalMemory () const noexcept
+{
+    size_type value;
+
+    if (::clGetDeviceInfo (handle(), GlobalMemSize, sizeof (size_type), &value, nullptr) != Success)
+        return size_type();
+
+    return value;
 }
 
 } } } // namespace CL

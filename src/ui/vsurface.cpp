@@ -25,7 +25,7 @@ namespace cppual { namespace Ui {
 
 ProxyRenderable::ProxyRenderable (shared_window const& pParent, Rect const& gRect) noexcept
 : IPlatformWindow (pParent != nullptr ? pParent->connection () : nullptr,
-                   pParent != nullptr ? pParent->id () : Graphics::Element (nullptr)),
+                   pParent != nullptr ? pParent->handle () : Handle (nullptr)),
   m_pParent (pParent),
   m_gRect (gRect),
   m_bIsVisible ()

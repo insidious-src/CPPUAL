@@ -34,7 +34,7 @@ class SoundSource : public Object
 {
 public:
     typedef std::deque<SoundBuffer*> queue_type;
-    typedef std::size_t              size_type;
+    typedef std::size_t              size_type ;
 
     SoundSource () noexcept;
     SoundSource (SoundBuffer&) noexcept;

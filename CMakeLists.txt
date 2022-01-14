@@ -129,6 +129,7 @@ add_library(cppual-host SHARED
     "include/cppual/system/clock.h"
     "include/cppual/resource.h"
     )
+target_compile_definitions(cppual-host PRIVATE -DAPI_EXPORT)
 
 # memory management
 add_library(cppual-memory SHARED
@@ -148,6 +149,7 @@ add_library(cppual-memory SHARED
     "include/cppual/memory/shared.h"
     "include/cppual/memory/allocator.h"
     )
+target_compile_definitions(cppual-memory PRIVATE -DAPI_EXPORT)
 
 # device compute, memory (Vulkan, OpenCL, Serial)
 add_library(cppual-compute SHARED
@@ -168,14 +170,13 @@ add_library(cppual-compute SHARED
     "src/compute/devmemory.cpp"
     "include/cppual/compute/devtask.h"
     "src/compute/devtask.cpp"
-#   "src/compute/context.cpp"
-#   "include/cppual/compute/context.h"
     "include/cppual/compute/pll_ops.h"
     "src/compute/task.cpp"
     "include/cppual/compute/task.h"
     "src/compute/thread.cpp"
     "include/cppual/compute/thread.h"
     )
+target_compile_definitions(cppual-compute PRIVATE -DAPI_EXPORT)
 
 # json
 add_library(cppual-json SHARED
@@ -279,6 +280,7 @@ add_library(cppual-dom SHARED
     "include/cppual/dom/detail/xml_parser_write.h"
     "include/cppual/dom/detail/xml_parser_writer_settings.h"
     )
+target_compile_definitions(cppual-dom PRIVATE -DAPI_EXPORT)
 
 # transparent network facilities
 add_library(cppual-network SHARED
@@ -314,6 +316,7 @@ add_library(cppual-network SHARED
     "src/network/protocols/protocol.cpp"
     "include/cppual/network/protocols/protocol.h"
     )
+target_compile_definitions(cppual-network PRIVATE -DAPI_EXPORT)
 
 # raw device input
 add_library(cppual-input SHARED
@@ -330,6 +333,7 @@ add_library(cppual-input SHARED
     "include/cppual/input/joysticks/joy_xbox.h"
     "include/cppual/input/joysticks/joy_wheel.h"
     )
+target_compile_definitions(cppual-input PRIVATE -DAPI_EXPORT)
 
 # mqtt client implementation
 add_library(cppual-mqtt SHARED
@@ -338,6 +342,7 @@ add_library(cppual-mqtt SHARED
     "include/cppual/mqtt/message.h"
     "src/mqtt/message.cpp"
     )
+target_compile_definitions(cppual-mqtt PRIVATE -DAPI_EXPORT)
 
 if(SNDFILE_FOUND AND OPENAL_FOUND)
 
@@ -364,6 +369,7 @@ add_library(cppual-audio SHARED
     "src/multimedia/audio/record.cpp"
     "include/cppual/multimedia/audio/record.h"
     )
+target_compile_definitions(cppual-audio PRIVATE -DAPI_EXPORT)
 
 # audio backend OpenAL
 add_library(cppual-audio-openal MODULE
@@ -395,6 +401,7 @@ add_library(cppual-multimedia SHARED
     "src/multimedia/media_sync.cpp"
     "include/cppual/multimedia/media_sync.h"
     )
+target_compile_definitions(cppual-multimedia PRIVATE -DAPI_EXPORT)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
@@ -422,12 +429,12 @@ add_library(cppual-video SHARED
     "src/multimedia/video/vequalizer.cpp"
     "include/cppual/multimedia/video/vequalizer.h"
     )
+target_compile_definitions(cppual-video PRIVATE -DAPI_EXPORT)
 
 if(FREETYPE_FOUND AND OPENGL_FOUND AND GLEW_FOUND AND EGL_FOUND)
 
 # graphics drawing library
 add_library(cppual-gfx SHARED
-    "include/cppual/gfx/dsp_details.h"
     "include/cppual/gfx/coord.h"
     "src/gfx/color.cpp"
     "include/cppual/gfx/color.h"
@@ -440,6 +447,7 @@ add_library(cppual-gfx SHARED
     "src/gfx/formats/bmp.cpp"
     "include/cppual/gfx/formats/bmp.h"
     )
+target_compile_definitions(cppual-gfx PRIVATE -DAPI_EXPORT)
 
 # OpenGL/ES library
 add_library(cppual-gl SHARED
@@ -467,6 +475,7 @@ add_library(cppual-gl SHARED
     "src/gfx/gl/instance.cpp"
     "include/cppual/gfx/gl/instance.h"
     )
+target_compile_definitions(cppual-gl PRIVATE -DAPI_EXPORT)
 
 # gfx formats library
 add_library(cppual-gfx-formats MODULE
@@ -521,6 +530,7 @@ add_library(cppual-ui SHARED
     #"src/ui/groups.cpp"
     "include/cppual/ui/groups.h"
     )
+target_compile_definitions(cppual-ui PRIVATE -DAPI_EXPORT)
 
 # graphical user interface - windows and controls
 add_library(cppual-ui-views SHARED
@@ -535,6 +545,7 @@ add_library(cppual-ui-views SHARED
     "src/ui/controls/popup.cpp"
     "include/cppual/ui/controls/popup.h"
     )
+target_compile_definitions(cppual-ui-views PRIVATE -DAPI_EXPORT)
 
 # graphical user interface - native dialogs
 add_library(cppual-ui-dialogs MODULE
@@ -658,7 +669,7 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 endif()
 
 target_link_libraries(cppual-host DL::Library)
-target_link_libraries(cppual-compute cppual-memory Sockets::Library)
+target_link_libraries(cppual-compute cppual-memory cppual-host Sockets::Library)
 target_link_libraries(cppual-network cppual-memory Sockets::Library)
 target_link_libraries(cppual-dom cppual-memory)
 

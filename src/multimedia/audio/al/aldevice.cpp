@@ -177,15 +177,15 @@ inline int convertDistanceModel (DistanceModel eModel) noexcept
 
 // ====================================================
 
-bool AudioDevice::isExtensionSupported (string const& gExt) noexcept
+bool AudioDevice::isExtensionSupported (string_type const& gExt) noexcept
 {
-    return alIsExtensionPresent (gExt.c_str ());
+    return ::alIsExtensionPresent (gExt.c_str ());
 }
 
-bool AudioDevice::isExtensionPresent (string const& gExt) noexcept
+bool AudioDevice::isExtensionPresent (string_type const& gExt) noexcept
 {
     if (m_pDevObj)
-        return alcIsExtensionPresent
+        return ::alcIsExtensionPresent
                 (static_cast<ALCdevice*> (m_pDevObj), gExt.c_str ());
     return false;
 }
@@ -194,45 +194,45 @@ bool AudioDevice::isExtensionPresent (string const& gExt) noexcept
 
 PlaybackDevice::PlaybackDevice () noexcept
 : AudioDevice ("Default",
-               alcOpenDevice (nullptr),
+               ::alcOpenDevice (nullptr),
                DeviceType::Playback)
 { }
 
-PlaybackDevice::PlaybackDevice (string const& gName) noexcept
+PlaybackDevice::PlaybackDevice (string_type const& gName) noexcept
 : AudioDevice (std::move (gName),
-               alcOpenDevice (gName.c_str ()),
+               ::alcOpenDevice (gName.c_str ()),
                DeviceType::Playback)
 { }
 
 PlaybackDevice::~PlaybackDevice () noexcept
 {
-    if (m_pDevObj) alcCloseDevice (static_cast<ALCdevice*> (m_pDevObj));
+    if (m_pDevObj) ::alcCloseDevice (static_cast<ALCdevice*> (m_pDevObj));
 }
 
 // ====================================================
 
 CaptureDevice::CaptureDevice () noexcept
 : AudioDevice ("Default",
-               alcCaptureOpenDevice (nullptr,
-                                     22050,
-                                     convertQuality (OutputFormat::Stereo,
-                                                     SoundQuality::Low),
-                                     0),
+               ::alcCaptureOpenDevice (nullptr,
+                                       22050,
+                                       convertQuality (OutputFormat::Stereo,
+                                                       SoundQuality::Low),
+                                       0),
                DeviceType::Capture),
   m_eQuality (SoundQuality::Low),
   m_eFormat (OutputFormat::Stereo)
 {
 }
 
-CaptureDevice::CaptureDevice (string const& gName,
-                              uint          uFreq,
-                              OutputFormat  eFormat,
-                              SoundQuality  eQuality) noexcept
+CaptureDevice::CaptureDevice (string_type const& gName,
+                              uint               uFreq,
+                              OutputFormat       eFormat,
+                              SoundQuality       eQuality) noexcept
 : AudioDevice (gName,
-               alcCaptureOpenDevice (gName.c_str (),
-                                     uFreq,
-                                     convertQuality (eFormat, eQuality),
-                                     0),
+               ::alcCaptureOpenDevice (gName.c_str (),
+                                       uFreq,
+                                       convertQuality (eFormat, eQuality),
+                                       0),
                DeviceType::Capture),
   m_eQuality (eQuality),
   m_eFormat (eFormat)
@@ -240,20 +240,20 @@ CaptureDevice::CaptureDevice (string const& gName,
 
 CaptureDevice::~CaptureDevice () noexcept
 {
-    if (m_pDevObj) alcCaptureCloseDevice (static_cast<ALCdevice*> (m_pDevObj));
+    if (m_pDevObj) ::alcCaptureCloseDevice (static_cast<ALCdevice*> (m_pDevObj));
 }
 
 // ====================================================
 
 Instance::Instance (PlaybackDevice& gDevice, bool bMakeCurrent) noexcept
 : m_gDevice (gDevice),
-  m_pDevContext (gDevice.isValid () ?
-                     alcCreateContext
+  m_pDevContext (gDevice.valid () ?
+                     ::alcCreateContext
                      (static_cast<ALCdevice*> (gDevice.object ()), nullptr) :
                      nullptr)
 {
     if (m_pDevContext and bMakeCurrent and
-            alcMakeContextCurrent (static_cast<ALCcontext*> (m_pDevContext)) == 1)
+            ::alcMakeContextCurrent (static_cast<ALCcontext*> (m_pDevContext)) == 1)
         Internal::currentContext = this;
 }
 
@@ -262,14 +262,14 @@ Instance::~Instance () noexcept
     if (m_pDevContext)
     {
         invalidate ();
-        alcDestroyContext (static_cast<ALCcontext*> (m_pDevContext));
+        ::alcDestroyContext (static_cast<ALCcontext*> (m_pDevContext));
     }
 }
 
 bool Instance::use () noexcept
 {
     if (Internal::currentContext != this and
-            alcMakeContextCurrent (static_cast<ALCcontext*> (m_pDevContext)) == 1)
+            ::alcMakeContextCurrent (static_cast<ALCcontext*> (m_pDevContext)) == 1)
     {
         Internal::currentContext = this;
         return true;
@@ -280,7 +280,7 @@ bool Instance::use () noexcept
 
 void Instance::invalidate () noexcept
 {
-    if (Internal::currentContext == this and alcMakeContextCurrent (nullptr) == 1)
+    if (Internal::currentContext == this and ::alcMakeContextCurrent (nullptr) == 1)
         Internal::currentContext  = nullptr;
 }
 
@@ -290,11 +290,11 @@ bool Instance::setCapability (int nCap, bool bEnable) noexcept
 
     if (m_pDevContext and use ())
     {
-        bEnable ? alEnable (nCap) : alDisable (nCap);
+        bEnable ? ::alEnable (nCap) : ::alDisable (nCap);
 
         if (pPrevContext and pPrevContext != this)
         {
-            if (alcMakeContextCurrent
+            if (::alcMakeContextCurrent
                     (static_cast<ALCcontext*> (pPrevContext->m_pDevContext)) == 1)
                 Internal::currentContext = pPrevContext;
         }
@@ -311,11 +311,11 @@ bool Instance::hasCapability (int nCap) noexcept
 
     if (m_pDevContext and use ())
     {
-        bool bHasCap = alIsEnabled (nCap) == 1;
+        bool bHasCap = ::alIsEnabled (nCap) == 1;
 
         if (pPrevContext and pPrevContext != this)
         {
-            if (alcMakeContextCurrent
+            if (::alcMakeContextCurrent
                     (static_cast<ALCcontext*> (pPrevContext->m_pDevContext)) == 1)
                 Internal::currentContext = pPrevContext;
         }
@@ -328,24 +328,24 @@ bool Instance::hasCapability (int nCap) noexcept
 
 void Instance::process () noexcept
 {
-    if (m_pDevContext) alcProcessContext (static_cast<ALCcontext*> (m_pDevContext));
+    if (m_pDevContext) ::alcProcessContext (static_cast<ALCcontext*> (m_pDevContext));
 }
 
 void Instance::suspend () noexcept
 {
-    if (m_pDevContext) alcSuspendContext (static_cast<ALCcontext*> (m_pDevContext));
+    if (m_pDevContext) ::alcSuspendContext (static_cast<ALCcontext*> (m_pDevContext));
 }
 
 DistanceModel Instance::distanceModel () noexcept
 {
     int nModel = 0;
-    alGetIntegerv (AL::CurrentDistanceModel, &nModel);
+    ::alGetIntegerv (AL::CurrentDistanceModel, &nModel);
     return convertDistanceModel (nModel);
 }
 
 void Instance::setDistanceModel (DistanceModel eModel) noexcept
 {
-    alDistanceModel (convertDistanceModel (eModel));
+    ::alDistanceModel (convertDistanceModel (eModel));
 }
 
 Instance* Instance::current () noexcept

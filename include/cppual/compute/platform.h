@@ -41,7 +41,7 @@ public:
 
 namespace Platform {
 
-enum class Info : unsigned char
+enum class Info : byte
 {
     Name,
     Vendor,
@@ -50,7 +50,7 @@ enum class Info : unsigned char
 };
 
 u16    count () noexcept;
-bool   available (cchar* feature, u16 id = 0);
+bool   available (string const& feature, u16 id = 0);
 float  version (u16 id = 0);
 string info (Info, u16 id = 0);
 

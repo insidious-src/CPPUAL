@@ -57,12 +57,24 @@ shared_window WlFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay*
 // =========================================================
 
 using cppual::Ui::Platform::WlFactory;
-using cppual::Ui::Platform::shared_manager;
+using cppual::Process::Plugin        ;
+using cppual::Memory::MemoryResource ;
+using cppual::Memory::Allocator      ;
 
-extern "C" int plugin_main (shared_manager& instance)
+extern "C" Plugin* plugin_main (MemoryResource* rc)
 {
-    instance.reset (new WlFactory);
-    return instance == nullptr;
+    static Plugin plugin;
+
+    plugin.name     = "WlFactory"         ;
+    plugin.desc     = "Wayland UI Factory";
+    plugin.provides = "Ui::Factory"       ;
+    plugin.verMajor = 1                   ;
+    plugin.verMinor = 0                   ;
+
+    plugin.iface    = std::static_pointer_cast<void>
+            (std::allocate_shared<WlFactory>(Allocator<WlFactory>(*rc)));
+
+    return &plugin;
 }
 
 #endif // OS_GNU_LINUX or OS_BSD

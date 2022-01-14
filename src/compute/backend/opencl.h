@@ -24,9 +24,14 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
+#include <cppual/string.h>
 #include <cppual/resource.h>
-#include <cppual/memory/stack.h>
+#include <cppual/noncopyable.h>
+#include <cppual/compute/object.h>
 #include <cppual/compute/device.h>
+#include <cppual/compute/backend_iface.h>
+
+#define CL_TARGET_OPENCL_VERSION 200
 
 #include <CL/cl.h>
 
@@ -38,7 +43,7 @@
  *
  * API calls should always start with root namespace "::";
  * define all API typedefs in a consistent non-conflicting way;
- * completely cross-platform implementation using the ISO C++14 standard;
+ * completely cross-platform implementation using the ISO C++17 standard;
  * for integer bit fields use enums;
  * for object encapsulation use template specialization,
  * inline & constexpr functions as much as possible;
@@ -46,9 +51,16 @@
  * if possible prefer static allocators (cpu stack memory);
  * define all class typedefs according to STL (ex. typedef T value_type);
  * maintain strict typesafety;
+ *
  */
 
 namespace cppual { namespace Compute { namespace CL {
+
+// =========================================================
+
+typedef string string_type;
+
+// =========================================================
 
 typedef std::remove_pointer<cl_platform_id  >::type platform_type;
 typedef std::remove_pointer<cl_device_id    >::type device_type  ;
@@ -58,9 +70,16 @@ typedef std::remove_pointer<cl_program      >::type program_type ;
 typedef std::remove_pointer<cl_context      >::type context_type ;
 typedef std::remove_pointer<cl_mem          >::type memory_type  ;
 typedef std::remove_pointer<cl_command_queue>::type queue_type   ;
+typedef std::remove_pointer<cl_sampler      >::type sampler_type ;
+
+// =========================================================
 
 enum
 {
+    Success            = CL_SUCCESS                         ,
+    True               = CL_TRUE                            ,
+    False              = CL_FALSE                           ,
+
     MaxUnits           = CL_DEVICE_MAX_COMPUTE_UNITS        ,
     MaxDimensions      = CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS ,
     MaxGroupSize       = CL_DEVICE_MAX_WORK_GROUP_SIZE      ,
@@ -99,14 +118,16 @@ class invalid_device     : public device_exception   { };
 // OpenCL Object Concept
 // =========================================================
 
-template <typename> struct is_cl_object_helper       : public std::false_type { };
-template <> struct is_cl_object_helper<device_type > : public std::true_type  { };
-template <> struct is_cl_object_helper<event_type  > : public std::true_type  { };
-template <> struct is_cl_object_helper<kernel_type > : public std::true_type  { };
-template <> struct is_cl_object_helper<program_type> : public std::true_type  { };
-template <> struct is_cl_object_helper<context_type> : public std::true_type  { };
-template <> struct is_cl_object_helper<memory_type > : public std::true_type  { };
-template <> struct is_cl_object_helper<queue_type  > : public std::true_type  { };
+template <typename> struct is_cl_object_helper        : public std::false_type { };
+template <> struct is_cl_object_helper<platform_type> : public std::true_type  { };
+template <> struct is_cl_object_helper<device_type  > : public std::true_type  { };
+template <> struct is_cl_object_helper<event_type   > : public std::true_type  { };
+template <> struct is_cl_object_helper<kernel_type  > : public std::true_type  { };
+template <> struct is_cl_object_helper<program_type > : public std::true_type  { };
+template <> struct is_cl_object_helper<context_type > : public std::true_type  { };
+template <> struct is_cl_object_helper<memory_type  > : public std::true_type  { };
+template <> struct is_cl_object_helper<queue_type   > : public std::true_type  { };
+template <> struct is_cl_object_helper<sampler_type > : public std::true_type  { };
 
 template <typename T>
 struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<typename
@@ -117,214 +138,304 @@ template <typename T>
 using CLObject = typename std::enable_if<is_cl_object<T>::value, T>::type;
 
 // =========================================================
-// simplified shared_ptr reimplementation for managing OpenCL handles
+
+template <typename>
+struct HandleType
+{
+    constexpr static auto value = ObjectType::Base;
+};
+
+template <>
+struct HandleType<device_type>
+{
+    constexpr static auto value = ObjectType::Device;
+};
+
+template <>
+struct HandleType<event_type>
+{
+    constexpr static auto value = ObjectType::Event;
+};
+
+template <>
+struct HandleType<kernel_type>
+{
+    constexpr static auto value = ObjectType::Shader;
+};
+
+template <>
+struct HandleType<program_type>
+{
+    constexpr static auto value = ObjectType::CommandSequence;
+};
+
+template <>
+struct HandleType<context_type>
+{
+    constexpr static auto value = ObjectType::Pipeline;
+};
+
+template <>
+struct HandleType<memory_type>
+{
+    constexpr static auto value = ObjectType::Buffer;
+};
+
+template <>
+struct HandleType<queue_type>
+{
+    constexpr static auto value = ObjectType::Queue;
+};
+
+// =========================================================
+// simplified implementation for managing OpenCL handles
 // =========================================================
 
+//! Program Handle Class
 template <typename T>
-class Object
+class ObjectHandle : public Object<HandleType<T>::value>
 {
 public:
-    typedef CLObject<T>* pointer    ;
-    typedef std::size_t  size_type  ;
-    typedef Handle       handle_type;
+    typedef Object<HandleType<T>::value> base_type  ;
+    typedef CLObject<T>*                 pointer    ;
+    typedef std::size_t                  size_type  ;
+    typedef Handle                       handle_type;
 
-    Object (Object &&        ) = default ;
-    Object (Object const& rhs)   noexcept;
+    ObjectHandle  () = delete ;
+    ~ObjectHandle () = default;
 
-    Object& operator = (Object &&        ) = default ;
-    Object& operator = (Object const& rhs)   noexcept;
-    ~Object () noexcept;
+    ObjectHandle (ObjectHandle&&) = default;
+    ObjectHandle& operator = (ObjectHandle&&) = default;
 
-    constexpr Object ()               noexcept : m_object ()       { }
-    constexpr Object (pointer handle) noexcept : m_object (handle) { }
+    constexpr operator pointer () const noexcept
+    {
+        return handle ();
+    }
 
-    template <typename U = pointer>
-    constexpr U handle () const noexcept { return m_object.get<U> (); }
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer>();
+    }
 
-private:
-    handle_type m_object;
+protected:
+    constexpr ObjectHandle (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-inline Object<device_type>::~Object () noexcept
+class ObjectHandle<device_type> : public IDevice
 {
-    if (m_object) ::clReleaseDevice (handle ());
-}
+public:
+    typedef IDevice                base_type  ;
+    typedef CLObject<device_type>* pointer    ;
+    typedef std::size_t            size_type  ;
+    typedef Handle                 handle_type;
 
-template <>
-inline Object<context_type>::~Object () noexcept
-{
-    if (m_object) ::clReleaseContext (handle ());
-}
+    ~ObjectHandle () noexcept;
 
-template <>
-inline Object<kernel_type>::~Object () noexcept
-{
-    if (m_object) ::clReleaseKernel (handle ());
-}
+    ObjectHandle (ObjectHandle&&) = default;
+    ObjectHandle& operator = (ObjectHandle &&) = default;
 
-template <>
-inline Object<program_type>::~Object () noexcept
-{
-    if (m_object) ::clReleaseProgram (handle ());
-}
+    constexpr operator pointer () const noexcept
+    {
+        return handle ();
+    }
 
-template <>
-inline Object<queue_type>::~Object () noexcept
-{
-    if (m_object) ::clReleaseCommandQueue (handle ());
-}
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer>();
+    }
 
-template <>
-inline Object<memory_type>::~Object () noexcept
-{
-    if (m_object) ::clReleaseMemObject (handle ());
-}
+protected:
+    constexpr ObjectHandle (pointer handle) noexcept : base_type (handle) { }
 
-template <>
-inline Object<event_type>::~Object () noexcept
-{
-    if (m_object) ::clReleaseEvent (handle ());
-}
-
-template <>
-inline Object<device_type>::Object (Object const& rhs) noexcept
-: m_object (rhs.m_object)
-{
-    if (m_object) ::clRetainDevice (handle ());
-}
-
-template <>
-inline Object<context_type>::Object (Object const& rhs) noexcept
-: m_object (rhs.m_object)
-{
-    if (m_object) ::clRetainContext (handle ());
-}
-
-template <>
-inline Object<kernel_type>::Object (Object const& rhs) noexcept
-: m_object (rhs.m_object)
-{
-    if (m_object) ::clRetainKernel (handle ());
-}
-
-template <>
-inline Object<program_type>::Object (Object const& rhs) noexcept
-: m_object (rhs.m_object)
-{
-    if (m_object) ::clRetainProgram (handle ());
-}
-
-template <>
-inline Object<queue_type>::Object (Object const& rhs) noexcept
-: m_object (rhs.m_object)
-{
-    if (m_object) ::clRetainCommandQueue (handle ());
-}
-
-template <>
-inline Object<event_type>::Object (Object const& rhs) noexcept
-: m_object (rhs.m_object)
-{
-    if (m_object) ::clRetainEvent (handle ());
-}
-
-template <>
-inline Object<memory_type>::Object (Object const& rhs) noexcept
-: m_object (rhs.m_object)
-{
-    if (m_object) ::clRetainMemObject (handle ());
-}
-
-template <>
-inline
-Object<device_type>&
-Object<device_type>::operator = (Object const& rhs) noexcept
-{
-    if (this == &rhs) return *this;
-    if (m_object) ::clReleaseDevice (handle ());
-    m_object = rhs.m_object;
-    if (m_object) ::clRetainDevice  (handle ());
-    return *this;
-}
-
-template <>
-inline
-Object<context_type>&
-Object<context_type>::operator = (Object const& rhs) noexcept
-{
-    if (this == &rhs) return *this;
-    if (m_object) ::clReleaseContext (handle ());
-    m_object = rhs.m_object;
-    if (m_object) ::clRetainContext  (handle ());
-    return *this;
-}
-
-template <>
-inline
-Object<kernel_type>&
-Object<kernel_type>::operator = (Object const& rhs) noexcept
-{
-    if (this == &rhs) return *this;
-    if (m_object) ::clReleaseKernel (handle ());
-    m_object = rhs.m_object;
-    if (m_object) ::clRetainKernel  (handle ());
-    return *this;
-}
-
-template <>
-inline
-Object<program_type>&
-Object<program_type>::operator = (Object const& rhs) noexcept
-{
-    if (this == &rhs) return *this;
-    if (m_object) ::clReleaseProgram (handle ());
-    m_object = rhs.m_object;
-    if (m_object) ::clRetainProgram  (handle ());
-    return *this;
-}
-
-template <>
-inline
-Object<queue_type>&
-Object<queue_type>::operator = (Object const& rhs) noexcept
-{
-    if (this == &rhs) return *this;
-    if (m_object) ::clReleaseCommandQueue (handle ());
-    m_object = rhs.m_object;
-    if (m_object) ::clRetainCommandQueue  (handle ());
-    return *this;
-}
-
-template <>
-inline
-Object<event_type>&
-Object<event_type>::operator = (Object const& rhs) noexcept
-{
-    if (this == &rhs) return *this;
-    if (m_object) ::clReleaseEvent (handle ());
-    m_object = rhs.m_object;
-    if (m_object) ::clRetainEvent  (handle ());
-    return *this;
-}
-
-template <>
-inline
-Object<memory_type>&
-Object<memory_type>::operator = (Object const& rhs) noexcept
-{
-    if (this == &rhs) return *this;
-    if (m_object) ::clReleaseMemObject (handle ());
-    m_object = rhs.m_object;
-    if (m_object) ::clRetainMemObject  (handle ());
-    return *this;
-}
+    ObjectHandle ();
+};
 
 // =========================================================
 
-class Device : public Object<device_type>
+template <>
+class ObjectHandle<memory_type> : public IBuffer
+{
+public:
+    typedef IBuffer                base_type  ;
+    typedef CLObject<memory_type>* pointer    ;
+    typedef std::size_t            size_type  ;
+    typedef Handle                 handle_type;
+
+    ~ObjectHandle () noexcept;
+
+    ObjectHandle (ObjectHandle&&) = default;
+    ObjectHandle& operator = (ObjectHandle&&) = default;
+
+    constexpr operator pointer () const noexcept
+    {
+        return handle ();
+    }
+
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer>();
+    }
+
+protected:
+    constexpr ObjectHandle (pointer handle) noexcept : base_type (handle) { }
+};
+
+// =========================================================
+
+template <>
+class ObjectHandle<context_type> : public IPipeline
+{
+public:
+    typedef IPipeline               base_type  ;
+    typedef CLObject<context_type>* pointer    ;
+    typedef std::size_t             size_type  ;
+    typedef Handle                  handle_type;
+
+    ~ObjectHandle () noexcept;
+
+    ObjectHandle (ObjectHandle&&) = default;
+    ObjectHandle& operator = (ObjectHandle&&) = default;
+
+    constexpr operator pointer () const noexcept
+    {
+        return handle ();
+    }
+
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer>();
+    }
+
+protected:
+    constexpr ObjectHandle (pointer handle) noexcept : base_type (handle) { }
+};
+
+// =========================================================
+
+template <>
+class ObjectHandle<kernel_type> : public IShader
+{
+public:
+    typedef IShader                base_type  ;
+    typedef CLObject<kernel_type>* pointer    ;
+    typedef std::size_t            size_type  ;
+    typedef Handle                 handle_type;
+
+    ~ObjectHandle () noexcept;
+
+    ObjectHandle (ObjectHandle&&) = default;
+    ObjectHandle& operator = (ObjectHandle&&) = default;
+
+    constexpr operator pointer () const noexcept
+    {
+        return handle ();
+    }
+
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer>();
+    }
+
+protected:
+    constexpr ObjectHandle (pointer handle) noexcept : base_type (handle) { }
+};
+
+// =========================================================
+
+template <>
+class ObjectHandle<program_type> : public ICommandSequence
+{
+public:
+    typedef ICommandSequence        base_type  ;
+    typedef CLObject<program_type>* pointer    ;
+    typedef std::size_t             size_type  ;
+    typedef Handle                  handle_type;
+
+    ~ObjectHandle () noexcept;
+
+    ObjectHandle (ObjectHandle&&) = default;
+    ObjectHandle& operator = (ObjectHandle&&) = default;
+
+    constexpr operator pointer () const noexcept
+    {
+        return handle ();
+    }
+
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer>();
+    }
+
+protected:
+    constexpr ObjectHandle (pointer handle) noexcept : base_type (handle) { }
+};
+
+// =========================================================
+
+template <>
+class ObjectHandle<queue_type> : public IQueue
+{
+public:
+    typedef IQueue                base_type  ;
+    typedef CLObject<queue_type>* pointer    ;
+    typedef std::size_t           size_type  ;
+    typedef Handle                handle_type;
+
+    ~ObjectHandle () noexcept;
+
+    ObjectHandle (ObjectHandle&&) = default;
+    ObjectHandle& operator = (ObjectHandle&&) = default;
+
+    constexpr operator pointer () const noexcept
+    {
+        return handle ();
+    }
+
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer>();
+    }
+
+protected:
+    constexpr ObjectHandle (pointer handle) noexcept : base_type (handle) { }
+};
+
+// =========================================================
+
+template <>
+class ObjectHandle<event_type> : public IEvent
+{
+public:
+    typedef IEvent                base_type  ;
+    typedef CLObject<event_type>* pointer    ;
+    typedef std::size_t           size_type  ;
+    typedef Handle                handle_type;
+
+    ~ObjectHandle () noexcept;
+
+    ObjectHandle (ObjectHandle&&) = default;
+    ObjectHandle& operator = (ObjectHandle&&) = default;
+
+    constexpr operator pointer () const noexcept
+    {
+        return handle ();
+    }
+
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer>();
+    }
+
+protected:
+    constexpr ObjectHandle (pointer handle) noexcept : base_type (handle) { }
+};
+
+// =========================================================
+
+class Device : public ObjectHandle<device_type>
 {
 public:
     enum Type
@@ -336,6 +447,12 @@ public:
         Custom      = CL_DEVICE_TYPE_CUSTOM     ,
         Any         = CL_DEVICE_TYPE_ALL
     };
+
+    size_type cache        () const noexcept;
+    size_type cacheLine    () const noexcept;
+    size_type localMemory  () const noexcept;
+    size_type constMemory  () const noexcept;
+    size_type globalMemory () const noexcept;
 
     constexpr static Compute::Device::Type convert (Type type) noexcept
     {
@@ -356,8 +473,7 @@ public:
     }
 
 private:
-    constexpr
-    Device (pointer handle) noexcept : Object (handle) { }
+    Device (pointer handle) noexcept : ObjectHandle (handle) { }
 
     friend class Platform;
 };
@@ -381,14 +497,14 @@ public:
 
     Platform () = delete;
 
-    string info          (Info  );
-    bool        has_extension (cchar*);
+    string info          (Info);
+    bool   has_extension (string_type const&);
 
     static size_type count () noexcept
-    { return list ().size  ();             }
+    { return list ().size  (); }
 
     inline pointer handle  () const noexcept
-    { return m_attributes.handle;          }
+    { return m_attributes.handle; }
 
     inline size_type device_count () const noexcept
     { return m_attributes.devices.size (); }
@@ -419,17 +535,16 @@ private:
     Platform (platform_type* handle, std::vector<Device::pointer>& devices) noexcept
     : m_attributes { handle, devices } { }
 
-    // helper functions
-    static cl_uint get_num_platforms () noexcept
+    static u32 get_num_platforms () noexcept
     {
-        cl_uint num;
+        u32 num;
         ::clGetPlatformIDs (0, nullptr, &num);
         return num;
     }
 
-    static cl_uint get_num_devices (platform_type* platform)
+    static u32 get_num_devices (platform_type* platform)
     {
-        cl_uint n;
+        u32 n;
         ::clGetDeviceIDs (platform, Device::Any, 0, nullptr, &n);
         return n;
     }

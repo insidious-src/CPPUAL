@@ -89,7 +89,7 @@ public:
     }
 
     template <typename TRet, typename... TArgs>
-    TRet call (string_type pName, TArgs&&... args) const
+    TRet call (string_type pName, TArgs... args) const
     {
         auto fn = direct_cast<TRet(*)(TArgs...)> (get_function (pName.c_str ()));
 
@@ -109,28 +109,59 @@ private:
 
 // =========================================================
 
-extern "C" struct Plugin
+struct Plugin
 {
-    cchar*  name    ;
-    cchar*  provides;
-    cchar*  desc    ;
-    cchar*  iface   ;
-    int     verMajor;
-    int     verMinor;
+    cchar*                name    ;
+    cchar*                provides;
+    cchar*                desc    ;
+    int                   verMajor;
+    int                   verMinor;
+    std::shared_ptr<void> iface   ;
+
+    inline Plugin () noexcept = default;
+    inline Plugin (Plugin const&) = default;
+    inline Plugin& operator = (Plugin const&) = default;
+
+    inline Plugin (Plugin&& obj)
+    : name(obj.name),
+      provides(obj.provides),
+      desc(obj.desc),
+      verMajor(obj.verMajor),
+      verMinor(obj.verMinor),
+      iface(std::move(obj.iface))
+    { }
+
+    inline Plugin& operator = (Plugin&& obj)
+    {
+        if (this == &obj) return *this;
+
+        name     = obj.name;
+        provides = obj.provides;
+        desc     = obj.desc;
+        verMajor = obj.verMajor;
+        verMinor = obj.verMinor;
+        iface    = std::move(obj.iface);
+
+        return *this;
+    }
 };
 
-typedef std::pair<DynLoader, Plugin> plugin_pair;
+typedef std::pair<DynLoader const, Plugin> plugin_pair;
+
+// =========================================================
 
 template <typename Interface,
-          typename Allocator = Memory::Allocator <std::pair<const string, plugin_pair>>,
+          typename Allocator = Memory::Allocator< std::pair<string const, plugin_pair> >,
           typename = typename std::enable_if<
               std::is_same<typename std::allocator_traits<Allocator>::value_type,
-                           std::pair<const string, plugin_pair>
+                           std::pair<string const, plugin_pair>
                            >{}>::type
           >
 class PluginManager : public NonCopyable
 {
 public:
+    static_assert (Memory::is_allocator<Allocator>::value, "invalid allocator object type!");
+
     typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type;
     typedef typename std::allocator_traits<Allocator>::size_type      size_type     ;
     typedef typename std::allocator_traits<Allocator>::value_type     pair_type     ;
@@ -146,6 +177,36 @@ public:
     typedef std::unordered_map
     <key_type, value_type, hash_type, equal_type, allocator_type> map_type;
 
+    typedef typename map_type::mapped_type&       reference      ;
+    typedef typename map_type::mapped_type const& const_reference;
+    typedef typename map_type::iterator           iterator       ;
+    typedef typename map_type::const_iterator     const_iterator ;
+
+    class plugin_pointer
+    {
+    public:
+        typedef Plugin const* const_pointer;
+
+        plugin_pointer() = delete;
+
+        constexpr const_pointer operator -> () const noexcept
+        { return &_M_ref.second; }
+
+        constexpr shared_iface interface () const
+        { return std::static_pointer_cast<iface_type>(_M_ref.second.iface); }
+
+    private:
+        constexpr plugin_pointer (const_reference ref) noexcept
+        : _M_ref(ref)
+        { }
+
+        template <typename, typename, typename>
+        friend class PluginManager;
+
+    private:
+        const_reference _M_ref;
+    };
+
     constexpr static const auto plugin_main = "plugin_main";
 
     PluginManager (PluginManager&&) = default;
@@ -154,49 +215,40 @@ public:
     void release_all ()
     { m_gPluginMap.clear(); }
 
-    bool empty () const noexcept
+    constexpr bool empty () const noexcept
     { return m_gPluginMap.empty (); }
 
-    allocator_type get_allocator () const noexcept
+    constexpr allocator_type get_allocator () const noexcept
     { return m_gPluginMap.get_allocator (); }
 
-    loader_type* loader (const_key& plugin_path) const
-    { return &m_gPluginMap[plugin_path].first; }
+    loader_type const* loader (const_key& path) const
+    { return &m_gPluginMap[path].first; }
 
-    Plugin plugin (const_key& plugin_path) const
-    { return m_gPluginMap[plugin_path].second; }
-
-    shared_iface construct (const_key& plugin_path) const
-    {
-        return shared_iface(m_gPluginMap[plugin_path].first.
-                            template call<iface_type*>(m_gPluginMap[plugin_path].second.iface),
-                            [this](auto ptr)
-        {
-            typedef typename allocator_type::template rebind<iface_type>::other other_type;
-
-            auto alloc = other_type (m_gPluginMap.get_allocator());
-            alloc.deallocate(ptr, 1);
-        });
-    }
+    plugin_pointer plugin (const_key& path) const
+    { return m_gPluginMap[path]; }
 
     PluginManager (allocator_type const& ator = allocator_type ())
     : m_gPluginMap(ator)
     { }
 
-    bool load_plugin (const_key& path)
+    template <typename... Args>
+    bool load_plugin (const_key& path, Memory::MemoryResource* rc = nullptr, Args... args)
     {
         loader_type loader (path);
 
         if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
-        Plugin plugin = loader.call<Plugin> (plugin_main);
+
+        Plugin* plugin = loader.call<Plugin*> (plugin_main,
+                                               rc == nullptr ? get_allocator().resource() : rc,
+                                               std::forward<Args> (args)...);
 
         for (auto& pair : m_gPluginMap)
         {
-            if (std::strcmp(pair.second.second.provides, plugin.provides) == 0)
+            if (std::strcmp(pair.second.second.provides, plugin->provides) == 0)
                 return false;
         }
 
-        m_gPluginMap.try_emplace (path, std::make_pair (std::move (loader), plugin));
+        m_gPluginMap.try_emplace (path, std::make_pair (std::move (loader), std::move(*plugin)));
         return true;
     }
 

@@ -23,66 +23,75 @@
 #define CPPUAL_COMPUTE_OBJECT_H_
 #ifdef __cplusplus
 
+#include <cppual/meta.h>
 #include <cppual/types.h>
+#include <cppual/flags.h>
+#include <cppual/string.h>
 #include <cppual/resource.h>
 
 namespace cppual { namespace Compute {
 
-class HostConnection; // application instance info
-class Device;
-class Behaviour;      // device and queue load balancing
-class MixedQueue;     // host and multiple devices
-class HostQueue;      // thread queue
-class DeviceQueue;
-class DeviceSurface;
-class Pipeline;
-class Image;
-class Render;         // render passes and states
-class Command;
-class CommandSequence;
-class Event;
+struct Factory;
+class  HostConnection; // application instance info
+class  Device;
+class  Behaviour;      // device and queue load balancing
+class  MixedQueue;     // host and multiple devices
+class  HostQueue;      // thread queue
+class  DeviceQueue;
+class  DeviceSurface;
+class  Pipeline;
+class  Image;
+class  Render;         // render passes and states
+class  Command;
+class  CommandSequence;
+class  Event;
 
 // =========================================================
 
-enum class Resource : unsigned short
+enum class ObjectType : ushort
 {
-    Buffer          = 1 << 0,
-    CommandSequence = 1 << 1,
-    Image           = 1 << 2,
-    Pipeline        = 1 << 3,
-    RenderPass      = 1 << 4,
-    Shader          = 1 << 5,
-    DescriptorPool  = 1 << 6,
-    Event           = 1 << 7,
-    State           = 1 << 8,
-    Queue           = 1 << 9
+    Base            =       0,
+    Device          = 1 <<  0,
+    Buffer          = 1 <<  1,
+    CommandSequence = 1 <<  2,
+    Image           = 1 <<  3,
+    Pipeline        = 1 <<  4,
+    RenderPass      = 1 <<  5,
+    Shader          = 1 <<  6,
+    DescriptorPool  = 1 <<  7,
+    Event           = 1 <<  8,
+    State           = 1 <<  9,
+    Queue           = 1 << 10
 };
 
 // =========================================================
 
-template <Resource Type>
-class Object
+template <ObjectType Type>
+class Object : public Resource<void, void*>
 {
 public:
-    typedef Handle      pointer;
-    typedef std::size_t size_type;
+    static_assert (Type != ObjectType::Base, "Not a valid Resource type!");
+
+    typedef std::size_t size_type  ;
+    typedef string      string_type;
+
+    constexpr Object () noexcept = default;
 
     Object (Object&&) noexcept = default;
-    Object (Object const& rhs) noexcept;
     Object& operator = (Object&&) = default;
-    Object& operator = (Object const& rhs) noexcept;
-    ~Object () noexcept;
 
-    Object (Device& owner) noexcept : m_object (), m_owner (&owner) { }
-    Device*   owner         () const noexcept { return m_owner; }
-    constexpr Resource type () const noexcept { return Type;    }
+    constexpr static ObjectType type () noexcept { return Type; }
 
-    template <typename T = pointer::pointer>
-    T handle () const noexcept { return m_object.get<T> ();  }
+    constexpr operator handle_type::pointer () const noexcept
+    { return _M_handle; }
+
+protected:
+    constexpr Object (handle_type handle) noexcept
+    : _M_handle (handle)
+    { }
 
 private:
-    pointer m_object;
-    Device* m_owner ;
+    handle_type _M_handle;
 };
 
 } } // Compute

@@ -28,16 +28,20 @@
 
 #include <new>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace Compute {
 
 struct memory_source_not_available : std::bad_alloc { };
 
 // =========================================================
 
-class MemoryChunk : public Compute::Object<Compute::Resource::Buffer>
+class MemoryChunk : public Object<ObjectType::Buffer>
 {
 public:
-    typedef Compute::Device device_type;
+    typedef Device        device_type           ;
+    typedef Device&       device_reference      ;
+    typedef Device*       device_pointer        ;
+    typedef Device const* device_const_pointer  ;
+    typedef Device const& device_const_reference;
 
     enum class Type : unsigned char
     {
@@ -46,20 +50,20 @@ public:
         Global
     };
 
-    MemoryChunk (device_type const&, size_type size);
+    MemoryChunk (device_const_reference, size_type size);
 
-    device_type const& device () const noexcept
+    device_const_reference device () const noexcept
     { return *m_pDevice; }
 
 private:
-    device_type const* m_pDevice;
+    device_const_pointer m_pDevice;
 };
 
 } } // namespace Compute
 
 // =========================================================
 
-using cppual::Memory::MemoryChunk;
+using cppual::Compute::MemoryChunk;
 
 void* operator new    (std::size_t size, MemoryChunk& source, std::size_t align = 0);
 void  operator delete (void* ptr, MemoryChunk& source);

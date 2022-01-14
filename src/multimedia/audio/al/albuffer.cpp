@@ -172,21 +172,21 @@ SoundBuffer::~SoundBuffer () noexcept
 int SoundBuffer::getFrequency () const noexcept
 {
     int nFreq = 0;
-    if (id ()) alGetBufferi (id (), AL::Frequency, &nFreq);
+    if (id ()) ::alGetBufferi (id (), AL::Frequency, &nFreq);
     return nFreq;
 }
 
 int SoundBuffer::getSize () const noexcept
 {
     int nSize = 0;
-    if (id ()) alGetBufferi (id (), AL::Size, &nSize);
+    if (id ()) ::alGetBufferi (id (), AL::Size, &nSize);
     return nSize;
 }
 
 int SoundBuffer::getBits () const noexcept
 {
     int nBits = 0;
-    if (id ()) alGetBufferi (id (), AL::Bits, &nBits);
+    if (id ()) ::alGetBufferi (id (), AL::Bits, &nBits);
     return nBits;
 }
 

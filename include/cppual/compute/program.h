@@ -23,22 +23,23 @@
 #define CPPUAL_COMPUTE_INSTANCE_H_
 #ifdef __cplusplus
 
-#include <vector>
 #include <cppual/types.h>
 #include <cppual/resource.h>
 #include <cppual/noncopyable.h>
 #include <cppual/compute/devtask.h>
 
-using std::vector;
+#include <vector>
 
 namespace cppual { namespace Compute {
 
-class Program : public Object <Resource::CommandSequence>
+class Program : public Object <ObjectType::CommandSequence>
 {
 public:
+    typedef std::size_t size_type;
+
     Program ();
     Program (Behaviour const&, string const& binary_path);
-    Program (Behaviour const&, vector<string> const& source);
+    Program (Behaviour const&, std::vector<string> const& source);
     Program (Program&&);
     Program (Program const&);
     Program& operator = (Program&&);

@@ -76,7 +76,7 @@ bool XQueue::set_window_events (window_type const& window, mask_type gFlags) noe
     }
 
     ::xcb_change_window_attributes (display   ().get<x::display_type> (),
-                                    window.id ().get<x::handle_type>  (),
+                                    window.handle ().get<x::handle_type>  (),
                                     XCB_CW_EVENT_MASK,
                                     &uMask);
 
@@ -115,7 +115,7 @@ void XQueue::send (window_type const& window, event_type const& event)
 
     ::xcb_send_event (display ().get<x::display_type> (),
                       false,
-                      window.id ().get<x::handle_type> (),
+                      window.handle ().get<x::handle_type> (),
                       send_event.response_type & ~0x80,
                       reinterpret_cast<cchar*> (&send_event));
 
@@ -128,7 +128,7 @@ void XQueue::post (window_type const& window, event_type const& event)
 
     ::xcb_send_event (display ().get<x::display_type> (),
                       false,
-                      window.id ().get<x::handle_type> (),
+                      window.handle ().get<x::handle_type> (),
                       post_event.response_type & ~0x80,
                       reinterpret_cast<cchar*> (&post_event));
 

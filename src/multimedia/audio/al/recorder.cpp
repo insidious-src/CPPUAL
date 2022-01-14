@@ -30,9 +30,9 @@ namespace cppual { namespace Audio { namespace AL {
 
 bool SoundStreamRecorder::record () noexcept
 {
-    if (m_gDevice.isValid () and !m_bIsRecording)
+    if (m_gDevice.valid () and !m_bIsRecording)
     {
-        alcCaptureStart (static_cast<ALCdevice*> (m_gDevice.object ()));
+        ::alcCaptureStart (static_cast<ALCdevice*> (m_gDevice.object ()));
         return m_bIsRecording = true;
     }
 
@@ -43,18 +43,18 @@ void SoundStreamRecorder::stop () noexcept
 {
     if (m_bIsRecording)
     {
-        alcCaptureStop (static_cast<ALCdevice*> (m_gDevice.object ()));
+        ::alcCaptureStop (static_cast<ALCdevice*> (m_gDevice.object ()));
         m_bIsRecording = false;
     }
 }
 
 void SoundStreamRecorder::setSamples (int nSamples) noexcept
 {
-    if (m_gDevice.isValid ())
+    if (m_gDevice.valid ())
     {
-        alcCaptureSamples (static_cast<ALCdevice*> (m_gDevice.object ()),
-                           nullptr,
-                           nSamples);
+        ::alcCaptureSamples (static_cast<ALCdevice*> (m_gDevice.object ()),
+                             nullptr,
+                             nSamples);
         m_nSamples = nSamples;
     }
 }

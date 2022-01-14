@@ -22,42 +22,22 @@
 #include <cppual/compute/devmemory.h>
 #include <cppual/compute/device.h>
 
+using namespace cppual::Compute;
+
 void* operator new (std::size_t /* size */, MemoryChunk& obj, std::size_t /* align */)
 {
-    using namespace cppual::Memory;
-
     if (!obj.device ().valid ()) throw memory_source_not_available ();
 
-    //::VkDeviceMemory mem_obj = nullptr;
-
-    // ::VkMemoryAllocateInfo nfo =
-    // {
-    //     size,
-    //     align ? align : size,
-    //     0,
-    //     1,
-    //     { 0 },
-    //     0
-    // };
-
-    // if (::vkAllocateMemory (obj.device ().handle<::VkDevice> (), &nfo, mem_obj))
-    //     throw std::bad_alloc ();
-
-    //return mem_obj;
-    return nullptr;
+    return reinterpret_cast<void*>(1);
 }
 
-void operator delete (void* ptr, MemoryChunk& obj)
+void operator delete (void* /*ptr*/, MemoryChunk& /*obj*/)
 {
-    using namespace cppual::Memory;
-    //const ::VkAllocationCallbacks* p = nullptr;
 
-    if (!obj.device ().valid ()) throw memory_source_not_available ();
-    //::vkFreeMemory (obj.device ().handle<::VkDevice> (), static_cast<::VkDeviceMemory> (ptr), p);
 }
 
 // =========================================================
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace Compute {
 
 } } // namespace Compute

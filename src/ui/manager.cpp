@@ -19,8 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
 #include <cppual/ui/manager.h>
+
+#include <iostream>
 
 namespace cppual { namespace Ui { namespace Platform {
 
@@ -50,11 +51,11 @@ private:
 
     inline Initializer ()
     {
-        if (mgr.load_plugin(platform_name())) factory = mgr.construct(platform_name());
+        if (mgr.load_plugin(platform_name())) factory = mgr.plugin(platform_name()).interface();
     }
 
 public:
-    inline static shared_manager& instance () noexcept
+    inline static shared_manager instance () noexcept
     {
         return platform ().factory;
     }
@@ -64,9 +65,9 @@ public:
 
 // ====================================================
 
-Factory* Factory::instance ()
+shared_manager Factory::instance ()
 {
-    return Initializer::instance ().get ();
+    return Initializer::instance ();
 }
 
 bool Factory::hasValidInstance () noexcept

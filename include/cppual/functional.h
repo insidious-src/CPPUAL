@@ -431,8 +431,7 @@ struct is_delegate : is_delegate_helper<T>
 };
 
 template <typename T>
-using DelegateType = typename
-std::enable_if<is_delegate<T>::value, T>::type;
+using DelegateType = typename std::enable_if<is_delegate<T>::value, T>::type;
 
 } // cppual
 

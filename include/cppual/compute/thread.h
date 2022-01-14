@@ -71,7 +71,7 @@ int			  sleepFor (uint millisec);
 class Thread final : public NonCopyable
 {
 public:
-    typedef Function<void()> callable;
+    typedef Function<void()> callable ;
     typedef std::size_t      size_type;
 
     class Id final
@@ -83,7 +83,7 @@ public:
         Id (thread_handle __id) : m_handle (__id) { }
 
     private:
-        friend class  Thread;
+        friend class  Thread  ;
         thread_handle m_handle;
 
         static bool threadHandlesEqual (thread_handle h1,
@@ -103,7 +103,7 @@ public:
     int         setPriority (ThreadPriority priority);
     void        cancel ();
     void        detach ();
-    void        join ();
+    void        join   ();
     //bool        tryJoinFor (uint millisec);
 
     bool start (callable&      func,
@@ -111,13 +111,13 @@ public:
                 ThreadPriority priority   = ThreadPriority::Inherit,
                 size_type      stack_size = 1048576U);
 
-    inline size_type stackSize () const noexcept { return m_uStackSize; }
-    inline Id        id () const noexcept { return m_gId; }
+    inline size_type stackSize  () const noexcept { return m_uStackSize;  }
+    inline Id        id         () const noexcept { return m_gId;         }
     inline bool      isJoinable () const noexcept { return m_bIsJoinable; }
 
 private:
-    Id          m_gId;
-    size_type   m_uStackSize;
+    Id          m_gId        ;
+    size_type   m_uStackSize ;
     atomic_bool m_bIsJoinable;
 };
 

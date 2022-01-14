@@ -54,22 +54,24 @@ enum class StringQuery : unsigned char
 class AudioDevice : public NonCopyable
 {
 public:
+    typedef string string_type;
+
     AudioDevice () = delete;
     static bool isExtensionSupported (string const& name) noexcept;
     bool        isExtensionPresent   (string const& name) noexcept;
 
-    inline DeviceType type    () const noexcept { return m_eType      ; }
-    inline string     name    () const noexcept { return m_gDeviceName; }
-    inline void*      object  ()       noexcept { return m_pDevObj    ; }
-    inline bool       isValid () const noexcept { return m_pDevObj    ; }
+    inline DeviceType  type   () const noexcept { return m_eType      ; }
+    inline string_type name   () const noexcept { return m_gDeviceName; }
+    inline void*       object ()       noexcept { return m_pDevObj    ; }
+    inline bool        valid  () const noexcept { return m_pDevObj    ; }
 
 protected:
-    string     m_gDeviceName;
-    void*      m_pDevObj;
-    DeviceType m_eType;
+    string_type m_gDeviceName;
+    void*       m_pDevObj;
+    DeviceType  m_eType;
 
     inline
-    AudioDevice (string const& gName, void* pObj, DeviceType eType) noexcept
+    AudioDevice (string_type const& gName, void* pObj, DeviceType eType) noexcept
     : m_gDeviceName (std::move (gName)),
       m_pDevObj     (pObj),
       m_eType       (eType)
@@ -80,20 +82,22 @@ class PlaybackDevice final : public AudioDevice
 {
 public:
     PlaybackDevice  () noexcept;
-    PlaybackDevice  (string const& name) noexcept;
+    PlaybackDevice  (string_type const& name) noexcept;
     ~PlaybackDevice () noexcept;
 };
 
 class CaptureDevice final : public AudioDevice
 {
 public:
+    typedef string string_type;
+
     CaptureDevice  () noexcept;
     ~CaptureDevice () noexcept;
 
-    CaptureDevice (string const& name,
-                   uint          freq    = 22050,
-                   OutputFormat  format  = OutputFormat::Stereo,
-                   SoundQuality  quality = SoundQuality::Low) noexcept;
+    CaptureDevice (string_type const& name,
+                   uint               freq    = 22050,
+                   OutputFormat       format  = OutputFormat::Stereo,
+                   SoundQuality       quality = SoundQuality::Low) noexcept;
 
     SoundQuality quality () const noexcept { return m_eQuality; }
     OutputFormat format  () const noexcept { return m_eFormat ; }
@@ -108,7 +112,9 @@ private:
 class Instance final : public NonCopyable
 {
 public:
-    typedef std::vector<string> ext_list;
+    typedef string                   string_type;
+    typedef std::vector<string_type> ext_list   ;
+
     Instance () = delete;
     Instance (PlaybackDevice& device, bool current = false) noexcept;
     ~Instance () noexcept;

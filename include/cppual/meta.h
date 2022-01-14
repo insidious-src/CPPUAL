@@ -154,7 +154,7 @@ struct is_string<std::basic_string<wchar, std::char_traits<wchar>, Allocator>> :
 
 template <typename T>
 struct member_function_to_static
-{ static_assert (std::is_same<T, T>::value, "template parameter T is not member function"); };
+{ static_assert (std::is_same<T, T>::value, "template parameter T is not a member function"); };
 
 template <typename T, typename Object, typename... Args>
 struct member_function_to_static <T(Object::*)(Args...) const>

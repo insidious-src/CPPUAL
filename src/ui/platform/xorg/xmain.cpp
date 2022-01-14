@@ -60,29 +60,23 @@ using cppual::Process::PluginManager;
 using cppual::Ui::Platform::Factory ;
 using cppual::Ui::Platform::XFactory;
 using cppual::Process::Plugin       ;
+using cppual::Memory::MemoryResource;
+using cppual::Memory::Allocator     ;
 
-extern "C" Plugin plugin_main ()
+extern "C" Plugin* plugin_main (MemoryResource* rc)
 {
-    Plugin plugin;
+    static Plugin plugin;
 
-    static const auto name     = "XFactory"       ;
-    static const auto desc     = "Xorg UI Factory";
-    static const auto provides = "Ui::Factory"    ;
-    static const auto iface    = "create_xfactory";
+    plugin.name     = "XFactory"       ;
+    plugin.desc     = "Xorg UI Factory";
+    plugin.provides = "Ui::Factory"    ;
+    plugin.verMajor = 1                ;
+    plugin.verMinor = 0                ;
 
-    plugin.name     = name    ;
-    plugin.desc     = desc    ;
-    plugin.provides = provides;
-    plugin.verMajor = 1       ;
-    plugin.verMinor = 0       ;
-    plugin.iface    = iface   ;
+    plugin.iface    = std::static_pointer_cast<void>
+            (std::allocate_shared<XFactory>(Allocator<XFactory>(*rc)));
 
-    return plugin;
-}
-
-extern "C" Factory* create_xfactory ()
-{
-    return new XFactory;
+    return &plugin;
 }
 
 #endif // OS_GNU_LINUX or OS_BSD

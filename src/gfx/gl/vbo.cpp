@@ -136,21 +136,21 @@ void* VertexBuffer::mapSubBufferToMemory (ptrdiff    uOffset,
 
 void VertexBuffer::unmapBuffer () noexcept
 {
-    if (id ()) glUnmapBuffer (getBufferType (m_eType));
+    if (handle ()) glUnmapBuffer (getBufferType (m_eType));
 }
 
 void VertexBuffer::bind (BufferType eType) noexcept
 {
-    if (id ())
+    if (handle ())
     {
         m_eType = eType;
-        glBindBuffer (getBufferType (eType), id ());
+        glBindBuffer (getBufferType (eType), handle ());
     }
 }
 
 void VertexBuffer::upload (UsageType eUsage)
 {
-    if (id ())
+    if (handle ())
     {
         glBufferData (getBufferType (m_eType),
                       static_cast<ptrdiff> (m_gData.size ()),
@@ -164,7 +164,7 @@ void VertexBuffer::upload (UsageType eUsage)
 
 void VertexBuffer::addData (pointer pData, size_type uDataSize)
 {
-    if (id ())
+    if (handle ())
     {
         m_gData.insert (m_gData.end (), pData, pData + uDataSize);
         m_bIsUploaded = false;

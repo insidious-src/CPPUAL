@@ -30,6 +30,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace cppual {
 
@@ -39,8 +40,8 @@ template <typename T = char,
 auto split_string(std::basic_string<T, std::char_traits<T>, Allocator> const& str,
                   T delim)
 {
-    typedef std::basic_string<T, std::char_traits<T>, Allocator>                      string_type   ;
-    typedef typename string_type::allocator_type::template rebind<string_type>::other allocator_type;
+    typedef std::basic_string<T, std::char_traits<T>, Allocator> string_type;
+    using allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<string_type>;
 
     std::vector<string_type, allocator_type> out (str.get_allocator());
 
@@ -91,14 +92,14 @@ public:
 
     // Converting a non-const iterator to a const iterator
     constexpr
-    string_list_iterator (string_list_iterator<typename std::remove_const<buf_type>::type>
-                   const& other) noexcept
+    string_list_iterator (string_list_iterator<typename std::remove_const<buf_type>::type> const& other)
+    noexcept
     : _M_buf (other._M_buf), _M_pos (other._M_pos)
     { }
 
     inline
     string_list_iterator& operator = (string_list_iterator<typename std::remove_const<buf_type>::type>
-                               const& other) noexcept
+                                      const& other) noexcept
     {
         _M_buf = other._M_buf;
         _M_pos = other._M_pos;
@@ -230,7 +231,7 @@ public:
 
     template <typename... U>
     constexpr string_list(U... array) noexcept
-    : _M_array{ array... }
+    : _M_array { array... }
     { }
 
     constexpr const_pointer operator [] (size_type i) const
@@ -253,6 +254,9 @@ public:
     constexpr const_iterator   cend   () const noexcept { return const_iterator (*this, size ()); }
     constexpr reverse_iterator rbegin () noexcept { return reverse_iterator (end ()); }
     constexpr reverse_iterator rend   () noexcept { return reverse_iterator (begin ()); }
+
+    constexpr const_reverse_iterator crbegin () noexcept { return const_reverse_iterator (cend ()); }
+    constexpr const_reverse_iterator crend   () noexcept { return const_reverse_iterator (cbegin ()); }
 
 private:
     const_pointer _M_array[N];

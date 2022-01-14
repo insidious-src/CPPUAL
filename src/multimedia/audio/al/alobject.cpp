@@ -20,11 +20,12 @@
  */
 
 #include <cppual/multimedia/audio/al/alobject.h>
+
 #include "aldef.h"
 
 namespace cppual { namespace Audio { namespace AL {
 
-atomic_uint Object::sm_uALObjCount { 0 };
+std::atomic_uint Object::sm_uALObjCount { 0 };
 
 // =========================================================
 
@@ -37,10 +38,10 @@ inline uint generateObject (ObjectType eType) noexcept
     switch (eType)
     {
     case ObjectType::Buffer:
-        alGenBuffers (1, &n);
+        ::alGenBuffers (1, &n);
         break;
     case ObjectType::Source:
-        alGenSources (1, &n);
+        ::alGenSources (1, &n);
         break;
     }
 
@@ -76,8 +77,8 @@ Object& Object::operator = (Object&& gObj) noexcept
     {
         reset ();
 
-        m_uObjId      = gObj.m_uObjId;
-        m_eObjType    = gObj.m_eObjType;
+        m_uObjId   = gObj.m_uObjId;
+        m_eObjType = gObj.m_eObjType;
 
         gObj.m_uObjId = 0;
     }
@@ -105,10 +106,10 @@ void Object::reset () noexcept
     switch (m_eObjType)
     {
     case ObjectType::Buffer:
-        alDeleteBuffers (1, &m_uObjId);
+        ::alDeleteBuffers (1, &m_uObjId);
         break;
     case ObjectType::Source:
-        alDeleteSources (1, &m_uObjId);
+        ::alDeleteSources (1, &m_uObjId);
         break;
     }
 

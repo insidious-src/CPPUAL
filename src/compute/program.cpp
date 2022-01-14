@@ -21,32 +21,35 @@
 
 #include <cppual/compute/program.h>
 #include <cppual/compute/backend_iface.h>
-//#include "backend/opencl.h"
+
+#include "backend/opencl.h"
 
 namespace cppual { namespace Compute {
 
 namespace {
 
-inline Program::pointer createProgramFromSource (Behaviour const& /*context*/, vector<string> const& source)
-{
-    if (!source.empty ())
-    {
-        vector<string>::size_type sizes[source.size ()];
+//inline Program::handle_type createProgramFromSource (Behaviour const& context,
+//                                                     std::vector<string> const& source)
+//{
+//    if (!source.empty ())
+//    {
+//        std::vector<Program::size_type> sizes;
 
-        for (vector<string>::size_type i = 0; i < source.size (); ++i)
-            sizes[i] = source[i].size ();
+//        sizes.reserve(source.size());
 
-        //auto sources = source.front ().c_str ();
+//        for (auto i = 0U; i < source.size (); ++i) sizes.push_back(source[i].size ());
 
-        /* return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
-                                           static_cast<uint> (source.size ()),
-                                           &sources,
-                                           sizes,
-                                           nullptr); */
-    }
+//        auto sources = source.front ().c_str ();
 
-    return nullptr;
-}
+//         return ::clCreateProgramWithSource (context.handle ().get<CL::context_type> (),
+//                                           static_cast<uint> (source.size ()),
+//                                           &sources,
+//                                           sizes,
+//                                           nullptr);
+//    }
+
+//    return nullptr;
+//}
 
 } // anonymous namespace
 

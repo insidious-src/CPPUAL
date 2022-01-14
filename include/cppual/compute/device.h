@@ -28,6 +28,8 @@
 #include <cppual/noncopyable.h>
 #include <cppual/compute/object.h>
 
+#include <string>
+
 namespace cppual { namespace Compute {
 
 class device_exception    : public std::bad_exception { };
@@ -38,7 +40,7 @@ class bad_partition_count : public device_exception   { };
 
 // =========================================================
 
-class Device
+class Device : public Object<ObjectType::Device>
 {
 public:
     enum Type
@@ -91,15 +93,13 @@ public:
         Version
     };
 
-    typedef BitSet<Type>      Types;
-    typedef BitSet<Attribute> Attributes;
-    typedef Handle            pointer;
-    typedef std::size_t       size_type;
+    typedef BitSet<Type>      Types      ;
+    typedef BitSet<Attribute> Attributes ;
 
     static size_type count () noexcept;
     static Device&   host  () noexcept;
 
-    bool      available    (cchar* feature);
+    bool      available    (std::string const& feature);
     string    info         (Info);
     size_type cache        () const;
     size_type cacheLine    () const;
@@ -109,17 +109,13 @@ public:
 
     size_type physical () const noexcept { return m_uId;      }
     Type      type     () const noexcept { return m_eType;    }
-    bool      valid    () const noexcept { return m_pHandle;  }
+    bool      valid    () const noexcept { return handle();   }
     Backend   backend  () const noexcept { return m_eBackend; }
 
-    template <typename T = pointer::pointer>
-    T handle () const noexcept { return m_pHandle.get<T> (); }
-
 private:
-    pointer   m_pHandle;
-    size_type m_uId;
-    Type      m_eType;
-    Backend   m_eBackend;
+    size_type   m_uId     ;
+    Type        m_eType   ;
+    Backend     m_eBackend;
 };
 
 } } // Compute

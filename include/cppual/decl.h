@@ -322,8 +322,7 @@ inline T pointer_cast (U value)
 }
 
 
-namespace cppual
-{
+namespace cppual {
 
 // void typedefs
 typedef const void cvoid;

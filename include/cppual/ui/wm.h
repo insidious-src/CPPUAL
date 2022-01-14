@@ -23,15 +23,15 @@
 #define CPPUAL_UI_VIEW_MANAGER_H_
 #ifdef __cplusplus
 
-#include <thread>
-#include <chrono>
-#include <memory>
 #include <cppual/flags.h>
 #include <cppual/resource.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/gfx/color.h>
-#include <cppual/gfx/dsp_details.h>
 #include <cppual/ui/display.h>
+
+#include <thread>
+#include <chrono>
+#include <memory>
 
 namespace cppual { namespace Ui {
 
@@ -58,14 +58,14 @@ typedef BitSet         <WindowFlag     > WindowFlags  ;
 
 // ====================================================
 
-class IPlatformWindow : public Resource <IDisplay*, Graphics::Element>
+class IPlatformWindow : public Resource <IDisplay*, Handle>
 {
 public:
-    using Resource<IDisplay*, Graphics::Element>::Resource;
+    using Resource<IDisplay*, Handle>::Resource;
 
     typedef shared_window const& const_pointer;
     typedef std::size_t          size_type    ;
-    typedef string          string_type  ;
+    typedef string               string_type  ;
 
     virtual weak_window owner () const = 0;
     virtual WindowFlags flags () const = 0;

@@ -158,7 +158,7 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 
         if (!pParentObj)
         {
-            uptr key = m_pRenderable->id ();
+            uptr key = m_pRenderable->handle ();
 
             if (Internal::map ().count (key) == 1) Internal::map ()[key] = this;
             else if (!Internal::map ().emplace (std::make_pair (key, this)).second)
@@ -233,7 +233,7 @@ void View::destroyChildren ()
 
 void View::destroyResources ()
 {
-    auto uId = m_pRenderable->id ();
+    auto uId = m_pRenderable->handle ();
 
     //! destroy all child virtual surfaces
     destroyChildren ();

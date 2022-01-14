@@ -20,9 +20,14 @@
  */
 
 #include <cppual/compute/backend_iface.h>
+#include <cppual/process/plugin.h>
 
 namespace cppual { namespace Compute {
 
+namespace { // optimize for internal unit usage
 
+
+
+} // anonymous namespace
 
 } } // namespace Compute

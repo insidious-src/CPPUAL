@@ -23,10 +23,11 @@
 #define CPPUAL_GFX_DISPLAY_H_
 #ifdef __cplusplus
 
-#include <memory>
 #include <cppual/noncopyable.h>
-#include <cppual/gfx/dsp_details.h>
+#include <cppual/resource.h>
 #include <cppual/string.h>
+
+#include <memory>
 
 namespace cppual { namespace Ui {
 
@@ -39,9 +40,9 @@ typedef std::weak_ptr  <IDisplay> weak_display  ;
 class IDisplay : public NonCopyableVirtual
 {
 public:
-    typedef Graphics::Connection handle_type;
-    typedef string               string_type;
-    typedef shared_display       pointer    ;
+    typedef Connection     handle_type;
+    typedef string         string_type;
+    typedef shared_display pointer    ;
 
     constexpr IDisplay () noexcept = default;
     ~IDisplay ();

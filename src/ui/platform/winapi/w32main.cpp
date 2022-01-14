@@ -58,12 +58,24 @@ shared_window Win32Factory::createWindow (Rect const& gRect, u32 nScreen, IDispl
 // =========================================================
 
 using cppual::Ui::Platform::Win32Factory;
-using cppual::Ui::Platform::shared_manager;
+using cppual::Process::Plugin           ;
+using cppual::Memory::MemoryResource    ;
+using cppual::Memory::Allocator         ;
 
-extern "C" int module_main (shared_manager& instance)
+extern "C" Plugin* plugin_main (MemoryResource* rc)
 {
-    instance.reset (new Win32Factory);
-    return instance == nullptr;
+    static Plugin plugin;
+
+    plugin.name     = "Win32Factory"    ;
+    plugin.desc     = "Win32 UI Factory";
+    plugin.provides = "Ui::Factory"     ;
+    plugin.verMajor = 1                 ;
+    plugin.verMinor = 0                 ;
+
+    plugin.iface    = std::static_pointer_cast<void>
+            (std::allocate_shared<Win32Factory>(Allocator<Win32Factory>(*rc)));
+
+    return &plugin;
 }
 
 #endif // OS_WINDOWS

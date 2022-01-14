@@ -98,7 +98,7 @@ Texture::Texture (string const&      gFile,
 
 Texture::~Texture () noexcept
 {
-    if (id () and m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
+    if (handle () and m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
 }
 
 void Texture::setState (State eState, bool bSwitch) noexcept
@@ -115,7 +115,7 @@ bool Texture::loadTexture2D (string const&      gFilePath,
                              PixelFormat const& gFormat,
                              bool               bGenMipMaps)
 {
-    if (!id () or m_gStates.test (Texture::IsLoaded)) return false;
+    if (!handle () or m_gStates.test (Texture::IsLoaded)) return false;
     ifstream gFile (gFilePath.c_str(), ios_base::binary);
     uint     uFormat;
 
@@ -155,7 +155,7 @@ bool Texture::loadTexture2D (cvoid*             pPixels,
                              PixelFormat const& gFormat,
                              bool               bGenMipMaps)
 {
-    if (!id () or m_gStates.test (Texture::IsLoaded) or
+    if (!handle () or m_gStates.test (Texture::IsLoaded) or
             !pPixels or !gSize.x or !gSize.y)
         return false;
 
@@ -183,18 +183,18 @@ bool Texture::loadTexture2D (cvoid*             pPixels,
 
 void Texture::setParameter (uint uName, int nParam) noexcept
 {
-    if (!id ()) return;
+    if (!handle ()) return;
 
     if (!GLStates::hasDirectAccess)
     {
         uint uBoundTex = 0;
 
         glGetIntegerv (GL_TEXTURE_BINDING_2D, reinterpret_cast<int*> (&uBoundTex));
-        glBindTexture (GL::Texture2D, id ());
+        glBindTexture (GL::Texture2D, handle ());
         glTexParameteri (GL::Texture2D, uName, nParam);
         glBindTexture (GL::Texture2D, uBoundTex);
     }
-    else glTextureParameteriEXT (id (), GL::Texture2D, uName, nParam);
+    else glTextureParameteriEXT (handle (), GL::Texture2D, uName, nParam);
 }
 
 void Texture::bind (uint uTexId) noexcept
@@ -202,7 +202,7 @@ void Texture::bind (uint uTexId) noexcept
     if (m_gStates.test (Texture::IsLoaded))
     {
         glActiveTexture (GL_TEXTURE0 + uTexId);
-        glBindTexture   (GL::Texture2D, id ());
+        glBindTexture   (GL::Texture2D, handle ());
         glBindSampler   (uTexId, m_uSampleId);
     }
 }

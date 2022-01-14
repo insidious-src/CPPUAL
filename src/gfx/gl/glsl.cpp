@@ -131,17 +131,17 @@ Shader::Shader (Shader::Type eType) noexcept
 
 Shader::string_type Shader::log ()
 {
-    if (!id ()) return string_type ();
+    if (!handle ()) return string_type ();
 
     string_type gLogString;
     int         nLogLen   ;
 
-    glGetShaderiv (id (), GL::LogLength, &nLogLen);
+    glGetShaderiv (handle (), GL::LogLength, &nLogLen);
 
     if (nLogLen > 1)
     {
         gLogString.resize  (static_cast<string_type::size_type> (nLogLen));
-        glGetShaderInfoLog (id (), nLogLen, nullptr,  &gLogString[0]);
+        glGetShaderInfoLog (handle (), nLogLen, nullptr,  &gLogString[0]);
     }
 
     return gLogString;
@@ -149,7 +149,7 @@ Shader::string_type Shader::log ()
 
 bool Shader::loadFromFile (string_type const& gFile)
 {
-    if (!id ()) return false;
+    if (!handle ()) return false;
     string_type gContent (syncReadFile (gFile));
 
     if (gContent.length ())
@@ -159,12 +159,12 @@ bool Shader::loadFromFile (string_type const& gFile)
         if (IDeviceContext::current ()->version () < 3)
         {
             string_type::const_pointer pBuffer = m_gSource.c_str ();
-            glShaderSource (id (), 1, &pBuffer, nullptr);
+            glShaderSource (handle (), 1, &pBuffer, nullptr);
         }
         else
         {
             string_type::const_pointer pBuffer = m_gSource.c_str ();
-            glShaderSourceARB (id (), 1, &pBuffer, nullptr);
+            glShaderSourceARB (handle (), 1, &pBuffer, nullptr);
         }
 
         m_gStates += Shader::IsLoaded;
@@ -177,12 +177,12 @@ bool Shader::loadFromFile (string_type const& gFile)
 
 bool Shader::loadFromBinary (string_type const& gFile)
 {
-    if (!id ()) return false;
+    if (!handle ()) return false;
     string_type gContent (syncReadFile (gFile, std::ios::binary));
 
     if (gContent.length ())
     {
-        uint uId = id ();
+        uint uId = handle ();
 
         glShaderBinary (1, &uId, 0, gContent.c_str (),
                 static_cast<GLsizei> (gContent.length ()));
@@ -198,18 +198,18 @@ bool Shader::loadFromBinary (string_type const& gFile)
 
 bool Shader::loadFromMemory (string_type const& gSource)
 {
-    if (!id () or gSource.empty ()) return false;
+    if (!handle () or gSource.empty ()) return false;
 
     string_type::const_pointer pBuffer =
             m_gSource.assign (std::move (gSource)).c_str ();
 
     if (IDeviceContext::current ()->version () < 3)
     {
-        glShaderSource (id (), 1, &pBuffer, nullptr);
+        glShaderSource (handle (), 1, &pBuffer, nullptr);
     }
     else
     {
-        glShaderSourceARB (id (), 1, &pBuffer, nullptr);
+        glShaderSourceARB (handle (), 1, &pBuffer, nullptr);
     }
 
     m_gStates += Shader::IsLoaded  ;
@@ -226,11 +226,11 @@ bool Shader::compile () noexcept
 
     // compile the shader
     IDeviceContext::current ()->version () < 3  ?
-                    glCompileShader     (id ()) :
-                    glCompileShaderARB  (id ()) ;
+                    glCompileShader     (handle ()) :
+                    glCompileShaderARB  (handle ()) ;
 
     // check the compilation status
-    glGetShaderiv (id (), GL::CompileStatus, &nStatus);
+    glGetShaderiv (handle (), GL::CompileStatus, &nStatus);
     nStatus == GL::TRUE ? m_gStates += Shader::IsCompiled :
                           m_gStates -= Shader::IsCompiled ;
 
@@ -257,20 +257,20 @@ SLProgram::SLProgram (string_type const& gBinaryName) noexcept
 
 bool SLProgram::link () noexcept
 {
-    if (id () and !m_gStates.test (SLProgram::IsLinked) and m_uShaderCount >= 2)
+    if (handle () and !m_gStates.test (SLProgram::IsLinked) and m_uShaderCount >= 2)
     {
         int nStatus;
 
         // link the program
         if (IDeviceContext::current ()->version () < 3)
         {
-            glLinkProgram  (id ());
-            glGetProgramiv (id (), GL::LinkStatus, &nStatus);
+            glLinkProgram  (handle ());
+            glGetProgramiv (handle (), GL::LinkStatus, &nStatus);
         }
         else
         {
-            glLinkProgramARB  (id ());
-            glGetProgramivARB (id (), GL::LinkStatus, &nStatus);
+            glLinkProgramARB  (handle ());
+            glGetProgramivARB (handle (), GL::LinkStatus, &nStatus);
         }
 
         // check linking status
@@ -285,20 +285,20 @@ bool SLProgram::link () noexcept
 
 bool SLProgram::validate () noexcept
 {
-    if (id ())
+    if (handle ())
     {
         int nStatus;
 
         // validate and check status
         if (IDeviceContext::current ()->version () < 3)
         {
-            glValidateProgram (id ());
-            glGetProgramiv    (id () , GL::ValidateStatus, &nStatus);
+            glValidateProgram (handle ());
+            glGetProgramiv    (handle () , GL::ValidateStatus, &nStatus);
         }
         else
         {
-            glValidateProgramARB (id ());
-            glGetProgramivARB    (id () , GL::ValidateStatus, &nStatus);
+            glValidateProgramARB (handle ());
+            glGetProgramivARB    (handle () , GL::ValidateStatus, &nStatus);
         }
 
         return nStatus;
@@ -310,22 +310,22 @@ bool SLProgram::validate () noexcept
 int SLProgram::addAttribute (string_type const& gName)
 {
     m_gAttribLocList[gName] = IDeviceContext::current ()->version () < 3 ?
-                                  glGetAttribLocation    (id (), gName.c_str ()) :
-                                  glGetAttribLocationARB (id (), gName.c_str ());
+                                  glGetAttribLocation    (handle (), gName.c_str ()) :
+                                  glGetAttribLocationARB (handle (), gName.c_str ());
     return m_gAttribLocList[gName];
 }
 
 int SLProgram::addUniform (string_type const& gName)
 {
     m_gUniformLocList[gName] = IDeviceContext::current ()->version () < 3 ?
-                                   glGetUniformLocation    (id (), gName.c_str ()) :
-                                   glGetUniformLocationARB (id (), gName.c_str ());
+                                   glGetUniformLocation    (handle (), gName.c_str ()) :
+                                   glGetUniformLocationARB (handle (), gName.c_str ());
     return m_gUniformLocList[gName];
 }
 
 void SLProgram::use () noexcept
 {
-    if (m_gStates.test (SLProgram::IsLinked)) glUseProgram (id ());
+    if (m_gStates.test (SLProgram::IsLinked)) glUseProgram (handle ());
 }
 
 void SLProgram::disable () noexcept
@@ -335,7 +335,7 @@ void SLProgram::disable () noexcept
 
 bool SLProgram::loadFromBinary (string_type const& gFile)
 {
-    if (!id ()) return false;
+    if (!handle ()) return false;
     string_type gData (syncReadFile (gFile, std::ios::binary));
 
     if (gData.length ())
@@ -344,15 +344,15 @@ bool SLProgram::loadFromBinary (string_type const& gFile)
         int  nStatus = 0, nCount = 0, nType = 0;
 
         // load binary
-        glProgramBinary (id (),
+        glProgramBinary (handle (),
                          0,
                          gData.c_str (),
                          static_cast<GLsizei> (gData.length ()));
 
         // check linking status
         IDeviceContext::current ()->version () < 3 ?
-                    glGetProgramiv    (id (), GL::LinkStatus, &nStatus) :
-                    glGetProgramivARB (id (), GL::LinkStatus, &nStatus);
+                    glGetProgramiv    (handle (), GL::LinkStatus, &nStatus) :
+                    glGetProgramivARB (handle (), GL::LinkStatus, &nStatus);
 
         m_gShaderTypes = 0;
 
@@ -365,11 +365,11 @@ bool SLProgram::loadFromBinary (string_type const& gFile)
 
         // get list of attached shaders
         IDeviceContext::current ()->version () < 3 ?
-                    glGetAttachedShaders (id (),
+                    glGetAttachedShaders (handle (),
                                           5,
                                           &nCount,
                                           &uAttached[0]) :
-            glGetAttachedObjectsARB (id (),
+            glGetAttachedObjectsARB (handle (),
                                      5,
                                      &nCount,
                                      &uAttached[0]);
@@ -401,10 +401,10 @@ void* SLProgram::binary () noexcept
         int nBuffSize;
 
         IDeviceContext::current ()->version () < 3 ?
-                    glGetProgramiv    (id (), GL::ProgramBinaryLength, &nBuffSize) :
-                    glGetProgramivARB (id (), GL::ProgramBinaryLength, &nBuffSize);
+                    glGetProgramiv    (handle (), GL::ProgramBinaryLength, &nBuffSize) :
+                    glGetProgramivARB (handle (), GL::ProgramBinaryLength, &nBuffSize);
 
-        glGetProgramBinary (id (), nBuffSize, nullptr, nullptr, pBinary);
+        glGetProgramBinary (handle (), nBuffSize, nullptr, nullptr, pBinary);
     }
 
     return pBinary;
@@ -419,17 +419,17 @@ uint SLProgram::binaryFormat () noexcept
         if (!m_gStates.test (SLProgram::BinaryAvailable))
         {
             IDeviceContext::current ()->version () < 3 ?
-                        glProgramParameteri    (id (),
+                        glProgramParameteri    (handle (),
                                                 GL::IsProgramBinaryRetrievable,
                                                 GL::TRUE) :
-                        glProgramParameteriARB (id (),
+                        glProgramParameteriARB (handle (),
                                                 GL::IsProgramBinaryRetrievable,
                                                 GL::TRUE);
 
             m_gStates += SLProgram::BinaryAvailable;
         }
 
-        glGetProgramBinary (id (), 0, nullptr, &uFormat, nullptr);
+        glGetProgramBinary (handle (), 0, nullptr, &uFormat, nullptr);
     }
 
     return uFormat;
@@ -437,12 +437,12 @@ uint SLProgram::binaryFormat () noexcept
 
 bool SLProgram::attach (Shader const& gShader)
 {
-    if (!id () or m_gShaderTypes.test (gShader.type ()))
+    if (!handle () or m_gShaderTypes.test (gShader.type ()))
         return false;
 
     IDeviceContext::current ()->version () < 3 ?
-                glAttachShader    (id (), gShader.id ()) :
-                glAttachObjectARB (id (), gShader.id ());
+                glAttachShader    (handle (), gShader.handle ()) :
+                glAttachObjectARB (handle (), gShader.handle ());
 
     m_gShaderTypes += gShader.type ();
     ++m_uShaderCount;
@@ -455,8 +455,8 @@ bool SLProgram::detach (Shader const& gShader)
         return false;
 
     IDeviceContext::current ()->version () < 3 ?
-                glDetachShader    (id (), gShader.id ()) :
-                glDetachObjectARB (id (), gShader.id ());
+                glDetachShader    (handle (), gShader.handle ()) :
+                glDetachObjectARB (handle (), gShader.handle ());
 
     m_gShaderTypes -= gShader.type ();
     --m_uShaderCount;
@@ -465,42 +465,42 @@ bool SLProgram::detach (Shader const& gShader)
 
 bool SLProgram::isAttached (Shader const& gShader)
 {
-    if (!id () or !m_uShaderCount or !gShader.valid ()) return false;
+    if (!handle () or !m_uShaderCount or !gShader.valid ()) return false;
 
     uint uAttached[5];
     uint uCount = m_uShaderCount;
 
     // get list of attached shaders
     IDeviceContext::current ()->version () < 3 ?
-                glGetAttachedShaders    (id (),
+                glGetAttachedShaders    (handle (),
                                          static_cast<GLsizei> (m_uShaderCount),
                                          nullptr,
                                          uAttached) :
-                glGetAttachedObjectsARB (id (),
+                glGetAttachedObjectsARB (handle (),
                                          static_cast<GLsizei> (m_uShaderCount),
                                          nullptr,
                                          uAttached);
 
     // check if the shader is attached
-    while (uCount) if (uAttached[--uCount] == gShader.id ()) return true;
+    while (uCount) if (uAttached[--uCount] == gShader.handle ()) return true;
     return false;
 }
 
 SLProgram::string_type SLProgram::log ()
 {
-    if (!id ()) return string_type ();
+    if (!handle ()) return string_type ();
 
     string_type gLogString;
     int         nLogLen   ;
 
     IDeviceContext::current ()->version () < 3 ?
-                glGetProgramiv    (id (), GL::LogLength, &nLogLen) :
-                glGetProgramivARB (id (), GL::LogLength, &nLogLen) ;
+                glGetProgramiv    (handle (), GL::LogLength, &nLogLen) :
+                glGetProgramivARB (handle (), GL::LogLength, &nLogLen) ;
 
     if (nLogLen > 1)
     {
         gLogString.reserve (static_cast<string_type::size_type> (nLogLen));
-        glGetProgramInfoLog (id (), nLogLen, nullptr, &gLogString[0]);
+        glGetProgramInfoLog (handle (), nLogLen, nullptr, &gLogString[0]);
     }
 
     return gLogString;

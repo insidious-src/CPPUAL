@@ -26,6 +26,7 @@
 #include <cppual/concepts.h>
 #include <cppual/iterator.h>
 #include <cppual/noncopyable.h>
+#include <cppual/memory/allocator.h>
 
 #include <atomic>
 #include <memory>
@@ -45,7 +46,7 @@ struct expand_ratio
 // ====================================================
 
 template <typename T,
-          typename Allocator = std::allocator<T>,
+          typename Allocator = Memory::Allocator<T>,
           bool     Atomic    = false
           >
 class CircularQueue : private Allocator
@@ -170,7 +171,8 @@ public:
     ~CircularQueue () noexcept
     {
         if  (!capacity()) return;
-        for (value_type& elem : *this) allocator_type::destroy (&elem);
+
+        for (auto it = begin(); it != end(); ++it) allocator_traits::destroy (*this, &(*it));
         allocator_type::deallocate (m_pArray, m_uCapacity);
     }
 
@@ -274,7 +276,7 @@ public:
         }
 
         // add element
-        allocator_type::construct (&m_pArray[uNewBegin], std::forward<Args> (args)...);
+        allocator_traits::construct (*this, &m_pArray[uNewBegin], std::forward<Args> (args)...);
         m_uBeginPos = uNewBegin;
     }
 
@@ -291,7 +293,7 @@ public:
         }
 
         // add element
-        allocator_type::construct (&m_pArray[m_uEndPos], std::forward<Args> (args)...);
+        allocator_traits::construct (*this, &m_pArray[m_uEndPos], std::forward<Args> (args)...);
         m_uEndPos = uNewEnd;
     }
 
@@ -308,7 +310,7 @@ public:
 
     void clear ()
     {
-        for (value_type& elem : *this) allocator_type::destroy (&elem);
+        for (auto it = begin(); it != end(); ++it) allocator_traits::destroy (*this, &(*it));
         m_uBeginPos = m_uEndPos = size_type ();
     }
 
@@ -316,7 +318,7 @@ private:
     void _pop_front ()
     {
         // ++front--
-        allocator_type::destroy (&m_pArray[m_uBeginPos]);
+        allocator_traits::destroy (*this, &m_pArray[m_uBeginPos]);
         m_uBeginPos = normalize (++m_uBeginPos);
     }
 
@@ -324,7 +326,7 @@ private:
     {
         // --back++
         m_uEndPos = m_uEndPos ? normalize (m_uEndPos - 1) : capacity () - 1;
-        allocator_type::destroy (&m_pArray[m_uEndPos]);
+        allocator_traits::destroy (*this, &m_pArray[m_uEndPos]);
     }
 
     size_type normalize (size_type uIdx) const noexcept
@@ -394,7 +396,7 @@ void CircularQueue<T, Allocator, Atomic>::erase (iterator& gIt)
     else if (pos == index_to_subscript (size () - 1)) _pop_back ();
     else
     {
-        allocator_type::destroy (&(*gIt));
+        allocator_traits::destroy (*this, &(*gIt));
 
         if (end() - gIt <= gIt - begin())
         {

@@ -26,7 +26,7 @@
 #include <cppual/flags.h>
 #include <cppual/gfx/color.h>
 #include <cppual/gfx/coord.h>
-#include <cppual/gfx/dsp_details.h>
+#include <cppual/resource.h>
 #include <cppual/string.h>
 
 #include <vector>
@@ -189,7 +189,7 @@ class Transform3D
 struct IResource
 {
     typedef Connection  controller ;
-    typedef Element     value_type ;
+    typedef Handle      value_type ;
     typedef PixelFormat format_type;
 
     virtual ~IResource ();

@@ -23,6 +23,9 @@
 #define CPPUAL_RESOURCE_H_
 #ifdef __cplusplus
 
+#include <cppual/types.h>
+#include <cppual/meta.h>
+
 #include <type_traits>
 
 namespace cppual {
@@ -50,25 +53,58 @@ enum class ResourceType : std::size_t
 
 // =========================================================
 
-class Handle
+class Handle final
 {
 public:
     typedef void* pointer;
 
     constexpr Handle () noexcept = default;
-    constexpr Handle (pointer handle) noexcept : m_handle (handle) { }
-    constexpr Handle (std::nullptr_t) noexcept : m_handle ()       { }
+    constexpr Handle (pointer handle) noexcept : _M_handle (handle) { }
+    constexpr Handle (std::nullptr_t) noexcept : _M_handle ()       { }
     inline    Handle (Handle&&) noexcept         = default;
     constexpr Handle (Handle const&) noexcept    = default;
     inline    Handle& operator = (Handle&&)      = default;
     inline    Handle& operator = (Handle const&) = default;
 
-    constexpr operator pointer () const noexcept
-    { return m_handle; }
+    template <typename T,
+              typename = typename std::enable_if<is_integer<T>::value>::type
+              >
+    constexpr Handle (T handle) noexcept : _M_handle (unsafe_direct_cast<pointer> (handle)) { }
 
-    template <typename T>
+    constexpr operator pointer () const noexcept
+    { return _M_handle; }
+
+    inline operator uptr () const noexcept
+    { return reinterpret_cast<uptr> (_M_handle); }
+
+    template <typename T,
+              typename =
+              typename std::enable_if<is_integer<T>::value>::type
+              >
+    constexpr T get () const noexcept
+    {
+        return unsafe_direct_cast<T> (_M_handle);
+    }
+
+    template <typename T,
+              typename =
+              typename std::enable_if<(std::is_pointer<T>::value  ||
+                                       std::is_class  <T>::value) && !std::is_same<T, Handle>::value
+                                      >::type
+              >
     constexpr typename std::remove_pointer<T>::type* get () const noexcept
-    { return static_cast<typename std::remove_pointer<T>::type*> (m_handle); }
+    {
+        return static_cast<typename std::remove_pointer<T>::type*> (_M_handle);
+    }
+
+    template <typename T,
+              typename =
+              typename std::enable_if<std::is_same<T, Handle>::value>::type
+              >
+    constexpr Handle get () const noexcept
+    {
+        return *this;
+    }
 
     friend
     constexpr bool operator == (Handle const&, Handle const&) noexcept;
@@ -77,16 +113,16 @@ public:
     constexpr bool operator == (Handle const&, std::nullptr_t) noexcept;
 
 private:
-    pointer m_handle { };
+    pointer _M_handle { };
 };
 
 // =========================================================
 
 constexpr bool operator == (Handle const& conn1, Handle const& conn2) noexcept
-{ return conn1.m_handle == conn2.m_handle; }
+{ return conn1._M_handle == conn2._M_handle; }
 
 constexpr bool operator == (Handle const& conn1, std::nullptr_t) noexcept
-{ return conn1.m_handle == nullptr; }
+{ return conn1._M_handle == nullptr; }
 
 constexpr bool operator != (Handle const& conn1, Handle const& conn2) noexcept
 { return !(conn1 == conn2); }
@@ -100,21 +136,27 @@ template <class Controller, class ID>
 class Resource
 {
 public:
-    typedef ID         value_type;
-    typedef Controller controller;
+    typedef ID         value_type ;
+    typedef Controller controller ;
+    typedef Handle     handle_type;
 
     constexpr Resource () noexcept = default;
+    Resource (Resource&&) = default;
+    Resource& operator = (Resource&&) = default;
     Resource (Resource const&) = delete;
     Resource& operator = (Resource const&) = delete;
+
     virtual ~Resource () { }
 
-    constexpr controller   connection () const noexcept { return m_pCon; }
-    constexpr value_type   id         () const noexcept { return m_id  ; }
-    constexpr bool         valid      () const noexcept { return m_id  ; }
+    constexpr controller connection () const noexcept { return _M_connection; }
+    constexpr bool       valid      () const noexcept { return _M_handle    ; }
 
-    constexpr Resource (controller pCon, value_type id) noexcept
-    : m_pCon (pCon),
-      m_id   (id)
+    template <typename T = value_type>
+    inline T handle () const noexcept { return _M_handle.get<T>(); }
+
+    constexpr Resource (controller conn, value_type id) noexcept
+    : _M_connection (conn),
+      _M_handle     (id  )
     { }
 
     template <class Controller_, class ID_>
@@ -122,29 +164,35 @@ public:
                                        Resource<Controller_, ID_> const&);
 
 private:
-    controller m_pCon { };
-    value_type m_id   { };
+    controller  _M_connection { };
+    handle_type _M_handle     { };
 };
 
 // =========================================================
 
 template <class ID>
-class Resource < void, ID >
+class Resource <void, ID>
 {
 public:
-    typedef ID   value_type;
-    typedef void controller;
+    typedef ID     value_type ;
+    typedef void   controller ;
+    typedef Handle handle_type;
 
     constexpr Resource () noexcept = default;
+    Resource (Resource&&) = default;
+    Resource& operator = (Resource&&) = default;
     Resource (Resource const&) = delete;
     Resource& operator = (Resource const&) = delete;
+
     virtual ~Resource () { }
 
-    constexpr value_type id    () const noexcept { return m_id; }
-    constexpr bool       valid () const noexcept { return m_id; }
+    constexpr bool valid () const noexcept { return _M_handle; }
+
+    template <typename T = value_type>
+    inline T handle () const noexcept { return _M_handle.get<T>(); }
 
     constexpr Resource (value_type id) noexcept
-    : m_id (id)
+    : _M_handle (id)
     { }
 
     template <class ID_>
@@ -152,7 +200,7 @@ public:
                                        Resource<void, ID_> const&);
 
 private:
-    value_type m_id { };
+    handle_type _M_handle;
 };
 
 // =========================================================
@@ -160,7 +208,7 @@ private:
 template <class ID>
 constexpr bool operator == (Resource<void, ID> const& gObj1,
                             Resource<void, ID> const& gObj2)
-{ return gObj1.m_id == gObj2.m_id; }
+{ return gObj1._M_handle == gObj2._M_handle; }
 
 template <class ID>
 constexpr bool operator != (Resource<void, ID> const& gObj1,
@@ -171,13 +219,21 @@ template <class Controller, class ID>
 constexpr bool operator == (Resource<Controller, ID> const& gObj1,
                             Resource<Controller, ID> const& gObj2)
 {
-    return gObj1.m_pCon == gObj2.m_pCon and gObj1.m_id == gObj2.m_id;
+    return gObj1.m_pCon == gObj2.m_pCon and gObj1._M_handle == gObj2._M_handle;
 }
 
 template <class Controller, class ID>
 constexpr bool operator != (Resource<Controller, ID> const& gObj1,
                             Resource<Controller, ID> const& gObj2)
 { return !(gObj1 == gObj2); }
+
+// =========================================================
+
+typedef Handle Connection;
+
+//static_assert (std::is_pod<Handle>::value, "Handle is not POD");
+
+// =========================================================
 
 } // cppual
 

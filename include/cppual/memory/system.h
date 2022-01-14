@@ -29,6 +29,10 @@
 
 namespace cppual { namespace Memory {
 
+class MemoryResource;
+
+// =========================================================
+
 static_assert (sizeof (std::size_t) == sizeof (u8*),
                "size_t is not equal to the size of a pointer!");
 
@@ -40,6 +44,10 @@ static_assert (alignof (std::size_t) == alignof (u8*),
 std::size_t size        (); // system memory size
 std::size_t maxSize     (); // largest available system memory block
 std::size_t workingSize (); // process' current memory usage
+
+// =========================================================
+
+MemoryResource* system_resource ();
 
 // =========================================================
 
@@ -115,6 +123,14 @@ thread_statistics(ThreadStatistics* stats);
 extern void
 global_statistics(GlobalStatistics* stats);
 
+void*
+allocate(std::size_t bytes);
+
+void
+deallocate(void* ptr);
+
+#ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
+
 extern MALLOC_CALL void*
 alloc(std::size_t size) MALLOC_ATTRIBUTE;
 
@@ -135,6 +151,8 @@ aligned_alloc(std::size_t alignment, std::size_t size) MALLOC_ATTRIBUTE;
 
 extern std::size_t
 alloc_usable_size(void* ptr);
+
+#endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 } } } // namespace Model
 

@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/noncopyable.h>
-#include <cppual/compute/context.h>
+#include <cppual/compute/behaviour.h>
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/multimedia/audio/spatial.h>
 

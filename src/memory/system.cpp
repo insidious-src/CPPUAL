@@ -20,6 +20,7 @@
  */
 
 #include <cppual/memory/system.h>
+#include <cppual/memory/allocator.h>
 
 #include <cstdlib>
 #include <assert.h>
@@ -62,6 +63,10 @@ static void initializer ()
 }
 
 } // anonymous namespace
+
+// =========================================================
+
+#ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 void* operator new (std::size_t size)
 {
@@ -124,7 +129,51 @@ void operator delete [] (void* ptr, std::size_t) noexcept
         cppual::Memory::Model::free (ptr);
 }
 
+#endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
+
+// =========================================================
+
 namespace cppual { namespace Memory {
+
+// =========================================================
+
+class SystemResource final : public MemoryResource
+{
+public:
+    using base_type::base_type;
+    using base_type::operator=;
+
+    bool is_thread_safe () const noexcept { return true      ; }
+    size_type  max_size () const          { return maxSize (); }
+    size_type  capacity () const          { return size    (); }
+
+private:
+    void* do_allocate(size_type bytes, size_type /*alignment*/)
+    {
+        if (!Model::is_thread_initialized ()) initializer ();
+        return Model::allocate (bytes);
+    }
+
+    void do_deallocate(void* p, size_type /*bytes*/, size_type /*alignment*/)
+    {
+        if (Model::is_thread_initialized ()) Model::deallocate (p);
+    }
+
+    bool do_is_equal(base_type const& other) const noexcept
+    {
+        return this == &other;
+    }
+};
+
+// =========================================================
+
+MemoryResource* system_resource ()
+{
+    static SystemResource rc;
+    return &rc;
+}
+
+// =========================================================
 
 // Get size of the total physical memory installed
 std::size_t size ()
@@ -1330,6 +1379,8 @@ _memory_deallocate(void* p) {
     }
 }
 
+#ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
+
 //! Reallocate the given block to the given size
 static void*
 _memory_reallocate(void* p, size_t size, size_t oldsize, unsigned int flags) {
@@ -1409,6 +1460,8 @@ _memory_usable_size(void* p) {
     size_t current_pages = (size_t)span->next_span;
     return (current_pages * (size_t)RPMALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
 }
+
+#endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 //! Adjust and optimize the size class properties for the given class
 static void
@@ -1923,7 +1976,27 @@ static void
 thread_yield()
 { }
 
+void* allocate (std::size_t bytes)
+{
+#if ENABLE_VALIDATE_ARGS
+    if (size >= MAX_ALLOC_SIZE)
+    {
+        errno = EINVAL;
+        return 0;
+    }
+#endif
+
+    return _memory_allocate (bytes);
+}
+
+void deallocate (void* ptr)
+{
+    _memory_deallocate (ptr);
+}
+
 // Extern interface
+
+#ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 MALLOC_CALL void*
 alloc(size_t size)
@@ -1935,6 +2008,7 @@ alloc(size_t size)
         return 0;
     }
 #endif
+
     return _memory_allocate(size);
 }
 
@@ -2032,6 +2106,8 @@ alloc_usable_size(void* ptr)
 {
     return ptr ? _memory_usable_size(ptr) : 0;
 }
+
+#endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 void
 thread_collect(void)

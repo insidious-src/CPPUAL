@@ -23,28 +23,21 @@
 #include <thread>
 #include <deque>
 
-using std::thread;
-using std::deque;
-
 namespace cppual { namespace Compute {
 
 namespace { // optimize for internal unit usage
 
-struct ThreadPoolInitializer
+struct ThreadPoolInitializer final
 {
     typedef HostQueue::mutex_type mutex_type;
     typedef HostQueue::write_lock write_lock;
     typedef HostQueue::read_lock  read_lock ;
 
+    ThreadPoolInitializer  () noexcept = default;
     ~ThreadPoolInitializer ();
 
-    ThreadPoolInitializer () noexcept
-    : threadMutex (),
-      threads     ()
-    { }
-
-    mutex_type    threadMutex;
-    deque<thread> threads    ;
+    mutex_type              threadMutex;
+    std::deque<std::thread> threads    ;
 
 };
 
@@ -58,8 +51,7 @@ inline ThreadPoolInitializer::~ThreadPoolInitializer ()
 
     if (!threads.empty ())
     {
-        for (thread& gThread : threads)
-            if (gThread.joinable ()) gThread.join ();
+        for (auto& gThread : threads) if (gThread.joinable ()) gThread.join ();
     }
 }
 
@@ -76,20 +68,22 @@ inline ThreadPoolInitializer& pool () noexcept
 class Assign final
 {
 public:
+    typedef HostQueue::write_lock write_lock;
+
     Assign (HostQueue& gTasks) : m_queue (gTasks)
     {
-        m_queue.m_gQueueMutex.lock ();
+        write_lock lock (m_queue.m_gQueueMutex);
+
         ++m_queue.m_uNumAssigned;
-        m_queue.m_gQueueMutex.unlock ();
     }
 
     ~Assign ()
     {
         // isolation brackets
         {
-            m_queue.m_gQueueMutex.lock ();
+            write_lock lock (m_queue.m_gQueueMutex);
+
             --m_queue.m_uNumAssigned;
-            m_queue.m_gQueueMutex.unlock ();
         }
 
         m_queue.m_gTaskCond.notify_all ();
@@ -112,7 +106,7 @@ void HostQueue::operator ()()
         {
             read_lock gReadLock (m_gQueueMutex);
 
-            m_gTaskCond.wait (gReadLock, [&]
+            m_gTaskCond.wait (gReadLock, [this]
             {
                 return Running > m_eState or !m_gTaskQueue.empty ();
             });
@@ -125,13 +119,12 @@ void HostQueue::operator ()()
                 break;
 
             run = std::move (m_gTaskQueue.front ());
-            gReadLock.unlock ();
+        }
 
-            // RAII lock
-            {
-                write_lock gWriteLock (m_gQueueMutex);
-                m_gTaskQueue.pop_front ();
-            }
+        // RAII lock
+        {
+            write_lock gWriteLock (m_gQueueMutex);
+            m_gTaskQueue.pop_front ();
         }
 
         run (); // run the aquired task if valid
@@ -159,7 +152,7 @@ bool ThreadPool::reserve (HostQueue& gTaskQueue, size_type uAddThreads, bool bDe
     while (uAddThreads--)
     {
         // add and initialize a thread with HostQueue::operator ()
-        pool ().threads.emplace_back (thread (gTaskQueue));
+        pool ().threads.emplace_back (std::thread (gTaskQueue));
         if (bDetached) pool ().threads.back ().detach ();
     }
 
@@ -243,10 +236,10 @@ void HostQueue::whenAllExit ()
 {
     read_lock gLock (m_gQueueMutex);
 
-    m_gTaskCond.wait (gLock, [&]
+    m_gTaskCond.wait (gLock, [this]
     {
         return m_uNumAssigned == 0;
     });
 }
 
-} } // namespace Concurency
+} } // namespace Compute

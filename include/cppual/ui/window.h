@@ -23,7 +23,6 @@
 #define CPPUAL_UI_WINDOW_H_
 #ifdef __cplusplus
 
-#include <chrono>
 #include <cppual/gfx/drawable/image.h>
 #include <cppual/ui/frame.h>
 #include <cppual/ui/view.h>
@@ -35,7 +34,7 @@ class Window : public View
 {
 public:
     typedef Graphics::Image image_type ;
-    typedef string     string_type;
+    typedef string          string_type;
 
     Window ();
     Window (Window const&);

@@ -46,8 +46,8 @@ public:
     constexpr StaticResource () noexcept : m_pMarker  (m_pBuffer) { }
 
 private:
-    pointer           m_pMarker;
-    alignas (uptr) u8 m_pBuffer[N];
+    pointer             m_pMarker;
+    alignas (uptr) byte m_pBuffer[N];
 
     void* do_allocate   (size_type size, align_type align);
     void  do_deallocate (void* p, size_type size, align_type align);

@@ -45,7 +45,7 @@ class IDisplayQueue : public NonCopyableVirtual
 {
 public:
     typedef Input::Event             event_type     ;
-    typedef Graphics::Connection     connection_type;
+    typedef Connection               connection_type;
     typedef IPlatformWindow          window_type    ;
     typedef std::atomic_bool         bool_type      ;
     typedef BitSet<event_type::Type> mask_type      ;
@@ -79,7 +79,7 @@ class EventQueue : public NonCopyable
 {
 public:
     typedef IDisplayQueue::event_type event_type  ;
-    typedef Graphics::Element         window_type ;
+    typedef Handle                    window_type ;
     typedef std::atomic_bool          bool_type   ;
     typedef View                      control_type;
 
