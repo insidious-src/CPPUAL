@@ -41,9 +41,14 @@ static_assert (alignof (std::size_t) == alignof (u8*),
 
 // =========================================================
 
-std::size_t size        (); // system memory size
-std::size_t maxSize     (); // largest available system memory block
-std::size_t workingSize (); // process' current memory usage
+/// Get size of the total physical memory installed
+std::size_t size ();
+
+/// Largest available system memory block
+std::size_t maxSize ();
+
+/// Get size the current process allocated memory
+std::size_t workingSize ();
 
 // =========================================================
 
@@ -128,6 +133,9 @@ allocate(std::size_t bytes);
 
 void
 deallocate(void* ptr);
+
+void*
+reallocate(void* ptr, std::size_t old_size, std::size_t new_size);
 
 #ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 

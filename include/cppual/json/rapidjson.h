@@ -1,5 +1,5 @@
 // Tencent is pleased to support the open source community by making RapidJSON available.
-// 
+//
 // Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip.
 //
 // Licensed under the MIT License (the "License"); you may not use this file except
@@ -7,9 +7,9 @@
 //
 // http://opensource.org/licenses/MIT
 //
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
 #ifndef RAPIDJSON_RAPIDJSON_H_
@@ -17,7 +17,7 @@
 
 /*!\file rapidjson.h
     \brief common definitions and configuration
-    
+
     \see RAPIDJSON_CONFIG
  */
 
@@ -115,13 +115,13 @@
     \see RAPIDJSON_NAMESPACE
 */
 #ifndef RAPIDJSON_NAMESPACE
-#define RAPIDJSON_NAMESPACE rapidjson
+#define RAPIDJSON_NAMESPACE cppual::Json
 #endif
 #ifndef RAPIDJSON_NAMESPACE_BEGIN
-#define RAPIDJSON_NAMESPACE_BEGIN namespace RAPIDJSON_NAMESPACE {
+#define RAPIDJSON_NAMESPACE_BEGIN namespace cppual { namespace Json {
 #endif
 #ifndef RAPIDJSON_NAMESPACE_END
-#define RAPIDJSON_NAMESPACE_END }
+#define RAPIDJSON_NAMESPACE_END } } // namespace Json
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -277,7 +277,7 @@
 #  elif defined(RAPIDJSON_DOXYGEN_RUNNING)
 #    define RAPIDJSON_ENDIAN
 #  else
-#    error Unknown machine endianness detected. User needs to define RAPIDJSON_ENDIAN.   
+#    error Unknown machine endianness detected. User needs to define RAPIDJSON_ENDIAN.
 #  endif
 #endif // RAPIDJSON_ENDIAN
 
@@ -406,20 +406,20 @@
 #ifdef RAPIDJSON_DOXYGEN_RUNNING
 #define RAPIDJSON_NO_SIZETYPEDEFINE
 #endif
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 //! Size type (for string lengths, array sizes, etc.)
 /*! RapidJSON uses 32-bit array/string indices even on 64-bit platforms,
     instead of using \c size_t. Users may override the SizeType by defining
     \ref RAPIDJSON_NO_SIZETYPEDEFINE.
 */
 typedef unsigned SizeType;
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 #endif
 
 // always import std::size_t to rapidjson namespace
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 using std::size_t;
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 ///////////////////////////////////////////////////////////////////////////////
 // RAPIDJSON_ASSERT
@@ -453,16 +453,16 @@ RAPIDJSON_NAMESPACE_END
 #ifndef __clang__
 //!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
 #endif
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 template <bool x> struct STATIC_ASSERTION_FAILURE;
 template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
 template <size_t x> struct StaticAssertTest {};
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #if defined(__GNUC__) || defined(__clang__)
 #define RAPIDJSON_STATIC_ASSERT_UNUSED_ATTRIBUTE __attribute__((unused))
 #else
-#define RAPIDJSON_STATIC_ASSERT_UNUSED_ATTRIBUTE 
+#define RAPIDJSON_STATIC_ASSERT_UNUSED_ATTRIBUTE
 #endif
 #ifndef __clang__
 //!@endcond
@@ -513,7 +513,7 @@ RAPIDJSON_NAMESPACE_END
 
 //!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
 
-#define RAPIDJSON_MULTILINEMACRO_BEGIN do {  
+#define RAPIDJSON_MULTILINEMACRO_BEGIN do {
 #define RAPIDJSON_MULTILINEMACRO_END \
 } while((void)0, 0)
 
@@ -723,7 +723,7 @@ RAPIDJSON_NAMESPACE_END
     \brief main RapidJSON namespace
     \see RAPIDJSON_NAMESPACE
 */
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! Type of JSON value
 enum Type {
@@ -731,11 +731,11 @@ enum Type {
     kFalseType = 1,     //!< false
     kTrueType = 2,      //!< true
     kObjectType = 3,    //!< object
-    kArrayType = 4,     //!< array 
+    kArrayType = 4,     //!< array
     kStringType = 5,    //!< string
     kNumberType = 6     //!< number
 };
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_RAPIDJSON_H_

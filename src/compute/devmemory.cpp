@@ -24,9 +24,9 @@
 
 using namespace cppual::Compute;
 
-void* operator new (std::size_t /* size */, MemoryChunk& obj, std::size_t /* align */)
+void* operator new (std::size_t /* size */, MemoryChunk& /*obj*/, std::size_t /* align */)
 {
-    if (!obj.device ().valid ()) throw memory_source_not_available ();
+    //if (!obj.device ().valid ()) throw memory_source_not_available ();
 
     return reinterpret_cast<void*>(1);
 }

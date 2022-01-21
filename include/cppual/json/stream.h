@@ -19,7 +19,7 @@
 
 #include "encodings.h"
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Stream
@@ -218,6 +218,6 @@ struct StreamTraits<GenericInsituStringStream<Encoding> > {
 //! Insitu string stream with UTF8 encoding.
 typedef GenericInsituStringStream<UTF8<> > InsituStringStream;
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_STREAM_H_

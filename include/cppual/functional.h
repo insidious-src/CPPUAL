@@ -25,8 +25,8 @@
 
 #include <cppual/types.h>
 #include <cppual/concepts.h>
+#include <cppual/memory/allocator.h>
 
-#include <memory>
 #include <cstring>
 #include <functional>
 #include <tuple>
@@ -253,15 +253,14 @@ public:
 
     // capture lambda constructor
     template <typename Callable,
-              typename Allocator = std::allocator<Callable>,
+              typename Allocator = Memory::Allocator<Callable>,
               typename =
               typename std::enable_if<!std::is_same<Function, typename std::decay<Callable>::type>{}>::type
               >
     inline Function (Callable&& mFunc,
                      Allocator const& ator = Allocator(),
                      LambdaCapturePtr<Callable> = nullptr)
-    : m_storage (std::static_pointer_cast<void>(std::allocate_shared<Callable>(
-                     ator, std::forward<Callable> (mFunc))))
+    : m_storage (Memory::allocate_shared<Callable, void>(ator, std::forward<Callable> (mFunc)))
     {
         using FuncType = typename std::decay<Callable>::type;
 

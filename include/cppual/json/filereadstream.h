@@ -25,7 +25,7 @@ RAPIDJSON_DIAG_OFF(unreachable-code)
 RAPIDJSON_DIAG_OFF(missing-noreturn)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! File byte stream for input using fread().
 /*!
@@ -90,7 +90,7 @@ private:
     bool eof_;
 };
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #ifdef __clang__
 RAPIDJSON_DIAG_POP

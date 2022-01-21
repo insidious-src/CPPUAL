@@ -23,7 +23,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(unreachable-code)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! Wrapper of C file stream for output using fwrite().
 /*!
@@ -95,7 +95,7 @@ inline void PutN(FileWriteStream& stream, char c, size_t n) {
     stream.PutN(c, n);
 }
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #ifdef __clang__
 RAPIDJSON_DIAG_POP

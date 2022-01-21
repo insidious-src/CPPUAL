@@ -68,7 +68,7 @@ RAPIDJSON_DIAG_OFF(variadic-macros)
 RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Verbose Utilities
@@ -490,9 +490,9 @@ public:
             if (v->IsArray() && v->Size() > 0) {
                 enum_ = static_cast<uint64_t*>(allocator_->Malloc(sizeof(uint64_t) * v->Size()));
                 for (ConstValueIterator itr = v->Begin(); itr != v->End(); ++itr) {
-                    typedef Hasher<EncodingType, MemoryPoolAllocator<> > EnumHasherType;
+                    typedef Hasher<EncodingType, MemoryPoolResource<> > EnumHasherType;
                     char buffer[256u + 24];
-                    MemoryPoolAllocator<> hasherAllocator(buffer, sizeof(buffer));
+                    MemoryPoolResource<> hasherAllocator(buffer, sizeof(buffer));
                     EnumHasherType h(&hasherAllocator, 256);
                     itr->Accept(h);
                     enum_[enumCount_++] = h.GetHashCode();
@@ -1576,7 +1576,7 @@ public:
     \tparam ValueT Type of JSON value (e.g. \c Value ), which also determine the encoding.
     \tparam Allocator Allocator type for allocating memory of this document.
 */
-template <typename ValueT, typename Allocator = CrtAllocator>
+template <typename ValueT, typename Allocator = cppual::Memory::MemoryResource>
 class GenericSchemaDocument {
 public:
     typedef ValueT ValueType;
@@ -1838,7 +1838,7 @@ typedef IGenericRemoteSchemaDocumentProvider<SchemaDocument> IRemoteSchemaDocume
 template <
     typename SchemaDocumentType,
     typename OutputHandler = BaseReaderHandler<typename SchemaDocumentType::SchemaType::EncodingType>,
-    typename StateAllocator = CrtAllocator>
+    typename StateAllocator = cppual::Memory::MemoryResource>
 class GenericSchemaValidator :
     public internal::ISchemaStateFactory<typename SchemaDocumentType::SchemaType>, 
     public internal::ISchemaValidator,
@@ -2582,7 +2582,7 @@ template <
     typename InputStream,
     typename SourceEncoding,
     typename SchemaDocumentType = SchemaDocument,
-    typename StackAllocator = CrtAllocator>
+    typename StackAllocator = cppual::Memory::MemoryResource>
 class SchemaValidatingReader {
 public:
     typedef typename SchemaDocumentType::PointerType PointerType;
@@ -2642,7 +2642,7 @@ private:
     bool isValid_;
 };
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 RAPIDJSON_DIAG_POP
 
 #endif // RAPIDJSON_SCHEMA_H_

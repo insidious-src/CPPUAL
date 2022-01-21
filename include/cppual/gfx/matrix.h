@@ -313,7 +313,7 @@ private:
 
 // =========================================================
 
-class ViewMatrix : public DynamicMatrix<RGBColor, Memory::PolymorphicAllocator<RGBColor>>
+class ViewMatrix : public DynamicMatrix<RGBColor, Memory::Allocator<RGBColor>>
 {
 public:
     enum class Type : bool

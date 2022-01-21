@@ -35,12 +35,12 @@ template <std::size_t LastBit>
 struct MinimumTypeHelper
 {
     typedef
-        typename std::conditional<LastBit ==  0, void    ,
-        typename std::conditional<LastBit <=  8, uint8_t ,
-        typename std::conditional<LastBit <= 16, uint16_t,
-        typename std::conditional<LastBit <= 32, uint32_t,
-        typename std::conditional<LastBit <= 64, uint64_t,
-        void>::type>::type>::type>::type>::type type;
+        typename std::conditional<LastBit ==  0, void,
+        typename std::conditional<LastBit <=  8, u8  ,
+        typename std::conditional<LastBit <= 16, u16 ,
+        typename std::conditional<LastBit <= 32, u32 ,
+        typename std::conditional<LastBit <= 64, u64 ,
+        void>::type>::type>::type>::type>::type  type;
 };
 
 // =========================================================

@@ -28,9 +28,10 @@
 #include <cppual/resource.h>
 #include <cppual/concepts.h>
 #include <cppual/string.h>
+#include <cppual/meta.h>
 
-#include <cstring>
 #include <memory>
+#include <cstring>
 #include <functional>
 #include <unordered_map>
 
@@ -111,12 +112,13 @@ private:
 
 struct Plugin
 {
-    cchar*                name    ;
-    cchar*                provides;
-    cchar*                desc    ;
-    int                   verMajor;
-    int                   verMinor;
-    std::shared_ptr<void> iface   ;
+    cchar*                name     { };
+    cchar*                provides { };
+    cchar*                desc     { };
+    uint                  verMajor { };
+    uint                  verMinor { };
+    u64                   priority { };
+    std::shared_ptr<void> iface    { };
 
     inline Plugin () noexcept = default;
     inline Plugin (Plugin const&) = default;
@@ -179,32 +181,34 @@ public:
 
     typedef typename map_type::mapped_type&       reference      ;
     typedef typename map_type::mapped_type const& const_reference;
+    typedef typename map_type::mapped_type*       pointer        ;
+    typedef typename map_type::mapped_type const* const_pointer  ;
     typedef typename map_type::iterator           iterator       ;
     typedef typename map_type::const_iterator     const_iterator ;
 
     class plugin_pointer
     {
     public:
-        typedef Plugin const* const_pointer;
+        typedef Plugin const* const_plugin_pointer;
 
         plugin_pointer() = delete;
 
-        constexpr const_pointer operator -> () const noexcept
-        { return &_M_ref.second; }
+        constexpr const_plugin_pointer operator -> () const noexcept
+        { return &_M_ref->second; }
 
         constexpr shared_iface interface () const
-        { return std::static_pointer_cast<iface_type>(_M_ref.second.iface); }
+        { return std::static_pointer_cast<iface_type>(_M_ref->second.iface); }
 
     private:
         constexpr plugin_pointer (const_reference ref) noexcept
-        : _M_ref(ref)
+        : _M_ref(&ref)
         { }
 
         template <typename, typename, typename>
         friend class PluginManager;
 
     private:
-        const_reference _M_ref;
+        const_pointer _M_ref;
     };
 
     constexpr static const auto plugin_main = "plugin_main";
@@ -234,6 +238,8 @@ public:
     template <typename... Args>
     bool load_plugin (const_key& path, Memory::MemoryResource* rc = nullptr, Args... args)
     {
+        static_assert (!are_any_references<Args...>::value, "References are not a 'C' concept!");
+
         loader_type loader (path);
 
         if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
@@ -259,7 +265,8 @@ public:
 
     void release_plugin (const_key& path)
     {
-        if (is_registered (path)) m_gPluginMap.erase (m_gPluginMap.find (path));
+        auto it = m_gPluginMap.find (path);
+        if  (it != m_gPluginMap.end ()) m_gPluginMap.erase (it);
     }
 
 private:

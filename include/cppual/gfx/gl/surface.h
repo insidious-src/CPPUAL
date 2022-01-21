@@ -51,9 +51,9 @@ struct not_initialized : public std::logic_error { using std::logic_error::logic
 class Config
 {
 public:
-    typedef void*                           pointer    ;
-    typedef int32                           int_type   ;
-    typedef pointer  Config::*              safe_bool  ;
+    typedef Handle                          handle_type;
+    typedef i32                             int_type   ;
+    typedef handle_type  Config::*          safe_bool  ;
     typedef typename IResource::controller  controller ;
     typedef typename IResource::format_type format_type;
 
@@ -96,7 +96,7 @@ public:
     constexpr controller  display  ()   const noexcept { return m_pDisplay ; }
     constexpr Features    features ()   const noexcept { return m_eFeatures; }
     constexpr format_type format   ()   const noexcept { return m_gFormat  ; }
-    constexpr void*       operator ()() const noexcept { return m_pCfg     ; }
+    constexpr Handle      operator ()() const noexcept { return m_pCfg     ; }
     constexpr operator    void*    ()   const noexcept { return m_pCfg     ; }
 
     constexpr explicit operator safe_bool () const noexcept
@@ -109,8 +109,8 @@ private:
     format_type toFormat () const;
 
 private:
-    pointer     m_pDisplay ;
-    pointer     m_pCfg     ;
+    handle_type m_pDisplay ;
+    handle_type m_pCfg     ;
     format_type m_gFormat  ;
     Features    m_eFeatures;
 };
@@ -130,7 +130,7 @@ class Surface : public IPixelSurface
 public:
     typedef Config const* conf_pointer  ;
     typedef Config const& conf_reference;
-    typedef void*         pointer       ;
+    typedef Handle        handle_type   ;
 
     Surface (Surface const&);
     Surface (Surface&&) noexcept = default;
@@ -151,7 +151,7 @@ public:
 
 private:
     conf_pointer m_pConf  ;
-    pointer      m_pHandle;
+    handle_type  m_pHandle;
     value_type   m_pWnd   ;
     Type         m_eType  ;
 };
@@ -171,10 +171,10 @@ public:
     ~Context () noexcept;
 
     Context (Config     const& config,
-             GFXVersion const& version = defaultVersion (),
+             Version const& version = defaultVersion (),
              Context*          shared  = nullptr);
 
-    static GFXVersion platformVersion () noexcept;
+    static Version platformVersion () noexcept;
 
     bool use     (pointer, const_pointer) noexcept;
     bool assign  () noexcept;
@@ -185,22 +185,22 @@ public:
     conf_reference config     () const noexcept { return *m_pConf;             }
     const_pointer  readable   () const noexcept { return  m_pReadTarget;       }
     pointer        drawable   () const noexcept { return  m_pDrawTarget;       }
-    GFXVersion     version    () const noexcept { return  m_nVersion;          }
+    Version        version    () const noexcept { return  m_nVersion;          }
     DeviceType     device     () const noexcept { return  DeviceType::GL;      }
     value_type     handle     () const noexcept { return  m_pGC;               }
     controller     connection () const noexcept { return  m_pConf->display (); }
     format_type    format     () const noexcept { return  m_pConf->format  (); }
 
-    static constexpr GFXVersion defaultVersion () noexcept
-    { return GFXVersion { 3, 0 }; }
+    static constexpr Version defaultVersion () noexcept
+    { return Version { 3, 0 }; }
 
 private:
     conf_pointer  m_pConf      ;
-    void*         m_pGC        ;
+    Handle        m_pGC        ;
     pointer       m_pDrawTarget;
     const_pointer m_pReadTarget;
     Context*      m_pShared    ;
-    GFXVersion    m_nVersion   ;
+    Version    m_nVersion   ;
 };
 
 // ====================================================
@@ -211,6 +211,11 @@ public:
     ContextMutex (Context& context) noexcept
     : m_context  (&context)
     { }
+
+    ~ContextMutex()
+    {
+        unlock ();
+    }
 
     void lock ()
     {

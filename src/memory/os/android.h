@@ -19,30 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/compute/backend_iface.h>
+#ifndef CPPUAL_MEMORY_OS_ANDROID_H_
+#define CPPUAL_MEMORY_OS_ANDROID_H_
+#ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/memory/stack.h>
-#include <cppual/compute/device.h>
+#include <cppual/decl.h>
 
-#include <vulkan/vulkan.h>
+#ifdef OS_ANDROID
+#endif
 
-#include <vector>
-#include <cstring>
-#include <type_traits>
-
-using std::vector;
-using cppual::Memory::StackedResource;
-using cppual::Memory::StackedAllocator;
-
-namespace cppual { namespace Compute {
-
-namespace { // optimize for internal unit usage
-
-
-
-} // anonymous namespace
-
-
-
-} } // namespace Compute
+#endif // __cplusplus
+#endif // CPPUAL_MEMORY_OS_ANDROID_H_

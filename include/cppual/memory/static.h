@@ -33,6 +33,8 @@ template <MemoryResource::size_type N>
 class StaticResource final : public MemoryResource, NonCopyable
 {
 public:
+    constexpr static auto bytes = N + (max_align * 2);
+
     size_type capacity () const noexcept
     { return sizeof (m_pBuffer); }
 
@@ -46,32 +48,32 @@ public:
     constexpr StaticResource () noexcept : m_pMarker  (m_pBuffer) { }
 
 private:
-    pointer             m_pMarker;
-    alignas (uptr) byte m_pBuffer[N];
+    pointer             m_pMarker       ;
+    alignas (uptr) byte m_pBuffer[bytes];
 
-    void* do_allocate   (size_type size, align_type align);
-    void  do_deallocate (void* p, size_type size, align_type align);
+    void* do_allocate   (size_type bytes, align_type align_size);
+    void  do_deallocate (void* p, size_type bytes, align_type align_size);
 
     bool  do_is_equal   (base_type const& gObj) const noexcept
     { return &gObj == this; }
 };
 
 template <MemoryResource::size_type N>
-inline void* StaticResource<N>::do_allocate (size_type n, align_type a)
+inline void* StaticResource<N>::do_allocate (size_type bytes, align_type align_size)
 {
-    pointer const pMarker    = nextAlignedAddr (m_pMarker, a);
-    pointer const pNewMarker = static_cast<math_pointer> (pMarker) + n;
+    pointer const pMarker    = nextAlignedAddr (m_pMarker, align_size);
+    pointer const pNewMarker = static_cast<math_pointer> (pMarker) + bytes;
 
-    if (pNewMarker > m_pBuffer + sizeof (m_pBuffer)) throw std::bad_alloc ();
+    if (pNewMarker > (m_pBuffer + sizeof (m_pBuffer))) throw std::bad_alloc ();
 
     m_pMarker = pNewMarker;
     return      pMarker   ;
 }
 
 template <MemoryResource::size_type N>
-inline void StaticResource<N>::do_deallocate (void* p, size_type n, align_type)
+inline void StaticResource<N>::do_deallocate (void* p, size_type bytes, align_type)
 {
-    if (static_cast<math_pointer> (p) + n == m_pMarker)
+    if ((static_cast<math_pointer> (p) + bytes) == m_pMarker)
         m_pMarker = p;
     else
         throw std::out_of_range ("pointer doesn't match the last element allocated");

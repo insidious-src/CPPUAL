@@ -23,7 +23,7 @@ RAPIDJSON_DIAG_OFF(switch-enum)
 RAPIDJSON_DIAG_OFF(covered-switch-default)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! Maps error code of parsing into error message.
 /*!
@@ -113,7 +113,7 @@ inline const RAPIDJSON_ERROR_CHARTYPE* GetValidateError_En(ValidateErrorCode val
     }
 }
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #ifdef __clang__
 RAPIDJSON_DIAG_POP

@@ -23,7 +23,7 @@ RAPIDJSON_DIAG_OFF(unreachable-code)
 RAPIDJSON_DIAG_OFF(missing-noreturn)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! Represents an in-memory input byte stream.
 /*!
@@ -62,7 +62,7 @@ struct MemoryStream {
     size_t size_;       //!< Size of the stream.
 };
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #ifdef __clang__
 RAPIDJSON_DIAG_POP

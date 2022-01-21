@@ -17,7 +17,7 @@
 
 #include "../rapidjson.h"
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 namespace internal {
 
 class Double {
@@ -73,6 +73,6 @@ private:
 };
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_IEEE754_

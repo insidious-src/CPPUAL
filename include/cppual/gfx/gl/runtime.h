@@ -25,23 +25,28 @@
 
 #include <cppual/gfx/draw.h>
 
-namespace cppual { namespace Graphics { namespace GL { namespace Driver {
+namespace cppual { namespace Graphics { namespace GL {
 
 enum class StringQuery : byte
 {
     Renderer,
-    Vendor,
-    Version,
+    Vendor  ,
+    Version ,
     SLVersion
 };
 
-GFXVersion version ();
-GFXVersion slVersion ();
-string     label (StringQuery);
-bool       isExtensionSupported (string const& name);
-void       drawTestTriagle(float axis);
+// ====================================================
 
-} } } } // namespace Driver
+struct Platform
+{
+    static Version version ();
+    static Version slVersion ();
+    static string  label (StringQuery);
+    static bool    isExtensionSupported (string const& name);
+    static void    drawTestTriagle(float axis);
+};
+
+} } } // namespace GL
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_GL_RUNTIME_H_

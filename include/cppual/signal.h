@@ -25,6 +25,7 @@
 
 #include <cppual/circular_queue.h>
 #include <cppual/functional.h>
+#include <cppual/memory/allocator.h>
 
 #include <vector>
 #include <memory>
@@ -34,7 +35,7 @@ namespace cppual {
 // =========================================================
 
 template <typename T>
-using SignalAllocator = std::allocator< Function<T> >;
+using SignalAllocator = Memory::Allocator< Function<T> >;
 
 template <typename T,
           typename Allocator = SignalAllocator<T>
@@ -101,7 +102,7 @@ public:
     { return _M_slots.end (); }
 
     //! emit signal to connected slots
-    template <typename CollectorAllocator = std::allocator<T> >
+    template <typename CollectorAllocator = Memory::Allocator<T> >
     collector_type<CollectorAllocator> operator () (Args... args) const
     {
         static_assert (std::is_same<typename CollectorAllocator::value_type, T>::value,

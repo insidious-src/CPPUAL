@@ -110,32 +110,32 @@ public:
     struct MWheelData
     {
         point2u pos;
-        int32   delta;
+        i32   delta;
     };
 
     struct TouchData
     {
-        int32   pid;
+        i32   pid;
         point2u pos;
     };
 
     struct JoyButtonData
     {
         size_type id;
-        int32     button;
+        i32     button;
     };
 
     struct JoyAxisData
     {
         size_type id;
-        int16     value;
+        i16     value;
         u8        axis;
     };
 
     struct JoyTriggerData
     {
         size_type id;
-        int16     threshold;
+        i16     threshold;
         u8        trigger;
 
     };
@@ -160,7 +160,7 @@ public:
     struct PropertyData
     {
         u32   prop;
-        int32 value;
+        i32 value;
     };
 
     union Data
@@ -175,7 +175,7 @@ public:
         JoyPlugData    joyPlug;
         JoyTriggerData joyTrigger;
         JoyTrackData   joyTrack;
-        int32          message;
+        i32          message;
         PaintData      paint;
         point2u        size;
         bool           state;
@@ -276,7 +276,7 @@ struct StepEvent : public Event
 
 struct PropertyEvent : public Event
 {
-    PropertyEvent (u32 prop, int32 value) noexcept
+    PropertyEvent (u32 prop, i32 value) noexcept
     : Event       (Event::Property)
     {
         m_data.property.prop  = prop;
@@ -359,7 +359,7 @@ struct MouseMoveEvent : public Event
 
 struct WheelEvent : public Event
 {
-    WheelEvent (int32 nDelta, point2u gPos) noexcept
+    WheelEvent (i32 nDelta, point2u gPos) noexcept
     : Event    (Event::MWheelStep)
     {
         m_data.wheel.delta = nDelta;
@@ -371,7 +371,7 @@ struct WheelEvent : public Event
 
 struct TouchPressEvent : public Event
 {
-    TouchPressEvent (int32 pid, point2u gPos) noexcept
+    TouchPressEvent (i32 pid, point2u gPos) noexcept
     : Event         (Event::TouchPress)
     {
         m_data.touch.pid = pid;
@@ -383,7 +383,7 @@ struct TouchPressEvent : public Event
 
 struct TouchReleaseEvent : public Event
 {
-    TouchReleaseEvent (int32 pid, point2u gPos) noexcept
+    TouchReleaseEvent (i32 pid, point2u gPos) noexcept
     : Event           (Event::TouchRelease)
     {
         m_data.touch.pid = pid;
@@ -395,7 +395,7 @@ struct TouchReleaseEvent : public Event
 
 struct TouchMovedEvent : public Event
 {
-    TouchMovedEvent (int32 pid, point2u gPos) noexcept
+    TouchMovedEvent (i32 pid, point2u gPos) noexcept
     : Event         (Event::TouchMove)
     {
         m_data.touch.pid = pid;

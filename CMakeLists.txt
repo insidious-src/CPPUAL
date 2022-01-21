@@ -103,11 +103,11 @@ add_library(cppual-host SHARED
     "include/cppual/types.h"
     "include/cppual/error.h"
     "include/cppual/common.h"
+    "include/cppual/containers.h"
     "include/cppual/string.h"
     "include/cppual/string_helper.h"
     "include/cppual/math.h"
     "include/cppual/reactive.h"
-    "include/cppual/simd.h"
     "include/cppual/meta.h"
     "include/cppual/concepts.h"
     "include/cppual/iterator.h"
@@ -133,12 +133,12 @@ target_compile_definitions(cppual-host PRIVATE -DAPI_EXPORT)
 
 # memory management
 add_library(cppual-memory SHARED
-    "include/cppual/memory/system.h"
-    "src/memory/system.cpp"
-    "include/cppual/memory/static.h"
+    "include/cppual/memory/allocator.h"
+    "src/memory/allocator.cpp"
     "include/cppual/memory/mop.h"
-    "src/memory/stack.cpp"
-    "include/cppual/memory/stack.h"
+    "include/cppual/memory/static.h"
+    "src/memory/stacked.cpp"
+    "include/cppual/memory/stacked.h"
     "src/memory/pool.cpp"
     "include/cppual/memory/pool.h"
     "src/memory/heap.cpp"
@@ -147,9 +147,22 @@ add_library(cppual-memory SHARED
     "include/cppual/memory/page.h"
     "src/memory/page.cpp"
     "include/cppual/memory/shared.h"
-    "include/cppual/memory/allocator.h"
+    "src/memory/shared.cpp"
+    "src/memory/os/linux.h"
+    "src/memory/os/win.h"
+    "src/memory/os/mac.h"
+    "src/memory/os/android.h"
+    "src/memory/os/ios.h"
+    "src/memory/os/aix.h"
+    "src/memory/os/solaris.h"
+    "src/memory/os/bsd.h"
     )
 target_compile_definitions(cppual-memory PRIVATE -DAPI_EXPORT)
+
+add_library(cppual-memory-system SHARED
+    "include/cppual/memory/system.h"
+    "src/memory/system.cpp"
+    )
 
 # device compute, memory (Vulkan, OpenCL, Serial)
 add_library(cppual-compute SHARED
@@ -161,7 +174,7 @@ add_library(cppual-compute SHARED
     "src/compute/object.cpp"
     "include/cppual/compute/backend_iface.h"
     "src/compute/backend_iface.cpp"
-    "include/cppual/compute/platform.h"
+    #"include/cppual/compute/platform.h"
     "include/cppual/compute/program.h"
     "src/compute/program.cpp"
     "include/cppual/compute/device.h"
@@ -225,8 +238,8 @@ target_compile_definitions(cppual-json PRIVATE -DAPI_EXPORT)
 if(VULKAN_FOUND)
 
 add_library(cppual-compute-vulkan MODULE
-    "src/compute/backend/vulkan.h"
-    "src/compute/backend/vulkan.cpp"
+    "src/compute/backend/vulkan/vulkan.h"
+    "src/compute/backend/vulkan/vulkan.cpp"
     )
 
 endif()
@@ -234,8 +247,27 @@ endif()
 if(OPENCL_FOUND)
 
 add_library(cppual-compute-opencl MODULE
-    "src/compute/backend/opencl.h"
-    "src/compute/backend/opencl.cpp"
+    "src/compute/backend/opencl/opencl.h"
+    "src/compute/backend/opencl/opencl.cpp"
+    "src/compute/backend/opencl/cldevice.h"
+    "src/compute/backend/opencl/cldevice.cpp"
+    "src/compute/backend/opencl/clprogram.h"
+    "src/compute/backend/opencl/clprogram.cpp"
+    "src/compute/backend/opencl/clkernel.h"
+    "src/compute/backend/opencl/clkernel.cpp"
+    "src/compute/backend/opencl/clqueue.h"
+    "src/compute/backend/opencl/clqueue.cpp"
+    "src/compute/backend/opencl/clcontext.h"
+    "src/compute/backend/opencl/clcontext.cpp"
+    "src/compute/backend/opencl/clevent.h"
+    "src/compute/backend/opencl/clevent.cpp"
+    "src/compute/backend/opencl/clcmdqueue.h"
+    "src/compute/backend/opencl/clcmdqueue.cpp"
+    "src/compute/backend/opencl/clbuffer.h"
+    "src/compute/backend/opencl/clbuffer.cpp"
+    "src/compute/backend/opencl/climage.h"
+    "src/compute/backend/opencl/climage.cpp"
+    "src/compute/backend/opencl/clentry.cpp"
     )
 
 endif()
@@ -668,19 +700,20 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 #    target_link_libraries(cppual-memory)
 endif()
 
-target_link_libraries(cppual-host DL::Library)
+target_link_libraries(cppual-host cppual-memory DL::Library)
 target_link_libraries(cppual-compute cppual-memory cppual-host Sockets::Library)
 target_link_libraries(cppual-network cppual-memory Sockets::Library)
 target_link_libraries(cppual-dom cppual-memory)
+target_link_libraries(cppual-json cppual-memory)
 
 target_link_libraries(cppual-video-compute cppual-compute)
 
 if(OPENCL_FOUND)
-    target_link_libraries(cppual-compute-opencl cppual-compute OpenCL::Library)
+    target_link_libraries(cppual-compute-opencl cppual-compute cppual-memory OpenCL::Library)
 endif()
 
 if(VULKAN_FOUND)
-    target_link_libraries(cppual-compute-vulkan cppual-compute Vulkan::Library)
+    target_link_libraries(cppual-compute-vulkan cppual-compute cppual-memory Vulkan::Library)
 endif()
 
 if(SNDFILE_FOUND AND OPENAL_FOUND)
@@ -689,10 +722,10 @@ if(SNDFILE_FOUND AND OPENAL_FOUND)
 endif()
 
 if(FREETYPE_FOUND AND OPENGL_FOUND AND GLEW_FOUND AND EGL_FOUND)
-    target_link_libraries(cppual-gfx cppual-compute Freetype::Library)
+    target_link_libraries(cppual-gfx cppual-memory cppual-compute Freetype::Library)
     target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx)
     target_link_libraries(cppual-gl cppual-gfx EGL::Library GLEW::Library OpenGL::Library)
-    target_link_libraries(cppual-ui cppual-gfx)
+    target_link_libraries(cppual-ui cppual-gfx cppual-memory)
     target_link_libraries(cppual-ui-views cppual-ui)
     target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
 endif()

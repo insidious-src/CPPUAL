@@ -50,7 +50,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 #include <map> // std::multimap
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 // Forward declaration.
 template <typename Encoding, typename Allocator>
@@ -63,20 +63,20 @@ class GenericDocument;
     \ingroup RAPIDJSON_CONFIG
     \brief Allows to choose default allocator.
 
-    User can define this to use CrtAllocator or MemoryPoolAllocator.
+    User can define this to use cppual::Memory::MemoryResource or MemoryPoolResource.
 */
 #ifndef RAPIDJSON_DEFAULT_ALLOCATOR
-#define RAPIDJSON_DEFAULT_ALLOCATOR MemoryPoolAllocator<CrtAllocator>
+#define RAPIDJSON_DEFAULT_ALLOCATOR MemoryPoolResource<cppual::Memory::MemoryResource>
 #endif
 
 /*! \def RAPIDJSON_DEFAULT_STACK_ALLOCATOR
     \ingroup RAPIDJSON_CONFIG
     \brief Allows to choose default stack allocator for Document.
 
-    User can define this to use CrtAllocator or MemoryPoolAllocator.
+    User can define this to use cppual::Memory::MemoryResource or MemoryPoolResource.
 */
 #ifndef RAPIDJSON_DEFAULT_STACK_ALLOCATOR
-#define RAPIDJSON_DEFAULT_STACK_ALLOCATOR CrtAllocator
+#define RAPIDJSON_DEFAULT_STACK_ALLOCATOR cppual::Memory::MemoryResource
 #endif
 
 /*! \def RAPIDJSON_VALUE_DEFAULT_OBJECT_CAPACITY
@@ -831,10 +831,12 @@ public:
     explicit GenericValue(StringRefType s) RAPIDJSON_NOEXCEPT : data_() { SetStringRaw(s); }
 
     //! Constructor for copy-string (i.e. do make a copy of string)
-    GenericValue(const Ch* s, SizeType length, Allocator& allocator) : data_() { SetStringRaw(StringRef(s, length), allocator); }
+    GenericValue(const Ch* s, SizeType length, Allocator& allocator)
+        : data_(), ator_(&allocator) { SetStringRaw(StringRef(s, length), allocator); }
 
     //! Constructor for copy-string (i.e. do make a copy of string)
-    GenericValue(const Ch*s, Allocator& allocator) : data_() { SetStringRaw(StringRef(s), allocator); }
+    GenericValue(const Ch*s, Allocator& allocator)
+        : data_(), ator_(&allocator) { SetStringRaw(StringRef(s), allocator); }
 
 #if RAPIDJSON_HAS_STDSTRING
     //! Constructor for copy-string from a string object (i.e. do make a copy of string)
@@ -870,18 +872,19 @@ public:
     */
     ~GenericValue() {
         // With RAPIDJSON_USE_MEMBERSMAP, the maps need to be destroyed to release
-        // their Allocator if it's refcounted (e.g. MemoryPoolAllocator).
-        if (Allocator::kNeedFree || (RAPIDJSON_USE_MEMBERSMAP+0 &&
-                                     internal::IsRefCounted<Allocator>::Value)) {
+        // their Allocator if it's refcounted (e.g. MemoryPoolResource).
+        if (/*ator_ != nullptr ||*/ (RAPIDJSON_USE_MEMBERSMAP+0 &&
+                                 internal::IsRefCounted<Allocator>::Value))
+        {
             switch(data_.f.flags) {
             case kArrayFlag:
                 {
                     GenericValue* e = GetElementsPointer();
                     for (GenericValue* v = e; v != e + data_.a.size; ++v)
                         v->~GenericValue();
-                    if (Allocator::kNeedFree) { // Shortcut by Allocator's trait
-                        Allocator::Free(e);
-                    }
+                    //if (Allocator::kNeedFree) { // Shortcut by Allocator's trait
+                    if (ator_ != nullptr) ator_->deallocate(e);
+                    //}
                 }
                 break;
 
@@ -890,9 +893,9 @@ public:
                 break;
 
             case kCopyStringFlag:
-                if (Allocator::kNeedFree) { // Shortcut by Allocator's trait
-                    Allocator::Free(const_cast<Ch*>(GetStringPointer()));
-                }
+                //if (Allocator::kNeedFree) { // Shortcut by Allocator's trait
+                if (ator_ != nullptr) ator_->deallocate(const_cast<Ch*>(GetStringPointer()));
+                //}
                 break;
 
             default:
@@ -1668,7 +1671,7 @@ public:
     GenericValue& Reserve(SizeType newCapacity, Allocator &allocator) {
         RAPIDJSON_ASSERT(IsArray());
         if (newCapacity > data_.a.capacity) {
-            SetElementsPointer(reinterpret_cast<GenericValue*>(allocator.Realloc(GetElementsPointer(), data_.a.capacity * sizeof(GenericValue), newCapacity * sizeof(GenericValue))));
+            SetElementsPointer(reinterpret_cast<GenericValue*>(allocator.reallocate(GetElementsPointer(), data_.a.capacity * sizeof(GenericValue), newCapacity * sizeof(GenericValue))));
             data_.a.capacity = newCapacity;
         }
         return *this;
@@ -2270,7 +2273,7 @@ private:
     void DoFreeMembers() {
         for (MemberIterator m = MemberBegin(); m != MemberEnd(); ++m)
             m->~Member();
-        Allocator::Free(GetMembersPointer());
+        if (ator_ != nullptr) ator_->deallocate(GetMembersPointer());
     }
 
 #endif // !RAPIDJSON_USE_MEMBERSMAP
@@ -2376,7 +2379,7 @@ private:
     void SetArrayRaw(GenericValue* values, SizeType count, Allocator& allocator) {
         data_.f.flags = kArrayFlag;
         if (count) {
-            GenericValue* e = static_cast<GenericValue*>(allocator.Malloc(count * sizeof(GenericValue)));
+            GenericValue* e = static_cast<GenericValue*>(allocator.allocate(count * sizeof(GenericValue)));
             SetElementsPointer(e);
             std::memcpy(static_cast<void*>(e), values, count * sizeof(GenericValue));
         }
@@ -2422,7 +2425,7 @@ private:
         } else {
             data_.f.flags = kCopyStringFlag;
             data_.s.length = s.length;
-            str = static_cast<Ch *>(allocator.Malloc((s.length + 1) * sizeof(Ch)));
+            str = static_cast<Ch*>(allocator.allocate((s.length + 1) * sizeof(Ch)));
             SetStringPointer(str);
         }
         std::memcpy(str, s, s.length * sizeof(Ch));
@@ -2453,6 +2456,7 @@ private:
     }
 
     Data data_;
+    cppual::Memory::MemoryResource* ator_;
 };
 
 //! GenericValue with UTF8 encoding
@@ -2483,11 +2487,14 @@ public:
         \param stackCapacity    Optional initial capacity of stack in bytes.
         \param stackAllocator   Optional allocator for allocating memory for stack.
     */
-    explicit GenericDocument(Type type, Allocator* allocator = 0, size_t stackCapacity = kDefaultStackCapacity, StackAllocator* stackAllocator = 0) :
+    explicit GenericDocument(Type type,
+                             Allocator* allocator = static_cast<Allocator*>(memory_pool_resource()),
+                             size_t stackCapacity = kDefaultStackCapacity,
+                             StackAllocator* stackAllocator = cppual::Memory::get_default_resource()) :
         GenericValue<Encoding, Allocator>(type),  allocator_(allocator), ownAllocator_(0), stack_(stackAllocator, stackCapacity), parseResult_()
     {
         if (!allocator_)
-            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator)();
+            ownAllocator_ = allocator_ = static_cast<Allocator*>(memory_pool_resource());
     }
 
     //! Constructor
@@ -2496,11 +2503,13 @@ public:
         \param stackCapacity    Optional initial capacity of stack in bytes.
         \param stackAllocator   Optional allocator for allocating memory for stack.
     */
-    GenericDocument(Allocator* allocator = 0, size_t stackCapacity = kDefaultStackCapacity, StackAllocator* stackAllocator = 0) :
+    GenericDocument(Allocator* allocator = static_cast<Allocator*>(memory_pool_resource()),
+                    size_t stackCapacity = kDefaultStackCapacity,
+                    StackAllocator* stackAllocator = cppual::Memory::get_default_resource()) :
         allocator_(allocator), ownAllocator_(0), stack_(stackAllocator, stackCapacity), parseResult_()
     {
         if (!allocator_)
-            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator)();
+            ownAllocator_ = allocator_ = static_cast<Allocator*>(memory_pool_resource());
     }
 
 #if RAPIDJSON_HAS_CXX11_RVALUE_REFS
@@ -2521,8 +2530,8 @@ public:
     ~GenericDocument() {
         // Clear the ::ValueType before ownAllocator is destroyed, ~ValueType()
         // runs last and may access its elements or members which would be freed
-        // with an allocator like MemoryPoolAllocator (CrtAllocator does not
-        // free its data when destroyed, but MemoryPoolAllocator does).
+        // with an allocator like MemoryPoolResource (cppual::Memory::MemoryResource does not
+        // free its data when destroyed, but MemoryPoolResource does).
         if (ownAllocator_) {
             ValueType::SetNull();
         }
@@ -3005,7 +3014,7 @@ private:
     ValueType& value_;
 };
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 RAPIDJSON_DIAG_POP
 
 #endif // RAPIDJSON_DOCUMENT_H_

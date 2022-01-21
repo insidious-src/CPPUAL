@@ -27,7 +27,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++98-compat)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! Combination of PrettyWriter format flags.
 /*! \see PrettyWriter::SetFormatOptions
@@ -44,7 +44,7 @@ enum PrettyFormatOptions {
     \tparam TargetEncoding Encoding of output stream.
     \tparam StackAllocator Type of allocator for allocating memory of stack.
 */
-template<typename OutputStream, typename SourceEncoding = UTF8<>, typename TargetEncoding = UTF8<>, typename StackAllocator = CrtAllocator, unsigned writeFlags = kWriteDefaultFlags>
+template<typename OutputStream, typename SourceEncoding = UTF8<>, typename TargetEncoding = UTF8<>, typename StackAllocator = cppual::Memory::MemoryResource, unsigned writeFlags = kWriteDefaultFlags>
 class PrettyWriter : public Writer<OutputStream, SourceEncoding, TargetEncoding, StackAllocator, writeFlags> {
 public:
     typedef Writer<OutputStream, SourceEncoding, TargetEncoding, StackAllocator, writeFlags> Base;
@@ -264,7 +264,7 @@ private:
     PrettyWriter& operator=(const PrettyWriter&);
 };
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #if defined(__clang__)
 RAPIDJSON_DIAG_POP

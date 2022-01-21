@@ -48,30 +48,10 @@ class  Event;
 
 // =========================================================
 
-enum class ObjectType : ushort
-{
-    Base            =       0,
-    Device          = 1 <<  0,
-    Buffer          = 1 <<  1,
-    CommandSequence = 1 <<  2,
-    Image           = 1 <<  3,
-    Pipeline        = 1 <<  4,
-    RenderPass      = 1 <<  5,
-    Shader          = 1 <<  6,
-    DescriptorPool  = 1 <<  7,
-    Event           = 1 <<  8,
-    State           = 1 <<  9,
-    Queue           = 1 << 10
-};
-
-// =========================================================
-
-template <ObjectType Type>
+template <ResourceType Type>
 class Object : public Resource<void, void*>
 {
 public:
-    static_assert (Type != ObjectType::Base, "Not a valid Resource type!");
-
     typedef std::size_t size_type  ;
     typedef string      string_type;
 
@@ -80,18 +60,15 @@ public:
     Object (Object&&) noexcept = default;
     Object& operator = (Object&&) = default;
 
-    constexpr static ObjectType type () noexcept { return Type; }
+    constexpr static ResourceType type () noexcept { return Type; }
 
     constexpr operator handle_type::pointer () const noexcept
-    { return _M_handle; }
+    { return handle<handle_type::pointer>(); }
 
 protected:
     constexpr Object (handle_type handle) noexcept
-    : _M_handle (handle)
+    : Resource (handle)
     { }
-
-private:
-    handle_type _M_handle;
 };
 
 } } // Compute

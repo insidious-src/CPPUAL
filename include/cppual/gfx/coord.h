@@ -33,14 +33,14 @@ template <typename> struct Point3;
 template <typename> struct Point4;
 template <typename> struct Angle ;
 
-typedef Point2<int16 > point2i;
+typedef Point2<i16 > point2i;
 typedef Point2<u16   > point2u;
 typedef Point2<u32   > point2u32;
 typedef Point2<float > point2f;
 typedef Point3<float > point3f;
 typedef Point3<float > vec3   ;
 typedef Point3<double> point3d;
-typedef Point3<int16 > point3i;
+typedef Point3<i16 > point3i;
 typedef Point3<u32   > point3u32;
 typedef Point4<float > point4f;
 typedef Point4<float > vec4   ;
@@ -118,7 +118,7 @@ constexpr bool operator != (Point4<T> const& gObj1,
 
 struct Rect final
 {
-    typedef int16 value_type;
+    typedef i16 value_type;
 
     value_type left, top, right, bottom;
 
@@ -173,8 +173,8 @@ struct Rect final
 
     inline Rect& operator = (point2i gPoint) noexcept
     {
-        right  = static_cast<int16> (gPoint.x + width  ());
-        bottom = static_cast<int16> (gPoint.y + height ());
+        right  = static_cast<i16> (gPoint.x + width  ());
+        bottom = static_cast<i16> (gPoint.y + height ());
         left   = gPoint.x;
         top    = gPoint.y;
         return *this;

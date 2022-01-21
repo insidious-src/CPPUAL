@@ -84,9 +84,9 @@ enum ErrorType
     Destroy
 };
 
-inline GFXVersion& version () noexcept
+inline Version& version () noexcept
 {
-    static GFXVersion eglVersion { 0, 0 };
+    static Version eglVersion { 0, 0 };
     return eglVersion;
 }
 
@@ -330,7 +330,7 @@ inline surface_pointer createSurface (Config const&       gConf,
     }
 }
 
-inline context_pointer createGC (Config const& gConf, GFXVersion version, void* pShared)
+inline context_pointer createGC (Config const& gConf, Version version, void* pShared)
 {
     value_type nContextAttribs[5];
 
@@ -362,7 +362,7 @@ inline context_pointer createGC (Config const& gConf, GFXVersion version, void* 
     return pContext;
 }
 
-inline point2u getSize (Config const& config, Surface::pointer surface) noexcept
+inline point2u getSize (Config const& config, Surface::handle_type surface) noexcept
 {
     value_type size[2];
 
@@ -388,6 +388,7 @@ Config::Config (controller dsp, format_type gFormat)
     if (!m_pDisplay) throw std::logic_error ("invalid display");
 
     EGL::value_type nNumConfigs = 0;
+    handle_type::pointer    ptr = nullptr;
 
     EGL::value_type const nConfigAttribs[]
     {
@@ -407,8 +408,10 @@ Config::Config (controller dsp, format_type gFormat)
 
     EGL::initialize (m_pDisplay);
 
-    ::eglGetConfigs   (m_pDisplay, &m_pCfg, 1, &nNumConfigs);
-    ::eglChooseConfig (m_pDisplay, nConfigAttribs, &m_pCfg, 1, &nNumConfigs);
+    ::eglGetConfigs   (m_pDisplay, &ptr, 1, &nNumConfigs);
+    ::eglChooseConfig (m_pDisplay, nConfigAttribs, &ptr, 1, &nNumConfigs);
+
+    m_pCfg = handle_type(ptr);
 
     m_eFeatures = EGL::convertExtensions (m_pDisplay);
     m_gFormat   = toFormat ();
@@ -603,13 +606,13 @@ void Surface::scale (point2u gSize)
 
 // ====================================================
 
-Context::Context (Config const& conf, GFXVersion const& version, Context* shared)
+Context::Context (Config const& conf, Version const& version, Context* shared)
 : m_pConf        (&conf),
   m_pGC          (EGL::createGC (conf, version, shared ? shared->m_pGC : nullptr)),
   m_pDrawTarget  (),
   m_pReadTarget  (),
   m_pShared      (shared),
-  m_nVersion     (m_pGC ? version : GFXVersion ())
+  m_nVersion     (m_pGC ? version : Version ())
 { }
 
 Context::Context (Context const& obj)
@@ -618,7 +621,7 @@ Context::Context (Context const& obj)
   m_pDrawTarget  (),
   m_pReadTarget  (),
   m_pShared      (obj.m_pShared),
-  m_nVersion     (m_pGC ? obj.m_nVersion : GFXVersion ())
+  m_nVersion     (m_pGC ? obj.m_nVersion : Version ())
 { }
 
 Context& Context::operator = (Context&& obj) noexcept
@@ -638,7 +641,7 @@ Context& Context::operator = (Context&& obj) noexcept
     m_pShared     = obj.m_pShared;
     m_pGC         = obj.m_pGC;
 
-    obj.m_nVersion    = GFXVersion ();
+    obj.m_nVersion    = Version ();
     obj.m_pGC         = nullptr;
     obj.m_pConf       = nullptr;
     obj.m_pShared     = nullptr;
@@ -676,7 +679,7 @@ Context::~Context () noexcept
     ::eglDestroyContext (config ().display (), m_pGC);
 }
 
-GFXVersion Context::platformVersion () noexcept
+Version Context::platformVersion () noexcept
 {
     return EGL::version ();
 }

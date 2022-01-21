@@ -89,13 +89,13 @@ enum
     Luminance                  = GL_LUMINANCE,
 
     // primary
-    Renderer                   = GL_RENDERER,
-    Vendor                     = GL_VENDOR,
-    Version                    = GL_VERSION,
-    MajorVersion               = GL_MAJOR_VERSION,
-    MinorVersion               = GL_MINOR_VERSION,
-    SLVersion                  = GL_SHADING_LANGUAGE_VERSION,
-    Extensions                 = GL_EXTENSIONS,
+    InfoRenderer               = GL_RENDERER,
+    InfoVendor                 = GL_VENDOR,
+    InfoVersion                = GL_VERSION,
+    InfoMajorVersion           = GL_MAJOR_VERSION,
+    InfoMinorVersion           = GL_MINOR_VERSION,
+    InfoSLVersion              = GL_SHADING_LANGUAGE_VERSION,
+    InfoExtensions             = GL_EXTENSIONS,
     TRUE                       = GL_TRUE,
     FALSE                      = GL_FALSE
 };

@@ -47,7 +47,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // WriteFlag
@@ -86,7 +86,7 @@ enum WriteFlag {
     \tparam StackAllocator Type of allocator for allocating memory of stack.
     \note implements Handler concept
 */
-template<typename OutputStream, typename SourceEncoding = UTF8<>, typename TargetEncoding = UTF8<>, typename StackAllocator = CrtAllocator, unsigned writeFlags = kWriteDefaultFlags>
+template<typename OutputStream, typename SourceEncoding = UTF8<>, typename TargetEncoding = UTF8<>, typename StackAllocator = cppual::Memory::MemoryResource, unsigned writeFlags = kWriteDefaultFlags>
 class Writer {
 public:
     typedef typename SourceEncoding::Ch Ch;
@@ -701,7 +701,7 @@ inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, siz
 }
 #endif // RAPIDJSON_NEON
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #if defined(_MSC_VER) || defined(__clang__)
 RAPIDJSON_DIAG_POP

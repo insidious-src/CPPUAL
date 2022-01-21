@@ -125,7 +125,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 
 #include "error/error.h" // ParseErrorCode, ParseResult
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ParseFlag
@@ -535,7 +535,7 @@ template<> inline void SkipWhitespace(EncodedInputStream<UTF8<>, MemoryStream>& 
     \tparam TargetEncoding Encoding of the parse output.
     \tparam StackAllocator Allocator type for stack.
 */
-template <typename SourceEncoding, typename TargetEncoding, typename StackAllocator = CrtAllocator>
+template <typename SourceEncoding, typename TargetEncoding, typename StackAllocator = cppual::Memory::MemoryResource>
 class GenericReader {
 public:
     typedef typename SourceEncoding::Ch Ch; //!< SourceEncoding character type
@@ -2230,7 +2230,7 @@ private:
 //! Reader with UTF8 encoding and default allocator.
 typedef GenericReader<UTF8<>, UTF8<> > Reader;
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #if defined(__clang__) || defined(_MSC_VER)
 RAPIDJSON_DIAG_POP

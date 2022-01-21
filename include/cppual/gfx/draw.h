@@ -65,7 +65,6 @@ enum class PolygonFace : byte
 
 // =========================================================
 
-struct  GFXVersion;
 struct  IDeviceContext;
 struct  IPixelSurface;
 struct  IDrawable2D;
@@ -79,21 +78,6 @@ typedef std::weak_ptr  <IDeviceContext> weak_context     ;
 typedef std::weak_ptr  <IPixelSurface>  weak_buffer      ;
 typedef std::weak_ptr  <IDrawable2D>    weak_drawable2d  ;
 typedef std::weak_ptr  <IDrawable3D>    weak_drawable3d  ;
-
-// =========================================================
-
-struct GFXVersion
-{
-    constexpr GFXVersion () noexcept
-    : GFXVersion (0, 0)
-    { }
-
-    constexpr GFXVersion (int _major, int _minor) noexcept
-    : major(_major), minor(_minor)
-    { }
-
-    int major, minor;
-};
 
 // =========================================================
 
@@ -228,7 +212,7 @@ struct IDeviceContext : public IResource
 
     virtual pointer       drawable () const = 0;
     virtual const_pointer readable () const = 0;
-    virtual GFXVersion    version  () const = 0;
+    virtual Version       version  () const = 0;
     virtual bool          assign   () = 0;
     virtual bool          use      (pointer, const_pointer) = 0;
     virtual void          finish   () = 0;
@@ -294,52 +278,7 @@ struct ContextFactory
     static shared_context create (string_type const& name);
 };
 
-// ====================================================
-
-inline bool operator  ! (GFXVersion const& gObj) noexcept
-{ return !gObj.major and !gObj.minor; }
-
-inline bool operator  < (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
-{ return (gObj1.major < gObj2.major or gObj1.minor < gObj2.minor); }
-
-inline bool operator  > (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
-{ return (gObj1.major > gObj2.major or gObj1.minor > gObj2.minor); }
-
-inline bool operator  < (GFXVersion const& gObj1, int uMajor) noexcept
-{ return gObj1.major  < uMajor; }
-
-inline bool operator  > (GFXVersion const& gObj1, int uMajor) noexcept
-{ return gObj1.major  > uMajor; }
-
-inline bool operator  == (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
-{ return (gObj1.major == gObj2.major and gObj1.minor == gObj2.minor); }
-
-inline bool operator  != (GFXVersion const& gObj1, GFXVersion const& gObj2) noexcept
-{ return (gObj1.major != gObj2.major or gObj1.minor != gObj2.minor); }
-
 } } // namespace Graphics
-
-namespace std {
-
-template <typename CharT, typename Traits>
-basic_ostream<CharT, Traits>&
-operator << (std::basic_ostream<CharT, Traits>& stream, cppual::Graphics::GFXVersion const& u)
-{ return stream << u.major << "." << u.minor; }
-
-template <>
-struct hash<cppual::Graphics::GFXVersion>
-{
-    size_t operator () (const cppual::Graphics::GFXVersion& version) const
-    {
-        // Compute individual hash values for major,
-        // and minor and combine them using XOR
-        // and bit shifting
-
-        return ((hash<int>()(version.major) ^ (hash<int>()(version.minor) << 1)) >> 1);
-    }
-};
-
-}
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_DRAW_H_

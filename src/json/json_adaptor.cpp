@@ -14,7 +14,7 @@ namespace cppual { namespace Json {
 // ======================================================================
 
 Parser::Parser(string_type const& file_path, Type type)
-: rapidjson::Document(),
+: Document(),
   _M_type (type)
 {
     std::ifstream file(file_path.c_str());
@@ -29,7 +29,7 @@ Parser::Parser(string_type const& file_path, Type type)
 
     file.seekg(std::ios::beg);
 
-    rapidjson::IStreamWrapper stream(file);
+    IStreamWrapper stream(file);
 
     ParseStream(stream);
 
@@ -51,7 +51,7 @@ Parser::Parser(string_type const& file_path, Type type)
 }
 
 Parser::Parser(std::istream& data, Type type)
-: rapidjson::Document(),
+: Document(),
   _M_type (type)
 {
     data.seekg(std::ios::beg, std::ios::end);
@@ -60,7 +60,7 @@ Parser::Parser(std::istream& data, Type type)
 
     data.seekg(std::ios::beg);
 
-    rapidjson::IStreamWrapper stream(data);
+    IStreamWrapper stream(data);
 
     ParseStream(stream);
 
@@ -94,7 +94,7 @@ bool Parser::createDocument(string_type const& file_path, Type type)
 
     file.seekg(std::ios::beg);
 
-    rapidjson::IStreamWrapper stream(file);
+    IStreamWrapper stream(file);
 
     ParseStream(stream);
 
@@ -123,8 +123,8 @@ bool Parser::save(std::ostream& stream)
 {
     aboutToSave();
 
-    rapidjson::OStreamWrapper wrapper(stream);
-    rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(wrapper);
+    OStreamWrapper wrapper(stream);
+    PrettyWriter<OStreamWrapper> writer(wrapper);
 
     return base_type::Accept(writer);
 }
@@ -355,7 +355,7 @@ void TemplateObject::assignFromParserObject()
         _M_parser->AddMember(value_type(_M_category.c_str(),
                                         static_cast<size_type>(_M_category.size()),
                                         _M_parser->GetAllocator()),
-                             value_type(rapidjson::kObjectType),
+                             value_type(kObjectType),
                              _M_parser->GetAllocator());
     }
 
@@ -375,7 +375,7 @@ void TemplateObject::assignFromParserArray()
                   << "exist. Appending new Object with index " << _M_parser->size()
                   << "." << std::endl;
 
-        _M_parser->PushBack(value_type(rapidjson::kObjectType), _M_parser->GetAllocator());
+        _M_parser->PushBack(value_type(kObjectType), _M_parser->GetAllocator());
 
         _M_index =  _M_parser->size() - 1;
     }
@@ -398,7 +398,7 @@ void TemplateObject::assignFromObject()
         parentObjectRef()->AddMember(value_type(_M_category.c_str(),
                                                 static_cast<size_type>(_M_category.size()),
                                                 _M_parser->GetAllocator()),
-                                     value_type(rapidjson::kObjectType),
+                                     value_type(kObjectType),
                                      _M_parser->GetAllocator());
     }
 
@@ -416,7 +416,7 @@ void TemplateObject::assignFromArray()
                   << "exist. Appending new Object with index " << parentArrayRef()->Size()
                   << "." << std::endl;
 
-        parentArrayRef()->PushBack(value_type(rapidjson::kObjectType),
+        parentArrayRef()->PushBack(value_type(kObjectType),
                                    _M_parser->GetAllocator());
 
         _M_index = parentArrayRef()->Size() - 1;
@@ -690,7 +690,7 @@ void TemplateArray::assignFromParserObject()
         _M_parser->AddMember(value_type(_M_category.c_str(),
                                         static_cast<size_type>(_M_category.size()),
                                         _M_parser->GetAllocator()),
-                             value_type(rapidjson::kArrayType),
+                             value_type(kArrayType),
                              _M_parser->GetAllocator());
     }
 
@@ -710,7 +710,7 @@ void TemplateArray::assignFromParserArray()
                   << "exist. Appending new Array with index " << _M_parser->size()
                   << "." << std::endl;
 
-        _M_parser->PushBack(value_type(rapidjson::kArrayType), _M_parser->GetAllocator());
+        _M_parser->PushBack(value_type(kArrayType), _M_parser->GetAllocator());
 
         _M_index = _M_parser->size() - 1;
     }
@@ -733,7 +733,7 @@ void TemplateArray::assignFromObject()
         parentObjectRef()->AddMember(value_type(_M_category.c_str(),
                                                 static_cast<size_type>(_M_category.size()),
                                                 _M_parser->GetAllocator()),
-                                     value_type(rapidjson::kArrayType),
+                                     value_type(kArrayType),
                                      _M_parser->GetAllocator());
     }
 
@@ -751,7 +751,7 @@ void TemplateArray::assignFromArray()
                   << "exist. Appending new Array with index " << parentArrayRef()->Size()
                   << "." << std::endl;
 
-        parentArrayRef()->PushBack(value_type(rapidjson::kArrayType),
+        parentArrayRef()->PushBack(value_type(kArrayType),
                                    _M_parser->GetAllocator());
 
         _M_index =  parentArrayRef()->Size() - 1;
@@ -780,7 +780,7 @@ void TemplateArray::append()
     assert(_M_ref != nullptr);
 
     aboutToAppend();
-    _M_ref->PushBack(value_type(rapidjson::kNullType), _M_parser->GetAllocator());
+    _M_ref->PushBack(value_type(kNullType), _M_parser->GetAllocator());
     appended();
 }
 
@@ -1023,7 +1023,7 @@ Reference<u16>::Reference(TemplateArray* owner,
 
 // ======================================================================
 
-Reference<int16>::Reference (TemplateObject*     owner,
+Reference<i16>::Reference (TemplateObject*     owner,
                              string_type  const& name,
                              value_type          default_val)
 : reference_base(owner, name, static_cast<default_type>(default_val))
@@ -1035,7 +1035,7 @@ Reference<int16>::Reference (TemplateObject*     owner,
     }
 }
 
-Reference<int16>::Reference (TemplateArray* owner,
+Reference<i16>::Reference (TemplateArray* owner,
                              size_type      idx,
                              value_type     default_val)
 : reference_base(owner, idx, static_cast<default_type>(default_val))
@@ -1127,7 +1127,7 @@ Reference<u64>::Reference (TemplateArray*    owner,
 
 // ======================================================================
 
-Reference<int64>::Reference (TemplateObject*    owner,
+Reference<i64>::Reference (TemplateObject*    owner,
                              string_type const& name,
                              value_type  const& default_val)
 : reference_base(owner, name, default_val)
@@ -1139,7 +1139,7 @@ Reference<int64>::Reference (TemplateObject*    owner,
     }
 }
 
-Reference<int64>::Reference (TemplateArray*    owner,
+Reference<i64>::Reference (TemplateArray*    owner,
                              size_type         idx,
                              value_type const& default_val)
 : reference_base(owner, idx, default_val)
@@ -1158,7 +1158,7 @@ Reference<float>::Reference (TemplateObject*    owner,
                              value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!ref()->IsFloat())
+    if (!ref()->IsNumber())
     {
         std::cerr << "json reference " << name << " value is not a float! type: "
                   << type() << std::endl;
@@ -1170,7 +1170,7 @@ Reference<float>::Reference (TemplateArray*    owner,
                              value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!ref()->IsFloat())
+    if (!ref()->IsNumber())
     {
         std::cerr << "json reference value with index " << idx << " is not a float! type: "
                   << type() << std::endl;
@@ -1184,7 +1184,7 @@ Reference<double>::Reference (TemplateObject*    owner,
                               value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
-    if (!ref()->IsDouble())
+    if (!ref()->IsNumber())
     {
         std::cerr << "json reference " << name << " value is not a double! type: "
                   << type() << std::endl;
@@ -1196,7 +1196,7 @@ Reference<double>::Reference (TemplateArray*    owner,
                               value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
-    if (!ref()->IsDouble())
+    if (!ref()->IsNumber())
     {
         std::cerr << "json reference value with index " << idx << " is not a double! type: "
                   << type() << std::endl;

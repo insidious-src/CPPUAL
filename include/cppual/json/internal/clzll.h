@@ -26,7 +26,7 @@
 #endif
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 namespace internal {
 
 inline uint32_t clzll(uint64_t x) {
@@ -66,6 +66,6 @@ inline uint32_t clzll(uint64_t x) {
 #define RAPIDJSON_CLZLL RAPIDJSON_NAMESPACE::internal::clzll
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_CLZLL_H_

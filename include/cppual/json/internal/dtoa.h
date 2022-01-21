@@ -23,7 +23,7 @@
 #include "diyfp.h"
 #include "ieee754.h"
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 namespace internal {
 
 #ifdef __GNUC__
@@ -240,6 +240,6 @@ RAPIDJSON_DIAG_POP
 #endif
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_DTOA_

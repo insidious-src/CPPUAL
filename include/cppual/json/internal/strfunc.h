@@ -18,7 +18,7 @@
 #include "../stream.h"
 #include <cwchar>
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 namespace internal {
 
 //! Custom strlen() which works on different character types.
@@ -64,6 +64,6 @@ bool CountStringCodePoint(const typename Encoding::Ch* s, SizeType length, SizeT
 }
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_INTERNAL_STRFUNC_H_

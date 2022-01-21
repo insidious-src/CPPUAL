@@ -29,7 +29,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++98-compat)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! Represents an in-memory output stream.
 /*!
@@ -37,7 +37,7 @@ RAPIDJSON_NAMESPACE_BEGIN
     \tparam Allocator type for allocating memory buffer.
     \note implements Stream concept
 */
-template <typename Encoding, typename Allocator = CrtAllocator>
+template <typename Encoding, typename Allocator = cppual::Memory::MemoryResource>
 class GenericStringBuffer {
 public:
     typedef typename Encoding::Ch Ch;
@@ -112,7 +112,7 @@ inline void PutN(GenericStringBuffer<UTF8<> >& stream, char c, size_t n) {
     std::memset(stream.stack_.Push<char>(n), c, n * sizeof(c));
 }
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #if defined(__clang__)
 RAPIDJSON_DIAG_POP

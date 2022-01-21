@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/memory/stack.h>
+#include <cppual/memory/stacked.h>
 #include <cppual/memory/mop.h>
 
 namespace cppual { namespace Memory {

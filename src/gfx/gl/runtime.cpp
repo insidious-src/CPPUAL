@@ -20,6 +20,7 @@
  */
 
 #include <cppual/gfx/gl/runtime.h>
+
 #include "gldef.h"
 
 #include <algorithm>
@@ -28,30 +29,30 @@
 #include <unordered_map>
 #include <stdexcept>
 
-namespace cppual { namespace Graphics { namespace GL { namespace Driver {
+namespace cppual { namespace Graphics { namespace GL {
 
 namespace {
 
-typedef std::unordered_map<GFXVersion, GFXVersion> version_map  ;
-typedef std::vector<string>                        string_vector;
-typedef std::size_t                                size_type    ;
+typedef std::unordered_map<Version, Version> version_map  ;
+typedef std::vector<string>                  string_vector;
+typedef std::size_t                          size_type    ;
 
 constexpr GLenum queryToGLEnum (StringQuery query) noexcept
 {
-    return query == StringQuery::Renderer ? Renderer :
-           query == StringQuery::Vendor   ? Vendor   :
-           query == StringQuery::Version  ? Version  : SLVersion;
+    return query == StringQuery::Renderer ? InfoRenderer :
+           query == StringQuery::Vendor   ? InfoVendor   :
+           query == StringQuery::Version  ? InfoVersion  : InfoSLVersion;
 }
 
-GFXVersion getGLVersion ()
+Version getGLVersion ()
 {
     GLint major = GLint ();
     GLint minor = GLint ();
 
-    ::glGetIntegerv (MajorVersion, &major);
-    ::glGetIntegerv (MinorVersion, &minor);
+    ::glGetIntegerv (InfoMajorVersion, &major);
+    ::glGetIntegerv (InfoMinorVersion, &minor);
 
-    return GFXVersion { major, minor };
+    return Version { major, minor };
 }
 
 version_map getSLVersions ()
@@ -59,18 +60,18 @@ version_map getSLVersions ()
     version_map slVersions;
 
     slVersions.reserve(12);
-    slVersions.emplace(GFXVersion(2, 0), GFXVersion(1, 10));
-    slVersions.emplace(GFXVersion(2, 1), GFXVersion(1, 20));
-    slVersions.emplace(GFXVersion(3, 0), GFXVersion(1, 30));
-    slVersions.emplace(GFXVersion(3, 1), GFXVersion(1, 40));
-    slVersions.emplace(GFXVersion(3, 2), GFXVersion(1, 50));
-    slVersions.emplace(GFXVersion(3, 3), GFXVersion(3, 30));
-    slVersions.emplace(GFXVersion(4, 0), GFXVersion(4, 00));
-    slVersions.emplace(GFXVersion(4, 1), GFXVersion(4, 10));
-    slVersions.emplace(GFXVersion(4, 2), GFXVersion(4, 20));
-    slVersions.emplace(GFXVersion(4, 3), GFXVersion(4, 30));
-    slVersions.emplace(GFXVersion(4, 4), GFXVersion(4, 40));
-    slVersions.emplace(GFXVersion(4, 5), GFXVersion(4, 50));
+    slVersions.emplace(Version(2, 0), Version(1, 10));
+    slVersions.emplace(Version(2, 1), Version(1, 20));
+    slVersions.emplace(Version(3, 0), Version(1, 30));
+    slVersions.emplace(Version(3, 1), Version(1, 40));
+    slVersions.emplace(Version(3, 2), Version(1, 50));
+    slVersions.emplace(Version(3, 3), Version(3, 30));
+    slVersions.emplace(Version(4, 0), Version(4, 00));
+    slVersions.emplace(Version(4, 1), Version(4, 10));
+    slVersions.emplace(Version(4, 2), Version(4, 20));
+    slVersions.emplace(Version(4, 3), Version(4, 30));
+    slVersions.emplace(Version(4, 4), Version(4, 40));
+    slVersions.emplace(Version(4, 5), Version(4, 50));
 
     return slVersions;
 }
@@ -83,10 +84,12 @@ string_vector getGLExtensions ()
 
     string_vector extensions;
 
+    if (n <= 0) return extensions;
+
     extensions.reserve(static_cast<size_type>(n));
 
     for (auto i = 0U; i < static_cast<GLuint> (n); ++i)
-        extensions.push_back (reinterpret_cast<cchar*> (::glGetStringi (Extensions, i)));
+        extensions.push_back (reinterpret_cast<cchar*> (::glGetStringi (InfoExtensions, i)));
 
     return extensions;
 }
@@ -107,7 +110,9 @@ string_vector getGLLabels ()
 
 } // anonymous namespace
 
-GFXVersion version ()
+// ====================================================
+
+Version Platform::version ()
 {
     if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
@@ -116,7 +121,7 @@ GFXVersion version ()
     return version;
 }
 
-GFXVersion slVersion ()
+Version Platform::slVersion ()
 {
     if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
@@ -125,7 +130,7 @@ GFXVersion slVersion ()
     return versions[version()];
 }
 
-string label (StringQuery query)
+string Platform::label (StringQuery query)
 {
     if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
@@ -135,7 +140,7 @@ string label (StringQuery query)
     return labels[static_cast<size_type>(query)];
 }
 
-bool isExtensionSupported (string const& name)
+bool Platform::isExtensionSupported (string const& name)
 {
     if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
@@ -146,7 +151,7 @@ bool isExtensionSupported (string const& name)
     return it != extensions.end();
 }
 
-void drawTestTriagle(float fAxis)
+void Platform::drawTestTriagle(float fAxis)
 {
     ::glClearColor (255.0f, 255.0f, 255.0f, 255.0f);
     ::glClear (GL_COLOR_BUFFER_BIT);
@@ -168,4 +173,4 @@ void drawTestTriagle(float fAxis)
     ::glPopMatrix ();
 }
 
-} } } } // namespace Driver
+} } } // namespace GL

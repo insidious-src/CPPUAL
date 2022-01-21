@@ -166,6 +166,32 @@ struct member_function_to_static <T(Object::*)(Args...)>
 
 // ====================================================
 
+template <typename...>
+struct are_any_references : std::false_type
+{ };
+
+template <typename T, typename... TT>
+struct are_any_references<T, TT...>
+        : std::integral_constant<bool, std::is_reference<typename std::remove_cv<T>::type>{} ||
+                                                         are_any_references<T, TT...>{}>
+{ };
+
+// ====================================================
+
+template <typename...>
+struct are_any_objects : std::false_type
+{ };
+
+template <typename T, typename... TT>
+struct are_any_objects<T, TT...>
+        : std::integral_constant<bool, (std::is_class<typename std::remove_pointer<T>::type>{} &&
+                                       !std::is_pointer<T>{}) ||
+                                        are_any_objects<T, TT...>{}
+                                 >
+{ };
+
+// ====================================================
+
 template <typename T, typename = typename std::enable_if<is_char<T>::value>::type>
 constexpr unsigned const_hash(T const* input)
 {

@@ -32,7 +32,7 @@
 
 namespace cppual { namespace Compute {
 
-class Program : public Object <ObjectType::CommandSequence>
+class Program : public Object <ResourceType::Program>
 {
 public:
     typedef std::size_t size_type;

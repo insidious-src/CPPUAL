@@ -579,8 +579,8 @@ public:
         case TKeyRelease:
             return Input::KeyReleaseEvent ({ keyCode(get ()->key.detail), 0 });
         case TExpose:
-            return Input::PaintEvent (Rect (static_cast<int16> (get ()->paint.x),
-                                            static_cast<int16> (get ()->paint.y),
+            return Input::PaintEvent (Rect (static_cast<i16> (get ()->paint.x),
+                                            static_cast<i16> (get ()->paint.y),
                                             get ()->paint.width,
                                             get ()->paint.height));
         case TEnter:
@@ -688,8 +688,8 @@ public:
             break;
         case Expose:
             EventQueue::events ().winPaint (window (),
-            { Rect (static_cast<int16> (get ()->paint.x),
-              static_cast<int16> (get ()->paint.y),
+            { Rect (static_cast<i16> (get ()->paint.x),
+              static_cast<i16> (get ()->paint.y),
               get ()->paint.width,
               get ()->paint.height) });
             break;

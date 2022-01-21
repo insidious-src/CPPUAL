@@ -94,7 +94,7 @@ public:
         Signal<void(window_type, event_type::TouchData)>    touchPress;
         Signal<void(window_type, event_type::TouchData)>    touchRelease;
         Signal<void(window_type, event_type::TouchData)>    touchMove;
-        Signal<void(window_type, int32)>                    sysMessage;
+        Signal<void(window_type, i32)>                    sysMessage;
         Signal<void(window_type, event_type::PaintData)>    winPaint;
         Signal<void(window_type, point2u)>                  winSize;
         Signal<void(window_type, bool)>                     winFocus;

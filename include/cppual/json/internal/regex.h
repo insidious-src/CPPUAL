@@ -37,7 +37,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 #define RAPIDJSON_REGEX_VERBOSE 0
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 namespace internal {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ class GenericRegexSearch;
         Cox, Russ. "Regular Expression Matching Can Be Simple And Fast (but is slow in Java, Perl, PHP, Python, Ruby,...).", 
         https://swtch.com/~rsc/regexp/regexp1.html 
 */
-template <typename Encoding, typename Allocator = CrtAllocator>
+template <typename Encoding, typename Allocator = cppual::Memory::MemoryResource>
 class GenericRegex {
 public:
     typedef Encoding EncodingType;
@@ -602,7 +602,7 @@ private:
     bool anchorEnd_;
 };
 
-template <typename RegexType, typename Allocator = CrtAllocator>
+template <typename RegexType, typename Allocator = cppual::Memory::MemoryResource>
 class GenericRegexSearch {
 public:
     typedef typename RegexType::EncodingType Encoding;
@@ -726,7 +726,7 @@ typedef GenericRegex<UTF8<> > Regex;
 typedef GenericRegexSearch<Regex> RegexSearch;
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #ifdef __GNUC__
 RAPIDJSON_DIAG_POP

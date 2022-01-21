@@ -32,7 +32,7 @@ RAPIDJSON_DIAG_OFF(6334)
 #endif
 
 //@cond RAPIDJSON_INTERNAL
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 namespace internal {
 
 // Helper to wrap/convert arbitrary types to void, useful for arbitrary type matching
@@ -172,7 +172,7 @@ template <typename T> struct RemoveSfinaeTag<SfinaeTag&(*)(T)> { typedef T Type;
          RAPIDJSON_REMOVEFPTR_(returntype)>::Type
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 //@endcond
 
 #if defined(_MSC_VER) && !defined(__clang__)

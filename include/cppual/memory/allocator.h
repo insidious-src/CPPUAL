@@ -25,9 +25,9 @@
 
 #include <cppual/types.h>
 
-#include <limits>
-#include <cassert>
 #include <memory>
+#include <limits>
+#include <algorithm>
 
 namespace cppual { namespace Memory {
 
@@ -37,22 +37,19 @@ namespace cppual { namespace Memory {
 
 class MemoryResource
 {
-protected:
-    static constexpr std::size_t max_align = alignof(std::max_align_t);
-
 public:
-    typedef MemoryResource            base_type             ;
-    typedef base_type*                base_pointer          ;
-    typedef base_type&                base_reference        ;
-    typedef base_type const&          base_const_reference  ;
-    typedef base_type*&               base_pointer_reference;
-    typedef base_type**               base_double_pointer   ;
-    typedef std::size_t               align_type            ;
-    typedef std::size_t               size_type             ;
-    typedef u8*                       math_pointer          ;
-    typedef void*                     pointer               ;
-    typedef cvoid*                    const_pointer         ;
-    typedef std::ptrdiff_t            difference_type       ;
+    typedef MemoryResource   base_type             ;
+    typedef base_type*       base_pointer          ;
+    typedef base_type&       base_reference        ;
+    typedef base_type const& base_const_reference  ;
+    typedef base_type*&      base_pointer_reference;
+    typedef base_type**      base_double_pointer   ;
+    typedef std::size_t      align_type            ;
+    typedef std::size_t      size_type             ;
+    typedef byte*            math_pointer          ;
+    typedef void*            pointer               ;
+    typedef cvoid*           const_pointer         ;
+    typedef std::ptrdiff_t   difference_type       ;
 
     virtual ~MemoryResource() { }
 
@@ -72,67 +69,44 @@ public:
     void* allocate(size_type bytes, size_type alignment = max_align)
     { return do_allocate(bytes, alignment); }
 
-    void deallocate(void* p, size_type bytes, size_type alignment = max_align)
+    void* reallocate(void* p, size_type old_size, size_type new_size, size_type alignment = max_align)
+    { return do_reallocate(p, old_size, new_size, alignment); }
+
+    void deallocate(void* p, size_type bytes = size_type(), size_type alignment = max_align)
     { do_deallocate(p, bytes, alignment); }
 
-    bool is_equal(MemoryResource const& other) const noexcept
+    bool is_equal(MemoryResource const& other) const
     { return do_is_equal(other); }
 
 protected:
-    virtual void* do_allocate(size_type bytes, size_type alignment) = 0;
-    virtual void  do_deallocate(void* p, size_type bytes, size_type alignment) = 0;
-    virtual bool  do_is_equal(base_type const& other) const noexcept = 0;
+    virtual void* do_allocate(size_type bytes, align_type alignment) = 0;
+    virtual void  do_deallocate(void* p, size_type bytes, align_type alignment) = 0;
+    virtual bool  do_is_equal(base_type const& other) const = 0;
 
-private:
-    static base_double_pointer default_resource_pointer() noexcept
+    virtual void* do_reallocate(void* p, size_type old_size, size_type new_size, align_type alignment)
     {
-        static base_pointer def_ptr = nullptr;
-        return &def_ptr;
+        auto old_p = static_cast<math_pointer>(p);
+        auto new_p = static_cast<math_pointer>
+                (allocate(new_size > old_size ? new_size : old_size, alignment));
+
+        if (p)
+        {
+            std::copy(old_p, old_p + (old_size <= new_size ? old_size : new_size), new_p);
+            deallocate(p, old_size, alignment);
+        }
+
+        return new_p;
     }
 
-    friend base_pointer get_default_resource() noexcept;
-    friend void         set_default_resource(base_reference) noexcept;
-};
-
-// =========================================================
-
-class NewDeleteResource final : public MemoryResource
-{
-public:
-    using base_type::base_type;
-    using base_type::operator=;
-
-    bool is_thread_safe () const noexcept
-    {
-        return true;
-    }
-
-private:
-    void* do_allocate(size_type bytes, size_type alignment)
-    {
-        if (bytes > this->max_size()) throw std::bad_alloc();
-
-        if (alignment > max_align) return ::operator new(bytes, std::align_val_t(alignment));
-        return ::operator new(bytes);
-    }
-
-    void do_deallocate(void* p, size_type /*bytes*/, size_type alignment)
-    {
-        if (alignment > max_align) ::operator delete(p, std::align_val_t(alignment));
-        else ::operator delete(p);
-    }
-
-    bool do_is_equal(base_type const& other) const noexcept
-    {
-        return this == &other;
-    }
+protected:
+    static constexpr align_type max_align = alignof(std::max_align_t);
 };
 
 // =========================================================
 
 inline bool
 operator == (MemoryResource const& a, MemoryResource const& b) noexcept
-{ return &a == &b || a.is_equal(b); }
+{ return a.is_equal(b); }
 
 inline bool
 operator != (MemoryResource const& a, MemoryResource const& b) noexcept
@@ -140,24 +114,11 @@ operator != (MemoryResource const& a, MemoryResource const& b) noexcept
 
 // =========================================================
 
-inline MemoryResource* new_delete_resource() noexcept
-{
-    static NewDeleteResource new_delete_resource;
-    return &new_delete_resource;
-}
+MemoryResource* new_delete_resource () noexcept;
+MemoryResource* malloc_resource     () noexcept;
+MemoryResource* get_default_resource() noexcept;
 
-inline MemoryResource* get_default_resource() noexcept
-{
-    static MemoryResource::base_double_pointer def_resource_ptr =
-            &(*MemoryResource::default_resource_pointer() = new_delete_resource());
-    return *def_resource_ptr;
-}
-
-inline void set_default_resource(MemoryResource& res) noexcept
-{
-    if (*MemoryResource::default_resource_pointer() == nullptr) get_default_resource();
-    *MemoryResource::default_resource_pointer() = &res;
-}
+void set_default_resource(MemoryResource& resource) noexcept;
 
 // =========================================================
 // MemoryResource Concept
@@ -221,6 +182,13 @@ public:
                                                             alignof(value_type)));
     }
 
+    pointer reallocate (pointer p, size_type old_n, size_type n)
+    {
+        return static_cast<pointer> (resource ()->reallocate (p, old_n * sizeof(value_type),
+                                                              sizeof (value_type) * n,
+                                                              alignof(value_type)));
+    }
+
     size_type max_size () const noexcept
     { return resource ()->max_size () / sizeof (T); }
 
@@ -237,26 +205,102 @@ public:
     static void destroy (pointer p)
     { p->~value_type (); }
 
-    Allocator select_on_container_copy_construction() const
+    constexpr Allocator select_on_container_copy_construction() const
     { return Allocator (); }
 
     constexpr resource_pointer resource () const noexcept
     { return _M_pRc; }
 
-    constexpr explicit Allocator (resource_type& rc) noexcept
+    constexpr explicit Allocator (resource_type& rc)
     : _M_pRc (&rc)
     { }
 
-    inline Allocator () noexcept
+    constexpr Allocator () noexcept
     : _M_pRc (get_default_resource())
     { }
 
-    template <class U>
+    template <typename U,
+              typename M,
+              typename = typename std::enable_if<std::is_same<MemoryResource, R>::value>::type
+              >
     constexpr
     explicit
-    Allocator (Allocator<U, resource_type> const& ator) noexcept
+    Allocator (Allocator<U, M> const& ator) noexcept
     : _M_pRc (ator._M_pRc)
     { }
+
+    template <typename U,
+              typename M,
+              typename = typename std::enable_if<std::is_same<MemoryResource, R>::value>::type
+              >
+    inline
+    explicit
+    Allocator (Allocator<U, M>&& ator) noexcept
+    : _M_pRc (ator._M_pRc)
+    {
+        ator._M_pRc = nullptr;
+    }
+
+    template <typename U,
+              typename M,
+              typename = typename std::enable_if<std::is_same<MemoryResource, R>::value>::type
+              >
+    inline
+    Allocator& operator = (Allocator<U, M> const& ator) noexcept
+    {
+        _M_pRc = ator._M_pRc;
+        return *this;
+    }
+
+    template <typename U,
+              typename M,
+              typename = typename std::enable_if<std::is_same<MemoryResource, R>::value>::type
+              >
+    inline
+    Allocator& operator = (Allocator<U, M>&& ator) noexcept
+    {
+        _M_pRc = ator._M_pRc;
+        ator._M_pRc = nullptr;
+        return *this;
+    }
+
+    template <typename U,
+              typename = typename std::enable_if<std::is_same<MemoryResource, R>::value>::type
+              >
+    constexpr
+    explicit
+    Allocator (std::allocator<U> const&) noexcept
+    : _M_pRc (new_delete_resource())
+    { }
+
+    template <typename U,
+              typename = typename std::enable_if<std::is_same<MemoryResource, R>::value>::type
+              >
+    constexpr
+    explicit
+    Allocator (std::allocator<U>&&) noexcept
+    : _M_pRc (new_delete_resource())
+    { }
+
+    template <typename U,
+              typename = typename std::enable_if<std::is_same<MemoryResource, R>::value>::type
+              >
+    inline
+    Allocator& operator = (std::allocator<U> const&) noexcept
+    {
+        _M_pRc = new_delete_resource();
+        return *this;
+    }
+
+    template <typename U,
+              typename = typename std::enable_if<std::is_same<MemoryResource, R>::value>::type
+              >
+    inline
+    Allocator& operator = (std::allocator<U>&&) noexcept
+    {
+        _M_pRc = new_delete_resource();
+        return *this;
+    }
 
     template <typename, typename>
     friend class Allocator;
@@ -266,14 +310,52 @@ private:
 };
 
 // =========================================================
+// Allocator Comparisons
+// =========================================================
 
-template <class T1, class T2>
-bool operator == (Allocator<T1> const& lhs, Allocator<T2> const& rhs) noexcept
-{ return *lhs.resource() == *rhs.resource(); }
+template <typename T1, typename T2>
+inline bool operator == (Allocator<T1> const& lhs, Allocator<T2> const& rhs) noexcept
+{
+    return lhs.resource() == rhs.resource() ||
+          (lhs.resource() && rhs.resource() && *lhs.resource() == *rhs.resource());
+}
 
-template <class T1, class T2>
-bool operator != (Allocator<T1> const& lhs, Allocator<T2> const& rhs) noexcept
-{ return *lhs.resource() != *rhs.resource(); }
+template <typename T1, typename T2>
+inline bool operator != (Allocator<T1> const& lhs, Allocator<T2> const& rhs) noexcept
+{ return !(lhs == rhs); }
+
+template <typename T, typename R>
+inline bool operator == (Allocator<T, R> const& lhs, Allocator<T, R> const& rhs) noexcept
+{
+    return lhs.resource() == rhs.resource() ||
+          (lhs.resource() && rhs.resource() && *lhs.resource() == *rhs.resource());
+}
+
+template <typename T, typename R>
+inline bool operator != (Allocator<T, R> const& lhs, Allocator<T, R> const& rhs) noexcept
+{ return !(lhs == rhs); }
+
+template <typename T1, typename T2, typename R2>
+inline bool operator == (Allocator<T1> const& lhs, Allocator<T2, R2> const& rhs) noexcept
+{
+    return lhs.resource() == rhs.resource() ||
+          (lhs.resource() && rhs.resource() && *lhs.resource() == *rhs.resource());
+}
+
+template <typename T1, typename T2, typename R2>
+inline bool operator != (Allocator<T1> const& lhs, Allocator<T2, R2> const& rhs) noexcept
+{ return !(lhs == rhs); }
+
+template <typename T1, typename R1, typename T2>
+inline bool operator == (Allocator<T1, R1> const& lhs, Allocator<T2> const& rhs) noexcept
+{
+    return lhs.resource() == rhs.resource() ||
+          (lhs.resource() && rhs.resource() && *lhs.resource() == *rhs.resource());
+}
+
+template <typename T1, typename R1, typename T2>
+inline bool operator != (Allocator<T1, R1> const& lhs, Allocator<T2> const& rhs) noexcept
+{ return !(lhs == rhs); }
 
 // =========================================================
 // Allocator Concept
@@ -300,53 +382,36 @@ using AllocatorType = typename
 std::enable_if<is_allocator<T>::value, T>::type;
 
 // =========================================================
-// Generic Declarations
+
+template <typename T, typename... Args>
+inline std::shared_ptr<T> allocate_shared (MemoryResource* rc, Args&&... args)
+{
+    return std::allocate_shared<T> (rc == nullptr ? Allocator<T>() : Allocator<T>(*rc),
+                                    std::forward<Args> (args)...);
+}
+
+template <typename T, typename U, typename... Args>
+inline std::shared_ptr<U> allocate_shared (MemoryResource* rc, Args&&... args)
+{
+    return std::static_pointer_cast<U>
+            (std::allocate_shared<T> (rc == nullptr ? Allocator<T>() : Allocator<T>(*rc),
+                                      std::forward<Args> (args)...));
+}
+
+template <typename T, typename... Args>
+inline std::shared_ptr<T> allocate_shared (Allocator<T> const& ator, Args&&... args)
+{
+    return std::allocate_shared<T> (ator, std::forward<Args> (args)...);
+}
+
+template <typename T, typename U, typename... Args>
+inline std::shared_ptr<U> allocate_shared (Allocator<T> const& ator, Args&&... args)
+{
+    return std::static_pointer_cast<U>
+            (std::allocate_shared<T> (ator, std::forward<Args> (args)...));
+}
+
 // =========================================================
-
-template <typename T>
-using PolymorphicAllocator = Allocator<T, MemoryResource>;
-
-// =========================================================
-// Allocator Comparisons
-// =========================================================
-
-template <class T, class U, class A>
-inline
-bool
-operator == (Allocator<T, A> const& x,
-             Allocator<U, A> const& y) noexcept
-{ return x.resource () == y.resource (); }
-
-template <class T, class U, class A>
-inline
-bool
-operator != (Allocator<T, A> const& x,
-             Allocator<U, A> const& y) noexcept
-{ return !(x == y); }
-
-template <class T, class A, class RAllocator>
-constexpr
-bool
-operator != (Allocator<T, A> const&, RAllocator const&) noexcept
-{ return true; }
-
-template <class T, class A, class RAllocator>
-constexpr
-bool
-operator == (Allocator<T, A> const&, RAllocator const&) noexcept
-{ return false; }
-
-template <class T, class U>
-constexpr
-bool
-operator != (Allocator<T, void> const&, std::allocator<U> const&) noexcept
-{ return false; }
-
-template <class T, class U>
-constexpr
-bool
-operator == (Allocator<T, void> const&, std::allocator<U> const&) noexcept
-{ return true; }
 
 } } // namespace Memory
 

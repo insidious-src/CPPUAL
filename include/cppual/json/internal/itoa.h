@@ -17,7 +17,7 @@
 
 #include "../rapidjson.h"
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 namespace internal {
 
 inline const char* GetDigitsLut() {
@@ -303,6 +303,6 @@ inline char* i64toa(int64_t value, char* buffer) {
 }
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_ITOA_

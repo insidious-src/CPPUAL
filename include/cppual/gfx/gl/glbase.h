@@ -23,9 +23,9 @@
 #define CPPUAL_GFX_GL_BASE_H_
 #ifdef __cplusplus
 
-#include <cstddef>
-#include <cppual/decl.h>
 #include <cppual/resource.h>
+
+#include <cstddef>
 
 namespace cppual { namespace Graphics { namespace GL {
 
@@ -38,28 +38,9 @@ class FrameBuffer;
 class VertexBuffer;
 class VertexArray;
 
-enum class ResourceType : unsigned char
-{
-    Null = 0,
-    Device,
-    Image,
-    Font,
-    Macro,
-    Texture,
-    Shader,
-    Program,
-    Query,
-    Surface,
-    Buffer,
-    Pixmap,
-    Colormap,
-    Cursor,
-    Context
-};
-
 // ====================================================
 
-class Object : public Resource < void, uint >
+class Object : public Resource <void, uint>
 {
 public:
     typedef std::ptrdiff_t ptrdiff;

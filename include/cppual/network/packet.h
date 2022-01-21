@@ -46,11 +46,11 @@ public:
     void append (cvoid* data, size_type size_in_bytes) noexcept;
 
     Packet& operator >> (bool&)      noexcept;
-    Packet& operator >> (int8&)      noexcept;
+    Packet& operator >> (i8&)      noexcept;
     Packet& operator >> (u8&)        noexcept;
-    Packet& operator >> (int16&)     noexcept;
+    Packet& operator >> (i16&)     noexcept;
     Packet& operator >> (u16&)       noexcept;
-    Packet& operator >> (int32&)     noexcept;
+    Packet& operator >> (i32&)     noexcept;
     Packet& operator >> (u32&)       noexcept;
     Packet& operator >> (float&)     noexcept;
     Packet& operator >> (double&)    noexcept;
@@ -65,11 +65,11 @@ public:
     Packet& operator >> (u32string&) noexcept;
 
     Packet& operator << (bool)             noexcept;
-    Packet& operator << (int8)             noexcept;
+    Packet& operator << (i8)             noexcept;
     Packet& operator << (u8)               noexcept;
-    Packet& operator << (int16)            noexcept;
+    Packet& operator << (i16)            noexcept;
     Packet& operator << (u16)              noexcept;
-    Packet& operator << (int32)            noexcept;
+    Packet& operator << (i32)            noexcept;
     Packet& operator << (u32)              noexcept;
     Packet& operator << (float)            noexcept;
     Packet& operator << (double)           noexcept;

@@ -32,18 +32,18 @@ namespace cppual { namespace Memory {
 class MonotonicResource final : public MemoryResource, NonCopyable
 {
 public:
-    // local memory
+    /// local memory
     MonotonicResource (size_type  blk_count,
                        size_type  blk_size,
                        align_type blk_align);
 
-    // nested allocators
+    /// nested allocators
     MonotonicResource (MemoryResource& allocator,
                        size_type   blk_count,
                        size_type   blk_size,
                        align_type  blk_align);
 
-    // shared memory
+    /// shared memory
     MonotonicResource (SharedObject& shared_obj,
                        size_type     blk_count,
                        size_type     blk_size,

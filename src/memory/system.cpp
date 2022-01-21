@@ -22,45 +22,89 @@
 #include <cppual/memory/system.h>
 #include <cppual/memory/allocator.h>
 
-#include <cstdlib>
-#include <assert.h>
-
-#ifdef OS_STD_UNIX
-#    include <unistd.h>
-#    include <sys/mman.h>
-#    include <sys/resource.h>
-//#    include <sys/types.h>
-//#    include <sys/param.h>
-#    ifdef OS_GNU_LINUX
-#        include <fcntl.h>
-#        include <stdio.h>
-#    elif defined (OS_MACX)
-#        include <mach/mach.h>
-#    elif defined (OS_AIX) or defined (OS_SOLARIS)
-#        include <fcntl.h>
-#        include <procfs.h>
-#    elif defined (OS_BSD)
-#        include <sys/sysctl.h>
-#    endif
+#ifdef OS_GNU_LINUX
+#   include "os/linux.h"
+#elif defined (OS_MACX)
+#   include "os/mac.h"
+#elif defined (OS_AIX)
+#   include "os/aix.h"
+#elif defined (OS_SOLARIS)
+#   include "os/solaris.h"
+#elif defined (OS_BSD)
+#   include "os/bsd.h"
 #elif defined (OS_WINDOWS)
-#    include <windows.h>
-#    include <psapi.h>
+#   include "os/win.h"
 #endif
 
 #include <new>
 #include <atomic>
-#include <cstring>
 #include <memory>
+
+#include <cstdlib>
+#include <cstring>
+#include <assert.h>
 
 namespace { // internal unit optimization
 
-static void initializer ()
-{
-    static auto ret = cppual::Memory::Model::initialize ();
-    UNUSED(ret);
+using namespace cppual::Memory;
 
-    cppual::Memory::Model::thread_initialize ();
+inline static void initializer ()
+{
+    static auto ret = Model::initialize ();
+
+    UNUSED(ret);
+    Model::thread_initialize ();
 }
+
+// =========================================================
+
+class SystemResource final : public MemoryResource
+{
+public:
+    using base_type::base_type;
+    using base_type::operator=;
+
+    bool is_thread_safe () const noexcept
+    {
+        return true;
+    }
+
+    size_type max_size () const noexcept
+    {
+        auto const max = maxSize ();
+        return max ? max : MemoryResource::max_size();
+    }
+
+    size_type capacity () const noexcept
+    {
+        auto const cap = size ();
+        return cap ? cap : MemoryResource::capacity();
+    }
+
+private:
+    void* do_allocate(size_type bytes, size_type /*alignment*/)
+    {
+        if (!Model::is_thread_initialized ()) initializer ();
+        return Model::allocate (bytes);
+    }
+
+    void* do_reallocate(void* p, size_type old_size, size_type new_size, size_type /*alignment*/)
+    {
+        if (!Model::is_thread_initialized ()) initializer ();
+        return p != nullptr ? Model::reallocate(p, old_size, new_size) : Model::allocate(new_size);
+    }
+
+    void do_deallocate(void* p, size_type /*bytes*/, size_type /*alignment*/)
+    {
+        if (!Model::is_thread_initialized ()) initializer ();
+        Model::deallocate (p);
+    }
+
+    bool do_is_equal(base_type const& other) const noexcept
+    {
+        return this == &other;
+    }
+};
 
 } // anonymous namespace
 
@@ -89,8 +133,8 @@ operator new [] (std::size_t size)
 
 void operator delete [] (void* ptr) noexcept
 {
-    if (cppual::Memory::Model::is_thread_initialized ())
-        cppual::Memory::Model::free (ptr);
+    if (!cppual::Memory::Model::is_thread_initialized ()) initializer ();
+    cppual::Memory::Model::free (ptr);
 }
 
 void* operator new (std::size_t size, const std::nothrow_t&) noexcept
@@ -137,36 +181,6 @@ namespace cppual { namespace Memory {
 
 // =========================================================
 
-class SystemResource final : public MemoryResource
-{
-public:
-    using base_type::base_type;
-    using base_type::operator=;
-
-    bool is_thread_safe () const noexcept { return true      ; }
-    size_type  max_size () const          { return maxSize (); }
-    size_type  capacity () const          { return size    (); }
-
-private:
-    void* do_allocate(size_type bytes, size_type /*alignment*/)
-    {
-        if (!Model::is_thread_initialized ()) initializer ();
-        return Model::allocate (bytes);
-    }
-
-    void do_deallocate(void* p, size_type /*bytes*/, size_type /*alignment*/)
-    {
-        if (Model::is_thread_initialized ()) Model::deallocate (p);
-    }
-
-    bool do_is_equal(base_type const& other) const noexcept
-    {
-        return this == &other;
-    }
-};
-
-// =========================================================
-
 MemoryResource* system_resource ()
 {
     static SystemResource rc;
@@ -175,7 +189,6 @@ MemoryResource* system_resource ()
 
 // =========================================================
 
-// Get size of the total physical memory installed
 std::size_t size ()
 {
 #if defined(OS_WINDOWS) and (defined(__CYGWIN__) or defined(__CYGWIN32__))
@@ -210,7 +223,7 @@ std::size_t size ()
 #elif defined (HW_PHYSMEM64)
     mib[1] = HW_PHYSMEM64;          /* NetBSD, OpenBSD. --------- */
 #endif
-    int64 size = 0;               /* 64-bit */
+    i64 size = 0;               /* 64-bit */
     std::size_t len = sizeof (size);
     if (sysctl (mib, 2, &size, &len, nullptr, 0) == 0)
         return static_cast<std::size_t> (size);
@@ -254,19 +267,17 @@ std::size_t size ()
 
 // =========================================================
 
-// Get usable memory size
 std::size_t maxSize ()
 {
-#    ifdef OS_GNU_LINUX
-#    elif defined (OS_WINDOWS)
-#    endif
+#   ifdef OS_GNU_LINUX
+#   elif defined (OS_WINDOWS)
+#   endif
 
-    return 0;
+    return size();
 }
 
 // =========================================================
 
-// Get size the current process allocated memory
 std::size_t workingSize ()
 {
 #if defined (OS_WINDOWS)
@@ -448,9 +459,9 @@ std::size_t workingSize ()
 #define SPAN_HEADER_SIZE          48 // Not exactly right, but keeps memory 16-aligned
 
 #if defined (ARCH_64BITS)
-typedef int64 offset_t;
+typedef i64 offset_t;
 #else
-typedef int32 offset_t;
+typedef i32 offset_t;
 #endif
 typedef u32 count_t;
 
@@ -505,7 +516,7 @@ union SpanData
 struct Span
 {
     //!	Heap ID
-    std::atomic<int32> heap_id;
+    std::atomic<i32> heap_id;
     //! Size class
     count_t  size_class;
     //! Span data
@@ -546,7 +557,7 @@ struct Heap
     //! Allocation counters
     SpanCounter  span_counter;
     //! Heap ID
-    int32 id;
+    i32 id;
     //! List of free spans for each large class count (single linked list)
     Span*        large_cache[LARGE_CLASS_COUNT];
     //! Allocation counters for large blocks
@@ -588,7 +599,7 @@ struct Segment
 static SizeClass _memory_size_class[SIZE_CLASS_COUNT];
 
 //! Heap ID counter
-static std::atomic<int32> _memory_heap_id;
+static std::atomic<i32> _memory_heap_id;
 
 //! Heaps array lock
 static std::atomic_flag _heaps_lock = ATOMIC_FLAG_INIT;
@@ -597,7 +608,7 @@ static std::atomic_flag _heaps_lock = ATOMIC_FLAG_INIT;
 static std::atomic<void*> _segments_head;
 
 //! Segment RW lock
-static std::atomic<int32> _segments_rw_lock;
+static std::atomic<i32> _segments_rw_lock;
 
 //! Global span cache
 static std::atomic<void*> _memory_span_cache;
@@ -622,11 +633,11 @@ static u32 _memory_max_allocation_large[LARGE_CLASS_COUNT];
 
 #if ENABLE_STATISTICS
 //! Total number of mapped memory pages
-static std::atomic<int32> _mapped_pages;
+static std::atomic<i32> _mapped_pages;
 //! Running counter of total number of mapped memory pages since start
-static std::atomic<int32> _mapped_total;
+static std::atomic<i32> _mapped_total;
 //! Running counter of total number of unmapped memory pages since start
-static std::atomic<int32> _unmapped_total;
+static std::atomic<i32> _unmapped_total;
 #endif
 
 static Span*
@@ -650,7 +661,7 @@ Heap* _get_heap_ptr(void* heap) {
 
 //! Lookup a memory heap from heap ID
 static Heap*
-_memory_heap_lookup(int32 id)
+_memory_heap_lookup(i32 id)
 {
     return _get_heap_ptr(_memory_heaps[id].load());
 }
@@ -1324,7 +1335,7 @@ _memory_deallocate_deferred(Heap* heap, size_t size_class) {
 
 //! Defer deallocation of the given block to the given heap
 static void
-_memory_deallocate_defer(int32 heap_id, void* p) {
+_memory_deallocate_defer(i32 heap_id, void* p) {
     //Get the heap and link in pointer in list of deferred opeations
     Heap* heap = _memory_heap_lookup(heap_id);
     void* last_ptr = heap->defer_deallocate.load();
@@ -1362,7 +1373,7 @@ _memory_deallocate(void* p) {
 
     //Grab the span (always at start of span, using 64KiB alignment)
     Span* span = static_cast<Span*>((void*)((uptr)p & SPAN_MASK));
-    int32 heap_id = span->heap_id.load();
+    i32 heap_id = span->heap_id.load();
     Heap* heap = GET_THREAD_LOCAL(Heap*, _memory_thread_heap);
     //Check if block belongs to this heap or if deallocation should be deferred
     if (heap_id == heap->id) {
@@ -1379,15 +1390,13 @@ _memory_deallocate(void* p) {
     }
 }
 
-#ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
-
 //! Reallocate the given block to the given size
 static void*
 _memory_reallocate(void* p, size_t size, size_t oldsize, unsigned int flags) {
     if (p) {
         //Grab the span (always at start of span, using 64KiB alignment)
         Span* span = static_cast<Span*>((void*)((uptr)p & SPAN_MASK));
-        int32 heap_id = span->heap_id.load();
+        i32 heap_id = span->heap_id.load();
         if (heap_id) {
             if (span->size_class < SIZE_CLASS_COUNT) {
                 //Small/medium sized block
@@ -1431,19 +1440,21 @@ _memory_reallocate(void* p, size_t size, size_t oldsize, unsigned int flags) {
     void* block = _memory_allocate(size > lower_bound ? size : lower_bound);
     if (p) {
         if (!(flags & NO_PRESERVE))
-            memcpy(block, p, oldsize < size ? oldsize : size);
+            std::memcpy(block, p, oldsize < size ? oldsize : size);
         _memory_deallocate(p);
     }
 
     return block;
 }
 
+#ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
+
 //! Get the usable size of the given block
 static size_t
 _memory_usable_size(void* p) {
     //Grab the span (always at start of span, using 64KiB alignment)
     Span* span = static_cast<Span*>((void*)((uptr)p & SPAN_MASK));
-    int32 heap_id = span->heap_id.load();
+    i32 heap_id = span->heap_id.load();
     if (heap_id) {
         if (span->size_class < SIZE_CLASS_COUNT) {
             //Small/medium block
@@ -1667,7 +1678,7 @@ thread_initialize(void) {
             // We have to allocate a new heap
             Heap* heap = _memory_allocate_heap();
 
-            int32 id = heap->id;
+            i32 id = heap->id;
             SET_THREAD_LOCAL(_memory_thread_heap, heap);
             _memory_heaps[id] = _mark_heap_in_use(heap);
             SET_THREAD_LOCAL(_memory_preferred_heap, u32(id));
@@ -1702,15 +1713,15 @@ is_thread_initialized(void) {
     return (GET_THREAD_LOCAL(Heap*, _memory_thread_heap) != nullptr) ? 1 : 0;
 }
 
-FORCEINLINE int _get_readers_count(int32 l)
+FORCEINLINE int _get_readers_count(i32 l)
 {
     return l & 0x7FFFFFFF;
 }
 
 void _acquire_segments_lock_read()
 {
-    int32 l = _segments_rw_lock.load();
-    int32 new_l = 0;
+    i32 l = _segments_rw_lock.load();
+    i32 new_l = 0;
     do {
         // Try to increase the readers count
         new_l = _get_readers_count(l) + 1;
@@ -1719,8 +1730,8 @@ void _acquire_segments_lock_read()
 
 void _release_segments_lock_read()
 {
-    int32 l = _segments_rw_lock.load();
-    int32 new_l = 0;
+    i32 l = _segments_rw_lock.load();
+    i32 new_l = 0;
     do {
         // Try to decrease the readers count
         new_l = _get_readers_count(l) - 1;
@@ -1729,7 +1740,7 @@ void _release_segments_lock_read()
 
 void _acquire_segments_lock_write()
 {
-    int32 exp = 0;
+    i32 exp = 0;
     while (!std::atomic_compare_exchange_weak(&_segments_rw_lock, &exp, 1))
     {
         exp = 0;
@@ -1738,7 +1749,7 @@ void _acquire_segments_lock_write()
 
 void _release_segments_lock_write()
 {
-    int32 exp = 1;
+    i32 exp = 1;
     while (!std::atomic_compare_exchange_weak(&_segments_rw_lock, &exp, 0))
     {
         exp = 1;
@@ -1994,6 +2005,17 @@ void deallocate (void* ptr)
     _memory_deallocate (ptr);
 }
 
+void* reallocate (void* ptr, std::size_t old_size, std::size_t new_size)
+{
+#if ENABLE_VALIDATE_ARGS
+    if (size >= MAX_ALLOC_SIZE) {
+        errno = EINVAL;
+        return ptr;
+    }
+#endif
+    return _memory_reallocate(ptr, new_size, old_size, 0);
+}
+
 // Extern interface
 
 #ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
@@ -2047,7 +2069,8 @@ calloc(size_t num, size_t size)
 }
 
 void*
-realloc(void* ptr, size_t size) {
+realloc(void* ptr, size_t size)
+{
 #if ENABLE_VALIDATE_ARGS
     if (size >= MAX_ALLOC_SIZE) {
         errno = EINVAL;

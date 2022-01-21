@@ -28,7 +28,7 @@ RAPIDJSON_DIAG_OFF(4702)  // unreachable code
 RAPIDJSON_DIAG_OFF(4512)  // assignment operator could not be generated
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 
 //! Cursor stream wrapper for counting line and column number if error exists.
@@ -73,6 +73,6 @@ RAPIDJSON_DIAG_POP
 RAPIDJSON_DIAG_POP
 #endif
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_CURSORSTREAMWRAPPER_H_

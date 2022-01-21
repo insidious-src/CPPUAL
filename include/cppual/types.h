@@ -32,37 +32,37 @@ namespace cppual
 {
 
 // int typedefs
-typedef std::int8_t int8;
-typedef std::int_fast8_t fint8;
-typedef const std::int8_t cint8;
-typedef const std::int_fast8_t cfint8;
+typedef std::int8_t i8;
+typedef std::int_fast8_t fi8;
+typedef const std::int8_t ci8;
+typedef const std::int_fast8_t cfi8;
 typedef std::uint8_t u8;
 typedef std::uint_fast8_t fu8;
 typedef const std::uint8_t cu8;
 typedef const std::uint_fast8_t cfu8;
 
-typedef std::int16_t int16;
-typedef std::int_fast16_t fint16;
-typedef const std::int16_t cint16;
-typedef const std::int_fast16_t cfint16;
+typedef std::int16_t i16;
+typedef std::int_fast16_t fi16;
+typedef const std::int16_t ci16;
+typedef const std::int_fast16_t cfi16;
 typedef std::uint16_t u16;
 typedef std::uint_fast16_t fu16;
 typedef const std::uint16_t cu16;
 typedef const std::uint_fast16_t cfu16;
 
-typedef std::int32_t int32;
-typedef std::int_fast32_t fint32;
-typedef const std::int32_t cint32;
-typedef const std::int_fast32_t cfint32;
+typedef std::int32_t i32;
+typedef std::int_fast32_t fi32;
+typedef const std::int32_t ci32;
+typedef const std::int_fast32_t cfi32;
 typedef std::uint32_t u32;
 typedef std::uint_fast32_t fu32;
 typedef const std::uint32_t cu32;
 typedef const std::uint_fast32_t cfu32;
 
-typedef std::int64_t int64;
-typedef std::int_fast64_t fint64;
-typedef const std::int64_t cint64;
-typedef const std::int_fast64_t cfint64;
+typedef std::int64_t i64;
+typedef std::int_fast64_t fi64;
+typedef const std::int64_t ci64;
+typedef const std::int_fast64_t cfi64;
 typedef std::uint64_t u64;
 typedef std::uint_fast64_t fu64;
 typedef const std::uint64_t cu64;
@@ -87,8 +87,8 @@ class bigunsigned
 
 };
 
-typedef bigsigned  <128> int128;
-typedef bigunsigned<128> u128  ;
+typedef bigsigned  <128> i128;
+typedef bigunsigned<128> u128;
 
 template<class Out, class In>
 union cast_union
@@ -103,7 +103,7 @@ union cast_union
 template<class Out, class In>
 constexpr Out direct_cast (In in) noexcept
 {
-    static_assert (sizeof (In) == sizeof (Out), "cannot use direct_cast");
+    static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are not equal!");
     return cast_union<Out, In>(in).out;
 }
 

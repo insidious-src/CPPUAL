@@ -18,7 +18,7 @@
 #include "stream.h"
 #include "internal/stack.h"
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! Represents an in-memory output byte stream.
 /*!
@@ -33,7 +33,7 @@ RAPIDJSON_NAMESPACE_BEGIN
     \tparam Allocator type for allocating memory buffer.
     \note implements Stream concept
 */
-template <typename Allocator = CrtAllocator>
+template <typename Allocator = cppual::Memory::MemoryResource>
 struct GenericMemoryBuffer {
     typedef char Ch; // byte
 
@@ -65,6 +65,6 @@ inline void PutN(MemoryBuffer& memoryBuffer, char c, size_t n) {
     std::memset(memoryBuffer.stack_.Push<char>(n), c, n * sizeof(c));
 }
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_MEMORYBUFFER_H_

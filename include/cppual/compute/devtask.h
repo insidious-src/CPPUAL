@@ -25,11 +25,10 @@
 
 #include <cppual/flags.h>
 #include <cppual/compute/device.h>
-#include <cppual/compute/platform.h>
 
 namespace cppual { namespace Compute {
 
-class DeviceQueue : public Object<ObjectType::Queue>
+class DeviceQueue : public Object<ResourceType::Queue>
 {
 public:
     enum EngineType

@@ -54,7 +54,7 @@ public:
     { return std::integral_constant<size_type, sizeof (value_type) * 8>::value; }
 
     constexpr bool test (enum_type const eFlag) const noexcept
-    { return (_M_flags & static_cast<value_type> (eFlag)) == eFlag; }
+    { return (_M_flags & static_cast<value_type> (eFlag)) == static_cast<value_type>(eFlag); }
 
     constexpr bool test (value_type const flags) const noexcept
     { return (_M_flags & flags) == flags; }

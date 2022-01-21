@@ -26,8 +26,45 @@ namespace cppual { namespace Compute {
 
 namespace { // optimize for internal unit usage
 
+class Initializer final
+{
+private:
+    Factory::manager_type mgr    ;
+    shared_factory        factory;
 
+    constexpr cchar* platform_name () noexcept
+    {
+        return "libcppual-compute-opencl";
+    }
+
+    inline static Initializer& platform () noexcept
+    {
+        static Initializer init;
+        return init;
+    }
+
+    inline Initializer ()
+    {
+        if (mgr.load_plugin(platform_name())) factory = mgr.plugin(platform_name()).interface();
+    }
+
+public:
+    inline static shared_factory instance () noexcept
+    {
+        return platform ().factory;
+    }
+};
 
 } // anonymous namespace
+
+shared_factory Factory::instance ()
+{
+    return Initializer::instance ();
+}
+
+bool Factory::hasValidInstance () noexcept
+{
+    return Initializer::instance () != nullptr;
+}
 
 } } // namespace Compute

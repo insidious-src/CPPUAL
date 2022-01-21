@@ -22,7 +22,7 @@
 #pragma intrinsic(_umul128)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 namespace internal {
 
 class BigInteger {
@@ -285,6 +285,6 @@ private:
 };
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_BIGINTEGER_H_

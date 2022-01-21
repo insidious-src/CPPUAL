@@ -76,7 +76,7 @@ public:
     typedef double                           value_type   ;
     typedef double*                          pointer      ;
     typedef double const*                    const_pointer;
-    typedef int64                            size_type    ;
+    typedef i64                            size_type    ;
     typedef string                           string_type  ;
 
     enum Attribute

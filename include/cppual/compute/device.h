@@ -26,11 +26,13 @@
 #include <cppual/flags.h>
 #include <cppual/string.h>
 #include <cppual/noncopyable.h>
-#include <cppual/compute/object.h>
+#include <cppual/compute/backend_iface.h>
 
-#include <string>
+#include <memory>
 
 namespace cppual { namespace Compute {
+
+// =========================================================
 
 class device_exception    : public std::bad_exception { };
 class bad_device          : public device_exception   { };
@@ -40,49 +42,12 @@ class bad_partition_count : public device_exception   { };
 
 // =========================================================
 
-class Device : public Object<ObjectType::Device>
+class Device
 {
 public:
-    enum Type
-    {
-        CPU    = 1 << 0, // serial processing
-        IGPU   = 1 << 1, // shader, texture and parallel processing
-        DGPU   = 1 << 2, // shader, texture and parallel processing
-        PPU    = 1 << 3, // dedicated parallel processing (generic processing)
-        DSP    = 1 << 4, // digital signal processing (audio)
-        BSD    = 1 << 5, // bit stream decoder (video)
-        VCE    = 1 << 6, // codec engine (video)
-        FPGA   = 1 << 7, // field-programmable gate array
-        MPU    = 1 << 8, // multi-specialized processing cores
-        Custom = 1 << 9,
-
-        GPU         = IGPU | DGPU,
-        Accelerator =  PPU |  DSP | BSD  | FPGA | VCE,
-        Any         =  CPU |  GPU | Accelerator | MPU | Custom
-    };
-
-    enum Attribute
-    {
-        Specialized = 1 << 0, // specialized processing
-        Native      = 1 << 1  // supoorts execution of native functions
-    };
-
-    enum class Backend : byte
-    {
-        Native,
-        OpenCL,
-        Vulkan,
-        D3D12,
-        Metal
-    };
-
-    enum class IL : byte
-    {
-        None,
-        GLSL,
-        SPIRV,
-        HLIL
-    };
+    typedef std::shared_ptr<IDevice> shared_device;
+    typedef string                   string_type  ;
+    typedef std::size_t              size_type    ;
 
     enum class Info : byte
     {
@@ -93,29 +58,22 @@ public:
         Version
     };
 
-    typedef BitSet<Type>      Types      ;
-    typedef BitSet<Attribute> Attributes ;
-
     static size_type count () noexcept;
     static Device&   host  () noexcept;
 
-    bool      available    (std::string const& feature);
+    bool      available    (string_type const& feature);
     string    info         (Info);
     size_type cache        () const;
     size_type cacheLine    () const;
     size_type localMemory  () const;
-    size_type constMemory  () const;
     size_type globalMemory () const;
 
-    size_type physical () const noexcept { return m_uId;      }
-    Type      type     () const noexcept { return m_eType;    }
-    bool      valid    () const noexcept { return handle();   }
-    Backend   backend  () const noexcept { return m_eBackend; }
+    DeviceType type     () const noexcept;
+    bool       valid    () const noexcept;
+    Backend    backend  () const noexcept;
 
 private:
-    size_type   m_uId     ;
-    Type        m_eType   ;
-    Backend     m_eBackend;
+    shared_device _M_devPtr;
 };
 
 } } // Compute

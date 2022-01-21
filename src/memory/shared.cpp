@@ -22,26 +22,18 @@
 #include <cppual/memory/shared.h>
 //#include <boost/interprocess/shared_memory_object.hpp>
 
-#ifdef OS_STD_UNIX
-#    include <unistd.h>
-#    include <sys/mman.h>
-#    include <sys/resource.h>
-//#    include <sys/types.h>
-//#    include <sys/param.h>
-#    ifdef OS_GNU_LINUX
-#        include <fcntl.h>
-#        include <stdio.h>
-#    elif defined (OS_MAC)
-#        include <mach/mach.h>
-#    elif defined (OS_AIX) or defined (OS_SOLARIS) or defined (OS_SOLARIS)
-#        include <fcntl.h>
-#        include <procfs.h>
-#    elif defined (OS_BSD)
-#        include <sys/sysctl.h>
-#    endif
+#ifdef OS_GNU_LINUX
+#   include "os/linux.h"
+#elif defined (OS_MACX)
+#   include "os/mac.h"
+#elif defined (OS_AIX)
+#   include "os/aix.h"
+#elif defined (OS_SOLARIS)
+#   include "os/solaris.h"
+#elif defined (OS_BSD)
+#   include "os/bsd.h"
 #elif defined (OS_WINDOWS)
-#    include <windows.h>
-#    include <psapi.h>
+#   include "os/win.h"
 #endif
 
 namespace cppual { namespace Memory {

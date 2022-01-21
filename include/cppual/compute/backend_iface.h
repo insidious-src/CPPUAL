@@ -25,8 +25,10 @@
 
 #include <cppual/types.h>
 #include <cppual/flags.h>
+#include <cppual/containers.h>
 #include <cppual/noncopyable.h>
 #include <cppual/compute/object.h>
+#include <cppual/process/plugin.h>
 
 #include <memory>
 #include <type_traits>
@@ -45,21 +47,44 @@ enum DeviceType
     Any         = CPU | GPU | GPGPU | Specialized
 };
 
+enum class Backend : byte
+{
+    Native,
+    OpenCL,
+    Vulkan,
+    D3D12 ,
+    Metal
+};
+
+enum class IL : u16
+{
+    None   = 0,
+    Native = 1 << 0,
+    OpenCL = 1 << 1,
+    GLSL   = 1 << 2,
+    SPIR   = 1 << 3,
+    SPIRV  = 1 << 4,
+    HLIL   = 1 << 5
+};
+
 typedef BitSet<DeviceType> device_types;
+typedef BitSet<IL>         device_ils  ;
 
 // =========================================================
 
-class IDevice;
-class IBuffer;
-class ICommandSequence;
-class IImage;
-class IPipeline;
-class IRenderPass;
-class IShader;
-class IDescriptorPool;
-class IEvent;
-class IState;
-class IQueue;
+struct Factory;
+class  IDevice;
+class  IBuffer;
+class  ICommandSequence;
+class  IImage;
+class  IPipeline;
+class  IRenderPass;
+class  IShader;
+class  IDescriptorPool;
+class  IEvent;
+class  IState;
+class  IQueue;
+class  ISampler;
 
 // =========================================================
 
@@ -75,15 +100,18 @@ typedef std::shared_ptr<IDescriptorPool>  shared_descriptor_pool;
 typedef std::shared_ptr<IEvent>           shared_event;
 typedef std::shared_ptr<IState>           shared_state;
 typedef std::shared_ptr<IQueue>           shared_queue;
+typedef std::shared_ptr<ISampler>         shared_sampler;
 
 // =========================================================
 
-struct Factory : public NonCopyableVirtual
+struct SHARED_API Factory : public NonCopyableVirtual
 {
 public:
-    typedef std::size_t size_type;
+    typedef std::size_t                     size_type    ;
+    typedef vector<shared_device>           device_vector;
+    typedef Process::PluginManager<Factory> manager_type ;
 
-    virtual shared_device          createDevice () = 0;
+    virtual device_vector          getDevices (device_types type = DeviceType::Any) = 0;
     virtual shared_buffer          createBuffer () = 0;
     virtual shared_cmd_sequence    createCmdSequence () = 0;
     virtual shared_image           createImage () = 0;
@@ -94,8 +122,8 @@ public:
     virtual shared_event           createEvent () = 0;
     virtual shared_state           createState () = 0;
     virtual shared_queue           createQueue () = 0;
-    virtual size_type              deviceCount () = 0;
-    virtual device_types           deviceTypes () = 0;
+    virtual shared_sampler         createSampler () = 0;
+    virtual size_type              deviceCount (device_types type = DeviceType::Any) = 0;
 
 public:
     static shared_factory instance();
@@ -104,90 +132,144 @@ public:
 
 // =========================================================
 
-class IDevice : public Object<ObjectType::Device>
+class SHARED_API IDevice : public Object<ResourceType::Device>
 {
 public:
-    using Object<ObjectType::Device>::Object;
+    enum class Profile : byte
+    {
+        Full,
+        Embedded
+    };
+
+    virtual string_type name              () const = 0;
+    virtual string_type vendor            () const = 0;
+    virtual Profile     profile           () const = 0;
+    virtual Backend     backend           () const = 0;
+    virtual device_ils  supportedILs      () const = 0;
+    virtual DeviceType  devType           () const = 0;
+    virtual Version     version           () const = 0;
+    virtual size_type   cacheSize         () const = 0;
+    virtual size_type   cacheLineSize     () const = 0;
+    virtual size_type   localMemorySize   () const = 0;
+    virtual size_type   constMemorySize   () const = 0;
+    virtual size_type   globalMemorySize  () const = 0;
+    virtual u32         computeUnits      () const = 0;
+    virtual u64         maxMemoryAllocSize() const = 0;
+
+protected:
+    using Object<ResourceType::Device>::Object;
 };
 
 // =========================================================
 
-class IBuffer : public Object<ObjectType::Buffer>
+class SHARED_API IBuffer : public Object<ResourceType::Buffer>
 {
 public:
-    using Object<ObjectType::Buffer>::Object;
+    enum class AddressSpace : byte
+    {
+        GlobalMemory ,
+        LocalMemory  ,
+        PrivateMemory,
+        ConstantMemory
+    };
+
+    enum class MemoryFlag : u16
+    {
+        ReadWrite     = 1 << 0,
+        ReadOnly      = 1 << 1,
+        WriteOnly     = 1 << 2,
+        UseHostPtr    = 1 << 3,
+        AllocHostPtr  = 1 << 4,
+        CopyHostPtr   = 1 << 5,
+        HostWriteOnly = 1 << 6,
+        HostReadOnly  = 1 << 7,
+        HostNoAccess  = 1 << 8
+    };
+
+    typedef BitSet<MemoryFlag> MemoryFlags;
+
+protected:
+    using Object<ResourceType::Buffer>::Object;
 };
 
 // =========================================================
 
-class ICommandSequence : public Object<ObjectType::CommandSequence>
+class SHARED_API ICommandSequence : public Object<ResourceType::Program>
 {
-public:
-    using Object<ObjectType::CommandSequence>::Object;
+protected:
+    using Object<ResourceType::Program>::Object;
 };
 
 // =========================================================
 
-class IImage : public Object<ObjectType::Image>
+class SHARED_API IImage : public Object<ResourceType::Image>
 {
-public:
-    using Object<ObjectType::Image>::Object;
+protected:
+    using Object<ResourceType::Image>::Object;
 };
 
 // =========================================================
 
-class IPipeline : public Object<ObjectType::Pipeline>
+class SHARED_API IPipeline : public Object<ResourceType::Context>
 {
-public:
-    using Object<ObjectType::Pipeline>::Object;
+protected:
+    using Object<ResourceType::Context>::Object;
 };
 
 // =========================================================
 
-class IRenderPass : public Object<ObjectType::RenderPass>
+class SHARED_API IRenderPass : public Object<ResourceType::RenderPass>
 {
-public:
-    using Object<ObjectType::RenderPass>::Object;
+protected:
+    using Object<ResourceType::RenderPass>::Object;
 };
 
 // =========================================================
 
-class IShader : public Object<ObjectType::Shader>
+class SHARED_API IShader : public Object<ResourceType::Shader>
 {
-public:
-    using Object<ObjectType::Shader>::Object;
+protected:
+    using Object<ResourceType::Shader>::Object;
 };
 
 // =========================================================
 
-class IDescriptorPool : public Object<ObjectType::DescriptorPool>
+class SHARED_API IDescriptorPool : public Object<ResourceType::DescriptorPool>
 {
-public:
-    using Object<ObjectType::DescriptorPool>::Object;
+protected:
+    using Object<ResourceType::DescriptorPool>::Object;
 };
 
 // =========================================================
 
-class IEvent : public Object<ObjectType::Event>
+class SHARED_API IEvent : public Object<ResourceType::Event>
 {
-public:
-    using Object<ObjectType::Event>::Object;
+protected:
+    using Object<ResourceType::Event>::Object;
 };
 
 // =========================================================
 
-class IState : public Object<ObjectType::State>
+class SHARED_API IState : public Object<ResourceType::State>
 {
-public:
-    using Object<ObjectType::State>::Object;
+protected:
+    using Object<ResourceType::State>::Object;
 };
 
 // =========================================================
 
-class IQueue : public Object<ObjectType::Queue>
+class SHARED_API IQueue : public Object<ResourceType::Queue>
 {
-public:
-    using Object<ObjectType::Queue>::Object;
+protected:
+    using Object<ResourceType::Queue>::Object;
+};
+
+// =========================================================
+
+class SHARED_API ISampler : public Object<ResourceType::Sampler>
+{
+protected:
+    using Object<ResourceType::Sampler>::Object;
 };
 
 // =========================================================

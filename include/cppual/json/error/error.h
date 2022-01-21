@@ -52,7 +52,7 @@ RAPIDJSON_DIAG_OFF(padded)
 #define RAPIDJSON_ERROR_STRING(x) x
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ParseErrorCode
@@ -207,7 +207,7 @@ enum ValidateErrorCode {
 */
 typedef const RAPIDJSON_ERROR_CHARTYPE* (*GetValidateErrorFunc)(ValidateErrorCode);
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #ifdef __clang__
 RAPIDJSON_DIAG_POP

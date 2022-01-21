@@ -34,7 +34,7 @@ struct memory_source_not_available : std::bad_alloc { };
 
 // =========================================================
 
-class MemoryChunk : public Object<ObjectType::Buffer>
+class MemoryChunk : public Object<ResourceType::Buffer>
 {
 public:
     typedef Device        device_type           ;

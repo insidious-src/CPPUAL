@@ -19,42 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_COMPUTE_PLATFORM_H_
-#define CPPUAL_COMPUTE_PLATFORM_H_
+#ifndef CPPUAL_MEMORY_OS_IOS_H_
+#define CPPUAL_MEMORY_OS_IOS_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/string.h>
-#include <cppual/compute/device.h>
+#include <cppual/decl.h>
 
-namespace cppual { namespace Compute {
-
-class platform_exception : public std::bad_exception { };
-class bad_platform       : public platform_exception { };
-
-class Instance : public NonCopyable
-{
-public:
-    size_t deviceCount ();
-    size_t gpuCount    ();
-};
-
-namespace Platform {
-
-enum class Info : byte
-{
-    Name,
-    Vendor,
-    Profile,
-    Version
-};
-
-u16    count () noexcept;
-bool   available (string const& feature, u16 id = 0);
-float  version (u16 id = 0);
-string info (Info, u16 id = 0);
-
-} } } // namespace Platform
+#ifdef OS_IOS
+#endif
 
 #endif // __cplusplus
-#endif // CPPUAL_COMPUTE_PLATFORM_H_
+#endif // CPPUAL_MEMORY_OS_IOS_H_

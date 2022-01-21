@@ -85,12 +85,12 @@ public:
     struct PACKED InfoHeader  // -- must be 40 bytes --
     {
         u32         size; // header size in bytes -> 4 bytes
-        int32       width, height; // width / height of image -> 2 * 4 bytes
+        i32       width, height; // width / height of image -> 2 * 4 bytes
         u16         planes; // number of colour planes -> 2 bytes
         u16         bits; // bits per pixel -> 2 bytes
         Compression compression; // compression type -> 4 bytes
         u32         imageSize; // image size in bytes -> 4 bytes
-        int32       xResolution, yResolution; // pixels per meter -> 2 * 4 bytes
+        i32       xResolution, yResolution; // pixels per meter -> 2 * 4 bytes
         u32         colors; // number of colors -> 4 bytes
         u32         importantColors; // important colors -> 4 bytes
 

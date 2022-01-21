@@ -53,21 +53,21 @@ public:
     struct JoyButtonData
     {
         size_type id;
-        int32     button;
+        i32     button;
     };
 
     struct JoyAxisData
     {
         size_type id;
         u8        axis;
-        int16     value;
+        i16     value;
     };
 
     struct JoyTriggerData
     {
         size_type id;
         u8        trigger;
-        int16     threshold;
+        i16     threshold;
     };
 
     struct JoyTrackData

@@ -3,10 +3,12 @@
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
+#include <cppual/memory/allocator.h>
 #include <cppual/functional.h>
 #include <cppual/signal.h>
 #include <cppual/meta.h>
 #include <cppual/string.h>
+#include <cppual/containers.h>
 
 #include <cppual/json/document.h>
 
@@ -38,7 +40,7 @@ struct is_json_value<u16> : std::true_type
 { };
 
 template <>
-struct is_json_value<int16> : std::true_type
+struct is_json_value<i16> : std::true_type
 { };
 
 template <>
@@ -46,7 +48,7 @@ struct is_json_value<u32> : std::true_type
 { };
 
 template <>
-struct is_json_value<int32> : std::true_type
+struct is_json_value<i32> : std::true_type
 { };
 
 template <>
@@ -54,7 +56,7 @@ struct is_json_value<u64> : std::true_type
 { };
 
 template <>
-struct is_json_value<int64> : std::true_type
+struct is_json_value<i64> : std::true_type
 { };
 
 template <>
@@ -82,7 +84,7 @@ struct is_json_int<u32> : std::true_type
 { };
 
 template <>
-struct is_json_int<int32> : std::true_type
+struct is_json_int<i32> : std::true_type
 { };
 
 template <>
@@ -90,7 +92,7 @@ struct is_json_int<u16> : std::true_type
 { };
 
 template <>
-struct is_json_int<int16> : std::true_type
+struct is_json_int<i16> : std::true_type
 { };
 
 template <>
@@ -98,7 +100,7 @@ struct is_json_int<u64> : std::true_type
 { };
 
 template <>
-struct is_json_int<int64> : std::true_type
+struct is_json_int<i64> : std::true_type
 { };
 
 //======================================================
@@ -149,13 +151,13 @@ class TemplateObject;
 class TemplateArray ;
 
 template <typename T,
-          typename A = std::allocator<Reference<T>>,
+          typename A = Memory::Allocator<Reference<T>>,
           typename   = typename std::enable_if<is_json_value<T>::value>::type
           >
 class ValuesArray;
 
 template <typename T,
-          typename A = std::allocator<T>,
+          typename A = Memory::Allocator<T>,
           typename   = typename std::enable_if<std::is_base_of<TemplateObject, T>::value ||
                                                std::is_base_of<TemplateArray , T>::value>::type
           >
@@ -163,21 +165,21 @@ class ObjectsArray;
 
 //======================================================
 
-class SHARED_API Parser : protected rapidjson::Document
+class SHARED_API Parser : protected Document
 {
 public:
-    typedef rapidjson::Document                   base_type      ;
-    typedef rapidjson::SizeType                   size_type      ;
-    typedef std::string                           string_type    ;
-    typedef rapidjson::Value                      value_type     ;
-    typedef value_type*                           pointer        ;
-    typedef value_type&                           reference      ;
-    typedef value_type const&                     const_reference;
-    typedef base_type::ValueIterator              iterator       ;
-    typedef base_type::ConstValueIterator         const_iterator ;
-    typedef base_type::Object                     object_type    ;
-    typedef base_type::Array                      array_type     ;
-    typedef std::pair<string_type, value_type>    pair_type      ;
+    typedef Document                           base_type      ;
+    typedef SizeType                           size_type      ;
+    typedef std::string                        string_type    ;
+    typedef Value                              value_type     ;
+    typedef value_type*                        pointer        ;
+    typedef value_type&                        reference      ;
+    typedef value_type const&                  const_reference;
+    typedef base_type::ValueIterator           iterator       ;
+    typedef base_type::ConstValueIterator      const_iterator ;
+    typedef base_type::Object                  object_type    ;
+    typedef base_type::Array                   array_type     ;
+    typedef std::pair<string_type, value_type> pair_type      ;
 
     enum class Type : u8
     {
@@ -287,15 +289,15 @@ private:
 class SHARED_API TemplateObject
 {
 public:
-    typedef Parser::size_type                               size_type      ;
-    typedef Parser::value_type                              value_type     ;
-    typedef Parser::reference                               reference      ;
-    typedef Parser::pointer                                 pointer        ;
-    typedef Parser::const_reference                         const_reference;
-    typedef Parser::ValueIterator                           iterator       ;
-    typedef Parser::ConstValueIterator                      const_iterator ;
-    typedef Parser::string_type                             string_type    ;
-    typedef std::pair<string_type, Parser::value_type>      pair_type      ;
+    typedef Parser::size_type                          size_type      ;
+    typedef Parser::value_type                         value_type     ;
+    typedef Parser::reference                          reference      ;
+    typedef Parser::pointer                            pointer        ;
+    typedef Parser::const_reference                    const_reference;
+    typedef Parser::ValueIterator                      iterator       ;
+    typedef Parser::ConstValueIterator                 const_iterator ;
+    typedef Parser::string_type                        string_type    ;
+    typedef std::pair<string_type, Parser::value_type> pair_type      ;
 
     static constexpr auto npos = static_cast<size_type>(-1);
 
@@ -399,15 +401,15 @@ private:
 class SHARED_API TemplateArray
 {
 public:
-    typedef Parser::size_type                               size_type      ;
-    typedef Parser::value_type                              value_type     ;
-    typedef Parser::reference                               reference      ;
-    typedef Parser::pointer                                 pointer        ;
-    typedef Parser::const_reference                         const_reference;
-    typedef Parser::iterator                                iterator       ;
-    typedef Parser::const_iterator                          const_iterator ;
-    typedef Parser::string_type                             string_type    ;
-    typedef std::pair<string_type, Parser::value_type>      pair_type      ;
+    typedef Parser::size_type                          size_type      ;
+    typedef Parser::value_type                         value_type     ;
+    typedef Parser::reference                          reference      ;
+    typedef Parser::pointer                            pointer        ;
+    typedef Parser::const_reference                    const_reference;
+    typedef Parser::iterator                           iterator       ;
+    typedef Parser::const_iterator                     const_iterator ;
+    typedef Parser::string_type                        string_type    ;
+    typedef std::pair<string_type, Parser::value_type> pair_type      ;
 
     static constexpr auto npos = static_cast<size_type>(-1);
 
@@ -527,7 +529,7 @@ public:
     typedef ReferenceBase<T>           self_type;
     typedef Function<void(self_type*)> func_type;
 
-    typedef typename std::conditional<std::is_same<int16, T>::value ||
+    typedef typename std::conditional<std::is_same<i16, T>::value ||
                                       std::is_enum<T>::value,
             int,
             typename std::conditional<std::is_same<u16, T>::value, uint, T>::type
@@ -548,7 +550,7 @@ public:
                _M_ref != nullptr && !_M_ref->IsNull();
     }
 
-    inline rapidjson::Type type() const
+    inline Type type() const
     {
         return ref()->GetType();
     }
@@ -746,7 +748,7 @@ public:
                _M_ref != nullptr && !_M_ref->IsNull();
     }
 
-    inline rapidjson::Type type() const
+    inline Type type() const
     {
         return ref()->GetType();
     }
@@ -986,10 +988,10 @@ public:
 //======================================================
 
 template <>
-class SHARED_API Reference<int16> : public ReferenceBase<int16>
+class SHARED_API Reference<i16> : public ReferenceBase<i16>
 {
 public:
-    typedef ReferenceBase<int16>                  reference_base;
+    typedef ReferenceBase<i16>                  reference_base;
     typedef typename reference_base::json_type    json_type     ;
     typedef typename reference_base::string_type  string_type   ;
     typedef typename reference_base::value_type   value_type    ;
@@ -1175,10 +1177,10 @@ public:
 //======================================================
 
 template <>
-class SHARED_API Reference<int64> : public ReferenceBase<int64>
+class SHARED_API Reference<i64> : public ReferenceBase<i64>
 {
 public:
-    typedef ReferenceBase<int64>                 reference_base;
+    typedef ReferenceBase<i64>                 reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1997,25 +1999,25 @@ public:
     template<typename T>
     using shared_ptr = std::shared_ptr<T>;
 
-    typedef Parser::string_type                               string_type        ;
-    typedef Parser::size_type                                 size_type          ;
-    typedef shared_ptr<Parser>                                json_ptr           ;
-    typedef std::pair<string_type, json_ptr>                  json_pair          ;
-    typedef std::tuple<size_type, string_type, Parser::Type>  file_tuple         ;
-    typedef shared_ptr<TemplateObject>                        generic_object_ptr ;
-    typedef shared_ptr<TemplateArray>                         generic_array_ptr  ;
-    typedef std::pair<size_type, generic_object_ptr>          generic_object_pair;
-    typedef std::pair<size_type, generic_array_ptr>           generic_array_pair ;
-    typedef std::unordered_map<size_type, json_pair>          json_map           ;
-    typedef std::unordered_map<size_type, generic_object_ptr> objects_container  ;
-    typedef std::unordered_map<size_type, generic_array_ptr>  arrays_container   ;
-    typedef std::unordered_map<size_type, objects_container>  objects_map        ;
-    typedef std::unordered_map<size_type, arrays_container>   arrays_map         ;
-    typedef json_map::iterator                                iterator           ;
-    typedef json_map::const_iterator                          const_iterator     ;
-    typedef json_map::mapped_type                             value_type         ;
-    typedef json_map::mapped_type&                            reference          ;
-    typedef json_map::mapped_type const&                      const_reference    ;
+    typedef Parser::string_type                              string_type        ;
+    typedef Parser::size_type                                size_type          ;
+    typedef shared_ptr<Parser>                               json_ptr           ;
+    typedef std::pair<string_type, json_ptr>                 json_pair          ;
+    typedef std::tuple<size_type, string_type, Parser::Type> file_tuple         ;
+    typedef shared_ptr<TemplateObject>                       generic_object_ptr ;
+    typedef shared_ptr<TemplateArray>                        generic_array_ptr  ;
+    typedef std::pair<size_type, generic_object_ptr>         generic_object_pair;
+    typedef std::pair<size_type, generic_array_ptr>          generic_array_pair ;
+    typedef unordered_map<size_type, json_pair>              json_map           ;
+    typedef unordered_map<size_type, generic_object_ptr>     objects_container  ;
+    typedef unordered_map<size_type, generic_array_ptr>      arrays_container   ;
+    typedef unordered_map<size_type, objects_container>      objects_map        ;
+    typedef unordered_map<size_type, arrays_container>       arrays_map         ;
+    typedef json_map::iterator                               iterator           ;
+    typedef json_map::const_iterator                         const_iterator     ;
+    typedef json_map::mapped_type                            value_type         ;
+    typedef json_map::mapped_type&                           reference          ;
+    typedef json_map::mapped_type const&                     const_reference    ;
 
     // ======================================================================
 
@@ -2048,8 +2050,10 @@ public:
 
             if (it_key == _M_objects[type].end())
             {
-                _M_objects[type].emplace(key, shared_ptr<T>(new T(*json->second.second.get(),
-                                                                  std::forward<Args>(args)...)));
+                _M_objects[type].emplace(key,
+                                         Memory::allocate_shared<T>(Memory::Allocator<T>(),
+                                                                    *json->second.second.get(),
+                                                                    std::forward<Args>(args)...));
             }
 
             return std::dynamic_pointer_cast<T>(_M_objects[type][key]);
@@ -2076,8 +2080,10 @@ public:
 
             if (it_key == _M_arrays[type].end())
             {
-                _M_arrays[type].emplace(key, shared_ptr<T>(new T(*json->second.second.get(),
-                                                                 std::forward<Args>(args)...)));
+                _M_arrays[type].emplace(key,
+                                        Memory::allocate_shared<T>(Memory::Allocator<T>(),
+                                                                   *json->second.second.get(),
+                                                                   std::forward<Args>(args)...));
             }
 
             return std::dynamic_pointer_cast<T>(_M_arrays[type][key]);
@@ -2147,12 +2153,6 @@ private:
 };
 
 // ======================================================================
-
-//template <typename T>
-//inline std::ostream& operator << (std::ostream& stream, Reference<T> const& ref)
-//{
-//   return stream << ref;
-//}
 
 inline std::ostream& operator << (std::ostream& stream, Reference<Parser::string_type> const& ref)
 {

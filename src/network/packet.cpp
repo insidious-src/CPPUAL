@@ -41,11 +41,11 @@ Packet& Packet::operator >> (bool& bData) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (int8& nData) noexcept
+Packet& Packet::operator >> (i8& nData) noexcept
 {
     if (canExchange (sizeof (nData)))
     {
-        nData   = *reinterpret_cast<cint8*> (&m_gData[m_uPos]);
+        nData   = *reinterpret_cast<ci8*> (&m_gData[m_uPos]);
         m_uPos +=  sizeof (nData);
     }
 
@@ -63,11 +63,11 @@ Packet& Packet::operator >> (u8& uData) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (int16& nData) noexcept
+Packet& Packet::operator >> (i16& nData) noexcept
 {
     if (canExchange (sizeof (nData)))
     {
-        nData   = *reinterpret_cast<cint16*> (&m_gData[m_uPos]);
+        nData   = *reinterpret_cast<ci16*> (&m_gData[m_uPos]);
         m_uPos +=  sizeof (nData);
     }
 
@@ -85,11 +85,11 @@ Packet& Packet::operator >> (u16& uData) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (int32& nData) noexcept
+Packet& Packet::operator >> (i32& nData) noexcept
 {
     if (canExchange (sizeof (nData)))
     {
-        nData   = *reinterpret_cast<cint32*> (&m_gData[m_uPos]);
+        nData   = *reinterpret_cast<ci32*> (&m_gData[m_uPos]);
         m_uPos +=  sizeof (nData);
     }
 

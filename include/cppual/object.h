@@ -25,13 +25,13 @@
 
 #include <thread>
 
-using std::thread;
-
 namespace cppual {
 
 class ThreadObject
 {
 public:
+    typedef std::thread thread_type;
+
     inline ThreadObject () noexcept
     : m_uThreadOwner (std::this_thread::get_id ())
     { }
@@ -39,11 +39,11 @@ public:
     inline virtual ~ThreadObject ()
     { }
 
-    inline thread::id threadOwner () const noexcept
+    inline thread_type::id threadOwner () const noexcept
     { return m_uThreadOwner; }
 
 private:
-    thread::id const m_uThreadOwner;
+    thread_type::id const m_uThreadOwner;
 };
 
 } // cppual

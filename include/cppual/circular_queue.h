@@ -52,8 +52,9 @@ template <typename T,
 class CircularQueue : private Allocator
 {
 public:
-    static_assert (std::is_move_constructible_v<T>, "T is not move constructible!");
-    static_assert (std::is_move_assignable_v<T>, "T is not move assignable!");
+    static_assert (!std::is_void<T>::value              , "T is void");
+    static_assert ( std::is_move_constructible<T>::value, "T is not move constructible!");
+    static_assert ( std::is_move_assignable<T>::value   , "T is not move assignable!");
 
     typedef std::allocator_traits<Allocator>           allocator_traits      ;
     typedef typename allocator_traits::allocator_type  allocator_type        ;
@@ -430,6 +431,8 @@ template <typename T, std::size_t N>
 class UniformQueue : NonCopyable
 {
 public:
+    static_assert (!std::is_void<T>::value, "T is void");
+
     typedef T                  value_type;
     typedef T*                 pointer;
     typedef T const*           const_pointer;
@@ -552,6 +555,8 @@ template <typename T, class Allocator>
 class CircularQueue <T, Allocator, true> : Allocator, NonCopyable
 {
 public:
+    static_assert (!std::is_void<T>::value, "T is void");
+
     typedef std::allocator_traits<Allocator>           allocator_traits;
     typedef typename allocator_traits::allocator_type  allocator_type  ;
     typedef T                                          value_type      ;

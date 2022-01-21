@@ -20,6 +20,7 @@
  */
 
 #include <cppual/ui/manager.h>
+#include <cppual/memory/static.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
@@ -61,10 +62,12 @@ using cppual::Ui::Platform::Factory ;
 using cppual::Ui::Platform::XFactory;
 using cppual::Process::Plugin       ;
 using cppual::Memory::MemoryResource;
+using cppual::Memory::StaticResource;
 using cppual::Memory::Allocator     ;
 
-extern "C" Plugin* plugin_main (MemoryResource* rc)
+extern "C" Plugin* plugin_main (MemoryResource* /*rc*/)
 {
+    static StaticResource<sizeof (XFactory)> static_resource;
     static Plugin plugin;
 
     plugin.name     = "XFactory"       ;
@@ -74,7 +77,7 @@ extern "C" Plugin* plugin_main (MemoryResource* rc)
     plugin.verMinor = 0                ;
 
     plugin.iface    = std::static_pointer_cast<void>
-            (std::allocate_shared<XFactory>(Allocator<XFactory>(*rc)));
+            (std::allocate_shared<XFactory>(Allocator<XFactory>(static_resource)));
 
     return &plugin;
 }

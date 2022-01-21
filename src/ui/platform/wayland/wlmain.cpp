@@ -20,6 +20,7 @@
  */
 
 #include <cppual/ui/manager.h>
+#include <cppual/memory/static.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
@@ -59,10 +60,12 @@ shared_window WlFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay*
 using cppual::Ui::Platform::WlFactory;
 using cppual::Process::Plugin        ;
 using cppual::Memory::MemoryResource ;
+using cppual::Memory::StaticResource ;
 using cppual::Memory::Allocator      ;
 
-extern "C" Plugin* plugin_main (MemoryResource* rc)
+extern "C" Plugin* plugin_main (MemoryResource* /*rc*/)
 {
+    static StaticResource<sizeof (WlFactory)> static_resource;
     static Plugin plugin;
 
     plugin.name     = "WlFactory"         ;
@@ -72,7 +75,7 @@ extern "C" Plugin* plugin_main (MemoryResource* rc)
     plugin.verMinor = 0                   ;
 
     plugin.iface    = std::static_pointer_cast<void>
-            (std::allocate_shared<WlFactory>(Allocator<WlFactory>(*rc)));
+            (std::allocate_shared<WlFactory>(Allocator<WlFactory>(static_resource)));
 
     return &plugin;
 }

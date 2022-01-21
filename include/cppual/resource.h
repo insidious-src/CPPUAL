@@ -24,39 +24,58 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
+#include <cppual/flags.h>
 #include <cppual/meta.h>
 
 #include <type_traits>
 
 namespace cppual {
 
-enum class ResourceType : std::size_t
+class   Handle           ;
+typedef Handle Connection;
+
+// =========================================================
+
+enum class ResourceType : u32
 {
-    Null,
-    Device,
-    Image,
-    Font,
-    Macro,
-    Texture,
-    Shader,
-    Program,
-    Query,
-    Window,
-    Surface,
-    Buffer,
-    Pixmap,
-    Colormap,
-    Cursor,
-    GlyphCursor,
-    Context
+    Null           =       0,
+    Instance       = 1 <<  0,
+    Device         = 1 <<  1,
+    Buffer         = 1 <<  2,
+    Image          = 1 <<  3,
+    Font           = 1 <<  4,
+    Macro          = 1 <<  5,
+    Texture        = 1 <<  6,
+    Shader         = 1 <<  7,
+    Program        = 1 <<  8,
+    Query          = 1 <<  9,
+    Window         = 1 << 10,
+    Surface        = 1 << 11,
+    Pixmap         = 1 << 12,
+    Colormap       = 1 << 13,
+    Cursor         = 1 << 14,
+    GlyphCursor    = 1 << 15,
+    Context        = 1 << 16,
+    Queue          = 1 << 17,
+    Event          = 1 << 18,
+    State          = 1 << 19,
+    Sampler        = 1 << 20,
+    RenderPass     = 1 << 21,
+    DescriptorPool = 1 << 22,
+    Custom         = 1 << 30
 };
+
+// =========================================================
+
+typedef BitSet<ResourceType> resource_types;
 
 // =========================================================
 
 class Handle final
 {
 public:
-    typedef void* pointer;
+    typedef void*             pointer  ;
+    typedef pointer Handle::* safe_bool;
 
     constexpr Handle () noexcept = default;
     constexpr Handle (pointer handle) noexcept : _M_handle (handle) { }
@@ -69,13 +88,16 @@ public:
     template <typename T,
               typename = typename std::enable_if<is_integer<T>::value>::type
               >
-    constexpr Handle (T handle) noexcept : _M_handle (unsafe_direct_cast<pointer> (handle)) { }
+    constexpr Handle (T handle) noexcept : _M_handle (unsafe_direct_cast<pointer> (handle))
+    {
+        static_assert (sizeof (T) <= sizeof (pointer), "T is bigger than the size of a pointer!");
+    }
 
     constexpr operator pointer () const noexcept
     { return _M_handle; }
 
-    inline operator uptr () const noexcept
-    { return reinterpret_cast<uptr> (_M_handle); }
+    constexpr operator uptr () const noexcept
+    { return direct_cast<uptr> (_M_handle); }
 
     template <typename T,
               typename =
@@ -83,13 +105,15 @@ public:
               >
     constexpr T get () const noexcept
     {
+        static_assert (sizeof (T) <= sizeof (pointer), "T is bigger than the size of a pointer!");
         return unsafe_direct_cast<T> (_M_handle);
     }
 
     template <typename T,
               typename =
               typename std::enable_if<(std::is_pointer<T>::value  ||
-                                       std::is_class  <T>::value) && !std::is_same<T, Handle>::value
+                                       std::is_class  <T>::value) &&
+                                      !std::is_same<typename std::remove_cv<T>::type, Handle>::value
                                       >::type
               >
     constexpr typename std::remove_pointer<T>::type* get () const noexcept
@@ -99,11 +123,18 @@ public:
 
     template <typename T,
               typename =
-              typename std::enable_if<std::is_same<T, Handle>::value>::type
+              typename std::enable_if<
+                  std::is_same<typename std::remove_cv<T>::type, Handle>::value
+                  >::type
               >
     constexpr Handle get () const noexcept
     {
         return *this;
+    }
+
+    constexpr explicit operator safe_bool () const noexcept
+    {
+        return _M_handle ? &Handle::_M_handle : nullptr;
     }
 
     friend
@@ -132,13 +163,61 @@ constexpr bool operator != (Handle const& conn1, std::nullptr_t) noexcept
 
 // =========================================================
 
+struct Version
+{
+    constexpr Version () noexcept
+    : Version (0, 0)
+    { }
+
+    constexpr Version (int _major, int _minor) noexcept
+    : major(_major), minor(_minor)
+    { }
+
+    int major, minor;
+};
+
+// ====================================================
+
+constexpr bool operator  < (Version const& gObj1, Version const& gObj2) noexcept
+{ return (gObj1.major < gObj2.major || gObj1.minor < gObj2.minor); }
+
+constexpr bool operator  < (Version const& gObj1, int uMajor) noexcept
+{ return gObj1.major  < uMajor; }
+
+constexpr bool operator  <= (Version const& gObj1, Version const& gObj2) noexcept
+{ return (gObj1.major <= gObj2.major && gObj1.minor <= gObj2.minor); }
+
+constexpr bool operator  <= (Version const& gObj1, int uMajor) noexcept
+{ return gObj1.major  <= uMajor; }
+
+constexpr bool operator  > (Version const& gObj1, Version const& gObj2) noexcept
+{ return (gObj1.major > gObj2.major || gObj1.minor > gObj2.minor); }
+
+constexpr bool operator  > (Version const& gObj1, int uMajor) noexcept
+{ return gObj1.major  > uMajor; }
+
+constexpr bool operator  >= (Version const& gObj1, Version const& gObj2) noexcept
+{ return (gObj1.major >= gObj2.major && gObj1.minor >= gObj2.minor); }
+
+constexpr bool operator  >= (Version const& gObj1, int uMajor) noexcept
+{ return gObj1.major  >= uMajor; }
+
+constexpr bool operator  == (Version const& gObj1, Version const& gObj2) noexcept
+{ return (gObj1.major == gObj2.major && gObj1.minor == gObj2.minor); }
+
+constexpr bool operator  != (Version const& gObj1, Version const& gObj2) noexcept
+{ return !(gObj1 == gObj2); }
+
+// =========================================================
+
 template <class Controller, class ID>
 class Resource
 {
 public:
-    typedef ID         value_type ;
-    typedef Controller controller ;
-    typedef Handle     handle_type;
+    typedef ID                    value_type ;
+    typedef Controller            controller ;
+    typedef Handle                handle_type;
+    typedef Resource* Resource::* safe_bool  ;
 
     constexpr Resource () noexcept = default;
     Resource (Resource&&) = default;
@@ -159,6 +238,11 @@ public:
       _M_handle     (id  )
     { }
 
+    constexpr explicit operator safe_bool () const noexcept
+    {
+        return _M_connection && _M_handle ? this : nullptr;
+    }
+
     template <class Controller_, class ID_>
     friend constexpr bool operator == (Resource<Controller_, ID_> const&,
                                        Resource<Controller_, ID_> const&);
@@ -174,9 +258,10 @@ template <class ID>
 class Resource <void, ID>
 {
 public:
-    typedef ID     value_type ;
-    typedef void   controller ;
-    typedef Handle handle_type;
+    typedef ID                       value_type ;
+    typedef void                     controller ;
+    typedef Handle                   handle_type;
+    typedef handle_type* Resource::* safe_bool  ;
 
     constexpr Resource () noexcept = default;
     Resource (Resource&&) = default;
@@ -194,6 +279,11 @@ public:
     constexpr Resource (value_type id) noexcept
     : _M_handle (id)
     { }
+
+    constexpr explicit operator safe_bool () const noexcept
+    {
+        return _M_handle ? &Resource::_M_handle : nullptr;
+    }
 
     template <class ID_>
     friend constexpr bool operator == (Resource<void, ID_> const&,
@@ -229,13 +319,28 @@ constexpr bool operator != (Resource<Controller, ID> const& gObj1,
 
 // =========================================================
 
-typedef Handle Connection;
-
-//static_assert (std::is_pod<Handle>::value, "Handle is not POD");
-
-// =========================================================
-
 } // cppual
+
+namespace std {
+
+template <typename CharT, typename Traits>
+basic_ostream<CharT, Traits>&
+operator << (std::basic_ostream<CharT, Traits>& stream, cppual::Version const& u)
+{ return stream << u.major << "." << u.minor; }
+
+template <>
+struct hash<cppual::Version>
+{
+    /// Compute individual hash values for major,
+    /// and minor and combine them using XOR
+    /// and bit shifting
+    size_t operator () (cppual::Version const& version) const
+    {
+        return ((hash<int>()(version.major) ^ (hash<int>()(version.minor) << 1)) >> 1);
+    }
+};
+
+}
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_RESOURCE_H_

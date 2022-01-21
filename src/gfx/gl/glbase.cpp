@@ -24,6 +24,7 @@
 #include <cppual/gfx/gl/glbase.h>
 #include <cppual/gfx/gl/runtime.h>
 #include <cppual/gfx/gl/surface.h>
+
 #include "gldef.h"
 
 namespace cppual { namespace Graphics { namespace GL {

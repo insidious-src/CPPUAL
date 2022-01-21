@@ -22,8 +22,6 @@
 #include <cppual/compute/program.h>
 #include <cppual/compute/backend_iface.h>
 
-#include "backend/opencl.h"
-
 namespace cppual { namespace Compute {
 
 namespace {

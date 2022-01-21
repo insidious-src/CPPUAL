@@ -27,7 +27,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 RAPIDJSON_DIAG_OFF(overflow)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Encoding
@@ -707,7 +707,7 @@ struct Transcoder<Encoding, Encoding> {
     }
 };
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #if defined(__GNUC__) || (defined(_MSC_VER) && !defined(__clang__))
 RAPIDJSON_DIAG_POP

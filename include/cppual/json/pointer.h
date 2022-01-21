@@ -26,7 +26,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 static const SizeType kPointerInvalidIndex = ~SizeType(0);  //!< Represents an invalid index in GenericPointer::Token
 
@@ -75,7 +75,7 @@ enum PointerParseErrorCode {
     \note GenericPointer uses same encoding of ValueType.
     However, Allocator of GenericPointer is independent of Allocator of Value.
 */
-template <typename ValueType, typename Allocator = CrtAllocator>
+template <typename ValueType, typename Allocator = cppual::Memory::MemoryResource>
 class GenericPointer {
 public:
     typedef typename ValueType::EncodingType EncodingType;  //!< Encoding type from Value
@@ -1406,7 +1406,7 @@ bool EraseValueByPointer(T& root, const CharType(&source)[N]) {
 
 //@}
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #if defined(__clang__) || defined(_MSC_VER)
 RAPIDJSON_DIAG_POP

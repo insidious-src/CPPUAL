@@ -31,8 +31,8 @@ namespace cppual { namespace Ui {
 
 namespace { namespace Internal {
 
-typedef Memory::PolymorphicAllocator<std::pair<const uptr, View*>> map_allocator;
-typedef Memory::PolymorphicAllocator<ProxyRenderable>              renderable_allocator;
+typedef Memory::Allocator<std::pair<const uptr, View*>> map_allocator;
+typedef Memory::Allocator<ProxyRenderable>              renderable_allocator;
 
 typedef std::unordered_map<
                            uptr,

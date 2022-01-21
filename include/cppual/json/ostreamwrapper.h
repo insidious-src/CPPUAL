@@ -23,7 +23,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(padded)
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+namespace cppual { namespace Json {
 
 //! Wrapper of \c std::basic_ostream into RapidJSON's Stream concept.
 /*!
@@ -76,6 +76,6 @@ typedef BasicOStreamWrapper<std::wostream> WOStreamWrapper;
 RAPIDJSON_DIAG_POP
 #endif
 
-RAPIDJSON_NAMESPACE_END
+} } // namespace Json
 
 #endif // RAPIDJSON_OSTREAMWRAPPER_H_
