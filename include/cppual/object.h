@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,23 +27,23 @@
 
 namespace cppual {
 
-class ThreadObject
+class thread_object
 {
 public:
     typedef std::thread thread_type;
 
-    inline ThreadObject () noexcept
-    : m_uThreadOwner (std::this_thread::get_id ())
+    inline thread_object () noexcept
+    : _M_uThreadOwner (std::this_thread::get_id ())
     { }
 
-    inline virtual ~ThreadObject ()
+    inline virtual ~thread_object ()
     { }
 
-    inline thread_type::id threadOwner () const noexcept
-    { return m_uThreadOwner; }
+    inline thread_type::id thread_owner () const noexcept
+    { return _M_uThreadOwner; }
 
 private:
-    thread_type::id const m_uThreadOwner;
+    thread_type::id const _M_uThreadOwner;
 };
 
 } // cppual

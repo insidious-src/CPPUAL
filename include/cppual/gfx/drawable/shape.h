@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,15 +25,15 @@
 
 #include <cppual/gfx/draw.h>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-class Shape : public IDrawable2D, public ITransformable2D
+class Shape : public drawable2d_interface, public transformable2d_interface
 {
 public:
-    Shape (Color const& fill_color) noexcept;
+    Shape (color const& fill_color) noexcept;
 
 protected:
-    Color m_gFillColor;
+    color _M_gFillColor;
 };
 
 } } // Graphics

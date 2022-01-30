@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 #   include <windows.h>
 #endif
 
-namespace cppual { namespace Process {
+namespace cppual { namespace process {
 
 #ifdef OS_STD_POSIX
 typedef pid_t  process_handle;
@@ -44,27 +44,25 @@ typedef HANDLE process_handle;
 
 } // Process
 
-namespace Compute {
+namespace compute {
 
 #ifdef OS_STD_POSIX
-//typedef pthread_t       thread_id;
 typedef pthread_t       thread_handle;
 typedef pthread_mutex_t mutex_object;
 typedef pid_t           process_handle;
 #elif defined (OS_WINDOWS)
-//typedef DWORD  thread_id;
 typedef DWORD  thread_handle;
 typedef HANDLE mutex_object;
 typedef HANDLE process_handle;
 #endif
 
-struct TaskTraits final
+struct task_traits final
 {
 #ifdef OS_WINDOWS
-    HANDLE          m_pEvent;
+    HANDLE          _M_pEvent;
 #elif defined (OS_STD_POSIX)
-    pthread_cond_t  m_gReady;
-    pthread_mutex_t m_gLock;
+    pthread_cond_t  _M_gReady;
+    pthread_mutex_t _M_gLock;
 #endif
 };
 

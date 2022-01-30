@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@
 
 #include <wayland-client-protocol.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class SHARED_API WlDisplay final : public IDisplay
+class SHARED_API WlDisplay final : public display_interface
 {
 public:
     WlDisplay () = delete;
@@ -37,21 +37,21 @@ public:
     { if (native ()) ::wl_display_disconnect (native<::wl_display> ()); }
 
 
-    string_type name        () const noexcept { return m_gName;        }
-    uint        screenCount () const noexcept { return m_nScreenCount; }
+    string_type name        () const noexcept { return _M_gName;        }
+    uint        screenCount () const noexcept { return _M_nScreenCount; }
 
     void flush () noexcept
     { ::wl_display_flush (native<::wl_display> ()); }
 
     WlDisplay (string_type const& strName) noexcept
-    : IDisplay       (::wl_display_connect (strName.c_str()), nullptr),
-      m_nScreenCount (),
-      m_gName        (strName)
+    : display_interface       (::wl_display_connect (strName.c_str()), nullptr),
+      _M_nScreenCount (),
+      _M_gName        (strName)
     { }
 
 private:
-    uint        m_nScreenCount;
-    string_type m_gName;
+    uint        _M_nScreenCount;
+    string_type _M_gName;
 };
 
 } } // namespace Graphics

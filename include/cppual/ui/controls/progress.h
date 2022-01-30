@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,54 +25,60 @@
 #include <cppual/signal.h>
 #include <cppual/ui/skin.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class Progress : public SkinnableView
+// =========================================================
+
+class progress : public skinnable_view
 {
 public:
-    void setValue (int);
-    void setStep (int);
-    void setRange (int min, int max);
-    void setMarquee (bool);
-    void showValue (bool);
-    void increment ();
-    void decrement ();
+    enum class progress_flag : byte
+    {
+        marquee    = 1 << 0,
+        show_value = 1 << 1
+    };
 
-    Progress (View*     parent,
-              Rect const& rect,
+    typedef bitset<progress_flag> progress_flags;
+
+    progress (view*     parent,
+              rect const& rect,
               int         value =   0,
               int         min   =   0,
               int         max   = 100,
               int         step  =   1);
 
-    enum ProgressFlag
-    {
-        Marquee   = 1 << 0,
-        ShowValue = 1 << 1
-    };
+    void set_value (int);
+    void set_step (int);
+    void set_range (int min, int max);
+    void set_marquee (bool);
+    void show_value (bool);
+    void increment ();
+    void decrement ();
 
-    typedef BitSet<ProgressFlag> ProgressFlags;
+    inline int value     () const noexcept { return _M_nValue; }
+    inline int min_value () const noexcept { return _M_nMin  ; }
+    inline int max_value () const noexcept { return _M_nMax  ; }
+    inline int step      () const noexcept { return _M_nStep ; }
 
-    inline int getValue    () const noexcept { return m_nValue; }
-    inline int getMinValue () const noexcept { return m_nMin  ; }
-    inline int getMaxValue () const noexcept { return m_nMax  ; }
-    inline int getStep     () const noexcept { return m_nStep ; }
+    inline bool is_marquee () const noexcept
+    { return _M_eProgressFlags.test (progress_flag::marquee); }
 
-    inline bool isMarquee () const noexcept
-    { return m_eProgressFlags.test (Progress::Marquee); }
+    inline bool is_value_visible () const noexcept
+    { return _M_eProgressFlags.test (progress_flag::show_value); }
 
-    inline bool isValueVisible () const noexcept
-    { return m_eProgressFlags.test (Progress::ShowValue); }
+public:
+    signal<void(int)> value_changed;
 
-    Signal<void(int)> valueChanged;
+protected:
+    virtual void paint_event (rect const&);
+    virtual void size_event  (point2u);
 
 private:
-    int           m_nValue, m_nMin, m_nMax, m_nStep;
-    ProgressFlags m_eProgressFlags;
-
-    void onPaint ();
-    void onSize  (Rect const&);
+    int            _M_nValue, _M_nMin, _M_nMax, _M_nStep;
+    progress_flags _M_eProgressFlags;
 };
+
+// =========================================================
 
 } } // Ui
 

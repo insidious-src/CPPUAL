@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,24 +23,24 @@
 
 #include "aldef.h"
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-std::atomic_uint Object::sm_uALObjCount { 0 };
+std::atomic_uint object::sm_uALObjCount { 0 };
 
 // =========================================================
 
 namespace { // optimize for internal unit usage
 
-inline uint generateObject (ObjectType eType) noexcept
+inline uint generate_object (object_type eType) noexcept
 {
     uint n = 0;
 
     switch (eType)
     {
-    case ObjectType::Buffer:
+    case object_type::buffer:
         ::alGenBuffers (1, &n);
         break;
-    case ObjectType::Source:
+    case object_type::source:
         ::alGenSources (1, &n);
         break;
     }
@@ -48,68 +48,68 @@ inline uint generateObject (ObjectType eType) noexcept
     return n;
 }
 
-} // anonymous
+} // anonymous namespace
 
 // =========================================================
 
-Object::Object (ObjectType eType) noexcept
-: m_uObjId (generateObject (eType)), m_eObjType (eType)
+object::object (object_type eType) noexcept
+: _M_uObjId (generate_object (eType)), _M_eObjType (eType)
 {
-    if (m_uObjId) ++sm_uALObjCount;
+    if (_M_uObjId) ++sm_uALObjCount;
 }
 
-Object::Object (Object const& gObj) noexcept
-: m_uObjId (generateObject (gObj.m_eObjType)), m_eObjType (gObj.m_eObjType)
+object::object (object const& gObj) noexcept
+: _M_uObjId (generate_object (gObj._M_eObjType)), _M_eObjType (gObj._M_eObjType)
 {
-    if (m_uObjId) ++sm_uALObjCount;
+    if (_M_uObjId) ++sm_uALObjCount;
 }
 
-Object::Object (Object&& gObj) noexcept
-: m_uObjId   (gObj.m_uObjId),
-  m_eObjType (gObj.m_eObjType)
+object::object (object&& gObj) noexcept
+: _M_uObjId   (gObj._M_uObjId),
+  _M_eObjType (gObj._M_eObjType)
 {
-    gObj.m_uObjId = 0;
+    gObj._M_uObjId = 0;
 }
 
-Object& Object::operator = (Object&& gObj) noexcept
+object& object::operator = (object&& gObj) noexcept
 {
     if (this != &gObj)
     {
         reset ();
 
-        m_uObjId   = gObj.m_uObjId;
-        m_eObjType = gObj.m_eObjType;
+        _M_uObjId   = gObj._M_uObjId;
+        _M_eObjType = gObj._M_eObjType;
 
-        gObj.m_uObjId = 0;
+        gObj._M_uObjId = 0;
     }
 
     return *this;
 }
 
-Object& Object::operator = (Object const& gObj) noexcept
+object& object::operator = (object const& gObj) noexcept
 {
-    if (this != &gObj and m_eObjType != gObj.m_eObjType)
+    if (this != &gObj and _M_eObjType != gObj._M_eObjType)
     {
         reset ();
 
-        m_uObjId   = generateObject (gObj.m_eObjType);
-        m_eObjType = gObj.m_eObjType;
+        _M_uObjId   = generate_object (gObj._M_eObjType);
+        _M_eObjType = gObj._M_eObjType;
     }
 
     return *this;
 }
 
-void Object::reset () noexcept
+void object::reset () noexcept
 {
-    if (!m_uObjId) return;
+    if (!_M_uObjId) return;
 
-    switch (m_eObjType)
+    switch (_M_eObjType)
     {
-    case ObjectType::Buffer:
-        ::alDeleteBuffers (1, &m_uObjId);
+    case object_type::buffer:
+        ::alDeleteBuffers (1, &_M_uObjId);
         break;
-    case ObjectType::Source:
-        ::alDeleteSources (1, &m_uObjId);
+    case object_type::source:
+        ::alDeleteSources (1, &_M_uObjId);
         break;
     }
 

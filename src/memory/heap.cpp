@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,79 +22,81 @@
 #include <cppual/memory/heap.h>
 #include <cppual/memory/mop.h>
 
-namespace cppual { namespace Memory {
+#include <iostream>
 
-HeapResource::HeapResource (size_type uSize)
-: m_gOwner (*this),
-  m_pBegin (uSize >= sizeof (FreeBlock) ? ::operator new (uSize) : nullptr),
-  m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
-  m_pFreeBlocks (reinterpret_cast<FreeBlock*> (m_pBegin)),
-  m_bIsMemShared ()
+namespace cppual { namespace memory {
+
+heap_resource::heap_resource (size_type uSize)
+: _M_gOwner (uSize > sizeof(free_block) ? get_default_resource()->max_size() >= uSize ?
+                           *get_default_resource() : *new_delete_resource() : *this),
+  _M_pBegin (uSize > sizeof(free_block) ? _M_gOwner.allocate (uSize, alignof (uptr)) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize) : nullptr),
+  _M_pFreeBlocks (reinterpret_cast<free_block*> (_M_pBegin)),
+  _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
-    if (m_pFreeBlocks != nullptr)
+    if (_M_pFreeBlocks != nullptr)
     {
-        m_pFreeBlocks->size = uSize;
-        m_pFreeBlocks->next = nullptr;
+        _M_pFreeBlocks->size = uSize;
+        _M_pFreeBlocks->next = nullptr;
     }
 }
 
-HeapResource::HeapResource (MemoryResource& pOwner, size_type uSize)
-: m_gOwner (uSize > pOwner.max_size () ? *this : pOwner),
-  m_pBegin (&m_gOwner != this ?
-                             (uSize >= sizeof (FreeBlock) ?
-                                  static_cast<pointer> (pOwner.allocate (
-                                                            uSize, alignof (size_type))) :
-                                  nullptr) :
-                             (uSize > 0 ? ::operator new (uSize) : nullptr)),
-  m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
-  m_pFreeBlocks (reinterpret_cast<FreeBlock*> (m_pBegin)),
-  m_bIsMemShared (&m_gOwner != this ? m_gOwner.is_shared () : false)
+heap_resource::heap_resource (memory_resource& pOwner, size_type uSize)
+: _M_gOwner (uSize > sizeof(free_block) ? uSize > pOwner.max_size () ?
+                                          uSize > get_default_resource()->max_size() ?
+                            *new_delete_resource() : *get_default_resource() : pOwner : *this),
+  _M_pBegin (uSize > sizeof(free_block) ? _M_gOwner.allocate (uSize, alignof (uptr)) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize) : nullptr),
+  _M_pFreeBlocks (static_cast<free_block*> (_M_pBegin)),
+  _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
-    if (m_pFreeBlocks != nullptr)
+    if (_M_pFreeBlocks != nullptr)
     {
-        m_pFreeBlocks->size = uSize;
-        m_pFreeBlocks->next = nullptr;
+        _M_pFreeBlocks->size = uSize;
+        _M_pFreeBlocks->next = nullptr;
+    }
+
+    if (&_M_gOwner != &pOwner)
+    {
+        std::cerr << __func__
+                  << " :: Specified owner cannot be assigned -> 'max_size' exceeded. "
+                     "Using default memory resource instead." << std::endl;
     }
 }
 
-//HeapPool::HeapPool (string& gName, size_type uSize)
-//: m_gSharedName (std::move (gName)),
-//  m_gOwner (*this),
-//  m_pBegin (uSize >= sizeof (FreeBlock) ? new (gName) u8[uSize] : nullptr),
-//  m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
-//  m_pFreeBlocks (reinterpret_cast<FreeBlock*> (m_pBegin)),
-//  m_bIsMemShared (true)
+//heap_resource::heap_resource (string& gName, size_type uSize)
+//: _M_gSharedName (std::move (gName)),
+//  _M_gOwner (*this),
+//  _M_pBegin (uSize > sizeof (FreeBlock) ? new (gName) u8[uSize] : nullptr),
+//  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize) : nullptr),
+//  _M_pFreeBlocks (reinterpret_cast<FreeBlock*> (_M_pBegin)),
+//  _M_bIsMemShared (true)
 //{
-//    if (m_pFreeBlocks != nullptr)
+//    if (_M_pFreeBlocks != nullptr)
 //    {
-//        m_pFreeBlocks->size = uSize;
-//        m_pFreeBlocks->next = nullptr;
+//        _M_pFreeBlocks->size = uSize;
+//        _M_pFreeBlocks->next = nullptr;
 //    }
 //}
 
-HeapResource::~HeapResource ()
+heap_resource::~heap_resource ()
 {
-    if (m_pBegin == nullptr) return;
-
-    if      (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
-    else if (!m_bIsMemShared) ::operator delete (m_pBegin);
+    if (&_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
 }
 
-void* HeapResource::do_allocate (size_type uSize, align_type uAlign) noexcept
+void* heap_resource::do_allocate (size_type uSize, align_type uAlign) noexcept
 {
-    static_assert (sizeof (Header) >= sizeof (FreeBlock), "Header is not big enough!");
-    if (!m_pBegin or !uSize) return nullptr;
+    static_assert (sizeof (header) >= sizeof (free_block), "Header is not big enough!");
+    if (!_M_pBegin or !uSize) return nullptr;
 
     // check free blocks
-    FreeBlock* pPrevFreeBlock = nullptr;
-    FreeBlock* pFreeBlock     = m_pFreeBlocks;
+    free_block* pPrevFreeBlock = nullptr;
+    free_block* pFreeBlock     = _M_pFreeBlocks;
 
     while (pFreeBlock)
     {
         // calculate uAdjust needed to keep object correctly aligned
-        size_type uAdjust = alignAdjustmentHeader (pFreeBlock,
-                                                   uAlign,
-                                                   sizeof (Header));
+        size_type uAdjust = align_adjustment_header (pFreeBlock, uAlign, sizeof (header));
 
         // if allocation doesn't fit in this FreeBlock, try the next
         if(pFreeBlock->size < (uSize + uAdjust))
@@ -105,30 +107,30 @@ void* HeapResource::do_allocate (size_type uSize, align_type uAlign) noexcept
         }
 
         // if allocations in the remaining memory will be impossible
-        if((pFreeBlock->size - uSize - uAdjust) <= sizeof (Header))
+        if((pFreeBlock->size - uSize - uAdjust) <= sizeof (header))
         {
             // increase allocation size instead of creating a new FreeBlock
             uSize = pFreeBlock->size;
 
             if(pPrevFreeBlock != nullptr) pPrevFreeBlock->next = pFreeBlock->next;
-            else m_pFreeBlocks = pFreeBlock->next;
+            else _M_pFreeBlocks = pFreeBlock->next;
         }
         else
         {
             // else create a new FreeBlock containing remaining memory
-            FreeBlock* pNextBlock = pFreeBlock + uSize + uAdjust;
+            free_block* pNextBlock = pFreeBlock + uSize + uAdjust;
             pNextBlock->size      = pFreeBlock->size - uSize - uAdjust;
             pNextBlock->next      = pFreeBlock->next;
 
             if(pPrevFreeBlock != nullptr)
                 pPrevFreeBlock->next = pNextBlock;
             else
-                m_pFreeBlocks = pNextBlock;
+                _M_pFreeBlocks = pNextBlock;
         }
 
-        size_type uAlignedAddr = reinterpret_cast<size_type> (pFreeBlock) + uAdjust;
+        auto uAlignedAddr = reinterpret_cast<uptr> (pFreeBlock) + uAdjust;
 
-        Header* pHeader = reinterpret_cast<Header*> (uAlignedAddr - sizeof (Header));
+        header* pHeader = reinterpret_cast<header*> (uAlignedAddr - sizeof (header));
         pHeader->size   = uSize + uAdjust;
         pHeader->adjust = uAdjust;
 
@@ -139,12 +141,12 @@ void* HeapResource::do_allocate (size_type uSize, align_type uAlign) noexcept
     return nullptr;
 }
 
-void HeapResource::do_deallocate (void* p, size_type uSize, align_type)
+void heap_resource::do_deallocate (void* p, size_type uSize, align_type)
 {
-    if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
+    if (_M_pEnd <= p or p < _M_pBegin) throw std::out_of_range ("pointer is outside the buffer");
 
-    Header* pHeader = reinterpret_cast<Header*>
-                      (static_cast<math_pointer> (p) - sizeof (Header));
+    header* pHeader = reinterpret_cast<header*>
+                      (static_cast<math_pointer> (p) - sizeof (header));
 
     if (pHeader->size < uSize) throw std::length_error ("deallocate size doesn't match");
     uSize = pHeader->size;
@@ -160,8 +162,8 @@ void HeapResource::do_deallocate (void* p, size_type uSize, align_type)
     {
         bSearch = false;
 
-        FreeBlock* pPrevFreeBlock = nullptr;
-        FreeBlock* pFreeBlock     = m_pFreeBlocks;
+        free_block* pPrevFreeBlock = nullptr;
+        free_block* pFreeBlock     = _M_pFreeBlocks;
 
         while (pFreeBlock != nullptr)
         {
@@ -179,12 +181,12 @@ void HeapResource::do_deallocate (void* p, size_type uSize, align_type)
             }
             else if (uBlockEnd == reinterpret_cast<size_type> (pFreeBlock))
             {
-                FreeBlock* pNewFreeBlock = reinterpret_cast<FreeBlock*> (uBlockStart);
+                free_block* pNewFreeBlock = reinterpret_cast<free_block*> (uBlockStart);
                 pNewFreeBlock->next      = pFreeBlock->next;
                 pNewFreeBlock->size      = uBlockSize + pFreeBlock->size;
 
-                if(pFreeBlock == m_pFreeBlocks)
-                    m_pFreeBlocks = pNewFreeBlock;
+                if(pFreeBlock == _M_pFreeBlocks)
+                    _M_pFreeBlocks = pNewFreeBlock;
                 else if(pPrevFreeBlock != pNewFreeBlock)
                     pPrevFreeBlock->next = pNewFreeBlock;
 
@@ -204,42 +206,42 @@ void HeapResource::do_deallocate (void* p, size_type uSize, align_type)
 
     if (!blockMerged)
     {
-        FreeBlock* pBlock = reinterpret_cast<FreeBlock*> (reinterpret_cast<math_pointer>(p) - pHeader->adjust);
+        free_block* pBlock = reinterpret_cast<free_block*> (reinterpret_cast<math_pointer>(p) - pHeader->adjust);
         pBlock->size      = uBlockSize;
-        pBlock->next      = m_pFreeBlocks;
-        m_pFreeBlocks     = pBlock;
+        pBlock->next      = _M_pFreeBlocks;
+        _M_pFreeBlocks     = pBlock;
     }
 }
 
-void HeapResource::clear () noexcept
+void heap_resource::clear () noexcept
 {
-    m_pFreeBlocks       = reinterpret_cast<FreeBlock*> (m_pBegin);
-    m_pFreeBlocks->size = capacity ();
-    m_pFreeBlocks->next = nullptr;
+    _M_pFreeBlocks       = reinterpret_cast<free_block*> (_M_pBegin);
+    _M_pFreeBlocks->size = capacity ();
+    _M_pFreeBlocks->next = nullptr;
 }
 
 // =========================================================
 // List Allocator
 // =========================================================
 
-inline ListResource::Header* header (void* p) noexcept
+inline list_resource::header* shift_to_header (void* p) noexcept
 {
-    return reinterpret_cast<ListResource::Header*>
-            (reinterpret_cast<uptr> (p) - sizeof (ListResource::Header));
+    return reinterpret_cast<list_resource::header*>
+            (reinterpret_cast<uptr> (p) - sizeof (list_resource::header));
 }
 
-inline void* forward (ListResource::Header*    const hdr,
-                      ListResource::Header*    const prev_hdr,
-                      ListResource::size_type  const size,
-                      ListResource::align_type const align) noexcept
+inline void* forward_alloc (list_resource::header*    const hdr,
+                            list_resource::header*    const prev_hdr,
+                            list_resource::size_type  const size,
+                            list_resource::align_type const align) noexcept
 {
-    typedef ListResource::Header Header;
+    typedef list_resource::header header;
 
     // get aligned address from header pointer
-    void* ptr = nextAlignedAddr (hdr, align);
+    void* ptr = next_aligned_addr (hdr, align);
 
     // determine the location of the new forwarding header
-    Header* split_hdr = static_cast<Header*> (ptr) + size;
+    header* split_hdr = static_cast<header*> (ptr) + size;
 
     split_hdr->size = hdr->size - size;
     split_hdr->next = hdr->next;
@@ -248,19 +250,18 @@ inline void* forward (ListResource::Header*    const hdr,
     return ptr;
 }
 
-inline ListResource::Header* find (ListResource::Header*          hdr,
-                                   ListResource::Header*&         prev_hdr,
-                                   ListResource::size_type  const size,
-                                   ListResource::align_type const align) noexcept
+inline list_resource::header* find (list_resource::header*          hdr,
+                                    list_resource::header*&         prev_hdr,
+                                    list_resource::size_type  const size,
+                                    list_resource::align_type const align) noexcept
 {
-    typedef ListResource::Header       Header ;
-    typedef ListResource::math_pointer pointer;
+    typedef list_resource::header       header ;
+    typedef list_resource::math_pointer pointer;
 
-    for (Header* pCurHeader = hdr; pCurHeader;
-         prev_hdr = pCurHeader, pCurHeader = pCurHeader->next)
+    for (header* pCurHeader = hdr; pCurHeader; prev_hdr = pCurHeader, pCurHeader = pCurHeader->next)
     {
-        if (pCurHeader->size >= size and
-                (static_cast<pointer> (nextAlignedAddr (pCurHeader, align)) + pCurHeader->size)
+        if (pCurHeader->size >= size &&
+                (static_cast<pointer> (next_aligned_addr (pCurHeader, align)) + pCurHeader->size)
                  <= static_cast<pointer> (static_cast<void*> (pCurHeader + pCurHeader->size)))
             return pCurHeader;
     }
@@ -271,50 +272,55 @@ inline ListResource::Header* find (ListResource::Header*          hdr,
 
 // =========================================================
 
-ListResource::ListResource (size_type uSize)
-: m_pBegin (uSize > sizeof (Header) ? ::operator new (uSize + sizeof (Header)) : nullptr),
-  m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize + sizeof (Header)) : nullptr),
-  m_pFirstFreeBlock (static_cast<Header*> (m_pBegin)),
-  m_gOwner (*this),
-  m_bIsMemShared ()
+list_resource::list_resource (size_type uSize)
+: _M_gOwner(uSize > sizeof (header) ? get_default_resource()->max_size() >= uSize ?
+                                     *get_default_resource() : *new_delete_resource() : *this),
+  _M_pBegin (uSize > sizeof (header) ? _M_gOwner.allocate (uSize, alignof (header)) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize + sizeof (header)) : nullptr),
+  _M_pFirstFreeBlock (static_cast<header*> (_M_pBegin)),
+  _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
-    if (m_pFirstFreeBlock != nullptr)
+    if (_M_pFirstFreeBlock != nullptr)
     {
-        m_pFirstFreeBlock->size = capacity () - sizeof (Header);
-        m_pFirstFreeBlock->next = nullptr;
+        _M_pFirstFreeBlock->size = capacity () - sizeof (header);
+        _M_pFirstFreeBlock->next = nullptr;
     }
 }
 
-ListResource::ListResource (MemoryResource& pOwner, size_type uSize)
-: m_pBegin (uSize > sizeof (Header) and uSize <= pOwner.max_size () ?
-                static_cast<pointer> (pOwner.allocate (uSize, alignof (Header))) :
-                nullptr),
-  m_pEnd (m_pBegin != nullptr ? address (m_pBegin, uSize) : nullptr),
-  m_pFirstFreeBlock (static_cast<Header*> (m_pBegin)),
-  m_gOwner (m_pBegin ? pOwner : *this),
-  m_bIsMemShared (&m_gOwner != this ? m_gOwner.is_shared () : false)
+list_resource::list_resource (memory_resource& pOwner, size_type uSize)
+: _M_gOwner (uSize > sizeof (header) ? uSize > pOwner.max_size () ?
+                                       uSize > get_default_resource()->max_size() ?
+                                      *new_delete_resource() : *get_default_resource() : pOwner : *this),
+  _M_pBegin (uSize > sizeof (header) ? _M_gOwner.allocate (uSize, alignof (header)) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize) : nullptr),
+  _M_pFirstFreeBlock (static_cast<header*> (_M_pBegin)),
+  _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
-    if (m_pFirstFreeBlock != nullptr)
+    if (_M_pFirstFreeBlock != nullptr)
     {
-        m_pFirstFreeBlock->size = distance (m_pEnd, m_pBegin);
-        m_pFirstFreeBlock->next = nullptr;
+        _M_pFirstFreeBlock->size = distance (_M_pEnd, _M_pBegin);
+        _M_pFirstFreeBlock->next = nullptr;
+    }
+
+    if (&_M_gOwner != &pOwner)
+    {
+        std::cerr << __func__
+                  << " :: Specified owner cannot be assigned -> 'max_size' exceeded. "
+                     "Using default memory resource instead." << std::endl;
     }
 }
 
-ListResource::~ListResource ()
+list_resource::~list_resource ()
 {
-    if (m_pBegin == nullptr) return;
-
-    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
-    else if (!m_bIsMemShared) ::operator delete (m_pBegin);
+    if (&_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
 }
 
-void ListResource::defragment () noexcept
+void list_resource::defragment () noexcept
 {
-    for (Header* pCurHeader = m_pFirstFreeBlock; pCurHeader;
+    for (header* pCurHeader = _M_pFirstFreeBlock; pCurHeader;
          pCurHeader = pCurHeader->next)
     {
-        for (Header* pItHeader = m_pFirstFreeBlock->next; pItHeader;
+        for (header* pItHeader = _M_pFirstFreeBlock->next; pItHeader;
              pItHeader = pItHeader->next)
         {
             if ((pCurHeader + pCurHeader->size) == pItHeader)
@@ -326,43 +332,57 @@ void ListResource::defragment () noexcept
     }
 }
 
-void* ListResource::do_allocate (size_type uSize, align_type uAlign) noexcept
+void* list_resource::do_allocate (size_type uSize, align_type uAlign) noexcept
 {
-    if (m_pFirstFreeBlock and uSize)
+    if (_M_pFirstFreeBlock and uSize)
     {
-        Header* pPrevHeader   = nullptr;
-        Header* pTargetHeader = find (m_pFirstFreeBlock, pPrevHeader, uSize, uAlign);
+        header* pPrevHeader   = nullptr;
+        header* pTargetHeader = find (_M_pFirstFreeBlock, pPrevHeader, uSize, uAlign);
 
         if (pTargetHeader)
-            return forward (pTargetHeader, pPrevHeader, uSize, uAlign);
+            return forward_alloc (pTargetHeader, pPrevHeader, uSize, uAlign);
     }
 
     // couldn't find free block large enough!
     return nullptr;
 }
 
-void ListResource::do_deallocate (void* p, size_type uSize, align_type)
+void list_resource::do_deallocate (void* p, size_type uSize, align_type /*uAlign*/)
 {
-    if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
+    if (!_M_pFirstFreeBlock || _M_pEnd <= p || p < _M_pBegin)
+        throw std::out_of_range ("pointer is outside the buffer");
 
-    Header* pHeader = header (p);
+    auto pHeader = shift_to_header (p);
+    auto bFound  = false;
 
-    if (pHeader->size < uSize) throw std::length_error ("deallocate size doesn't match");
-    uSize = pHeader->size;
+    if (pHeader->size != uSize) throw std::length_error ("deallocate size doesn't match");
+
+    header* pPrevHdr = _M_pFirstFreeBlock;
+
+    for (header* pCurHdr = pPrevHdr; pCurHdr; pPrevHdr = pCurHdr, pCurHdr = pCurHdr->next)
+    {
+        if (pCurHdr == pHeader)
+        {
+            pPrevHdr->next = pHeader->next;
+            bFound = true;
+        }
+    }
+
+    if (bFound) pPrevHdr->next = pHeader;
+    else throw std::logic_error("pointer NOT found!");
 }
 
-void ListResource::clear () noexcept
+void list_resource::clear () noexcept
 {
-    m_pFirstFreeBlock       = static_cast<Header*> (static_cast<void*> (m_pBegin));
-    m_pFirstFreeBlock->size = distance (m_pEnd, m_pBegin);
-    m_pFirstFreeBlock->next = nullptr;
+    _M_pFirstFreeBlock->size = distance (_M_pEnd, _M_pBegin);
+    _M_pFirstFreeBlock->next = nullptr;
 }
 
-ListResource::size_type ListResource::max_size () const noexcept
+list_resource::size_type list_resource::max_size () const noexcept
 {
     size_type uMaxSize = 0;
 
-    for (Header* pCurHeader = m_pFirstFreeBlock; pCurHeader; pCurHeader = pCurHeader->next)
+    for (header* pCurHeader = _M_pFirstFreeBlock; pCurHeader; pCurHeader = pCurHeader->next)
         if (uMaxSize < pCurHeader->size) uMaxSize = pCurHeader->size;
     return uMaxSize;
 }

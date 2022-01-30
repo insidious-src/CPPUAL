@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,75 +28,87 @@
 
 namespace cppual {
 
-template <typename>
-class Reactive;
+// =========================================================
 
-typedef Reactive<char>    reactive_char;
-typedef Reactive<uchar>   reactive_uchar;
-typedef Reactive<char16>  reactive_char16;
-typedef Reactive<char32>  reactive_char32;
-typedef Reactive<wchar>   reactive_wchar;
-typedef Reactive<bool>    reactive_bool;
-typedef Reactive<short>   reactive_short;
-typedef Reactive<ushort>  reactive_ushort;
-typedef Reactive<int>     reactive_int;
-typedef Reactive<uint>    reactive_uint;
-typedef Reactive<long>    reactive_long;
-typedef Reactive<ulong>   reactive_ulong;
-typedef Reactive<long64>  reactive_long64;
-typedef Reactive<ulong64> reactive_ulong64;
-typedef Reactive<float>   reactive_float;
-typedef Reactive<double>  reactive_double;
-typedef Reactive<ldouble> reactive_ldouble;
+template <typename T,
+          typename A = signal_allocator<void(T const&)>
+          >
+class reactive;
 
-template <typename T>
-class Reactive : Signal<void(T const&)>
+// =========================================================
+
+typedef reactive<char>    reactive_char   ;
+typedef reactive<uchar>   reactive_uchar  ;
+typedef reactive<char16>  reactive_char16 ;
+typedef reactive<char32>  reactive_char32 ;
+typedef reactive<wchar>   reactive_wchar  ;
+typedef reactive<bool>    reactive_bool   ;
+typedef reactive<short>   reactive_short  ;
+typedef reactive<ushort>  reactive_ushort ;
+typedef reactive<int>     reactive_int    ;
+typedef reactive<uint>    reactive_uint   ;
+typedef reactive<long>    reactive_long   ;
+typedef reactive<ulong>   reactive_ulong  ;
+typedef reactive<long64>  reactive_long64 ;
+typedef reactive<ulong64> reactive_ulong64;
+typedef reactive<float>   reactive_float  ;
+typedef reactive<double>  reactive_double ;
+typedef reactive<ldouble> reactive_ldouble;
+
+// =========================================================
+
+template <typename T, typename A>
+class reactive : signal<void(T const&), A>
 {
 public:
-    typedef T        value_type;
-    typedef T&       reference;
+    static_assert (!std::is_void<T>::value, "T is void");
+
+    typedef T        value_type     ;
+    typedef T&       reference      ;
     typedef T const& const_reference;
 
-    constexpr Reactive () noexcept = default;
-    inline Reactive (Reactive&&) = default;
-    inline Reactive (Reactive const&) = default;
-    inline Reactive& operator = (Reactive&&) = default;
+    constexpr reactive () noexcept = default;
+    inline reactive (reactive&&) = default;
+    inline reactive (reactive const&) = default;
+    inline reactive& operator = (reactive&&) = default;
 
-    inline Reactive (value_type&&    value) : m_value (std::forward<T> (value)) { }
-    inline Reactive (const_reference value) : m_value (value)                   { }
+    inline reactive (value_type&&    value) : _M_value (std::forward<T> (value)) { }
+    inline reactive (const_reference value) : _M_value (value)                   { }
 
-    inline Reactive& operator = (Reactive const& gObj)
+    inline reactive& operator = (reactive const& gObj)
     {
         if (this != &gObj)
         {
-            Signal<void(T const&)>::operator = (gObj);
-            m_value = gObj.m_value;
-            *this (m_value);
+            signal<void(T const&)>::operator = (gObj);
+            _M_value = gObj._M_value;
+            (*this)(_M_value);
         }
 
         return *this;
     }
 
-    inline Reactive& operator = (value_type&& value)
+    inline reactive& operator = (value_type&& value)
     {
-        m_value = std::forward<T> (value);
-        *this (m_value);
+        _M_value = std::forward<T> (value);
+        (*this)(_M_value);
         return *this;
     }
 
-    inline Reactive& operator = (const_reference value)
+    inline reactive& operator = (const_reference value)
     {
-        m_value = value;
-        *this (m_value);
+        _M_value = value;
+        (*this)(_M_value);
         return *this;
     }
 
     constexpr operator const_reference () const noexcept
-    { return m_value; }
+    { return _M_value; }
 
 private:
-    T m_value;
+    T _M_value;
 };
+
+// =========================================================
 
 } // cppual
 

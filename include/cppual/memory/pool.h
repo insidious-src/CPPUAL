@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,73 +27,77 @@
 #include <cppual/memory/shared.h>
 #include <cppual/memory/mop.h>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
-class MonotonicResource final : public MemoryResource, NonCopyable
+// =========================================================
+
+class monotonic_pool_resource final : public memory_resource
 {
 public:
     /// local memory
-    MonotonicResource (size_type  blk_count,
-                       size_type  blk_size,
-                       align_type blk_align);
+    monotonic_pool_resource (size_type  blk_count,
+                             size_type  blk_size,
+                             align_type blk_align = alignof(uptr));
 
     /// nested allocators
-    MonotonicResource (MemoryResource& allocator,
-                       size_type   blk_count,
-                       size_type   blk_size,
-                       align_type  blk_align);
+    monotonic_pool_resource (memory_resource& allocator,
+                             size_type        blk_count,
+                             size_type        blk_size,
+                             align_type       blk_align = alignof(uptr));
 
     /// shared memory
-    MonotonicResource (SharedObject& shared_obj,
-                       size_type     blk_count,
-                       size_type     blk_size,
-                       align_type    blk_align);
+    monotonic_pool_resource (shared_object& shared_obj,
+                             size_type     blk_count,
+                             size_type     blk_size,
+                             align_type    blk_align = alignof(uptr));
 
-    ~MonotonicResource ();
-    void clear     () noexcept;
+    ~monotonic_pool_resource ();
+    void clear () noexcept;
 
-    size_type blockSize  () const noexcept { return m_uBlkSize ; }
-    size_type blockAlign () const noexcept { return m_uBlkAlign; }
-    size_type blockCount () const noexcept { return m_uBlkNum  ; }
-
-    bool is_equal (base_type const& gObj) const noexcept
-    { return &gObj == &m_gOwner;                   }
+    size_type block_size  () const noexcept { return _M_uBlkSize ; }
+    size_type block_align () const noexcept { return _M_uBlkAlign; }
+    size_type block_count () const noexcept { return _M_uBlkNum  ; }
 
     size_type max_size () const noexcept
-    { return m_pBegin != nullptr ? m_uBlkSize : 0; }
+    { return _M_pBegin != nullptr ? _M_uBlkSize : 0; }
 
     size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd  ) -
-                                      (static_cast<math_pointer> (m_pBegin) +
-                                       alignAdjust (m_pBegin, m_uBlkAlign)));
+        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
+                                      (static_cast<math_pointer> (_M_pBegin) +
+                                       align_adjust (_M_pBegin, _M_uBlkAlign)));
     }
 
     bool is_shared () const noexcept
-    { return false;    }
+    { return false; }
 
-    MemoryResource& owner () const noexcept
-    { return m_gOwner; }
+    memory_resource& owner () const noexcept
+    { return _M_gOwner; }
 
 private:
-    MemoryResource&  m_gOwner;
-    pointer const    m_pBegin;
-    pointer const    m_pEnd;
-    pointer*         m_pFreeList;
-    size_type  const m_uBlkSize;
-    align_type const m_uBlkAlign;
-    size_type        m_uBlkNum;
+    memory_resource& _M_gOwner      ;
+    pointer const    _M_pBegin      ;
+    pointer const    _M_pEnd        ;
+    pointer*         _M_pFreeList   ;
+    size_type  const _M_uBlkSize    ;
+    align_type const _M_uBlkAlign   ;
+    size_type        _M_uBlkNum     ;
+    cbool            _M_bIsMemShared;
 
-    void  initialize    ()                                  noexcept;
-    void* do_allocate   (size_type size, align_type align)  noexcept;
+    void  initialize    () noexcept;
+    void* do_allocate   (size_type size, align_type align);
     void  do_deallocate (void* p, size_type size, align_type align) ;
 
-    bool  do_is_equal   (base_type const& gObj) const noexcept
-    { return &gObj == &m_gOwner; }
+    bool  do_is_equal   (base_const_reference gObj) const noexcept
+    { return &gObj == this; }
 };
 
-template <class T>
-using MonotonicAllocator = Allocator <T, MonotonicResource>;
+// =========================================================
+
+template <typename T>
+using monotonic_pool_allocator = allocator <T, monotonic_pool_resource>;
+
+// =========================================================
 
 } } // namespace Memory
 

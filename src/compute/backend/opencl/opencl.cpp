@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,13 @@
 #include <cstring>
 #include <memory>
 
-namespace cppual { namespace Compute { namespace CL {
+namespace cppual { namespace compute { namespace cl {
 
 // =========================================================
 
 namespace { // optimize for internal unit usage
+
+
 
 } // anonymous namespace
 
@@ -112,47 +114,47 @@ string_type opencl_error::to_string(i32 error)
 
 // =========================================================
 
-Interface<ResourceType::Device>::~Interface() noexcept
+interface<resource_type::device>::~interface() noexcept
 {
     if (handle ()) ::clReleaseDevice (handle ());
 }
 
-Interface<ResourceType::Context>::~Interface () noexcept
+interface<resource_type::context>::~interface () noexcept
 {
     if (handle ()) ::clReleaseContext (handle ());
 }
 
-Interface<ResourceType::Shader>::~Interface () noexcept
+interface<resource_type::shader>::~interface () noexcept
 {
     if (handle ()) ::clReleaseKernel (handle ());
 }
 
-Interface<ResourceType::Program>::~Interface () noexcept
+interface<resource_type::program>::~interface () noexcept
 {
     if (handle ()) ::clReleaseProgram (handle ());
 }
 
-Interface<ResourceType::Queue>::~Interface () noexcept
+interface<resource_type::queue>::~interface () noexcept
 {
     if (handle ()) ::clReleaseCommandQueue (handle ());
 }
 
-Interface<ResourceType::Buffer>::~Interface () noexcept
+interface<resource_type::buffer>::~interface () noexcept
 {
     if (handle ()) ::clReleaseMemObject (handle ());
 }
 
-Interface<ResourceType::Image>::~Interface () noexcept
+interface<resource_type::image>::~interface () noexcept
 {
     if (handle ()) ::clReleaseMemObject (handle ());
 }
 
-Interface<ResourceType::Event>::~Interface () noexcept
+interface<resource_type::event>::~interface () noexcept
 {
     if (handle ()) ::clReleaseEvent (handle ());
 }
 
-Interface<ResourceType::Sampler>::~Interface () noexcept
+interface<resource_type::sampler>::~interface () noexcept
 {
     if (handle ()) ::clReleaseSampler(handle ());
 }

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,48 +26,49 @@
 #include <cppual/gfx/coord.h>
 #include <cppual/multimedia/audio/al/alsource.h>
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-class SoundEmitter : public SoundSource
+class sound_emitter : public sound_source
 {
 public:
-    using    SoundSource::SoundSource;
-    explicit SoundEmitter (SoundEmitter const&) noexcept;
-    SoundEmitter& operator = (SoundEmitter&&) noexcept = default;
-    SoundEmitter& operator = (SoundEmitter const&) noexcept;
+    using sound_source::sound_source;
 
-    EmitType getType () const noexcept;
-    void     setType (Audio::EmitType type) noexcept;
-    void     setRelativeToListener (bool value) noexcept;
-    bool     isRelativeToListener () const noexcept;
+    explicit sound_emitter (sound_emitter const&) noexcept;
+    sound_emitter& operator = (sound_emitter&&) noexcept = default;
+    sound_emitter& operator = (sound_emitter const&) noexcept;
 
-    void     setMinVolume (float value) noexcept;
-    float    getMinVolume () const noexcept;
-    void     setMaxVolume (float value) noexcept;
-    float    getMaxVolume () const noexcept;
-    void     setConeOuterVolume (float value) noexcept;
-    float    getConeOuterVolume () const noexcept;
+    emit_type type () const noexcept;
+    void      set_type (audio::emit_type type) noexcept;
+    void      set_relative_to_listener (bool value) noexcept;
+    bool      is_relative_to_listener () const noexcept;
 
-    void     setReferenceDistance (float value) noexcept;
-    float    getReferenceDistance () const noexcept;
-    void     setCancelation (float value) noexcept;
-    float    getCancelation () const noexcept;
-    void     setMaxDistance (float value) noexcept;
-    float    getMaxDistance () const noexcept;
-    void     setPosition (point3f const& pos) noexcept;
-    point3f  getPosition () const noexcept;
-    void     setVelocity (point3f const& pos) noexcept;
-    point3f  getVelocity () const noexcept;
-    void     setDirection (point3f const& pos) noexcept;
-    point3f  getDirection () const noexcept;
+    void      set_min_volume (float value) noexcept;
+    float     min_volume () const noexcept;
+    void      set_max_volume (float value) noexcept;
+    float     max_volume () const noexcept;
+    void      set_cone_outer_volume (float value) noexcept;
+    float     cone_outer_volume () const noexcept;
 
-    void     setConeInnerAngle (anglef angle) noexcept;
-    anglef   getConeInnerAngle () const noexcept;
-    void     setConeOuterAngle (anglef angle) noexcept;
-    anglef   getConeOuterAngle () const noexcept;
+    void      set_reference_distance (float value) noexcept;
+    float     reference_distance () const noexcept;
+    void      set_cancelation (float value) noexcept;
+    float     cancelation () const noexcept;
+    void      set_max_distance (float value) noexcept;
+    float     max_distance () const noexcept;
+    void      set_position (point3f const& pos) noexcept;
+    point3f   position () const noexcept;
+    void      set_velocity (point3f const& pos) noexcept;
+    point3f   velocity () const noexcept;
+    void      set_direction (point3f const& pos) noexcept;
+    point3f   direction () const noexcept;
+
+    void      set_cone_inner_angle (anglef angle) noexcept;
+    anglef    cone_inner_angle () const noexcept;
+    void      set_cone_outer_angle (anglef angle) noexcept;
+    anglef    cone_outer_angle () const noexcept;
 
 private:
-    void copyEmitterState (SoundEmitter const&) noexcept;
+    void copy_emitter_state (sound_emitter const&) noexcept;
 };
 
 } } } // namespace Audio

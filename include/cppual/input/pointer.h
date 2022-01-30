@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,82 +27,58 @@
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/coord.h>
 
-namespace cppual { namespace Input {
+namespace cppual { namespace input {
 
-struct Touch;
-struct Mouse;
-struct MouseEvent;
-
-// =========================================================
-
-// specialized for touch gestures
-class TouchEvent
-{
-public:
-    typedef u16 size_type;
-
-    enum class Type : unsigned char
-    {
-        Move,
-        Press,
-        Release
-    };
-
-    struct TouchData
-    {
-        size_type id;
-        point2i   pos;
-    };
-
-private:
-};
+struct touch_event;
+struct mouse;
+struct mouse_event;
 
 // =========================================================
 
-class MouseQueue : NonConstructible
+class mouse_queue : non_constructible
 {
 public:
-    typedef MouseEvent event_type;
+    typedef mouse_event event_type;
 
     static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
 
 // =========================================================
 
-class TouchQueue : NonConstructible
+class touch_queue : non_constructible
 {
 public:
-    typedef TouchEvent event_type;
+    typedef touch_event event_type;
 
     static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
 
 // =========================================================
 
-struct Mouse
+struct mouse
 {
-    typedef MouseQueue queue_type;
+    typedef mouse_queue queue_type;
 
     enum
     {
-        ButtonCount = 7
+        button_count = 7
     };
 
-    enum Button
+    enum button
     {
-        Left     = 1 << 0,
-        Right    = 1 << 1,
-        Middle   = 1 << 2,
-        XButton1 = 1 << 3,
-        XButton2 = 1 << 4,
-        XButton3 = 1 << 5,
-        XButton4 = 1 << 6
+        left     = 1 << 0,
+        right    = 1 << 1,
+        middle   = 1 << 2,
+        xbutton1 = 1 << 3,
+        xbutton2 = 1 << 4,
+        xbutton3 = 1 << 5,
+        xbutton4 = 1 << 6
     };
 
     static point2i position ();
-    static void    setPosition (point2i pos);
-    static bool    isButtonPressed (u8 btn);
-    static bool    isConnected () noexcept;
+    static void    set_position (point2i pos);
+    static bool    is_button_pressed (u8 btn);
+    static bool    is_connected () noexcept;
 };
 
 } } // namespace Input

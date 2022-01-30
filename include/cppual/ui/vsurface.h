@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,17 @@
 #include <cppual/gfx/gl/texture.h>
 #include <cppual/string.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class ProxyRenderable final : public IPlatformWindow
+class proxy_renderable final : public platform_wnd_interface
 {
 public:
-    ProxyRenderable () = delete;
-    ProxyRenderable (IPlatformWindow*) noexcept;
-    ProxyRenderable (ProxyRenderable const&) noexcept;
-    ProxyRenderable (shared_window const& owner, Rect const& rect) noexcept;
-    ProxyRenderable& operator = (IPlatformWindow*) noexcept;
-    ProxyRenderable& operator = (ProxyRenderable const&) noexcept;
+    proxy_renderable () = delete;
+    proxy_renderable (platform_wnd_interface*) noexcept;
+    proxy_renderable (proxy_renderable const&) noexcept;
+    proxy_renderable (shared_window const& owner, rect const& rect) noexcept;
+    proxy_renderable& operator = (platform_wnd_interface*) noexcept;
+    proxy_renderable& operator = (proxy_renderable const&) noexcept;
 
     string title () const noexcept { return string (); }
     void   setTitle (string const&) noexcept { }
@@ -58,33 +58,33 @@ public:
     void   setMimimumSize (point2u) noexcept { }
     void   setMaximumSize (point2u) noexcept { }
     void   flash (uint) noexcept { }
-    void   setGeometry (Rect const&) noexcept;
+    void   setGeometry (rect const&) noexcept;
     void   setOwner (const_pointer) noexcept;
     void   move (point2i) noexcept;
     void   map () noexcept;
     void   unmap () noexcept;
 
-    WindowFlags flags () const { return WindowFlags (); }
-    void        setFlags (WindowFlags) { }
+    window_flags flags () const { return window_flags (); }
+    void        setFlags (window_flags) { }
 
-    inline ~ProxyRenderable     ()       noexcept { unmap ();            }
-    inline weak_window owner    () const noexcept { return m_pParent;    }
-    inline Rect        geometry () const noexcept { return m_gRect;      }
-    inline bool        isMapped () const noexcept { return m_bIsVisible; }
+    inline ~proxy_renderable    ()       noexcept { unmap ();            }
+    inline weak_window owner    () const noexcept { return _M_pParent;    }
+    inline rect        geometry () const noexcept { return _M_gRect;      }
+    inline bool        isMapped () const noexcept { return _M_bIsVisible; }
 
     inline u32 screen () const noexcept
-    { return m_pParent != nullptr ? m_pParent->screen () : 0; }
+    { return _M_pParent != nullptr ? _M_pParent->screen () : 0; }
 
     inline void raise () noexcept
-    { if (m_pParent != nullptr) m_pParent->raise (); }
+    { if (_M_pParent != nullptr) _M_pParent->raise (); }
 
     inline void lower () noexcept
-    { if (m_pParent != nullptr) m_pParent->lower (); }
+    { if (_M_pParent != nullptr) _M_pParent->lower (); }
 
 private:
-    shared_window m_pParent;
-    Rect          m_gRect;
-    bool          m_bIsVisible;
+    shared_window _M_pParent;
+    rect          _M_gRect;
+    bool          _M_bIsVisible;
 };
 
 } } // namespace Ui

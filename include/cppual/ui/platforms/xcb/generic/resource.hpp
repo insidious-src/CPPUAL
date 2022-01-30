@@ -46,12 +46,12 @@ class resource
 protected:
     using self = resource<Connection, ResourceId, Interfaces ...>;
 
-    Connection m_c;
+    Connection _M_c;
     // reference counting for Resource object
-    std::shared_ptr<ResourceId> m_resource;
+    std::shared_ptr<ResourceId> _M_resource;
 
     resource(Connection c)
-        : m_c(c)
+        : _M_c(c)
     {}
 
     template<typename C, typename Create, typename Destroy>
@@ -69,11 +69,11 @@ protected:
         // when create() throws, then the shared_ptr will not be created
         create(std::forward<C>(c), xid);
 
-        resource.m_resource =
+        resource._M_resource =
                 std::shared_ptr<ResourceId>(new ResourceId(xid),
                                             [&](ResourceId * r)
         {
-                destroy(resource.m_c, *r);
+                destroy(resource._M_c, *r);
                 delete r;
     });
 
@@ -83,47 +83,47 @@ protected:
 public:
     template<typename C>
     resource(C && c, const ResourceId & resource_id)
-        : m_c(std::forward<C>(c))
-        , m_resource(std::make_shared<ResourceId>(resource_id))
+        : _M_c(std::forward<C>(c))
+        , _M_resource(std::make_shared<ResourceId>(resource_id))
     {}
 
     resource(const resource<Connection, ResourceId, Interfaces ...> & other)
-        : m_c(other.m_c)
-        , m_resource(other.m_resource)
+        : _M_c(other._M_c)
+        , _M_resource(other._M_resource)
     {}
 
     virtual
     void
     operator=(const resource<Connection, ResourceId, Interfaces ...> & other)
     {
-        m_c = other.m_c;
-        m_resource = other.m_resource;
+        _M_c = other._M_c;
+        _M_resource = other._M_resource;
     }
 
     virtual
     void
     operator=(const ResourceId & resource)
     {
-        m_resource = std::make_shared<ResourceId>(resource);
+        _M_resource = std::make_shared<ResourceId>(resource);
     }
 
     virtual
     const ResourceId &
     operator*(void) const
     {
-        return *m_resource;
+        return *_M_resource;
     }
 
     virtual
     operator const ResourceId &(void) const
     {
-        return *m_resource;
+        return *_M_resource;
     }
 
     Connection
     connection(void) const
     {
-        return m_c;
+        return _M_c;
     }
 }; // class resource
 

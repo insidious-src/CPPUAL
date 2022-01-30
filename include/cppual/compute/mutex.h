@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@
 #define CPPUAL_CONCURENCY_MUTEX_H_
 #ifdef __cplusplus
 
-#include <atomic>
 #include <cppual/compute/cv.h>
 
+#include <atomic>
 
 namespace cppual { namespace Compute {
 
@@ -37,7 +37,7 @@ template <class T>
 class UniqueLock final
 {
 private:
-    //T& m_gMutex;
+    //T& _M_gMutex;
 };
 
 template <class T>
@@ -47,8 +47,8 @@ public:
     typedef std::atomic_size_t atomic_size;
 
 private:
-    atomic_size m_uLockCount;
-    //T&          m_mutex;
+    atomic_size _M_uLockCount;
+    //T&          _M_mutex;
 };
 
 // ====================================================
@@ -67,8 +67,8 @@ public:
     void unlock ();
 
 private:
-    ConditionVariable m_gCond;
-    atomic_id         m_gOwner;
+    ConditionVariable _M_gCond;
+    atomic_id         _M_gOwner;
 };
 
 

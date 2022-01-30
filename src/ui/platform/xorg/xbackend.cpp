@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 #include <iostream>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
 namespace { // optimize for internal unit usage
 
@@ -42,23 +42,23 @@ inline XDisplay::handle_type x11_connection (cchar* pName) noexcept
                                  pDisplay = ::XOpenDisplay (pCachedName = pName);
 }
 
-inline x::display_type* get_connection (cchar* pName) noexcept
+inline xcb::display_type* get_connection (cchar* pName) noexcept
 {
-    return ::XGetXCBConnection (x11_connection (pName).get<x::legacy_type> ());
+    return ::XGetXCBConnection (x11_connection (pName).get<xcb::legacy_type> ());
 }
 
 } // anonymous namespace
 
 XDisplay::XDisplay (string_type const& name) noexcept
-: IDisplay (get_connection (name.c_str()), x11_connection (name.c_str())),
-  m_gName  (native () ? name : nullptr)
+: display_interface (get_connection (name.c_str()), x11_connection (name.c_str())),
+  _M_gName  (native () ? name : nullptr)
 {
     if (!native ()) return;
 
     // take ownership of the event queue
-    ::XSetEventQueueOwner (legacy<x::legacy_type> (), XCBOwnsEventQueue);
+    ::XSetEventQueueOwner (legacy<xcb::legacy_type> (), XCBOwnsEventQueue);
 
-    if (::xcb_connection_has_error (native<x::display_type> ()))
+    if (::xcb_connection_has_error (native<xcb::display_type> ()))
     {
         std::cout << "error when connecting to display: "
                   << name << std::endl;
@@ -67,18 +67,18 @@ XDisplay::XDisplay (string_type const& name) noexcept
 
 XDisplay::~XDisplay ()
 {
-    if (native ()) ::XCloseDisplay (legacy<x::legacy_type> ());
+    if (native ()) ::XCloseDisplay (legacy<xcb::legacy_type> ());
 }
 
 uint XDisplay::screenCount () const noexcept
 {
     return static_cast<uint>
-            (::xcb_setup_roots_length (::xcb_get_setup (native<x::display_type> ())));
+            (::xcb_setup_roots_length (::xcb_get_setup (native<xcb::display_type> ())));
 }
 
 void XDisplay::flush () noexcept
 {
-    ::xcb_flush (native<x::display_type> ());
+    ::xcb_flush (native<xcb::display_type> ());
 }
 
 } } // namespace Ui

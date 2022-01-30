@@ -17,7 +17,7 @@
 
 #include "../rapidjson.h"
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 //! Computes integer powers of 10 in double (10.0^n).

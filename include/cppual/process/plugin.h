@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,41 +35,46 @@
 #include <functional>
 #include <unordered_map>
 
-namespace cppual { namespace Process {
+namespace cppual { namespace process {
 
-class DynLoader : public NonCopyable
+// =========================================================
+
+class dyn_loader : public non_copyable
 {
 public:
     typedef call_ret_t (DLCALL * function_type)();
-    typedef string string_type;
-    typedef Handle handle_type;
+    typedef string          string_type;
+    typedef resource_handle handle_type;
 
-    enum class ResolvePolicy : byte
+    enum class resolve_policy : byte
     {
-        Static,    // use as data file or load as static library
-        Immediate, // resolve everything on load
-        Lazy       // don't resolve any object or function references
+        /// use as data file or load as static library
+        statically,
+        /// resolve everything on load
+        immediate,
+        /// don't resolve any object or function references
+        lazy
     };
 
-    DynLoader () = default;
-    DynLoader (DynLoader&&) noexcept;
-    DynLoader& operator = (DynLoader&&) noexcept;
+    dyn_loader () = default;
+    dyn_loader (dyn_loader&&) noexcept;
+    dyn_loader& operator = (dyn_loader&&) noexcept;
     bool attach () noexcept;
     void detach () noexcept;
 
-    DynLoader (string_type   path,
+    dyn_loader (string_type   path,
                bool          attach = true,
-               ResolvePolicy policy = ResolvePolicy::Lazy) noexcept;
+               resolve_policy policy = resolve_policy::lazy) noexcept;
 
     static string_type extension () noexcept;
 
-    string_type   path        () const noexcept { return m_gLibPath; }
-    void*         handle      () const noexcept { return m_pHandle;  }
-    ResolvePolicy policy      () const noexcept { return m_eResolve; }
-    bool          is_attached () const noexcept { return m_pHandle;  }
+    string_type    path        () const noexcept { return _M_gLibPath; }
+    void*          handle      () const noexcept { return _M_pHandle;  }
+    resolve_policy policy      () const noexcept { return _M_eResolve; }
+    bool           is_attached () const noexcept { return _M_pHandle;  }
 
-    ~DynLoader ()
-    { if (m_eResolve != ResolvePolicy::Static) detach (); }
+    ~dyn_loader ()
+    { if (_M_eResolve != resolve_policy::statically) detach (); }
 
     bool contains (string_type const& gName) const noexcept
     { return get_address (gName.c_str ()); }
@@ -103,9 +108,9 @@ private:
     function_type get_function (string_type::const_pointer name) const noexcept;
 
 private:
-    handle_type   m_pHandle ;
-    string_type   m_gLibPath;
-    ResolvePolicy m_eResolve;
+    handle_type   _M_pHandle ;
+    string_type   _M_gLibPath;
+    resolve_policy _M_eResolve;
 };
 
 // =========================================================
@@ -148,21 +153,21 @@ struct Plugin
     }
 };
 
-typedef std::pair<DynLoader const, Plugin> plugin_pair;
+typedef std::pair<dyn_loader const, Plugin> plugin_pair;
 
 // =========================================================
 
 template <typename Interface,
-          typename Allocator = Memory::Allocator< std::pair<string const, plugin_pair> >,
+          typename Allocator = memory::allocator< std::pair<string const, plugin_pair> >,
           typename = typename std::enable_if<
               std::is_same<typename std::allocator_traits<Allocator>::value_type,
                            std::pair<string const, plugin_pair>
                            >{}>::type
           >
-class PluginManager : public NonCopyable
+class plugin_manager : public non_copyable
 {
 public:
-    static_assert (Memory::is_allocator<Allocator>::value, "invalid allocator object type!");
+    static_assert (memory::is_allocator<Allocator>::value, "invalid allocator object type!");
 
     typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type;
     typedef typename std::allocator_traits<Allocator>::size_type      size_type     ;
@@ -171,7 +176,7 @@ public:
     typedef string const                                              const_key     ;
     typedef std::hash<key_type>                                       hash_type     ;
     typedef std::equal_to<key_type>                                   equal_type    ;
-    typedef Movable<DynLoader>                                        loader_type   ;
+    typedef Movable<dyn_loader>                                       loader_type   ;
     typedef plugin_pair                                               value_type    ;
     typedef Interface                                                 iface_type    ;
     typedef std::shared_ptr<iface_type>                               shared_iface  ;
@@ -205,7 +210,7 @@ public:
         { }
 
         template <typename, typename, typename>
-        friend class PluginManager;
+        friend class plugin_manager;
 
     private:
         const_pointer _M_ref;
@@ -213,30 +218,30 @@ public:
 
     constexpr static const auto plugin_main = "plugin_main";
 
-    PluginManager (PluginManager&&) = default;
-    PluginManager& operator = (PluginManager&&) = default;
+    plugin_manager (plugin_manager&&) = default;
+    plugin_manager& operator = (plugin_manager&&) = default;
 
     void release_all ()
-    { m_gPluginMap.clear(); }
+    { _M_gPluginMap.clear(); }
 
     constexpr bool empty () const noexcept
-    { return m_gPluginMap.empty (); }
+    { return _M_gPluginMap.empty (); }
 
     constexpr allocator_type get_allocator () const noexcept
-    { return m_gPluginMap.get_allocator (); }
+    { return _M_gPluginMap.get_allocator (); }
 
     loader_type const* loader (const_key& path) const
-    { return &m_gPluginMap[path].first; }
+    { return &_M_gPluginMap[path].first; }
 
     plugin_pointer plugin (const_key& path) const
-    { return m_gPluginMap[path]; }
+    { return _M_gPluginMap[path]; }
 
-    PluginManager (allocator_type const& ator = allocator_type ())
-    : m_gPluginMap(ator)
+    plugin_manager (allocator_type const& ator = allocator_type ())
+    : _M_gPluginMap(ator)
     { }
 
     template <typename... Args>
-    bool load_plugin (const_key& path, Memory::MemoryResource* rc = nullptr, Args... args)
+    bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args... args)
     {
         static_assert (!are_any_references<Args...>::value, "References are not a 'C' concept!");
 
@@ -248,30 +253,32 @@ public:
                                                rc == nullptr ? get_allocator().resource() : rc,
                                                std::forward<Args> (args)...);
 
-        for (auto& pair : m_gPluginMap)
+        for (auto& pair : _M_gPluginMap)
         {
             if (std::strcmp(pair.second.second.provides, plugin->provides) == 0)
                 return false;
         }
 
-        m_gPluginMap.try_emplace (path, std::make_pair (std::move (loader), std::move(*plugin)));
+        _M_gPluginMap.try_emplace (path, std::make_pair (std::move (loader), std::move(*plugin)));
         return true;
     }
 
     bool is_registered (const_key& path) const noexcept
     {
-        return m_gPluginMap.find (path) != m_gPluginMap.end ();
+        return _M_gPluginMap.find (path) != _M_gPluginMap.end ();
     }
 
     void release_plugin (const_key& path)
     {
-        auto it = m_gPluginMap.find (path);
-        if  (it != m_gPluginMap.end ()) m_gPluginMap.erase (it);
+        auto it = _M_gPluginMap.find (path);
+        if  (it != _M_gPluginMap.end ()) _M_gPluginMap.erase (it);
     }
 
 private:
-    mutable map_type m_gPluginMap;
+    mutable map_type _M_gPluginMap;
 };
+
+// =========================================================
 
 } } // namespace Process
 

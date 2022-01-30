@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,118 +24,116 @@
 #ifdef __cplusplus
 
 #include <cppual/string.h>
-#include <cppual/noncopyable.h>
 #include <cppual/memory/allocator.h>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
-class StackedResource final : public MemoryResource, NonCopyable
+class stacked_resource final : public memory_resource
 {
 public:
-    StackedResource  (size_type capacity);
-    StackedResource  (MemoryResource& allocator, size_type capacity);
-    //StackedResource  (string& shared_name, size_type size);
-    ~StackedResource ();
+    stacked_resource  (size_type capacity);
+    stacked_resource  (memory_resource& allocator, size_type capacity);
+    //stacked_resource  (string& shared_name, size_type size);
+    ~stacked_resource ();
 
-    void   clear  ()       noexcept {        m_pCurMarker = m_pBegin; }
-    cvoid* marker () const noexcept { return m_pCurMarker;            }
+    void   clear  ()       noexcept {        _M_pMarker = _M_pBegin; }
+    cvoid* marker () const noexcept { return _M_pMarker;             }
 
-    bool is_equal (MemoryResource const& gObj) const noexcept
-    { return &gObj == &m_gOwner; }
+    bool is_equal (base_const_reference gObj) const noexcept
+    { return &gObj == &_M_gOwner; }
 
     size_type max_size () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
-                                       static_cast<math_pointer> (m_pCurMarker));
+        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd) -
+                                       static_cast<math_pointer> (_M_pMarker));
     }
 
     size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
-                                       static_cast<math_pointer> (m_pBegin));
+        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd) -
+                                       static_cast<math_pointer> (_M_pBegin));
     }
 
-    MemoryResource& owner () const noexcept { return m_gOwner; }
-    bool        is_shared () const noexcept { return m_bIsMemShared; }
+    memory_resource& owner () const noexcept { return _M_gOwner      ; }
+    bool         is_shared () const noexcept { return _M_bIsMemShared; }
 
 private:
-    MemoryResource& m_gOwner;
-    pointer         m_pCurMarker;
-    pointer const   m_pBegin;
-    pointer const   m_pEnd;
-    cbool           m_bIsMemShared;
+    memory_resource& _M_gOwner      ;
+    pointer          _M_pMarker     ;
+    pointer const    _M_pBegin      ;
+    pointer const    _M_pEnd        ;
+    cbool            _M_bIsMemShared;
 
-    void* do_allocate   (size_type capacity, align_type align) noexcept;
+    void* do_allocate   (size_type capacity, align_type align);
+    void* do_reallocate (void* p, size_type old_size, size_type size, align_type align_size);
     void  do_deallocate (void* p, size_type capacity, align_type align);
 
     bool  do_is_equal   (base_const_reference gObj) const noexcept
-    { return &gObj == &m_gOwner; }
+    { return &gObj == this; }
 };
 
 // =========================================================
 
-template <class T>
-using StackedAllocator = Allocator <T, StackedResource>;
-
-// =========================================================
-
-class DStackedResource final : public MemoryResource, NonCopyable
+class dstacked_resource final : public memory_resource
 {
 public:
-    DStackedResource  (size_type capacity, size_type marker_hint);
-    DStackedResource  (MemoryResource& allocator, size_type capacity, size_type marker_hint);
-    //DStackedResource  (string& shared, size_type size, size_type marker_hint);
-    ~DStackedResource ();
+    dstacked_resource  (size_type capacity, size_type hint);
+    dstacked_resource  (memory_resource& allocator, size_type capacity, size_type hint);
+    //dstacked_resource  (string& shared, size_type size, size_type hint);
+    ~dstacked_resource ();
 
-    size_type hint () const noexcept { return m_uHint; }
-    void      setHint (size_type uHint) noexcept { m_uHint = uHint; }
-    cvoid*    bottomMarker () const noexcept { return m_pBottomMarker; }
-    cvoid*    topMarker () const noexcept { return m_pTopMarker; }
+    size_type hint () const noexcept { return _M_uHint; }
+    void      set_hint (size_type uHint) noexcept { _M_uHint = uHint; }
+    cvoid*    bottom_marker () const noexcept { return _M_pBottomMarker; }
+    cvoid*    top_marker () const noexcept { return _M_pTopMarker; }
 
-    bool is_shared () const noexcept
-    { return m_bIsMemShared;  }
-
-    MemoryResource& owner () const noexcept
-    { return m_gOwner; }
+    memory_resource& owner () const noexcept { return _M_gOwner      ; }
+    bool         is_shared () const noexcept { return _M_bIsMemShared; }
 
     size_type max_size () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (m_pBottomMarker) -
-                                       static_cast<math_pointer> (m_pTopMarker));
+        return static_cast<size_type> (static_cast<math_pointer> (_M_pBottomMarker) -
+                                       static_cast<math_pointer> (_M_pTopMarker));
     }
 
     size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd) -
-                                       static_cast<math_pointer> (m_pBegin));
+        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd) -
+                                       static_cast<math_pointer> (_M_pBegin));
     }
 
     void clear () noexcept
     {
-        m_pTopMarker    = m_pBegin;
-        m_pBottomMarker = m_pEnd;
+        _M_pTopMarker    = _M_pBegin;
+        _M_pBottomMarker = _M_pEnd;
     }
 
 private:
-    MemoryResource& m_gOwner;
-    pointer         m_pTopMarker;
-    pointer         m_pBottomMarker;
-    pointer const   m_pBegin;
-    size_type       m_uHint;
-    pointer const   m_pEnd;
-    cbool           m_bIsMemShared;
+    memory_resource& _M_gOwner       ;
+    pointer          _M_pTopMarker   ;
+    pointer          _M_pBottomMarker;
+    pointer const    _M_pBegin       ;
+    size_type        _M_uHint        ;
+    pointer const    _M_pEnd         ;
+    cbool            _M_bIsMemShared ;
 
-    void* do_allocate   (size_type capacity, align_type align) noexcept;
+    void* do_allocate   (size_type capacity, align_type align);
+    void* do_reallocate (void* p, size_type old_size, size_type size, align_type align_size);
     void  do_deallocate (void* p, size_type capacity, align_type align);
 
     bool  do_is_equal   (base_const_reference gObj) const noexcept
-    { return &gObj == &m_gOwner; }
+    { return &gObj == this; }
 };
 
 // =========================================================
 
 template <class T>
-using DStackedAllocator = Allocator <T, DStackedResource>;
+using stacked_allocator = allocator <T, stacked_resource>;
+
+template <class T>
+using dstacked_allocator = allocator <T, dstacked_resource>;
+
+// =========================================================
 
 } } // namespace Memory
 

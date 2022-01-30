@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,114 +30,116 @@
 #include <cppual/memory/allocator.h>
 #include <cppual/string.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class View
+class view
 {
 public:
-    typedef Input::Event                         event_type;
-    typedef Handle                               window_type;
-    typedef Memory::Allocator<View*>             allocator_type;
-    typedef CircularQueue<View*, allocator_type> container;
-    typedef std::size_t                          size_type;
-    typedef typename container::iterator         iterator;
-    typedef string                               string_type;
+    typedef input::event                          event_type    ;
+    typedef resource_handle                       window_type   ;
+    typedef memory::allocator<view*>              allocator_type;
+    typedef circular_queue<view*, allocator_type> container     ;
+    typedef std::size_t                           size_type     ;
+    typedef typename container::iterator          iterator      ;
+    typedef string                                string_type   ;
 
     enum
     {
-        DefaultWidth  = 800,
-        DefaultHeight = 600
+        default_width  = 800,
+        default_height = 600
     };
 
-    View (View const&) noexcept;
-    View& operator = (View const&) noexcept;
-    virtual ~View ();
+    view (view const&) noexcept;
+    view& operator = (view const&) noexcept;
+    virtual ~view ();
 
-    View (View*       parent,
-          Rect const& rect,
+    view (view*       parent,
+          rect const& rect,
           u32         screen    = 0,
           allocator_type const& = allocator_type ());
 
     void destroy ();
     void show ();
     void hide ();
-    bool setParent (View* parent, point2i pos = point2i ());
-    void setGeometry (Rect const&);
-    void setMinimumSize (point2u);
-    void setMaximumSize (point2u);
+    bool set_parent (view* parent, point2i pos = point2i ());
+    void set_geometry (rect const&);
+    void set_minimum_size (point2u);
+    void set_maximum_size (point2u);
     void move (point2i);
-    void destroyChildren ();
+    void destroy_children ();
     void refresh ();
     void enable ();
     void disable ();
-    void setFocus ();
-    void killFocus ();
+    void set_focus ();
+    void kill_focus ();
 
-    inline weak_window      renderable () const noexcept { return m_pRenderable; }
-    inline IPlatformWindow* renderable_unsafe () const noexcept { return m_pRenderable.get (); }
-    inline point2u          minimumSize () const noexcept { return m_gMinSize; }
-    inline point2u          maximumSize () const noexcept { return m_gMaxSize; }
+    inline weak_window             renderable () const noexcept { return _M_pRenderable; }
+    inline platform_wnd_interface* renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
+    inline point2u                 minimum_size () const noexcept { return _M_gMinSize; }
+    inline point2u                 maximum_size () const noexcept { return _M_gMaxSize; }
 
     inline bool valid () const noexcept
-    { return m_gStateFlags.test (View::Valid); }
+    { return _M_gStateFlags.test (view::is_valid); }
 
-    inline bool isEnabled () const noexcept
-    { return m_gStateFlags.test (View::Enabled); }
+    inline bool is_enabled () const noexcept
+    { return _M_gStateFlags.test (view::enabled); }
 
-    inline bool hasFocus () const noexcept
-    { return m_gStateFlags.test (View::HasFocus); }
+    inline bool has_focus () const noexcept
+    { return _M_gStateFlags.test (view::focus); }
 
-    inline bool isHidden () const noexcept
-    { return !m_gStateFlags.test (View::Valid) or !m_pRenderable->isMapped (); }
+    inline bool is_hidden () const noexcept
+    { return !_M_gStateFlags.test (view::is_valid) or !_M_pRenderable->isMapped (); }
 
-    inline Rect geometry () const noexcept
-    { return m_gStateFlags.test (View::Valid) ? m_pRenderable->geometry () : Rect (); }
+    inline rect geometry () const noexcept
+    { return _M_gStateFlags.test (view::is_valid) ? _M_pRenderable->geometry () : rect (); }
 
-    inline View () noexcept
-    : View (nullptr, Rect (0, 0, DefaultWidth, DefaultHeight))
+    inline view () noexcept
+    : view (nullptr, rect (0, 0, default_width, default_height))
     { }
 
 protected:
-    virtual void mouseMovedEvent (point2u);
-    virtual void mouseWheelEvent (event_type::MWheelData const&);
-    virtual void mousePressedEvent (event_type::MButtonData const&);
-    virtual void mouseReleasedEvent (event_type::MButtonData const&);
-    virtual void destroyEvent ();
-    virtual void showEvent (bool);
-    virtual void paintEvent (Rect const&);
-    virtual void sizeEvent (point2u);
-    virtual void moveEvent (point2i);
-    virtual void enterLeaveEvent(bool);
-    virtual void beginSizeMoveEvent (Rect const&);
-    virtual void endSizeMoveEvent (Rect const&);
-    virtual void minMaxSizeEvent (point2u);
-    virtual void focusEvent (bool);
+    virtual void mouse_moved_event (point2u);
+    virtual void mouse_wheel_event (event_type::mwheel_data const&);
+    virtual void mouse_pressed_event (event_type::mbutton_data const&);
+    virtual void mouse_released_event (event_type::mbutton_data const&);
+    virtual void key_pressed_event(event_type::key_data const&);
+    virtual void key_released_event(event_type::key_data const&);
+    virtual void destroy_event ();
+    virtual void show_event (bool);
+    virtual void paint_event (rect const&);
+    virtual void size_event (point2u);
+    virtual void move_event (point2i);
+    virtual void enter_leave_event (bool);
+    virtual void begin_size_move_event (rect const&);
+    virtual void end_size_move_event (rect const&);
+    virtual void min_max_size_event (point2u);
+    virtual void focus_event (bool);
 
-    virtual void onEnable (bool);
-    virtual void onParentSize (point2u);
+    virtual void on_enable (bool);
+    virtual void on_parent_size (point2u);
 
 private:
-    enum StateFlag
+    enum state_flag
     {
-        Valid    = 1 << 0,
-        HasFocus = 1 << 1,
-        Enabled  = 1 << 2
+        is_valid = 1 << 0,
+        focus    = 1 << 1,
+        enabled  = 1 << 2
     };
 
-    typedef BitSet<StateFlag> StateFlags;
+    typedef bitset<state_flag> state_flags;
 
-    void paint (Rect const&);
+    void paint (rect const&);
     void size (point2u);
-    void destroyResources ();
+    void destroy_resources ();
     void invalidate () noexcept;
 
 private:
-    container     m_gChildrenList;
-    point2u       m_gMinSize, m_gMaxSize;
-    shared_window m_pRenderable;
-    iterator      m_gItFromParent;
-    View*         m_pParentObj;
-    StateFlags    m_gStateFlags;
+    container     _M_gChildrenList;
+    point2u       _M_gMinSize, _M_gMaxSize;
+    shared_window _M_pRenderable;
+    iterator      _M_gItFromParent;
+    view*         _M_pParentObj;
+    state_flags   _M_gStateFlags;
 };
 
 } } // namespace Ui

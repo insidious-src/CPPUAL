@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,121 +24,122 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
+
 #include <type_traits>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-union   RGBColor  ;
-struct  CMYKColor ;
-struct  HSLColor  ;
-struct  YUVColor  ;
-struct  YCbCrColor;
-struct  YPbPrColor;
-
-// =========================================================
-
-typedef RGBColor Color;
+union  rgb_color   ;
+struct cmyk_color  ;
+struct hsl_color   ;
+struct yuv_color   ;
+struct ycb_cr_color;
+struct ypb_pr_color;
 
 // =========================================================
 
-enum class ColorName : uchar
+typedef rgb_color color;
+
+// =========================================================
+
+enum class color_name : byte
 {
-    White ,
-    Black ,
-    Grey  ,
-    Red   ,
-    Green ,
-    Blue  ,
-    Yellow,
-    Brown ,
-    Orange
+    white ,
+    black ,
+    grey  ,
+    red   ,
+    green ,
+    blue  ,
+    yellow,
+    brown ,
+    orange
 };
 
-enum class ColorType : uchar
+enum class color_type : byte
 {
-    TrueType,
-    Direct  ,
-    Pseudo  ,
-    Static  ,
-    Grey    ,
-    StaticGrey
+    true_type  ,
+    direct     ,
+    pseudo     ,
+    static_type,
+    grey       ,
+    static_grey
 };
 
 // =========================================================
 
-union RGBColor
+union rgb_color
 {
     typedef std::size_t size_type;
 
     enum
     {
-        Red,
-        Green,
-        Blue
+        red_idx  ,
+        green_idx,
+        blue_idx
     };
 
     byte idx[3];
     byte red, green, blue;
 
-    RGBColor () noexcept = default;
+    rgb_color () noexcept = default;
 
     //! right to left in binary mode
-    constexpr RGBColor binary () const noexcept
-    { return { idx[Blue], idx[Green], idx[Red] }; }
+    constexpr rgb_color binary () const noexcept
+    { return { idx[blue_idx], idx[green_idx], idx[red_idx] }; }
 
     constexpr byte operator [] (size_type i) const noexcept
     { return idx[i]; }
 
-    constexpr RGBColor (byte r, byte g, byte b) noexcept : idx { r, g, b } { }
+    constexpr rgb_color (byte r, byte g, byte b) noexcept : idx { r, g, b } { }
     byte& operator [] (size_type i) noexcept { return idx[i]; }
 };
 
-constexpr bool operator == (RGBColor const& gObj1, RGBColor const& gObj2) noexcept
+constexpr bool operator == (rgb_color const& gObj1, rgb_color const& gObj2) noexcept
 {
     return (gObj1.red   == gObj2.red   and
             gObj1.green == gObj2.green and
             gObj1.blue  == gObj2.blue);
 }
 
-constexpr bool operator != (RGBColor const& gObj1, RGBColor const& gObj2) noexcept
+constexpr bool operator != (rgb_color const& gObj1, rgb_color const& gObj2) noexcept
 {
     return (gObj1.red != gObj2.red or
                          gObj1.green != gObj2.green or
                                         gObj1.blue != gObj2.blue);
 }
 
-static_assert (sizeof (RGBColor) == 3, "RGBColor is not 24-bit!");
-static_assert (std::is_pod<RGBColor>::value, "RGBColor is not POD!");
+static_assert (sizeof (rgb_color) == 3, "RGBColor is not 24-bit!");
+static_assert (std::is_pod<rgb_color>::value, "RGBColor is not POD!");
 
 // =========================================================
 
-struct CMYKColor
-{ u8 cyan, magenta, yellow, black; };
+struct cmyk_color
+{ byte cyan, magenta, yellow, black; };
 
 // =========================================================
 
-struct HSLColor
-{ u8 hue, saturation, luminance; };
+struct hsl_color
+{ byte hue, saturation, luminance; };
 
 // =========================================================
 
-struct YUVColor
+struct yuv_color
 { double y, u, v; };
 
 // =========================================================
 
-struct YCbCrColor
-{ u8 luminance, Cb, Cr; };
+struct ycb_cr_color
+{ byte luminance, Cb, Cr; };
 
 // =========================================================
 
-struct YPbPrColor
-{ u8 luminance, Pb, Pr; };
+struct ypb_pr_color
+{ byte luminance, Pb, Pr; };
 
 // =========================================================
 
 struct Gradient
-{ RGBColor color; u8 position; };
+{ rgb_color color; byte position; };
 
 inline bool operator == (Gradient const& gObj1, Gradient const& gObj2) noexcept
 { return (gObj1.position == gObj2.position and gObj1.color == gObj2.color); }
@@ -148,23 +149,23 @@ inline bool operator != (Gradient const& gObj1, Gradient const& gObj2) noexcept
 
 // =========================================================
 
-RGBColor   colorFromName       (ColorName)         noexcept;
-RGBColor   colorFromHexValue   (u8 value)          noexcept; // ex. 0xff0000
-RGBColor   CMYKtoRGBColor      (CMYKColor  const&) noexcept;
-RGBColor   HSLtoRGBColor       (HSLColor   const&) noexcept;
-RGBColor   YUVtoRGBColor       (YUVColor   const&) noexcept;
-RGBColor   YCbCrtoRGBColor     (YCbCrColor const&) noexcept;
-RGBColor   YPbPrtoRGBColor     (YPbPrColor const&) noexcept;
-RGBColor   YCbCrtoRGBColorHDTV (YCbCrColor const&) noexcept;
-RGBColor   YPbPrtoRGBColorHDTV (YPbPrColor const&) noexcept;
+rgb_color    color_from_name          (color_name)          noexcept;
+rgb_color    color_from_hex_value     (byte value)          noexcept; // ex. 0xff0000
+rgb_color    cmyk_to_rgb_color        (cmyk_color   const&) noexcept;
+rgb_color    hsl_to_rgb_color         (hsl_color    const&) noexcept;
+rgb_color    yuv_to_rgb_color         (yuv_color    const&) noexcept;
+rgb_color    ycb_cr_to_rgb_color      (ycb_cr_color const&) noexcept;
+rgb_color    ypb_pr_to_rgb_color      (ypb_pr_color const&) noexcept;
+rgb_color    ycb_cr_to_rgb_color_hdtv (ycb_cr_color const&) noexcept;
+rgb_color    ypb_pr_to_rgb_color_hdtv (ypb_pr_color const&) noexcept;
 
-CMYKColor  RGBtoCMYKColor      (RGBColor   const&) noexcept;
-HSLColor   RGBtoHSLColor       (RGBColor   const&) noexcept;
-YUVColor   RGBtoYUVColor       (RGBColor   const&) noexcept;
-YCbCrColor RGBtoYCbCrColor     (RGBColor   const&) noexcept;
-YPbPrColor RGBtoYPbPrColor     (RGBColor   const&) noexcept;
-YCbCrColor RGBtoYCbCrColorHDTV (RGBColor   const&) noexcept;
-YPbPrColor RGBtoYPbPrColorHDTV (RGBColor   const&) noexcept;
+cmyk_color   rgb_to_cmyk_color        (rgb_color   const&) noexcept;
+hsl_color    rgb_to_hsl_color         (rgb_color   const&) noexcept;
+yuv_color    rgb_to_yuv_color         (rgb_color   const&) noexcept;
+ycb_cr_color rgb_to_ycb_cr_color      (rgb_color   const&) noexcept;
+ypb_pr_color rgb_to_ypb_pr_color      (rgb_color   const&) noexcept;
+ycb_cr_color rgb_to_ycb_cr_color_hdtv (rgb_color   const&) noexcept;
+ypb_pr_color rgb_to_ypb_pr_color_hdtv (rgb_color   const&) noexcept;
 
 } } // namespace Graphics
 

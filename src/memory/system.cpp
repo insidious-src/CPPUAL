@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,11 +34,16 @@
 #   include "os/bsd.h"
 #elif defined (OS_WINDOWS)
 #   include "os/win.h"
+#elif defined (OS_ANDROID)
+#   include "os/android.h"
+#elif defined (OS_IOS)
+#   include "os/ios.h"
 #endif
 
 #include <new>
 #include <atomic>
 #include <memory>
+#include <iostream>
 
 #include <cstdlib>
 #include <cstring>
@@ -46,19 +51,19 @@
 
 namespace { // internal unit optimization
 
-using namespace cppual::Memory;
+using namespace cppual;
 
 inline static void initializer ()
 {
-    static auto ret = Model::initialize ();
+    static auto ret = memory::model::initialize ();
 
     UNUSED(ret);
-    Model::thread_initialize ();
+    memory::model::thread_initialize ();
 }
 
 // =========================================================
 
-class SystemResource final : public MemoryResource
+class system_memory_resource final : public memory::memory_resource
 {
 public:
     using base_type::base_type;
@@ -71,33 +76,34 @@ public:
 
     size_type max_size () const noexcept
     {
-        auto const max = maxSize ();
-        return max ? max : MemoryResource::max_size();
+        auto const max = memory::max_size ();
+        return max ? max : memory_resource::max_size();
     }
 
     size_type capacity () const noexcept
     {
-        auto const cap = size ();
-        return cap ? cap : MemoryResource::capacity();
+        auto const cap = memory::capacity ();
+        return cap ? cap : memory_resource::capacity();
     }
 
 private:
     void* do_allocate(size_type bytes, size_type /*alignment*/)
     {
-        if (!Model::is_thread_initialized ()) initializer ();
-        return Model::allocate (bytes);
+        if (!memory::model::is_thread_initialized ()) initializer ();
+        return memory::model::allocate (bytes);
     }
 
     void* do_reallocate(void* p, size_type old_size, size_type new_size, size_type /*alignment*/)
     {
-        if (!Model::is_thread_initialized ()) initializer ();
-        return p != nullptr ? Model::reallocate(p, old_size, new_size) : Model::allocate(new_size);
+        if (!memory::model::is_thread_initialized ()) initializer ();
+        return p != nullptr ? memory::model::reallocate(p, old_size, new_size) :
+                              memory::model::allocate(new_size);
     }
 
     void do_deallocate(void* p, size_type /*bytes*/, size_type /*alignment*/)
     {
-        if (!Model::is_thread_initialized ()) initializer ();
-        Model::deallocate (p);
+        if (!memory::model::is_thread_initialized ()) initializer ();
+        memory::model::deallocate (p);
     }
 
     bool do_is_equal(base_type const& other) const noexcept
@@ -114,82 +120,82 @@ private:
 
 void* operator new (std::size_t size)
 {
-    if (!cppual::Memory::Model::is_thread_initialized ()) initializer ();
-    return cppual::Memory::Model::alloc (size);
+    if (!cppual::memory::Model::is_thread_initialized ()) initializer ();
+    return cppual::memory::Model::alloc (size);
 }
 
 void operator delete (void* ptr) noexcept
 {
-    if (cppual::Memory::Model::is_thread_initialized ())
-        cppual::Memory::Model::free (ptr);
+    if (cppual::memory::Model::is_thread_initialized ())
+        cppual::memory::Model::free (ptr);
 }
 
 void*
 operator new [] (std::size_t size)
 {
-    if (!cppual::Memory::Model::is_thread_initialized ()) initializer ();
-    return cppual::Memory::Model::alloc (size);
+    if (!cppual::memory::Model::is_thread_initialized ()) initializer ();
+    return cppual::memory::Model::alloc (size);
 }
 
 void operator delete [] (void* ptr) noexcept
 {
-    if (!cppual::Memory::Model::is_thread_initialized ()) initializer ();
-    cppual::Memory::Model::free (ptr);
+    if (!cppual::memory::Model::is_thread_initialized ()) initializer ();
+    cppual::memory::Model::free (ptr);
 }
 
 void* operator new (std::size_t size, const std::nothrow_t&) noexcept
 {
-    if (!cppual::Memory::Model::is_thread_initialized ()) initializer();
-    return cppual::Memory::Model::alloc (size);
+    if (!cppual::memory::Model::is_thread_initialized ()) initializer();
+    return cppual::memory::Model::alloc (size);
 }
 
 void* operator new [] (std::size_t size, const std::nothrow_t&) noexcept
 {
-    if (!cppual::Memory::Model::is_thread_initialized ()) initializer();
-    return cppual::Memory::Model::alloc (size);
+    if (!cppual::memory::Model::is_thread_initialized ()) initializer();
+    return cppual::memory::Model::alloc (size);
 }
 
 void operator delete (void* ptr, const std::nothrow_t&) noexcept
 {
-    if (cppual::Memory::Model::is_thread_initialized ())
-        cppual::Memory::Model::free (ptr);
+    if (cppual::memory::Model::is_thread_initialized ())
+        cppual::memory::Model::free (ptr);
 }
 
 void operator delete [] (void* ptr, const std::nothrow_t&) noexcept
 {
-    if (cppual::Memory::Model::is_thread_initialized ())
-        cppual::Memory::Model::free (ptr);
+    if (cppual::memory::Model::is_thread_initialized ())
+        cppual::memory::Model::free (ptr);
 }
 
 void operator delete (void* ptr, std::size_t) noexcept
 {
-    if (cppual::Memory::Model::is_thread_initialized ())
-        cppual::Memory::Model::free (ptr);
+    if (cppual::memory::Model::is_thread_initialized ())
+        cppual::memory::Model::free (ptr);
 }
 
 void operator delete [] (void* ptr, std::size_t) noexcept
 {
-    if (cppual::Memory::Model::is_thread_initialized ())
-        cppual::Memory::Model::free (ptr);
+    if (cppual::memory::Model::is_thread_initialized ())
+        cppual::memory::Model::free (ptr);
 }
 
 #endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 // =========================================================
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
 // =========================================================
 
-MemoryResource* system_resource ()
+memory_resource* system_resource ()
 {
-    static SystemResource rc;
+    static system_memory_resource rc;
     return &rc;
 }
 
 // =========================================================
 
-std::size_t size ()
+std::size_t capacity ()
 {
 #if defined(OS_WINDOWS) and (defined(__CYGWIN__) or defined(__CYGWIN32__))
 
@@ -227,6 +233,8 @@ std::size_t size ()
     std::size_t len = sizeof (size);
     if (sysctl (mib, 2, &size, &len, nullptr, 0) == 0)
         return static_cast<std::size_t> (size);
+
+    std::cerr << __func__ << " :: Error :: failed to read system memory size!" << std::endl;
     return 0;            /* Failed? */
 
 #elif defined(_SC_AIX_REALMEM)
@@ -254,9 +262,11 @@ std::size_t size ()
 #elif defined(HW_PYSMEM)
     mib[1] = HW_PHYSMEM;        /* Others. ------------------ */
 #endif
-    uint size = 0;        /* 32-bit */
+    u32 size = 0;        /* 32-bit */
     std::size_t len = sizeof (size);
     if (sysctl (mib, 2, &size, &len, NULL, 0) == 0) return size;
+
+    std::cerr << __func__ << " :: Error :: failed to read system memory size!" << std::endl;
     return 0;            /* Failed? */
 #endif /* sysctl and sysconf variants */
 
@@ -267,18 +277,18 @@ std::size_t size ()
 
 // =========================================================
 
-std::size_t maxSize ()
+std::size_t max_size ()
 {
 #   ifdef OS_GNU_LINUX
 #   elif defined (OS_WINDOWS)
 #   endif
 
-    return size();
+    return capacity();
 }
 
 // =========================================================
 
-std::size_t workingSize ()
+std::size_t working_size ()
 {
 #if defined (OS_WINDOWS)
 
@@ -292,9 +302,13 @@ std::size_t workingSize ()
     /* OSX ------------------------------------------------------ */
     mach_task_basic_info info;
     mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
-    if (task_info (mach_task_self ( ), MACH_TASK_BASIC_INFO,
+    if (task_info (mach_task_self (), MACH_TASK_BASIC_INFO,
                    (task_info_t)&info, &infoCount) != KERN_SUCCESS)
+    {
+        std::cerr << __func__ << " :: Error :: Cannot access working memory size!" << std::endl;
         return 0;        /* Can't access? */
+    }
+
     return static_cast<std::size_t> (info.resident_size);
 
 #elif defined (OS_STD_UNIX)
@@ -303,11 +317,16 @@ std::size_t workingSize ()
     long  rss = 0;
     FILE* fp  = nullptr;
 
-    if (!(fp = ::fopen ("/proc/self/statm", "r"))) return 0;
+    if (!(fp = ::fopen ("/proc/self/statm", "r")))
+    {
+        std::cerr << __func__ << " :: Error :: Cannot access '/proc/self/statm'!" << std::endl;
+        return 0;
+    }
 
     if (::fscanf (fp, "%*s%ld", &rss) != 1)
     {
         ::fclose (fp);
+        std::cerr << __func__ << " :: Error :: Cannot read '/proc/self/statm'!" << std::endl;
         return 0;        /* Can't read? */
     }
 
@@ -317,6 +336,7 @@ std::size_t workingSize ()
 #else
 
     /* AIX, BSD, Solaris, and Unknown OS ------------------------ */
+    std::cerr << __func__ << " :: Error :: unsupported OS!" << std::endl;
     return 0;            /* Unsupported. */
 #endif
 }
@@ -406,7 +426,7 @@ std::size_t workingSize ()
 #endif
 
 //! Memory page size
-#define RPMALLOC_PAGE_SIZE        512
+#define MALLOC_PAGE_SIZE        512
 
 //! Granularity of all memory page spans for small & medium block allocations
 #define SPAN_ADDRESS_GRANULARITY  8192
@@ -415,7 +435,7 @@ std::size_t workingSize ()
 //! Mask for getting the start of a span of memory pages
 #define SPAN_MASK                 (~(static_cast<uptr>(SPAN_MAX_SIZE) - 1))
 //! Maximum number of memory pages in a span
-#define SPAN_MAX_PAGE_COUNT       (SPAN_MAX_SIZE / RPMALLOC_PAGE_SIZE)
+#define SPAN_MAX_PAGE_COUNT       (SPAN_MAX_SIZE / MALLOC_PAGE_SIZE)
 
 #define QUICK_ALLOCATION_PAGES_COUNT SPAN_MAX_PAGE_COUNT
 #define SPANS_PER_SEGMENT 32
@@ -425,7 +445,7 @@ std::size_t workingSize ()
 //! Small granularity shift count
 #define SMALL_GRANULARITY_SHIFT   4
 //! Number of small block size classes
-#define SMALL_CLASS_COUNT         (((RPMALLOC_PAGE_SIZE - SPAN_HEADER_SIZE) >> 1) >> SMALL_GRANULARITY_SHIFT)
+#define SMALL_CLASS_COUNT         (((MALLOC_PAGE_SIZE - SPAN_HEADER_SIZE) >> 1) >> SMALL_GRANULARITY_SHIFT)
 //! Maximum size of a small block
 #define SMALL_SIZE_LIMIT          (SMALL_CLASS_COUNT * SMALL_GRANULARITY)
 
@@ -446,7 +466,7 @@ std::size_t workingSize ()
 //! Maximum number of memory pages in a large block
 #define LARGE_MAX_PAGES           (SPAN_MAX_PAGE_COUNT * LARGE_CLASS_COUNT)
 //! Maximum size of a large block
-#define LARGE_SIZE_LIMIT          ((LARGE_MAX_PAGES * RPMALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE)
+#define LARGE_SIZE_LIMIT          ((LARGE_MAX_PAGES * MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE)
 
 #define SPAN_LIST_LOCK_TOKEN      (reinterpret_cast<void*>(1))
 
@@ -467,10 +487,10 @@ typedef u32 count_t;
 
 #if ENABLE_VALIDATE_ARGS
 //! Maximum allocation size to avoid integer overflow
-#define MAX_ALLOC_SIZE ((std::size_t(-1)) - RPMALLOC_PAGE_SIZE)
+#define MAX_ALLOC_SIZE ((std::size_t(-1)) - MALLOC_PAGE_SIZE)
 #endif
 
-namespace Model {
+namespace model {
 
 static void thread_yield();
 void _acquire_segments_lock_write();
@@ -938,7 +958,7 @@ use_active:
         span = _memory_global_cache_extract();
 #if ENABLE_STATISTICS
         if (span)
-            heap->global_to_thread += (size_t)span->data.list_size * size_class->page_count * RPMALLOC_PAGE_SIZE;
+            heap->global_to_thread += (size_t)span->data.list_size * size_class->page_count * MALLOC_PAGE_SIZE;
 #endif
     }
     if (span) {
@@ -1011,7 +1031,7 @@ _memory_allocate_large_from_heap(Heap* heap, size_t size) {
             span = _memory_global_cache_extract();
 #if ENABLE_STATISTICS
             if (span)
-                heap->global_to_thread += (size_t)span->data.list_size * SPAN_MAX_PAGE_COUNT * RPMALLOC_PAGE_SIZE;
+                heap->global_to_thread += (size_t)span->data.list_size * SPAN_MAX_PAGE_COUNT * MALLOC_PAGE_SIZE;
 #endif
         }
         if (span) {
@@ -1189,7 +1209,7 @@ _memory_heap_cache_insert(Heap* heap, Span* span) {
         *cache = next;
         _memory_global_cache_insert(span, list_size);
 #if ENABLE_STATISTICS
-        heap->thread_to_global += list_size * QUICK_ALLOCATION_PAGES_COUNT * RPMALLOC_PAGE_SIZE;
+        heap->thread_to_global += list_size * QUICK_ALLOCATION_PAGES_COUNT * MALLOC_PAGE_SIZE;
 #endif
     }
 #endif
@@ -1354,8 +1374,8 @@ _memory_allocate(size_t size) {
 
     //Oversized, allocate pages directly
     size += SPAN_HEADER_SIZE;
-    size_t num_pages = size / RPMALLOC_PAGE_SIZE;
-    if (size % RPMALLOC_PAGE_SIZE)
+    size_t num_pages = size / MALLOC_PAGE_SIZE;
+    if (size % MALLOC_PAGE_SIZE)
         ++num_pages;
     Span* span = _memory_map(num_pages);
     span->heap_id = 0;
@@ -1422,15 +1442,15 @@ _memory_reallocate(void* p, size_t size, size_t oldsize, unsigned int flags) {
         else {
             //Oversized block
             size_t total_size = size + SPAN_HEADER_SIZE;
-            size_t num_pages = total_size / RPMALLOC_PAGE_SIZE;
-            if (total_size % RPMALLOC_PAGE_SIZE)
+            size_t num_pages = total_size / MALLOC_PAGE_SIZE;
+            if (total_size % MALLOC_PAGE_SIZE)
                 ++num_pages;
             //Page count is stored in next_span
             size_t current_pages = (size_t)span->next_span;
             if ((current_pages >= num_pages) && (num_pages >= (current_pages / 2)))
                 return p; //Still fits and less than half of memory would be freed
             if (!oldsize)
-                oldsize = (current_pages * (size_t)RPMALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
+                oldsize = (current_pages * (size_t)MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
         }
     }
 
@@ -1469,7 +1489,7 @@ _memory_usable_size(void* p) {
 
     //Oversized block, page count is stored in next_span
     size_t current_pages = (size_t)span->next_span;
-    return (current_pages * (size_t)RPMALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
+    return (current_pages * (size_t)MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
 }
 
 #endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
@@ -1482,7 +1502,7 @@ _memory_adjust_size_class(size_t iclass) {
 
     //TODO: STNK Hardcode always 16 pages
     size_t page_count = QUICK_ALLOCATION_PAGES_COUNT;
-    size_t block_count = ((page_count * RPMALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE) / block_size;
+    size_t block_count = ((page_count * MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE) / block_size;
     //Store the final configuration
     _memory_size_class[iclass].page_count = (uint16_t)page_count;
     _memory_size_class[iclass].block_count = (uint16_t)block_count;
@@ -1928,7 +1948,7 @@ _memory_map(size_t page_count) {
     // Allocate a segment of the minimal required size
     else
     {
-        size_t size = page_count * RPMALLOC_PAGE_SIZE + sizeof(Segment) + SPAN_ADDRESS_GRANULARITY;
+        size_t size = page_count * MALLOC_PAGE_SIZE + sizeof(Segment) + SPAN_ADDRESS_GRANULARITY;
         Segment* segment = static_cast<Segment*>(_memory_allocate_external(size));
         span = static_cast<Span*>(pointer_offset(segment, sizeof(Segment)));
         // Align to the required size of the spans
@@ -1970,8 +1990,8 @@ static void*
 _memory_allocate_external(size_t bytes)
 {
 #if ENABLE_STATISTICS
-    _mapped_total += (int)(bytes / RPMALLOC_PAGE_SIZE);
-    _mapped_pages += (int)(bytes / RPMALLOC_PAGE_SIZE);
+    _mapped_total += (int)(bytes / MALLOC_PAGE_SIZE);
+    _mapped_pages += (int)(bytes / MALLOC_PAGE_SIZE);
 #endif
     return std::malloc (bytes);
 }
@@ -2173,7 +2193,7 @@ thread_statistics(ThreadStatistics* stats)
 
     if (heap->span_cache)
         stats->spancache = static_cast<size_t>(heap->span_cache->data.list_size) *
-                           QUICK_ALLOCATION_PAGES_COUNT * RPMALLOC_PAGE_SIZE;
+                           QUICK_ALLOCATION_PAGES_COUNT * MALLOC_PAGE_SIZE;
 }
 
 void
@@ -2181,9 +2201,9 @@ global_statistics(GlobalStatistics* stats)
 {
     new (stats) GlobalStatistics ();
 #if ENABLE_STATISTICS
-    stats->mapped = _mapped_pages * RPMALLOC_PAGE_SIZE;
-    stats->mapped_total = _mapped_total * RPMALLOC_PAGE_SIZE;
-    stats->unmapped_total = _unmapped_total * RPMALLOC_PAGE_SIZE;
+    stats->mapped = _mapped_pages * MALLOC_PAGE_SIZE;
+    stats->mapped_total = _mapped_total * MALLOC_PAGE_SIZE;
+    stats->unmapped_total = _unmapped_total * MALLOC_PAGE_SIZE;
 #endif
     {
         void* global_span_ptr = _memory_span_cache.load();
@@ -2192,7 +2212,7 @@ global_statistics(GlobalStatistics* stats)
             global_span_ptr = _memory_span_cache.load();
         }
         uptr global_span_count = reinterpret_cast<uptr>(global_span_ptr) & ~SPAN_MASK;
-        size_t list_bytes = global_span_count * QUICK_ALLOCATION_PAGES_COUNT * RPMALLOC_PAGE_SIZE;
+        size_t list_bytes = global_span_count * QUICK_ALLOCATION_PAGES_COUNT * MALLOC_PAGE_SIZE;
         stats->cached += list_bytes;
     }
 
@@ -2203,7 +2223,7 @@ global_statistics(GlobalStatistics* stats)
             global_span_ptr = _memory_large_cache[iclass].load();
         }
         uptr global_span_count = reinterpret_cast<uptr>(global_span_ptr) & ~SPAN_MASK;
-        size_t list_bytes = global_span_count * (iclass + 1) * SPAN_MAX_PAGE_COUNT * RPMALLOC_PAGE_SIZE;
+        size_t list_bytes = global_span_count * (iclass + 1) * SPAN_MAX_PAGE_COUNT * MALLOC_PAGE_SIZE;
         stats->cached_large += list_bytes;
     }
 }

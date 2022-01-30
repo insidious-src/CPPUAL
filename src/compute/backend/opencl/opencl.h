@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@
  *
  */
 
-namespace cppual { namespace Compute { namespace CL {
+namespace cppual { namespace compute { namespace cl {
 
 // =========================================================
 
@@ -111,12 +111,12 @@ enum class SupportedILs : ::cl_device_exec_capabilities
     Native = CL_EXEC_NATIVE_KERNEL
 };
 
-typedef BitSet<SupportedILs> supported_ils_type;
+typedef bitset<SupportedILs> supported_ils_type;
 
 // =========================================================
 
-class Platform    ;
-class Device      ;
+class platform    ;
+class device      ;
 class Program     ;
 class Kernel      ;
 class Event       ;
@@ -149,15 +149,15 @@ using CLObject = typename std::enable_if<is_cl_object<T>::value, T>::type;
 
 // =========================================================
 
-template <ResourceType> struct conv_type            { typedef platform_type type; };
-template <> struct conv_type<ResourceType::Device>  { typedef device_type   type; };
-template <> struct conv_type<ResourceType::Event>   { typedef event_type    type; };
-template <> struct conv_type<ResourceType::Shader>  { typedef kernel_type   type; };
-template <> struct conv_type<ResourceType::Program> { typedef program_type  type; };
-template <> struct conv_type<ResourceType::Context> { typedef context_type  type; };
-template <> struct conv_type<ResourceType::Buffer>  { typedef memory_type   type; };
-template <> struct conv_type<ResourceType::Image>   { typedef memory_type   type; };
-template <> struct conv_type<ResourceType::Queue>   { typedef queue_type    type; };
+template <resource_type> struct conv_type            { typedef platform_type type; };
+template <> struct conv_type<resource_type::device>  { typedef device_type   type; };
+template <> struct conv_type<resource_type::event>   { typedef event_type    type; };
+template <> struct conv_type<resource_type::shader>  { typedef kernel_type   type; };
+template <> struct conv_type<resource_type::program> { typedef program_type  type; };
+template <> struct conv_type<resource_type::context> { typedef context_type  type; };
+template <> struct conv_type<resource_type::buffer>  { typedef memory_type   type; };
+template <> struct conv_type<resource_type::image>   { typedef memory_type   type; };
+template <> struct conv_type<resource_type::queue>   { typedef queue_type    type; };
 
 // =========================================================
 
@@ -166,8 +166,8 @@ class opencl_error : public std::exception
 public:
     /// Creates a new opencl_error exception object for \p error.
     explicit opencl_error (i32 error) noexcept
-    : m_error(error),
-      m_error_string(to_string(error))
+    : _M_error(error),
+      _M_error_string(to_string(error))
     {
     }
 
@@ -179,19 +179,19 @@ public:
     /// Returns the numeric error code.
     constexpr i32 error_code() const noexcept
     {
-        return m_error;
+        return _M_error;
     }
 
     /// Returns a string description of the error.
     string_type error_string() const noexcept
     {
-        return m_error_string;
+        return _M_error_string;
     }
 
     /// Returns a C-string description of the error.
     cchar* what() const noexcept
     {
-        return m_error_string.c_str();
+        return _M_error_string.c_str();
     }
 
     /// Static function which converts the numeric OpenCL error code \p error
@@ -210,8 +210,8 @@ public:
     static string_type to_string(i32 error);
 
 private:
-    i32       m_error;
-    string_type m_error_string;
+    i32       _M_error;
+    string_type _M_error_string;
 };
 
 // =========================================================
@@ -240,9 +240,9 @@ template <class Function, class Object, class AuxInfo>
 struct bound_info_function
 {
     bound_info_function(Function function, Object object, AuxInfo aux_info)
-    : m_function(function),
-      m_object(object),
-      m_aux_info(aux_info)
+    : _M_function(function),
+      _M_object(object),
+      _M_aux_info(aux_info)
     {
     }
 
@@ -250,8 +250,8 @@ struct bound_info_function
     i32 operator()(Info info, size_t input_size, const void *input,
                    size_t size, void *value, size_t *size_ret) const
     {
-        return m_function(
-            m_object, m_aux_info, info,
+        return _M_function(
+            _M_object, _M_aux_info, info,
             input_size, input, size, value, size_ret
         );
     }
@@ -259,71 +259,71 @@ struct bound_info_function
     template <class Info>
     i32 operator()(Info info, size_t size, void *value, size_t* size_ret) const
     {
-        return m_function(m_object, m_aux_info, info, size, value, size_ret);
+        return _M_function(_M_object, _M_aux_info, info, size, value, size_ret);
     }
 
-    Function m_function;
-    Object   m_object;
-    AuxInfo  m_aux_info;
+    Function _M_function;
+    Object   _M_object;
+    AuxInfo  _M_aux_info;
 };
 
 template <class Function, class Object>
 struct bound_info_function<Function, Object, void>
 {
     bound_info_function(Function function, Object object)
-    : m_function(function),
-      m_object(object)
+    : _M_function(function),
+      _M_object(object)
     {
     }
 
     template<class Info>
     i32 operator()(Info info, size_t size, void *value, size_t* size_ret) const
     {
-        return m_function(m_object, info, size, value, size_ret);
+        return _M_function(_M_object, info, size, value, size_ret);
     }
 
-    Function m_function;
-    Object   m_object;
+    Function _M_function;
+    Object   _M_object;
 };
 
 template <class Function>
 struct bound_info_function<Function, platform_type*, void>
 {
     bound_info_function(Function function, platform_type* object)
-    : m_function(function),
-      m_object(object)
+    : _M_function(function),
+      _M_object(object)
     {
     }
 
     template<class Info>
     i32 operator()(Info info, u32 size, device_type** value, u32* size_ret) const
     {
-        return m_function(m_object, info, size, value, size_ret);
+        return _M_function(_M_object, info, size, value, size_ret);
     }
 
-    Function       m_function;
-    platform_type* m_object;
+    Function       _M_function;
+    platform_type* _M_object;
 };
 
 template <class Function>
 struct bound_info_function<Function, void, void>
 {
     bound_info_function(Function function)
-    : m_function(function)
+    : _M_function(function)
     {
     }
 
     i32 operator()(size_t size, void *value, size_t* size_ret) const
     {
-        return m_function(size, value, size_ret);
+        return _M_function(size, value, size_ret);
     }
 
     i32 operator()(u32 size, platform_type** value, u32* size_ret) const
     {
-        return m_function(size, value, size_ret);
+        return _M_function(size, value, size_ret);
     }
 
-    Function m_function;
+    Function _M_function;
 };
 
 template <class Function>
@@ -547,20 +547,20 @@ inline T get_object_info(Function f, Object o, Info i, AuxInfo j, const size_t k
 // =========================================================
 
 //! Handle Class
-template <ResourceType T>
-class Interface : public Object<T>
+template <resource_type T>
+class interface : public object<T>
 {
 public:
-    typedef Object<T>                              base_type  ;
+    typedef object<T>                              base_type  ;
     typedef CLObject<typename conv_type<T>::type>* pointer    ;
     typedef std::size_t                            size_type  ;
-    typedef Handle                                 handle_type;
+    typedef resource_handle                        handle_type;
 
-    Interface  () = delete ;
-    ~Interface () = default;
+    interface  () = delete ;
+    ~interface () = default;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -573,24 +573,24 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Device> : public IDevice
+class interface<resource_type::device> : public device_interface
 {
 public:
-    typedef IDevice                base_type  ;
+    typedef device_interface       base_type  ;
     typedef CLObject<device_type>* pointer    ;
     typedef std::size_t            size_type  ;
-    typedef Handle                 handle_type;
+    typedef resource_handle        handle_type;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface &&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface &&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -603,24 +603,24 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Buffer> : public IBuffer
+class interface<resource_type::buffer> : public buffer_interface
 {
 public:
-    typedef IBuffer                base_type  ;
+    typedef buffer_interface       base_type  ;
     typedef CLObject<memory_type>* pointer    ;
     typedef std::size_t            size_type  ;
-    typedef Handle                 handle_type;
+    typedef resource_handle        handle_type;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -633,24 +633,24 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Image> : public IImage
+class interface<resource_type::image> : public image_interface
 {
 public:
-    typedef IImage                 base_type  ;
+    typedef image_interface        base_type  ;
     typedef CLObject<memory_type>* pointer    ;
     typedef std::size_t            size_type  ;
-    typedef Handle                 handle_type;
+    typedef resource_handle        handle_type;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -663,24 +663,24 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Context> : public IPipeline
+class interface<resource_type::context> : public pipeline_interface
 {
 public:
-    typedef IPipeline               base_type  ;
+    typedef pipeline_interface      base_type  ;
     typedef CLObject<context_type>* pointer    ;
     typedef std::size_t             size_type  ;
-    typedef Handle                  handle_type;
+    typedef resource_handle         handle_type;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -693,24 +693,24 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Shader> : public IShader
+class interface<resource_type::shader> : public shader_interface
 {
 public:
-    typedef IShader                base_type  ;
+    typedef shader_interface       base_type  ;
     typedef CLObject<kernel_type>* pointer    ;
     typedef std::size_t            size_type  ;
-    typedef Handle                 handle_type;
+    typedef resource_handle        handle_type;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -723,24 +723,24 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Program> : public ICommandSequence
+class interface<resource_type::program> : public cmd_sequence_interface
 {
 public:
-    typedef ICommandSequence        base_type  ;
+    typedef cmd_sequence_interface  base_type  ;
     typedef CLObject<program_type>* pointer    ;
     typedef std::size_t             size_type  ;
-    typedef Handle                  handle_type;
+    typedef resource_handle         handle_type;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -753,24 +753,24 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Queue> : public IQueue
+class interface<resource_type::queue> : public queue_interface
 {
 public:
-    typedef IQueue                base_type  ;
+    typedef queue_interface       base_type  ;
     typedef CLObject<queue_type>* pointer    ;
     typedef std::size_t           size_type  ;
-    typedef Handle                handle_type;
+    typedef resource_handle       handle_type;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -783,24 +783,24 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Event> : public IEvent
+class interface<resource_type::event> : public event_interface
 {
 public:
-    typedef IEvent                base_type  ;
+    typedef event_interface       base_type  ;
     typedef CLObject<event_type>* pointer    ;
     typedef std::size_t           size_type  ;
-    typedef Handle                handle_type;
+    typedef resource_handle       handle_type;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -813,23 +813,23 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================
 
 template <>
-class Interface<ResourceType::Sampler> : public ISampler
+class interface<resource_type::sampler> : public sampler_interface
 {
 public:
-    typedef ISampler                base_type  ;
+    typedef sampler_interface       base_type  ;
     typedef CLObject<sampler_type>* pointer    ;
     typedef std::size_t             size_type  ;
 
-    ~Interface () noexcept;
+    ~interface () noexcept;
 
-    Interface (Interface&&) = default;
-    Interface& operator = (Interface&&) = default;
+    interface (interface&&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr operator pointer () const noexcept
     {
@@ -842,7 +842,7 @@ public:
     }
 
 protected:
-    constexpr explicit Interface (pointer handle) noexcept : base_type (handle) { }
+    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
 };
 
 // =========================================================

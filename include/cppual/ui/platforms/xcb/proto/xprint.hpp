@@ -44,8 +44,8 @@ public:
            uint8_t first_event,
            const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~notify(void) {}
@@ -72,7 +72,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_x_print_pcontext_t, typename ... Parameter>
@@ -83,14 +83,14 @@ public:
         decltype((*this)->context),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->context,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class notify
 
 
@@ -113,8 +113,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~attribut_notify(void) {}
@@ -141,7 +141,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_x_print_pcontext_t, typename ... Parameter>
@@ -152,14 +152,14 @@ public:
         decltype((*this)->context),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->context,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class attribut_notify
 
 
@@ -199,7 +199,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_context
 } // namespace error
 
@@ -235,7 +235,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_sequence
 } // namespace error
 
@@ -349,7 +349,7 @@ CookieFunction>
                 SIGNATURE(xcb_x_print_printer_next),
                 SIGNATURE(xcb_x_print_printer_sizeof),
                 SIGNATURE(xcb_x_print_print_get_printer_list_printers_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class print_get_printer_list
 
@@ -560,7 +560,7 @@ CookieFunction>
         decltype(this->get()->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -734,7 +734,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_x_print_print_get_document_data_data),
                 SIGNATURE(xcb_x_print_print_get_document_data_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class print_get_document_data
 
@@ -934,7 +934,7 @@ CookieFunction>
                 ::xcb_x_print_string8_t,
                 SIGNATURE(xcb_x_print_print_get_attributes_attributes),
                 SIGNATURE(xcb_x_print_print_get_attributes_attributes_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class print_get_attributes
 
@@ -1016,7 +1016,7 @@ CookieFunction>
                 ::xcb_x_print_string8_t,
                 SIGNATURE(xcb_x_print_print_get_one_attributes_value),
                 SIGNATURE(xcb_x_print_print_get_one_attributes_value_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class print_get_one_attributes
 
@@ -1205,7 +1205,7 @@ CookieFunction>
                 Roots,
                 SIGNATURE(xcb_x_print_print_query_screens_roots),
                 SIGNATURE(xcb_x_print_print_query_screens_roots_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class print_query_screens
 
@@ -2133,8 +2133,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -2147,14 +2147,14 @@ public:
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_X_PRINT_NOTIFY:
-            handler(cppual::x_print::event::notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::x_print::event::notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_X_PRINT_ATTRIBUT_NOTIFY:
-            handler(cppual::x_print::event::attribut_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::x_print::event::attribut_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -2163,8 +2163,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -2177,7 +2177,7 @@ public:
     typedef cppual::x_print::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::x_print::extension & extension)
@@ -2187,7 +2187,7 @@ public:
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-        switch (error->error_code - m_first_error) {
+        switch (error->error_code - _M_first_error) {
 
         case XCB_X_PRINT_BAD_CONTEXT: // 0
             throw cppual::x_print::error::bad_context(error);
@@ -2199,7 +2199,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,51 +21,51 @@
 
 #include <cppual/ui/controls/label.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-Label::Label (View*            pParent,
+label::label (view*            pParent,
               string_type const& gText,
-              Rect const&        gRect,
-              TextFormat)
-: SkinnableView(pParent, gRect, pParent ?
+              rect const&        gRect,
+              text_format)
+: skinnable_view(pParent, gRect, pParent ?
                 pParent->renderable_unsafe ()->screen () : 0),
-  m_gText(gText)
+  _M_gText(gText)
 { }
 
-void Label::setText (string const& gText)
+void label::set_text (string const& gText)
 {
-    m_gText = gText;
+    _M_gText = gText;
 
     if (valid ())
     {
         refresh ();
-        textChanged();
+        text_changed();
     }
 }
 
-void Label::setFormat (TextFormat eFormat)
+void label::set_format (text_format eFormat)
 {
-    if (m_eFormat != eFormat)
+    if (_M_eFormat != eFormat)
     {
-        m_eFormat = eFormat;
+        _M_eFormat = eFormat;
 
         if (valid ())
         {
             refresh();
-            textChanged();
+            text_changed();
         }
     }
 }
 
-void Label::paintEvent (Rect const&)
+void label::paint_event (rect const&)
 {
 }
 
-void Label::onEnable (bool)
+void label::size_event (point2u)
 {
 }
 
-void Label::sizeEvent (point2u)
+void label::on_enable (bool)
 {
 }
 

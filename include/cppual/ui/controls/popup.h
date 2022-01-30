@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,82 +26,87 @@
 #include <cppual/ui/layout.h>
 #include <cppual/ui/controls/button.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-enum class MenuItemType : unsigned char
+// =========================================================
+
+enum class menu_item_type : byte
 {
-    Invalid,
-    Command,
-    Separator,
-    Parent,
-    Radio,
-    Check,
-    Group
+    invalid,
+    command,
+    separator,
+    parent,
+    radio,
+    check,
+    group
 };
 
 // ====================================================
 
-class PopupMenu : public SkinnableView
+class popup_menu : public skinnable_view
 {
 public:
-    union ItemData
+    typedef command command_type;
+    typedef string  string_type ;
+
+    union item_data
     {
-        Command  * action ;
-        CheckBox * check  ;
-        RadioBox * radio  ;
-        PopupMenu* subMenu;
+        command_type* action ;
+        check_box*    check  ;
+        radio_box*    radio  ;
+        popup_menu*   subMenu;
     };
 
-    typedef string string_type;
+    popup_menu ();
+    popup_menu (popup_menu&&);
+    popup_menu (popup_menu const&);
+    popup_menu& operator = (popup_menu&&);
+    popup_menu& operator = (popup_menu const&);
 
-    PopupMenu ();
-    PopupMenu (PopupMenu&&);
-    PopupMenu (PopupMenu const&);
-    PopupMenu& operator = (PopupMenu&&);
-    PopupMenu& operator = (PopupMenu const&);
+    menu_item_type item_type (int pos);
+    popup_menu*    sub_menu (int menu_pos);
+    command_type*  command (int action_pos);
+    size_type      delay ();
+    bool           create (point2i);
+    bool           add_command (command_type*, int pos = -1);
+    bool           add_check (command_type*, int pos = -1);
+    bool           add_radio (command_type*, int pos = -1);
+    bool           add_sub_menu (popup_menu*, string_type const&, int pos = -1);
+    bool           add_separator (int pos = -1);
+    bool           add_group (int pos = -1);
+    bool           add_to_group (int group_pos, view*);
+    bool           remove_from_group (int group_pos, view*);
+    bool           remove_item (int pos);
+    void           set_delay (size_type ms);
+    void           set_position (point2i);
+    void           set_group_name (int group_pos, string_type const&);
 
-    MenuItemType itemType (int pos);
-    PopupMenu*   subMenu (int menu_pos);
-    Command*     command (int action_pos);
-    size_type    delay ();
-    bool         create (point2i);
-    bool         addCommand (Command*, int pos = -1);
-    bool         addCheck (Command*, int pos = -1);
-    bool         addRadio (Command*, int pos = -1);
-    bool         addSubMenu (PopupMenu*, string const&, int pos = -1);
-    bool         addSeparator (int pos = -1);
-    bool         addGroup (int pos = -1);
-    bool         addToGroup (int group_pos, View*);
-    bool         removeFromGroup (int group_pos, View*);
-    bool         removeItem (int pos);
-    void         setDelay (size_type ms);
-    void         setPosition (point2i);
-    void         setGroupName (int group_pos, string const&);
+    static size_type default_delay     ();
+    static void      set_default_delay (size_type ms);
 
-    static size_type defaultDelay    ();
-    static void      setDefaultDelay (size_type ms);
-
-    inline size_type itemCount () const noexcept
-    { return m_gItemList.size (); }
+    inline size_type item_count () const noexcept
+    { return _M_gItemList.size (); }
 
 private:
-    struct MenuItem
+    struct menu_item
     {
-        ItemData     data;
-        MenuItemType type;
+        item_data      data;
+        menu_item_type type;
     };
 
-    typedef std::vector<MenuItem*> vector_type;
+    typedef vector<menu_item*> vector_type;
 
 private:
-    void paintEvent (Rect const&);
-    void onFocusKilled ();
-    void onKeyPress (u8);
-    void onKeyRelease (u8);
+    void paint_event (rect const&);
+    void focus_event (bool);
+    void key_pressed_event (event_type::key_data const&);
+    void key_released_event (event_type::key_data const&);
 
-    vector_type m_gItemList;
+    vector_type _M_gItemList;
 
 };
+
+// =========================================================
 
 } } // namespace Ui
 

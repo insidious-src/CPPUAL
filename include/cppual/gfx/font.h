@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,79 +25,80 @@
 
 #include <cppual/flags.h>
 #include <cppual/string.h>
+#include <cppual/containers.h>
 
 #include <string>
 #include <vector>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-class Font
+class font
 {
 public:
-    enum Style
+    enum style
     {
-        Undecorated = 0,
-        Italic      = 1 << 0,
-        Bold        = 1 << 1,
-        Underlined  = 1 << 2,
-        Overlined   = 1 << 3,
-        Erased      = 1 << 4
+        undecorated =      0,
+        italic      = 1 << 0,
+        bold        = 1 << 1,
+        underlined  = 1 << 2,
+        overlined   = 1 << 3,
+        erased      = 1 << 4
     };
 
-    enum class SubPixel : unsigned char
+    enum class sub_pixel : byte
     {
-        None = 0,
-        RGB,
-        BGR,
-        VerticalRGB,
-        VerticalBGR
+        none        ,
+        rgb         ,
+        bgr         ,
+        vertical_rgb,
+        vertical_bgr
     };
 
-    typedef std::size_t                              size_type;
-    typedef string                                   string_type;
-    typedef Memory::Allocator<uint>                  allocator_type;
-    typedef std::vector<uint, allocator_type>        vector_type;
-    typedef BitSet<Font::Style>                      Styles;
-    typedef struct { u8 spacing, size, lineHeight; } Format;
+    typedef std::size_t                               size_type     ;
+    typedef string                                    string_type   ;
+    typedef memory::allocator<uint>                   allocator_type;
+    typedef vector<uint>                              vector_type   ;
+    typedef bitset<font::style>                       styles        ;
+    typedef struct { u8 spacing, size, line_height; } format_type   ;
 
-    class Atlas
+    class atlas
     {
     public:
-        Atlas  (string_type const& name);
-        ~Atlas ();
+        atlas  (string_type const& name);
+        ~atlas ();
 
-        Atlas () noexcept
-        : m_gName (), m_pFace ()
+        atlas () noexcept
+        : _M_gName (), _M_pFace ()
         { }
 
-        friend class Font;
+        friend class font;
 
     private:
-        string_type m_gName;
-        void*       m_pFace;
+        string_type _M_gName;
+        void*       _M_pFace;
     };
 
-    Font ();
-    Font (Font&&);
-    Font (Font const&);
-    Font& operator = (Font&&);
-    Font& operator = (Font const&);
-    ~Font ();
+    font ();
+    font (font&&);
+    font (font const&);
+    font& operator = (font&&);
+    font& operator = (font const&);
+    ~font ();
 
-    Font (Atlas const&,
+    font (atlas const&,
           allocator_type&,
-          int  kerning    = 0,
+          int     kerning = 0,
           bool anti_alias = true,
-          SubPixel        = SubPixel::None);
+          sub_pixel   sub = sub_pixel::none);
 
-    SubPixel subPixelRendering  ();
-    bool     isAntiAliased      () const;
-    int      kerning            () const;
-    void     setKerning      (int);
-    void     glyph (size_type idx) const;
+    sub_pixel sub_pixel_rendering  ()      ;
+    bool      is_anti_aliased      () const;
+    int       kerning              () const;
+    void      set_kerning       (int)      ;
+    void      glyph   (size_type idx) const;
 
 private:
-    vector_type m_gPixels;
+    vector_type _M_gPixels;
 };
 
 } } // Graphics

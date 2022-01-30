@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@
 #include "wlsurface.cpp"
 #include "wlbackend.cpp"
 
-namespace cppual { namespace Ui { namespace Platform {
+namespace cppual { namespace ui { namespace platform {
 
-struct WlFactory final : Factory
+struct WlFactory final : factory
 {
     shared_queue   createQueueInstance ();
     shared_display connectDisplay      (string_type const&);
-    shared_window  createWindow        (Rect const&, u32, IDisplay*);
+    shared_window  createWindow        (rect const&, u32, shared_display);
 };
 
 shared_display WlFactory::connectDisplay (string_type const& name)
@@ -48,7 +48,7 @@ shared_queue WlFactory::createQueueInstance ()
     return shared_queue ();
 }
 
-shared_window WlFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
+shared_window WlFactory::createWindow (rect const& gRect, u32 nScreen, shared_display pDisplay)
 {
     return shared_window (new WlSurface (gRect, nScreen, pDisplay));
 }
@@ -57,15 +57,15 @@ shared_window WlFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay*
 
 // =========================================================
 
-using cppual::Ui::Platform::WlFactory;
-using cppual::Process::Plugin        ;
-using cppual::Memory::MemoryResource ;
-using cppual::Memory::StaticResource ;
-using cppual::Memory::Allocator      ;
+using cppual::ui::platform::WlFactory;
+using cppual::process::Plugin        ;
+using cppual::memory::memory_resource ;
+using cppual::memory::stacked_static_resource ;
+using cppual::memory::allocator      ;
 
-extern "C" Plugin* plugin_main (MemoryResource* /*rc*/)
+extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
 {
-    static StaticResource<sizeof (WlFactory)> static_resource;
+    static stacked_static_resource<sizeof (WlFactory)> static_resource;
     static Plugin plugin;
 
     plugin.name     = "WlFactory"         ;
@@ -75,7 +75,7 @@ extern "C" Plugin* plugin_main (MemoryResource* /*rc*/)
     plugin.verMinor = 0                   ;
 
     plugin.iface    = std::static_pointer_cast<void>
-            (std::allocate_shared<WlFactory>(Allocator<WlFactory>(static_resource)));
+            (std::allocate_shared<WlFactory>(allocator<WlFactory>(static_resource)));
 
     return &plugin;
 }

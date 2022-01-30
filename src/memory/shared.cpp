@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,76 +34,73 @@
 #   include "os/bsd.h"
 #elif defined (OS_WINDOWS)
 #   include "os/win.h"
+#elif defined (OS_ANDROID)
+#   include "os/android.h"
+#elif defined (OS_IOS)
+#   include "os/ios.h"
 #endif
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
 #if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
 
-inline int flags1 (State eState) noexcept
+constexpr int convert_state (State eState) noexcept
 {
-    switch (eState)
-    {
-    case State::ReadOnly:
-        return O_RDONLY | O_EXCL;
-    case State::ReadWrite:
-        return O_RDWR | O_EXCL;
-    default:
-        return O_EXCL;
-    }
+    return eState == State::ReadOnly ?
+                O_RDONLY | O_EXCL : eState == State::ReadWrite ? O_RDWR | O_EXCL : O_EXCL;
 }
 
-constexpr int flags (Mode eMode) noexcept
+constexpr int convert_mode (Mode eMode) noexcept
 {
     return eMode == Mode::Create ? O_CREAT : 0;
 }
 
 #endif
 
-SharedObject::SharedObject (string const& gName, Mode eMode, State eState)
-: m_gName (gName),
-  m_eMode (eMode),
-  m_eState (eState)
+shared_object::shared_object (string const& gName, Mode eMode, State eState)
+: _M_gName (gName),
+  _M_eMode (eMode),
+  _M_eState (eState)
 #if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
-  , m_nId (::shm_open (gName.c_str (), flags (eMode) | flags1 (eState), 0600u))
+  , _M_nId (::shm_open (gName.c_str (), convert_mode (eMode) | convert_state (eState), 0600u))
 #endif
 { }
 
-SharedObject::~SharedObject () noexcept
+shared_object::~shared_object () noexcept
 {
 #   if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
-    if (m_nId != -1) ::shm_unlink (m_gName.c_str ());
+    if (_M_nId != -1) ::shm_unlink (_M_gName.c_str ());
 #   endif
 }
 
-bool SharedObject::truncate (size_type) noexcept
+bool shared_object::truncate (size_type) noexcept
 {
     return false;
 }
 
-SharedRegion::SharedRegion (SharedObject& gObj, size_type uSize, bool bWritable)
-: m_gObject (gObj),
-  m_pRegion (),
-  m_uSize (gObj.isValid () ? uSize : 0)
+shared_memory::shared_memory (shared_object& gObj, size_type uSize, bool bWritable)
+: _M_gObject (gObj),
+  _M_pRegion (),
+  _M_uSize (gObj.valid () ? uSize : 0)
 {
-    if (gObj.isValid ())
+    if (gObj.valid ())
     {
         if (gObj.mode () != Mode::Open) gObj.truncate (uSize);
 
 #       ifdef OS_STD_UNIX
-        m_pRegion = ::mmap (nullptr, uSize,
-                            bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
-                            MAP_SHARED, gObj.id (), 0);
+        _M_pRegion = ::mmap (nullptr, uSize,
+                             bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
+                             MAP_SHARED, gObj.id (), 0);
 #       elif defined OS_WINDOWS
         bWritable = bWritable;
 #       endif
     }
 }
 
-SharedRegion::~SharedRegion () noexcept
+shared_memory::~shared_memory () noexcept
 {
 #   ifdef OS_STD_UNIX
-    if (m_pRegion) ::munmap (m_pRegion, m_uSize);
+    if (_M_pRegion) ::munmap (_M_pRegion, _M_uSize);
 #   endif
 }
 

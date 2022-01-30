@@ -27,7 +27,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 RAPIDJSON_DIAG_OFF(overflow)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Encoding

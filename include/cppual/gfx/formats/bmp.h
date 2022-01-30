@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,16 +37,16 @@ namespace cppual {
  * So every byte is divided by 8. RGB=(0,0,8) is used in MK4 to define BLACK.
  */
 
-class BitmapStream : public std::fstream
+class bitmap_stream : public std::fstream
 {
 public:
-    typedef std::size_t                 size_type   ;
-    typedef std::streamsize             streamsize  ;
-    typedef Graphics::RGBColor          rgb_type    ;
-    typedef std::unique_ptr<rgb_type[]> pointer     ;
-    using   base                      = std::fstream;
+    typedef std::size_t                 size_type ;
+    typedef std::streamsize             streamsize;
+    typedef gfx::rgb_color              rgb_type  ;
+    typedef std::unique_ptr<rgb_type[]> pointer   ;
+    typedef std::fstream                base      ;
 
-    enum class Type : u16
+    enum class bmp_type : u16
     {
         BM = 0x4D42, // Windows 3.1x, 95, NT, ... etc.
         BA = 0x4142, // OS/2 struct bitmap array
@@ -56,7 +56,7 @@ public:
         PT = 0x5450  // OS/2 pointer
     };
 
-    enum class Compression : u32
+    enum class compression_type : u32
     {
         BI_RGB,
         BI_RLE8, // RLE 8-bit/pixel Can be used only with 8-bit/pixel bitmaps
@@ -74,25 +74,25 @@ public:
         BI_CMYKRLE4   // RLE-4 only Windows Metafile CMYK
     };
 
-    struct PACKED Header  // -- must be 14 bytes --
+    struct PACKED bmp_header  // -- must be 14 bytes --
     {
-        Type type; // magic identifier -> 2 bytes
-        u32  filesize; // file size in bytes -> 4 bytes
-        u16  reserved1, reserved2; // 2 * 2 bytes
-        u32  offset; // offset to pixel data in bytes -> 4 bytes
+        bmp_type type; // magic identifier -> 2 bytes
+        u32      filesize; // file size in bytes -> 4 bytes
+        u16      reserved1, reserved2; // 2 * 2 bytes
+        u32      offset; // offset to pixel data in bytes -> 4 bytes
     };
 
-    struct PACKED InfoHeader  // -- must be 40 bytes --
+    struct PACKED info_header  // -- must be 40 bytes --
     {
-        u32         size; // header size in bytes -> 4 bytes
-        i32       width, height; // width / height of image -> 2 * 4 bytes
-        u16         planes; // number of colour planes -> 2 bytes
-        u16         bits; // bits per pixel -> 2 bytes
-        Compression compression; // compression type -> 4 bytes
-        u32         imageSize; // image size in bytes -> 4 bytes
-        i32       xResolution, yResolution; // pixels per meter -> 2 * 4 bytes
-        u32         colors; // number of colors -> 4 bytes
-        u32         importantColors; // important colors -> 4 bytes
+        u32              size; // header size in bytes -> 4 bytes
+        i32              width, height; // width / height of image -> 2 * 4 bytes
+        u16              planes; // number of colour planes -> 2 bytes
+        u16              bits; // bits per pixel -> 2 bytes
+        compression_type compression; // compression type -> 4 bytes
+        u32              imageSize; // image size in bytes -> 4 bytes
+        i32              xResolution, yResolution; // pixels per meter -> 2 * 4 bytes
+        u32              colors; // number of colors -> 4 bytes
+        u32              importantColors; // important colors -> 4 bytes
 
         constexpr u32 absolute_width () const noexcept
         { return static_cast<u32> (width);  }
@@ -112,20 +112,20 @@ public:
         }
     };
 
-    BitmapStream  () = delete;
-    ~BitmapStream ();
+    bitmap_stream  () = delete;
+    ~bitmap_stream ();
 
 
-    BitmapStream (cchar* path, bool create = false)
+    bitmap_stream (cchar* path, bool create = false)
     : base (path, in | out | binary),
-      m_infoHeader { },
-      m_header     { }
+      _M_infoHeader { },
+      _M_header     { }
     {
         if (!is_open () && create) open (path, in | out | binary | trunc);
         if ( good    ())  _parse_header ();
     }
 
-    inline BitmapStream& operator = (BitmapStream& obj)
+    inline bitmap_stream& operator = (bitmap_stream& obj)
     {
         if (this != &obj)
         {
@@ -143,9 +143,9 @@ public:
 
     bool valid () const noexcept
     {
-        return header ().type == Type::BM            &&
-               header ().offset                      >=
-               sizeof (Header) + sizeof (InfoHeader) &&
+        return header ().type == bmp_type::BM             &&
+               header ().offset                           >=
+               sizeof (bmp_header) + sizeof (info_header) &&
                header ().filesize - header ().offset ==
                info   ().image_size_calc   ();
     }
@@ -156,8 +156,8 @@ public:
         seekp (0);
     }
 
-    Header     const& header () const noexcept { return m_header;     }
-    InfoHeader const& info   () const noexcept { return m_infoHeader; }
+    bmp_header  const& header () const noexcept { return _M_header    ; }
+    info_header const& info   () const noexcept { return _M_infoHeader; }
 
     size_type replace (rgb_type const target_color, rgb_type const new_color);
 
@@ -165,14 +165,14 @@ private:
     void _parse_header ();
 
 private:
-    InfoHeader m_infoHeader;
-    Header     m_header    ;
+    info_header _M_infoHeader;
+    bmp_header  _M_header    ;
 };
 
 // ===============================================
 
-static_assert (sizeof (BitmapStream::Header    ) == 14, "Header must be 14 bytes!"    );
-static_assert (sizeof (BitmapStream::InfoHeader) == 40, "InfoHeader must be 40 bytes!");
+static_assert (sizeof (bitmap_stream::bmp_header    ) == 14, "Header must be 14 bytes!"    );
+static_assert (sizeof (bitmap_stream::info_header) == 40, "InfoHeader must be 40 bytes!");
 
 } // namespace cppual
 

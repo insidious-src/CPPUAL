@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 
 #include <unordered_map>
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
 enum class TessGenType : unsigned char
 {
@@ -55,14 +55,14 @@ enum class VertexOrder : bool
 
 // ====================================================
 
-struct Binary
+struct binary
 {
-    static uint binaryFormats () noexcept;
+    static uint binary_formats () noexcept;
 };
 
 // ====================================================
 
-class Shader : public Object, public Binary
+class shader : public object, public binary
 {
 public:
     typedef string string_type;
@@ -77,38 +77,38 @@ public:
         Compute        = 1 << 5
     };
 
-    typedef BitSet<Shader::Type> Types;
+    typedef bitset<shader::Type> types;
 
-    Shader () = default;
-    Shader (Shader::Type type) noexcept;
-    Shader (Shader&&) noexcept;
-    Shader& operator = (Shader&&) noexcept;
+    shader () = default;
+    shader (shader::Type type) noexcept;
+    shader (shader&&) noexcept;
+    shader& operator = (shader&&) noexcept;
 
     string_type log ();
     bool        compile () noexcept;
-    bool        loadFromFile   (string_type const& file  );
-    bool        loadFromBinary (string_type const& file  );
-    bool        loadFromMemory (string_type const& source);
+    bool        load_from_file   (string_type const& file  );
+    bool        load_From_binary (string_type const& file  );
+    bool        load_from_memory (string_type const& source);
 
-    string_type const& source () const noexcept { return m_gSource; }
-    Shader::Type       type   () const noexcept { return m_eType  ; }
+    string_type const& source () const noexcept { return _M_gSource; }
+    shader::Type       type   () const noexcept { return _M_eType  ; }
 
-    bool isLoaded () const noexcept
-    { return m_gStates.test (Shader::IsLoaded); }
+    bool is_loaded () const noexcept
+    { return _M_gStates.test (shader::IsLoaded); }
 
-    bool isCompiled () const noexcept
-    { return m_gStates.test (Shader::IsCompiled); }
+    bool is_compiled () const noexcept
+    { return _M_gStates.test (shader::IsCompiled); }
 
-    bool load (string_type const& gString, LoadFrom const eMode = LoadFrom::File)
+    bool load (string_type const& gString, load_from const eMode = load_from::file)
     {
         switch (eMode)
         {
-        case LoadFrom::File:
-            return loadFromFile   (gString);
-        case LoadFrom::Memory:
-            return loadFromMemory (gString);
-        case LoadFrom::Binary:
-            return loadFromBinary (gString);
+        case load_from::file:
+            return load_from_file   (gString);
+        case load_from::memory:
+            return load_from_memory (gString);
+        case load_from::binary:
+            return load_From_binary (gString);
         };
     }
 
@@ -119,95 +119,113 @@ private:
         IsCompiled = 1 << 1
     };
 
-    typedef BitSet<Shader::State> States;
+    typedef bitset<shader::State> states;
 
 private:
-    string_type  m_gSource;
-    States       m_gStates;
-    Shader::Type m_eType  ;
+    string_type  _M_gSource;
+    states       _M_gStates;
+    shader::Type _M_eType  ;
 };
 
-struct FragmentShader : public Shader
+// ====================================================
+
+class fragment_shader : public shader
 {
+public:
     typedef string string_type;
 
-    FragmentShader () noexcept
-    : Shader (Shader::Fragment)
+    fragment_shader () noexcept
+    : shader (shader::Fragment)
     { }
 
-    FragmentShader (string_type const& gString, LoadFrom eMode = LoadFrom::File)
-    : Shader (Shader::Fragment)
-    { load (gString, eMode); }
-};
-
-struct VertexShader : public Shader
-{
-    typedef string string_type;
-
-    VertexShader () noexcept
-    : Shader (Shader::Vertex)
-    { }
-
-    VertexShader (string_type const& gString, LoadFrom eMode = LoadFrom::File)
-    : Shader (Shader::Vertex)
-    { load (gString, eMode); }
-};
-
-struct GeometryShader : public Shader
-{
-    typedef string string_type;
-
-    GeometryShader () noexcept
-    : Shader (Shader::Geometry)
-    { }
-
-    GeometryShader (string_type const& gString, LoadFrom eMode = LoadFrom::File)
-    : Shader (Shader::Geometry)
-    { load (gString, eMode); }
-};
-
-struct ComputeShader : public Shader
-{
-    typedef string string_type;
-
-    ComputeShader () noexcept
-    : Shader (Shader::Compute)
-    { }
-
-    ComputeShader (string_type const& gString, LoadFrom eMode = LoadFrom::File)
-    : Shader (Shader::Compute)
-    { load (gString, eMode); }
-};
-
-struct TessControlShader : public Shader
-{
-    typedef string string_type;
-
-    TessControlShader () noexcept
-    : Shader (Shader::TessControl)
-    { }
-
-    TessControlShader (string_type const& gString, LoadFrom eMode = LoadFrom::File)
-    : Shader (Shader::TessControl)
-    { load (gString, eMode); }
-};
-
-struct TessEvaluationShader : public Shader
-{
-    typedef string string_type;
-
-    TessEvaluationShader () noexcept
-    : Shader (Shader::TessEvaluation)
-    { }
-
-    TessEvaluationShader (string_type const& gString, LoadFrom eMode = LoadFrom::File)
-    : Shader (Shader::TessEvaluation)
+    fragment_shader (string_type const& gString, load_from eMode = load_from::file)
+    : shader (shader::Fragment)
     { load (gString, eMode); }
 };
 
 // ====================================================
 
-class SLProgram final : public Object, public Binary
+class vertex_shader : public shader
+{
+public:
+    typedef string string_type;
+
+    vertex_shader () noexcept
+    : shader (shader::Vertex)
+    { }
+
+    vertex_shader (string_type const& gString, load_from eMode = load_from::file)
+    : shader (shader::Vertex)
+    { load (gString, eMode); }
+};
+
+// ====================================================
+
+class geometry_shader : public shader
+{
+public:
+    typedef string string_type;
+
+    geometry_shader () noexcept
+    : shader (shader::Geometry)
+    { }
+
+    geometry_shader (string_type const& gString, load_from eMode = load_from::file)
+    : shader (shader::Geometry)
+    { load (gString, eMode); }
+};
+
+// ====================================================
+
+class compute_shader : public shader
+{
+public:
+    typedef string string_type;
+
+    compute_shader () noexcept
+    : shader (shader::Compute)
+    { }
+
+    compute_shader (string_type const& gString, load_from eMode = load_from::file)
+    : shader (shader::Compute)
+    { load (gString, eMode); }
+};
+
+// ====================================================
+
+class tess_control_shader : public shader
+{
+public:
+    typedef string string_type;
+
+    tess_control_shader () noexcept
+    : shader (shader::TessControl)
+    { }
+
+    tess_control_shader (string_type const& gString, load_from eMode = load_from::file)
+    : shader (shader::TessControl)
+    { load (gString, eMode); }
+};
+
+// ====================================================
+
+class tess_evaluation_shader : public shader
+{
+public:
+    typedef string string_type;
+
+    tess_evaluation_shader () noexcept
+    : shader (shader::TessEvaluation)
+    { }
+
+    tess_evaluation_shader (string_type const& gString, load_from eMode = load_from::file)
+    : shader (shader::TessEvaluation)
+    { load (gString, eMode); }
+};
+
+// ====================================================
+
+class sl_program final : public object, public binary
 {
 public:
     typedef string string_type;
@@ -220,59 +238,59 @@ public:
 
     typedef std::unordered_map<string_type, int,
                                std::hash<string_type>, std::equal_to<string_type>,
-                               Memory::Allocator<std::pair<const string_type, int>>> map_type;
+                               memory::allocator<std::pair<const string_type, int>>> map_type;
 
-    typedef BitSet<SLProgram::State> States;
+    typedef bitset<sl_program::State> States;
 
-    SLProgram () noexcept;
-    SLProgram (string_type const& binary_name) noexcept;
+    sl_program () noexcept;
+    sl_program (string_type const& binary_name) noexcept;
 
     string_type log ();
     void*       binary () noexcept;
-    uint        binaryFormat () noexcept;
-    int         addAttribute (string_type const& name);
-    int         addUniform (string_type const& name);
-    bool        loadFromBinary (string_type const& file);
-    bool        attach (Shader const& shader);
-    bool        detach (Shader const& shader);
-    bool        isAttached (Shader const& shader);
+    uint        binary_format () noexcept;
+    int         add_attribute (string_type const& name);
+    int         add_uniform (string_type const& name);
+    bool        load_from_binary (string_type const& file);
+    bool        attach (shader const& shader);
+    bool        detach (shader const& shader);
+    bool        is_attached (shader const& shader);
     bool        link () noexcept;
     bool        validate () noexcept;
     void        use () noexcept;
     void        disable () noexcept;
 
-    uint shaderCount () const noexcept
-    { return m_uShaderCount; }
+    uint shader_count () const noexcept
+    { return _M_uShaderCount; }
 
-    bool isLinked () const noexcept
-    { return m_gStates.test (SLProgram::IsLinked); }
+    bool is_linked () const noexcept
+    { return _M_gStates.test (sl_program::IsLinked); }
 
     int attribute (string_type const& gName)
-    { return m_gAttribLocList[gName]; }
+    { return _M_gAttribLocList[gName]; }
 
     int uniform (string_type const& gName)
-    { return m_gUniformLocList[gName]; }
+    { return _M_gUniformLocList[gName]; }
 
-    bool hasFragmentShader () const noexcept
-    { return m_gShaderTypes.test (Shader::Fragment); }
+    bool has_fragment_shader () const noexcept
+    { return _M_gShaderTypes.test (shader::Fragment); }
 
-    bool hasVertexShader () const noexcept
-    { return m_gShaderTypes.test (Shader::Vertex); }
+    bool has_vertex_shader () const noexcept
+    { return _M_gShaderTypes.test (shader::Vertex); }
 
-    bool hasComputeShader () const noexcept
-    { return m_gShaderTypes.test (Shader::Compute); }
+    bool has_compute_shader () const noexcept
+    { return _M_gShaderTypes.test (shader::Compute); }
 
-    bool hasTessControlShader () const noexcept
-    { return m_gShaderTypes.test (Shader::TessControl); }
+    bool has_tess_control_shader () const noexcept
+    { return _M_gShaderTypes.test (shader::TessControl); }
 
-    bool hasTessEvaluationShader () const noexcept
-    { return m_gShaderTypes.test (Shader::TessEvaluation); }
+    bool has_tess_evaluation_shader () const noexcept
+    { return _M_gShaderTypes.test (shader::TessEvaluation); }
 
 private:
-    map_type      m_gAttribLocList, m_gUniformLocList;
-    uint          m_uShaderCount;
-    Shader::Types m_gShaderTypes;
-    States        m_gStates;
+    map_type      _M_gAttribLocList, _M_gUniformLocList;
+    uint          _M_uShaderCount;
+    shader::types _M_gShaderTypes;
+    States        _M_gStates;
 };
 
 } } } // namespace GL

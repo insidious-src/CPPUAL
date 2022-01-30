@@ -23,7 +23,7 @@ RAPIDJSON_DIAG_OFF(switch-enum)
 RAPIDJSON_DIAG_OFF(covered-switch-default)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! Maps error code of parsing into error message.
 /*!

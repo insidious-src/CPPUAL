@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@
 
 #include <cstddef>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
-class MemoryResource;
+class memory_resource;
 
 // =========================================================
 
@@ -42,21 +42,21 @@ static_assert (alignof (std::size_t) == alignof (u8*),
 // =========================================================
 
 /// Get size of the total physical memory installed
-std::size_t size ();
+std::size_t capacity ();
 
 /// Largest available system memory block
-std::size_t maxSize ();
+std::size_t max_size ();
 
 /// Get size the current process allocated memory
-std::size_t workingSize ();
+std::size_t working_size ();
 
 // =========================================================
 
-MemoryResource* system_resource ();
+memory_resource* system_resource ();
 
 // =========================================================
 
-namespace Model {
+namespace model {
 
 #if defined(__clang__) || defined(__GNUC__)
 # define MALLOC_ATTRIBUTE __attribute__((__malloc__))

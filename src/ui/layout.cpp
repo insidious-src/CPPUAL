@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,30 +21,30 @@
 
 #include <cppual/ui/layout.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-Layout::Layout  ()
-: m_gViewList   (),
-  m_pOwner      (),
-  m_uNumRows    (),
-  m_uNumColumns ()
+layout::layout   ()
+: _M_gViewList   (),
+  _M_pOwner      (),
+  _M_uNumRows    (),
+  _M_uNumColumns ()
 {
 }
 
-void Layout::onSize (Rect const&)
+void layout::on_size (rect const&)
 {
 }
 
-void Layout::setViewMetrics (View*, LayoutMetrics const&)
+void layout::set_view_metrics (view*, layout_metrics const&)
 {
 }
 
-bool Layout::addView (View*, LayoutMetrics const&)
+bool layout::add_view (view*, layout_metrics const&)
 {
     return false;
 }
 
-bool Layout::removeView (View*)
+bool layout::remove_view (view*)
 {
     return false;
 }

@@ -44,8 +44,8 @@ public:
                    uint8_t first_event,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~counter_notify(void) {}
@@ -72,7 +72,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_sync_counter_t, typename ... Parameter>
@@ -83,14 +83,14 @@ public:
         decltype((*this)->counter),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->counter,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class counter_notify
 
 
@@ -113,8 +113,8 @@ public:
                  uint8_t first_event,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~alarm_notify(void) {}
@@ -141,7 +141,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_sync_alarm_t, typename ... Parameter>
@@ -152,14 +152,14 @@ public:
         decltype((*this)->alarm),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->alarm,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class alarm_notify
 
 
@@ -199,7 +199,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class counter
 } // namespace error
 
@@ -235,7 +235,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class alarm
 } // namespace error
 
@@ -349,7 +349,7 @@ CookieFunction>
                 SIGNATURE(xcb_sync_systemcounter_next),
                 SIGNATURE(xcb_sync_systemcounter_sizeof),
                 SIGNATURE(xcb_sync_list_system_counters_counters_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_system_counters
 
@@ -1698,8 +1698,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -1712,14 +1712,14 @@ public:
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_SYNC_COUNTER_NOTIFY:
-            handler(cppual::sync::event::counter_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::sync::event::counter_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_SYNC_ALARM_NOTIFY:
-            handler(cppual::sync::event::alarm_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::sync::event::alarm_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -1728,8 +1728,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -1742,7 +1742,7 @@ public:
     typedef cppual::sync::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::sync::extension & extension)
@@ -1752,7 +1752,7 @@ public:
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-        switch (error->error_code - m_first_error) {
+        switch (error->error_code - _M_first_error) {
 
         case XCB_SYNC_COUNTER: // 0
             throw cppual::sync::error::counter(error);
@@ -1764,7 +1764,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

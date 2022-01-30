@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,117 +26,127 @@
 #include <cppual/ui/groups.h>
 #include <cppual/common.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-enum class ToolStyle : unsigned char
+// =========================================================
+
+enum class tool_style : byte
 {
-    Flat,
-    Modern
+    flat,
+    modern
 };
 
-enum class ToolButton : unsigned char
+// =========================================================
+
+enum class tool_button : byte
 {
-    TextBesideIcon,
-    IconAboveText,
-    TextOnly,
-    IconOnly
+    text_beside_icon,
+    icon_above_text,
+    text_only,
+    icon_only
 };
 
-class ToolBar : public SkinnableView
+// =========================================================
+
+class tool_bar : public skinnable_view
 {
 public:
-    enum ToolFlag
+    enum tool_flag
     {
-        AutoHide    = 1 << 0,
-        HotTracking = 1 << 1,
-        Splitter    = 1 << 2,
-        Movable     = 1 << 3,
-        Draggable   = 1 << 4,
-        Floatable   = 1 << 5
+        auto_hide    = 1 << 0,
+        hot_tracking = 1 << 1,
+        splitter     = 1 << 2,
+        movable      = 1 << 3,
+        draggable    = 1 << 4,
+        floatable    = 1 << 5
     };
 
-    typedef BitSet<ToolFlag>        ToolFlags   ;
-    typedef std::vector<ViewGroup*> group_vector;
+    typedef bitset<tool_flag>   tool_flags      ;
+    typedef vector<view_group*> group_vector    ;
+    typedef orientation         orientation_type;
 
-    point2i iconSize () const;
-    u8      getRowCount ();
+    point2u icon_size () const;
+    u8      row_count ();
 
-    void setStyle (ToolStyle);
-    void setSimple (bool);
-    void setMovable (bool);
-    void setDraggable (bool);
-    void setFloatable (bool);
-    void setButtonType (ToolButton);
-    void setButtonStyle (ToolStyle);
-    void setIconSize (point2i const&);
-    void setMaxRows (u8);
-    void setOrientation (Orientation);
-    void setAutoHide (bool);
-    void setHotTracking (bool);
-    void enableSplitter (bool);
-    void moveGroup (size_type pos, size_type new_pos);
-    void maximizeGroup (size_type pos);
-    void minimizeGroup (size_type pos);
-    void pushChevron (); // auto hide
-    bool isFloating () const;
-    bool addGroup (ViewGroup&, size_type pos);
+    void set_style (tool_style);
+    void set_simple (bool);
+    void set_movable (bool);
+    void set_draggable (bool);
+    void set_floatable (bool);
+    void set_button_type (tool_button);
+    void set_button_style (tool_style);
+    void set_icon_size (point2u const&);
+    void set_max_rows (u8);
+    void set_orientation (orientation_type);
+    void set_auto_hide (bool);
+    void set_hot_tracking (bool);
+    void enable_splitter (bool);
+    void move_group (size_type pos, size_type new_pos);
+    void maximize_group (size_type pos);
+    void minimize_group (size_type pos);
+    void push_chevron (); // auto hide
+    bool is_floating () const;
+    bool add_group (view_group&, size_type pos);
 
-    inline ToolButton getButtonType () const noexcept
-    { return m_eButtonType; }
+    inline tool_button button_type () const noexcept
+    { return _M_eButtonType; }
 
-    inline Orientation getOrientation () const noexcept
-    { return m_eOrientation; }
+    inline orientation_type orientation () const noexcept
+    { return _M_eOrientation; }
 
-    inline bool isMovable () const noexcept
-    { return m_eToolFlags.test (ToolBar::Movable); }
+    inline bool is_movable () const noexcept
+    { return _M_eToolFlags.test (tool_bar::movable); }
 
-    inline bool isDraggable () const noexcept
-    { return m_eToolFlags.test (ToolBar::Draggable); }
+    inline bool is_draggable () const noexcept
+    { return _M_eToolFlags.test (tool_bar::draggable); }
 
-    inline bool isFloatable () const noexcept
-    { return m_eToolFlags.test (ToolBar::Floatable); }
+    inline bool is_floatable () const noexcept
+    { return _M_eToolFlags.test (tool_bar::floatable); }
 
-    inline bool isAutoHide () const noexcept
-    { return m_eToolFlags.test (ToolBar::AutoHide); }
+    inline bool is_auto_hide () const noexcept
+    { return _M_eToolFlags.test (tool_bar::auto_hide); }
 
-    inline bool hasHotTracking () const noexcept
-    { return m_eToolFlags.test (ToolBar::HotTracking); }
+    inline bool has_hot_tracking () const noexcept
+    { return _M_eToolFlags.test (tool_bar::hot_tracking); }
 
-    inline bool hasSplitter () const noexcept
-    { return m_eToolFlags.test (ToolBar::Splitter); }
+    inline bool has_splitter () const noexcept
+    { return _M_eToolFlags.test (tool_bar::splitter); }
 
-    inline size_type getGroupCount () const noexcept
-    { return m_gGroups.size (); }
+    inline size_type group_count () const noexcept
+    { return _M_gGroups.size (); }
 
-    inline ViewGroup* getGroup (size_type uId) const noexcept
-    { return m_gGroups[uId]; }
+    inline view_group* group (size_type uId) const noexcept
+    { return _M_gGroups[uId]; }
 
-    Signal<void()> clicked;
-    Signal<void()> doubleClicked;
-    Signal<void()> rightClicked;
-    Signal<void()> childResized;
-    Signal<void()> groupAdded;
-    Signal<void()> groupRemoved;
-    Signal<void()> dragBegun;
-    Signal<void()> dragEnded;
-    Signal<void()> chevronPushed;
-    Signal<void()> heightChanged;
-    Signal<void()> splitterDragging;
-    Signal<void()> orientationChanged;
+public:
+    signal<void()> clicked            ;
+    signal<void()> double_clicked     ;
+    signal<void()> right_clicked      ;
+    signal<void()> child_resized      ;
+    signal<void()> group_added        ;
+    signal<void()> group_removed      ;
+    signal<void()> drag_begun         ;
+    signal<void()> drag_ended         ;
+    signal<void()> chevron_pushed     ;
+    signal<void()> height_changed     ;
+    signal<void()> splitter_dragging  ;
+    signal<void()> orientation_changed;
+
+protected:
+    virtual void paint_event (rect const&);
+    virtual void size_event  (point2u);
+    virtual void move_event  (point2i);
+    virtual void focus_event (bool);
+    virtual void on_enable   (bool);
 
 private:
-    group_vector m_gGroups;
-    ToolButton   m_eButtonType;
-    ToolFlags    m_eToolFlags;
-    Orientation  m_eOrientation;
-
-    void onPaint       ();
-    void onEnable      (bool);
-    void onSize        (Rect const&);
-    void onMove        (Rect const&);
-    void onGotFocus    ();
-    void onFocusKilled ();
+    group_vector     _M_gGroups     ;
+    tool_button      _M_eButtonType ;
+    tool_flags       _M_eToolFlags  ;
+    orientation_type _M_eOrientation;
 };
+
+// =========================================================
 
 } } // Ui
 

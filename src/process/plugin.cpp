@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
  */
 
 #include <cppual/process/plugin.h>
+#include <cppual/types.h>
 
 #include <iostream>
 
@@ -30,11 +31,13 @@
 #   include <windows.h>
 #endif
 
-namespace cppual { namespace Process {
+namespace cppual { namespace process {
+
+// =========================================================
 
 namespace { // optimize for internal unit usage
 
-static DynLoader::string_type ext() noexcept
+static dyn_loader::string_type ext() noexcept
 {
 #   if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
     return ".so";
@@ -43,155 +46,157 @@ static DynLoader::string_type ext() noexcept
 #   elif defined (OS_WINDOWS)
     return ".dll";
 #   else
-    return DynLoader::string_type();
+    return dyn_loader::string_type();
 #   endif
 }
 
-static DynLoader::string_type format (DynLoader::string_type const& path) noexcept
+static dyn_loader::string_type format (dyn_loader::string_type const& path) noexcept
 {
     static const auto _ext = ext();
 
     const auto pos = path.rfind(_ext);
 
-    return pos == DynLoader::string_type::npos ? path + _ext : path;
+    return pos == dyn_loader::string_type::npos ? path + _ext : path;
 }
 
 } // anonymous namespace
 
-DynLoader::DynLoader (string_type   strPath,
-                      bool          bAttach,
-                      ResolvePolicy eResolve) noexcept
-: m_pHandle  (),
-  m_gLibPath (format(strPath)),
-  m_eResolve (eResolve)
+// =========================================================
+
+dyn_loader::dyn_loader (string_type   strPath,
+                        bool          bAttach,
+                        resolve_policy eResolve) noexcept
+: _M_pHandle  (),
+  _M_gLibPath (format(strPath)),
+  _M_eResolve (eResolve)
 {
     if (bAttach) attach ();
 }
 
-DynLoader::string_type DynLoader::extension () noexcept
+dyn_loader::string_type dyn_loader::extension () noexcept
 {
     return ext();
 }
 
-DynLoader::DynLoader (DynLoader&& obj) noexcept
-: m_pHandle  (obj.m_pHandle),
-  m_gLibPath (std::move (obj.m_gLibPath))
+dyn_loader::dyn_loader (dyn_loader&& obj) noexcept
+: _M_pHandle  (obj._M_pHandle),
+  _M_gLibPath (std::move (obj._M_gLibPath))
 {
-    obj.m_pHandle = nullptr;
+    obj._M_pHandle = nullptr;
 }
 
-DynLoader& DynLoader::operator = (DynLoader&& obj) noexcept
+dyn_loader& dyn_loader::operator = (dyn_loader&& obj) noexcept
 {
     if (this != &obj)
     {
-        m_pHandle  = obj.m_pHandle;
-        m_gLibPath = std::move (obj.m_gLibPath);
+        _M_pHandle  = obj._M_pHandle;
+        _M_gLibPath = std::move (obj._M_gLibPath);
 
-        obj.m_pHandle = nullptr;
+        obj._M_pHandle = nullptr;
     }
 
     return *this;
 }
 
-bool DynLoader::attach () noexcept
+bool dyn_loader::attach () noexcept
 {
-    if (m_pHandle) return true;
+    if (_M_pHandle) return true;
     int nLibMode = 0;
 
 #   ifdef OS_STD_POSIX
 
-    switch (m_eResolve)
+    switch (_M_eResolve)
     {
-    case ResolvePolicy::Static:
+    case resolve_policy::statically:
         nLibMode = RTLD_GLOBAL;
         break;
-    case ResolvePolicy::Immediate:
+    case resolve_policy::immediate:
         nLibMode = RTLD_NOW;
         break;
-    case ResolvePolicy::Lazy:
+    case resolve_policy::lazy:
         nLibMode = RTLD_LAZY;
         break;
     }
 
-    m_pHandle = ::dlopen (m_gLibPath.c_str (), nLibMode);
-    if (!m_pHandle) std::cerr << ::dlerror () << std::endl;
+    _M_pHandle = ::dlopen (_M_gLibPath.c_str (), nLibMode);
+    if (!_M_pHandle) std::cerr << ::dlerror () << std::endl;
 
 #   elif defined (OS_WINDOWS)
 
-    switch (m_eResolve)
+    switch (_M_eResolve)
     {
-    case ResolvePolicy::Static:
+    case resolve_policy::statically:
         nLibMode |= LOAD_LIBRARY_AS_DATAFILE;
         break;
-    case ResolvePolicy::Lazy:
+    case resolve_policy::lazy:
         nLibMode |= DONT_RESOLVE_DLL_REFERENCES;
         break;
-    case ResolvePolicy::Immediate:
+    case resolve_policy::immediate:
         break;
     }
 
     nLibMode |= LOAD_LIBRARY_SEARCH_DEFAULT_DIRS;
 
-    m_pHandle = ::LoadLibraryEx (m_gLibPath.data (), nullptr, nLibMode);
-    if (!m_pHandle) std::cerr << ::GetLastError () << std::endl;
+    _M_pHandle = ::LoadLibraryEx (_M_gLibPath.data (), nullptr, nLibMode);
+    if (!_M_pHandle) std::cerr << ::GetLastError () << std::endl;
 
 #   endif
 
-    return m_pHandle;
+    return _M_pHandle;
 }
 
-void DynLoader::detach () noexcept
+void dyn_loader::detach () noexcept
 {
-    if (!m_pHandle) return;
+    if (!_M_pHandle) return;
 
 #    ifdef OS_STD_POSIX
 
-    if (::dlclose (m_pHandle) != 0) std::cerr << ::dlerror () << std::endl;
+    if (::dlclose (_M_pHandle) != 0) std::cerr << ::dlerror () << std::endl;
 
 #    elif defined (OS_WINDOWS)
 
-    if (!::FreeLibrary (m_pHandle.get<HMODULE> ()))
+    if (!::FreeLibrary (_M_pHandle.get<HMODULE> ()))
         std::cerr << ::GetLastError () << std::endl;
 
 #    endif
 
-    m_pHandle = nullptr;
+    _M_pHandle = nullptr;
 }
 
-void* DynLoader::get_address (string_type::const_pointer pName) const noexcept
+void* dyn_loader::get_address (string_type::const_pointer pName) const noexcept
 {
 #   ifdef OS_STD_POSIX
 
-    void* pAddr = ::dlsym (m_pHandle, pName);
+    void* pAddr = ::dlsym (_M_pHandle, pName);
     if (!pAddr) std::cerr << ::dlerror () << std::endl;
     return pAddr;
 
 #   elif defined (OS_WINDOWS)
 
-    union { function_type func; void* obj; } convert;
-    convert.func = ::GetProcAddress (m_pHandle.get<HMODULE> (), pName);
-    if (!convert.func)
-        std::cerr << "error: " << ::GetLastError () << "\naddress not found!\n";
-    return convert.obj;
+    auto const convert = direct_cast<void*> (::GetProcAddress (_M_pHandle.get<HMODULE> (), pName));
+
+    if (!convert)
+        std::cerr << "error: " << ::GetLastError () << "\naddress not found!" << std::endl;
+    return convert;
 
 #   endif
 }
 
-DynLoader::function_type
-DynLoader::get_function (string_type::const_pointer pName) const noexcept
+dyn_loader::function_type
+dyn_loader::get_function (string_type::const_pointer pName) const noexcept
 {
 #   ifdef OS_STD_POSIX
 
-    union { void* obj; function_type func; } convert;
-    convert.obj = ::dlsym (m_pHandle, pName);
-    if (!convert.obj) std::cerr << ::dlerror () << std::endl;
-    return convert.func;
+    auto const convert = direct_cast<function_type> (::dlsym (_M_pHandle, pName));
+
+    if (!convert) std::cerr << ::dlerror () << std::endl;
+    return convert;
 
 #   elif defined (OS_WINDOWS)
 
-    function_type func = ::GetProcAddress (m_pHandle.get<HMODULE> (), pName);
+    function_type func = ::GetProcAddress (_M_pHandle.get<HMODULE> (), pName);
     if (!func)
-        std::cerr << "error: " << ::GetLastError () << "\nfunction not found!\n";
+        std::cerr << "error: " << ::GetLastError () << "\nfunction not found!" << std::endl;
     return func;
 
 #   endif

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,62 +33,62 @@
 #include "clqueue.h"
 #include "clsampler.h"
 
-namespace cppual { namespace Compute { namespace CL {
+namespace cppual { namespace compute { namespace cl {
 
-class CLFactory final : Factory
+class cl_factory final : factory
 {
 public:
     typedef device_vector& device_const_reference;
 
-    constexpr CLFactory(Memory::MemoryResource& rc) noexcept
+    constexpr cl_factory(memory::memory_resource& rc) noexcept
     : _M_rc(&rc)
     { }
 
-    device_vector          getDevices(device_types = DeviceType::Any);
-    shared_buffer          createBuffer();
-    shared_cmd_sequence    createCmdSequence();
-    shared_image           createImage();
-    shared_pipeline        createPipeline();
-    shared_render_pass     createRenderPass();
-    shared_shader          createShader();
-    shared_descriptor_pool createDescriptorPool();
-    shared_event           createEvent();
-    shared_state           createState();
-    shared_queue           createQueue();
-    shared_sampler         createSampler();
-    size_type              deviceCount(device_types = DeviceType::Any);
+    device_vector          get_devices(device_categories = device_category::any);
+    shared_buffer          create_buffer();
+    shared_cmd_sequence    create_cmd_sequence();
+    shared_image           create_image();
+    shared_pipeline        create_pipeline();
+    shared_render_pass     create_render_pass();
+    shared_shader          create_shader();
+    shared_descriptor_pool create_descriptor_pool();
+    shared_event           create_event();
+    shared_state           create_state();
+    shared_queue           create_queue();
+    shared_sampler         create_sampler();
+    size_type              device_count(device_categories = device_category::any);
 
 private:
-    device_const_reference allDevices() const;
+    device_const_reference all_devices() const;
 
 private:
-    Memory::MemoryResource* _M_rc;
+    memory::memory_resource* _M_rc;
 };
 
 // =========================================================
 
-CLFactory::device_const_reference CLFactory::allDevices() const
+cl_factory::device_const_reference cl_factory::all_devices() const
 {
-    static auto devs = Device::get_devices(*_M_rc);
+    static auto devs = device::get_devices(*_M_rc);
     return devs;
 }
 
 // =========================================================
 
-Factory::device_vector CLFactory::getDevices(device_types types)
+factory::device_vector cl_factory::get_devices(device_categories types)
 {
-    device_const_reference devs = allDevices();
+    device_const_reference devs = all_devices();
 
-    if (types != DeviceType::Any)
+    if (types != device_category::any)
     {
         device_vector ret_devs;
-        auto const    dev_count = deviceCount(types);
+        auto const    dev_count = device_count(types);
 
         if (dev_count) ret_devs.reserve(dev_count);
 
         for (auto i = 0U; i < devs.size(); ++i)
         {
-            if (types.test(devs[i]->devType())) ret_devs.push_back(devs[i]);
+            if (types.test(devs[i]->dev_type())) ret_devs.push_back(devs[i]);
         }
 
         return ret_devs;
@@ -97,17 +97,17 @@ Factory::device_vector CLFactory::getDevices(device_types types)
     return devs;
 }
 
-Factory::size_type CLFactory::deviceCount(device_types types)
+factory::size_type cl_factory::device_count(device_categories types)
 {
-    device_const_reference devs = allDevices();
+    device_const_reference devs = all_devices();
 
-    if (types != DeviceType::Any)
+    if (types != device_category::any)
     {
         auto dev_count = size_type ();
 
         for (auto i = 0U; i < devs.size(); ++i)
         {
-            if (types.test(devs[i]->devType())) ++dev_count;
+            if (types.test(devs[i]->dev_type())) ++dev_count;
         }
 
         return dev_count;
@@ -120,27 +120,27 @@ Factory::size_type CLFactory::deviceCount(device_types types)
 
 // =========================================================
 
-using cppual::Compute::CL::CLFactory ;
-using cppual::Process::Plugin        ;
-using cppual::Memory::MemoryResource ;
-using cppual::Memory::Allocator      ;
-using cppual::Memory::StaticResource ;
-using cppual::Memory::allocate_shared;
+using cppual::compute::cl::cl_factory        ;
+using cppual::process::Plugin                ;
+using cppual::memory::memory_resource        ;
+using cppual::memory::allocator              ;
+using cppual::memory::stacked_static_resource;
+using cppual::memory::allocate_shared        ;
 
 // =========================================================
 
-extern "C" Plugin* plugin_main (MemoryResource* rc)
+extern "C" Plugin* plugin_main (memory_resource* rc)
 {
-    static StaticResource<sizeof (CLFactory)> static_resource;
+    static stacked_static_resource<sizeof (cl_factory)> static_resource;
     static Plugin plugin;
 
-    plugin.name     = "CLFactory"       ;
+    plugin.name     = "cl_factory"      ;
     plugin.desc     = "OpenCL Factory"  ;
     plugin.provides = "Compute::Factory";
     plugin.verMajor = 1                 ;
     plugin.verMinor = 0                 ;
 
-    plugin.iface    = allocate_shared<CLFactory, void>(&static_resource, *rc);
+    plugin.iface    = allocate_shared<cl_factory, void>(&static_resource, *rc);
 
     return &plugin;
 }

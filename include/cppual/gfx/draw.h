@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,199 +27,239 @@
 #include <cppual/gfx/color.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/resource.h>
+#include <cppual/containers.h>
 #include <cppual/string.h>
 
 #include <vector>
 #include <memory>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-struct PixelFlag final
+// =========================================================
+
+struct pixel_flag final
 {
-    enum Type
+    enum type
     {
-        Drawable = 1 << 0, // support surface buffer
-        Bitmap   = 1 << 1, // support pixmap buffer
-        Palette  = 1 << 2  // support off-screen buffer
+        /// support surface buffer
+        drawable = 1 << 0,
+        /// support pixmap buffer
+        bitmap   = 1 << 1,
+        /// support off-screen buffer
+        palette  = 1 << 2
     };
 };
 
-enum class DeviceType : byte
+enum class device_backend : byte
 {
-    Custom,
-    Native,
-    GL,
-    Vulkan,
-    Direct3D,
-    Direct3D12,
-    Direct2D,
-    Metal
+    native,
+    gl,
+    vulkan,
+    direct3d,
+    direct3d12,
+    direct2d,
+    metal,
+    custom,
 };
 
-enum class PolygonFace : byte
+enum class polygon_face : byte
 {
-    Front,
-    Back,
-    BothSides
+    front,
+    back ,
+    both_sides
 };
 
 // =========================================================
 
-struct  IDeviceContext;
-struct  IPixelSurface;
-struct  IDrawable2D;
-struct  IDrawable3D;
-typedef BitSet<PixelFlag::Type>         PixelFlags       ;
-typedef std::shared_ptr<IDeviceContext> shared_context   ;
-typedef std::shared_ptr<IPixelSurface>  shared_buffer    ;
-typedef std::shared_ptr<IDrawable2D>    shared_drawable2d;
-typedef std::shared_ptr<IDrawable3D>    shared_drawable3d;
-typedef std::weak_ptr  <IDeviceContext> weak_context     ;
-typedef std::weak_ptr  <IPixelSurface>  weak_buffer      ;
-typedef std::weak_ptr  <IDrawable2D>    weak_drawable2d  ;
-typedef std::weak_ptr  <IDrawable3D>    weak_drawable3d  ;
+struct  context_interface;
+struct  surface_interface;
+struct  drawable2d_interface;
+struct  drawable3d_interface;
+struct  draw_fractory;
+typedef bitset<pixel_flag::type>              pixel_flags      ;
+typedef std::shared_ptr<draw_fractory>        shared_factory   ;
+typedef std::shared_ptr<context_interface>    shared_context   ;
+typedef std::shared_ptr<surface_interface>    shared_surface   ;
+typedef std::shared_ptr<drawable2d_interface> shared_drawable2d;
+typedef std::shared_ptr<drawable3d_interface> shared_drawable3d;
+typedef std::weak_ptr  <context_interface>    weak_context     ;
+typedef std::weak_ptr  <surface_interface>    weak_surface     ;
+typedef std::weak_ptr  <drawable2d_interface> weak_drawable2d  ;
+typedef std::weak_ptr  <drawable3d_interface> weak_drawable3d  ;
+
+// ====================================================
+
+struct bad_match       : public std::logic_error { using std::logic_error::logic_error; };
+struct bad_display     : public std::logic_error { using std::logic_error::logic_error; };
+struct bad_surface     : public std::logic_error { using std::logic_error::logic_error; };
+struct bad_parameter   : public std::logic_error { using std::logic_error::logic_error; };
+struct bad_window      : public std::logic_error { using std::logic_error::logic_error; };
+struct bad_context     : public std::logic_error { using std::logic_error::logic_error; };
+struct bad_config      : public std::logic_error { using std::logic_error::logic_error; };
+struct bad_attrib      : public std::logic_error { using std::logic_error::logic_error; };
+struct bad_access      : public std::logic_error { using std::logic_error::logic_error; };
+struct context_lost    : public std::logic_error { using std::logic_error::logic_error; };
+struct not_initialized : public std::logic_error { using std::logic_error::logic_error; };
 
 // =========================================================
 
-struct PixelFormat final
+class pixel_format final
 {
-    PixelFlags flags;
-    byte       red, green, blue, alpha;
-    byte       depth, stencil;
-    ColorType  colorType;
+public:
+    pixel_flags flags;
+    byte        red, green, blue, alpha;
+    byte        depth, stencil;
+    color_type  type;
 
     constexpr byte bits () const noexcept
     { return byte (red + green + blue + alpha); }
 
-    constexpr static PixelFormat default2D () noexcept
+    constexpr static pixel_format default2d () noexcept
     {
         return
         {
-            PixelFlag::Drawable | PixelFlag::Bitmap,
+            pixel_flag::drawable | pixel_flag::bitmap,
             8,
             8,
             8,
             0,
             0,
             0,
-            ColorType::TrueType
+            color_type::true_type
         };
     }
 
-    constexpr static PixelFormat default3D () noexcept
+    constexpr static pixel_format default3d () noexcept
     {
         return
         {
-            PixelFlag::Drawable | PixelFlag::Bitmap,
+            pixel_flag::drawable | pixel_flag::bitmap,
             8,
             8,
             8,
             8,
             24,
             0,
-            ColorType::Direct
+            color_type::direct
         };
     }
 };
 
 // =========================================================
 
-// memory buffer
-class VirtualBuffer
+constexpr bool operator == (pixel_format const& lh, pixel_format const& rh) noexcept
+{
+    return lh.flags   == rh.flags   &&
+           lh.red     == rh.red     &&
+           lh.green   == rh.green   &&
+           lh.blue    == rh.blue    &&
+           lh.alpha   == rh.alpha   &&
+           lh.depth   == rh.depth   &&
+           lh.stencil == rh.stencil &&
+           lh.type    == rh.type;
+}
+
+constexpr bool operator != (pixel_format const& lh, pixel_format const& rh) noexcept
+{ return !(lh == rh); }
+
+// =========================================================
+
+/// internal memory buffer
+class virtual_buffer
 {
 public:
-    typedef std::vector<Color> vector_type;
-    typedef PixelFormat        format_type;
-    typedef std::size_t        size_type;
-    typedef Color              value_type;
+    typedef vector<color> vector_type;
+    typedef pixel_format  format_type;
+    typedef std::size_t   size_type  ;
+    typedef color         value_type ;
 
-    inline format_type  format () const noexcept { return m_gFormat; }
-    inline vector_type& data   ()       noexcept { return m_gPixels; }
+    inline format_type  format () const noexcept { return _M_gFormat; }
+    inline vector_type& data   ()       noexcept { return _M_gPixels; }
 
-    inline VirtualBuffer () noexcept
-    : m_gFormat (PixelFormat::default2D ()),
-      m_gPixels ()
+    inline virtual_buffer () noexcept
+    : _M_gFormat (pixel_format::default2d ()),
+      _M_gPixels ()
     { }
 
-    VirtualBuffer (point2i gSize, PixelFormat const& gFormat = PixelFormat::default2D ())
-    : m_gFormat   (gFormat),
-      m_gPixels   (size_type (gSize.x * gSize.y))
+    inline virtual_buffer (point2i gSize, pixel_format const& gFormat = pixel_format::default2d ())
+    : _M_gFormat (gFormat),
+      _M_gPixels (size_type (gSize.x * gSize.y))
     { }
 
 private:
-    PixelFormat m_gFormat;
-    vector_type m_gPixels;
+    format_type _M_gFormat;
+    vector_type _M_gPixels;
 };
 
 // =========================================================
 
-class Transform2D
+class transform2d
 {
 public:
-    Transform2D () noexcept = default;
-    constexpr Rect geometry () const noexcept { return m_gRect; }
+    transform2d () noexcept = default;
+    constexpr rect geometry () const noexcept { return _M_gRect; }
 
 private:
-    Rect m_gRect;
+    rect _M_gRect;
 };
 
 // =========================================================
 
-class Transform3D
+class transform3d
 { };
 
 // =========================================================
 
-struct IResource
+struct resource_interface
 {
-    typedef Connection  controller ;
-    typedef Handle      value_type ;
-    typedef PixelFormat format_type;
+    typedef connection_type controller ;
+    typedef resource_handle handle_type;
+    typedef pixel_format    format_type;
 
-    virtual ~IResource ();
+    virtual ~resource_interface () { }
 
-    virtual controller  connection () const = 0;
-    virtual format_type format     () const = 0;
-    virtual value_type  handle     () const = 0;
-    virtual DeviceType  device     () const = 0;
-    virtual void        flush      ()       = 0;
+    virtual controller     connection () const = 0;
+    virtual format_type    format     () const = 0;
+    virtual handle_type    handle     () const = 0;
+    virtual device_backend device     () const = 0;
+    virtual void           flush      ()       = 0;
 };
 
 // =========================================================
 
-// Surface
-struct IPixelSurface : public IResource
+struct surface_interface : public resource_interface
 {
-    enum class Type : byte
+    enum class surface_type : byte
     {
-        Drawable,
-        DoubleBuffer,
-        BackBuffer,
-        Pixmap
+        drawable     ,
+        double_buffer,
+        back_buffer  ,
+        pixmap
     };
 
-    virtual point2u size  () const = 0;
-    virtual Type    type  () const = 0;
-    virtual void    scale (point2u size) = 0;
+    virtual point2u      size  () const = 0;
+    virtual surface_type type  () const = 0;
+    virtual void         scale (point2u size) = 0;
 };
 
 // =========================================================
 
-struct IDeviceContext : public IResource
+struct context_interface : public resource_interface
 {
-    typedef IPixelSurface*       pointer      ;
-    typedef IPixelSurface const* const_pointer;
+    typedef surface_interface*       pointer      ;
+    typedef surface_interface const* const_pointer;
+    typedef resource_version         version_type ;
 
     virtual pointer       drawable () const = 0;
     virtual const_pointer readable () const = 0;
-    virtual Version       version  () const = 0;
+    virtual version_type  version  () const = 0;
     virtual bool          assign   () = 0;
     virtual bool          use      (pointer, const_pointer) = 0;
     virtual void          finish   () = 0;
     virtual void          release  () = 0;
 
-    static IDeviceContext* current () noexcept;
-    static void            acquire (IDeviceContext*) noexcept;
+    static context_interface* current () noexcept;
+    static void               acquire (context_interface*) noexcept;
 
     bool active () const noexcept
     { return this == current (); }
@@ -227,51 +267,72 @@ struct IDeviceContext : public IResource
 
 // =========================================================
 
-struct IDrawable2D
+struct drawable2d_interface
 {
-    virtual DeviceType type () const noexcept    = 0;
-    virtual void       draw (Transform2D const&) = 0;
+    virtual device_backend type () const noexcept    = 0;
+    virtual void           draw (transform2d const&) = 0;
 
-    virtual ~IDrawable2D ();
+    virtual ~drawable2d_interface () { }
 };
 
 // =========================================================
 
-struct IDrawable3D
+struct drawable3d_interface
 {
-    virtual DeviceType type () const noexcept    = 0;
-    virtual void       draw (Transform3D const&) = 0;
+    virtual device_backend type () const noexcept    = 0;
+    virtual void           draw (transform3d const&) = 0;
 
-    virtual ~IDrawable3D ();
+    virtual ~drawable3d_interface () { }
 };
 
 // =========================================================
 
-struct ITransformable2D
+struct transformable2d_interface
 {
-    virtual ~ITransformable2D ();
+    virtual ~transformable2d_interface () { }
 };
 
 // =========================================================
 
-struct ITransformable3D
+struct transformable3d_interface
 {
-    virtual ~ITransformable3D ();
+    virtual ~transformable3d_interface () { }
 };
 
 // ====================================================
 
-struct DrawableFactory
+struct draw_fractory
 {
     typedef string string_type;
 
-    static shared_drawable2d create2D (string_type const& name);
-    static shared_drawable3d create3D (string_type const& name);
+    virtual shared_surface create_surface() = 0;
+    virtual shared_context create_context() = 0;
+    virtual device_backend backend() = 0;
+
+    virtual shared_drawable2d create_image() = 0;
+    virtual shared_drawable2d create_line() = 0;
+    virtual shared_drawable2d create_elipse() = 0;
+    virtual shared_drawable2d create_polygon() = 0;
+    virtual shared_drawable2d create_rectangle() = 0;
+    virtual shared_drawable2d create_text() = 0;
+
+    static shared_factory instance ();
+    static bool           has_valid_instance () noexcept;
 };
 
 // ====================================================
 
-struct ContextFactory
+struct drawable_factory
+{
+    typedef string string_type;
+
+    static shared_drawable2d create2d (string_type const& name);
+    static shared_drawable3d create3d (string_type const& name);
+};
+
+// ====================================================
+
+struct context_factory
 {
     typedef string string_type;
 

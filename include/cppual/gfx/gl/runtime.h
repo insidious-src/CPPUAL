@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,12 @@
 #define CPPUAL_GFX_GL_RUNTIME_H_
 #ifdef __cplusplus
 
-#include <cppual/gfx/draw.h>
+#include <cppual/string.h>
+#include <cppual/resource.h>
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
+
+// ====================================================
 
 enum class StringQuery : byte
 {
@@ -37,14 +40,18 @@ enum class StringQuery : byte
 
 // ====================================================
 
-struct Platform
+struct platform
 {
-    static Version version ();
-    static Version slVersion ();
-    static string  label (StringQuery);
-    static bool    isExtensionSupported (string const& name);
-    static void    drawTestTriagle(float axis);
+    typedef struct resource_version version_type;
+
+    static version_type version ();
+    static version_type sl_version ();
+    static string       label (StringQuery);
+    static bool         is_extension_supported (string const& name);
+    static void         draw_test_triagle(float axis);
 };
+
+// ====================================================
 
 } } } // namespace GL
 

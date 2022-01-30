@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,34 +19,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstring>
 #include <cppual/network/packet.h>
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
 void Packet::append (cvoid* pData, size_type uSize) noexcept
 {
-    if (pData and (uSize > 0))
+    if (pData && uSize > 0)
     {
-        std::size_t start = m_gData.size ();
-        m_gData.reserve (start + uSize);
-        std::copy(static_cast<cu8*>(pData), static_cast<cu8*>(pData) + uSize, &m_gData[start]);
+        std::size_t start = _M_gData.size ();
+        _M_gData.reserve (start + uSize);
+        std::copy(static_cast<cu8*> (pData), static_cast<cu8*> (pData) + uSize, &_M_gData[start]);
     }
 }
 
 Packet& Packet::operator >> (bool& bData) noexcept
 {
-    u8 value;
-    if (*this >> value) bData = (value != 0);
+    u8 value = 0;
+    if (*this >> value) bData = (value > 0);
     return *this;
 }
 
 Packet& Packet::operator >> (i8& nData) noexcept
 {
-    if (canExchange (sizeof (nData)))
+    if (can_exchange (sizeof (nData)))
     {
-        nData   = *reinterpret_cast<ci8*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (nData);
+        nData   = *reinterpret_cast<ci8*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (nData);
     }
 
     return *this;
@@ -54,10 +53,10 @@ Packet& Packet::operator >> (i8& nData) noexcept
 
 Packet& Packet::operator >> (u8& uData) noexcept
 {
-    if (canExchange (sizeof (uData)))
+    if (can_exchange (sizeof (uData)))
     {
-        uData   = *reinterpret_cast<cu8*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (uData);
+        uData   = *reinterpret_cast<cu8*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (uData);
     }
 
     return *this;
@@ -65,10 +64,10 @@ Packet& Packet::operator >> (u8& uData) noexcept
 
 Packet& Packet::operator >> (i16& nData) noexcept
 {
-    if (canExchange (sizeof (nData)))
+    if (can_exchange (sizeof (nData)))
     {
-        nData   = *reinterpret_cast<ci16*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (nData);
+        nData   = *reinterpret_cast<ci16*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (nData);
     }
 
     return *this;
@@ -76,10 +75,10 @@ Packet& Packet::operator >> (i16& nData) noexcept
 
 Packet& Packet::operator >> (u16& uData) noexcept
 {
-    if (canExchange (sizeof (uData)))
+    if (can_exchange (sizeof (uData)))
     {
-        uData   = *reinterpret_cast<cu16*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (uData);
+        uData    = *reinterpret_cast<cu16*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (uData);
     }
 
     return *this;
@@ -87,10 +86,10 @@ Packet& Packet::operator >> (u16& uData) noexcept
 
 Packet& Packet::operator >> (i32& nData) noexcept
 {
-    if (canExchange (sizeof (nData)))
+    if (can_exchange (sizeof (nData)))
     {
-        nData   = *reinterpret_cast<ci32*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (nData);
+        nData    = *reinterpret_cast<ci32*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (nData);
     }
 
     return *this;
@@ -98,10 +97,10 @@ Packet& Packet::operator >> (i32& nData) noexcept
 
 Packet& Packet::operator >> (u32& uData) noexcept
 {
-    if (canExchange (sizeof (uData)))
+    if (can_exchange (sizeof (uData)))
     {
-        uData   = *reinterpret_cast<cu32*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (uData);
+        uData    = *reinterpret_cast<cu32*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (uData);
     }
 
     return *this;
@@ -109,10 +108,10 @@ Packet& Packet::operator >> (u32& uData) noexcept
 
 Packet& Packet::operator >> (float& fData) noexcept
 {
-    if (canExchange (sizeof (fData)))
+    if (can_exchange (sizeof (fData)))
     {
-        fData   = *reinterpret_cast<cfloat*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (fData);
+        fData    = *reinterpret_cast<cfloat*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (fData);
     }
 
     return *this;
@@ -120,10 +119,10 @@ Packet& Packet::operator >> (float& fData) noexcept
 
 Packet& Packet::operator >> (double& dData) noexcept
 {
-    if (canExchange (sizeof (dData)))
+    if (can_exchange (sizeof (dData)))
     {
-        dData   = *reinterpret_cast<cdouble*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (dData);
+        dData    = *reinterpret_cast<cdouble*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (dData);
     }
 
     return *this;
@@ -131,10 +130,10 @@ Packet& Packet::operator >> (double& dData) noexcept
 
 Packet& Packet::operator >> (ldouble& dData) noexcept
 {
-    if (canExchange (sizeof (dData)))
+    if (can_exchange (sizeof (dData)))
     {
-        dData   = *reinterpret_cast<cu32*> (&m_gData[m_uPos]);
-        m_uPos +=  sizeof (dData);
+        dData    = *reinterpret_cast<cu32*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (dData);
     }
 
     return *this;
@@ -146,14 +145,14 @@ Packet& Packet::operator >> (char* pData) noexcept
     u32 uLength = 0;
     *this >> uLength;
 
-    if ((uLength > 0) and canExchange (uLength))
+    if ((uLength > 0) and can_exchange (uLength))
     {
         // Then extract characters
-        ::memcpy (pData, &m_gData[m_uPos], uLength);
+        ::memcpy (pData, &_M_gData[_M_uPos], uLength);
         pData[uLength] = '\0';
 
         // Update reading position
-        m_uPos += uLength;
+        _M_uPos += uLength;
     }
 
     return *this;
@@ -166,13 +165,13 @@ Packet& Packet::operator >> (string& gData) noexcept
     *this >> uLength;
 
     gData.clear ();
-    if ((uLength > 0) and canExchange (uLength))
+    if ((uLength > 0) and can_exchange (uLength))
     {
         // Then extract characters
-        gData.assign (&m_gData[m_uPos], uLength);
+        gData.assign (&_M_gData[_M_uPos], uLength);
 
         // Update reading position
-        m_uPos += uLength;
+        _M_uPos += uLength;
     }
 
     return *this;
@@ -208,20 +207,20 @@ Packet& Packet::operator >> (u32string&) noexcept
     return *this;
 }
 
-cvoid* Packet::onSend (size_type& uSize)
+cvoid* Packet::on_send (size_type& uSize)
 {
-    uSize = getSize ();
-    return  getData ();
+    uSize = size ();
+    return  data ();
 }
 
-void Packet::onReceive (cvoid* pData, size_type uSize)
+void Packet::on_receive (cvoid* pData, size_type uSize)
 {
     append (pData, uSize);
 }
 
-bool Packet::canExchange (size_type uSize) noexcept
+bool Packet::can_exchange (size_type uSize) noexcept
 {
-    return m_bIsValid and (m_uPos + uSize <= m_gData.size ());
+    return _M_bIsValid && (_M_uPos + uSize <= _M_gData.size ());
 }
 
 } } // namespace Network

@@ -17,7 +17,7 @@
 
 #include "../rapidjson.h"
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 class Double {

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,27 +24,27 @@
 
 #include "aldef.h"
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-inline void makePlayer (uint uId) noexcept
+inline void make_player (uint uId) noexcept
 {
     point3f gValue { 0, 0, 0 };
 
-    ::alSourcei  (uId, AL::IsRelativeToListener, true);
-    ::alSourcefv (uId, AL::Position, &gValue.x);
+    ::alSourcei  (uId, al::is_relative_to_listener, true);
+    ::alSourcefv (uId, al::position, &gValue.x);
     //::alSourcefv (getObjectId (), AL::Direction, &gValue.x);
 }
 
-SoundPlayer::SoundPlayer () noexcept
-: SoundSource ()
+sound_player::sound_player () noexcept
+: sound_source ()
 {
-    if (valid ()) makePlayer (id ());
+    if (valid ()) make_player (id ());
 }
 
-SoundPlayer::SoundPlayer (SoundBuffer& gBuffer) noexcept
-: SoundSource (gBuffer)
+sound_player::sound_player (sound_buffer& gBuffer) noexcept
+: sound_source (gBuffer)
 {
-    if (valid ()) makePlayer (id ());
+    if (valid ()) make_player (id ());
 }
 
 } } } // namespace Audio

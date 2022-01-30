@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +25,17 @@
 
 #include "opencl.h"
 
-namespace cppual { namespace Compute { namespace CL {
+namespace cppual { namespace compute { namespace cl {
 
 // =========================================================
 
-class Buffer final : public Interface<ResourceType::Buffer>
+class buffer final : public interface<resource_type::buffer>
 {
 public:
-    typedef std::vector<Buffer::pointer> device_ids_vector;
-    typedef Factory::device_vector       device_vector    ;
+    typedef std::vector<buffer::pointer> device_ids_vector;
+    typedef factory::device_vector       device_vector    ;
 
-    Buffer (pointer handle) noexcept : Interface (handle) { }
+    buffer (pointer handle) noexcept : interface (handle) { }
 
 private:
     template<typename T>

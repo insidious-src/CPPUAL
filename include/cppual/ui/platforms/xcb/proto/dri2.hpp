@@ -44,8 +44,8 @@ class buffer_swap_complete
                          uint8_t first_event,
                          const std::shared_ptr<xcb_generic_event_t> & event)
       : base(event)
-      , m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      , _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     virtual ~buffer_swap_complete(void) {}
@@ -72,7 +72,7 @@ class buffer_swap_complete
 
     uint8_t first_event(void)
     {
-      return m_first_event;
+      return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_drawable_t, typename ... Parameter>
@@ -83,14 +83,14 @@ class buffer_swap_complete
                                                decltype((*this)->drawable),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     (*this)->drawable,
                     std::forward<Parameter>(parameter) ...);
     }
 
   protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class buffer_swap_complete
 
 
@@ -113,8 +113,8 @@ class invalidate_buffers
                        uint8_t first_event,
                        const std::shared_ptr<xcb_generic_event_t> & event)
       : base(event)
-      , m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      , _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     virtual ~invalidate_buffers(void) {}
@@ -141,7 +141,7 @@ class invalidate_buffers
 
     uint8_t first_event(void)
     {
-      return m_first_event;
+      return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_drawable_t, typename ... Parameter>
@@ -152,14 +152,14 @@ class invalidate_buffers
                                                decltype((*this)->drawable),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     (*this)->drawable,
                     std::forward<Parameter>(parameter) ...);
     }
 
   protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class invalidate_buffers
 
 
@@ -285,7 +285,7 @@ class connect
                                                        Type,
                                                        SIGNATURE(xcb_dri2_connect_alignment_pad),
                                                        SIGNATURE(xcb_dri2_connect_alignment_pad_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -495,7 +495,7 @@ class get_buffers
                                                        ::xcb_dri2_dri2_buffer_t,
                                                        SIGNATURE(xcb_dri2_get_buffers_buffers),
                                                        SIGNATURE(xcb_dri2_get_buffers_buffers_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_buffers
 
@@ -660,7 +660,7 @@ class get_buffers_with_format
                                                        ::xcb_dri2_dri2_buffer_t,
                                                        SIGNATURE(xcb_dri2_get_buffers_with_format_buffers),
                                                        SIGNATURE(xcb_dri2_get_buffers_with_format_buffers_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_buffers_with_format
 
@@ -1387,8 +1387,8 @@ class dispatcher
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-      : m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      : _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -1401,14 +1401,14 @@ class dispatcher
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-      switch ((event->response_type & ~0x80) - m_first_event) {
+      switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_DRI2_BUFFER_SWAP_COMPLETE:
-          handler(cppual::dri2::event::buffer_swap_complete<Connection>(m_c, m_first_event, event));
+          handler(cppual::dri2::event::buffer_swap_complete<Connection>(_M_c, _M_first_event, event));
           return true;
 
         case XCB_DRI2_INVALIDATE_BUFFERS:
-          handler(cppual::dri2::event::invalidate_buffers<Connection>(m_c, m_first_event, event));
+          handler(cppual::dri2::event::invalidate_buffers<Connection>(_M_c, _M_first_event, event));
           return true;
 
       };
@@ -1417,8 +1417,8 @@ class dispatcher
     }
 
   protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -1431,7 +1431,7 @@ class dispatcher
     typedef cppual::dri2::extension extension;
 
     dispatcher(uint8_t first_error)
-      : m_first_error(first_error)
+      : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::dri2::extension & extension)
@@ -1444,7 +1444,7 @@ class dispatcher
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

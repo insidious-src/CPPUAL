@@ -61,14 +61,14 @@ class reply<Derived,
 public:
     template<typename C, typename ... Parameter>
     reply(C && c, Parameter && ... parameter)
-        : m_c(std::forward<C>(c))
-        , m_cookie(Derived::cookie(std::forward<C>(c),
+        : _M_c(std::forward<C>(c))
+        , _M_cookie(Derived::cookie(std::forward<C>(c),
                                    std::forward<Parameter>(parameter) ...))
     {}
 
     operator bool(void)
     {
-        return m_reply.operator bool();
+        return _M_reply.operator bool();
     }
 
     const Reply &
@@ -86,10 +86,10 @@ public:
     const std::shared_ptr<Reply> &
     get(void)
     {
-        if (! m_reply) {
-            m_reply = get(Check());
+        if (! _M_reply) {
+            _M_reply = get(Check());
         }
-        return m_reply;
+        return _M_reply;
     }
 
     template<typename ... Parameter>
@@ -101,18 +101,18 @@ public:
     }
 
 protected:
-    Connection m_c;
-    Cookie m_cookie;
-    std::shared_ptr<Reply> m_reply;
+    Connection _M_c;
+    Cookie _M_cookie;
+    std::shared_ptr<Reply> _M_reply;
 
     std::shared_ptr<Reply>
     get(checked_tag)
     {
         ::xcb_generic_error_t * error = nullptr;
-        auto reply = std::shared_ptr<Reply>(ReplyFunction(m_c, m_cookie, &error),
+        auto reply = std::shared_ptr<Reply>(ReplyFunction(_M_c, _M_cookie, &error),
                                             std::free);
         if (error) {
-            dispatch(m_c, std::shared_ptr<xcb_generic_error_t>(error, std::free));
+            dispatch(_M_c, std::shared_ptr<xcb_generic_error_t>(error, std::free));
         }
         return reply;
     }
@@ -120,7 +120,7 @@ protected:
     std::shared_ptr<Reply>
     get(unchecked_tag)
     {
-        return std::shared_ptr<Reply>(ReplyFunction(m_c, m_cookie, nullptr),
+        return std::shared_ptr<Reply>(ReplyFunction(_M_c, _M_cookie, nullptr),
                                       std::free);
     }
 };

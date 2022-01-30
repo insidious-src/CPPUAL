@@ -1,5 +1,5 @@
 // Tencent is pleased to support the open source community by making RapidJSON available.
-// 
+//
 // Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip.
 //
 // Licensed under the MIT License (the "License"); you may not use this file except
@@ -7,9 +7,9 @@
 //
 // http://opensource.org/licenses/MIT
 //
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
 #ifndef RAPIDJSON_STRINGBUFFER_H_
@@ -29,7 +29,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++98-compat)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! Represents an in-memory output stream.
 /*!
@@ -37,8 +37,9 @@ namespace cppual { namespace Json {
     \tparam Allocator type for allocating memory buffer.
     \note implements Stream concept
 */
-template <typename Encoding, typename Allocator = cppual::Memory::MemoryResource>
-class GenericStringBuffer {
+template <typename Encoding, typename Allocator = memory::memory_resource>
+class GenericStringBuffer
+    {
 public:
     typedef typename Encoding::Ch Ch;
 

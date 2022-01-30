@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,34 +25,41 @@
 #include <cppual/ui/view.h>
 #include <cppual/ui/cmd.h>
 
-using string;
+namespace cppual { namespace ui {
 
-namespace cppual { namespace Ui {
+// =========================================================
 
-class DataGroup
+class data_group
 {
 };
 
-class ViewGroup
+// =========================================================
+
+class view_group
 {
 public:
-    enum class ItemType : unsigned char
+    typedef string  string_type ;
+    typedef command command_type;
+
+    enum class type : byte
     {
-        Action,
-        Separator,
-        View
+        action,
+        separator,
+        view
     };
 
-    void setLabel (string const& text);
-    void addSeparator (int pos = -1);
-    bool addView (View*, int pos = -1);
-    bool addCommand (Command const&, int pos = -1);
-    bool moveItem (int pos, int new_pos);
-    bool removeItem (int pos);
+    void set_label (string_type const& text);
+    void add_separator (int pos = -1);
+    bool add_view (view*, int pos = -1);
+    bool add_command (command_type const&, int pos = -1);
+    bool move_item (int pos, int new_pos);
+    bool remove_item (int pos);
 
-    ItemType itemType (int pos) const;
-    uint     itemCount () const;
+    type item_type (int pos) const;
+    uint item_count () const;
 };
+
+// =========================================================
 
 } } // namespace Ui
 

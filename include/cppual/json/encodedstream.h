@@ -28,7 +28,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(padded)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! Input byte stream wrapper with a statically bound encoding.
 /*!

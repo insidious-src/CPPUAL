@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,26 +26,26 @@
 
 #include <cppual/multimedia/audio/al/aldevice.h>
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-class SoundStreamRecorder : public NonCopyable
+class sound_stream_recorder : public non_copyable
 {
 public:
-    SoundStreamRecorder () = delete;
-    explicit    SoundStreamRecorder (CaptureDevice&) noexcept;
-    static bool isAvailable         () noexcept;
+    sound_stream_recorder () = delete;
+    explicit sound_stream_recorder (capture_device&) noexcept;
+    static bool is_available () noexcept;
 
-    bool record     () noexcept;
-    void stop       () noexcept;
-    void setSamples (int samples) noexcept;
+    bool record      () noexcept;
+    void stop        () noexcept;
+    void set_samples (int samples) noexcept;
 
-    inline CaptureDevice& getCaptureDevice () noexcept { return m_gDevice;  }
-    inline int            getSamples () const noexcept { return m_nSamples; }
+    inline capture_device& get_device ()       noexcept { return *_M_gDevice ; }
+    inline int             samples    () const noexcept { return  _M_nSamples; }
 
 private:
-    CaptureDevice& m_gDevice;
-    int            m_nSamples;
-    bool           m_bIsRecording;
+    capture_device* _M_gDevice     ;
+    int             _M_nSamples    ;
+    bool            _M_bIsRecording;
 };
 
 } } } // namespace Audio

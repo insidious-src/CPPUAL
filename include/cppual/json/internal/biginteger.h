@@ -22,7 +22,7 @@
 #pragma intrinsic(_umul128)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 class BigInteger {

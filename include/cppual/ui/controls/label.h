@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,44 +25,51 @@
 #include <cppual/signal.h>
 #include <cppual/ui/skin.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-enum class TextFormat : unsigned char
+// =========================================================
+
+enum class text_format : byte
 {
-    Plain,
-    WordWrap,
-    Enclosed
+    plain,
+    word_wrap,
+    enclosed
 };
 
-class Label : public SkinnableView
+// =========================================================
+
+class label : public skinnable_view
 {
 public:
-    typedef string string_type;
+    label  () { }
+    ~label () { }
 
-    Label  () { }
-    ~Label () { }
+    void set_text   (string_type const&);
+    void set_format (text_format);
 
-    void setText   (string_type const&);
-    void setFormat (TextFormat);
-
-    Label (View*            parent,
+    label (view*            parent,
            string_type const& text,
-           Rect        const& rect,
-           TextFormat       format = TextFormat::Plain);
+           rect        const& rect,
+           text_format       format = text_format::plain);
 
-    inline TextFormat  getFormat () const noexcept { return m_eFormat; }
-    inline string_type getText   () const noexcept { return m_gText  ; }
+    inline text_format format () const noexcept { return _M_eFormat; }
+    inline string_type text   () const noexcept { return _M_gText  ; }
 
-    Signal<void()> textChanged;
+public:
+    signal<void()> text_changed;
+
+protected:
+    virtual void paint_event (rect const&);
+    virtual void size_event (point2u);
+
+    virtual void on_enable (bool);
 
 private:
-    string_type m_gText;
-    TextFormat  m_eFormat;
-
-    void paintEvent (Rect const&);
-    void onEnable (bool);
-    void sizeEvent (point2u);
+    string_type _M_gText  ;
+    text_format _M_eFormat;
 };
+
+// =========================================================
 
 } } // Ui
 

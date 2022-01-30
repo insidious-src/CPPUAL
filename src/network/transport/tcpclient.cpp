@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,29 @@
 
 #include <cppual/network/transport/tcpclient.h>
 
-#ifdef OS_STD_UNIX
-//#    include <netinet/in.h>
-#    include <netdb.h>
-#    include <arpa/inet.h>
-#elif defined OS_WINDOWS
-#   include <windows.h>
+#ifdef OS_GNU_LINUX
+#   include "os/linux.h"
+#elif defined (OS_MACX)
+#   include "os/mac.h"
+#elif defined (OS_AIX)
+#   include "os/aix.h"
+#elif defined (OS_SOLARIS)
+#   include "os/solaris.h"
+#elif defined (OS_BSD)
+#   include "os/bsd.h"
+#elif defined (OS_WINDOWS)
+#   include "os/win.h"
+#elif defined (OS_ANDROID)
+#   include "os/android.h"
+#elif defined (OS_IOS)
+#   include "os/ios.h"
 #endif
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
-bool resolveHostName (cchar* hostname, in_addr* addr) noexcept
+namespace { // internal unit optimization
+
+inline bool resolve_host_name (cchar* hostname, in_addr* addr) noexcept
 {
 #   ifdef OS_STD_UNIX
     addrinfo* res;
@@ -47,6 +59,8 @@ bool resolveHostName (cchar* hostname, in_addr* addr) noexcept
     return false;
 }
 
+} // anonymous namespace
+
 bool TcpClient::connect (TcpStream& gStream, Address const& server, u16 port) noexcept
 {
     sockaddr_in gAddr;
@@ -54,14 +68,14 @@ bool TcpClient::connect (TcpStream& gStream, Address const& server, u16 port) no
     gAddr.sin_family = AF_INET;
     gAddr.sin_port   = htons (port);
 
-    if (resolveHostName (server.toString ().c_str (), &gAddr.sin_addr))
+    if (resolve_host_name (server.to_string ().c_str (), &gAddr.sin_addr))
     {
 #       ifdef OS_STD_UNIX
-        ::inet_pton (PF_INET, server.toString ().c_str (), &gAddr.sin_addr);
+        ::inet_pton (PF_INET, server.to_string ().c_str (), &gAddr.sin_addr);
 #       endif
     }
 
-    if (gStream.isValid ())
+    if (gStream.valid ())
         ::connect (gStream.id (),
                    reinterpret_cast<sockaddr*> (&gAddr),
                    sizeof (sockaddr_in));

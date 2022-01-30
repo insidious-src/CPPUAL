@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include <cppual/ui/controls/popup.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
 class PopupGroup final
 {
@@ -29,135 +29,135 @@ class PopupGroup final
 
 // ====================================================
 
-PopupMenu::PopupMenu ()
+popup_menu::popup_menu ()
 {
 }
 
-PopupMenu::PopupMenu (PopupMenu&& gObj)
-: SkinnableView (gObj)
+popup_menu::popup_menu (popup_menu&& gObj)
+: skinnable_view (gObj)
 {
 }
 
-PopupMenu::PopupMenu (PopupMenu const& gObj)
-: SkinnableView (gObj)
+popup_menu::popup_menu (popup_menu const& gObj)
+: skinnable_view (gObj)
 {
 }
 
-PopupMenu& PopupMenu::operator = (PopupMenu&&)
-{
-    return *this;
-}
-
-PopupMenu& PopupMenu::operator = (PopupMenu const&)
+popup_menu& popup_menu::operator = (popup_menu&&)
 {
     return *this;
 }
 
-MenuItemType PopupMenu::itemType (int)
+popup_menu& popup_menu::operator = (popup_menu const&)
 {
-    return MenuItemType::Invalid;
+    return *this;
 }
 
-PopupMenu* PopupMenu::subMenu (int)
+menu_item_type popup_menu::item_type (int)
+{
+    return menu_item_type::invalid;
+}
+
+popup_menu* popup_menu::sub_menu (int)
 {
     return nullptr;
 }
 
-Command* PopupMenu::command (int)
+popup_menu::command_type* popup_menu::command (int)
 {
     return nullptr;
 }
 
-PopupMenu::size_type PopupMenu::delay ()
+popup_menu::size_type popup_menu::delay ()
 {
     return 0;
 }
 
-bool PopupMenu::create (point2i)
+bool popup_menu::create (point2i)
 {
     return false;
 }
 
-bool PopupMenu::addCommand (Command*, int)
+bool popup_menu::add_command (command_type*, int)
 {
     return false;
 }
 
-bool PopupMenu::addCheck (Command*, int)
+bool popup_menu::add_check (command_type*, int)
 {
     return false;
 }
 
-bool PopupMenu::addRadio (Command*, int)
+bool popup_menu::add_radio (command_type*, int)
 {
     return false;
 }
 
-bool PopupMenu::addSubMenu (PopupMenu*, string const&, int)
+bool popup_menu::add_sub_menu (popup_menu*, string const&, int)
 {
     return false;
 }
 
-bool PopupMenu::addSeparator (int)
+bool popup_menu::add_separator (int)
 {
     return false;
 }
 
-bool PopupMenu::addGroup (int)
+bool popup_menu::add_group (int)
 {
     return false;
 }
 
-bool PopupMenu::addToGroup (int, View*)
+bool popup_menu::add_to_group (int, view*)
 {
     return false;
 }
 
-bool PopupMenu::removeFromGroup (int, View*)
+bool popup_menu::remove_from_group (int, view*)
 {
     return false;
 }
 
-bool PopupMenu::removeItem (int)
+bool popup_menu::remove_item (int)
 {
     return false;
 }
 
-void PopupMenu::setDelay (View::size_type)
+void popup_menu::set_delay (view::size_type)
 {
 }
 
-void PopupMenu::setPosition (point2i)
+void popup_menu::set_position (point2i)
 {
 }
 
-void PopupMenu::setGroupName (int, string const&)
+void popup_menu::set_group_name (int, string const&)
 {
 }
 
-PopupMenu::size_type PopupMenu::defaultDelay ()
+popup_menu::size_type popup_menu::default_delay ()
 {
-    return 0;
+    return 300;
 }
 
-void PopupMenu::setDefaultDelay (size_type)
-{
-}
-
-void PopupMenu::paintEvent (Rect const&)
+void popup_menu::set_default_delay (size_type)
 {
 }
 
-void PopupMenu::onFocusKilled ()
-{
-    hide ();
-}
-
-void PopupMenu::onKeyPress (u8)
+void popup_menu::paint_event (rect const&)
 {
 }
 
-void PopupMenu::onKeyRelease (u8)
+void popup_menu::focus_event (bool is_focused)
+{
+    if (!is_focused) hide ();
+}
+
+void popup_menu::key_pressed_event (event_type::key_data const&)
+{
+}
+
+void popup_menu::key_released_event (event_type::key_data const&)
 {
 }
 

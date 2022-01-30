@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,21 +74,6 @@ typedef std::uintptr_t uptr;
 typedef const std::uintptr_t cuptr;
 typedef std::ptrdiff_t ptrdiff;
 typedef const std::ptrdiff_t cptrdiff;
-
-template <std::size_t N>
-class bigsigned
-{
-
-};
-
-template <std::size_t N>
-class bigunsigned
-{
-
-};
-
-typedef bigsigned  <128> i128;
-typedef bigunsigned<128> u128;
 
 template<class Out, class In>
 union cast_union

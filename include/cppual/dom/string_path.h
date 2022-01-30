@@ -123,10 +123,10 @@ namespace boost { namespace property_tree
         bool single() const;
 
         /// Get the separator used by this path.
-        char_type separator() const { return m_separator; }
+        char_type separator() const { return _M_separator; }
 
         string dump() const {
-            return detail::dump_sequence(m_value);
+            return detail::dump_sequence(_M_value);
         }
 
         /// Append a second path to this one.
@@ -135,17 +135,17 @@ namespace boost { namespace property_tree
             // If it's single, there's no separator. This allows to do
             // p /= "piece";
             // even for non-default separators.
-            BOOST_ASSERT((m_separator == o.m_separator
+            BOOST_ASSERT((_M_separator == o._M_separator
                           || o.empty()
                           || o.single())
                          && "Incompatible paths.");
             if(!o.empty()) {
                 String sub;
                 if(!this->empty()) {
-                    sub.push_back(m_separator);
+                    sub.push_back(_M_separator);
                 }
-                sub.insert(sub.end(), o.cstart(), o.m_value.end());
-                detail::append_and_preserve_iter(m_value, sub, m_start,
+                sub.insert(sub.end(), o.cstart(), o._M_value.end());
+                detail::append_and_preserve_iter(_M_value, sub, _M_start,
                     typename std::iterator_traits<s_iter>::iterator_category());
             }
             return *this;
@@ -154,51 +154,51 @@ namespace boost { namespace property_tree
     private:
         typedef typename String::iterator s_iter;
         typedef typename String::const_iterator s_c_iter;
-        String m_value;
-        char_type m_separator;
-        Translator m_tr;
-        s_iter m_start;
-        s_c_iter cstart() const { return m_start; }
+        String _M_value;
+        char_type _M_separator;
+        Translator _M_tr;
+        s_iter _M_start;
+        s_c_iter cstart() const { return _M_start; }
     };
 
     template <typename String, typename Translator> inline
     string_path<String, Translator>::string_path(char_type separator)
-        : m_separator(separator), m_start(m_value.begin())
+        : _M_separator(separator), _M_start(_M_value.begin())
     {}
 
     template <typename String, typename Translator> inline
     string_path<String, Translator>::string_path(const String &value,
                                                  char_type separator,
                                                  Translator tr)
-        : m_value(value), m_separator(separator),
-          m_tr(tr), m_start(m_value.begin())
+        : _M_value(value), _M_separator(separator),
+          _M_tr(tr), _M_start(_M_value.begin())
     {}
 
     template <typename String, typename Translator> inline
     string_path<String, Translator>::string_path(const char_type *value,
                                                  char_type separator,
                                                  Translator tr)
-        : m_value(value), m_separator(separator),
-          m_tr(tr), m_start(m_value.begin())
+        : _M_value(value), _M_separator(separator),
+          _M_tr(tr), _M_start(_M_value.begin())
     {}
 
     template <typename String, typename Translator> inline
     string_path<String, Translator>::string_path(const string_path &o)
-        : m_value(o.m_value), m_separator(o.m_separator),
-          m_tr(o.m_tr), m_start(m_value.begin())
+        : _M_value(o._M_value), _M_separator(o._M_separator),
+          _M_tr(o._M_tr), _M_start(_M_value.begin())
     {
-        std::advance(m_start, std::distance(o.m_value.begin(), o.cstart()));
+        std::advance(_M_start, std::distance(o._M_value.begin(), o.cstart()));
     }
 
     template <typename String, typename Translator> inline
     string_path<String, Translator>&
     string_path<String, Translator>::operator =(const string_path &o)
     {
-        m_value = o.m_value;
-        m_separator = o.m_separator;
-        m_tr = o.m_tr;
-        m_start = m_value.begin();
-        std::advance(m_start, std::distance(o.m_value.begin(), o.cstart()));
+        _M_value = o._M_value;
+        _M_separator = o._M_separator;
+        _M_tr = o._M_tr;
+        _M_start = _M_value.begin();
+        std::advance(_M_start, std::distance(o._M_value.begin(), o.cstart()));
         return *this;
     }
 
@@ -207,15 +207,15 @@ namespace boost { namespace property_tree
     {
         BOOST_ASSERT(!empty() && "Reducing empty path");
 
-        s_iter next_sep = std::find(m_start, m_value.end(), m_separator);
-        String part(m_start, next_sep);
-        m_start = next_sep;
+        s_iter next_sep = std::find(_M_start, _M_value.end(), _M_separator);
+        String part(_M_start, next_sep);
+        _M_start = next_sep;
         if(!empty()) {
           // Unless we're at the end, skip the separator we found.
-          ++m_start;
+          ++_M_start;
         }
 
-        if(optional<key_type> key = m_tr.get_value(part)) {
+        if(optional<key_type> key = _M_tr.get_value(part)) {
             return *key;
         }
         BOOST_PROPERTY_TREE_THROW(ptree_bad_path("Path syntax error", *this));
@@ -224,15 +224,15 @@ namespace boost { namespace property_tree
     template <typename String, typename Translator> inline
     bool string_path<String, Translator>::empty() const
     {
-        return m_start == m_value.end();
+        return _M_start == _M_value.end();
     }
 
     template <typename String, typename Translator> inline
     bool string_path<String, Translator>::single() const
     {
-        return std::find(static_cast<s_c_iter>(m_start),
-                         m_value.end(), m_separator)
-            == m_value.end();
+        return std::find(static_cast<s_c_iter>(_M_start),
+                         _M_value.end(), _M_separator)
+            == _M_value.end();
     }
 
     // By default, this is the path for strings. You can override this by

@@ -44,8 +44,8 @@ public:
            uint8_t first_event,
            const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~notify(void) {}
@@ -72,7 +72,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_drawable_t, typename ... Parameter>
@@ -83,7 +83,7 @@ public:
         decltype((*this)->drawable),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->drawable,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -96,14 +96,14 @@ public:
         decltype((*this)->damage),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->damage,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class notify
 
 
@@ -143,7 +143,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_damage
 } // namespace error
 
@@ -519,8 +519,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -533,10 +533,10 @@ public:
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_DAMAGE_NOTIFY:
-            handler(cppual::damage::event::notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::damage::event::notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -545,8 +545,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -559,7 +559,7 @@ public:
     typedef cppual::damage::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::damage::extension & extension)
@@ -569,7 +569,7 @@ public:
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-        switch (error->error_code - m_first_error) {
+        switch (error->error_code - _M_first_error) {
 
         case XCB_DAMAGE_BAD_DAMAGE: // 0
             throw cppual::damage::error::bad_damage(error);
@@ -578,7 +578,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

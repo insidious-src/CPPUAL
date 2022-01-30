@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,20 +27,20 @@ using namespace cppual::Clock;
 namespace cppual { namespace Compute {
 
 Mutex::Mutex ()
-: m_gCond ()
+: _M_gCond ()
 { }
 
 void Mutex::lock ()
 {
-    if (m_gOwner.load () != Thread::Id ()) m_gCond.wait ();
-    m_gOwner.store (Thread::Id (ThisThread::handle ()));
+    if (_M_gOwner.load () != Thread::Id ()) _M_gCond.wait ();
+    _M_gOwner.store (Thread::Id (ThisThread::handle ()));
 }
 
 void Mutex::unlock ()
 {
-    if (m_gOwner.load () != Thread::Id (ThisThread::handle ())) return;
-    m_gOwner.store (Thread::Id ());
-    m_gCond.notifyAll ();
+    if (_M_gOwner.load () != Thread::Id (ThisThread::handle ())) return;
+    _M_gOwner.store (Thread::Id ());
+    _M_gCond.notifyAll ();
 }
 
 } } // Concurency

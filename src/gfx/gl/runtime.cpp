@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
  */
 
 #include <cppual/gfx/gl/runtime.h>
+#include <cppual/gfx/draw.h>
+#include <cppual/containers.h>
 
 #include "gldef.h"
 
@@ -29,22 +31,22 @@
 #include <unordered_map>
 #include <stdexcept>
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
 namespace {
 
-typedef std::unordered_map<Version, Version> version_map  ;
-typedef std::vector<string>                  string_vector;
-typedef std::size_t                          size_type    ;
+typedef unordered_map<resource_version, resource_version> version_map  ;
+typedef vector<string>                                    string_vector;
+typedef std::size_t                                       size_type    ;
 
-constexpr GLenum queryToGLEnum (StringQuery query) noexcept
+constexpr GLenum query_to_gl_enum (StringQuery query) noexcept
 {
     return query == StringQuery::Renderer ? InfoRenderer :
            query == StringQuery::Vendor   ? InfoVendor   :
            query == StringQuery::Version  ? InfoVersion  : InfoSLVersion;
 }
 
-Version getGLVersion ()
+resource_version get_gl_version ()
 {
     GLint major = GLint ();
     GLint minor = GLint ();
@@ -52,31 +54,31 @@ Version getGLVersion ()
     ::glGetIntegerv (InfoMajorVersion, &major);
     ::glGetIntegerv (InfoMinorVersion, &minor);
 
-    return Version { major, minor };
+    return resource_version { major, minor };
 }
 
-version_map getSLVersions ()
+version_map get_sl_versions ()
 {
     version_map slVersions;
 
     slVersions.reserve(12);
-    slVersions.emplace(Version(2, 0), Version(1, 10));
-    slVersions.emplace(Version(2, 1), Version(1, 20));
-    slVersions.emplace(Version(3, 0), Version(1, 30));
-    slVersions.emplace(Version(3, 1), Version(1, 40));
-    slVersions.emplace(Version(3, 2), Version(1, 50));
-    slVersions.emplace(Version(3, 3), Version(3, 30));
-    slVersions.emplace(Version(4, 0), Version(4, 00));
-    slVersions.emplace(Version(4, 1), Version(4, 10));
-    slVersions.emplace(Version(4, 2), Version(4, 20));
-    slVersions.emplace(Version(4, 3), Version(4, 30));
-    slVersions.emplace(Version(4, 4), Version(4, 40));
-    slVersions.emplace(Version(4, 5), Version(4, 50));
+    slVersions.emplace(resource_version(2, 0), resource_version(1, 10));
+    slVersions.emplace(resource_version(2, 1), resource_version(1, 20));
+    slVersions.emplace(resource_version(3, 0), resource_version(1, 30));
+    slVersions.emplace(resource_version(3, 1), resource_version(1, 40));
+    slVersions.emplace(resource_version(3, 2), resource_version(1, 50));
+    slVersions.emplace(resource_version(3, 3), resource_version(3, 30));
+    slVersions.emplace(resource_version(4, 0), resource_version(4, 00));
+    slVersions.emplace(resource_version(4, 1), resource_version(4, 10));
+    slVersions.emplace(resource_version(4, 2), resource_version(4, 20));
+    slVersions.emplace(resource_version(4, 3), resource_version(4, 30));
+    slVersions.emplace(resource_version(4, 4), resource_version(4, 40));
+    slVersions.emplace(resource_version(4, 5), resource_version(4, 50));
 
     return slVersions;
 }
 
-string_vector getGLExtensions ()
+string_vector get_gl_extensions ()
 {
     GLint n = GLint ();
 
@@ -94,16 +96,16 @@ string_vector getGLExtensions ()
     return extensions;
 }
 
-string_vector getGLLabels ()
+string_vector get_gl_labels ()
 {
     string_vector labels;
 
     labels.reserve(4);
 
-    labels.push_back (reinterpret_cast<cchar*> (::glGetString(queryToGLEnum(StringQuery::Renderer))));
-    labels.push_back (reinterpret_cast<cchar*> (::glGetString(queryToGLEnum(StringQuery::Vendor))));
-    labels.push_back (reinterpret_cast<cchar*> (::glGetString(queryToGLEnum(StringQuery::Version))));
-    labels.push_back (reinterpret_cast<cchar*> (::glGetString(queryToGLEnum(StringQuery::SLVersion))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(StringQuery::Renderer))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(StringQuery::Vendor))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(StringQuery::Version))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(StringQuery::SLVersion))));
 
     return labels;
 }
@@ -112,46 +114,46 @@ string_vector getGLLabels ()
 
 // ====================================================
 
-Version Platform::version ()
+platform::version_type platform::version ()
 {
-    if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
+    if(!context_interface::current() || context_interface::current()->device() != device_backend::gl)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
 
-    static const auto version = getGLVersion ();
+    static const auto version = get_gl_version ();
     return version;
 }
 
-Version Platform::slVersion ()
+platform::version_type platform::sl_version ()
 {
-    if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
+    if(!context_interface::current() || context_interface::current()->device() != device_backend::gl)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
 
-    static auto versions = getSLVersions();
+    static auto versions = get_sl_versions();
     return versions[version()];
 }
 
-string Platform::label (StringQuery query)
+string platform::label (StringQuery query)
 {
-    if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
+    if(!context_interface::current() || context_interface::current()->device() != device_backend::gl)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
 
-    static const auto labels = getGLLabels ();
+    static const auto labels = get_gl_labels ();
 
     return labels[static_cast<size_type>(query)];
 }
 
-bool Platform::isExtensionSupported (string const& name)
+bool platform::is_extension_supported (string const& name)
 {
-    if(!IDeviceContext::current() || IDeviceContext::current()->device() != DeviceType::GL)
+    if(!context_interface::current() || context_interface::current()->device() != device_backend::gl)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
 
-    static auto extensions = getGLExtensions ();
+    static auto extensions = get_gl_extensions ();
     auto        it         = std::find (extensions.begin(), extensions.end(), name);
 
     return it != extensions.end();
 }
 
-void Platform::drawTestTriagle(float fAxis)
+void platform::draw_test_triagle(float fAxis)
 {
     ::glClearColor (255.0f, 255.0f, 255.0f, 255.0f);
     ::glClear (GL_COLOR_BUFFER_BIT);

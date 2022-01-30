@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,26 +22,27 @@
 
 #include <cppual/network/protocols/protocol.h>
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
-IProtocol* IProtocol::getLowestLayer () const
+Protocol* Protocol::lowest_layer () const
 {
-    if (m_pLowerProt != nullptr)
+    if (_M_pLowerProt != nullptr)
     {
-        IProtocol* pLowestProt = m_pLowerProt->getLowerLayer ();
-        while (pLowestProt != nullptr) pLowestProt = pLowestProt->getLowerLayer ();
+        Protocol* pLowestProt = _M_pLowerProt->lower_layer ();
+
+        while (pLowestProt != nullptr) pLowestProt = pLowestProt->lower_layer ();
         return pLowestProt;
     }
 
     return nullptr;
 }
 
-uint IProtocol::getRequiredOutputSize (uint)
+uint Protocol::required_output_size (uint)
 {
     return 0;
 }
 
-uint IProtocol::getRequiredRecyclableStreams (uint, uint)
+uint Protocol::required_recyclable_streams (uint, uint)
 {
     return 0;
 }

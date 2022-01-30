@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,16 +24,20 @@
 
 #include <cppual/ui/skin.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class GroupBox : public SkinnableView
+// =========================================================
+
+class group_box : public skinnable_view
 {
 public:
-    void showLabel (bool);
-    void setHeaderOnly (bool);
-    bool isLabelVisible () const;
-    bool isHeaderOnly () const;
+    void show_label (bool);
+    void set_header_only (bool);
+    bool is_label_visible () const;
+    bool is_header_only () const;
 };
+
+// =========================================================
 
 } } // Ui
 

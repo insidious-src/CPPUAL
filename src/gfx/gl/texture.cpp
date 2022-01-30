@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 using std::ios_base;
 using std::ifstream;
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
 namespace { // optimize for internal unit usage
 
@@ -42,25 +42,25 @@ struct GLStates final
 
 bool GLStates::hasDirectAccess = false;
 
-constexpr int convertMagFilter (Texture::MagFilter eMag) noexcept
+constexpr int convert_mag_filter (texture::MagFilter eMag) noexcept
 {
-    return eMag == Texture::MagFilter::Bilinear ? GL::Linear : GL::Nearest;
+    return eMag == texture::MagFilter::Bilinear ? gl::Linear : gl::Nearest;
 }
 
-inline int convertMinFilter (Texture::MinFilter eMin) noexcept
+constexpr int convert_min_filter (texture::MinFilter eMin) noexcept
 {
     switch (eMin)
     {
-    case Texture::MinFilter::Bilinear:
-        return GL::Linear;
-    case Texture::MinFilter::NearestMipMap:
-        return GL::NearestMipMapNearest;
-    case Texture::MinFilter::BilinearMipMap:
-        return GL::LinearMipMapNearest;
-    case Texture::MinFilter::TrilinearMipMap:
-        return GL::LinearMipMapLinear;
+    case texture::MinFilter::Bilinear:
+        return gl::Linear;
+    case texture::MinFilter::NearestMipMap:
+        return gl::NearestMipMapNearest;
+    case texture::MinFilter::BilinearMipMap:
+        return gl::LinearMipMapNearest;
+    case texture::MinFilter::TrilinearMipMap:
+        return gl::LinearMipMapLinear;
     default:
-        return GL::Nearest;
+        return gl::Nearest;
     }
 }
 
@@ -68,40 +68,40 @@ inline int convertMinFilter (Texture::MinFilter eMin) noexcept
 
 // ====================================================
 
-Texture::Texture () noexcept
-: Object (ResourceType::Texture),
-  m_gFormat (),
-  m_gSize (),
-  m_uSampleId (),
-  m_eMin (MinFilter::NearestMipMap),
-  m_eMag (MagFilter::Nearest),
-  m_gStates ()
+texture::texture () noexcept
+: object (resource_type::texture),
+  _M_gFormat (),
+  _M_gSize (),
+  _M_uSampleId (),
+  _M_eMin (MinFilter::NearestMipMap),
+  _M_eMag (MagFilter::Nearest),
+  _M_gStates ()
 { }
 
-Texture::Texture (string const&      gFile,
-                  PixelFormat const& gFormat,
+texture::texture (string const&      gFile,
+                  pixel_format const& gFormat,
                   bool               bGenMipMaps)
-: Object (ResourceType::Texture),
-  m_gFormat (),
-  m_gSize (),
-  m_uSampleId (),
-  m_eMin (MinFilter::NearestMipMap),
-  m_eMag (MagFilter::Nearest),
-  m_gStates ()
+: object (resource_type::texture),
+  _M_gFormat (),
+  _M_gSize (),
+  _M_uSampleId (),
+  _M_eMin (MinFilter::NearestMipMap),
+  _M_eMag (MagFilter::Nearest),
+  _M_gStates ()
 {
-    if (loadTexture2D (gFile, gFormat, bGenMipMaps))
+    if (load_texture_2d (gFile, gFormat, bGenMipMaps))
     {
-        if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
-        m_gStates += Texture::IsLoaded;
+        if (bGenMipMaps) _M_gStates += texture::HasMipMaps;
+        _M_gStates += texture::IsLoaded;
     }
 }
 
-Texture::~Texture () noexcept
+texture::~texture () noexcept
 {
-    if (handle () and m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
+    if (handle () and _M_uSampleId) glDeleteSamplers (1, &_M_uSampleId);
 }
 
-void Texture::setState (State eState, bool bSwitch) noexcept
+void texture::set_state (State eState, bool bSwitch) noexcept
 {
     switch (eState)
     {
@@ -111,29 +111,29 @@ void Texture::setState (State eState, bool bSwitch) noexcept
     }
 }
 
-bool Texture::loadTexture2D (string const&      gFilePath,
-                             PixelFormat const& gFormat,
-                             bool               bGenMipMaps)
+bool texture::load_texture_2d (string const&      gFilePath,
+                               pixel_format const& gFormat,
+                               bool               bGenMipMaps)
 {
-    if (!handle () or m_gStates.test (Texture::IsLoaded)) return false;
+    if (!handle () or _M_gStates.test (texture::IsLoaded)) return false;
     ifstream gFile (gFilePath.c_str(), ios_base::binary);
     uint     uFormat;
 
     if (gFile.is_open ())
     {
-        if (m_gSize.x and !isPowerOfTwo (m_gSize.x)) --m_gSize.x;
-        if (m_gSize.y and !isPowerOfTwo (m_gSize.y)) --m_gSize.y;
+        if (_M_gSize.x and !isPowerOfTwo (_M_gSize.x)) --_M_gSize.x;
+        if (_M_gSize.y and !isPowerOfTwo (_M_gSize.y)) --_M_gSize.y;
     }
 
-    if (m_gSize.x == 0 or m_gSize.y == 0) return false;
+    if (_M_gSize.x == 0 or _M_gSize.y == 0) return false;
 
     uFormat    = gFormat.depth == 24 ?
                   GL_RGB : (gFormat.depth == 8 ? GL_LUMINANCE : 0);
 
-    glTexImage2D (GL::Texture2D,
+    glTexImage2D (gl::Texture2D,
                   0, // level
                   gFormat.depth == 24 ? GL_RGB : GL_DEPTH_COMPONENT,
-                  m_gSize.x, m_gSize.y,
+                  _M_gSize.x, _M_gSize.y,
                   0, // border
                   uFormat,
                   GL_UNSIGNED_BYTE,
@@ -141,47 +141,47 @@ bool Texture::loadTexture2D (string const&      gFilePath,
 
     gFile.close ();
 
-    if (bGenMipMaps) glGenerateMipmap (GL::Texture2D);
-    glGenSamplers (1, &m_uSampleId);
+    if (bGenMipMaps) glGenerateMipmap (gl::Texture2D);
+    glGenSamplers (1, &_M_uSampleId);
 
-    m_gFormat  = gFormat;
-    m_gStates += Texture::IsLoaded;
-    if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
+    _M_gFormat  = gFormat;
+    _M_gStates += texture::IsLoaded;
+    if (bGenMipMaps) _M_gStates += texture::HasMipMaps;
     return true;
 }
 
-bool Texture::loadTexture2D (cvoid*             pPixels,
-                             point2i     const& gSize,
-                             PixelFormat const& gFormat,
-                             bool               bGenMipMaps)
+bool texture::load_texture_2d (cvoid*             pPixels,
+                               point2i     const& gSize,
+                               pixel_format const& gFormat,
+                               bool               bGenMipMaps)
 {
-    if (!handle () or m_gStates.test (Texture::IsLoaded) or
+    if (!handle () or _M_gStates.test (texture::IsLoaded) or
             !pPixels or !gSize.x or !gSize.y)
         return false;
 
     uint uFormat = gFormat.depth == 24 ?
-                       GL::RGB : (gFormat.depth == 8 ?
-                                      static_cast<uint> (GL::Luminance) : 0);
+                       gl::RGB : (gFormat.depth == 8 ?
+                                      static_cast<uint> (gl::Luminance) : 0);
 
-    glTexImage2D (GL::Texture2D,
+    glTexImage2D (gl::Texture2D,
                   0, // level
-                  gFormat.depth == 24 ? static_cast<int> (GL::RGB) : GL_DEPTH_COMPONENT,
-                  m_gSize.x, m_gSize.y,
+                  gFormat.depth == 24 ? static_cast<int> (gl::RGB) : GL_DEPTH_COMPONENT,
+                  _M_gSize.x, _M_gSize.y,
                   0, // border
                   uFormat,
                   GL_UNSIGNED_BYTE,
                   pPixels);
 
-    if (bGenMipMaps) glGenerateMipmap (GL::Texture2D);
-    glGenSamplers (1, &m_uSampleId);
+    if (bGenMipMaps) glGenerateMipmap (gl::Texture2D);
+    glGenSamplers (1, &_M_uSampleId);
 
-    m_gFormat  = gFormat;
-    m_gStates += Texture::IsLoaded;
-    if (bGenMipMaps) m_gStates += Texture::HasMipMaps;
+    _M_gFormat  = gFormat;
+    _M_gStates += texture::IsLoaded;
+    if (bGenMipMaps) _M_gStates += texture::HasMipMaps;
     return true;
 }
 
-void Texture::setParameter (uint uName, int nParam) noexcept
+void texture::set_parameter (uint uName, int nParam) noexcept
 {
     if (!handle ()) return;
 
@@ -190,42 +190,42 @@ void Texture::setParameter (uint uName, int nParam) noexcept
         uint uBoundTex = 0;
 
         glGetIntegerv (GL_TEXTURE_BINDING_2D, reinterpret_cast<int*> (&uBoundTex));
-        glBindTexture (GL::Texture2D, handle ());
-        glTexParameteri (GL::Texture2D, uName, nParam);
-        glBindTexture (GL::Texture2D, uBoundTex);
+        glBindTexture (gl::Texture2D, handle ());
+        glTexParameteri (gl::Texture2D, uName, nParam);
+        glBindTexture (gl::Texture2D, uBoundTex);
     }
-    else glTextureParameteriEXT (handle (), GL::Texture2D, uName, nParam);
+    else glTextureParameteriEXT (handle (), gl::Texture2D, uName, nParam);
 }
 
-void Texture::bind (uint uTexId) noexcept
+void texture::bind (uint uTexId) noexcept
 {
-    if (m_gStates.test (Texture::IsLoaded))
+    if (_M_gStates.test (texture::IsLoaded))
     {
         glActiveTexture (GL_TEXTURE0 + uTexId);
-        glBindTexture   (GL::Texture2D, handle ());
-        glBindSampler   (uTexId, m_uSampleId);
+        glBindTexture   (gl::Texture2D, handle ());
+        glBindSampler   (uTexId, _M_uSampleId);
     }
 }
 
-void Texture::setFiltering (MagFilter eMag, MinFilter eMin) noexcept
+void texture::set_filtering (MagFilter eMag, MinFilter eMin) noexcept
 {
-    if (m_uSampleId)
+    if (_M_uSampleId)
     {
-        glSamplerParameteri (m_uSampleId, GL::Tex2DMinFilter, convertMinFilter (eMin));
-        glSamplerParameteri (m_uSampleId, GL::Tex2DMagFilter, convertMagFilter (eMag));
+        glSamplerParameteri (_M_uSampleId, gl::Tex2DMinFilter, convert_min_filter (eMin));
+        glSamplerParameteri (_M_uSampleId, gl::Tex2DMagFilter, convert_mag_filter (eMag));
 
-        m_eMin = eMin;
-        m_eMag = eMag;
+        _M_eMin = eMin;
+        _M_eMag = eMag;
     }
 }
 
-void Texture::release () noexcept
+void texture::release () noexcept
 {
-    if (m_gStates.test (Texture::IsLoaded))
+    if (_M_gStates.test (texture::IsLoaded))
     {
-        if (m_uSampleId) glDeleteSamplers (1, &m_uSampleId);
-        m_uSampleId = 0;
-        m_gStates  -= Texture::IsLoaded;
+        if (_M_uSampleId) glDeleteSamplers (1, &_M_uSampleId);
+        _M_uSampleId = 0;
+        _M_gStates  -= texture::IsLoaded;
     }
 }
 

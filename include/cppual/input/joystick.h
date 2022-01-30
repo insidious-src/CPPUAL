@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,114 +28,64 @@
 #include <cppual/noncopyable.h>
 #include <cppual/string.h>
 
-namespace cppual { namespace Input {
-
-struct Joystick;
+namespace cppual { namespace input {
 
 // =========================================================
 
-class JoystickEvent
-{
-public:
-    typedef std::size_t size_type;
-
-    enum class Type : unsigned char
-    {
-        Connect,
-        Disconnect,
-        Press,
-        Release,
-        Move,
-        Trigger,
-        TrackMove
-    };
-
-    struct JoyButtonData
-    {
-        size_type id;
-        i32     button;
-    };
-
-    struct JoyAxisData
-    {
-        size_type id;
-        u8        axis;
-        i16     value;
-    };
-
-    struct JoyTriggerData
-    {
-        size_type id;
-        u8        trigger;
-        i16     threshold;
-    };
-
-    struct JoyTrackData
-    {
-        size_type id;
-        u8        track;
-        point2i   pos;
-    };
-
-    struct JoyPlugData
-    {
-        size_type id;
-    };
-
-private:
-};
+struct joystick      ;
+struct joystick_event;
 
 // =========================================================
 
-class JoystickQueue : NonConstructible
+class joystick_queue : non_constructible
 {
 public:
-    typedef JoystickEvent event_type;
+    typedef joystick_event event_type;
 
     static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
 
 // =========================================================
 
-struct Joystick : NonCopyableVirtual
+struct joystick : non_copyable_virtual
 {
     typedef std::size_t size_type;
 
     enum
     {
-        MaxCount    = 16,
-        ButtonCount = 32,
-        AxisCount   =  8
+        max_count    = 16,
+        button_count = 32,
+        axis_count   =  8
     };
 
-    enum class Axis : unsigned char
+    enum class axis : byte
     {
-        X,
-        Y,
-        Z,
-        R,
-        U,
-        V,
-        PovX,
-        PovY
+        x,
+        y,
+        z,
+        r,
+        u,
+        v,
+        pov_x,
+        pov_y
     };
 
-    enum class Surface : unsigned char
+    enum class surface : byte
     {
-        TrackPad,
-        TrackBall,
-        Touch
+        track_pad,
+        track_ball,
+        touch
     };
 
-    virtual string    getModelName () const = 0;
-    virtual float     getAxisPosition (Axis) = 0;
-    virtual size_type getId () const = 0;
-    virtual size_type getButtonCount () const = 0;
-    virtual bool      isValid () const = 0;
-    virtual bool      isButtonPressed (int) = 0;
-    virtual bool      hasAxis (Axis) const = 0;
-    virtual bool      hasSurface (Surface) const = 0;
-    virtual bool      hasMotor () const = 0;
+    virtual string    model_name () const = 0;
+    virtual float     axis_position (axis) = 0;
+    virtual size_type id () const = 0;
+    virtual size_type btn_count () const = 0;
+    virtual bool      valid () const = 0;
+    virtual bool      is_button_pressed (int) = 0;
+    virtual bool      has_axis (axis) const = 0;
+    virtual bool      has_surface (surface) const = 0;
+    virtual bool      has_motor () const = 0;
     virtual void      vibrate (ushort) noexcept = 0;
 };
 

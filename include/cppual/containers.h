@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,51 +43,51 @@ namespace cppual {
 
 template <typename T>
 using vector =
-std::vector<T, Memory::Allocator<T>>;
+std::vector<T, memory::allocator<T>>;
 
 template <typename T>
 using deque =
-std::deque<T, Memory::Allocator<T>>;
+std::deque<T, memory::allocator<T>>;
 
 template <typename T>
 using list =
-std::list<T, Memory::Allocator<T>>;
+std::list<T, memory::allocator<T>>;
 
 template <typename T>
 using forward_list =
-std::forward_list<T, Memory::Allocator<T>>;
+std::forward_list<T, memory::allocator<T>>;
 
 template <class Key, class Tp, class Hash = std::hash<Key>, class Pred = std::equal_to<Key>>
 using unordered_map =
-std::unordered_map<Key, Tp, Hash, Pred, Memory::Allocator<std::pair<const Key, Tp>>>;
+std::unordered_map<Key, Tp, Hash, Pred, memory::allocator<std::pair<const Key, Tp>>>;
 
 template <class Key, class Tp, class Hash = std::hash<Key>, class Pred = std::equal_to<Key>>
 using unordered_multimap =
-std::unordered_multimap<Key, Tp, Hash, Pred, Memory::Allocator<std::pair<const Key, Tp>>>;
+std::unordered_multimap<Key, Tp, Hash, Pred, memory::allocator<std::pair<const Key, Tp>>>;
 
 template <class T, class Hash = std::hash<T>, class Pred = std::equal_to<T>>
 using unordered_set =
-std::unordered_set<T, Hash, Pred, Memory::Allocator<T>>;
+std::unordered_set<T, Hash, Pred, memory::allocator<T>>;
 
 template <class T, class Hash = std::hash<T>, class Pred = std::equal_to<T>>
 using unordered_multiset =
-std::unordered_multiset<T, Hash, Pred, Memory::Allocator<T>>;
+std::unordered_multiset<T, Hash, Pred, memory::allocator<T>>;
 
 template <class Key, class Tp, class Compare = std::less<Key>>
 using map =
-std::map<Key, Compare, Memory::Allocator<std::pair<const Key, Tp>>>;
+std::map<Key, Compare, memory::allocator<std::pair<const Key, Tp>>>;
 
 template <class Key, class Tp, class Compare = std::less<Key>>
 using multimap =
-std::multimap<Key, Compare, Memory::Allocator<std::pair<const Key, Tp>>>;
+std::multimap<Key, Compare, memory::allocator<std::pair<const Key, Tp>>>;
 
 template <class Key, class Compare = std::less<Key>>
 using set =
-std::set<Key, Compare, Memory::Allocator<Key>>;
+std::set<Key, Compare, memory::allocator<Key>>;
 
 template <class Key, class Compare = std::less<Key>>
 using multiset =
-std::multiset<Key, Compare, Memory::Allocator<Key>>;
+std::multiset<Key, Compare, memory::allocator<Key>>;
 
 // ====================================================
 

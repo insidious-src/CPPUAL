@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,55 +24,56 @@
 
 #include <cppual/ui/window.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class Dialog : public Window
+class dialog : public window
 {
 public:
-    Dialog () noexcept;
-    Dialog (Dialog&&) noexcept;
-    Dialog (Dialog const&) noexcept;
-    Dialog& operator = (Dialog&&) noexcept;
-    Dialog& operator = (Dialog const&) noexcept;
+    dialog () noexcept;
+    dialog (dialog&&) noexcept;
+    dialog (dialog const&) noexcept;
+    dialog& operator = (dialog&&) noexcept;
+    dialog& operator = (dialog const&) noexcept;
 
-    Dialog (View*         parent,
-            Rect const&   rect,
-            string const& title,
-            image_type*   icon   = nullptr,
-            u32           screen = 0)
-    : Window (parent, rect, title, icon, screen),
-      m_pOwnerWnd ()
+    dialog (view*              parent,
+            rect const&        rect,
+            string_type const& title,
+            image_type*        icon   = nullptr,
+            u32                screen = 0)
+    : window (parent, rect, title, icon, screen),
+      _M_pOwnerWnd ()
     { }
 
-    enum Result
+    enum class result : u16
     {
-        Close    = 0,
-        OK       = 1 <<  0,
-        Cancel   = 1 <<  1,
-        Yes      = 1 <<  2,
-        YesToAll = 1 <<  3,
-        No       = 1 <<  4,
-        NoToAll  = 1 <<  5,
-        Discard  = 1 <<  6,
-        Accept   = 1 <<  7,
-        Decline  = 1 <<  8,
-        Save     = 1 <<  9,
-        SaveAll  = 1 << 10,
-        Ignore   = 1 << 11
+        close      =       0,
+        ok         = 1 <<  0,
+        cancel     = 1 <<  1,
+        yes        = 1 <<  2,
+        yes_to_all = 1 <<  3,
+        no         = 1 <<  4,
+        no_to_all  = 1 <<  5,
+        discard    = 1 <<  6,
+        accept     = 1 <<  7,
+        decline    = 1 <<  8,
+        save       = 1 <<  9,
+        save_all   = 1 << 10,
+        ignore     = 1 << 11
     };
 
-    Result getResult () noexcept;
-    void   showModal (Ui::Window*) noexcept;
+    result get_result () noexcept;
+    void   show_modal (window*) noexcept;
 
 protected:
-    virtual void onInit () { }
-    virtual void onEnd  () { }
+    virtual void on_init () { }
+    virtual void on_end  () { }
 
 private:
-    Ui::Window* m_pOwnerWnd;
+    void on_create ();
+    void destroy_event ();
 
-    void onCreate  ();
-    void destroyEvent ();
+private:
+    window* _M_pOwnerWnd;
 };
 
 } } // namespace Ui

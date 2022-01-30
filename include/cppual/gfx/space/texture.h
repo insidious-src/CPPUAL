@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,27 +77,27 @@ public:
                         PixelFormat const& format     = PixelFormat (),
                         bool               gen_mipmap = false);
 
-    inline TexMinFilter getMinFilter () const noexcept { return m_eMin; }
-    inline TexMagFilter getMagFilter () const noexcept { return m_eMag; }
-    inline PixelFormat  format () const noexcept { return m_gFormat; }
-    inline uint            sampleId () const noexcept { return m_uSampleId; }
+    inline TexMinFilter getMinFilter () const noexcept { return _M_eMin; }
+    inline TexMagFilter getMagFilter () const noexcept { return _M_eMag; }
+    inline PixelFormat  format () const noexcept { return _M_gFormat; }
+    inline uint            sampleId () const noexcept { return _M_uSampleId; }
 
     inline bool    isLoaded () const noexcept
-    { return m_gStates.hasFlag (Texture::IsLoaded); }
+    { return _M_gStates.hasFlag (Texture::IsLoaded); }
 
     inline bool    hasMipMaps () const noexcept
-    { return m_gStates.hasFlag (Texture::HasMipMaps); }
+    { return _M_gStates.hasFlag (Texture::HasMipMaps); }
 
 private:
     enum    State { IsLoaded = 1 << 0, HasMipMaps = 1 << 1 };
     typedef FlagSet<Texture::State, u8> States;
 
-    PixelFormat  m_gFormat;
-    point2i      m_gSize;
-    uint         m_uSampleId;
-    TexMinFilter m_eMin;
-    TexMagFilter m_eMag;
-    States       m_gStates;
+    PixelFormat  _M_gFormat;
+    point2i      _M_gSize;
+    uint         _M_uSampleId;
+    TexMinFilter _M_eMin;
+    TexMagFilter _M_eMag;
+    States       _M_gStates;
 };
 
 } } // Graphics

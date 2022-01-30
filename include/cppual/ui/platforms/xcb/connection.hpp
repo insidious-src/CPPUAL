@@ -49,7 +49,7 @@ public:
         , Extensions(static_cast<xcb_connection_t *>(*this)) ...
         , Extensions::error_dispatcher(static_cast<Extensions &>(*this).get()) ...
     {
-        m_root_window = screen_of_display(default_screen())->root;
+        _M_root_window = screen_of_display(default_screen())->root;
     }
 
     virtual
@@ -85,7 +85,7 @@ public:
     root(void)
     {
         using make = cppual::generic::factory::make<self, ::xcb_window_t, Window>;
-        return make()(*this, m_root_window);
+        return make()(*this, _M_root_window);
     }
 
     template<typename Window = ::xcb_window_t>
@@ -93,7 +93,7 @@ public:
     root(void) const
     {
         using make = cppual::generic::factory::make<self, ::xcb_window_t, Window>;
-        return make()(*this, m_root_window);
+        return make()(*this, _M_root_window);
     }
 
     virtual
@@ -123,7 +123,7 @@ public:
     }
 
 private:
-    ::xcb_window_t m_root_window;
+    ::xcb_window_t _M_root_window;
 
     template<typename Extension, typename Next, typename ... Rest>
     void
@@ -149,7 +149,7 @@ connection<>::connection(Parameters && ... parameters)
     : cppual::core::core(std::forward<Parameters>(parameters) ...)
     , detail::interfaces<connection<>>(*this)
 {
-    m_root_window = screen_of_display(static_cast<core &>(*this).default_screen())->root;
+    _M_root_window = screen_of_display(static_cast<core &>(*this).default_screen())->root;
 }
 
 } // namespace cppual

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,14 +94,14 @@ public:
     bool   load (string const& str, LoadFrom mode = LoadFrom::File);
     bool   compile () noexcept;
 
-    inline string const& source () const noexcept { return m_gSource; }
-    inline Shader::Type  type   () const noexcept { return m_eType  ; }
+    inline string const& source () const noexcept { return _M_gSource; }
+    inline Shader::Type  type   () const noexcept { return _M_eType  ; }
 
     inline bool isLoaded () const noexcept
-    { return m_gStates.test (Shader::IsLoaded); }
+    { return _M_gStates.test (Shader::IsLoaded); }
 
     inline bool isCompiled () const noexcept
-    { return m_gStates.test (Shader::IsCompiled); }
+    { return _M_gStates.test (Shader::IsCompiled); }
 
 private:
     enum State
@@ -112,9 +112,9 @@ private:
 
     typedef BitSet<Shader::State> States;
 
-    string       m_gSource;
-    States       m_gStates;
-    Shader::Type m_eType;
+    string       _M_gSource;
+    States       _M_gStates;
+    Shader::Type _M_eType;
 
     bool loadFromFile   (string const& file);
     bool loadFromBinary (string const& file);
@@ -238,37 +238,37 @@ public:
     void   disable () noexcept;
 
     inline uint    shaderCount () const noexcept
-    { return m_uShaderCount; }
+    { return _M_uShaderCount; }
 
     inline bool isLinked () const noexcept
-    { return m_gStates.test (SLProgram::IsLinked); }
+    { return _M_gStates.test (SLProgram::IsLinked); }
 
     inline int attribute (string const& gName)
-    { return m_gAttribLocList[gName]; }
+    { return _M_gAttribLocList[gName]; }
 
     inline int uniform (string const& gName)
-    { return m_gUniformLocList[gName]; }
+    { return _M_gUniformLocList[gName]; }
 
     inline bool hasFragmentShader () const noexcept
-    { return m_gShaderTypes.test (Shader::Fragment); }
+    { return _M_gShaderTypes.test (Shader::Fragment); }
 
     inline bool hasVertexShader () const noexcept
-    { return m_gShaderTypes.test (Shader::Vertex); }
+    { return _M_gShaderTypes.test (Shader::Vertex); }
 
     inline bool hasComputeShader () const noexcept
-    { return m_gShaderTypes.test (Shader::Compute); }
+    { return _M_gShaderTypes.test (Shader::Compute); }
 
     inline bool hasTessControlShader () const noexcept
-    { return m_gShaderTypes.test (Shader::TessControl); }
+    { return _M_gShaderTypes.test (Shader::TessControl); }
 
     inline bool hasTessEvaluationShader () const noexcept
-    { return m_gShaderTypes.test (Shader::TessEvaluation); }
+    { return _M_gShaderTypes.test (Shader::TessEvaluation); }
 
 private:
-    map<string, int> m_gAttribLocList, m_gUniformLocList;
-    uint             m_uShaderCount;
-    Shader::Types    m_gShaderTypes;
-    States           m_gStates;
+    map<string, int> _M_gAttribLocList, _M_gUniformLocList;
+    uint             _M_uShaderCount;
+    Shader::Types    _M_gShaderTypes;
+    States           _M_gStates;
 };
 
 } } // Graphics

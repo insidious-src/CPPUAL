@@ -151,7 +151,7 @@
     \brief Enable Json support for \c string
 
     By defining this preprocessor symbol to \c 1, several convenience functions for using
-    \ref cppual::Json::GenericValue with \c string are enabled, especially
+    \ref cppual::json::GenericValue with \c string are enabled, especially
     for construction and comparison.
 
     \hideinitializer
@@ -169,7 +169,7 @@
     \ingroup CPPUAL_JSON_CONFIG
     \brief Enable Json support for object members handling in a \c std::multimap
 
-    By defining this preprocessor symbol to \c 1, \ref cppual::Json::GenericValue object
+    By defining this preprocessor symbol to \c 1, \ref cppual::json::GenericValue object
     members are stored in a \c std::multimap for faster lookup and deletion times, a
     trade off with a slightly slower insertion time and a small object allocat(or)ed
     memory overhead.
@@ -393,7 +393,7 @@
     \brief User-provided \c SizeType definition.
 
     In order to avoid using 32-bit size types for indexing strings and arrays,
-    define this preprocessor symbol and provide the type cppual::Json::SizeType
+    define this preprocessor symbol and provide the type cppual::json::SizeType
     before including Json:
     \code
     #define CPPUAL_JSON_NO_SIZETYPEDEFINE
@@ -401,7 +401,7 @@
     #include "cppual::Json/..."
     \endcode
 
-    \see cppual::Json::SizeType
+    \see cppual::json::SizeType
 */
 #ifdef CPPUAL_JSON_DOXYGEN_RUNNING
 #define CPPUAL_JSON_NO_SIZETYPEDEFINE

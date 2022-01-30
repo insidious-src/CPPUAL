@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,21 +25,21 @@
 
 namespace cppual {
 
-struct Error
+struct error
 {
-    enum Type
+    enum type
     {
-        Already               =   0,
-        Failed                =  -1,
-        Invalid               =  -2,
-        Denied                =  -3,
-        NoResources           =  -4,
-        NoAccess              =  -5,
-        Terminated            =  -6,
-        Incomplete            =  -7,
-        NotSupported          =  -8,
-        ConnectionLost        =  -9,
-        Undefined             = -10
+        already               =   0,
+        failed                =  -1,
+        invalid               =  -2,
+        denied                =  -3,
+        no_resources          =  -4,
+        no_access             =  -5,
+        terminated            =  -6,
+        incomplete            =  -7,
+        not_supported         =  -8,
+        connection_lost       =  -9,
+        undefined             = -10
     };
 };
 

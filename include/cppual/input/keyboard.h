@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,38 +26,38 @@
 #include <cppual/types.h>
 #include <cppual/noncopyable.h>
 
-namespace cppual { namespace Input {
+namespace cppual { namespace input {
 
-struct Keyboard;
-struct KeyEvent;
+struct keyboard ;
+struct key_event;
 
 // =========================================================
 
-class KeyQueue : NonConstructible
+class key_queue : non_constructible
 {
 public:
-    typedef KeyEvent event_type;
+    typedef key_event event_type;
 
     static bool pop_front (event_type& next_event, bool wait = false) noexcept;
 };
 
 // =========================================================
 
-struct Keyboard
+struct keyboard
 {
-    typedef KeyQueue queue_type;
+    typedef key_queue queue_type;
 
     enum
     {
-        MaxCount        = 5,
-        KeysAtOnceCount = 3
+        max_count        = 5,
+        max_keys_at_once = 3
     };
 
-    enum class Lock : byte
+    enum class lock : byte
     {
-        Caps,
-        Num,
-        Scroll
+        caps,
+        num,
+        scroll
     };
 
     enum Code
@@ -345,9 +345,9 @@ struct Keyboard
         CodeCount = 512
     };
 
-    enum Key
+    enum key
     {
-        UndefinedKey = 0,
+        undefined_key = 0,
         Zero = '0',
         One = '1',
         Two = '2',
@@ -474,9 +474,9 @@ struct Keyboard
         ScrollLock = (CodeScrollLock | 1<<30)
     };
 
-    static bool isKeyPressed (int key_code);
-    static bool isLockActive (Lock lock_state);
-    static bool isConnected  () noexcept;
+    static bool is_key_pressed (int key_code);
+    static bool is_lock_active (lock lock_state);
+    static bool is_connected  () noexcept;
 };
 
 } } // namespace Input

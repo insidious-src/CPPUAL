@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,90 +25,96 @@
 #include <cppual/signal.h>
 #include <cppual/ui/skin.h>
 
-using cppual::Graphics::Icon;
+using cppual::gfx::icon;
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class TabBar : public SkinnableView
+// =========================================================
+
+class tab_bar : public skinnable_view
 {
 public:
-    TabBar ();
-    TabBar (TabBar&&);
-    TabBar (TabBar const&);
-    TabBar& operator = (TabBar&&);
-    TabBar& operator = (TabBar const&);
+    tab_bar ();
+    tab_bar (tab_bar&&);
+    tab_bar (tab_bar const&);
+    tab_bar& operator = (tab_bar&&);
+    tab_bar& operator = (tab_bar const&);
 
-    enum TabFlag
+    enum class tab_flag : byte
     {
-        Movable,
-        Draggable,
-        Removable,
-        CloseButton,
-        AddButton,
-        ShowIcons
+        movable      = 1 << 0,
+        draggable    = 1 << 1,
+        removable    = 1 << 2,
+        close_button = 1 << 3,
+        add_button   = 1 << 4,
+        show_icons   = 1 << 5
     };
 
-    typedef BitSet<TabFlag> TabFlags;
+    typedef bitset<tab_flag> tab_flags;
 
-    TabBar (View* parent, Rect const&);
-    bool addTab (string const&, Icon* = nullptr, int pos = -1);
-    bool removeTab (int pos);
-    bool moveTab (int pos, int new_pos);
-    bool isMovable () const;
-    bool isDraggable () const;
-    bool isRemovable () const;
-    bool hasCloseButtton () const;
-    bool hasAddButton () const;
-    void setMovable (bool);
-    void setDraggable (bool);
-    void setRemovable (bool);
-    void setTabLabel (int pos, string const& text);
-    void setTabIcon (int pos, Icon*);
-    void setAddButtonFlags ();
-    void setCloseButtonFlags ();
-    void enableCloseButton (bool);
-    void enableAddButton (bool);
+    tab_bar (view* parent, rect const&);
 
-    Signal<void(int)> tabIdxChanged;
-    Signal<void(int)> tabAddded;
-    Signal<void(int)> tabRemoved;
+    bool add_tab (string const&, icon* = nullptr, int pos = -1);
+    bool remove_tab (int pos);
+    bool move_tab (int pos, int new_pos);
+    bool is_movable () const;
+    bool is_draggable () const;
+    bool is_removable () const;
+    bool has_close_buttton () const;
+    bool has_add_button () const;
+    void set_movable (bool);
+    void set_draggable (bool);
+    void set_removable (bool);
+    void set_tab_label (int pos, string const& text);
+    void set_tab_icon (int pos, icon*);
+    void set_add_button_flags ();
+    void set_close_button_flags ();
+    void enable_close_button (bool);
+    void enable_add_button (bool);
+
+public:
+    signal<void(int)> tab_index_changed;
+    signal<void(int)> tab_addded       ;
+    signal<void(int)> tab_removed      ;
+
+protected:
+    virtual void show_event (bool);
+    virtual void paint_event (rect const&);
+    virtual void size_event (point2u);
+    virtual void focus_event (bool);
+
+    virtual void on_create ();
 
 private:
-    TabFlags m_gTabFlags;
-
-    void onCreate ();
-    void onShow (bool);
-    void onPaint ();
-    void onSize (Rect const&);
-    void onGotFocus ();
-    void onFocusKilled ();
+    tab_flags _M_gTabFlags;
 };
 
-class TabView : public SkinnableView
+// =========================================================
+
+class tab_view : public skinnable_view
 {
 public:
-    TabView ();
-    TabView (TabView&&);
-    TabView (TabView const&);
-    TabView& operator = (TabView&&);
-    TabView& operator = (TabView const&);
+    tab_view ();
+    tab_view (tab_view&&);
+    tab_view (tab_view const&);
+    tab_view& operator = (tab_view&&);
+    tab_view& operator = (tab_view const&);
 
-    View* getTabContainer (int);
-    bool    create (View* parent, Rect const&);
+    view* get_tab_container (int) noexcept;
 
-    TabBar* getTabBar () noexcept
-    { return &m_TabBar; }
+    tab_bar* get_tab_bar () noexcept
+    { return &_M_TabBar; }
+
+protected:
+    void on_tab_index_change (int);
+    void on_add_tab (int);
+    void on_remove_tab (int);
 
 private:
-    TabBar m_TabBar;
-    //function<void(int)> m_gSlotTabIdx;
-    //function<void(int)> m_gSlotAddTab;
-    //function<void(int)> m_gSlotRemoveTab;
-
-    void onTabIdxChange (int);
-    void onAddTab (int);
-    void onRemoveTab (int);
+    tab_bar _M_TabBar;
 };
+
+// =========================================================
 
 } } // Ui
 

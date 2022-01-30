@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
 #include <cppual/ui/window.h>
 #include <cppual/ui/manager.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-namespace { namespace Internal {
+namespace { namespace internal {
 
 
 
@@ -32,82 +32,82 @@ namespace { namespace Internal {
 
 // =========================================================
 
-Window::Window (View* parent,
-                Rect const& rect,
+window::window (view* parent,
+                rect const& rect,
                 string_type const& title,
-                Window::image_type*,
+                window::image_type*,
                 u32 screen)
-: View(parent, rect, screen)
+: view(parent, rect, screen)
 {
-    setTitle(title);
+    set_title(title);
 }
 
 
 
-Window::Window ()
-: View()
+window::window ()
+: view()
 {
 }
 
-Window::Window(Window const&)
-: View()
+window::window(window const&)
+: view()
 {
 }
 
-Window::~Window ()
+window::~window ()
 {
 }
 
-Window& Window::operator = (Window const&)
+window& window::operator = (window const&)
 {
     return *this;
 }
 
-bool Window::setIcon(Window::image_type*)
+bool window::set_icon(window::image_type*)
 {
     return false;
 }
 
-void Window::setTitle (string_type const& strTitle)
+void window::set_title (string_type const& strTitle)
 {
     renderable_unsafe ()->setTitle (strTitle);
 }
 
-void Window::setFullscreen(bool bFullscreen)
+void window::set_fullscreen(bool bFullscreen)
 {
     renderable_unsafe ()->setFullscreen (bFullscreen);
 }
 
-void Window::flash(ushort)
+void window::flash(ushort)
 {
 
 }
 
-void Window::showInTaskbar(bool)
+void window::show_in_taskbar(bool)
 {
 }
 
-void Window::restore()
-{
-
-}
-
-void Window::minimize()
+void window::restore()
 {
 
 }
 
-void Window::maximize()
+void window::minimize()
 {
 
 }
 
-void Window::close()
+void window::maximize()
 {
 
 }
 
-Window::string_type Window::title() const
+void window::close()
+{
+
+}
+
+window::string_type window::title() const
 {
     return renderable_unsafe ()->title ();
 }

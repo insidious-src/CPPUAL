@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@
 #include <cppual/types.h>
 #include <cppual/gfx/gl/glbase.h>
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
-class Query : public Object
+class query : public object
 {
 public:
-    enum class Type : unsigned char
+    enum class Type : byte
     {
         Undefined = 0,
         SamplesPassed,
@@ -43,22 +43,22 @@ public:
         Timestamp
     };
 
-    Query                  () noexcept;
-    ~Query                 () noexcept;
-    u64  get64             () noexcept;
-    uint get               () noexcept;
-    bool isReady           () noexcept;
-    void beginQuery        (Type type) noexcept;
-    void beginQueryIndexed (Type type, uint index) noexcept;
-    void endQuery          () noexcept;
-    void queryCounter      (Type type) noexcept;
+    query                    () noexcept;
+    ~query                   () noexcept;
+    u64  get64               () noexcept;
+    uint get                 () noexcept;
+    bool is_ready            () noexcept;
+    void begin_query         (Type type) noexcept;
+    void begin_query_indexed (Type type, uint index) noexcept;
+    void end_query           () noexcept;
+    void query_counter       (Type type) noexcept;
 
-    inline Type queryType () const noexcept
-    { return m_eType; }
+    inline Type query_type () const noexcept
+    { return _M_eType; }
 
 private:
-    Type m_eType    ;
-    bool m_bHasQuery;
+    Type _M_eType    ;
+    bool _M_bHasQuery;
 };
 
 } } } // namespace GL

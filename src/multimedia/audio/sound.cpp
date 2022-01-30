@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,60 +22,61 @@
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/types.h>
 
-
 #include <locale>
+
 #include <sndfile.h>
 
-namespace cppual { namespace Audio {
+namespace cppual { namespace audio {
 
-Sound::Sound (Sound&& gObj) noexcept
-: m_gBuffer       (gObj.m_gBuffer)      ,
-  m_pSndDesc      (gObj.m_pSndDesc)     ,
-  m_nSampleCount  (gObj.m_nSampleCount) ,
-  m_nSampleRate   (gObj.m_nSampleRate)  ,
-  m_nChannelCount (gObj.m_nChannelCount),
-  m_gFlags        (gObj.m_gFlags)
+sound::sound (sound&& gObj) noexcept
+: _M_gBuffer       (gObj._M_gBuffer)      ,
+  _M_pSndDesc      (gObj._M_pSndDesc)     ,
+  _M_nSampleCount  (gObj._M_nSampleCount) ,
+  _M_nSampleRate   (gObj._M_nSampleRate)  ,
+  _M_nChannelCount (gObj._M_nChannelCount),
+  _M_gFlags        (gObj._M_gFlags)
 {
-    gObj.m_nSampleCount = gObj.m_nChannelCount = gObj.m_nSampleRate = 0;
-    gObj.m_pSndDesc     = nullptr;
-    gObj.m_gFlags       = 0;
+    gObj._M_nSampleCount = gObj._M_nChannelCount = gObj._M_nSampleRate = 0;
+    gObj._M_pSndDesc     = nullptr;
+    gObj._M_gFlags       = 0;
 }
 
-Sound& Sound::operator = (Sound&& gObj) noexcept
+sound& sound::operator = (sound&& gObj) noexcept
 {
     if (this == &gObj) return *this;
     return *this;
 }
 
-Sound::~Sound () noexcept
+sound::~sound () noexcept
 {
-    if (m_pSndDesc) ::sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+    if (_M_pSndDesc) ::sf_close (static_cast<SNDFILE*> (_M_pSndDesc));
 }
 
-int Sound::openReadOnly (string const& gFile) noexcept
+int sound::open_read_only (string const& gFile) noexcept
 {
     close ();
 
     ::SF_INFO gInfo { 0, 0, 0, 0, 0, 0 };
-    m_pSndDesc = ::sf_open (gFile.c_str (), 0, &gInfo);
+    _M_pSndDesc = ::sf_open (gFile.c_str (), 0, &gInfo);
 
-    if (m_pSndDesc)
+    if (_M_pSndDesc)
     {
-        if (gInfo.channels > MaxChannels)
+        if (gInfo.channels > max_channels)
         {
-            ::sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+            ::sf_close (static_cast<SNDFILE*> (_M_pSndDesc));
             return false;
         }
 
-        m_nChannelCount = gInfo.channels;
-        m_nSampleCount  = gInfo.frames;
-        m_nSampleRate   = gInfo.samplerate;
+        _M_nChannelCount = gInfo.channels;
+        _M_nSampleCount  = gInfo.frames;
+        _M_nSampleRate   = gInfo.samplerate;
 
-        if (gInfo.seekable) m_gFlags += Sound::Read | Sound::Seekable;
-        else m_gFlags += Sound::Read;
+        if (gInfo.seekable) _M_gFlags += flag::seekable;
+
+        _M_gFlags += flag::read;
 
         // using format to save an int copy
-        if (!(gInfo.format = onOpen ()))
+        if (!(gInfo.format = on_open ()))
         {
             close ();
             return gInfo.format;
@@ -87,55 +88,55 @@ int Sound::openReadOnly (string const& gFile) noexcept
     return false;
 }
 
-int Sound::openReadOnly (cvoid*, size_type) noexcept
+int sound::open_read_only (cvoid*, size_type) noexcept
 {
     close ();
-    m_gFlags = Sound::Read;
+    _M_gFlags = flag::read;
     return false;
 }
 
-int Sound::openWritable (string_type const&, int, int) noexcept
+int sound::open_writable (string_type const&, int, int) noexcept
 {
     close ();
-    m_gFlags = Sound::Read | Sound::Write;
+    _M_gFlags = flags::value_type(flag::read) | flags::value_type(flag::write);
 
-    onOpen ();
+    on_open ();
     return false;
 }
 
-bool Sound::save (string_type const& gFileName) noexcept
+bool sound::save (string_type const& gFileName) noexcept
 {
-    if (m_pSndDesc)
+    if (_M_pSndDesc)
     {
-        onSave (gFileName);
+        on_save (gFileName);
         return true;
     }
 
     return false;
 }
 
-void Sound::close () noexcept
+void sound::close () noexcept
 {
-    if (m_pSndDesc)
+    if (_M_pSndDesc)
     {
-        onClose ();
-        ::sf_close (static_cast<SNDFILE*> (m_pSndDesc));
+        on_close ();
+        ::sf_close (static_cast<SNDFILE*> (_M_pSndDesc));
 
-        m_nSampleCount = m_nSampleRate = m_nChannelCount = 0;
-        m_gFlags = 0;
+        _M_nSampleCount = _M_nSampleRate = _M_nChannelCount = 0;
+        _M_gFlags = 0;
     }
 }
 
-void Sound::seek (std::chrono::seconds) noexcept
+void sound::seek (std::chrono::seconds) noexcept
 {
-    if (m_gFlags.test (Sound::Seekable))
+    if (_M_gFlags.test (flag::seekable))
     {
     }
 }
 
-string Sound::attribute (Attribute eType) const noexcept
+sound::string_type sound::attribute (attribute_type eType) const noexcept
 {
-    return ::sf_get_string (static_cast<::SNDFILE*> (m_pSndDesc), eType);
+    return ::sf_get_string (static_cast<::SNDFILE*> (_M_pSndDesc), eType);
 }
 
 

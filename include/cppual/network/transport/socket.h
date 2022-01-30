@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,14 +26,13 @@
 #include <cppual/types.h>
 #include <cppual/string.h>
 #include <cppual/noncopyable.h>
+#include <cppual/network/protocols/protocol.h>
 
-#include <vector>
+namespace cppual { namespace network {
 
-namespace cppual { namespace Network {
+// ====================================================
 
-typedef int socket_id;
-
-enum class SocketType : bool
+enum class SocketType : byte
 {
     Tcp,
     Udp
@@ -41,41 +40,44 @@ enum class SocketType : bool
 
 // ====================================================
 
-class TransportSocket : public NonCopyable
+class TransportSocket : public Protocol
 {
 public:
-    typedef socket_id const const_id;
-    constexpr static socket_id nullSocket = -1;
+    typedef int             socket_id;
+    typedef socket_id const const_id ;
+
+    constexpr static socket_id null_socket = -1;
 
     TransportSocket () = delete;
     TransportSocket (SocketType) noexcept;
     TransportSocket (TransportSocket&&) noexcept;
     TransportSocket& operator = (TransportSocket&&) noexcept;
 
-    void setBlocking (bool) noexcept;
+    void set_blocking (bool) noexcept;
 
     enum
     {
         AnyPort = 0
     };
 
-    inline ~TransportSocket ()            noexcept { close ();                      }
-    inline socket_id  id ()         const noexcept { return m_nId;                  }
-    inline SocketType type ()       const noexcept { return m_eProtocol;            }
-    inline bool       isValid ()    const noexcept { return m_nId != nullSocket;    }
-    inline bool       isBlocking () const noexcept { return m_bIsBlocking;          }
+    inline ~TransportSocket ()             noexcept { close ();                     }
+    inline socket_id  id ()          const noexcept { return _M_nId;                }
+    inline SocketType type ()        const noexcept { return _M_eProtocol;          }
+    inline bool       valid ()       const noexcept { return _M_nId != null_socket; }
+    inline bool       is_blocking () const noexcept { return _M_bIsBlocking;        }
 
 protected:
     static socket_id create (SocketType) noexcept;
-    void replaceFromId (socket_id) noexcept;
+    void replace_from_id (socket_id) noexcept;
     void close () noexcept;
 
 private:
-    socket_id  m_nId;
-    SocketType m_eProtocol;
-    bool       m_bIsBlocking;
+    void init_socket () noexcept;
 
-    void initSocket () noexcept;
+private:
+    socket_id  _M_nId;
+    SocketType _M_eProtocol;
+    bool       _M_bIsBlocking;
 };
 
 } } // namespace Network

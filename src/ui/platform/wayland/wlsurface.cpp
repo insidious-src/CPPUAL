@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,35 +26,35 @@
 
 #include <wayland-client-protocol.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class WlSurface final : public IPlatformWindow
+class WlSurface final : public platform_wnd_interface
 {
 public:
     WlSurface  () = delete;
     ~WlSurface () noexcept { }
 
-    WlSurface (Rect const& gRect, u32 nScreen, IDisplay* pDisplay) noexcept
-    : IPlatformWindow(pDisplay, nullptr),
-      m_gRect        (gRect),
-      m_uScreen      (nScreen)
+    WlSurface (rect const& gRect, u32 nScreen, shared_display pDisplay) noexcept
+    : platform_wnd_interface(pDisplay, nullptr),
+      _M_gRect        (gRect),
+      _M_uScreen      (nScreen)
     { }
 
     bool isMapped    () const noexcept { return false; }
     void setOwner    (const_pointer) noexcept { }
     void move        (point2i) noexcept { }
-    void setGeometry (Rect const&) noexcept { }
+    void setGeometry (rect const&) noexcept { }
     void raise () noexcept { }
     void lower () noexcept { }
     void map   () noexcept { }
     void unmap () noexcept { }
 
     weak_window owner    () const noexcept { return weak_window(); }
-    Rect        geometry () const noexcept { return m_gRect      ; }
-    u32         screen   () const noexcept { return m_uScreen    ; }
+    rect        geometry () const noexcept { return _M_gRect      ; }
+    u32         screen   () const noexcept { return _M_uScreen    ; }
 
-    WindowFlags flags () const { return WindowFlags (); }
-    void setFlags (WindowFlags) { }
+    window_flags flags () const { return window_flags (); }
+    void setFlags (window_flags) { }
 
     string_type title () const { return string_type (); }
     void setTitle (string_type const&) { }
@@ -75,8 +75,8 @@ public:
     void flash (uint) { }
 
 private:
-    Rect m_gRect;
-    u32  m_uScreen;
+    rect _M_gRect;
+    u32  _M_uScreen;
 };
 
 } } // namespace Ui

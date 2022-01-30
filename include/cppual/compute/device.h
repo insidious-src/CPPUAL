@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 #include <memory>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
 // =========================================================
 
@@ -42,35 +42,35 @@ class bad_partition_count : public device_exception   { };
 
 // =========================================================
 
-class Device
+class device
 {
 public:
-    typedef std::shared_ptr<IDevice> shared_device;
+    typedef std::shared_ptr<device_interface> shared_device;
     typedef string                   string_type  ;
     typedef std::size_t              size_type    ;
 
-    enum class Info : byte
+    enum class info_type : byte
     {
-        Name,
-        Board,
-        Vendor,
-        Profile,
-        Version
+        name,
+        board,
+        vendor,
+        profile,
+        version
     };
 
     static size_type count () noexcept;
-    static Device&   host  () noexcept;
+    static device&   host  () noexcept;
 
     bool      available    (string_type const& feature);
-    string    info         (Info);
+    string    info         (info_type nfo);
     size_type cache        () const;
     size_type cacheLine    () const;
     size_type localMemory  () const;
     size_type globalMemory () const;
 
-    DeviceType type     () const noexcept;
+    device_category type     () const noexcept;
     bool       valid    () const noexcept;
-    Backend    backend  () const noexcept;
+    backend_type    backend  () const noexcept;
 
 private:
     shared_device _M_devPtr;

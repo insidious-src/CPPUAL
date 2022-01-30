@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,30 +25,30 @@
 
 #include <cppual/decl.h>
 
-namespace cppual { namespace Audio {
+namespace cppual { namespace audio {
 
-enum class ObjectType : byte
+enum class object_type : byte
 {
-    Buffer,
-    Source
+    buffer,
+    source
 };
 
-enum class EmitType : byte
+enum class emit_type : byte
 {
-    Undetermined,
-    Static,
-    Streaming
+    undetermined,
+    statically,
+    streaming
 };
 
-enum class DistanceModel : byte
+enum class distance_type : byte
 {
-    Plain,
-    InverseDistance,
-    InverseDistanceClamped,
-    LinearDistance,
-    LinearDistanceClamped,
-    ExponentDistance,
-    ExponentDistanceClamped
+    plain,
+    inverse_distance,
+    inverse_distance_clamped,
+    linear_distance,
+    linear_distance_clamped,
+    exponent_distance,
+    exponent_distance_clamped
 };
 
 } } // namespace Audio

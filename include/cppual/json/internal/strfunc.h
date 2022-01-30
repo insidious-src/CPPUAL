@@ -18,7 +18,7 @@
 #include "../stream.h"
 #include <cwchar>
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 //! Custom strlen() which works on different character types.

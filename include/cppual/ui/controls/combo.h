@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,58 +26,65 @@
 #include <cppual/ui/cmd.h>
 
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class ComboBox : public SkinnableView
+// =========================================================
+
+class combo_box : public skinnable_view
 {
 public:
-    ComboBox ();
-    ComboBox (ComboBox&&);
-    ComboBox (ComboBox const&);
-    ComboBox& operator = (ComboBox&&);
-    ComboBox& operator = (ComboBox const&);
+    typedef gfx::image_interface image_type  ;
+    typedef command              command_type;
 
-    uint getItemCount ();
-    int  getCurItemIdx ();
-    bool addItem (Command*, int pos = -1);
-    bool removeItem (int pos);
-    bool isEditable () const;
-    void setEditable (bool);
-    void setTextLimit (size_type max_chars_shown);
-    void setDropListWidth (int);
-    void setItemIcon (int, Icon*);
-    void setItemText (int, string const&);
-    void setItemDesc (int, string const&);
-    void setItemHeight (int);
-    void showDropList ();
-    void hideDropList ();
+    combo_box ();
+    combo_box (combo_box&&);
+    combo_box (combo_box const&);
+    combo_box& operator = (combo_box&&);
+    combo_box& operator = (combo_box const&);
+
+    uint item_count ();
+    int  current_index ();
+    bool add_item (command_type*, int pos = -1);
+    bool remove_item (int pos);
+    bool is_editable () const;
+    void set_editable (bool);
+    void set_text_limit (size_type max_chars_shown);
+    void set_drop_list_width (int);
+    void set_item_icon (int, image_type*);
+    void set_item_text (int, string const&);
+    void set_item_desc (int, string const&);
+    void set_item_height (int);
+    void show_drop_list ();
+    void hide_drop_list ();
     void clear ();
 
-    bool addItem (string const&   text,
-                  string const&   desc,
-                  Icon*           icon = nullptr,
-                  int             pos  = -1);
+    bool add_item (string_type const& text,
+                   string_type const& desc,
+                   image_type*        icon = nullptr,
+                   int                pos  = -1);
 
-    Signal<void(int)>  itemIdxChanged;
-    Signal<void(int)>  itemAdded;
-    Signal<void(int)>  itemRemoved;
-    Signal<void(int)>  itemTextChanged;
-    Signal<void(int)>  itemIconChanged;
-    Signal<void(int)>  itemDescChanged;
-    Signal<void()>     doubleClicked;
-    Signal<void(bool)> droppedDown;
+public:
+    signal<void(int)>  index_changed    ;
+    signal<void(int)>  item_added       ;
+    signal<void(int)>  item_removed     ;
+    signal<void(int)>  item_text_changed;
+    signal<void(int)>  item_icon_changed;
+    signal<void(int)>  item_desc_changed;
+    signal<void()>     double_clicked   ;
+    signal<void(bool)> dropped_down     ;
 
-private:
-    void onCreate      ();
-    void onShow        (bool);
-    void onPaint       ();
-    void onEnable      (bool);
-    void onSize        (Rect const&);
-    void onGotFocus    ();
-    void onFocusKilled ();
-    void onKeyPress    (int);
-    void onKeyRelease  (int);
+protected:
+    virtual void show_event         (bool);
+    virtual void paint_event        (rect const&);
+    virtual void size_event         (point2u);
+    virtual void focus_event        (bool);
+    virtual void key_pressed_event  (event_type::key_data const&);
+    virtual void key_released_event (event_type::key_data const&);
+
+    virtual void on_enable (bool);
 };
+
+// =========================================================
 
 } } // Ui
 

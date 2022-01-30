@@ -9,7 +9,7 @@
 #include <iostream>
 #include <cassert>
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 // ======================================================================
 
@@ -939,7 +939,7 @@ ReferenceBase<Parser::string_type>::ReferenceBase (TemplateArray* owner,
     connections();
 }
 
-void cppual::Json::ReferenceBase<Parser::string_type>::connections()
+void cppual::json::ReferenceBase<Parser::string_type>::connections()
 {
     if (_M_owner.type() == Parser::Type::Object)
     {
@@ -951,7 +951,7 @@ void cppual::Json::ReferenceBase<Parser::string_type>::connections()
     }
 }
 
-void cppual::Json::ReferenceBase<Parser::string_type>::disconnections()
+void cppual::json::ReferenceBase<Parser::string_type>::disconnections()
 {
     if (_M_owner.type() == Parser::Type::Object)
     {
@@ -963,7 +963,7 @@ void cppual::Json::ReferenceBase<Parser::string_type>::disconnections()
     }
 }
 
-void cppual::Json::ReferenceBase<Parser::string_type>::assign()
+void cppual::json::ReferenceBase<Parser::string_type>::assign()
 {
     if(_M_fn != nullptr) _M_fn(this);
     changed();

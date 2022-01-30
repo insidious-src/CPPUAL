@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 
 #include <vector>
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
 enum class UsageType : unsigned char
 {
@@ -64,11 +64,11 @@ struct GLMapFlag final
 
 // ====================================================
 
-typedef BitSet<GLMapFlag::Type> GLMapFlags;
+typedef bitset<GLMapFlag::Type> GLMapFlags;
 
 // ====================================================
 
-class VertexBuffer final : public BufferObject
+class vertex_buffer final : public buffer_object
 {
 public:
     typedef byte              value_type;
@@ -76,30 +76,30 @@ public:
     typedef byte*             pointer;
     typedef byte const*       const_pointer;
 
-    VertexBuffer () noexcept;
-    VertexBuffer (size_type size) noexcept;
-    void* mapBufferToMemory (AccessMode access) noexcept;
-    void* mapSubBufferToMemory (ptrdiff offset, ptrdiff length, GLMapFlags flags) noexcept;
-    void  unmapBuffer () noexcept;
+    vertex_buffer () noexcept;
+    vertex_buffer (size_type size) noexcept;
+    void* map_buffer_to_memory (access_mode access) noexcept;
+    void* map_subbuffer_to_memory (difference_type offset, difference_type length, GLMapFlags flags) noexcept;
+    void  unmap_buffer () noexcept;
     void  bind (BufferType type) noexcept;
     void  upload (UsageType usage_hint);
-    void  addData (pointer data, size_type data_size);
+    void  add_data (pointer data, size_type data_size);
 
     inline const_pointer getDataPointer () const noexcept
-    { return m_bIsUploaded ? &m_gData[0] : nullptr; }
+    { return _M_bIsUploaded ? &_M_gData[0] : nullptr; }
 
 private:
-    vector_type m_gData;
-    BufferType  m_eType;
-    bool        m_bIsUploaded;
+    vector_type _M_gData;
+    BufferType  _M_eType;
+    bool        _M_bIsUploaded;
 };
 
 // ====================================================
 
-class VertexArray final : public Object
+class vertex_array final : public object
 {
 public:
-    VertexArray () noexcept;
+    vertex_array () noexcept;
 };
 
 } } } // namespace GL

@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-namespace cppual { namespace Ui { namespace x {
+namespace cppual { namespace ui { namespace xcb {
 
 class ScreenForwardIterator
 {
@@ -43,56 +43,56 @@ public:
     typedef ::xcb_screen_iterator_t const& const_reference  ;
     typedef std::forward_iterator_tag      iterator_category;
 
-    constexpr reference operator *  () { return  m_gPos; }
-    constexpr pointer   operator -> () { return &m_gPos; }
+    constexpr reference operator *  () { return  _M_gPos; }
+    constexpr pointer   operator -> () { return &_M_gPos; }
 
     constexpr ScreenForwardIterator () noexcept
-    : m_gPos { }
+    : _M_gPos { }
     { }
 
     ScreenForwardIterator (const_handle& handle) noexcept
-    : m_gPos (::xcb_setup_roots_iterator (&handle))
+    : _M_gPos (::xcb_setup_roots_iterator (&handle))
     { }
 
     self_type& operator ++ ()
     {
-        ::xcb_screen_next (&m_gPos);
+        ::xcb_screen_next (&_M_gPos);
         return *this;
     }
 
     self_type operator ++ (int)
     {
         self_type tmp (*this);
-        ::xcb_screen_next (&m_gPos);
+        ::xcb_screen_next (&_M_gPos);
         return tmp;
     }
 
     constexpr reference pos () noexcept
-    { return m_gPos; }
+    { return _M_gPos; }
 
     constexpr const_reference pos () const noexcept
-    { return m_gPos; }
+    { return _M_gPos; }
 
     constexpr bool operator == (self_type const& other) const
-    { return m_gPos.index == other.m_gPos.index; }
+    { return _M_gPos.index == other._M_gPos.index; }
 
     constexpr bool operator != (self_type const& other) const
     { return !(*this == other); }
 
     constexpr bool operator > (self_type const& other) const
-    { return m_gPos.index > other.m_gPos.index; }
+    { return _M_gPos.index > other._M_gPos.index; }
 
     constexpr bool operator >= (self_type const& other) const
-    { return m_gPos.index >= other.m_gPos.index; }
+    { return _M_gPos.index >= other._M_gPos.index; }
 
     constexpr bool operator < (self_type const& other) const
-    { return m_gPos.index < other.m_gPos.index; }
+    { return _M_gPos.index < other._M_gPos.index; }
 
     constexpr bool operator <= (self_type const& other) const
-    { return m_gPos.index <= other.m_gPos.index; }
+    { return _M_gPos.index <= other._M_gPos.index; }
 
 private:
-    value_type m_gPos;
+    value_type _M_gPos;
 };
 
 } } } // namespace x

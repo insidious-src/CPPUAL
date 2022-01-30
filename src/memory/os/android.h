@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,12 @@
 
 #include <cppual/decl.h>
 
-#ifdef OS_ANDROID
+#ifdef OS_STD_UNIX
+#    include <unistd.h>
+#    include <sys/mman.h>
+#    include <sys/resource.h>
+//#    include <sys/types.h>
+//#    include <sys/param.h>
 #endif
 
 #endif // __cplusplus

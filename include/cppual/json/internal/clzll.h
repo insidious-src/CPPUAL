@@ -26,7 +26,7 @@
 #endif
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 inline uint32_t clzll(uint64_t x) {

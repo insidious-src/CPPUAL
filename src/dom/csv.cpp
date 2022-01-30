@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 namespace cppual {
 
-bool CSVParser::append(string_type const& strFilePath)
+bool csv_parser::append(string_type const& strFilePath)
 {
     std::fstream file (strFilePath.c_str());
     string_type  line;
@@ -37,7 +37,7 @@ bool CSVParser::append(string_type const& strFilePath)
     auto lineCount = std::count (std::istreambuf_iterator<char> (file),
                                  std::istreambuf_iterator<char> (), '\n');
 
-    m_data.reserve (static_cast<size_type> (lineCount) + 1);
+    _M_data.reserve (static_cast<size_type> (lineCount) + 1);
     file.seekg (0);
 
     // read each line
@@ -74,7 +74,7 @@ bool CSVParser::append(string_type const& strFilePath)
             record.push_back (field);
         }
 
-        m_data.push_back (std::move(record));
+        _M_data.push_back (std::move(record));
     }
 
     return true;

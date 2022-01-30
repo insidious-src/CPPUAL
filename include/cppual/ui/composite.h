@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,14 @@
 
 #include <cppual/decl.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-void useInternalCompositor (bool) noexcept;
-bool isUsingInternalCompositor () noexcept;
+// ====================================================
+
+void use_internal_compositor  (bool) noexcept;
+bool is_using_internal_compositor () noexcept;
+
+// ====================================================
 
 } } // namespace Ui
 

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,46 +27,52 @@
 #include <cppual/gfx/drawable/image.h>
 #include <cppual/string.h>
 
-using cppual::Graphics::Icon;
+namespace cppual { namespace ui {
 
-namespace cppual { namespace Ui {
+// ====================================================
 
-class PopupMenu;
+class popup_menu;
 
-class Command
+// ====================================================
+
+class command
 {
 public:
-    inline Icon* icon () const noexcept { return const_cast<Icon*> (&m_gIcon); }
-    inline uint  id () const noexcept { return m_uId; }
-    inline uint  hotkey () const noexcept { return m_uHotkey; }
-    inline bool  hasMenu () const noexcept { return m_pMenu; }
-    inline bool  hasSideMenu () const noexcept { return m_bSideMenu; }
+    typedef gfx::icon icon_type;
 
-    inline bool setIcon (string const& gPath) noexcept
-    { return m_gIcon.load (gPath); }
+    inline icon_type* icon () const noexcept { return const_cast<icon_type*> (&_M_gIcon); }
+    inline uint       id () const noexcept { return _M_uId; }
+    inline uint       hotkey () const noexcept { return _M_uHotkey; }
+    inline bool       has_menu () const noexcept { return _M_pMenu; }
+    inline bool       has_side_menu () const noexcept { return _M_bSideMenu; }
 
-    inline void setText (string const& gText) noexcept
-    { m_gText = gText; }
+    inline bool set_icon (string const& gPath) noexcept
+    { return _M_gIcon.load (gPath); }
 
-    inline void setMenu (PopupMenu* pMenu) noexcept
-    { if (pMenu) m_pMenu = pMenu; }
+    inline void set_text (string const& gText) noexcept
+    { _M_gText = gText; }
 
-    inline void setMenuSideMode (bool bSide) noexcept
-    { if (m_pMenu) m_bSideMenu = bSide; }
+    inline void set_menu (popup_menu* pMenu) noexcept
+    { if (pMenu) _M_pMenu = pMenu; }
+
+    inline void set_menu_side_mode (bool bSide) noexcept
+    { if (_M_pMenu) _M_bSideMenu = bSide; }
 
     inline string const& text () const noexcept
-    { return m_gText; }
+    { return _M_gText; }
 
-    Signal<void(bool)> triggered;
+    signal<void(bool)> triggered;
 
 private:
-    Icon       m_gIcon;
-    string     m_gText;
-    uint       m_uId, m_uHotkey;
-    PopupMenu* m_pMenu;
-    bool       m_bSideMenu;
+    icon_type   _M_gIcon;
+    string      _M_gText;
+    uint        _M_uId, _M_uHotkey;
+    popup_menu* _M_pMenu;
+    bool        _M_bSideMenu;
 
 };
+
+// ====================================================
 
 } } // namespace Ui
 

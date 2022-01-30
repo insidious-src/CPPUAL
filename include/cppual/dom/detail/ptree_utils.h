@@ -25,10 +25,10 @@ namespace boost { namespace property_tree { namespace detail
     struct less_nocase
     {
         typedef typename T::value_type Ch;
-        std::locale m_locale;
+        std::locale _M_locale;
         inline bool operator()(Ch c1, Ch c2) const
         {
-            return std::toupper(c1, m_locale) < std::toupper(c2, m_locale);
+            return std::toupper(c1, _M_locale) < std::toupper(c2, _M_locale);
         }
         inline bool operator()(const T &t1, const T &t2) const
         {

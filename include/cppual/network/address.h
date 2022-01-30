@@ -3,16 +3,16 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
- * This program is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it &&/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 3 of the License, ||
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY || FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -28,7 +28,7 @@
 
 #include <cstring>
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
 class Address
 {
@@ -39,39 +39,39 @@ private:
 public:
     typedef string string_type;
 
-    Address () noexcept = default;
+    constexpr Address () noexcept = default;
     Address (string_type const&) noexcept;
     Address (u8 byte1, u8 byte2, u8 byte3, u8 byte4) noexcept;
-    string_type toString () const noexcept;
-    bool        isValid  () const noexcept;
+    string_type to_string () const noexcept;
+    bool        valid () const noexcept;
 
-    static Address localAddress  () noexcept;
-    static Address publicAddress () noexcept;
+    static Address local_address  () noexcept;
+    static Address public_address () noexcept;
 
-    bool isV4 () const noexcept
-    { return std::memcmp (&m_uBytes[0], &v4_mapped_prefix[0], 12) == 0; }
+    bool is_v4 () const noexcept
+    { return std::memcmp (&_M_uBytes[0], &v4_mapped_prefix[0], 12) == 0; }
 
-    bool isMulticast () const noexcept
-    { return isV4 () ? m_uBytes[12] == 224 : m_uBytes[0] == 0xff; }
+    bool is_multicast () const noexcept
+    { return is_v4 () ? _M_uBytes[12] == 224 : _M_uBytes[0] == 0xff; }
 
-    bool isLoopback () const noexcept
+    bool is_loopback () const noexcept
     {
-        return isV4 () ? m_uBytes[12] == 127 :
-                         m_uBytes[ 0] == 0 and m_uBytes[ 1] == 0 and
-                         m_uBytes[ 2] == 0 and m_uBytes[ 3] == 0 and
-                         m_uBytes[ 4] == 0 and m_uBytes[ 5] == 0 and
-                         m_uBytes[ 6] == 0 and m_uBytes[ 7] == 0 and
-                         m_uBytes[ 8] == 0 and m_uBytes[ 9] == 0 and
-                         m_uBytes[10] == 0 and m_uBytes[11] == 0 and
-                         m_uBytes[12] == 0 and m_uBytes[13] == 0 and
-                         m_uBytes[14] == 0 and m_uBytes[15] == 1;
+        return is_v4 () ? _M_uBytes[12] == 127 :
+                          _M_uBytes[ 0] == 0 && _M_uBytes[ 1] == 0 &&
+                          _M_uBytes[ 2] == 0 && _M_uBytes[ 3] == 0 &&
+                          _M_uBytes[ 4] == 0 && _M_uBytes[ 5] == 0 &&
+                          _M_uBytes[ 6] == 0 && _M_uBytes[ 7] == 0 &&
+                          _M_uBytes[ 8] == 0 && _M_uBytes[ 9] == 0 &&
+                          _M_uBytes[10] == 0 && _M_uBytes[11] == 0 &&
+                          _M_uBytes[12] == 0 && _M_uBytes[13] == 0 &&
+                          _M_uBytes[14] == 0 && _M_uBytes[15] == 1;
     }
 
-    bool isBroadcast () const noexcept
+    bool is_broadcast () const noexcept
     {
-        return isV4 () and
-               m_uBytes[12] == 0xff and m_uBytes[13] == 0xff and
-               m_uBytes[14] == 0xff and m_uBytes[15] == 0xff;
+        return is_v4 () &&
+               _M_uBytes[12] == 0xff && _M_uBytes[13] == 0xff &&
+               _M_uBytes[14] == 0xff && _M_uBytes[15] == 0xff;
     }
 
     friend bool operator != (Address const&, Address const&) noexcept;
@@ -82,7 +82,7 @@ public:
     friend bool operator >= (Address const&, Address const&) noexcept;
 
 private:
-    u8 m_uBytes[16];
+    byte _M_uBytes[16] { };
 };
 
 std::istream& operator >> (std::istream& stream, Address& address);
@@ -90,82 +90,80 @@ std::ostream& operator << (std::ostream& stream, Address const& address);
 
 inline bool operator != (Address const& gObj1, Address const& gObj2) noexcept
 {
-    return gObj1.isV4 () != gObj2.isV4 () ?
+    return gObj1.is_v4 () != gObj2.is_v4 () ?
                                 true :
-                                gObj1.m_uBytes[ 0] != gObj2.m_uBytes[ 0] or
-                                gObj1.m_uBytes[ 1] != gObj2.m_uBytes[ 1] or
-                                gObj1.m_uBytes[ 2] != gObj2.m_uBytes[ 2] or
-                                gObj1.m_uBytes[ 3] != gObj2.m_uBytes[ 3] or
-                                gObj1.m_uBytes[ 4] != gObj2.m_uBytes[ 4] or
-                                gObj1.m_uBytes[ 5] != gObj2.m_uBytes[ 5] or
-                                gObj1.m_uBytes[ 6] != gObj2.m_uBytes[ 6] or
-                                gObj1.m_uBytes[ 7] != gObj2.m_uBytes[ 7] or
-                                gObj1.m_uBytes[ 8] != gObj2.m_uBytes[ 8] or
-                                gObj1.m_uBytes[ 9] != gObj2.m_uBytes[ 9] or
-                                gObj1.m_uBytes[10] != gObj2.m_uBytes[10] or
-                                gObj1.m_uBytes[11] != gObj2.m_uBytes[11] or
-                                gObj1.m_uBytes[12] != gObj2.m_uBytes[12] or
-                                gObj1.m_uBytes[13] != gObj2.m_uBytes[13] or
-                                gObj1.m_uBytes[14] != gObj2.m_uBytes[14] or
-                                gObj1.m_uBytes[15] != gObj2.m_uBytes[15];
+                                gObj1._M_uBytes[ 0] != gObj2._M_uBytes[ 0] ||
+                                gObj1._M_uBytes[ 1] != gObj2._M_uBytes[ 1] ||
+                                gObj1._M_uBytes[ 2] != gObj2._M_uBytes[ 2] ||
+                                gObj1._M_uBytes[ 3] != gObj2._M_uBytes[ 3] ||
+                                gObj1._M_uBytes[ 4] != gObj2._M_uBytes[ 4] ||
+                                gObj1._M_uBytes[ 5] != gObj2._M_uBytes[ 5] ||
+                                gObj1._M_uBytes[ 6] != gObj2._M_uBytes[ 6] ||
+                                gObj1._M_uBytes[ 7] != gObj2._M_uBytes[ 7] ||
+                                gObj1._M_uBytes[ 8] != gObj2._M_uBytes[ 8] ||
+                                gObj1._M_uBytes[ 9] != gObj2._M_uBytes[ 9] ||
+                                gObj1._M_uBytes[10] != gObj2._M_uBytes[10] ||
+                                gObj1._M_uBytes[11] != gObj2._M_uBytes[11] ||
+                                gObj1._M_uBytes[12] != gObj2._M_uBytes[12] ||
+                                gObj1._M_uBytes[13] != gObj2._M_uBytes[13] ||
+                                gObj1._M_uBytes[14] != gObj2._M_uBytes[14] ||
+                                gObj1._M_uBytes[15] != gObj2._M_uBytes[15];
 }
 
 inline bool operator < (Address const& gObj1, Address const& gObj2) noexcept
 {
-    return gObj1.isV4 () != gObj2.isV4 () ?
+    return gObj1.is_v4 () != gObj2.is_v4 () ?
                                 false :
-                                gObj1.m_uBytes[15] < gObj2.m_uBytes[15] or
-                                gObj1.m_uBytes[14] < gObj2.m_uBytes[14] or
-                                gObj1.m_uBytes[13] < gObj2.m_uBytes[13] or
-                                gObj1.m_uBytes[12] < gObj2.m_uBytes[12] or
-                                gObj1.m_uBytes[11] < gObj2.m_uBytes[11] or
-                                gObj1.m_uBytes[10] < gObj2.m_uBytes[10] or
-                                gObj1.m_uBytes[ 9] < gObj2.m_uBytes[ 9] or
-                                gObj1.m_uBytes[ 8] < gObj2.m_uBytes[ 8] or
-                                gObj1.m_uBytes[ 7] < gObj2.m_uBytes[ 7] or
-                                gObj1.m_uBytes[ 6] < gObj2.m_uBytes[ 6] or
-                                gObj1.m_uBytes[ 5] < gObj2.m_uBytes[ 5] or
-                                gObj1.m_uBytes[ 4] < gObj2.m_uBytes[ 4] or
-                                gObj1.m_uBytes[ 3] < gObj2.m_uBytes[ 3] or
-                                gObj1.m_uBytes[ 2] < gObj2.m_uBytes[ 2] or
-                                gObj1.m_uBytes[ 1] < gObj2.m_uBytes[ 1] or
-                                gObj1.m_uBytes[ 0] < gObj2.m_uBytes[ 0];
+                                gObj1._M_uBytes[15] < gObj2._M_uBytes[15] ||
+                                gObj1._M_uBytes[14] < gObj2._M_uBytes[14] ||
+                                gObj1._M_uBytes[13] < gObj2._M_uBytes[13] ||
+                                gObj1._M_uBytes[12] < gObj2._M_uBytes[12] ||
+                                gObj1._M_uBytes[11] < gObj2._M_uBytes[11] ||
+                                gObj1._M_uBytes[10] < gObj2._M_uBytes[10] ||
+                                gObj1._M_uBytes[ 9] < gObj2._M_uBytes[ 9] ||
+                                gObj1._M_uBytes[ 8] < gObj2._M_uBytes[ 8] ||
+                                gObj1._M_uBytes[ 7] < gObj2._M_uBytes[ 7] ||
+                                gObj1._M_uBytes[ 6] < gObj2._M_uBytes[ 6] ||
+                                gObj1._M_uBytes[ 5] < gObj2._M_uBytes[ 5] ||
+                                gObj1._M_uBytes[ 4] < gObj2._M_uBytes[ 4] ||
+                                gObj1._M_uBytes[ 3] < gObj2._M_uBytes[ 3] ||
+                                gObj1._M_uBytes[ 2] < gObj2._M_uBytes[ 2] ||
+                                gObj1._M_uBytes[ 1] < gObj2._M_uBytes[ 1] ||
+                                gObj1._M_uBytes[ 0] < gObj2._M_uBytes[ 0];
 }
 
 inline bool operator > (Address const& gObj1, Address const& gObj2) noexcept
 {
-    return gObj1.isV4 () != gObj2.isV4 () ?
+    return gObj1.is_v4 () != gObj2.is_v4 () ?
                                 false :
-                                gObj1.m_uBytes[15] > gObj2.m_uBytes[15] or
-                                gObj1.m_uBytes[14] > gObj2.m_uBytes[14] or
-                                gObj1.m_uBytes[13] > gObj2.m_uBytes[13] or
-                                gObj1.m_uBytes[12] > gObj2.m_uBytes[12] or
-                                gObj1.m_uBytes[11] > gObj2.m_uBytes[11] or
-                                gObj1.m_uBytes[10] > gObj2.m_uBytes[10] or
-                                gObj1.m_uBytes[ 9] > gObj2.m_uBytes[ 9] or
-                                gObj1.m_uBytes[ 8] > gObj2.m_uBytes[ 8] or
-                                gObj1.m_uBytes[ 7] > gObj2.m_uBytes[ 7] or
-                                gObj1.m_uBytes[ 6] > gObj2.m_uBytes[ 6] or
-                                gObj1.m_uBytes[ 5] > gObj2.m_uBytes[ 5] or
-                                gObj1.m_uBytes[ 4] > gObj2.m_uBytes[ 4] or
-                                gObj1.m_uBytes[ 3] > gObj2.m_uBytes[ 3] or
-                                gObj1.m_uBytes[ 2] > gObj2.m_uBytes[ 2] or
-                                gObj1.m_uBytes[ 1] > gObj2.m_uBytes[ 1] or
-                                gObj1.m_uBytes[ 0] > gObj2.m_uBytes[ 0];
+                                gObj1._M_uBytes[15] > gObj2._M_uBytes[15] ||
+                                gObj1._M_uBytes[14] > gObj2._M_uBytes[14] ||
+                                gObj1._M_uBytes[13] > gObj2._M_uBytes[13] ||
+                                gObj1._M_uBytes[12] > gObj2._M_uBytes[12] ||
+                                gObj1._M_uBytes[11] > gObj2._M_uBytes[11] ||
+                                gObj1._M_uBytes[10] > gObj2._M_uBytes[10] ||
+                                gObj1._M_uBytes[ 9] > gObj2._M_uBytes[ 9] ||
+                                gObj1._M_uBytes[ 8] > gObj2._M_uBytes[ 8] ||
+                                gObj1._M_uBytes[ 7] > gObj2._M_uBytes[ 7] ||
+                                gObj1._M_uBytes[ 6] > gObj2._M_uBytes[ 6] ||
+                                gObj1._M_uBytes[ 5] > gObj2._M_uBytes[ 5] ||
+                                gObj1._M_uBytes[ 4] > gObj2._M_uBytes[ 4] ||
+                                gObj1._M_uBytes[ 3] > gObj2._M_uBytes[ 3] ||
+                                gObj1._M_uBytes[ 2] > gObj2._M_uBytes[ 2] ||
+                                gObj1._M_uBytes[ 1] > gObj2._M_uBytes[ 1] ||
+                                gObj1._M_uBytes[ 0] > gObj2._M_uBytes[ 0];
 }
 
 inline bool operator <= (Address const& gObj1, Address const& gObj2) noexcept
-{ return gObj1 < gObj2 or gObj1 == gObj1; }
+{ return gObj1 < gObj2 || gObj1 == gObj1; }
 
 inline bool operator == (Address const& gObj1, Address const& gObj2) noexcept
 { return !(gObj1 != gObj2); }
 
 inline bool operator >= (Address const& gObj1, Address const& gObj2) noexcept
-{ return gObj1 > gObj2 or gObj1 == gObj1; }
+{ return gObj1 > gObj2 || gObj1 == gObj1; }
 
 // =========================================================
-
-static_assert (std::is_pod<Address>::value, "Address must be a POD");
 
 } } // namespace Network
 

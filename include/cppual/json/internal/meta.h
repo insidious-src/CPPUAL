@@ -32,7 +32,7 @@ RAPIDJSON_DIAG_OFF(6334)
 #endif
 
 //@cond RAPIDJSON_INTERNAL
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 // Helper to wrap/convert arbitrary types to void, useful for arbitrary type matching

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,14 +33,14 @@ namespace cppual {
 
 bool Xml::open (string const& gFilePath)
 {
-    if (m_gFile.is_open ()) return false;
-    m_gFile.open (gFilePath);
-    return m_gFile.is_open ();
+    if (_M_gFile.is_open ()) return false;
+    _M_gFile.open (gFilePath);
+    return _M_gFile.is_open ();
 }
 
 bool Xml::open (fstream const& /*gStream*/)
 {
-    if (!m_gFile.is_open ())
+    if (!_M_gFile.is_open ())
     {
     }
 
@@ -49,7 +49,7 @@ bool Xml::open (fstream const& /*gStream*/)
 
 string Xml::getAttrib (string const& /*gElem*/, string const& /*gAttrib*/)
 {
-    if (m_gFile.is_open ())
+    if (_M_gFile.is_open ())
     {
     }
 
@@ -60,14 +60,14 @@ void Xml::setAttrib (string const& /*gElem*/,
                      string const& /*gAttrib*/,
                      string const& /*gValue*/)
 {
-    if (m_gFile.is_open ())
+    if (_M_gFile.is_open ())
     {
     }
 }
 
 void Xml::addElement (string const& gElem)
 {
-    if (m_gFile.is_open ())
+    if (_M_gFile.is_open ())
     {
         string gElement;
 
@@ -75,12 +75,12 @@ void Xml::addElement (string const& gElem)
         gElement  = TXT ("<");
         gElement += gElem;
         gElement += TXT (">");
-        m_gFile << gElement;
+        _M_gFile << gElement;
 
         gElement  = TXT ("</");
         gElement += gElem;
         gElement += TXT (">");
-        m_gFile << gElement;
+        _M_gFile << gElement;
     }
 }
 

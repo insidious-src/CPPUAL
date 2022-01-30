@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@
 
 #include <cppual/gfx/matrix.h>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-Matrix2& Matrix2::transpose () noexcept
+matrix2& matrix2::transpose () noexcept
 {
     std::swap ((*this)[1], (*this)[2]);
     return *this;
@@ -31,7 +31,7 @@ Matrix2& Matrix2::transpose () noexcept
 
 // =========================================================
 
-Matrix3& Matrix3::transpose () noexcept
+matrix3& matrix3::transpose () noexcept
 {
     std::swap ((*this)[1], (*this)[3]);
     std::swap ((*this)[2], (*this)[6]);
@@ -42,7 +42,7 @@ Matrix3& Matrix3::transpose () noexcept
 
 // =========================================================
 
-Matrix4& Matrix4::transpose () noexcept
+matrix4& matrix4::transpose () noexcept
 {
     std::swap ((*this)[ 1], (*this)[ 4]);
     std::swap ((*this)[ 2], (*this)[ 8]);

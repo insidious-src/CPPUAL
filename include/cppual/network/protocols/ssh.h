@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,15 +25,15 @@
 
 #include <cppual/network/protocols/protocol.h>
 
-namespace cppual { namespace Network { namespace SecureShell {
+namespace cppual { namespace network { namespace ssh {
 
-class Client : public IProtocol
+class Client : public Protocol
 {
 public:
-    void startSession  (ProtocolContext&, Packet& outgoing_packet);
-    bool readData      (ProtocolContext&, Packet& incoming_packet);
-    byte tryDecode     (ProtocolContext&, Packet& output_packet);
-    byte encodeContent (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    void start_session  (ProtocolContext&, Packet& outgoing_packet);
+    bool read_data      (ProtocolContext&, Packet& incoming_packet);
+    byte try_decode     (ProtocolContext&, Packet& output_packet);
+    byte encode_content (ProtocolContext&, Packet& input_packet, Packet& output_packet);
 };
 
 } } } // SecureShell

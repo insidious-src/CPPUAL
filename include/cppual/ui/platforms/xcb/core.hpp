@@ -14,25 +14,25 @@ class connection_error : public std::runtime_error
   public:
     connection_error(uint8_t code, string const& description)
       : std::runtime_error(to_std_string(description + '(' + to_string(code, description.get_allocator()) + ')'))
-      , m_code(code)
-      , m_description(description)
+      , _M_code(code)
+      , _M_description(description)
     {}
 
     uint8_t
     code(void)
     {
-      return m_code;
+      return _M_code;
     }
 
     string
     description(void)
     {
-      return m_description;
+      return _M_description;
     }
 
   protected:
-    uint8_t m_code;
-    string m_description;
+    uint8_t _M_code;
+    string _M_description;
 };
 
 class core
@@ -40,9 +40,9 @@ class core
   protected:
     using shared_generic_event_ptr = std::shared_ptr<xcb_generic_event_t>;
 
-    int m_screen = 0;
+    int _M_screen = 0;
     // reference counting for ::xcb_connection_t
-    std::shared_ptr<xcb_connection_t> m_c;
+    std::shared_ptr<xcb_connection_t> _M_c;
 
     shared_generic_event_ptr
     dispatch(string const& producer, ::xcb_generic_event_t * event) const
@@ -63,14 +63,14 @@ class core
   public:
     explicit
     core(xcb_connection_t * c)
-      : m_c(std::shared_ptr<xcb_connection_t>(c, [](...) {}))
+      : _M_c(std::shared_ptr<xcb_connection_t>(c, [](...) {}))
     {}
 
     template<typename ... ConnectionParameter>
     explicit
     core(xcb_connection_t * (*Connect)(ConnectionParameter ...),
                ConnectionParameter ... connection_parameter)
-      : m_c(std::shared_ptr<xcb_connection_t>(
+      : _M_c(std::shared_ptr<xcb_connection_t>(
           Connect(connection_parameter ...),
           [&](void *) { disconnect(); }))
     {}
@@ -78,7 +78,7 @@ class core
     // ::xcb_connect (const char *displayname, int *screenp)
     explicit
     core(const string & displayname = "")
-      : core(xcb_connect, displayname.c_str(), &m_screen)
+      : core(xcb_connect, displayname.c_str(), &_M_screen)
     {}
 
     // ::xcb_connect_to_fd (int fd, ::xcb_auth_info_t *auth_info)
@@ -92,7 +92,7 @@ class core
     explicit
     core(const string & display, ::xcb_auth_info_t * auth)
       : core(xcb_connect_to_display_with_auth_info,
-                   display.c_str(), auth, &m_screen)
+                   display.c_str(), auth, &_M_screen)
     {}
 
     virtual
@@ -103,69 +103,69 @@ class core
     ::xcb_connection_t *
     operator*(void) const
     {
-      return m_c.get();
+      return _M_c.get();
     }
 
     virtual
     operator ::xcb_connection_t *(void) const
     {
-      return m_c.get();
+      return _M_c.get();
     }
 
     virtual
     int
     default_screen(void) const
     {
-      return m_screen;
+      return _M_screen;
     }
 
     virtual
     int
     flush(void) const
     {
-      return ::xcb_flush(m_c.get());
+      return ::xcb_flush(_M_c.get());
     }
 
     virtual
     uint32_t
     get_maximum_request_length(void) const
     {
-      return ::xcb_get_maximum_request_length(m_c.get());
+      return ::xcb_get_maximum_request_length(_M_c.get());
     }
 
     virtual
     void
     prefetch_maximum_request_length(void) const
     {
-      ::xcb_prefetch_maximum_request_length(m_c.get());
+      ::xcb_prefetch_maximum_request_length(_M_c.get());
     }
 
     virtual
     shared_generic_event_ptr
     wait_for_event(void) const
     {
-      return dispatch("wait_for_event", ::xcb_wait_for_event(m_c.get()));
+      return dispatch("wait_for_event", ::xcb_wait_for_event(_M_c.get()));
     }
 
     virtual
     shared_generic_event_ptr
     poll_for_event(void) const
     {
-      return shared_generic_event_ptr(xcb_poll_for_event(m_c.get()));
+      return shared_generic_event_ptr(xcb_poll_for_event(_M_c.get()));
     }
 
     virtual
     shared_generic_event_ptr
     poll_for_queued_event(void) const
     {
-      return shared_generic_event_ptr(xcb_poll_for_queued_event(m_c.get()));
+      return shared_generic_event_ptr(xcb_poll_for_queued_event(_M_c.get()));
     }
 
     virtual
     shared_generic_event_ptr
     poll_for_special_event(xcb_special_event_t * se) const
     {
-      return shared_generic_event_ptr(xcb_poll_for_special_event(m_c.get(), se));
+      return shared_generic_event_ptr(xcb_poll_for_special_event(_M_c.get(), se));
     }
 
     // virtual
@@ -180,7 +180,7 @@ class core
     wait_for_special_event(xcb_special_event_t * se) const
     {
       return dispatch("wait_for_special_event",
-                      ::xcb_wait_for_special_event(m_c.get(), se));
+                      ::xcb_wait_for_special_event(_M_c.get(), se));
     }
 
     // virtual
@@ -197,14 +197,14 @@ class core
                              uint32_t eid,
                              uint32_t * stamp) const
     {
-      return ::xcb_register_for_special_xge(m_c.get(), ext, eid, stamp);
+      return ::xcb_register_for_special_xge(_M_c.get(), ext, eid, stamp);
     }
 
     virtual
     void
     unregister_for_special_event(xcb_special_event_t * se) const
     {
-      ::xcb_unregister_for_special_event(m_c.get(), se);
+      ::xcb_unregister_for_special_event(_M_c.get(), se);
     }
 
     virtual
@@ -212,14 +212,14 @@ class core
     request_check(xcb_void_cookie_t cookie) const
     {
       return std::shared_ptr<xcb_generic_error_t>(
-          ::xcb_request_check(m_c.get(), cookie));
+          ::xcb_request_check(_M_c.get(), cookie));
     }
 
     virtual
     void
     discard_reply(unsigned int sequence) const
     {
-      ::xcb_discard_reply(m_c.get(), sequence);
+      ::xcb_discard_reply(_M_c.get(), sequence);
     }
 
     // The result must not be freed.
@@ -228,42 +228,42 @@ class core
     const ::xcb_query_extension_reply_t *
     get_extension_data(xcb_extension_t * ext) const
     {
-      return ::xcb_get_extension_data(m_c.get(), ext);
+      return ::xcb_get_extension_data(_M_c.get(), ext);
     }
 
     virtual
     void
     prefetch_extension_data(xcb_extension_t * ext) const
     {
-      ::xcb_prefetch_extension_data(m_c.get(), ext);
+      ::xcb_prefetch_extension_data(_M_c.get(), ext);
     }
 
     virtual
     const ::xcb_setup_t *
     get_setup(void) const
     {
-      return ::xcb_get_setup(m_c.get());
+      return ::xcb_get_setup(_M_c.get());
     }
 
     virtual
     int
     get_file_descriptor(void) const
     {
-      return ::xcb_get_file_descriptor(m_c.get());
+      return ::xcb_get_file_descriptor(_M_c.get());
     }
 
     virtual
     int
     connection_has_error(void) const
     {
-      return ::xcb_connection_has_error(m_c.get());
+      return ::xcb_connection_has_error(_M_c.get());
     }
 
     virtual
     void
     disconnect(void) const
     {
-      ::xcb_disconnect(m_c.get());
+      ::xcb_disconnect(_M_c.get());
     }
 
     // hostname, display, screen
@@ -288,7 +288,7 @@ class core
     uint32_t
     generate_id(void) const
     {
-      return ::xcb_generate_id(m_c.get());
+      return ::xcb_generate_id(_M_c.get());
     }
 
     ::xcb_screen_t *
@@ -296,7 +296,7 @@ class core
     {
       ::xcb_screen_iterator_t iter;
 
-      iter = ::xcb_setup_roots_iterator(xcb_get_setup(m_c.get()));
+      iter = ::xcb_setup_roots_iterator(xcb_get_setup(_M_c.get()));
       for (; iter.rem; --screen, ::xcb_screen_next(&iter))
         if (screen == 0)
           return iter.data;
@@ -307,7 +307,7 @@ class core
     void
     check_connection(void) const
     {
-      switch (xcb_connection_has_error(m_c.get())) {
+      switch (xcb_connection_has_error(_M_c.get())) {
         case XCB_CONN_ERROR:
           throw(connection_error(
                 XCB_CONN_ERROR, "XCB_CONN_ERROR"));

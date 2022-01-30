@@ -51,8 +51,8 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     
         //! Constructs parse error
         parse_error(const char *wa, void *we)
-            : m_what(wa)
-            , m_where(we)
+            : _M_what(wa)
+            , _M_where(we)
         {
         }
 
@@ -60,7 +60,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Pointer to null terminated description of the error.
         virtual const char *what() const throw()
         {
-            return m_what;
+            return _M_what;
         }
 
         //! Gets pointer to character data where error happened.
@@ -69,13 +69,13 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         template<class Ch>
         Ch *where() const
         {
-            return reinterpret_cast<Ch *>(m_where);
+            return reinterpret_cast<Ch *>(_M_where);
         }
 
     private:  
 
-        const char *m_what;
-        void *m_where;
+        const char *_M_what;
+        void *_M_where;
 
     };
 }}}}
@@ -376,8 +376,8 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         
         //! Constructs empty pool with default allocator functions.
         memory_pool()
-            : m_alloc_func(0)
-            , m_free_func(0)
+            : _M_alloc_func(0)
+            , _M_free_func(0)
         {
             init();
         }
@@ -512,14 +512,14 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! Any nodes or strings allocated from the pool will no longer be valid.
         void clear()
         {
-            while (m_begin != m_static_memory)
+            while (_M_begin != _M_static_memory)
             {
-                char *previous_begin = reinterpret_cast<header *>(align(m_begin))->previous_begin;
-                if (m_free_func)
-                    m_free_func(m_begin);
+                char *previous_begin = reinterpret_cast<header *>(align(_M_begin))->previous_begin;
+                if (_M_free_func)
+                    _M_free_func(_M_begin);
                 else
-                    delete[] m_begin;
-                m_begin = previous_begin;
+                    delete[] _M_begin;
+                _M_begin = previous_begin;
             }
             init();
         }
@@ -539,9 +539,9 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \param ff Free function, or 0 to restore default function
         void set_allocator(boost_ptree_raw_alloc_func *af, boost_ptree_raw_free_func *ff)
         {
-            BOOST_ASSERT(m_begin == m_static_memory && m_ptr == align(m_begin));    // Verify that no memory is allocated yet
-            m_alloc_func = af;
-            m_free_func = ff;
+            BOOST_ASSERT(_M_begin == _M_static_memory && _M_ptr == align(_M_begin));    // Verify that no memory is allocated yet
+            _M_alloc_func = af;
+            _M_free_func = ff;
         }
 
     private:
@@ -553,9 +553,9 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
 
         void init()
         {
-            m_begin = m_static_memory;
-            m_ptr = align(m_begin);
-            m_end = m_static_memory + sizeof(m_static_memory);
+            _M_begin = _M_static_memory;
+            _M_ptr = align(_M_begin);
+            _M_end = _M_static_memory + sizeof(_M_static_memory);
         }
         
         char *align(char *ptr)
@@ -568,9 +568,9 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         {
             // Allocate
             void *memory;   
-            if (m_alloc_func)   // Allocate memory using either user-specified allocation function or global operator new[]
+            if (_M_alloc_func)   // Allocate memory using either user-specified allocation function or global operator new[]
             {
-                memory = m_alloc_func(size);
+                memory = _M_alloc_func(size);
                 BOOST_ASSERT(memory); // Allocator is not allowed to return 0, on failure it must either throw, stop the program or use longjmp
             }
             else
@@ -583,10 +583,10 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         void *allocate_aligned(std::size_t size)
         {
             // Calculate aligned pointer
-            char *result = align(m_ptr);
+            char *result = align(_M_ptr);
 
             // If not enough memory left in current pool, allocate a new pool
-            if (result + size > m_end)
+            if (result + size > _M_end)
             {
                 // Calculate required pool size (may be bigger than BOOST_PROPERTY_TREE_RAPIDXML_DYNAMIC_POOL_SIZE)
                 std::size_t pool_size = BOOST_PROPERTY_TREE_RAPIDXML_DYNAMIC_POOL_SIZE;
@@ -600,26 +600,26 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
                 // Setup new pool in allocated memory
                 char *pool = align(raw_memory);
                 header *new_header = reinterpret_cast<header *>(pool);
-                new_header->previous_begin = m_begin;
-                m_begin = raw_memory;
-                m_ptr = pool + sizeof(header);
-                m_end = raw_memory + alloc_size;
+                new_header->previous_begin = _M_begin;
+                _M_begin = raw_memory;
+                _M_ptr = pool + sizeof(header);
+                _M_end = raw_memory + alloc_size;
 
                 // Calculate aligned pointer again using new pool
-                result = align(m_ptr);
+                result = align(_M_ptr);
             }
 
             // Update pool and return aligned pointer
-            m_ptr = result + size;
+            _M_ptr = result + size;
             return result;
         }
 
-        char *m_begin;                                      // Start of raw memory making up current pool
-        char *m_ptr;                                        // First free byte in current pool
-        char *m_end;                                        // One past last available byte in current pool
-        char m_static_memory[BOOST_PROPERTY_TREE_RAPIDXML_STATIC_POOL_SIZE];    // Static raw memory
-        boost_ptree_raw_alloc_func *m_alloc_func;           // Allocator function, or 0 if default is to be used
-        boost_ptree_raw_free_func *m_free_func;             // Free function, or 0 if default is to be used
+        char *_M_begin;                                      // Start of raw memory making up current pool
+        char *_M_ptr;                                        // First free byte in current pool
+        char *_M_end;                                        // One past last available byte in current pool
+        char _M_static_memory[BOOST_PROPERTY_TREE_RAPIDXML_STATIC_POOL_SIZE];    // Static raw memory
+        boost_ptree_raw_alloc_func *_M_alloc_func;           // Allocator function, or 0 if default is to be used
+        boost_ptree_raw_free_func *_M_free_func;             // Free function, or 0 if default is to be used
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -639,9 +639,9 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     
         // Construct a base with empty name, value and parent
         xml_base()
-            : m_name(0)
-            , m_value(0)
-            , m_parent(0)
+            : _M_name(0)
+            , _M_value(0)
+            , _M_parent(0)
         {
         }
 
@@ -656,7 +656,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Name of node, or empty string if node has no name.
         Ch *name() const
         {
-            return m_name ? m_name : nullstr();
+            return _M_name ? _M_name : nullstr();
         }
 
         //! Gets size of node name, not including terminator character.
@@ -664,7 +664,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Size of node name, in characters.
         std::size_t name_size() const
         {
-            return m_name ? m_name_size : 0;
+            return _M_name ? _M_name_size : 0;
         }
 
         //! Gets value of node. 
@@ -675,7 +675,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Value of node, or empty string if node has no value.
         Ch *value() const
         {
-            return m_value ? m_value : nullstr();
+            return _M_value ? _M_value : nullstr();
         }
 
         //! Gets size of node value, not including terminator character.
@@ -683,7 +683,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Size of node value, in characters.
         std::size_t value_size() const
         {
-            return m_value ? m_value_size : 0;
+            return _M_value ? _M_value_size : 0;
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -704,8 +704,8 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \param size Size of name, in characters. This does not include zero terminator, if one is present.
         void name(const Ch *n, std::size_t size)
         {
-            m_name = const_cast<Ch *>(n);
-            m_name_size = size;
+            _M_name = const_cast<Ch *>(n);
+            _M_name_size = size;
         }
 
         //! Sets name of node to a zero-terminated string.
@@ -734,8 +734,8 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \param size Size of value, in characters. This does not include zero terminator, if one is present.
         void value(const Ch *val, std::size_t size)
         {
-            m_value = const_cast<Ch *>(val);
-            m_value_size = size;
+            _M_value = const_cast<Ch *>(val);
+            _M_value_size = size;
         }
 
         //! Sets value of node to a zero-terminated string.
@@ -753,7 +753,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Pointer to parent node, or 0 if there is no parent.
         xml_node<Ch> *parent() const
         {
-            return m_parent;
+            return _M_parent;
         }
 
     protected:
@@ -765,11 +765,11 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             return &zero;
         }
 
-        Ch *m_name;                         // Name of node, or 0 if no name
-        Ch *m_value;                        // Value of node, or 0 if no value
-        std::size_t m_name_size;            // Length of node name, or undefined of no name
-        std::size_t m_value_size;           // Length of node value, or undefined if no value
-        xml_node<Ch> *m_parent;             // Pointer to parent node, or 0 if none
+        Ch *_M_name;                         // Name of node, or 0 if no name
+        Ch *_M_value;                        // Value of node, or 0 if no value
+        std::size_t _M_name_size;            // Length of node name, or undefined of no name
+        std::size_t _M_value_size;           // Length of node value, or undefined if no value
+        xml_node<Ch> *_M_parent;             // Pointer to parent node, or 0 if none
 
     };
 
@@ -823,13 +823,13 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             {
                 if (nsize == 0)
                     nsize = internal::measure(n);
-                for (xml_attribute<Ch> *attribute = m_prev_attribute; attribute; attribute = attribute->m_prev_attribute)
+                for (xml_attribute<Ch> *attribute = _M_prev_attribute; attribute; attribute = attribute->_M_prev_attribute)
                     if (internal::compare(attribute->name(), attribute->name_size(), n, nsize, case_sensitive))
                         return attribute;
                 return 0;
             }
             else
-                return this->m_parent ? m_prev_attribute : 0;
+                return this->_M_parent ? _M_prev_attribute : 0;
         }
 
         //! Gets next attribute, optionally matching attribute name. 
@@ -843,19 +843,19 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             {
                 if (nsize == 0)
                     nsize = internal::measure(n);
-                for (xml_attribute<Ch> *attribute = m_next_attribute; attribute; attribute = attribute->m_next_attribute)
+                for (xml_attribute<Ch> *attribute = _M_next_attribute; attribute; attribute = attribute->_M_next_attribute)
                     if (internal::compare(attribute->name(), attribute->name_size(), n, nsize, case_sensitive))
                         return attribute;
                 return 0;
             }
             else
-                return this->m_parent ? m_next_attribute : 0;
+                return this->_M_parent ? _M_next_attribute : 0;
         }
 
     private:
 
-        xml_attribute<Ch> *m_prev_attribute;        // Pointer to previous sibling of attribute, or 0 if none; only valid if parent is non-zero
-        xml_attribute<Ch> *m_next_attribute;        // Pointer to next sibling of attribute, or 0 if none; only valid if parent is non-zero
+        xml_attribute<Ch> *_M_prev_attribute;        // Pointer to previous sibling of attribute, or 0 if none; only valid if parent is non-zero
+        xml_attribute<Ch> *_M_next_attribute;        // Pointer to next sibling of attribute, or 0 if none; only valid if parent is non-zero
     
     };
 
@@ -883,9 +883,9 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! Consider using memory_pool of appropriate document to allocate nodes manually.
         //! \param t Type of node to construct.
         xml_node(node_type t)
-            : m_type(t)
-            , m_first_node(0)
-            , m_first_attribute(0)
+            : _M_type(t)
+            , _M_first_node(0)
+            , _M_first_attribute(0)
         {
         }
 
@@ -896,7 +896,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Type of node.
         node_type type() const
         {
-            return m_type;
+            return _M_type;
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -923,13 +923,13 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             {
                 if (nsize == 0)
                     nsize = internal::measure(n);
-                for (xml_node<Ch> *child = m_first_node; child; child = child->next_sibling())
+                for (xml_node<Ch> *child = _M_first_node; child; child = child->next_sibling())
                     if (internal::compare(child->name(), child->name_size(), n, nsize, case_sensitive))
                         return child;
                 return 0;
             }
             else
-                return m_first_node;
+                return _M_first_node;
         }
 
         //! Gets last child node, optionally matching node name. 
@@ -941,18 +941,18 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Pointer to found child, or 0 if not found.
         xml_node<Ch> *last_node(const Ch *n = 0, std::size_t nsize = 0, bool case_sensitive = true) const
         {
-            BOOST_ASSERT(m_first_node);  // Cannot query for last child if node has no children
+            BOOST_ASSERT(_M_first_node);  // Cannot query for last child if node has no children
             if (n)
             {
                 if (nsize == 0)
                     nsize = internal::measure(n);
-                for (xml_node<Ch> *child = m_last_node; child; child = child->previous_sibling())
+                for (xml_node<Ch> *child = _M_last_node; child; child = child->previous_sibling())
                     if (internal::compare(child->name(), child->name_size(), n, nsize, case_sensitive))
                         return child;
                 return 0;
             }
             else
-                return m_last_node;
+                return _M_last_node;
         }
 
         //! Gets previous sibling node, optionally matching node name. 
@@ -964,18 +964,18 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Pointer to found sibling, or 0 if not found.
         xml_node<Ch> *previous_sibling(const Ch *n = 0, std::size_t nsize = 0, bool case_sensitive = true) const
         {
-            BOOST_ASSERT(this->m_parent);     // Cannot query for siblings if node has no parent
+            BOOST_ASSERT(this->_M_parent);     // Cannot query for siblings if node has no parent
             if (n)
             {
                 if (nsize == 0)
                     nsize = internal::measure(n);
-                for (xml_node<Ch> *sibling = m_prev_sibling; sibling; sibling = sibling->m_prev_sibling)
+                for (xml_node<Ch> *sibling = _M_prev_sibling; sibling; sibling = sibling->_M_prev_sibling)
                     if (internal::compare(sibling->name(), sibling->name_size(), n, nsize, case_sensitive))
                         return sibling;
                 return 0;
             }
             else
-                return m_prev_sibling;
+                return _M_prev_sibling;
         }
 
         //! Gets next sibling node, optionally matching node name. 
@@ -987,18 +987,18 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \return Pointer to found sibling, or 0 if not found.
         xml_node<Ch> *next_sibling(const Ch *n = 0, std::size_t nsize = 0, bool case_sensitive = true) const
         {
-            BOOST_ASSERT(this->m_parent);     // Cannot query for siblings if node has no parent
+            BOOST_ASSERT(this->_M_parent);     // Cannot query for siblings if node has no parent
             if (n)
             {
                 if (nsize == 0)
                     nsize = internal::measure(n);
-                for (xml_node<Ch> *sibling = m_next_sibling; sibling; sibling = sibling->m_next_sibling)
+                for (xml_node<Ch> *sibling = _M_next_sibling; sibling; sibling = sibling->_M_next_sibling)
                     if (internal::compare(sibling->name(), sibling->name_size(), n, nsize, case_sensitive))
                         return sibling;
                 return 0;
             }
             else
-                return m_next_sibling;
+                return _M_next_sibling;
         }
 
         //! Gets first attribute of node, optionally matching attribute name.
@@ -1012,13 +1012,13 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             {
                 if (nsize == 0)
                     nsize = internal::measure(n);
-                for (xml_attribute<Ch> *attribute = m_first_attribute; attribute; attribute = attribute->m_next_attribute)
+                for (xml_attribute<Ch> *attribute = _M_first_attribute; attribute; attribute = attribute->_M_next_attribute)
                     if (internal::compare(attribute->name(), attribute->name_size(), n, nsize, case_sensitive))
                         return attribute;
                 return 0;
             }
             else
-                return m_first_attribute;
+                return _M_first_attribute;
         }
 
         //! Gets last attribute of node, optionally matching attribute name.
@@ -1032,13 +1032,13 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             {
                 if (nsize == 0)
                     nsize = internal::measure(n);
-                for (xml_attribute<Ch> *attribute = m_last_attribute; attribute; attribute = attribute->m_prev_attribute)
+                for (xml_attribute<Ch> *attribute = _M_last_attribute; attribute; attribute = attribute->_M_prev_attribute)
                     if (internal::compare(attribute->name(), attribute->name_size(), n, nsize, case_sensitive))
                         return attribute;
                 return 0;
             }
             else
-                return m_first_attribute ? m_last_attribute : 0;
+                return _M_first_attribute ? _M_last_attribute : 0;
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -1048,7 +1048,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! \param t Type of node to set.
         void type(node_type t)
         {
-            m_type = t;
+            _M_type = t;
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -1062,17 +1062,17 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             BOOST_ASSERT(child && !child->parent() && child->type() != node_document);
             if (first_node())
             {
-                child->m_next_sibling = m_first_node;
-                m_first_node->m_prev_sibling = child;
+                child->_M_next_sibling = _M_first_node;
+                _M_first_node->_M_prev_sibling = child;
             }
             else
             {
-                child->m_next_sibling = 0;
-                m_last_node = child;
+                child->_M_next_sibling = 0;
+                _M_last_node = child;
             }
-            m_first_node = child;
-            child->m_parent = this;
-            child->m_prev_sibling = 0;
+            _M_first_node = child;
+            child->_M_parent = this;
+            child->_M_prev_sibling = 0;
         }
 
         //! Appends a new child node. 
@@ -1083,17 +1083,17 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             BOOST_ASSERT(child && !child->parent() && child->type() != node_document);
             if (first_node())
             {
-                child->m_prev_sibling = m_last_node;
-                m_last_node->m_next_sibling = child;
+                child->_M_prev_sibling = _M_last_node;
+                _M_last_node->_M_next_sibling = child;
             }
             else
             {
-                child->m_prev_sibling = 0;
-                m_first_node = child;
+                child->_M_prev_sibling = 0;
+                _M_first_node = child;
             }
-            m_last_node = child;
-            child->m_parent = this;
-            child->m_next_sibling = 0;
+            _M_last_node = child;
+            child->_M_parent = this;
+            child->_M_next_sibling = 0;
         }
 
         //! Inserts a new child node at specified place inside the node. 
@@ -1104,17 +1104,17 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         {
             BOOST_ASSERT(!where || where->parent() == this);
             BOOST_ASSERT(child && !child->parent() && child->type() != node_document);
-            if (where == m_first_node)
+            if (where == _M_first_node)
                 prepend_node(child);
             else if (where == 0)
                 append_node(child);
             else
             {
-                child->m_prev_sibling = where->m_prev_sibling;
-                child->m_next_sibling = where;
-                where->m_prev_sibling->m_next_sibling = child;
-                where->m_prev_sibling = child;
-                child->m_parent = this;
+                child->_M_prev_sibling = where->_M_prev_sibling;
+                child->_M_next_sibling = where;
+                where->_M_prev_sibling->_M_next_sibling = child;
+                where->_M_prev_sibling = child;
+                child->_M_parent = this;
             }
         }
 
@@ -1124,13 +1124,13 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         void remove_first_node()
         {
             BOOST_ASSERT(first_node());
-            xml_node<Ch> *child = m_first_node;
-            m_first_node = child->m_next_sibling;
-            if (child->m_next_sibling)
-                child->m_next_sibling->m_prev_sibling = 0;
+            xml_node<Ch> *child = _M_first_node;
+            _M_first_node = child->_M_next_sibling;
+            if (child->_M_next_sibling)
+                child->_M_next_sibling->_M_prev_sibling = 0;
             else
-                m_last_node = 0;
-            child->m_parent = 0;
+                _M_last_node = 0;
+            child->_M_parent = 0;
         }
 
         //! Removes last child of the node. 
@@ -1139,15 +1139,15 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         void remove_last_node()
         {
             BOOST_ASSERT(first_node());
-            xml_node<Ch> *child = m_last_node;
-            if (child->m_prev_sibling)
+            xml_node<Ch> *child = _M_last_node;
+            if (child->_M_prev_sibling)
             {
-                m_last_node = child->m_prev_sibling;
-                child->m_prev_sibling->m_next_sibling = 0;
+                _M_last_node = child->_M_prev_sibling;
+                child->_M_prev_sibling->_M_next_sibling = 0;
             }
             else
-                m_first_node = 0;
-            child->m_parent = 0;
+                _M_first_node = 0;
+            child->_M_parent = 0;
         }
 
         //! Removes specified child from the node
@@ -1156,24 +1156,24 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         {
             BOOST_ASSERT(where && where->parent() == this);
             BOOST_ASSERT(first_node());
-            if (where == m_first_node)
+            if (where == _M_first_node)
                 remove_first_node();
-            else if (where == m_last_node)
+            else if (where == _M_last_node)
                 remove_last_node();
             else
             {
-                where->m_prev_sibling->m_next_sibling = where->m_next_sibling;
-                where->m_next_sibling->m_prev_sibling = where->m_prev_sibling;
-                where->m_parent = 0;
+                where->_M_prev_sibling->_M_next_sibling = where->_M_next_sibling;
+                where->_M_next_sibling->_M_prev_sibling = where->_M_prev_sibling;
+                where->_M_parent = 0;
             }
         }
 
         //! Removes all child nodes (but not attributes).
         void remove_all_nodes()
         {
-            for (xml_node<Ch> *node = first_node(); node; node = node->m_next_sibling)
-                node->m_parent = 0;
-            m_first_node = 0;
+            for (xml_node<Ch> *node = first_node(); node; node = node->_M_next_sibling)
+                node->_M_parent = 0;
+            _M_first_node = 0;
         }
 
         //! Prepends a new attribute to the node.
@@ -1183,17 +1183,17 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             BOOST_ASSERT(attribute && !attribute->parent());
             if (first_attribute())
             {
-                attribute->m_next_attribute = m_first_attribute;
-                m_first_attribute->m_prev_attribute = attribute;
+                attribute->_M_next_attribute = _M_first_attribute;
+                _M_first_attribute->_M_prev_attribute = attribute;
             }
             else
             {
-                attribute->m_next_attribute = 0;
-                m_last_attribute = attribute;
+                attribute->_M_next_attribute = 0;
+                _M_last_attribute = attribute;
             }
-            m_first_attribute = attribute;
-            attribute->m_parent = this;
-            attribute->m_prev_attribute = 0;
+            _M_first_attribute = attribute;
+            attribute->_M_parent = this;
+            attribute->_M_prev_attribute = 0;
         }
 
         //! Appends a new attribute to the node.
@@ -1203,17 +1203,17 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
             BOOST_ASSERT(attribute && !attribute->parent());
             if (first_attribute())
             {
-                attribute->m_prev_attribute = m_last_attribute;
-                m_last_attribute->m_next_attribute = attribute;
+                attribute->_M_prev_attribute = _M_last_attribute;
+                _M_last_attribute->_M_next_attribute = attribute;
             }
             else
             {
-                attribute->m_prev_attribute = 0;
-                m_first_attribute = attribute;
+                attribute->_M_prev_attribute = 0;
+                _M_first_attribute = attribute;
             }
-            m_last_attribute = attribute;
-            attribute->m_parent = this;
-            attribute->m_next_attribute = 0;
+            _M_last_attribute = attribute;
+            attribute->_M_parent = this;
+            attribute->_M_next_attribute = 0;
         }
 
         //! Inserts a new attribute at specified place inside the node. 
@@ -1224,17 +1224,17 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         {
             BOOST_ASSERT(!where || where->parent() == this);
             BOOST_ASSERT(attribute && !attribute->parent());
-            if (where == m_first_attribute)
+            if (where == _M_first_attribute)
                 prepend_attribute(attribute);
             else if (where == 0)
                 append_attribute(attribute);
             else
             {
-                attribute->m_prev_attribute = where->m_prev_attribute;
-                attribute->m_next_attribute = where;
-                where->m_prev_attribute->m_next_attribute = attribute;
-                where->m_prev_attribute = attribute;
-                attribute->m_parent = this;
+                attribute->_M_prev_attribute = where->_M_prev_attribute;
+                attribute->_M_next_attribute = where;
+                where->_M_prev_attribute->_M_next_attribute = attribute;
+                where->_M_prev_attribute = attribute;
+                attribute->_M_parent = this;
             }
         }
 
@@ -1244,15 +1244,15 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         void remove_first_attribute()
         {
             BOOST_ASSERT(first_attribute());
-            xml_attribute<Ch> *attribute = m_first_attribute;
-            if (attribute->m_next_attribute)
+            xml_attribute<Ch> *attribute = _M_first_attribute;
+            if (attribute->_M_next_attribute)
             {
-                attribute->m_next_attribute->m_prev_attribute = 0;
+                attribute->_M_next_attribute->_M_prev_attribute = 0;
             }
             else
-                m_last_attribute = 0;
-            attribute->m_parent = 0;
-            m_first_attribute = attribute->m_next_attribute;
+                _M_last_attribute = 0;
+            attribute->_M_parent = 0;
+            _M_first_attribute = attribute->_M_next_attribute;
         }
 
         //! Removes last attribute of the node. 
@@ -1261,15 +1261,15 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         void remove_last_attribute()
         {
             BOOST_ASSERT(first_attribute());
-            xml_attribute<Ch> *attribute = m_last_attribute;
-            if (attribute->m_prev_attribute)
+            xml_attribute<Ch> *attribute = _M_last_attribute;
+            if (attribute->_M_prev_attribute)
             {
-                attribute->m_prev_attribute->m_next_attribute = 0;
-                m_last_attribute = attribute->m_prev_attribute;
+                attribute->_M_prev_attribute->_M_next_attribute = 0;
+                _M_last_attribute = attribute->_M_prev_attribute;
             }
             else
-                m_first_attribute = 0;
-            attribute->m_parent = 0;
+                _M_first_attribute = 0;
+            attribute->_M_parent = 0;
         }
 
         //! Removes specified attribute from node.
@@ -1277,24 +1277,24 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         void remove_attribute(xml_attribute<Ch> *where)
         {
             BOOST_ASSERT(first_attribute() && where->parent() == this);
-            if (where == m_first_attribute)
+            if (where == _M_first_attribute)
                 remove_first_attribute();
-            else if (where == m_last_attribute)
+            else if (where == _M_last_attribute)
                 remove_last_attribute();
             else
             {
-                where->m_prev_attribute->m_next_attribute = where->m_next_attribute;
-                where->m_next_attribute->m_prev_attribute = where->m_prev_attribute;
-                where->m_parent = 0;
+                where->_M_prev_attribute->_M_next_attribute = where->_M_next_attribute;
+                where->_M_next_attribute->_M_prev_attribute = where->_M_prev_attribute;
+                where->_M_parent = 0;
             }
         }
 
         //! Removes all attributes of node.
         void remove_all_attributes()
         {
-            for (xml_attribute<Ch> *attribute = first_attribute(); attribute; attribute = attribute->m_next_attribute)
-                attribute->m_parent = 0;
-            m_first_attribute = 0;
+            for (xml_attribute<Ch> *attribute = first_attribute(); attribute; attribute = attribute->_M_next_attribute)
+                attribute->_M_parent = 0;
+            _M_first_attribute = 0;
         }
         
     private:
@@ -1318,13 +1318,13 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         // 2. last_node and last_attribute are valid only if node has at least one child/attribute respectively, otherwise they contain garbage
         // 3. prev_sibling and next_sibling are valid only if node has a parent, otherwise they contain garbage
 
-        node_type m_type;                       // Type of node; always valid
-        xml_node<Ch> *m_first_node;             // Pointer to first child node, or 0 if none; always valid
-        xml_node<Ch> *m_last_node;              // Pointer to last child node, or 0 if none; this value is only valid if m_first_node is non-zero
-        xml_attribute<Ch> *m_first_attribute;   // Pointer to first attribute of node, or 0 if none; always valid
-        xml_attribute<Ch> *m_last_attribute;    // Pointer to last attribute of node, or 0 if none; this value is only valid if m_first_attribute is non-zero
-        xml_node<Ch> *m_prev_sibling;           // Pointer to previous sibling of node, or 0 if none; this value is only valid if m_parent is non-zero
-        xml_node<Ch> *m_next_sibling;           // Pointer to next sibling of node, or 0 if none; this value is only valid if m_parent is non-zero
+        node_type _M_type;                       // Type of node; always valid
+        xml_node<Ch> *_M_first_node;             // Pointer to first child node, or 0 if none; always valid
+        xml_node<Ch> *_M_last_node;              // Pointer to last child node, or 0 if none; this value is only valid if _M_first_node is non-zero
+        xml_attribute<Ch> *_M_first_attribute;   // Pointer to first attribute of node, or 0 if none; always valid
+        xml_attribute<Ch> *_M_last_attribute;    // Pointer to last attribute of node, or 0 if none; this value is only valid if _M_first_attribute is non-zero
+        xml_node<Ch> *_M_prev_sibling;           // Pointer to previous sibling of node, or 0 if none; this value is only valid if _M_parent is non-zero
+        xml_node<Ch> *_M_next_sibling;           // Pointer to next sibling of node, or 0 if none; this value is only valid if _M_parent is non-zero
 
     };
 

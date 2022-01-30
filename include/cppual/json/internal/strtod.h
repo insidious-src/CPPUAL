@@ -22,7 +22,7 @@
 #include <climits>
 #include <limits>
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 inline double FastPath(double significand, int exp) {

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 
 #include <cppual/decl.h>
 
-namespace cppual { namespace Platform { namespace Joystick { namespace Xbox {
+namespace cppual { namespace platform { namespace joystick { namespace xbox {
 
-enum X360Button
+enum class X360Button
 {
     A,
     B,
@@ -48,7 +48,7 @@ enum X360Button
     Menu
 };
 
-enum XOneButton
+enum class XOneButton
 {
     A,
     B,

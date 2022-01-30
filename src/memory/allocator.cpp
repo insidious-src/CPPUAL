@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,46 +21,48 @@
 
 #include <cppual/memory/allocator.h>
 
-#include <cstdlib>
+#include <new>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
 // =========================================================
 
 namespace { // optimize for internal unit usage
 
-MemoryResource::base_double_pointer default_resource_pointer() noexcept
+inline static memory_resource::base_double_pointer default_resource_pointer() noexcept
 {
-    static MemoryResource::base_pointer def_ptr = nullptr;
+    static memory_resource::base_pointer def_ptr = nullptr;
     return &def_ptr;
 }
 
 // =========================================================
 
-class NewDeleteResource final : public MemoryResource
+inline static memory_resource::base_double_pointer default_thread_resource_pointer() noexcept
+{
+    static thread_local memory_resource::base_pointer def_ptr = nullptr;
+    return &def_ptr;
+}
+
+// =========================================================
+
+class new_delete_memory_resource final : public memory_resource
 {
 public:
     using base_type::base_type;
     using base_type::operator=;
 
-    bool is_thread_safe () const noexcept
-    {
-        return true;
-    }
+    bool is_thread_safe () const noexcept { return true; }
 
 private:
     void* do_allocate(size_type bytes, size_type alignment)
     {
-        if (bytes > this->max_size()) throw std::bad_alloc();
-
-        if (alignment > max_align) return ::operator new(bytes, std::align_val_t(alignment));
-        return ::operator new(bytes);
+        if (bytes > max_size ()) throw std::bad_alloc();
+        return ::operator new (bytes, std::align_val_t(alignment));
     }
 
-    void do_deallocate(void* p, size_type /*bytes*/, size_type alignment)
+    void do_deallocate(void* p, size_type bytes, size_type alignment)
     {
-        if (alignment > max_align) ::operator delete(p, std::align_val_t(alignment));
-        else ::operator delete(p);
+        ::operator delete (p, bytes, std::align_val_t(alignment));
     }
 
     bool do_is_equal(base_type const& other) const noexcept
@@ -71,16 +73,13 @@ private:
 
 // =========================================================
 
-class MallocResource final : public MemoryResource
+class malloc_memory_resource final : public memory_resource
 {
 public:
     using base_type::base_type;
     using base_type::operator=;
 
-    bool is_thread_safe () const noexcept
-    {
-        return true;
-    }
+    bool is_thread_safe () const noexcept { return true; }
 
 private:
     void* do_allocate(size_type bytes, size_type /*alignment*/)
@@ -108,30 +107,44 @@ private:
 
 // =========================================================
 
-MemoryResource* new_delete_resource() noexcept
+memory_resource* new_delete_resource() noexcept
 {
-    static NewDeleteResource new_delete_resource;
-    return &new_delete_resource;
+    static class new_delete_memory_resource res;
+    return &res;
 }
 
-MemoryResource* malloc_resource() noexcept
+memory_resource* malloc_resource() noexcept
 {
-    static MallocResource malloc_resource;
-    return &malloc_resource;
+    static class malloc_memory_resource res;
+    return &res;
 }
 
-MemoryResource* get_default_resource() noexcept
+memory_resource* get_default_resource() noexcept
 {
-    static MemoryResource::base_double_pointer def_resource_ptr =
+    static memory_resource::base_double_pointer def_resource_ptr =
             &(*default_resource_pointer() = new_delete_resource());
     return *def_resource_ptr;
 }
 
-void set_default_resource(MemoryResource& res) noexcept
+memory_resource* get_default_thread_resource() noexcept
+{
+    static thread_local memory_resource::base_double_pointer def_resource_ptr =
+            &(*default_thread_resource_pointer() = new_delete_resource());
+    return *def_resource_ptr;
+}
+
+void set_default_resource(memory_resource& res) noexcept
 {
     if (*default_resource_pointer() == nullptr) get_default_resource();
 
     *default_resource_pointer() = &res;
+}
+
+void set_default_thread_resource(memory_resource& res) noexcept
+{
+    if (*default_thread_resource_pointer() == nullptr) get_default_thread_resource();
+
+    *default_thread_resource_pointer() = &res;
 }
 
 // =========================================================

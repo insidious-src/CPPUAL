@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,38 +25,39 @@
 
 #include "opencl.h"
 
-namespace cppual { namespace Compute { namespace CL {
+namespace cppual { namespace compute { namespace cl {
 
 // =========================================================
 
-class Device final : public Interface<ResourceType::Device>
+class device final : public interface<resource_type::device>
 {
 public:
-    typedef vector<Device::pointer> device_ids_vector;
-    typedef Factory::device_vector  device_vector    ;
+    typedef vector<pointer>        device_ids_vector;
+    typedef factory::device_vector device_vector    ;
 
-    string_type name              () const;
-    string_type vendor            () const;
-    Profile     profile           () const;
-    Backend     backend           () const;
-    device_ils  supportedILs      () const;
-    DeviceType  devType           () const;
-    Version     version           () const;
-    size_type   cacheSize         () const;
-    size_type   cacheLineSize     () const;
-    size_type   localMemorySize   () const;
-    size_type   constMemorySize   () const;
-    size_type   globalMemorySize  () const;
-    u32         computeUnits      () const;
-    u64         maxMemoryAllocSize() const;
+    string_type     name                 () const;
+    string_type     vendor               () const;
+    profile_type    profile              () const;
+    backend_type    backend              () const;
+    device_ils      supported_ils        () const;
+    device_category dev_type             () const;
+    version_type    version              () const;
+    size_type       cache_size           () const;
+    size_type       cache_line_size      () const;
+    size_type       local_memory_size    () const;
+    size_type       const_memory_size    () const;
+    size_type       global_memory_size   () const;
+    u32             compute_units        () const;
+    u64             max_memory_alloc_size() const;
 
-    Device (pointer handle) noexcept : Interface (handle) { }
+    device (pointer handle) noexcept : interface (handle) { }
 
 private:
     vector<string_type> extensions() const;
     bool supports_extension(string_type const& name) const;
+
     static device_ids_vector get_device_ids();
-    static device_vector     get_devices(Memory::MemoryResource& rc);
+    static device_vector     get_devices(memory::memory_resource& rc);
     static size_type         count();
 
     template<typename T>
@@ -65,8 +66,8 @@ private:
         return get_object_info<T> (::clGetDeviceInfo, handle(), info);
     }
 
-    friend class Platform ;
-    friend class CLFactory;
+    friend class platform  ;
+    friend class cl_factory;
 };
 
 // =========================================================

@@ -52,7 +52,7 @@ public:
         : cppual::x::event::dispatcher<Connection>(std::forward<C>(c))
         , Extensions::template event_dispatcher<Connection>(
               std::forward<C>(c), c.template extension<Extensions>()) ...
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     bool
@@ -78,8 +78,8 @@ public:
 private:
     typedef std::multimap<priority, detail::dispatcher *> priority_map;
 
-    Connection m_c;
-    std::unordered_map<uint8_t, priority_map> m_dispatchers;
+    Connection _M_c;
+    std::unordered_map<uint8_t, priority_map> _M_dispatchers;
 
     template<typename Event>
     uint8_t opcode(const cppual::x::extension &) const
@@ -96,7 +96,7 @@ private:
     template<typename Event>
     uint8_t opcode(void) const
     {
-        return opcode<Event>(m_c.template extension<typename Event::extension>());
+        return opcode<Event>(_M_c.template extension<typename Event::extension>());
     }
 
     template<typename Event>
@@ -104,7 +104,7 @@ private:
     handle(const Event & event) const
     {
         try {
-            for (auto & item : m_dispatchers.at(opcode<Event>())) {
+            for (auto & item : _M_dispatchers.at(opcode<Event>())) {
                 item.second->dispatch(event);
             }
         } catch (...) {}
@@ -112,16 +112,16 @@ private:
 
     struct handler {
         handler(const registry<Connection, Extensions ...> & registry)
-            : m_registry(registry)
+            : _M_registry(registry)
         {}
 
-        const registry<Connection, Extensions ...> & m_registry;
+        const registry<Connection, Extensions ...> & _M_registry;
 
         template<typename Event>
         void
         operator()(const Event & event) const
         {
-            m_registry.handle(event);
+            _M_registry.handle(event);
         }
     };
 
@@ -158,7 +158,7 @@ private:
 
     void attach(priority p, detail::dispatcher * d, uint8_t opcode)
     {
-        m_dispatchers[opcode].emplace(p, d);
+        _M_dispatchers[opcode].emplace(p, d);
     }
 
     template<typename Sink, typename Event>
@@ -180,7 +180,7 @@ private:
     detach(priority p, detail::dispatcher * d, uint8_t opcode)
     {
         try {
-            auto & prio_map = m_dispatchers.at(opcode);
+            auto & prio_map = _M_dispatchers.at(opcode);
             const auto & prio_sink_pair = prio_map.equal_range(p);
             for (auto it = prio_sink_pair.first; it != prio_sink_pair.second; ) {
                 if (d == it->second) {

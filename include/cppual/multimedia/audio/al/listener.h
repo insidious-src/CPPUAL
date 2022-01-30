@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,19 +25,19 @@
 
 #include <cppual/gfx/coord.h>
 
-namespace cppual { namespace Audio { namespace AL { namespace Listener {
+namespace cppual { namespace audio { namespace al { namespace listener {
 
 void    reset () noexcept;
-void    setPosition (point3f const& position) noexcept;
+void    set_position (point3f const& position) noexcept;
 point3f position () noexcept;
-void    setVelocity (point3f const& velocity) noexcept;
+void    set_velocity (point3f const& velocity) noexcept;
 point3f velocity () noexcept;
-void    setOrientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) noexcept;
-point3f orientationAt () noexcept;
-point3f orientationUp () noexcept;
-void    setVolume (float value) noexcept;
+void    set_orientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) noexcept;
+point3f orientation_at () noexcept;
+point3f orientation_up () noexcept;
+void    set_volume (float value) noexcept;
 float   volume () noexcept;
-bool    isMute () noexcept;
+bool    is_mute () noexcept;
 void    mute () noexcept;
 void    unmute () noexcept;
 

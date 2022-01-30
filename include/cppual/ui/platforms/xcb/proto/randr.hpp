@@ -44,8 +44,8 @@ class screen_change_notify
                          uint8_t first_event,
                          const std::shared_ptr<xcb_generic_event_t> & event)
       : base(event)
-      , m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      , _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     virtual ~screen_change_notify(void) {}
@@ -72,7 +72,7 @@ class screen_change_notify
 
     uint8_t first_event(void)
     {
-      return m_first_event;
+      return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -83,7 +83,7 @@ class screen_change_notify
                                                decltype((*this)->root),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     (*this)->root,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -96,14 +96,14 @@ class screen_change_notify
                                                decltype((*this)->request_window),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     (*this)->request_window,
                     std::forward<Parameter>(parameter) ...);
     }
 
   protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class screen_change_notify
 
 
@@ -126,8 +126,8 @@ class notify
            uint8_t first_event,
            const std::shared_ptr<xcb_generic_event_t> & event)
       : base(event)
-      , m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      , _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     virtual ~notify(void) {}
@@ -154,11 +154,11 @@ class notify
 
     uint8_t first_event(void)
     {
-      return m_first_event;
+      return _M_first_event;
     }
   protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class notify
 } // namespace event
 
@@ -195,7 +195,7 @@ class bad_output
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_output
 } // namespace error
 
@@ -231,7 +231,7 @@ class bad_crtc
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_crtc
 } // namespace error
 
@@ -267,7 +267,7 @@ class bad_mode
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_mode
 } // namespace error
 
@@ -303,7 +303,7 @@ class bad_provider
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_provider
 } // namespace error
 
@@ -421,7 +421,7 @@ class set_screen_config
                                                decltype(this->get()->root),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     this->get()->root,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -523,7 +523,7 @@ class get_screen_info
                                                        ::xcb_randr_screen_size_t,
                                                        SIGNATURE(xcb_randr_get_screen_info_sizes),
                                                        SIGNATURE(xcb_randr_get_screen_info_sizes_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -544,7 +544,7 @@ class get_screen_info
                                                        SIGNATURE(xcb_randr_refresh_rates_next),
                                                        SIGNATURE(xcb_randr_refresh_rates_sizeof),
                                                        SIGNATURE(xcb_randr_get_screen_info_rates_iterator)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -555,7 +555,7 @@ class get_screen_info
                                                decltype(this->get()->root),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     this->get()->root,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -721,7 +721,7 @@ class get_screen_resources
                                                        ::xcb_randr_crtc_t,
                                                        SIGNATURE(xcb_randr_get_screen_resources_crtcs),
                                                        SIGNATURE(xcb_randr_get_screen_resources_crtcs_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -740,7 +740,7 @@ class get_screen_resources
                                                        ::xcb_randr_output_t,
                                                        SIGNATURE(xcb_randr_get_screen_resources_outputs),
                                                        SIGNATURE(xcb_randr_get_screen_resources_outputs_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -759,7 +759,7 @@ class get_screen_resources
                                                        ::xcb_randr_mode_info_t,
                                                        SIGNATURE(xcb_randr_get_screen_resources_modes),
                                                        SIGNATURE(xcb_randr_get_screen_resources_modes_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -778,7 +778,7 @@ class get_screen_resources
                                                        uint8_t,
                                                        SIGNATURE(xcb_randr_get_screen_resources_names),
                                                        SIGNATURE(xcb_randr_get_screen_resources_names_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_screen_resources
 
@@ -866,7 +866,7 @@ class get_output_info
                                                        ::xcb_randr_crtc_t,
                                                        SIGNATURE(xcb_randr_get_output_info_crtcs),
                                                        SIGNATURE(xcb_randr_get_output_info_crtcs_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -885,7 +885,7 @@ class get_output_info
                                                        ::xcb_randr_mode_t,
                                                        SIGNATURE(xcb_randr_get_output_info_modes),
                                                        SIGNATURE(xcb_randr_get_output_info_modes_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -904,7 +904,7 @@ class get_output_info
                                                        ::xcb_randr_output_t,
                                                        SIGNATURE(xcb_randr_get_output_info_clones),
                                                        SIGNATURE(xcb_randr_get_output_info_clones_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -923,7 +923,7 @@ class get_output_info
                                                        uint8_t,
                                                        SIGNATURE(xcb_randr_get_output_info_name),
                                                        SIGNATURE(xcb_randr_get_output_info_name_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_randr_crtc_t, typename ... Parameter>
@@ -934,7 +934,7 @@ class get_output_info
                                                decltype(this->get()->crtc),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     this->get()->crtc,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -1019,7 +1019,7 @@ class list_output_properties
                                                        Atoms,
                                                        SIGNATURE(xcb_randr_list_output_properties_atoms),
                                                        SIGNATURE(xcb_randr_list_output_properties_atoms_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class list_output_properties
 
@@ -1101,7 +1101,7 @@ class query_output_property
                                                        int32_t,
                                                        SIGNATURE(xcb_randr_query_output_property_valid_values),
                                                        SIGNATURE(xcb_randr_query_output_property_valid_values_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_output_property
 
@@ -1261,7 +1261,7 @@ class get_output_property
                                                        uint8_t,
                                                        SIGNATURE(xcb_randr_get_output_property_data),
                                                        SIGNATURE(xcb_randr_get_output_property_data_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_atom_t, typename ... Parameter>
@@ -1272,7 +1272,7 @@ class get_output_property
                                                decltype(this->get()->type),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     this->get()->type,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -1362,7 +1362,7 @@ class create_mode
                                                decltype(this->get()->mode),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     this->get()->mode,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -1506,7 +1506,7 @@ class get_crtc_info
                                                        ::xcb_randr_output_t,
                                                        SIGNATURE(xcb_randr_get_crtc_info_outputs),
                                                        SIGNATURE(xcb_randr_get_crtc_info_outputs_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -1525,7 +1525,7 @@ class get_crtc_info
                                                        ::xcb_randr_output_t,
                                                        SIGNATURE(xcb_randr_get_crtc_info_possible),
                                                        SIGNATURE(xcb_randr_get_crtc_info_possible_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_randr_mode_t, typename ... Parameter>
@@ -1536,7 +1536,7 @@ class get_crtc_info
                                                decltype(this->get()->mode),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     this->get()->mode,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -1774,7 +1774,7 @@ class get_crtc_gamma
                                                        uint16_t,
                                                        SIGNATURE(xcb_randr_get_crtc_gamma_red),
                                                        SIGNATURE(xcb_randr_get_crtc_gamma_red_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -1793,7 +1793,7 @@ class get_crtc_gamma
                                                        uint16_t,
                                                        SIGNATURE(xcb_randr_get_crtc_gamma_green),
                                                        SIGNATURE(xcb_randr_get_crtc_gamma_green_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -1812,7 +1812,7 @@ class get_crtc_gamma
                                                        uint16_t,
                                                        SIGNATURE(xcb_randr_get_crtc_gamma_blue),
                                                        SIGNATURE(xcb_randr_get_crtc_gamma_blue_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_crtc_gamma
 
@@ -1912,7 +1912,7 @@ class get_screen_resources_current
                                                        ::xcb_randr_crtc_t,
                                                        SIGNATURE(xcb_randr_get_screen_resources_current_crtcs),
                                                        SIGNATURE(xcb_randr_get_screen_resources_current_crtcs_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -1931,7 +1931,7 @@ class get_screen_resources_current
                                                        ::xcb_randr_output_t,
                                                        SIGNATURE(xcb_randr_get_screen_resources_current_outputs),
                                                        SIGNATURE(xcb_randr_get_screen_resources_current_outputs_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -1950,7 +1950,7 @@ class get_screen_resources_current
                                                        ::xcb_randr_mode_info_t,
                                                        SIGNATURE(xcb_randr_get_screen_resources_current_modes),
                                                        SIGNATURE(xcb_randr_get_screen_resources_current_modes_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -1969,7 +1969,7 @@ class get_screen_resources_current
                                                        uint8_t,
                                                        SIGNATURE(xcb_randr_get_screen_resources_current_names),
                                                        SIGNATURE(xcb_randr_get_screen_resources_current_names_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_screen_resources_current
 
@@ -2102,7 +2102,7 @@ class get_crtc_transform
                                                        ::xcb_render_fixed_t,
                                                        SIGNATURE(xcb_randr_get_crtc_transform_pending_params),
                                                        SIGNATURE(xcb_randr_get_crtc_transform_pending_params_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -2130,7 +2130,7 @@ class get_crtc_transform
                                                        ::xcb_render_fixed_t,
                                                        SIGNATURE(xcb_randr_get_crtc_transform_current_params),
                                                        SIGNATURE(xcb_randr_get_crtc_transform_current_params_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_crtc_transform
 
@@ -2364,7 +2364,7 @@ class get_output_primary
                                                decltype(this->get()->output),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     this->get()->output,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -2448,7 +2448,7 @@ class get_providers
                                                        ::xcb_randr_provider_t,
                                                        SIGNATURE(xcb_randr_get_providers_providers),
                                                        SIGNATURE(xcb_randr_get_providers_providers_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_providers
 
@@ -2536,7 +2536,7 @@ class get_provider_info
                                                        ::xcb_randr_crtc_t,
                                                        SIGNATURE(xcb_randr_get_provider_info_crtcs),
                                                        SIGNATURE(xcb_randr_get_provider_info_crtcs_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -2555,7 +2555,7 @@ class get_provider_info
                                                        ::xcb_randr_output_t,
                                                        SIGNATURE(xcb_randr_get_provider_info_outputs),
                                                        SIGNATURE(xcb_randr_get_provider_info_outputs_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -2574,7 +2574,7 @@ class get_provider_info
                                                        ::xcb_randr_provider_t,
                                                        SIGNATURE(xcb_randr_get_provider_info_associated_providers),
                                                        SIGNATURE(xcb_randr_get_provider_info_associated_providers_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -2593,7 +2593,7 @@ class get_provider_info
                                                        uint32_t,
                                                        SIGNATURE(xcb_randr_get_provider_info_associated_capability),
                                                        SIGNATURE(xcb_randr_get_provider_info_associated_capability_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -2717,7 +2717,7 @@ class list_provider_properties
                                                        Atoms,
                                                        SIGNATURE(xcb_randr_list_provider_properties_atoms),
                                                        SIGNATURE(xcb_randr_list_provider_properties_atoms_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class list_provider_properties
 
@@ -2799,7 +2799,7 @@ class query_provider_property
                                                        int32_t,
                                                        SIGNATURE(xcb_randr_query_provider_property_valid_values),
                                                        SIGNATURE(xcb_randr_query_provider_property_valid_values_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_provider_property
 
@@ -2960,7 +2960,7 @@ class get_provider_property
                                                        Type,
                                                        SIGNATURE(xcb_randr_get_provider_property_data),
                                                        SIGNATURE(xcb_randr_get_provider_property_data_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_atom_t, typename ... Parameter>
@@ -2971,7 +2971,7 @@ class get_provider_property
                                                decltype(this->get()->type),
                                                ReturnType,
                                                Parameter ...>;
-      return make()(this->m_c,
+      return make()(this->_M_c,
                     this->get()->type,
                     std::forward<Parameter>(parameter) ...);
     }
@@ -3057,7 +3057,7 @@ class get_monitors
                                                        SIGNATURE(xcb_randr_monitor_info_next),
                                                        SIGNATURE(xcb_randr_monitor_info_sizeof),
                                                        SIGNATURE(xcb_randr_get_monitors_monitors_iterator)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_monitors
 
@@ -4827,8 +4827,8 @@ class dispatcher
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-      : m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      : _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -4841,14 +4841,14 @@ class dispatcher
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-      switch ((event->response_type & ~0x80) - m_first_event) {
+      switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_RANDR_SCREEN_CHANGE_NOTIFY:
-          handler(cppual::randr::event::screen_change_notify<Connection>(m_c, m_first_event, event));
+          handler(cppual::randr::event::screen_change_notify<Connection>(_M_c, _M_first_event, event));
           return true;
 
         case XCB_RANDR_NOTIFY:
-          handler(cppual::randr::event::notify<Connection>(m_c, m_first_event, event));
+          handler(cppual::randr::event::notify<Connection>(_M_c, _M_first_event, event));
           return true;
 
       };
@@ -4857,8 +4857,8 @@ class dispatcher
     }
 
   protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -4871,7 +4871,7 @@ class dispatcher
     typedef cppual::randr::extension extension;
 
     dispatcher(uint8_t first_error)
-      : m_first_error(first_error)
+      : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::randr::extension & extension)
@@ -4881,7 +4881,7 @@ class dispatcher
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-      switch (error->error_code - m_first_error) {
+      switch (error->error_code - _M_first_error) {
 
         case XCB_RANDR_BAD_OUTPUT: // 0
           throw cppual::randr::error::bad_output(error);
@@ -4899,7 +4899,7 @@ class dispatcher
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

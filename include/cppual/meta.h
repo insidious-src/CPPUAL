@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@
 namespace cppual {
 
 template <typename... Args>
-struct Select
+struct select
 {
     template <typename C, typename R>
-    static constexpr auto Overload(R (C::* fn)(Args...)) noexcept -> decltype(fn)
+    static constexpr auto overload(R (C::* fn)(Args...)) noexcept -> decltype(fn)
     { return fn; }
 };
 
@@ -57,7 +57,7 @@ template <typename T, typename Base, typename... Tail, std::size_t I>
 struct tuple_ref_index<T, std::tuple<Base, Tail...>, I>
     : std::conditional<std::is_base_of<Base, T>::value || std::is_same<Base, T>::value,
                        std::integral_constant<std::size_t, I>,
-                       tuple_ref_index<T, std::tuple<Tail...>, I+1>
+                       tuple_ref_index<T, std::tuple<Tail...>, I + 1>
                        >::type
 { };
 
@@ -82,51 +82,20 @@ struct is_char : std::integral_constant<bool, (is_char_helper<typename
 
 // ====================================================
 
-template <typename>
-struct is_bool : std::false_type
-{ };
-
-template <>
-struct is_bool<bool> : std::true_type
-{ };
+template <typename> struct is_bool : std::false_type { };
+template <> struct is_bool<bool>   : std::true_type  { };
 
 // ====================================================
 
-template <typename>
-struct is_integer : std::false_type
-{ };
-
-template <>
-struct is_integer<ushort> : std::true_type
-{ };
-
-template <>
-struct is_integer<uint> : std::true_type
-{ };
-
-template <>
-struct is_integer<ulong> : std::true_type
-{ };
-
-template <>
-struct is_integer<ulong64> : std::true_type
-{ };
-
-template <>
-struct is_integer<short> : std::true_type
-{ };
-
-template <>
-struct is_integer<int> : std::true_type
-{ };
-
-template <>
-struct is_integer<long> : std::true_type
-{ };
-
-template <>
-struct is_integer<long64> : std::true_type
-{ };
+template <typename> struct is_integer  : std::false_type { };
+template <> struct is_integer<ushort>  : std::true_type  { };
+template <> struct is_integer<uint>    : std::true_type  { };
+template <> struct is_integer<ulong>   : std::true_type  { };
+template <> struct is_integer<ulong64> : std::true_type  { };
+template <> struct is_integer<short>   : std::true_type  { };
+template <> struct is_integer<int>     : std::true_type  { };
+template <> struct is_integer<long>    : std::true_type  { };
+template <> struct is_integer<long64>  : std::true_type  { };
 
 // ====================================================
 

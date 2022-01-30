@@ -365,7 +365,7 @@ CookieFunction>
                 uint64_t,
                 SIGNATURE(xcb_dri3_get_supported_modifiers_window_modifiers),
                 SIGNATURE(xcb_dri3_get_supported_modifiers_window_modifiers_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -384,7 +384,7 @@ CookieFunction>
                 uint64_t,
                 SIGNATURE(xcb_dri3_get_supported_modifiers_screen_modifiers),
                 SIGNATURE(xcb_dri3_get_supported_modifiers_screen_modifiers_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_supported_modifiers
 
@@ -484,7 +484,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_dri3_buffers_from_pixmap_strides),
                 SIGNATURE(xcb_dri3_buffers_from_pixmap_strides_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -503,7 +503,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_dri3_buffers_from_pixmap_offsets),
                 SIGNATURE(xcb_dri3_buffers_from_pixmap_offsets_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -522,7 +522,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_dri3_buffers_from_pixmap_buffers),
                 SIGNATURE(xcb_dri3_buffers_from_pixmap_buffers_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class buffers_from_pixmap
 
@@ -806,8 +806,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -824,8 +824,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -838,7 +838,7 @@ public:
     typedef cppual::dri3::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::dri3::extension & extension)
@@ -851,7 +851,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

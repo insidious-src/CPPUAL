@@ -48,22 +48,22 @@ template<typename Iterator>
 struct value_iterator_base
 {
     value_iterator_base(const Iterator & iterator)
-        : m_iterator(iterator)
+        : _M_iterator(iterator)
     {}
 
     bool operator==(const value_iterator_base & other)
     {
-        return m_iterator == other.m_iterator;
+        return _M_iterator == other._M_iterator;
     }
 
     bool operator!=(const value_iterator_base & other)
     {
-        return m_iterator != other.m_iterator;
+        return _M_iterator != other._M_iterator;
     }
 
     void operator++(void)
     {
-        ++m_iterator;
+        ++_M_iterator;
     }
 
     template<typename Key, typename Value>
@@ -80,7 +80,7 @@ struct value_iterator_base
         return v;
     }
 
-    Iterator m_iterator;
+    Iterator _M_iterator;
 };
 
 template<typename Iterator>
@@ -101,7 +101,7 @@ struct value_iterator_pair
     const typename Iterator::value_type::second_type &
     operator*(void)
     {
-        return base::get_value(*base::m_iterator);
+        return base::get_value(*base::_M_iterator);
     }
 };
 
@@ -120,7 +120,7 @@ struct value_iterator_integral
     const typename Iterator::value_type &
     operator*(void)
     {
-        return base::get_value(*base::m_iterator);
+        return base::get_value(*base::_M_iterator);
     }
 };
 

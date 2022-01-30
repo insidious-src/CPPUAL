@@ -50,7 +50,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 #include <map> // std::multimap
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 // Forward declaration.
 template <typename Encoding, typename Allocator>
@@ -63,20 +63,20 @@ class GenericDocument;
     \ingroup RAPIDJSON_CONFIG
     \brief Allows to choose default allocator.
 
-    User can define this to use cppual::Memory::MemoryResource or MemoryPoolResource.
+    User can define this to use cppual::memory::memory_resource or MemoryPoolResource.
 */
 #ifndef RAPIDJSON_DEFAULT_ALLOCATOR
-#define RAPIDJSON_DEFAULT_ALLOCATOR MemoryPoolResource<cppual::Memory::MemoryResource>
+#define RAPIDJSON_DEFAULT_ALLOCATOR MemoryPoolResource<cppual::memory::memory_resource>
 #endif
 
 /*! \def RAPIDJSON_DEFAULT_STACK_ALLOCATOR
     \ingroup RAPIDJSON_CONFIG
     \brief Allows to choose default stack allocator for Document.
 
-    User can define this to use cppual::Memory::MemoryResource or MemoryPoolResource.
+    User can define this to use cppual::memory::memory_resource or MemoryPoolResource.
 */
 #ifndef RAPIDJSON_DEFAULT_STACK_ALLOCATOR
-#define RAPIDJSON_DEFAULT_STACK_ALLOCATOR cppual::Memory::MemoryResource
+#define RAPIDJSON_DEFAULT_STACK_ALLOCATOR cppual::memory::memory_resource
 #endif
 
 /*! \def RAPIDJSON_VALUE_DEFAULT_OBJECT_CAPACITY
@@ -2456,7 +2456,7 @@ private:
     }
 
     Data data_;
-    cppual::Memory::MemoryResource* ator_;
+    cppual::memory::memory_resource* ator_;
 };
 
 //! GenericValue with UTF8 encoding
@@ -2490,7 +2490,7 @@ public:
     explicit GenericDocument(Type type,
                              Allocator* allocator = static_cast<Allocator*>(memory_pool_resource()),
                              size_t stackCapacity = kDefaultStackCapacity,
-                             StackAllocator* stackAllocator = cppual::Memory::get_default_resource()) :
+                             StackAllocator* stackAllocator = cppual::memory::get_default_resource()) :
         GenericValue<Encoding, Allocator>(type),  allocator_(allocator), ownAllocator_(0), stack_(stackAllocator, stackCapacity), parseResult_()
     {
         if (!allocator_)
@@ -2505,7 +2505,7 @@ public:
     */
     GenericDocument(Allocator* allocator = static_cast<Allocator*>(memory_pool_resource()),
                     size_t stackCapacity = kDefaultStackCapacity,
-                    StackAllocator* stackAllocator = cppual::Memory::get_default_resource()) :
+                    StackAllocator* stackAllocator = cppual::memory::get_default_resource()) :
         allocator_(allocator), ownAllocator_(0), stack_(stackAllocator, stackCapacity), parseResult_()
     {
         if (!allocator_)
@@ -2530,7 +2530,7 @@ public:
     ~GenericDocument() {
         // Clear the ::ValueType before ownAllocator is destroyed, ~ValueType()
         // runs last and may access its elements or members which would be freed
-        // with an allocator like MemoryPoolResource (cppual::Memory::MemoryResource does not
+        // with an allocator like MemoryPoolResource (cppual::memory::memory_resource does not
         // free its data when destroyed, but MemoryPoolResource does).
         if (ownAllocator_) {
             ValueType::SetNull();

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,16 +26,16 @@
 
 #define  API_EXPORT
 #include "xinput.h"
-#include "xsurface.h"
+#include "xwindow.h"
 #include "xbackend.h"
 
-namespace cppual { namespace Ui { namespace Platform {
+namespace cppual { namespace ui { namespace platform {
 
-struct XFactory final : Factory
+struct XFactory final : factory
 {
     shared_queue   createQueueInstance ();
     shared_display connectDisplay      (string_type const&);
-    shared_window  createWindow        (Rect const&, u32, IDisplay*);
+    shared_window  createWindow        (rect const&, u32, shared_display);
 };
 
 shared_display XFactory::connectDisplay (string_type const& name)
@@ -48,7 +48,7 @@ shared_queue XFactory::createQueueInstance ()
     return shared_queue (new XQueue);
 }
 
-shared_window XFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
+shared_window XFactory::createWindow (rect const& gRect, u32 nScreen, shared_display pDisplay)
 {
     return shared_window (new XWindow (gRect, nScreen, pDisplay));
 }
@@ -57,17 +57,17 @@ shared_window XFactory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* 
 
 // =========================================================
 
-using cppual::Process::PluginManager;
-using cppual::Ui::Platform::Factory ;
-using cppual::Ui::Platform::XFactory;
-using cppual::Process::Plugin       ;
-using cppual::Memory::MemoryResource;
-using cppual::Memory::StaticResource;
-using cppual::Memory::Allocator     ;
+using cppual::process::plugin_manager;
+using cppual::ui::platform::factory ;
+using cppual::ui::platform::XFactory;
+using cppual::process::Plugin       ;
+using cppual::memory::memory_resource;
+using cppual::memory::stacked_static_resource;
+using cppual::memory::allocator     ;
 
-extern "C" Plugin* plugin_main (MemoryResource* /*rc*/)
+extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
 {
-    static StaticResource<sizeof (XFactory)> static_resource;
+    static stacked_static_resource<sizeof (XFactory)> static_resource;
     static Plugin plugin;
 
     plugin.name     = "XFactory"       ;
@@ -77,7 +77,7 @@ extern "C" Plugin* plugin_main (MemoryResource* /*rc*/)
     plugin.verMinor = 0                ;
 
     plugin.iface    = std::static_pointer_cast<void>
-            (std::allocate_shared<XFactory>(Allocator<XFactory>(static_resource)));
+            (std::allocate_shared<XFactory>(allocator<XFactory>(static_resource)));
 
     return &plugin;
 }

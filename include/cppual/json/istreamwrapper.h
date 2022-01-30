@@ -27,7 +27,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4351) // new behavior: elements of array 'array' will be default initialized
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! Wrapper of \c std::basic_istream into RapidJSON's Stream concept.
 /*!

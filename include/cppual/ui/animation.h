@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,44 +23,44 @@
 #define CPPUAL_GFX_ANIMATION_H_
 #ifdef __cplusplus
 
-#include <atomic>
 #include <cppual/ui/wm.h>
 
-using std::atomic_bool;
+#include <atomic>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class IAnimation : public NonCopyAssignable
+class animation_interface : public non_copy_assignable
 {
 public:
-    static  float defaultSpeed;
-    virtual float speed    () const = 0;
-    virtual void  setSpeed (float speed) = 0;
-    virtual void  play     (int repeat_num = 0) = 0;
-    virtual void  cancel   () = 0;
-    virtual void  pause    () = 0;
-    virtual void  resume   () = 0;
+    virtual float speed     () const = 0;
+    virtual void  set_speed (float speed) = 0;
+    virtual void  play      (int repeat_num = 0) = 0;
+    virtual void  cancel    () = 0;
+    virtual void  pause     () = 0;
+    virtual void  resume    () = 0;
 };
 
-class AnimationBase : public IAnimation
+class animation_base : public animation_interface
 {
 public:
+    typedef std::atomic_bool bool_type;
+
     inline float speed () const noexcept
-    { return m_fSpeed; }
+    { return _M_fSpeed; }
 
     inline void cancel () noexcept
-    { m_bIsPlaying.store (true, std::memory_order_relaxed); }
+    { _M_bIsPlaying.store (true, std::memory_order_relaxed); }
 
-    inline void setSpeed (float fSpeed) noexcept
-    { if (!m_bIsPlaying.load ()) m_fSpeed = fSpeed; }
+    inline void set_speed (float fSpeed) noexcept
+    { if (!_M_bIsPlaying.load ()) _M_fSpeed = fSpeed; }
 
 protected:
-    IPlatformWindow*    m_pObject;
-    float       m_fSpeed;
-    atomic_bool m_bIsPlaying;
+    platform_wnd_interface* _M_pObject   ;
+    float                   _M_fSpeed    ;
+    bool_type               _M_bIsPlaying;
 };
 
-class Motion final : public AnimationBase
+class motion final : public animation_base
 {
 public:
     void play   (int);
@@ -68,7 +68,7 @@ public:
     void resume ();
 };
 
-class Fade final : public AnimationBase
+class fade final : public animation_base
 {
 public:
     void play   (int);
@@ -76,7 +76,7 @@ public:
     void resume ();
 };
 
-class Rotation final : public AnimationBase
+class rotation final : public animation_base
 {
 public:
     void play   (int);
@@ -84,7 +84,7 @@ public:
     void resume ();
 };
 
-class Pulse final : public AnimationBase
+class pulse final : public animation_base
 {
 public:
     void play   (int);

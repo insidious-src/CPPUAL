@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,33 +25,33 @@
 
 #include <cppual/network/protocols/protocol.h>
 
-namespace cppual { namespace Network { namespace P2P {
+namespace cppual { namespace network { namespace p2p {
 
-class BaseClient : public IProtocol
+class BaseClient : public Protocol
 {
 public:
-    void startSession  (ProtocolContext&, Packet& outgoing_packet);
-    bool readData      (ProtocolContext&, Packet& incoming_packet);
-    byte tryDecode     (ProtocolContext&, Packet& output_packet);
-    byte encodeContent (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    void start_session  (ProtocolContext&, Packet& outgoing_packet);
+    bool read_data      (ProtocolContext&, Packet& incoming_packet);
+    byte try_decode     (ProtocolContext&, Packet& output_packet);
+    byte encode_content (ProtocolContext&, Packet& input_packet, Packet& output_packet);
 };
 
-class TorrentClient : public IProtocol
+class TorrentClient : public Protocol
 {
 public:
-    void startSession  (ProtocolContext&, Packet& outgoing_packet);
-    bool readData      (ProtocolContext&, Packet& incoming_packet);
-    byte tryDecode     (ProtocolContext&, Packet& output_packet);
-    byte encodeContent (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    void start_session  (ProtocolContext&, Packet& outgoing_packet);
+    bool read_data      (ProtocolContext&, Packet& incoming_packet);
+    byte try_decode     (ProtocolContext&, Packet& output_packet);
+    byte encode_content (ProtocolContext&, Packet& input_packet, Packet& output_packet);
 };
 
-class MagnetClient : public IProtocol
+class MagnetClient : public Protocol
 {
 public:
-    void startSession  (ProtocolContext&, Packet& outgoing_packet);
-    bool readData      (ProtocolContext&, Packet& incoming_packet);
-    byte tryDecode     (ProtocolContext&, Packet& output_packet);
-    byte encodeContent (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    void start_session  (ProtocolContext&, Packet& outgoing_packet);
+    bool read_data      (ProtocolContext&, Packet& incoming_packet);
+    byte try_decode     (ProtocolContext&, Packet& output_packet);
+    byte encode_content (ProtocolContext&, Packet& input_packet, Packet& output_packet);
 };
 
 } } } // P2P

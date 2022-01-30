@@ -61,7 +61,7 @@ class pict_format
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class pict_format
 } // namespace error
 
@@ -97,7 +97,7 @@ class picture
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class picture
 } // namespace error
 
@@ -133,7 +133,7 @@ class pict_op
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class pict_op
 } // namespace error
 
@@ -169,7 +169,7 @@ class glyph_set
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class glyph_set
 } // namespace error
 
@@ -205,7 +205,7 @@ class glyph
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class glyph
 } // namespace error
 
@@ -317,7 +317,7 @@ class query_pict_formats
                                                        ::xcb_render_pictforminfo_t,
                                                        SIGNATURE(xcb_render_query_pict_formats_formats),
                                                        SIGNATURE(xcb_render_query_pict_formats_formats_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -338,7 +338,7 @@ class query_pict_formats
                                                        SIGNATURE(xcb_render_pictscreen_next),
                                                        SIGNATURE(xcb_render_pictscreen_sizeof),
                                                        SIGNATURE(xcb_render_query_pict_formats_screens_iterator)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -357,7 +357,7 @@ class query_pict_formats
                                                        uint32_t,
                                                        SIGNATURE(xcb_render_query_pict_formats_subpixels),
                                                        SIGNATURE(xcb_render_query_pict_formats_subpixels_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_pict_formats
 
@@ -439,7 +439,7 @@ class query_pict_index_values
                                                        ::xcb_render_indexvalue_t,
                                                        SIGNATURE(xcb_render_query_pict_index_values_values),
                                                        SIGNATURE(xcb_render_query_pict_index_values_values_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_pict_index_values
 
@@ -1145,7 +1145,7 @@ class query_filters
                                                        uint16_t,
                                                        SIGNATURE(xcb_render_query_filters_aliases),
                                                        SIGNATURE(xcb_render_query_filters_aliases_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 
 
@@ -1166,7 +1166,7 @@ class query_filters
                                                        SIGNATURE(xcb_str_next),
                                                        SIGNATURE(xcb_str_sizeof),
                                                        SIGNATURE(xcb_render_query_filters_filters_iterator)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_filters
 
@@ -2394,8 +2394,8 @@ class dispatcher
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-      : m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      : _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -2412,8 +2412,8 @@ class dispatcher
     }
 
   protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -2426,7 +2426,7 @@ class dispatcher
     typedef cppual::render::extension extension;
 
     dispatcher(uint8_t first_error)
-      : m_first_error(first_error)
+      : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::render::extension & extension)
@@ -2436,7 +2436,7 @@ class dispatcher
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-      switch (error->error_code - m_first_error) {
+      switch (error->error_code - _M_first_error) {
 
         case XCB_RENDER_PICT_FORMAT: // 0
           throw cppual::render::error::pict_format(error);
@@ -2457,7 +2457,7 @@ class dispatcher
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

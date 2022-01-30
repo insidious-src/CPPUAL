@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 //using std::u16string;
 //using std::u32string;
 
-namespace cppual { namespace Process {
+namespace cppual { namespace process {
 
 enum class PipeType : unsigned char
 {
@@ -43,7 +43,7 @@ enum class PipeType : unsigned char
     Network
 };
 
-class Pipe : public NonCopyable
+class Pipe : public non_copyable
 {
 public:
     Pipe () = delete;
@@ -54,10 +54,10 @@ public:
     void setBlocking (bool) noexcept;
 
     inline bool isBlocking () const noexcept
-    { return m_bIsBlocking; }
+    { return _M_bIsBlocking; }
 
 private:
-    bool m_bIsBlocking;
+    bool _M_bIsBlocking;
 };
 
 } } // namespace Process

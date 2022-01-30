@@ -137,7 +137,7 @@ class query_clients
                                                        ::xcb_res_client_t,
                                                        SIGNATURE(xcb_res_query_clients_clients),
                                                        SIGNATURE(xcb_res_query_clients_clients_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_clients
 
@@ -219,7 +219,7 @@ class query_client_resources
                                                        ::xcb_res_type_t,
                                                        SIGNATURE(xcb_res_query_client_resources_types),
                                                        SIGNATURE(xcb_res_query_client_resources_types_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_client_resources
 
@@ -367,7 +367,7 @@ class query_client_ids
                                                        SIGNATURE(xcb_res_client_id_value_next),
                                                        SIGNATURE(xcb_res_client_id_value_sizeof),
                                                        SIGNATURE(xcb_res_query_client_ids_ids_iterator)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_client_ids
 
@@ -451,7 +451,7 @@ class query_resource_bytes
                                                        SIGNATURE(xcb_res_resource_size_value_next),
                                                        SIGNATURE(xcb_res_resource_size_value_sizeof),
                                                        SIGNATURE(xcb_res_query_resource_bytes_sizes_iterator)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class query_resource_bytes
 
@@ -684,8 +684,8 @@ class dispatcher
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-      : m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      : _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -702,8 +702,8 @@ class dispatcher
     }
 
   protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -716,7 +716,7 @@ class dispatcher
     typedef cppual::res::extension extension;
 
     dispatcher(uint8_t first_error)
-      : m_first_error(first_error)
+      : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::res::extension & extension)
@@ -729,7 +729,7 @@ class dispatcher
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

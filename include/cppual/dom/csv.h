@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,35 +24,34 @@
 #ifdef __cplusplus
 
 #include <cppual/string.h>
-
-#include <vector>
+#include <cppual/containers.h>
 
 namespace cppual {
 
-class CSVParser
+class csv_parser
 {
 public:
-    typedef string                                string_type;
-    typedef std::vector<std::vector<string_type>> vector_type;
-    typedef std::size_t                           size_type  ;
+    typedef string                           string_type;
+    typedef vector<std::vector<string_type>> vector_type;
+    typedef std::size_t                      size_type  ;
 
     bool append (string_type const& file_path);
 
-    CSVParser& operator += (string_type const& file_path)
+    csv_parser& operator += (string_type const& file_path)
     { append(file_path); return *this; }
 
-    size_type lineCount () const noexcept
-    { return m_data.size(); }
+    size_type line_count () const noexcept
+    { return _M_data.size(); }
 
-    size_type fieldCount () const noexcept
-    { return m_data.empty() ? size_type () : m_data[0].size(); }
+    size_type field_count () const noexcept
+    { return _M_data.empty() ? size_type () : _M_data[0].size(); }
 
     template <size_type N>
     string_type get (size_type idx) const
-    { return m_data[idx][N]; }
+    { return _M_data[idx][N]; }
 
 private:
-    vector_type m_data;
+    vector_type _M_data;
 };
 
 } // namespace cppual

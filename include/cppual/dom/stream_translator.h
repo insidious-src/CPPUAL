@@ -188,12 +188,12 @@ namespace boost { namespace property_tree
         typedef E external_type;
 
         explicit stream_translator(std::locale loc = std::locale())
-            : m_loc(loc)
+            : _M_loc(loc)
         {}
 
         boost::optional<E> get_value(const internal_type &v) {
             std::basic_istringstream<Ch, Traits, Alloc> iss(v);
-            iss.imbue(m_loc);
+            iss.imbue(_M_loc);
             E e;
             customized::extract(iss, e);
             if(iss.fail() || iss.bad() || iss.get() != Traits::eof()) {
@@ -203,7 +203,7 @@ namespace boost { namespace property_tree
         }
         boost::optional<internal_type> put_value(const E &v) {
             std::basic_ostringstream<Ch, Traits, Alloc> oss;
-            oss.imbue(m_loc);
+            oss.imbue(_M_loc);
             customized::insert(oss, v);
             if(oss) {
                 return oss.str();
@@ -212,7 +212,7 @@ namespace boost { namespace property_tree
         }
 
     private:
-        std::locale m_loc;
+        std::locale _M_loc;
     };
 
     // This is the default translator when basic_string is the internal type.

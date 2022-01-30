@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,66 +26,65 @@
 #include <cppual/multimedia/audio/al/albuffer.h>
 
 #include <mutex>
-#include <deque>
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-class SoundSource : public Object
+class sound_source : public object
 {
 public:
-    typedef std::deque<SoundBuffer*> queue_type;
-    typedef std::size_t              size_type ;
+    typedef deque<sound_buffer*> queue_type;
+    typedef std::size_t          size_type ;
 
-    SoundSource () noexcept;
-    SoundSource (SoundBuffer&) noexcept;
+    sound_source () noexcept;
+    sound_source (sound_buffer&) noexcept;
 
-    explicit SoundSource (SoundSource&&) noexcept;
-    explicit SoundSource (SoundSource const&) noexcept;
-    SoundSource& operator = (SoundSource&&) noexcept;
-    SoundSource& operator = (SoundSource const&) noexcept;
-    ~SoundSource () noexcept;
+    explicit sound_source (sound_source&&) noexcept;
+    explicit sound_source (sound_source const&) noexcept;
+    sound_source& operator = (sound_source&&) noexcept;
+    sound_source& operator = (sound_source const&) noexcept;
+    ~sound_source () noexcept;
 
-    SoundState state () const noexcept;
+    sound_state state () const noexcept;
 
-    void  play      () noexcept;
-    void  replay    () noexcept;
-    void  pause     () noexcept;
-    void  stop      () noexcept;
-    void  rewind    () noexcept;
-    bool  isPlaying () const noexcept;
+    void  play       () noexcept;
+    void  replay     () noexcept;
+    void  pause      () noexcept;
+    void  stop       () noexcept;
+    void  rewind     () noexcept;
+    bool  is_playing () const noexcept;
 
-    void  setLooping (bool value) noexcept;
-    bool  isLooping  () const noexcept;
+    void  set_looping (bool value) noexcept;
+    bool  is_looping  () const noexcept;
 
-    void  enqueue (SoundBuffer&) noexcept;
-    bool  attach  (SoundBuffer&) noexcept;
+    void  enqueue (sound_buffer&) noexcept;
+    bool  attach  (sound_buffer&) noexcept;
     void  detach  () noexcept;
 
-    void  setVolume (float value) noexcept;
-    float getVolume () const noexcept;
+    void  set_volume (float value) noexcept;
+    float volume () const noexcept;
 
-    void  setPlayingSpeed  (float value) noexcept;
-    float playingSpeed     () const noexcept;
-    void  setPlayingOffset (std::chrono::seconds value) noexcept;
-    int   playingOffset    () noexcept;
-    void  setSampleOffset  (float value) noexcept;
-    void  setByteOffset    (float value) noexcept;
+    void  set_playing_speed  (float value) noexcept;
+    float playing_speed      () const noexcept;
+    void  set_playing_offset (std::chrono::seconds value) noexcept;
+    int   playing_offset     () noexcept;
+    void  set_sample_offset  (float value) noexcept;
+    void  set_byte_offset    (float value) noexcept;
 
-    void  mute () noexcept;
+    void  mute   () noexcept;
     void  unmute () noexcept;
 
-    inline SoundBuffer* buffer () const noexcept { return m_pBuffer;  }
-    inline void         clear  ()       noexcept { m_gQueue.clear (); }
+    inline sound_buffer* buffer () const noexcept { return _M_pBuffer;  }
+    inline void          clear  ()       noexcept { _M_gQueue.clear (); }
 
 protected:
-    queue_type         m_gQueue;
-    std::mutex mutable m_gMutex;
-    SoundBuffer*       m_pBuffer;
-    size_type          m_uBufferSlot;
-    float              m_fVolume;
+    queue_type         _M_gQueue;
+    std::mutex mutable _M_gMutex;
+    sound_buffer*      _M_pBuffer;
+    size_type          _M_uBufferSlot;
+    float              _M_fVolume;
 
-    void onDetach () noexcept;
-    friend class SoundBuffer;
+    void on_detach () noexcept;
+    friend class sound_buffer;
 };
 
 } } } // namespace Audio

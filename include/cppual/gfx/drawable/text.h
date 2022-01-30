@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,61 +26,61 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/gfx/font.h>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-class Label2D final : public IDrawable2D, public ITransformable2D
+class label2d final : public drawable2d_interface, public transformable2d_interface
 {
 public:
-    using Styles = Font::Styles;
-    typedef string string_type;
+    typedef font::styles styles     ;
+    typedef string       string_type;
 
-    Label2D ();
-    Label2D (string_type const&, Font&);
-    Label2D (Label2D const&);
-    Label2D (Label2D&&) noexcept;
-    Label2D& operator = (Label2D const&);
-    Label2D& operator = (Label2D&&) noexcept;
-    void draw (Transform2D const&);
+    label2d ();
+    label2d (string_type const&, font&);
+    label2d (label2d const&);
+    label2d (label2d&&) noexcept;
+    label2d& operator = (label2d const&);
+    label2d& operator = (label2d&&) noexcept;
+    void draw (transform2d const&);
 
-    DeviceType  type     ()                   const noexcept { return DeviceType::GL; }
-    string_type text     ()                   const noexcept { return m_gText;        }
-    Styles      style    ()                   const noexcept { return m_gStyle;       }
-    void        setStyle (Styles gStyle)            noexcept { m_gStyle = gStyle;     }
-    void        setText  (string_type const& gText) noexcept { m_gText  = gText;      }
+    device_backend type     ()                    const noexcept { return device_backend::gl; }
+    string_type    text     ()                    const noexcept { return _M_gText;           }
+    styles         style    ()                    const noexcept { return _M_gStyle;          }
+    void           set_style (styles gStyle)            noexcept { _M_gStyle = gStyle;        }
+    void           set_text  (string_type const& gText) noexcept { _M_gText  = gText;         }
 
 private:
-    Font*       m_pFont;
-    string_type m_gText;
-    Styles      m_gStyle;
+    font*       _M_pFont ;
+    string_type _M_gText ;
+    styles      _M_gStyle;
 };
 
 // =========================================================
 
-class Label3D final : public IDrawable3D, public ITransformable3D
+class label3d final : public drawable3d_interface, public transformable3d_interface
 {
 public:
-    using Styles = Font::Styles;
-    typedef string string_type;
+    typedef font::styles styles     ;
+    typedef string       string_type;
 
-    Label3D ();
-    Label3D (string_type const&, Font const& = Font ());
-    Label3D (string_type&&, Font const& = Font ()) noexcept;
-    Label3D (Label3D const&);
-    Label3D (Label3D&&) noexcept;
-    Label3D& operator = (Label3D const&);
-    Label3D& operator = (Label3D&&) noexcept;
-    void draw (Transform3D const&);
+    label3d ();
+    label3d (string_type const& text, font const& = font ());
+    label3d (string_type&& text, font const& = font ()) noexcept;
+    label3d (label3d const&);
+    label3d (label3d&&) noexcept;
+    label3d& operator = (label3d const&);
+    label3d& operator = (label3d&&) noexcept;
+    void draw (transform3d const&);
 
-    DeviceType  type     ()                   const noexcept { return DeviceType::GL; }
-    string_type text     ()                   const noexcept { return m_gText;        }
-    Styles      style    ()                   const noexcept { return m_gStyle;       }
-    void        setStyle (Styles gStyle)            noexcept { m_gStyle = gStyle;     }
-    void        setText  (string_type const& gText) noexcept { m_gText  = gText;      }
+    device_backend type      ()                   const noexcept { return device_backend::gl; }
+    string_type    text      ()                   const noexcept { return _M_gText;           }
+    styles         style     ()                   const noexcept { return _M_gStyle;          }
+    void           set_style (styles gStyle)            noexcept { _M_gStyle = gStyle;        }
+    void           set_text  (string_type const& gText) noexcept { _M_gText  = gText;         }
 
 private:
-    Font*       m_pFont;
-    string_type m_gText;
-    Styles      m_gStyle;
+    font*       _M_pFont ;
+    string_type _M_gText ;
+    styles      _M_gStyle;
 };
 
 } } // Graphics

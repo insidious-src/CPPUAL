@@ -39,7 +39,7 @@ public:
     key_press(C && c,
               const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~key_press(void) {}
@@ -62,7 +62,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -75,7 +75,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -88,13 +88,13 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class key_press
 
 
@@ -116,7 +116,7 @@ public:
     key_release(C && c,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~key_release(void) {}
@@ -139,7 +139,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -152,7 +152,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -165,13 +165,13 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class key_release
 
 
@@ -193,7 +193,7 @@ public:
     button_press(C && c,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~button_press(void) {}
@@ -216,7 +216,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -229,7 +229,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -242,13 +242,13 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class button_press
 
 
@@ -270,7 +270,7 @@ public:
     button_release(C && c,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~button_release(void) {}
@@ -293,7 +293,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -306,7 +306,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -319,13 +319,13 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class button_release
 
 
@@ -347,7 +347,7 @@ public:
     motion_notify(C && c,
                   const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~motion_notify(void) {}
@@ -370,7 +370,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -383,7 +383,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -396,13 +396,13 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class motion_notify
 
 
@@ -424,7 +424,7 @@ public:
     enter_notify(C && c,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~enter_notify(void) {}
@@ -447,7 +447,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -460,7 +460,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -473,13 +473,13 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class enter_notify
 
 
@@ -501,7 +501,7 @@ public:
     leave_notify(C && c,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~leave_notify(void) {}
@@ -524,7 +524,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -537,7 +537,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -550,13 +550,13 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class leave_notify
 
 
@@ -578,7 +578,7 @@ public:
     focus_in(C && c,
              const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~focus_in(void) {}
@@ -601,13 +601,13 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class focus_in
 
 
@@ -629,7 +629,7 @@ public:
     focus_out(C && c,
               const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~focus_out(void) {}
@@ -652,13 +652,13 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class focus_out
 
 
@@ -680,7 +680,7 @@ public:
     keymap_notify(C && c,
                   const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~keymap_notify(void) {}
@@ -695,7 +695,7 @@ public:
         return string("XCB_KEYMAP_NOTIFY");
     }
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class keymap_notify
 } // namespace event
 
@@ -714,7 +714,7 @@ public:
     expose(C && c,
            const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~expose(void) {}
@@ -737,13 +737,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class expose
 
 
@@ -765,7 +765,7 @@ public:
     graphics_exposure(C && c,
                       const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~graphics_exposure(void) {}
@@ -788,13 +788,13 @@ public:
         decltype((*this)->drawable),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->drawable,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class graphics_exposure
 
 
@@ -816,7 +816,7 @@ public:
     no_exposure(C && c,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~no_exposure(void) {}
@@ -839,13 +839,13 @@ public:
         decltype((*this)->drawable),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->drawable,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class no_exposure
 
 
@@ -867,7 +867,7 @@ public:
     visibility_notify(C && c,
                       const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~visibility_notify(void) {}
@@ -890,13 +890,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class visibility_notify
 
 
@@ -918,7 +918,7 @@ public:
     create_notify(C && c,
                   const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~create_notify(void) {}
@@ -941,7 +941,7 @@ public:
         decltype((*this)->parent),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->parent,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -954,13 +954,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class create_notify
 
 
@@ -982,7 +982,7 @@ public:
     destroy_notify(C && c,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~destroy_notify(void) {}
@@ -1005,7 +1005,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1018,13 +1018,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class destroy_notify
 
 
@@ -1046,7 +1046,7 @@ public:
     unmap_notify(C && c,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~unmap_notify(void) {}
@@ -1069,7 +1069,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1082,13 +1082,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class unmap_notify
 
 
@@ -1110,7 +1110,7 @@ public:
     map_notify(C && c,
                const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~map_notify(void) {}
@@ -1133,7 +1133,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1146,13 +1146,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class map_notify
 
 
@@ -1174,7 +1174,7 @@ public:
     map_request(C && c,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~map_request(void) {}
@@ -1197,7 +1197,7 @@ public:
         decltype((*this)->parent),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->parent,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1210,13 +1210,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class map_request
 
 
@@ -1238,7 +1238,7 @@ public:
     reparent_notify(C && c,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~reparent_notify(void) {}
@@ -1261,7 +1261,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1274,7 +1274,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1287,13 +1287,13 @@ public:
         decltype((*this)->parent),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->parent,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class reparent_notify
 
 
@@ -1315,7 +1315,7 @@ public:
     configure_notify(C && c,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~configure_notify(void) {}
@@ -1338,7 +1338,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1351,7 +1351,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1364,13 +1364,13 @@ public:
         decltype((*this)->above_sibling),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->above_sibling,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class configure_notify
 
 
@@ -1392,7 +1392,7 @@ public:
     configure_request(C && c,
                       const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~configure_request(void) {}
@@ -1415,7 +1415,7 @@ public:
         decltype((*this)->parent),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->parent,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1428,7 +1428,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1441,13 +1441,13 @@ public:
         decltype((*this)->sibling),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->sibling,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class configure_request
 
 
@@ -1469,7 +1469,7 @@ public:
     gravity_notify(C && c,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~gravity_notify(void) {}
@@ -1492,7 +1492,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1505,13 +1505,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class gravity_notify
 
 
@@ -1533,7 +1533,7 @@ public:
     resize_request(C && c,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~resize_request(void) {}
@@ -1556,13 +1556,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class resize_request
 
 
@@ -1584,7 +1584,7 @@ public:
     circulate_notify(C && c,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~circulate_notify(void) {}
@@ -1607,7 +1607,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1620,13 +1620,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class circulate_notify
 
 
@@ -1648,7 +1648,7 @@ public:
     circulate_request(C && c,
                       const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~circulate_request(void) {}
@@ -1671,7 +1671,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1684,13 +1684,13 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class circulate_request
 
 
@@ -1712,7 +1712,7 @@ public:
     property_notify(C && c,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~property_notify(void) {}
@@ -1735,7 +1735,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1748,13 +1748,13 @@ public:
         decltype((*this)->atom),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->atom,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class property_notify
 
 
@@ -1776,7 +1776,7 @@ public:
     selection_clear(C && c,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~selection_clear(void) {}
@@ -1799,7 +1799,7 @@ public:
         decltype((*this)->owner),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->owner,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1812,13 +1812,13 @@ public:
         decltype((*this)->selection),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->selection,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class selection_clear
 
 
@@ -1840,7 +1840,7 @@ public:
     selection_request(C && c,
                       const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~selection_request(void) {}
@@ -1863,7 +1863,7 @@ public:
         decltype((*this)->owner),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->owner,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1876,7 +1876,7 @@ public:
         decltype((*this)->requestor),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->requestor,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1889,7 +1889,7 @@ public:
         decltype((*this)->selection),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->selection,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1902,7 +1902,7 @@ public:
         decltype((*this)->target),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->target,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1915,13 +1915,13 @@ public:
         decltype((*this)->property),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->property,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class selection_request
 
 
@@ -1943,7 +1943,7 @@ public:
     selection_notify(C && c,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~selection_notify(void) {}
@@ -1966,7 +1966,7 @@ public:
         decltype((*this)->requestor),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->requestor,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1979,7 +1979,7 @@ public:
         decltype((*this)->selection),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->selection,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1992,7 +1992,7 @@ public:
         decltype((*this)->target),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->target,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2005,13 +2005,13 @@ public:
         decltype((*this)->property),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->property,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class selection_notify
 
 
@@ -2033,7 +2033,7 @@ public:
     colormap_notify(C && c,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~colormap_notify(void) {}
@@ -2056,7 +2056,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2069,13 +2069,13 @@ public:
         decltype((*this)->colormap),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->colormap,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class colormap_notify
 
 
@@ -2097,7 +2097,7 @@ public:
     client_message(C && c,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~client_message(void) {}
@@ -2120,7 +2120,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2133,13 +2133,13 @@ public:
         decltype((*this)->type),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->type,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class client_message
 
 
@@ -2161,7 +2161,7 @@ public:
     mapping_notify(C && c,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~mapping_notify(void) {}
@@ -2176,7 +2176,7 @@ public:
         return string("XCB_MAPPING_NOTIFY");
     }
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class mapping_notify
 } // namespace event
 
@@ -2195,7 +2195,7 @@ public:
     ge_generic(C && c,
                const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
+        , _M_c(std::forward<C>(c))
     {}
 
     virtual ~ge_generic(void) {}
@@ -2210,7 +2210,7 @@ public:
         return string("XCB_GE_GENERIC");
     }
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class ge_generic
 } // namespace event
 
@@ -2679,7 +2679,7 @@ CookieFunction>
         decltype(this->get()->colormap),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->colormap,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2936,7 +2936,7 @@ CookieFunction>
         decltype(this->get()->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3021,7 +3021,7 @@ CookieFunction>
                 Children,
                 SIGNATURE(xcb_query_tree_children),
                 SIGNATURE(xcb_query_tree_children_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -3032,7 +3032,7 @@ CookieFunction>
         decltype(this->get()->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3045,7 +3045,7 @@ CookieFunction>
         decltype(this->get()->parent),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->parent,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3135,7 +3135,7 @@ CookieFunction>
         decltype(this->get()->atom),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->atom,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3352,7 +3352,7 @@ CookieFunction>
                 Type,
                 SIGNATURE(xcb_get_property_value),
                 SIGNATURE(xcb_get_property_value_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_atom_t, typename ... Parameter>
@@ -3363,7 +3363,7 @@ CookieFunction>
         decltype(this->get()->type),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->type,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3448,7 +3448,7 @@ CookieFunction>
                 Atoms,
                 SIGNATURE(xcb_list_properties_atoms),
                 SIGNATURE(xcb_list_properties_atoms_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_properties
 
@@ -3539,7 +3539,7 @@ CookieFunction>
         decltype(this->get()->owner),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->owner,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3985,7 +3985,7 @@ CookieFunction>
         decltype(this->get()->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3998,7 +3998,7 @@ CookieFunction>
         decltype(this->get()->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->child,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -4088,7 +4088,7 @@ CookieFunction>
                 ::xcb_timecoord_t,
                 SIGNATURE(xcb_get_motion_events_events),
                 SIGNATURE(xcb_get_motion_events_events_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_motion_events
 
@@ -4163,7 +4163,7 @@ CookieFunction>
         decltype(this->get()->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->child,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -4274,7 +4274,7 @@ CookieFunction>
         decltype(this->get()->focus),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->focus,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -4472,7 +4472,7 @@ CookieFunction>
                 ::xcb_fontprop_t,
                 SIGNATURE(xcb_query_font_properties),
                 SIGNATURE(xcb_query_font_properties_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -4491,7 +4491,7 @@ CookieFunction>
                 ::xcb_charinfo_t,
                 SIGNATURE(xcb_query_font_char_infos),
                 SIGNATURE(xcb_query_font_char_infos_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_font
 
@@ -4671,7 +4671,7 @@ CookieFunction>
                 SIGNATURE(xcb_str_next),
                 SIGNATURE(xcb_str_sizeof),
                 SIGNATURE(xcb_list_fonts_names_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_fonts
 
@@ -4766,7 +4766,7 @@ CookieFunction>
                 ::xcb_fontprop_t,
                 SIGNATURE(xcb_list_fonts_with_info_properties),
                 SIGNATURE(xcb_list_fonts_with_info_properties_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -4877,7 +4877,7 @@ CookieFunction>
                 SIGNATURE(xcb_str_next),
                 SIGNATURE(xcb_str_sizeof),
                 SIGNATURE(xcb_get_font_path_path_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_font_path
 
@@ -5583,7 +5583,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_get_image_data),
                 SIGNATURE(xcb_get_image_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_image
 
@@ -5876,7 +5876,7 @@ CookieFunction>
                 Cmaps,
                 SIGNATURE(xcb_list_installed_colormaps_cmaps),
                 SIGNATURE(xcb_list_installed_colormaps_cmaps_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_installed_colormaps
 
@@ -6099,7 +6099,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_alloc_color_cells_pixels),
                 SIGNATURE(xcb_alloc_color_cells_pixels_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -6118,7 +6118,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_alloc_color_cells_masks),
                 SIGNATURE(xcb_alloc_color_cells_masks_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class alloc_color_cells
 
@@ -6200,7 +6200,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_alloc_color_planes_pixels),
                 SIGNATURE(xcb_alloc_color_planes_pixels_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class alloc_color_planes
 
@@ -6417,7 +6417,7 @@ CookieFunction>
                 ::xcb_rgb_t,
                 SIGNATURE(xcb_query_colors_colors),
                 SIGNATURE(xcb_query_colors_colors_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_colors
 
@@ -6791,7 +6791,7 @@ CookieFunction>
                 SIGNATURE(xcb_str_next),
                 SIGNATURE(xcb_str_sizeof),
                 SIGNATURE(xcb_list_extensions_names_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_extensions
 
@@ -6891,7 +6891,7 @@ CookieFunction>
                 ::xcb_keysym_t,
                 SIGNATURE(xcb_get_keyboard_mapping_keysyms),
                 SIGNATURE(xcb_get_keyboard_mapping_keysyms_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_keyboard_mapping
 
@@ -7281,7 +7281,7 @@ CookieFunction>
                 SIGNATURE(xcb_host_next),
                 SIGNATURE(xcb_host_sizeof),
                 SIGNATURE(xcb_list_hosts_hosts_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_hosts
 
@@ -7536,7 +7536,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_get_pointer_mapping_map),
                 SIGNATURE(xcb_get_pointer_mapping_map_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_pointer_mapping
 
@@ -7682,7 +7682,7 @@ CookieFunction>
                 ::xcb_keycode_t,
                 SIGNATURE(xcb_get_modifier_mapping_keycodes),
                 SIGNATURE(xcb_get_modifier_mapping_keycodes_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_modifier_mapping
 
@@ -11379,7 +11379,7 @@ public:
 
     template<typename C>
     dispatcher(C && c)
-        : m_c(std::forward<C>(c))
+        : _M_c(std::forward<C>(c))
     {}
 
     template<typename Handler>
@@ -11390,139 +11390,139 @@ public:
         switch (event->response_type & ~0x80) {
 
         case XCB_KEY_PRESS:
-            handler(cppual::x::event::key_press<Connection>(m_c, event));
+            handler(cppual::x::event::key_press<Connection>(_M_c, event));
             return true;
 
         case XCB_KEY_RELEASE:
-            handler(cppual::x::event::key_release<Connection>(m_c, event));
+            handler(cppual::x::event::key_release<Connection>(_M_c, event));
             return true;
 
         case XCB_BUTTON_PRESS:
-            handler(cppual::x::event::button_press<Connection>(m_c, event));
+            handler(cppual::x::event::button_press<Connection>(_M_c, event));
             return true;
 
         case XCB_BUTTON_RELEASE:
-            handler(cppual::x::event::button_release<Connection>(m_c, event));
+            handler(cppual::x::event::button_release<Connection>(_M_c, event));
             return true;
 
         case XCB_MOTION_NOTIFY:
-            handler(cppual::x::event::motion_notify<Connection>(m_c, event));
+            handler(cppual::x::event::motion_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_ENTER_NOTIFY:
-            handler(cppual::x::event::enter_notify<Connection>(m_c, event));
+            handler(cppual::x::event::enter_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_LEAVE_NOTIFY:
-            handler(cppual::x::event::leave_notify<Connection>(m_c, event));
+            handler(cppual::x::event::leave_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_FOCUS_IN:
-            handler(cppual::x::event::focus_in<Connection>(m_c, event));
+            handler(cppual::x::event::focus_in<Connection>(_M_c, event));
             return true;
 
         case XCB_FOCUS_OUT:
-            handler(cppual::x::event::focus_out<Connection>(m_c, event));
+            handler(cppual::x::event::focus_out<Connection>(_M_c, event));
             return true;
 
         case XCB_KEYMAP_NOTIFY:
-            handler(cppual::x::event::keymap_notify<Connection>(m_c, event));
+            handler(cppual::x::event::keymap_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_EXPOSE:
-            handler(cppual::x::event::expose<Connection>(m_c, event));
+            handler(cppual::x::event::expose<Connection>(_M_c, event));
             return true;
 
         case XCB_GRAPHICS_EXPOSURE:
-            handler(cppual::x::event::graphics_exposure<Connection>(m_c, event));
+            handler(cppual::x::event::graphics_exposure<Connection>(_M_c, event));
             return true;
 
         case XCB_NO_EXPOSURE:
-            handler(cppual::x::event::no_exposure<Connection>(m_c, event));
+            handler(cppual::x::event::no_exposure<Connection>(_M_c, event));
             return true;
 
         case XCB_VISIBILITY_NOTIFY:
-            handler(cppual::x::event::visibility_notify<Connection>(m_c, event));
+            handler(cppual::x::event::visibility_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_CREATE_NOTIFY:
-            handler(cppual::x::event::create_notify<Connection>(m_c, event));
+            handler(cppual::x::event::create_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_DESTROY_NOTIFY:
-            handler(cppual::x::event::destroy_notify<Connection>(m_c, event));
+            handler(cppual::x::event::destroy_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_UNMAP_NOTIFY:
-            handler(cppual::x::event::unmap_notify<Connection>(m_c, event));
+            handler(cppual::x::event::unmap_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_MAP_NOTIFY:
-            handler(cppual::x::event::map_notify<Connection>(m_c, event));
+            handler(cppual::x::event::map_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_MAP_REQUEST:
-            handler(cppual::x::event::map_request<Connection>(m_c, event));
+            handler(cppual::x::event::map_request<Connection>(_M_c, event));
             return true;
 
         case XCB_REPARENT_NOTIFY:
-            handler(cppual::x::event::reparent_notify<Connection>(m_c, event));
+            handler(cppual::x::event::reparent_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_CONFIGURE_NOTIFY:
-            handler(cppual::x::event::configure_notify<Connection>(m_c, event));
+            handler(cppual::x::event::configure_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_CONFIGURE_REQUEST:
-            handler(cppual::x::event::configure_request<Connection>(m_c, event));
+            handler(cppual::x::event::configure_request<Connection>(_M_c, event));
             return true;
 
         case XCB_GRAVITY_NOTIFY:
-            handler(cppual::x::event::gravity_notify<Connection>(m_c, event));
+            handler(cppual::x::event::gravity_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_RESIZE_REQUEST:
-            handler(cppual::x::event::resize_request<Connection>(m_c, event));
+            handler(cppual::x::event::resize_request<Connection>(_M_c, event));
             return true;
 
         case XCB_CIRCULATE_NOTIFY:
-            handler(cppual::x::event::circulate_notify<Connection>(m_c, event));
+            handler(cppual::x::event::circulate_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_CIRCULATE_REQUEST:
-            handler(cppual::x::event::circulate_request<Connection>(m_c, event));
+            handler(cppual::x::event::circulate_request<Connection>(_M_c, event));
             return true;
 
         case XCB_PROPERTY_NOTIFY:
-            handler(cppual::x::event::property_notify<Connection>(m_c, event));
+            handler(cppual::x::event::property_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_SELECTION_CLEAR:
-            handler(cppual::x::event::selection_clear<Connection>(m_c, event));
+            handler(cppual::x::event::selection_clear<Connection>(_M_c, event));
             return true;
 
         case XCB_SELECTION_REQUEST:
-            handler(cppual::x::event::selection_request<Connection>(m_c, event));
+            handler(cppual::x::event::selection_request<Connection>(_M_c, event));
             return true;
 
         case XCB_SELECTION_NOTIFY:
-            handler(cppual::x::event::selection_notify<Connection>(m_c, event));
+            handler(cppual::x::event::selection_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_COLORMAP_NOTIFY:
-            handler(cppual::x::event::colormap_notify<Connection>(m_c, event));
+            handler(cppual::x::event::colormap_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_CLIENT_MESSAGE:
-            handler(cppual::x::event::client_message<Connection>(m_c, event));
+            handler(cppual::x::event::client_message<Connection>(_M_c, event));
             return true;
 
         case XCB_MAPPING_NOTIFY:
-            handler(cppual::x::event::mapping_notify<Connection>(m_c, event));
+            handler(cppual::x::event::mapping_notify<Connection>(_M_c, event));
             return true;
 
         case XCB_GE_GENERIC:
-            handler(cppual::x::event::ge_generic<Connection>(m_c, event));
+            handler(cppual::x::event::ge_generic<Connection>(_M_c, event));
             return true;
 
         };
@@ -11531,7 +11531,7 @@ public:
     }
 
 protected:
-    Connection m_c;
+    Connection _M_c;
 }; // class dispatcher
 
 } // namespace event

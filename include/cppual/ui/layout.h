@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,49 +23,49 @@
 #define CPPUAL_UI_LAYOUT_H_
 #ifdef __cplusplus
 
-#include <vector>
 #include <cppual/ui/view.h>
 
-using std::vector;
+namespace cppual { namespace ui {
 
-namespace cppual { namespace Ui {
-
-struct LayoutMetrics
+struct layout_metrics
 { uint row, column, rowspan, colspan; };
 
-struct Align
+struct align
 {
-    enum Side
+    enum side
     {
-        Left   = 1 << 0,
-        Top    = 1 << 1,
-        Right  = 1 << 2,
-        Bottom = 1 << 3
+        left   = 1 << 0,
+        top    = 1 << 1,
+        right  = 1 << 2,
+        bottom = 1 << 3
     };
 };
 
 // =========================================================
 
-class Layout
+class layout
 {
 public:
-    Layout ();
-    Layout (Layout&&);
-    Layout (Layout const&);
-    Layout& operator = (Layout&&);
-    Layout& operator = (Layout const&);
+    typedef vector<view*> vector_type;
 
-    bool addView (View*, LayoutMetrics const&);
-    bool removeView (View*);
-    void setViewMetrics (View*, LayoutMetrics const&);
-    void setPadding (Rect const&);
+    layout ();
+    layout (layout&&);
+    layout (layout const&);
+    layout& operator = (layout&&);
+    layout& operator = (layout const&);
+
+    bool add_view (view*, layout_metrics const&);
+    bool remove_view (view*);
+    void set_view_metrics (view*, layout_metrics const&);
+    void set_padding (rect const&);
 
 private:
-    vector<View*> m_gViewList;
-    View*         m_pOwner;
-    uint          m_uNumRows, m_uNumColumns;
+    void on_size (rect const&);
 
-    void onSize (Rect const&);
+private:
+    vector_type _M_gViewList;
+    view*       _M_pOwner;
+    uint        _M_uNumRows, _M_uNumColumns;
 };
 
 } } // namespace Ui

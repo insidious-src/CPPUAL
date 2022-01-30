@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,17 +23,19 @@
 
 #include <iostream>
 
-namespace cppual { namespace Ui { namespace Platform {
+namespace cppual { namespace ui { namespace platform {
+
+// ====================================================
 
 namespace { // optimize for internal unit usage
 
-class Initializer final
+class initializer final
 {
 private:
-    Factory::manager_type mgr    ;
+    factory::manager_type mgr    ;
     shared_manager        factory;
 
-    inline cchar* platform_name () noexcept
+    inline static cchar* platform_name () noexcept
     {
     #   if defined OS_GNU_LINUX or defined OS_BSD
             return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" :
@@ -43,36 +45,38 @@ private:
     #   endif
     }
 
-    inline static Initializer& platform () noexcept
-    {
-        static Initializer init;
-        return init;
-    }
-
-    inline Initializer ()
+public:
+    inline initializer ()
     {
         if (mgr.load_plugin(platform_name())) factory = mgr.plugin(platform_name()).interface();
     }
 
-public:
-    inline static shared_manager instance () noexcept
+    inline operator shared_manager () const
     {
-        return platform ().factory;
+        return factory;
     }
 };
+
+// ====================================================
+
+inline static shared_manager platform_instance ()
+{
+    static auto inst = initializer();
+    return inst;
+}
 
 } // anonymous namespace
 
 // ====================================================
 
-shared_manager Factory::instance ()
+shared_manager factory::instance ()
 {
-    return Initializer::instance ();
+    return platform_instance ();
 }
 
-bool Factory::hasValidInstance () noexcept
+bool factory::has_valid_instance () noexcept
 {
-    return Initializer::instance () != nullptr;
+    return platform_instance () != nullptr;
 }
 
 } } } // namespace Platform

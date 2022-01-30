@@ -61,7 +61,7 @@ class bad_context
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_context
 } // namespace error
 
@@ -229,7 +229,7 @@ class get_context
                                                        SIGNATURE(xcb_record_client_info_next),
                                                        SIGNATURE(xcb_record_client_info_sizeof),
                                                        SIGNATURE(xcb_record_get_context_intercepted_clients_iterator)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class get_context
 
@@ -311,7 +311,7 @@ class enable_context
                                                        uint8_t,
                                                        SIGNATURE(xcb_record_enable_context_data),
                                                        SIGNATURE(xcb_record_enable_context_data_length)>
-                               >(this->m_c, this->get());
+                               >(this->_M_c, this->get());
     }
 }; // class enable_context
 
@@ -764,8 +764,8 @@ class dispatcher
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-      : m_c(std::forward<C>(c))
-      , m_first_event(first_event)
+      : _M_c(std::forward<C>(c))
+      , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -782,8 +782,8 @@ class dispatcher
     }
 
   protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -796,7 +796,7 @@ class dispatcher
     typedef cppual::record::extension extension;
 
     dispatcher(uint8_t first_error)
-      : m_first_error(first_error)
+      : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::record::extension & extension)
@@ -806,7 +806,7 @@ class dispatcher
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-      switch (error->error_code - m_first_error) {
+      switch (error->error_code - _M_first_error) {
 
         case XCB_RECORD_BAD_CONTEXT: // 0
           throw cppual::record::error::bad_context(error);
@@ -815,7 +815,7 @@ class dispatcher
     }
 
   protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

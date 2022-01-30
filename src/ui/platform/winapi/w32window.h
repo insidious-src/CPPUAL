@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,14 +61,14 @@ public:
     void   map ();
     void   unmap ();
 
-    WindowFlags flags () const noexcept { return m_eFlags; }
+    WindowFlags flags () const noexcept { return _M_eFlags; }
     void        setFlags (WindowFlags) noexcept;
 
     weak_window owner  () const noexcept { return shared_window (); }
     u32         screen () const noexcept { return 0; }
 
 private:
-    WindowFlags m_eFlags;
+    WindowFlags _M_eFlags;
 };
 
 } } // namespace Ui

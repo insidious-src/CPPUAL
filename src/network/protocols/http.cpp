@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,23 +22,23 @@
 
 #include <cppual/network/protocols/http.h>
 
-namespace cppual { namespace Network { namespace Http {
+namespace cppual { namespace network { namespace http {
 
-void Client::startSession (ProtocolContext&, Packet& /*outgoing_packet*/)
+void Client::start_session (ProtocolContext&, Packet& /*outgoing_packet*/)
 {
 }
 
-bool Client::readData (ProtocolContext&, Packet& /*incoming_packet*/)
+bool Client::read_data (ProtocolContext&, Packet& /*incoming_packet*/)
 {
     return false;
 }
 
-byte Client::tryDecode (ProtocolContext&, Packet& /*output_packet*/)
+byte Client::try_decode (ProtocolContext&, Packet& /*output_packet*/)
 {
     return byte ();
 }
 
-byte Client::encodeContent (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
+byte Client::encode_content (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
 {
     return byte ();
 }

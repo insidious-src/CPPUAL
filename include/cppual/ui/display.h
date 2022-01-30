@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,51 +29,50 @@
 
 #include <memory>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class   IDisplay;
-typedef std::shared_ptr<IDisplay> shared_display;
-typedef std::weak_ptr  <IDisplay> weak_display  ;
+class   display_interface;
+typedef std::shared_ptr<display_interface> shared_display;
+typedef std::weak_ptr  <display_interface> weak_display  ;
 
 // ====================================================
 
-class IDisplay : public NonCopyableVirtual
+class display_interface : public non_copyable_virtual
 {
 public:
-    typedef Connection     handle_type;
-    typedef string         string_type;
-    typedef shared_display pointer    ;
+    typedef connection_type handle_type;
+    typedef string          string_type;
+    typedef shared_display  pointer    ;
 
-    constexpr IDisplay () noexcept = default;
-    ~IDisplay ();
+    constexpr display_interface () noexcept = default;
 
     virtual string_type name             () const = 0;
     virtual uint        screenCount      () const = 0;
     virtual void        flush            ()       = 0;
 
-    static  IDisplay*   primary          ();
-    static  bool        hasValidInstance () noexcept;
-    static  bool        primary          (string_type const&);
-    static  pointer     connect          (string_type const&);
+    static  pointer primary            ();
+    static  bool    has_valid_instance () noexcept;
+    static  bool    primary            (string_type const&);
+    static  pointer connect            (string_type const&);
 
-    handle_type native () const noexcept { return m_native; }
-    handle_type legacy () const noexcept { return m_legacy; }
+    handle_type native () const noexcept { return _M_native; }
+    handle_type legacy () const noexcept { return _M_legacy; }
 
     template <typename U>
     constexpr typename std::remove_pointer<U>::type* native () const noexcept
-    { return m_native.get<U> (); }
+    { return _M_native.get<U> (); }
 
     template <typename U>
     constexpr typename std::remove_pointer<U>::type* legacy () const noexcept
-    { return m_legacy.get<U> (); }
+    { return _M_legacy.get<U> (); }
 
 protected:
-    constexpr IDisplay (handle_type native, handle_type legacy) noexcept
-    : m_native (native), m_legacy (legacy)
+    constexpr display_interface (handle_type native, handle_type legacy) noexcept
+    : _M_native (native), _M_legacy (legacy)
     { }
 
 private:
-    handle_type m_native { }, m_legacy { };
+    handle_type _M_native { }, _M_legacy { };
 };
 
 } } // namespace Ui

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,25 @@
 
 #include <cppual/network/transport/udp.h>
 
-namespace cppual { namespace Network {
+#ifdef OS_GNU_LINUX
+#   include "os/linux.h"
+#elif defined (OS_MACX)
+#   include "os/mac.h"
+#elif defined (OS_AIX)
+#   include "os/aix.h"
+#elif defined (OS_SOLARIS)
+#   include "os/solaris.h"
+#elif defined (OS_BSD)
+#   include "os/bsd.h"
+#elif defined (OS_WINDOWS)
+#   include "os/win.h"
+#elif defined (OS_ANDROID)
+#   include "os/android.h"
+#elif defined (OS_IOS)
+#   include "os/ios.h"
+#endif
+
+namespace cppual { namespace network {
 
 UdpStream::UdpStream () noexcept
 : TransportSocket (SocketType::Udp)

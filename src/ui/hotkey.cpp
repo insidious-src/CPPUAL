@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,57 +21,57 @@
 
 #include <cppual/ui/hotkey.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-HotKey::HotKey () noexcept
+hotkey::hotkey () noexcept
 {
 }
 
-HotKey::HotKey (value_type const) noexcept
+hotkey::hotkey (value_type const) noexcept
 {
 }
 
-void HotKey::setKeyCode (value_type const gCode) noexcept
+void hotkey::set_key_code (value_type const gCode) noexcept
 {
-    m_gKeyCode = gCode;
+    _M_gKeyCode = gCode;
 }
 
-void HotKey::onKeyPress (u8 nKey) noexcept
+void hotkey::on_key_press (u8 nKey) noexcept
 {
-    if (!m_bIsTriggered.load (std::memory_order_consume) and
-            m_gKeyCode.key == nKey)
+    if (!_M_bIsTriggered.load (std::memory_order_consume) and
+            _M_gKeyCode.key == nKey)
     {
-        m_bIsTriggered.store (true, std::memory_order_relaxed);
-        signalTriggered ();
+        _M_bIsTriggered.store (true, std::memory_order_relaxed);
+        signal_triggered ();
     }
 }
 
-void HotKey::onKeyRelease (u8 nKey) noexcept
+void hotkey::on_key_release (u8 nKey) noexcept
 {
-    if (m_bIsTriggered.load (std::memory_order_consume) and
-            m_gKeyCode.key == nKey)
+    if (_M_bIsTriggered.load (std::memory_order_consume) and
+            _M_gKeyCode.key == nKey)
     {
-        m_bIsTriggered.store (false, std::memory_order_relaxed);
-        signalReleased ();
+        _M_bIsTriggered.store (false, std::memory_order_relaxed);
+        signal_released ();
     }
 }
 
-void HotKey::onKeyNotify (value_type const gCode) noexcept
+void hotkey::on_key_notify (value_type const gCode) noexcept
 {
-    if (m_bIsTriggered.load (std::memory_order_consume))
+    if (_M_bIsTriggered.load (std::memory_order_consume))
     {
-        if (m_gKeyCode.key == gCode.key)
+        if (_M_gKeyCode.key == gCode.key)
         {
-            m_bIsTriggered.store (true, std::memory_order_relaxed);
-            signalTriggered ();
+            _M_bIsTriggered.store (true, std::memory_order_relaxed);
+            signal_triggered ();
         }
     }
     else
     {
-        if (m_gKeyCode.key == gCode.key)
+        if (_M_gKeyCode.key == gCode.key)
         {
-            m_bIsTriggered.store (false, std::memory_order_relaxed);
-            signalReleased ();
+            _M_bIsTriggered.store (false, std::memory_order_relaxed);
+            signal_released ();
         }
     }
 }

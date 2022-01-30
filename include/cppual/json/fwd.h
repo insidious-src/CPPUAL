@@ -19,7 +19,7 @@
 
 #include "rapidjson.h"
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 // encodings.h
 
@@ -60,7 +60,7 @@ typedef GenericInsituStringStream<UTF8<char> > InsituStringStream;
 template <typename Encoding, typename Allocator>
 class GenericStringBuffer;
 
-typedef GenericStringBuffer<UTF8<char>, Memory::MemoryResource> StringBuffer;
+typedef GenericStringBuffer<UTF8<char>, memory::memory_resource> StringBuffer;
 
 // filereadstream.h
 
@@ -75,7 +75,7 @@ class FileWriteStream;
 template <typename Allocator>
 struct GenericMemoryBuffer;
 
-typedef GenericMemoryBuffer<Memory::MemoryResource> MemoryBuffer;
+typedef GenericMemoryBuffer<memory::memory_resource> MemoryBuffer;
 
 // memorystream.h
 
@@ -89,7 +89,7 @@ struct BaseReaderHandler;
 template <typename SourceEncoding, typename TargetEncoding, typename StackAllocator>
 class GenericReader;
 
-typedef GenericReader<UTF8<char>, UTF8<char>, Memory::MemoryResource> Reader;
+typedef GenericReader<UTF8<char>, UTF8<char>, memory::memory_resource> Reader;
 
 // writer.h
 
@@ -115,14 +115,14 @@ struct GenericStringRef;
 template <typename Encoding, typename Allocator>
 class GenericValue;
 
-typedef GenericValue<UTF8<char>, MemoryPoolResource<Memory::MemoryResource> > Value;
+typedef GenericValue<UTF8<char>, MemoryPoolResource<memory::memory_resource> > Value;
 
 template <typename Encoding, typename Allocator, typename StackAllocator>
 class GenericDocument;
 
 typedef
 GenericDocument
-<UTF8<char>, MemoryPoolResource<Memory::MemoryResource>, Memory::MemoryResource>
+<UTF8<char>, MemoryPoolResource<memory::memory_resource>, memory::memory_resource>
 Document;
 
 // pointer.h
@@ -130,7 +130,7 @@ Document;
 template <typename ValueType, typename Allocator>
 class GenericPointer;
 
-typedef GenericPointer<Value, Memory::MemoryResource> Pointer;
+typedef GenericPointer<Value, memory::memory_resource> Pointer;
 
 // schema.h
 
@@ -140,7 +140,7 @@ class IGenericRemoteSchemaDocumentProvider;
 template <typename ValueT, typename Allocator>
 class GenericSchemaDocument;
 
-typedef GenericSchemaDocument<Value, Memory::MemoryResource> SchemaDocument;
+typedef GenericSchemaDocument<Value, memory::memory_resource> SchemaDocument;
 typedef IGenericRemoteSchemaDocumentProvider<SchemaDocument> IRemoteSchemaDocumentProvider;
 
 template <
@@ -152,7 +152,7 @@ class GenericSchemaValidator;
 
 typedef
 GenericSchemaValidator
-<SchemaDocument, BaseReaderHandler<UTF8<char>, void>, Memory::MemoryResource>
+<SchemaDocument, BaseReaderHandler<UTF8<char>, void>, memory::memory_resource>
 SchemaValidator;
 
 } } // namespace Json

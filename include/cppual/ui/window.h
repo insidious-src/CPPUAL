@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,63 +23,63 @@
 #define CPPUAL_UI_WINDOW_H_
 #ifdef __cplusplus
 
-#include <cppual/gfx/drawable/image.h>
 #include <cppual/ui/frame.h>
 #include <cppual/ui/view.h>
+#include <cppual/gfx/drawable/image.h>
 #include <cppual/input/event.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class Window : public View
+class window : public view
 {
 public:
-    typedef Graphics::Image image_type ;
-    typedef string          string_type;
+    typedef gfx::image_interface image_type ;
+    typedef string               string_type;
 
-    Window ();
-    Window (Window const&);
-    Window& operator = (Window const&);
-    ~Window ();
+    window ();
+    window (window const&);
+    window& operator = (window const&);
+    ~window ();
 
-    bool setIcon (image_type*);
-    void setTitle (string_type const&);
-    void setFullscreen (bool);
+    bool set_icon (image_type*);
+    void set_title (string_type const&);
+    void set_fullscreen (bool);
     void flash (ushort);
-    void showInTaskbar (bool);
+    void show_in_taskbar (bool);
     void restore ();
     void minimize ();
     void maximize ();
     void close ();
 
-    Window (View*              parent,
-            Rect   const&      rect,
+    window (view*              parent,
+            rect   const&      rect,
             string_type const& title,
             image_type*        icon   = nullptr,
             u32                screen = 0);
 
     string_type title () const;
 
-    inline FrameView*  frame () noexcept { return m_gFrame; }
-    inline image_type* icon  () const noexcept { return m_pIcon; }
+    inline frame_view* frame () noexcept { return _M_gFrame; }
+    inline image_type* icon  () const noexcept { return _M_pIcon; }
 
-    inline bool isFullscreen () const noexcept
+    inline bool is_fullscreen () const noexcept
     { return renderable_unsafe()->isFullscreen(); }
 
-    inline bool isMinimized () const noexcept
-    { return m_gFrame->attached () == this and m_gFrame->isHidden (); }
+    inline bool is_minimized () const noexcept
+    { return _M_gFrame->attached () == this and _M_gFrame->is_hidden (); }
 
-    inline bool isMaximized () const noexcept
-    { return m_gFrame->attached () == this and m_gFrame->isStretched (); }
+    inline bool is_maximized () const noexcept
+    { return _M_gFrame->attached () == this and _M_gFrame->is_stretched (); }
 
 protected:
-    virtual bool onClose () { return true; }
-    virtual void onMinimize () { }
-    virtual void onMaximize () { }
-    virtual void onHelp () { }
+    virtual bool on_close    () { return true; }
+    virtual void on_minimize () { }
+    virtual void on_maximize () { }
+    virtual void on_help     () { }
 
 private:
-    FrameView*  m_gFrame;
-    image_type* m_pIcon;
+    frame_view* _M_gFrame;
+    image_type* _M_pIcon ;
 };
 
 } } // namespace Ui

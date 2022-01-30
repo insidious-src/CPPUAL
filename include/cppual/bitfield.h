@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,16 +23,15 @@
 #define CPPUAL_BITFIELD_H_
 #ifdef __cplusplus
 
-#include <cstdint>
-#include <cstddef>
-#include <type_traits>
 #include <cppual/meta.h>
 #include <cppual/types.h>
+
+#include <type_traits>
 
 namespace cppual {
 
 template <std::size_t LastBit>
-struct MinimumTypeHelper
+struct minimum_type_helper
 {
     typedef
         typename std::conditional<LastBit ==  0, void,
@@ -46,35 +45,35 @@ struct MinimumTypeHelper
 // =========================================================
 
 template <std::size_t Index, std::size_t Bits = 1>
-class BitField
+class bitfield
 {
 private:
     enum { Mask = (1u << Bits) - 1u };
-    typedef typename MinimumTypeHelper<Index + Bits>::type value_type;
+    typedef typename minimum_type_helper<Index + Bits>::type value_type;
 
 public:
     template <class U>
-    BitField& operator = (U value)
+    bitfield& operator = (U value)
     {
-        m_value = (m_value & ~(Mask << Index)) | ((value & Mask) << Index);
+        _M_value = (_M_value & ~(Mask << Index)) | ((value & Mask) << Index);
         return *this;
     }
 
-    operator      value_type() const { return (m_value >> Index) & Mask;  }
-    explicit   operator bool() const { return  m_value & (Mask << Index); }
-    BitField&  operator ++  ()       { return *this = *this + 1;          }
+    operator      value_type() const { return (_M_value >> Index) & Mask;  }
+    explicit   operator bool() const { return  _M_value & (Mask << Index); }
+    bitfield&  operator ++  ()       { return *this = *this + 1;          }
     value_type operator ++  (int)    { value_type r = *this; ++*this; return r;    }
-    BitField&  operator --  ()       { return *this = *this - 1;          }
+    bitfield&  operator --  ()       { return *this = *this - 1;          }
     value_type operator --  (int)    { value_type r = *this; --*this; return r;    }
 
 private:
-    value_type m_value;
+    value_type _M_value;
 };
 
 // =========================================================
 
 template <std::size_t Index>
-class BitField<Index, 1>
+class bitfield<Index, 1>
 {
 private:
     enum
@@ -83,20 +82,20 @@ private:
         Mask = 0x01
     };
 
-    typedef typename MinimumTypeHelper<Index + Bits>::type value_type;
+    typedef typename minimum_type_helper<Index + Bits>::type value_type;
 
 public:
-    BitField& operator = (bool value)
+    bitfield& operator = (bool value)
     {
-        m_value = (m_value & ~(Mask << Index)) | (value << Index);
+        _M_value = (_M_value & ~(Mask << Index)) | (value << Index);
         return *this;
     }
 
     explicit operator bool() const
-    { return m_value & (Mask << Index); }
+    { return _M_value & (Mask << Index); }
 
 private:
-    value_type m_value;
+    value_type _M_value;
 };
 
 // =========================================================
@@ -104,7 +103,7 @@ private:
 // function to reverse bits of a number
 template <typename T,
           typename = typename std::enable_if<is_integer<T>::value>::type>
-T reverseBits(T n)
+T reverse_bits(T n)
 {
     T rev = 0;
 

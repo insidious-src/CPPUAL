@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@
 #include <cppual/meta.h>
 
 namespace cppual {
+
+// ====================================================
 
 template <typename T>
 using FundamentalType = typename
@@ -222,75 +224,77 @@ std::enable_if<std::is_pod<T>::value, T>::type;
 
 // ====================================================
 
-template <typename T>
-using Container = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using Container = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using ReversibleContainer = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using ReversibleContainer = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using SequenceContainer = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using SequenceContainer = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using AssociativeContainer = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using AssociativeContainer = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using UnorderedAssociativeContainer = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using UnorderedAssociativeContainer = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using AllocatorAwareContainer = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using AllocatorAwareContainer = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using Erasable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using Erasable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using DefaultInsertable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using DefaultInsertable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using CopyInsertable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using CopyInsertable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using MoveInsertable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using MoveInsertable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using EmplaceConstructible = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using EmplaceConstructible = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
 // ====================================================
 
-template <typename T>
-using EqualityComparable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using EqualityComparable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using LessThanComparable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using LessThanComparable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using Swappable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using Swappable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using ValueSwappable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using ValueSwappable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using Sortable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using Sortable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
 
-template <typename T>
-using Mergeable = typename
-std::enable_if<std::is_standard_layout<T>::value, T>::type;
+//template <typename T>
+//using Mergeable = typename
+//std::enable_if<std::is_standard_layout<T>::value, T>::type;
+
+// ====================================================
 
 } // cppual
 

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,13 @@
 #include <cppual/ui/queue.h>
 #include <cppual/ui/manager.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-namespace { namespace Internal { // optimize for internal unit usage
+namespace { namespace internal { // optimize for internal unit usage
 
-inline const shared_queue& queue ()
+inline static const shared_queue& queue ()
 {
-    static const shared_queue instance (Platform::Factory::instance ()->createQueueInstance ());
+    static const shared_queue instance (platform::factory::instance ()->createQueueInstance ());
     return instance;
 }
 
@@ -36,19 +36,19 @@ inline const shared_queue& queue ()
 
 // =========================================================
 
-IDisplayQueue::~IDisplayQueue()
+display_queue_interface::~display_queue_interface()
 {
 
 }
 
-IDisplayQueue* IDisplayQueue::primary () noexcept
+shared_queue display_queue_interface::primary () noexcept
 {
-    return Internal::queue ().get ();
+    return internal::queue ();
 }
 
-bool IDisplayQueue::hasValidInstance () noexcept
+bool display_queue_interface::has_valid_instance () noexcept
 {
-    return Internal::queue () != nullptr;
+    return internal::queue () != nullptr;
 }
 
 } } // namespace Input

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,36 +23,36 @@
 
 #include <sstream>
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
 Address::Address (string_type const&) noexcept
 {
 }
 
-Address::string_type Address::toString () const noexcept
+Address::string_type Address::to_string () const noexcept
 {
     stringstream output;
 
-    if (!isV4 ())
+    if (!is_v4 ())
     {
-        for (uint i = 0; i < 7; ++i) output << m_uBytes[i] << ':';
-        output << m_uBytes[7];
+        for (auto i = 0U; i < 7; ++i) output << _M_uBytes[i] << ':';
+        output << _M_uBytes[7];
     }
     else
     {
-        for (uint i = 0; i < 2; ++i) output << m_uBytes[i] << '.';
-        output << m_uBytes[3];
+        for (auto i = 0U; i < 2; ++i) output << _M_uBytes[i] << '.';
+        output << _M_uBytes[3];
     }
 
     return output.str ();
 }
 
-Address Address::localAddress () noexcept
+Address Address::local_address () noexcept
 {
     return Address ();
 }
 
-Address Address::publicAddress () noexcept
+Address Address::public_address () noexcept
 {
     return Address ();
 }

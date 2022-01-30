@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,38 +26,41 @@
 #include <cppual/flags.h>
 #include <cppual/compute/device.h>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
-class DeviceQueue : public Object<ResourceType::Queue>
+class device_queue : public object<resource_type::queue>
 {
 public:
-    enum EngineType
+    enum class engine_type : byte
     {
-        Compute   = 1 << 0,
-        Graphics  = 1 << 1,
-        DMA       = 1 << 2, // direct memory access
-        Universal = 1 << 3,
-        Timer     = 1 << 4,
-        Custom    = 1 << 5
+        none      =      0,
+        compute   = 1 << 0,
+        graphics  = 1 << 1,
+
+        /// direct memory access
+        dma       = 1 << 2,
+        universal = 1 << 3,
+        timer     = 1 << 4,
+        custom    = 1 << 7
     };
 
-    typedef BitSet<EngineType> EngineTypes;
+    typedef bitset<engine_type> engine_types;
 
-    DeviceQueue ();
-    DeviceQueue (Device const&, EngineType exec_engine_type);
-    DeviceQueue (DeviceQueue&&);
-    DeviceQueue& operator = (DeviceQueue&&);
+    device_queue ();
+    device_queue (device const&, engine_type exec_engine_type);
+    device_queue (device_queue&&);
+    device_queue& operator = (device_queue&&);
 
-    static EngineTypes supportedTypes (Device const&) noexcept;
+    static engine_types supported_types (device const&) noexcept;
 
-    EngineType type () const noexcept { return m_eQueueType; }
+    engine_type type () const noexcept { return _M_eQueueType; }
 
 private:
-    EngineType m_eQueueType;
+    engine_type _M_eQueueType;
 };
 
 template <typename T>
-class DeviceTask : private DeviceQueue
+class device_task : private device_queue
 {
 };
 

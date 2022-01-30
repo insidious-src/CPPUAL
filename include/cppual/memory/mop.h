@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,27 +29,7 @@
 #include <cstddef>
 #include <cstring>
 
-namespace cppual { namespace Memory {
-
-template <typename T>
-class MathPointer
-{
-public:
-    typedef T*       pointer;
-    typedef T const* const_pointer;
-    typedef uptr     uptr_type;
-    typedef ptrdiff  diff_type;
-
-    MathPointer& operator  = (MathPointer const&);
-    MathPointer& operator  = (const_pointer);
-    MathPointer  operator +  (MathPointer const&);
-    MathPointer  operator +  (const_pointer);
-    MathPointer& operator += (MathPointer const&);
-    MathPointer& operator += (const_pointer);
-
-private:
-    pointer m_ptr;
-};
+namespace cppual { namespace memory {
 
 // =========================================================
 
@@ -65,25 +45,25 @@ template <typename T>
 constexpr T* address (T* const p, std::size_t shift) noexcept
 { return reinterpret_cast<T*> (reinterpret_cast<uptr> (p) + shift); }
 
-constexpr std::size_t alignedSize (std::size_t const n,
-                                   std::size_t const align = alignof (uptr)) noexcept
+constexpr std::size_t aligned_size (std::size_t const n,
+                                    std::size_t const align = alignof (uptr)) noexcept
 { return (n + (align - 1)) & ~(align - 1); }
 
-inline std::size_t alignAdjust (cvoid* pAddr, std::size_t const uAlign) noexcept
+inline std::size_t align_adjust (cvoid* pAddr, std::size_t const uAlign) noexcept
 {
     std::size_t uAdjust  = uAlign - (reinterpret_cast<uptr> (pAddr) & (uAlign - 1));
     return      uAdjust == uAlign ? 0 : uAdjust;
 }
 
-inline void* nextAlignedAddr (cvoid* pAddr, std::size_t const uAlign) noexcept
+inline void* next_aligned_addr (cvoid* pAddr, std::size_t const uAlign) noexcept
 {
     return reinterpret_cast<void*>
             ((reinterpret_cast<uptr> (pAddr) + (uAlign - 1)) & ~(uAlign - 1));
 }
 
-inline std::size_t alignAdjustmentHeader (cvoid*      addr,
-                                          std::size_t align,
-                                          std::size_t header_size) noexcept
+inline std::size_t align_adjustment_header (cvoid*      addr,
+                                            std::size_t align,
+                                            std::size_t header_size) noexcept
 {
     std::size_t uAdjust = align - (reinterpret_cast<uptr> (addr) & (align - 1));
 
@@ -102,29 +82,7 @@ inline std::size_t alignAdjustmentHeader (cvoid*      addr,
     return uAdjust;
 }
 
-template <typename InputIterator,
-          typename OutputIterator,
-          typename = typename std::enable_if<is_iterator<InputIterator>::value>::type,
-          typename = typename std::enable_if<is_iterator<InputIterator>::value>::type
-          >
-static void copy (InputIterator gBegin, InputIterator gEnd, OutputIterator gDst)
-{
-    while (gBegin != gEnd)
-        std::memcpy(&(*gDst++), &(*gBegin++),
-                    sizeof(typename std::iterator_traits<OutputIterator>::value_type));
-}
-
-template <typename InputIterator,
-          typename OutputIterator,
-          typename = typename std::enable_if<is_iterator<InputIterator>::value>::type,
-          typename = typename std::enable_if<is_iterator<InputIterator>::value>::type
-          >
-static void move (InputIterator gBegin, InputIterator gEnd, OutputIterator gDst)
-{
-    while (gBegin != gEnd)
-        std::memmove(&(*gDst++), &(*gBegin++),
-                     sizeof(typename std::iterator_traits<OutputIterator>::value_type));
-}
+// =========================================================
 
 } } // namespace Memory
 

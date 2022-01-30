@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,15 +26,15 @@
 #include <cppual/types.h>
 #include <cppual/compute/devtask.h>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
 template <typename T>
-void sort (T begin, T end, DeviceQueue& queue)
+void sort (T begin, T end, device_queue& queue)
 {
 }
 
 template <typename T>
-void copy (T begin, T end, T dst, DeviceQueue& queue)
+void copy (T begin, T end, T dst, device_queue& queue)
 {
 }
 

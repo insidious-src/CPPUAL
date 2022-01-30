@@ -55,7 +55,7 @@ namespace boost { namespace property_tree
         /// specify its type.
         template<class T> T data() const;
     private:
-        boost::any m_data;
+        boost::any _M_data;
     };
 
 
@@ -76,7 +76,7 @@ namespace boost { namespace property_tree
         /// type of path.
         template<class T> T path() const;
     private:
-        boost::any m_path;
+        boost::any _M_path;
     };
 
 }}

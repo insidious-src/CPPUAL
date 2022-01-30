@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,26 +20,35 @@
  */
 
 #include <cppual/ui/composite.h>
+
 #include <atomic>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
+
+// ====================================================
 
 namespace {
 
-struct Internal { static std::atomic_bool compositing; };
-std::atomic_bool Internal::compositing (false);
+typedef std::atomic_bool bool_type;
+
+inline static bool_type& compositing ()
+{
+    static bool_type internal = false;
+    return internal;
+}
 
 } // anonymous namespace
 
+// ====================================================
 
-void useInternalCompositor (bool bUse) noexcept
+void use_internal_compositor (bool bUse) noexcept
 {
-    return Internal::compositing.store (bUse);
+    return compositing ().store (bUse);
 }
 
-bool isUsingInternalCompositor () noexcept
+bool is_using_internal_compositor () noexcept
 {
-    return Internal::compositing.load (std::memory_order_relaxed);
+    return compositing ().load (std::memory_order_relaxed);
 }
 
 } } // namespace Ui

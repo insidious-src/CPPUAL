@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,27 +29,27 @@
 #include <cppual/ui/wm.h>
 #include <cppual/string.h>
 
-namespace cppual { namespace Ui { namespace Platform {
+namespace cppual { namespace ui { namespace platform {
 
-struct  Factory;
-typedef std::shared_ptr<Factory> shared_manager;
+struct  factory;
+typedef std::shared_ptr<factory> shared_manager;
 
 // =========================================================
 
-struct Factory : public NonCopyableVirtual
+struct factory : public non_copyable_virtual
 {
-    typedef Process::PluginManager<Factory> manager_type;
-    typedef string                          string_type ;
+    typedef process::plugin_manager<factory> manager_type;
+    typedef string                           string_type ;
 
-    virtual shared_window createWindow (Rect const& rect,
-                                        u32         screen  = 0,
-                                        IDisplay*   display = IDisplay::primary ()) = 0;
+    virtual shared_window createWindow (rect const&    rect,
+                                        u32            screen  = 0,
+                                        shared_display display = display_interface::primary ()) = 0;
 
     virtual shared_display connectDisplay (string_type const& name = string_type()) = 0;
     virtual shared_queue   createQueueInstance () = 0;
 
     static shared_manager instance ();
-    static bool           hasValidInstance () noexcept;
+    static bool           has_valid_instance () noexcept;
 };
 
 } } } // namespace Platform

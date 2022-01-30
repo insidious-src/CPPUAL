@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,17 +24,16 @@
 #ifdef __cplusplus
 
 #include <cppual/string.h>
-#include <cppual/noncopyable.h>
 #include <cppual/memory/allocator.h>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
-class PageResource final : public MemoryResource, NonCopyable
+class page_resource final : public memory_resource
 {
 public:
-    PageResource (size_type size);
-    PageResource (MemoryResource* allocator, size_type size);
-    //PageResource (string&& shared_name, size_type size);
+    page_resource (size_type size);
+    page_resource (memory_resource* allocator, size_type size);
+    //page_resource (string&& shared_name, size_type size);
     void clear    () noexcept;
 
     inline size_type count () const noexcept
@@ -57,7 +56,7 @@ private:
 // =========================================================
 
 template <typename T>
-using PageAllocator = Allocator<T, MemoryResource>;
+using page_allocator = allocator<T, memory_resource>;
 
 } } // Memory
 

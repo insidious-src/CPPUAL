@@ -52,7 +52,7 @@ RAPIDJSON_DIAG_OFF(padded)
 #define RAPIDJSON_ERROR_STRING(x) x
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ParseErrorCode

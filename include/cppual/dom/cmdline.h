@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,51 +28,57 @@
 
 #include <cppual/string.h>
 
-namespace cppual
+namespace cppual {
+
+// =========================================================
+
+class command_line
 {
-
-class CommandLine
-{
-protected:
-    ushort m_uArgCount;
-    ctchar* m_pArgArray;
-
-    CommandLine& operator = (const CommandLine&);
-    bool IsSpace ();
-    ctchar* IsolateQuotes ();
-
-    void SetArgCount (ctchar* pArgArray) { m_uArgCount = CalcLength (pArgArray); }
-
 public:
-    ctchar* Parse (ctchar*);
-    short FindArgument (ctchar*);
+    static ctchar* parse (ctchar*);
+    short find_argument (ctchar*);
 
-    CommandLine (ctchar* pArgArray) : m_uArgCount (), m_pArgArray (Parse (pArgArray)) { }
-    ushort GetArgCount () const { return (m_uArgCount); }
-    ctchar GetArgument (uint uIndex) const { return (m_pArgArray[uIndex]); }
-    ctchar operator [] (uint uIndex) const { return (m_pArgArray[uIndex]); }
+    command_line (ctchar* pArgArray) : _M_uArgCount (), _M_pArgArray (parse (pArgArray)) { }
+    ushort arg_count () const { return (_M_uArgCount); }
+    ctchar argument (uint uIndex) const { return (_M_pArgArray[uIndex]); }
+    ctchar operator [] (uint uIndex) const { return (_M_pArgArray[uIndex]); }
+
+protected:
+    command_line& operator = (command_line const&);
+
+    bool is_space ();
+    ctchar* isolate_quotes ();
+
+    void set_arg_count (ctchar* /*pArgArray*/)
+    { /*_M_uArgCount = CalcLength (pArgArray);*/ }
+
+protected:
+    ushort  _M_uArgCount;
+    ctchar* _M_pArgArray;
 };
 
-inline bool CommandLine::IsSpace ()
+inline bool command_line::is_space ()
 {
     return false;
 }
 
-inline ctchar* CommandLine::IsolateQuotes ()
+inline ctchar* command_line::isolate_quotes ()
 {
-    return 0;
+    return nullptr;
 }
 
-ctchar* CommandLine::Parse (ctchar* pArray)
+ctchar* command_line::parse (ctchar* /*pArray*/)
 {
-    return 0;
+    return nullptr;
 }
 
-inline short CommandLine::FindArgument (ctchar* pArgArray)
+inline short command_line::find_argument (ctchar* /*pArgArray*/)
 {
-    for (ushort n = 0; n < m_uArgCount; ++n) if (m_pArgArray[n] == pArgArray) return n;
+    //for (ushort n = 0U; n < _M_uArgCount; ++n) if (_M_pArgArray[n] == pArgArray) return n;
     return -1;
 }
+
+// =========================================================
 
 } /* cppual */
 

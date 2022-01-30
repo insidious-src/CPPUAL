@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,24 +33,24 @@
 #include <atomic>
 #include <memory>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class   IDisplayQueue;
-class   View;
-typedef std::shared_ptr<IDisplayQueue> shared_queue;
+class   display_queue_interface;
+class   view;
+typedef std::shared_ptr<display_queue_interface> shared_queue;
 
 // =========================================================
 
-class IDisplayQueue : public NonCopyableVirtual
+class display_queue_interface : public non_copyable_virtual
 {
 public:
-    typedef Input::Event             event_type     ;
-    typedef Connection               connection_type;
-    typedef IPlatformWindow          window_type    ;
+    typedef input::event             event_type     ;
+    typedef connection_type          connection_type;
+    typedef platform_wnd_interface          window_type    ;
     typedef std::atomic_bool         bool_type      ;
-    typedef BitSet<event_type::Type> mask_type      ;
+    typedef bitset<event_type::bits> mask_type      ;
 
-    ~IDisplayQueue();
+    ~display_queue_interface();
 
     virtual bool set_window_events (window_type const&, mask_type)         = 0;
     virtual bool pop_front         (bool wait)                             = 0;
@@ -58,61 +58,61 @@ public:
     virtual void send              (window_type const&, event_type const&) = 0;
     virtual void post              (window_type const&, event_type const&) = 0;
 
-    static IDisplayQueue* primary          () noexcept;
-    static bool           hasValidInstance () noexcept;
+    static shared_queue primary            () noexcept;
+    static bool         has_valid_instance () noexcept;
 
-    connection_type display () const noexcept { return m_display; }
-    bool            valid   () const noexcept { return m_display; }
+    connection_type display () const noexcept { return _M_display; }
+    bool            valid   () const noexcept { return _M_display; }
 
 protected:
-    constexpr IDisplayQueue (connection_type display) noexcept
-    : m_display (display)
+    constexpr display_queue_interface (connection_type display) noexcept
+    : _M_display (display)
     { }
 
 private:
-    connection_type m_display;
+    connection_type _M_display;
 };
 
 // =========================================================
 
-class EventQueue : public NonCopyable
+class event_queue : public non_copyable
 {
 public:
-    typedef IDisplayQueue::event_type event_type  ;
-    typedef Handle                    window_type ;
-    typedef std::atomic_bool          bool_type   ;
-    typedef View                      control_type;
+    typedef display_queue_interface::event_type event_type  ;
+    typedef resource_handle                     window_type ;
+    typedef std::atomic_bool                    bool_type   ;
+    typedef view                                control_type;
 
-    struct Signals final : NonCopyable
+    struct event_signals final : non_copyable
     {
-        Signal<void(window_type, event_type::KeyData)>      keyPress;
-        Signal<void(window_type, event_type::KeyData)>      keyRelease;
-        Signal<void(window_type, event_type::MButtonData)>  mousePress;
-        Signal<void(window_type, event_type::MButtonData)>  mouseRelease;
-        Signal<void(window_type, point2u)>                  mouseMove;
-        Signal<void(window_type, event_type::MWheelData)>   scroll;
-        Signal<void(window_type, event_type::TouchData)>    touchPress;
-        Signal<void(window_type, event_type::TouchData)>    touchRelease;
-        Signal<void(window_type, event_type::TouchData)>    touchMove;
-        Signal<void(window_type, i32)>                    sysMessage;
-        Signal<void(window_type, event_type::PaintData)>    winPaint;
-        Signal<void(window_type, point2u)>                  winSize;
-        Signal<void(window_type, bool)>                     winFocus;
-        Signal<void(window_type, bool)>                     winStep;
-        Signal<void(window_type, event_type::PropertyData)> winProperty;
-        Signal<void(window_type, bool)>                     winVisible;
-        Signal<void(window_type)>                           winDestroy;
+        signal<void(window_type, event_type::key_data)>      keyPress;
+        signal<void(window_type, event_type::key_data)>      keyRelease;
+        signal<void(window_type, event_type::mbutton_data)>  mousePress;
+        signal<void(window_type, event_type::mbutton_data)>  mouseRelease;
+        signal<void(window_type, point2u)>                   mouseMove;
+        signal<void(window_type, event_type::mwheel_data)>   scroll;
+        signal<void(window_type, event_type::touch_data)>    touchPress;
+        signal<void(window_type, event_type::touch_data)>    touchRelease;
+        signal<void(window_type, event_type::touch_data)>    touchMove;
+        signal<void(window_type, i32)>                       sysMessage;
+        signal<void(window_type, event_type::paint_data)>    winPaint;
+        signal<void(window_type, point2u)>                   winSize;
+        signal<void(window_type, bool)>                      winFocus;
+        signal<void(window_type, bool)>                      winStep;
+        signal<void(window_type, event_type::property_data)> winProperty;
+        signal<void(window_type, bool)>                      winVisible;
+        signal<void(window_type)>                            winDestroy;
     };
 
-    static Signals& events ()
+    inline static event_signals& events ()
     {
-        static Signals event_signals;
-        return event_signals;
+        static event_signals inst;
+        return inst;
     }
 
-    EventQueue (IDisplayQueue* display_queue = IDisplayQueue::primary ()) noexcept
-    : queue    (display_queue),
-      polling  (true)
+    event_queue (shared_queue const& display_queue = display_queue_interface::primary ()) noexcept
+    : queue     (display_queue),
+      polling   (true)
     { }
 
     int poll ()
@@ -133,12 +133,12 @@ public:
     bool pop_front (bool wait)
     { return queue->pop_front (wait); }
 
-    bool isPolling () const noexcept
+    bool is_polling () const noexcept
     { return polling; }
 
 private:
-    IDisplayQueue* queue  ;
-    bool_type      polling;
+    shared_queue queue  ;
+    bool_type    polling;
 };
 
 } } // namespace Input

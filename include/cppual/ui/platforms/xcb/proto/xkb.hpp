@@ -44,8 +44,8 @@ public:
                         uint8_t first_event,
                         const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~new_keyboard_notify(void) {}
@@ -72,11 +72,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class new_keyboard_notify
 } // namespace event
 
@@ -96,8 +96,8 @@ public:
                uint8_t first_event,
                const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~map_notify(void) {}
@@ -124,11 +124,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class map_notify
 } // namespace event
 
@@ -148,8 +148,8 @@ public:
                  uint8_t first_event,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~state_notify(void) {}
@@ -176,11 +176,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class state_notify
 } // namespace event
 
@@ -200,8 +200,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~controls_notify(void) {}
@@ -228,11 +228,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class controls_notify
 } // namespace event
 
@@ -252,8 +252,8 @@ public:
                            uint8_t first_event,
                            const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~indicator_state_notify(void) {}
@@ -280,11 +280,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class indicator_state_notify
 } // namespace event
 
@@ -304,8 +304,8 @@ public:
                          uint8_t first_event,
                          const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~indicator_map_notify(void) {}
@@ -332,11 +332,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class indicator_map_notify
 } // namespace event
 
@@ -356,8 +356,8 @@ public:
                  uint8_t first_event,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~names_notify(void) {}
@@ -384,11 +384,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class names_notify
 } // namespace event
 
@@ -408,8 +408,8 @@ public:
                       uint8_t first_event,
                       const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~compat_map_notify(void) {}
@@ -436,11 +436,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class compat_map_notify
 } // namespace event
 
@@ -460,8 +460,8 @@ public:
                 uint8_t first_event,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~bell_notify(void) {}
@@ -488,7 +488,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_atom_t, typename ... Parameter>
@@ -499,7 +499,7 @@ public:
         decltype((*this)->name),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->name,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -512,14 +512,14 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class bell_notify
 
 
@@ -542,8 +542,8 @@ public:
                    uint8_t first_event,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~action_message(void) {}
@@ -570,11 +570,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class action_message
 } // namespace event
 
@@ -594,8 +594,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~access_x_notify(void) {}
@@ -622,11 +622,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class access_x_notify
 } // namespace event
 
@@ -646,8 +646,8 @@ public:
                             uint8_t first_event,
                             const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~extension_device_notify(void) {}
@@ -674,11 +674,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class extension_device_notify
 } // namespace event
 
@@ -715,7 +715,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class keyboard
 } // namespace error
 
@@ -1109,7 +1109,7 @@ CookieFunction>
                 ::xcb_xkb_sym_interpret_t,
                 SIGNATURE(xcb_xkb_get_compat_map_si_rtrn),
                 SIGNATURE(xcb_xkb_get_compat_map_si_rtrn_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1128,7 +1128,7 @@ CookieFunction>
                 ::xcb_xkb_mod_def_t,
                 SIGNATURE(xcb_xkb_get_compat_map_group_rtrn),
                 SIGNATURE(xcb_xkb_get_compat_map_group_rtrn_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_compat_map
 
@@ -1292,7 +1292,7 @@ CookieFunction>
                 ::xcb_xkb_indicator_map_t,
                 SIGNATURE(xcb_xkb_get_indicator_map_maps),
                 SIGNATURE(xcb_xkb_get_indicator_map_maps_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_indicator_map
 
@@ -1385,7 +1385,7 @@ CookieFunction>
         decltype(this->get()->indicator),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->indicator,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1635,7 +1635,7 @@ CookieFunction>
                 SIGNATURE(xcb_xkb_listing_next),
                 SIGNATURE(xcb_xkb_listing_sizeof),
                 SIGNATURE(xcb_xkb_list_components_keymaps_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1656,7 +1656,7 @@ CookieFunction>
                 SIGNATURE(xcb_xkb_listing_next),
                 SIGNATURE(xcb_xkb_listing_sizeof),
                 SIGNATURE(xcb_xkb_list_components_keycodes_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1677,7 +1677,7 @@ CookieFunction>
                 SIGNATURE(xcb_xkb_listing_next),
                 SIGNATURE(xcb_xkb_listing_sizeof),
                 SIGNATURE(xcb_xkb_list_components_types_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1698,7 +1698,7 @@ CookieFunction>
                 SIGNATURE(xcb_xkb_listing_next),
                 SIGNATURE(xcb_xkb_listing_sizeof),
                 SIGNATURE(xcb_xkb_list_components_compat_maps_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1719,7 +1719,7 @@ CookieFunction>
                 SIGNATURE(xcb_xkb_listing_next),
                 SIGNATURE(xcb_xkb_listing_sizeof),
                 SIGNATURE(xcb_xkb_list_components_symbols_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1740,7 +1740,7 @@ CookieFunction>
                 SIGNATURE(xcb_xkb_listing_next),
                 SIGNATURE(xcb_xkb_listing_sizeof),
                 SIGNATURE(xcb_xkb_list_components_geometries_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_components
 
@@ -1886,7 +1886,7 @@ CookieFunction>
                 ::xcb_xkb_string8_t,
                 SIGNATURE(xcb_xkb_get_device_info_name),
                 SIGNATURE(xcb_xkb_get_device_info_name_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1905,7 +1905,7 @@ CookieFunction>
                 ::xcb_xkb_action_t,
                 SIGNATURE(xcb_xkb_get_device_info_btn_actions),
                 SIGNATURE(xcb_xkb_get_device_info_btn_actions_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1926,7 +1926,7 @@ CookieFunction>
                 SIGNATURE(xcb_xkb_device_led_info_next),
                 SIGNATURE(xcb_xkb_device_led_info_sizeof),
                 SIGNATURE(xcb_xkb_get_device_info_leds_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_atom_t, typename ... Parameter>
@@ -1937,7 +1937,7 @@ CookieFunction>
         decltype(this->get()->devtype),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->devtype,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2592,8 +2592,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -2609,51 +2609,51 @@ public:
         switch (event->pad0) {
 
         case XCB_XKB_NEW_KEYBOARD_NOTIFY:
-            handler(cppual::xkb::event::new_keyboard_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::new_keyboard_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_MAP_NOTIFY:
-            handler(cppual::xkb::event::map_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::map_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_STATE_NOTIFY:
-            handler(cppual::xkb::event::state_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::state_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_CONTROLS_NOTIFY:
-            handler(cppual::xkb::event::controls_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::controls_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_INDICATOR_STATE_NOTIFY:
-            handler(cppual::xkb::event::indicator_state_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::indicator_state_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_INDICATOR_MAP_NOTIFY:
-            handler(cppual::xkb::event::indicator_map_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::indicator_map_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_NAMES_NOTIFY:
-            handler(cppual::xkb::event::names_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::names_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_COMPAT_MAP_NOTIFY:
-            handler(cppual::xkb::event::compat_map_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::compat_map_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_BELL_NOTIFY:
-            handler(cppual::xkb::event::bell_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::bell_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_ACTION_MESSAGE:
-            handler(cppual::xkb::event::action_message<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::action_message<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_ACCESS_X_NOTIFY:
-            handler(cppual::xkb::event::access_x_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::access_x_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XKB_EXTENSION_DEVICE_NOTIFY:
-            handler(cppual::xkb::event::extension_device_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xkb::event::extension_device_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -2662,8 +2662,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -2676,7 +2676,7 @@ public:
     typedef cppual::xkb::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::xkb::extension & extension)
@@ -2686,7 +2686,7 @@ public:
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-        switch (error->error_code - m_first_error) {
+        switch (error->error_code - _M_first_error) {
 
         case XCB_XKB_KEYBOARD: // 0
             throw cppual::xkb::error::keyboard(error);
@@ -2695,7 +2695,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

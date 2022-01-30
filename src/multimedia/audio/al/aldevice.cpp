@@ -3,9 +3,9 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
- * This program is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it &&/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,109 +23,110 @@
 #include <AL/alc.h>
 #include "aldef.h"
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
 namespace { // optimize for internal unit usage
 
-struct Internal final : NonConstructible
-{ static thread_local Instance* currentContext; };
-
-thread_local Instance* Internal::currentContext = nullptr;
+inline static instance*& current_context() noexcept
+{
+    static thread_local instance* inst = nullptr;
+    return inst;
+}
 
 } // anonymous
 
 // ====================================================
 
-inline int convertQuality (OutputFormat eFormat, SoundQuality eQuality) noexcept
+inline int convert_quality (output_format eFormat, sound_quality eQuality) noexcept
 {
     switch (eFormat)
     {
-    case OutputFormat::Mono:
+    case output_format::mono:
         switch (eQuality)
         {
-        case SoundQuality::Low:
-            return AL::Mono8;
-        case SoundQuality::Medium:
-            return AL::Mono16;
-        case SoundQuality::High:
-            return AL::Mono32;
+        case sound_quality::low:
+            return al::mono8;
+        case sound_quality::medium:
+            return al::mono16;
+        case sound_quality::high:
+            return al::mono32;
         }
         break;
-    case OutputFormat::Stereo:
+    case output_format::stereo:
         switch (eQuality)
         {
-        case SoundQuality::Low:
-            return AL::Stereo8;
-        case SoundQuality::Medium:
-            return AL::Stereo16;
-        case SoundQuality::High:
-            return AL::Stereo32;
+        case sound_quality::low:
+            return al::stereo8;
+        case sound_quality::medium:
+            return al::stereo16;
+        case sound_quality::high:
+            return al::stereo32;
         }
         break;
-    case OutputFormat::Rear:
+    case output_format::rear:
         switch (eQuality)
         {
-        case SoundQuality::Low:
-            return AL::Rear8;
-        case SoundQuality::Medium:
-            return AL::Rear16;
-        case SoundQuality::High:
-            return AL::Rear32;
+        case sound_quality::low:
+            return al::rear8;
+        case sound_quality::medium:
+            return al::rear16;
+        case sound_quality::high:
+            return al::rear32;
         }
         break;
-    case OutputFormat::Quad:
+    case output_format::quad:
         switch (eQuality)
         {
-        case SoundQuality::Low:
-            return AL::Quad8;
-        case SoundQuality::Medium:
-            return AL::Quad16;
-        case SoundQuality::High:
-            return AL::Quad32;
+        case sound_quality::low:
+            return al::quad8;
+        case sound_quality::medium:
+            return al::quad16;
+        case sound_quality::high:
+            return al::quad32;
         }
         break;
-    case OutputFormat::CH51:
+    case output_format::ch51:
         switch (eQuality)
         {
-        case SoundQuality::Low:
-            return AL::CH51_8;
-        case SoundQuality::Medium:
-            return AL::CH51_16;
-        case SoundQuality::High:
-            return AL::CH51_32;
+        case sound_quality::low:
+            return al::ch51_8;
+        case sound_quality::medium:
+            return al::ch51_16;
+        case sound_quality::high:
+            return al::ch51_32;
         }
         break;
-    case OutputFormat::CH61:
+    case output_format::ch61:
         switch (eQuality)
         {
-        case SoundQuality::Low:
-            return AL::CH61_8;
-        case SoundQuality::Medium:
-            return AL::CH61_16;
-        case SoundQuality::High:
-            return AL::CH61_32;
+        case sound_quality::low:
+            return al::ch61_8;
+        case sound_quality::medium:
+            return al::ch61_16;
+        case sound_quality::high:
+            return al::ch61_32;
         }
         break;
-    case OutputFormat::CH71:
+    case output_format::ch71:
         switch (eQuality)
         {
-        case SoundQuality::Low:
-            return AL::CH71_8;
-        case SoundQuality::Medium:
-            return AL::CH71_16;
-        case SoundQuality::High:
-            return AL::CH71_32;
+        case sound_quality::low:
+            return al::ch71_8;
+        case sound_quality::medium:
+            return al::ch71_16;
+        case sound_quality::high:
+            return al::ch71_32;
         }
         break;
     default:
         switch (eQuality)
         {
-        case SoundQuality::Low:
-            return AL::Stereo8;
-        case SoundQuality::Medium:
-            return AL::Stereo16;
-        case SoundQuality::High:
-            return AL::Stereo32;
+        case sound_quality::low:
+            return al::stereo8;
+        case sound_quality::medium:
+            return al::stereo16;
+        case sound_quality::high:
+            return al::stereo32;
         }
         break;
     }
@@ -133,170 +134,168 @@ inline int convertQuality (OutputFormat eFormat, SoundQuality eQuality) noexcept
     return 0;
 }
 
-inline DistanceModel convertDistanceModel (int nModel) noexcept
+inline distance_type convert_distance_model (int nModel) noexcept
 {
     switch (nModel)
     {
-    case AL::InverseDistance:
-        return DistanceModel::InverseDistance;
-    case AL::InverseDistanceClamped:
-        return DistanceModel::InverseDistanceClamped;
-    case AL::LinearDistance:
-        return DistanceModel::LinearDistance;
-    case AL::LinearDistanceClamped:
-        return DistanceModel::LinearDistanceClamped;
-    case AL::ExponentDistance:
-        return DistanceModel::ExponentDistance;
-    case AL::ExponentDistanceClamped:
-        return DistanceModel::ExponentDistanceClamped;
+    case al::inverse_distance:
+        return distance_type::inverse_distance;
+    case al::inverse_distance_clamped:
+        return distance_type::inverse_distance_clamped;
+    case al::linear_distance:
+        return distance_type::linear_distance;
+    case al::linear_distance_clamped:
+        return distance_type::linear_distance_clamped;
+    case al::exponent_distance:
+        return distance_type::exponent_distance;
+    case al::exponent_distance_clamped:
+        return distance_type::exponent_distance_clamped;
     default:
-        return DistanceModel::Plain;
+        return distance_type::plain;
     }
 }
 
-inline int convertDistanceModel (DistanceModel eModel) noexcept
+inline int convert_distance_model (distance_type eModel) noexcept
 {
     switch (eModel)
     {
-    case DistanceModel::Plain:
+    case distance_type::plain:
         return 0;
-    case DistanceModel::InverseDistance:
-        return AL::InverseDistance;
-    case DistanceModel::InverseDistanceClamped:
-        return AL::InverseDistanceClamped;
-    case DistanceModel::LinearDistance:
-        return AL::LinearDistance;
-    case DistanceModel::LinearDistanceClamped:
-        return AL::LinearDistanceClamped;
-    case DistanceModel::ExponentDistance:
-        return AL::ExponentDistance;
+    case distance_type::inverse_distance:
+        return al::inverse_distance;
+    case distance_type::inverse_distance_clamped:
+        return al::inverse_distance_clamped;
+    case distance_type::linear_distance:
+        return al::linear_distance;
+    case distance_type::linear_distance_clamped:
+        return al::linear_distance_clamped;
+    case distance_type::exponent_distance:
+        return al::exponent_distance;
     default:
-        return AL::ExponentDistanceClamped;
+        return al::exponent_distance_clamped;
     }
 }
 
 // ====================================================
 
-bool AudioDevice::isExtensionSupported (string_type const& gExt) noexcept
+bool audio_device::is_extension_supported (string_type const& gExt) noexcept
 {
     return ::alIsExtensionPresent (gExt.c_str ());
 }
 
-bool AudioDevice::isExtensionPresent (string_type const& gExt) noexcept
+bool audio_device::is_extension_present (string_type const& gExt) noexcept
 {
-    if (m_pDevObj)
+    if (_M_pDevObj)
         return ::alcIsExtensionPresent
-                (static_cast<ALCdevice*> (m_pDevObj), gExt.c_str ());
+                (static_cast<ALCdevice*> (_M_pDevObj), gExt.c_str ());
     return false;
 }
 
 // ====================================================
 
-PlaybackDevice::PlaybackDevice () noexcept
-: AudioDevice ("Default",
+playback_device::playback_device () noexcept
+: audio_device ("Default",
                ::alcOpenDevice (nullptr),
-               DeviceType::Playback)
+               device_type::playback)
 { }
 
-PlaybackDevice::PlaybackDevice (string_type const& gName) noexcept
-: AudioDevice (std::move (gName),
+playback_device::playback_device (string_type const& gName) noexcept
+: audio_device (std::move (gName),
                ::alcOpenDevice (gName.c_str ()),
-               DeviceType::Playback)
+               device_type::playback)
 { }
 
-PlaybackDevice::~PlaybackDevice () noexcept
+playback_device::~playback_device () noexcept
 {
-    if (m_pDevObj) ::alcCloseDevice (static_cast<ALCdevice*> (m_pDevObj));
+    if (_M_pDevObj) ::alcCloseDevice (static_cast<ALCdevice*> (_M_pDevObj));
 }
 
 // ====================================================
 
-CaptureDevice::CaptureDevice () noexcept
-: AudioDevice ("Default",
+capture_device::capture_device () noexcept
+: audio_device ("Default",
                ::alcCaptureOpenDevice (nullptr,
                                        22050,
-                                       convertQuality (OutputFormat::Stereo,
-                                                       SoundQuality::Low),
+                                       convert_quality (output_format::stereo,
+                                                       sound_quality::low),
                                        0),
-               DeviceType::Capture),
-  m_eQuality (SoundQuality::Low),
-  m_eFormat (OutputFormat::Stereo)
+               device_type::capture),
+  _M_eQuality (sound_quality::low),
+  _M_eFormat (output_format::stereo)
 {
 }
 
-CaptureDevice::CaptureDevice (string_type const& gName,
-                              uint               uFreq,
-                              OutputFormat       eFormat,
-                              SoundQuality       eQuality) noexcept
-: AudioDevice (gName,
-               ::alcCaptureOpenDevice (gName.c_str (),
-                                       uFreq,
-                                       convertQuality (eFormat, eQuality),
-                                       0),
-               DeviceType::Capture),
-  m_eQuality (eQuality),
-  m_eFormat (eFormat)
+capture_device::capture_device (string_type const& gName,
+                                uint               uFreq,
+                                output_format       eFormat,
+                                sound_quality       eQuality) noexcept
+: audio_device (gName,
+                ::alcCaptureOpenDevice (gName.c_str (),
+                                        uFreq,
+                                        convert_quality (eFormat, eQuality),
+                                        0),
+                device_type::capture),
+  _M_eQuality (eQuality),
+  _M_eFormat (eFormat)
 { }
 
-CaptureDevice::~CaptureDevice () noexcept
+capture_device::~capture_device () noexcept
 {
-    if (m_pDevObj) ::alcCaptureCloseDevice (static_cast<ALCdevice*> (m_pDevObj));
+    if (_M_pDevObj) ::alcCaptureCloseDevice (static_cast<ALCdevice*> (_M_pDevObj));
 }
 
 // ====================================================
 
-Instance::Instance (PlaybackDevice& gDevice, bool bMakeCurrent) noexcept
-: m_gDevice (gDevice),
-  m_pDevContext (gDevice.valid () ?
+instance::instance (playback_device& gDevice, bool bMakeCurrent) noexcept
+: _M_gDevice (&gDevice),
+  _M_pDevContext (gDevice.valid () ?
                      ::alcCreateContext
-                     (static_cast<ALCdevice*> (gDevice.object ()), nullptr) :
+                     (static_cast<ALCdevice*> (gDevice.handle ()), nullptr) :
                      nullptr)
 {
-    if (m_pDevContext and bMakeCurrent and
-            ::alcMakeContextCurrent (static_cast<ALCcontext*> (m_pDevContext)) == 1)
-        Internal::currentContext = this;
+    if (_M_pDevContext && bMakeCurrent &&
+            ::alcMakeContextCurrent (static_cast<ALCcontext*> (_M_pDevContext)) == 1)
+        current_context () = this;
 }
 
-Instance::~Instance () noexcept
+instance::~instance () noexcept
 {
-    if (m_pDevContext)
+    if (_M_pDevContext)
     {
         invalidate ();
-        ::alcDestroyContext (static_cast<ALCcontext*> (m_pDevContext));
+        ::alcDestroyContext (static_cast<ALCcontext*> (_M_pDevContext));
     }
 }
 
-bool Instance::use () noexcept
+bool instance::use () noexcept
 {
-    if (Internal::currentContext != this and
-            ::alcMakeContextCurrent (static_cast<ALCcontext*> (m_pDevContext)) == 1)
+    if (current_context () != this && ::alcMakeContextCurrent (static_cast<ALCcontext*> (_M_pDevContext)) == 1)
     {
-        Internal::currentContext = this;
+        current_context () = this;
         return true;
     }
 
     return false;
 }
 
-void Instance::invalidate () noexcept
+void instance::invalidate () noexcept
 {
-    if (Internal::currentContext == this and ::alcMakeContextCurrent (nullptr) == 1)
-        Internal::currentContext  = nullptr;
+    if (current_context () == this && ::alcMakeContextCurrent (nullptr) == 1)
+        current_context ()  = nullptr;
 }
 
-bool Instance::setCapability (int nCap, bool bEnable) noexcept
+bool instance::set_capability (int nCap, bool bEnable) noexcept
 {
-    Instance* pPrevContext = Internal::currentContext;
+    instance* pPrevContext = current_context ();
 
-    if (m_pDevContext and use ())
+    if (_M_pDevContext && use ())
     {
         bEnable ? ::alEnable (nCap) : ::alDisable (nCap);
 
-        if (pPrevContext and pPrevContext != this)
+        if (pPrevContext && pPrevContext != this)
         {
-            if (::alcMakeContextCurrent
-                    (static_cast<ALCcontext*> (pPrevContext->m_pDevContext)) == 1)
-                Internal::currentContext = pPrevContext;
+            if (::alcMakeContextCurrent (static_cast<ALCcontext*> (pPrevContext->_M_pDevContext)) == 1)
+                current_context () = pPrevContext;
         }
 
         return true;
@@ -305,19 +304,19 @@ bool Instance::setCapability (int nCap, bool bEnable) noexcept
     return false;
 }
 
-bool Instance::hasCapability (int nCap) noexcept
+bool instance::has_capability (int nCap) noexcept
 {
-    Instance* pPrevContext = Internal::currentContext;
+    instance* pPrevContext = current_context ();
 
-    if (m_pDevContext and use ())
+    if (_M_pDevContext && use ())
     {
         bool bHasCap = ::alIsEnabled (nCap) == 1;
 
-        if (pPrevContext and pPrevContext != this)
+        if (pPrevContext && pPrevContext != this)
         {
             if (::alcMakeContextCurrent
-                    (static_cast<ALCcontext*> (pPrevContext->m_pDevContext)) == 1)
-                Internal::currentContext = pPrevContext;
+                    (static_cast<ALCcontext*> (pPrevContext->_M_pDevContext)) == 1)
+                current_context () = pPrevContext;
         }
 
         return bHasCap;
@@ -326,57 +325,57 @@ bool Instance::hasCapability (int nCap) noexcept
     return false;
 }
 
-void Instance::process () noexcept
+void instance::process () noexcept
 {
-    if (m_pDevContext) ::alcProcessContext (static_cast<ALCcontext*> (m_pDevContext));
+    if (_M_pDevContext) ::alcProcessContext (static_cast<ALCcontext*> (_M_pDevContext));
 }
 
-void Instance::suspend () noexcept
+void instance::suspend () noexcept
 {
-    if (m_pDevContext) ::alcSuspendContext (static_cast<ALCcontext*> (m_pDevContext));
+    if (_M_pDevContext) ::alcSuspendContext (static_cast<ALCcontext*> (_M_pDevContext));
 }
 
-DistanceModel Instance::distanceModel () noexcept
+distance_type instance::distance_model () noexcept
 {
     int nModel = 0;
-    ::alGetIntegerv (AL::CurrentDistanceModel, &nModel);
-    return convertDistanceModel (nModel);
+    ::alGetIntegerv (al::current_distance_model, &nModel);
+    return convert_distance_model (nModel);
 }
 
-void Instance::setDistanceModel (DistanceModel eModel) noexcept
+void instance::set_distance_model (distance_type eModel) noexcept
 {
-    ::alDistanceModel (convertDistanceModel (eModel));
+    ::alDistanceModel (convert_distance_model (eModel));
 }
 
-Instance* Instance::current () noexcept
+instance* instance::current () noexcept
 {
-    return Internal::currentContext;
+    return current_context ();
 }
 
-string Instance::label (StringQuery) noexcept
-{
-    return { };
-}
-
-Instance::ext_list Instance::extensions () noexcept
+string instance::label (string_query) noexcept
 {
     return { };
 }
 
-void Instance::setDopplerFactor (float) noexcept
+instance::ext_list instance::extensions () noexcept
+{
+    return { };
+}
+
+void instance::set_doppler_factor (float) noexcept
 {
 }
 
-float Instance::dopplerFactor () noexcept
+float instance::doppler_factor () noexcept
 {
     return .0f;
 }
 
-void Instance::setSpeedOfSound (float) noexcept
+void instance::set_speed_of_sound (float) noexcept
 {
 }
 
-float Instance::speedOfSound () noexcept
+float instance::speed_of_sound () noexcept
 {
     return .0f;
 }

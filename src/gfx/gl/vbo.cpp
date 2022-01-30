@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,24 +24,24 @@
 
 #include "gldef.h"
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
-inline uint getAccessMode (AccessMode eMode) noexcept
+constexpr uint get_access_mode (access_mode eMode) noexcept
 {
     switch (eMode)
     {
-    case AccessMode::Read:
+    case access_mode::read:
         return GL_READ_ONLY;
-    case AccessMode::Write:
+    case access_mode::write:
         return GL_WRITE_ONLY;
-    case AccessMode::ReadWrite:
+    case access_mode::read_write:
         return GL_READ_WRITE;
+    default:
+        return 0;
     }
-
-    return 0;
 }
 
-inline uint getBufferType (BufferType eType) noexcept
+constexpr uint get_buffer_type (BufferType eType) noexcept
 {
     switch (eType)
     {
@@ -73,12 +73,12 @@ inline uint getBufferType (BufferType eType) noexcept
         return GL_TRANSFORM_FEEDBACK_BUFFER;
     case BufferType::Uniform:
         return GL_UNIFORM_BUFFER;
+    default:
+        return 0;
     }
-
-    return 0;
 }
 
-inline static uint getUsageType (UsageType eType) noexcept
+constexpr uint get_usage_type (UsageType eType) noexcept
 {
     switch (eType)
     {
@@ -100,81 +100,81 @@ inline static uint getUsageType (UsageType eType) noexcept
         return GL_DYNAMIC_COPY;
     case UsageType::DynamicDraw:
         return GL_DYNAMIC_DRAW;
+    default:
+        return 0;
     }
-
-    return 0;
 }
 
 // ====================================================
 
-VertexBuffer::VertexBuffer (size_type uSize) noexcept
-: m_gData (),
-  m_eType (),
-  m_bIsUploaded ()
+vertex_buffer::vertex_buffer (size_type uSize) noexcept
+: _M_gData (),
+  _M_eType (),
+  _M_bIsUploaded ()
 {
-    m_gData.reserve (uSize);
+    _M_gData.reserve (uSize);
 }
 
-void* VertexBuffer::mapBufferToMemory (AccessMode eMode) noexcept
+void* vertex_buffer::map_buffer_to_memory (access_mode eMode) noexcept
 {
-    if (!m_bIsUploaded) return nullptr;
-    return IDeviceContext::current ()->version () < 3 ?
-                glMapBuffer    (getBufferType (m_eType), getAccessMode (eMode)) :
-                glMapBufferARB (getBufferType (m_eType), getAccessMode (eMode)) ;
+    if (!_M_bIsUploaded) return nullptr;
+    return context_interface::current ()->version () < 3 ?
+                glMapBuffer    (get_buffer_type (_M_eType), get_access_mode (eMode)) :
+                glMapBufferARB (get_buffer_type (_M_eType), get_access_mode (eMode)) ;
 }
 
-void* VertexBuffer::mapSubBufferToMemory (ptrdiff    uOffset,
-                                          ptrdiff    uLen,
+void* vertex_buffer::map_subbuffer_to_memory (difference_type    uOffset,
+                                          difference_type    uLen,
                                           GLMapFlags gAccesFlags) noexcept
 {
-    if (!m_bIsUploaded) return nullptr;
-    return glMapBufferRange (getBufferType (m_eType),
+    if (!_M_bIsUploaded) return nullptr;
+    return glMapBufferRange (get_buffer_type (_M_eType),
                              uOffset,
                              uLen,
                              gAccesFlags);
 }
 
-void VertexBuffer::unmapBuffer () noexcept
+void vertex_buffer::unmap_buffer () noexcept
 {
-    if (handle ()) glUnmapBuffer (getBufferType (m_eType));
+    if (handle ()) glUnmapBuffer (get_buffer_type (_M_eType));
 }
 
-void VertexBuffer::bind (BufferType eType) noexcept
+void vertex_buffer::bind (BufferType eType) noexcept
 {
     if (handle ())
     {
-        m_eType = eType;
-        glBindBuffer (getBufferType (eType), handle ());
+        _M_eType = eType;
+        glBindBuffer (get_buffer_type (eType), handle ());
     }
 }
 
-void VertexBuffer::upload (UsageType eUsage)
+void vertex_buffer::upload (UsageType eUsage)
 {
     if (handle ())
     {
-        glBufferData (getBufferType (m_eType),
-                      static_cast<ptrdiff> (m_gData.size ()),
-                      &m_gData[0],
-                      getUsageType (eUsage));
+        glBufferData (get_buffer_type (_M_eType),
+                      static_cast<difference_type> (_M_gData.size ()),
+                      &_M_gData[0],
+                      get_usage_type (eUsage));
 
-        m_bIsUploaded = true;
-        m_gData.clear ();
+        _M_bIsUploaded = true;
+        _M_gData.clear ();
     }
 }
 
-void VertexBuffer::addData (pointer pData, size_type uDataSize)
+void vertex_buffer::add_data (pointer pData, size_type uDataSize)
 {
     if (handle ())
     {
-        m_gData.insert (m_gData.end (), pData, pData + uDataSize);
-        m_bIsUploaded = false;
+        _M_gData.insert (_M_gData.end (), pData, pData + uDataSize);
+        _M_bIsUploaded = false;
     }
 }
 
 // ====================================================
 
-VertexArray::VertexArray () noexcept
-: Object (ResourceType::Macro)
+vertex_array::vertex_array () noexcept
+: object (resource_type::macro)
 { }
 
 } } } // namespace GL

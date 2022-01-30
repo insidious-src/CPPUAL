@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,31 +27,42 @@
 #include <cppual/network/address.h>
 #include <cppual/network/packet.h>
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
-class TcpStream final : public virtual TransportSocket
+class TcpStream : public virtual TransportSocket
 {
 public:
     typedef std::size_t size_type;
     typedef ssize_t     stream_size;
 
-    TcpStream& operator << (Packet const&) noexcept; // send
-    TcpStream& operator >> (Packet&) noexcept;       // receive
+    /// send
+    TcpStream& operator << (Packet const&) noexcept;
+
+    /// receive
+    TcpStream& operator >> (Packet&) noexcept;
+
     TcpStream  () noexcept;
-    ~TcpStream () noexcept;
+    virtual ~TcpStream () noexcept;
 
     void disconnect () noexcept;
 
-    Address getPeerIp   () const noexcept { return m_gPeerAddr; }
-    u16     getPeerPort () const noexcept { return m_nPeerPort; }
+    virtual void start_session(ProtocolContext&, Packet& outgoing_packet);
+    virtual bool read_data(ProtocolContext&, Packet& incoming_packet);
+    virtual byte try_decode(ProtocolContext&, Packet& output_packet);
+    virtual byte encode_content(ProtocolContext&, Packet& input_packet, Packet& output_packet);
 
-private:
-    Address m_gPeerAddr;
-    u16     m_nPeerPort;
-    bool    m_bIsConnected;
+    Address peer_address () const noexcept { return _M_gPeerAddr; }
+    u16     peer_port    () const noexcept { return _M_nPeerPort; }
 
+protected:
     TcpStream (TcpStream&& stream) noexcept;
     TcpStream (Address const& address, u16 port) noexcept;
+
+private:
+    Address _M_gPeerAddr    { };
+    u16     _M_nPeerPort    { };
+    bool    _M_bIsConnected { };
+
 };
 
 } } // namespace Network

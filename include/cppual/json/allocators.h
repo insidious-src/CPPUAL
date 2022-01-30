@@ -26,7 +26,7 @@
 #include <type_traits>
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Allocator
@@ -81,7 +81,7 @@ concept Allocator {
 
     It does not free memory blocks. And Realloc() only allocate new memory.
 
-    The memory chunks are allocated by BaseAllocator, which is cppual::Memory::MemoryResource by default.
+    The memory chunks are allocated by BaseAllocator, which is cppual::memory::memory_resource by default.
 
     User may also supply a buffer as the first chunk.
 
@@ -89,11 +89,11 @@ concept Allocator {
 
     The user-buffer is not deallocated by this allocator.
 
-    \tparam BaseAllocator the allocator type for allocating memory chunks. Default is cppual::Memory::MemoryResource.
+    \tparam BaseAllocator the allocator type for allocating memory chunks. Default is cppual::memory::memory_resource.
     \note implements Allocator concept
 */
-template <typename BaseResource = cppual::Memory::MemoryResource>
-class MemoryPoolResource : public cppual::Memory::MemoryResource
+template <typename BaseResource = cppual::memory::memory_resource>
+class MemoryPoolResource : public cppual::memory::memory_resource
 {
     //! Chunk header for perpending to each chunk.
     /*! Chunks are stored as a singly linked list.
@@ -135,9 +135,9 @@ public:
     */
     explicit
     MemoryPoolResource(size_type chunkSize = kDefaultChunkCapacity,
-                       BaseResource* baseAllocator = cppual::Memory::get_default_resource()) :
+                       BaseResource* baseAllocator = cppual::memory::get_default_resource()) :
         chunk_capacity_(chunkSize),
-        baseAllocator_(baseAllocator ? baseAllocator : cppual::Memory::get_default_resource()),
+        baseAllocator_(baseAllocator ? baseAllocator : cppual::memory::get_default_resource()),
         shared_(static_cast<SharedData*>(baseAllocator_ ?
                                              baseAllocator_->allocate(SIZEOF_SHARED_DATA +
                                                                       SIZEOF_CHUNK_HEADER) : nullptr))
@@ -170,7 +170,7 @@ public:
         \param baseAllocator The allocator for allocating memory chunks.
     */
     MemoryPoolResource(void *buffer, size_type size, size_type chunkSize = kDefaultChunkCapacity,
-                       BaseResource* baseAllocator = cppual::Memory::get_default_resource()) :
+                       BaseResource* baseAllocator = cppual::memory::get_default_resource()) :
         chunk_capacity_(chunkSize),
         baseAllocator_(baseAllocator),
         shared_(static_cast<SharedData*>(AlignBuffer(buffer, size)))
@@ -369,7 +369,7 @@ private:
     */
     bool AddChunk(size_type capacity) {
         if (!baseAllocator_)
-            shared_->ownBaseAllocator = baseAllocator_ = cppual::Memory::get_default_resource();
+            shared_->ownBaseAllocator = baseAllocator_ = cppual::memory::get_default_resource();
         if (ChunkHeader* chunk = static_cast<ChunkHeader*>(baseAllocator_->allocate
                                                            (SIZEOF_CHUNK_HEADER + capacity)))
         {
@@ -402,7 +402,7 @@ private:
     SharedData*   shared_         { }; //!< The shared data of the allocator
 };
 
-inline MemoryPoolResource<cppual::Memory::MemoryResource>* memory_pool_resource()
+inline MemoryPoolResource<cppual::memory::memory_resource>* memory_pool_resource()
 {
     static auto rc = MemoryPoolResource();
     return &rc;

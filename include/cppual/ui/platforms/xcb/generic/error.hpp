@@ -54,7 +54,7 @@ class error
 public:
     error(const std::shared_ptr<xcb_generic_error_t> & error)
         : runtime_error(get_error_description(error.get()))
-        , m_error(error)
+        , _M_error(error)
     {}
 
     virtual
@@ -64,21 +64,21 @@ public:
     virtual
     operator const Error &(void) const
     {
-        return reinterpret_cast<const Error &>(*m_error);
+        return reinterpret_cast<const Error &>(*_M_error);
     }
 
     virtual
     const Error &
     operator*(void) const
     {
-        return reinterpret_cast<const Error &>(*m_error);
+        return reinterpret_cast<const Error &>(*_M_error);
     }
 
     virtual
     Error *
     operator->(void) const
     {
-        return reinterpret_cast<Error * const>(m_error.get());
+        return reinterpret_cast<Error * const>(_M_error.get());
     }
 
 protected:
@@ -89,7 +89,7 @@ protected:
         return std::string(Derived::description()) + " (" + std::to_string(error->error_code) + ")";
     }
 
-    std::shared_ptr<xcb_generic_error_t> m_error;
+    std::shared_ptr<xcb_generic_error_t> _M_error;
 }; // class error
 
 } } // xpp::generic

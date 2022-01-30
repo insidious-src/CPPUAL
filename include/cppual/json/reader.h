@@ -125,7 +125,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 
 #include "error/error.h" // ParseErrorCode, ParseResult
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ParseFlag
@@ -535,8 +535,9 @@ template<> inline void SkipWhitespace(EncodedInputStream<UTF8<>, MemoryStream>& 
     \tparam TargetEncoding Encoding of the parse output.
     \tparam StackAllocator Allocator type for stack.
 */
-template <typename SourceEncoding, typename TargetEncoding, typename StackAllocator = cppual::Memory::MemoryResource>
-class GenericReader {
+template <typename SourceEncoding, typename TargetEncoding, typename StackAllocator = memory::memory_resource>
+class GenericReader
+{
 public:
     typedef typename SourceEncoding::Ch Ch; //!< SourceEncoding character type
 

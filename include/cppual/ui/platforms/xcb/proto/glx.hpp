@@ -44,8 +44,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~pbuffer_clobber(void) {}
@@ -72,7 +72,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_glx_drawable_t, typename ... Parameter>
@@ -83,14 +83,14 @@ public:
         decltype((*this)->drawable),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->drawable,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class pbuffer_clobber
 
 
@@ -113,8 +113,8 @@ public:
                          uint8_t first_event,
                          const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~buffer_swap_complete(void) {}
@@ -141,7 +141,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_glx_drawable_t, typename ... Parameter>
@@ -152,14 +152,14 @@ public:
         decltype((*this)->drawable),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->drawable,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class buffer_swap_complete
 
 
@@ -180,7 +180,7 @@ public:
 
     static uint8_t opcode(void)
     {
-        return XCB_GLX_GENERIC;
+        return static_cast<uint8_t>(XCB_GLX_GENERIC);
     }
 
     static uint8_t opcode(uint8_t first_error)
@@ -199,7 +199,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class generic
 } // namespace error
 
@@ -235,7 +235,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_context
 } // namespace error
 
@@ -271,7 +271,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_context_state
 } // namespace error
 
@@ -307,7 +307,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_drawable
 } // namespace error
 
@@ -343,7 +343,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_pixmap
 } // namespace error
 
@@ -379,7 +379,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_context_tag
 } // namespace error
 
@@ -415,7 +415,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_current_window
 } // namespace error
 
@@ -451,7 +451,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_render_request
 } // namespace error
 
@@ -487,7 +487,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_large_request
 } // namespace error
 
@@ -523,7 +523,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class unsupported_private_request
 } // namespace error
 
@@ -559,7 +559,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_fb_config
 } // namespace error
 
@@ -595,7 +595,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_pbuffer
 } // namespace error
 
@@ -631,7 +631,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_current_drawable
 } // namespace error
 
@@ -667,7 +667,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_window
 } // namespace error
 
@@ -703,7 +703,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class glx_bad_profile_arb
 } // namespace error
 
@@ -1171,7 +1171,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_get_visual_configs_property_list),
                 SIGNATURE(xcb_glx_get_visual_configs_property_list_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_visual_configs
 
@@ -1332,7 +1332,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_vendor_private_with_reply_data_2),
                 SIGNATURE(xcb_glx_vendor_private_with_reply_data_2_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class vendor_private_with_reply
 
@@ -1568,7 +1568,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_get_fb_configs_property_list),
                 SIGNATURE(xcb_glx_get_fb_configs_property_list_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_fb_configs
 
@@ -1704,7 +1704,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_query_context_attribs),
                 SIGNATURE(xcb_glx_query_context_attribs_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_context
 
@@ -1886,7 +1886,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_get_drawable_attributes_attribs),
                 SIGNATURE(xcb_glx_get_drawable_attributes_attribs_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_drawable_attributes
 
@@ -2230,7 +2230,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_render_mode_data),
                 SIGNATURE(xcb_glx_render_mode_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class render_mode
 
@@ -2412,7 +2412,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_read_pixels_data),
                 SIGNATURE(xcb_glx_read_pixels_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class read_pixels
 
@@ -2494,7 +2494,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_booleanv_data),
                 SIGNATURE(xcb_glx_get_booleanv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_booleanv
 
@@ -2576,7 +2576,7 @@ CookieFunction>
                 ::xcb_glx_float64_t,
                 SIGNATURE(xcb_glx_get_clip_plane_data),
                 SIGNATURE(xcb_glx_get_clip_plane_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_clip_plane
 
@@ -2658,7 +2658,7 @@ CookieFunction>
                 ::xcb_glx_float64_t,
                 SIGNATURE(xcb_glx_get_doublev_data),
                 SIGNATURE(xcb_glx_get_doublev_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_doublev
 
@@ -2804,7 +2804,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_floatv_data),
                 SIGNATURE(xcb_glx_get_floatv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_floatv
 
@@ -2886,7 +2886,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_integerv_data),
                 SIGNATURE(xcb_glx_get_integerv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_integerv
 
@@ -2968,7 +2968,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_lightfv_data),
                 SIGNATURE(xcb_glx_get_lightfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_lightfv
 
@@ -3050,7 +3050,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_lightiv_data),
                 SIGNATURE(xcb_glx_get_lightiv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_lightiv
 
@@ -3132,7 +3132,7 @@ CookieFunction>
                 ::xcb_glx_float64_t,
                 SIGNATURE(xcb_glx_get_mapdv_data),
                 SIGNATURE(xcb_glx_get_mapdv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_mapdv
 
@@ -3214,7 +3214,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_mapfv_data),
                 SIGNATURE(xcb_glx_get_mapfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_mapfv
 
@@ -3296,7 +3296,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_mapiv_data),
                 SIGNATURE(xcb_glx_get_mapiv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_mapiv
 
@@ -3378,7 +3378,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_materialfv_data),
                 SIGNATURE(xcb_glx_get_materialfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_materialfv
 
@@ -3460,7 +3460,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_materialiv_data),
                 SIGNATURE(xcb_glx_get_materialiv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_materialiv
 
@@ -3542,7 +3542,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_pixel_mapfv_data),
                 SIGNATURE(xcb_glx_get_pixel_mapfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_pixel_mapfv
 
@@ -3624,7 +3624,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_get_pixel_mapuiv_data),
                 SIGNATURE(xcb_glx_get_pixel_mapuiv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_pixel_mapuiv
 
@@ -3706,7 +3706,7 @@ CookieFunction>
                 uint16_t,
                 SIGNATURE(xcb_glx_get_pixel_mapusv_data),
                 SIGNATURE(xcb_glx_get_pixel_mapusv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_pixel_mapusv
 
@@ -3788,7 +3788,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_polygon_stipple_data),
                 SIGNATURE(xcb_glx_get_polygon_stipple_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_polygon_stipple
 
@@ -3942,7 +3942,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_tex_envfv_data),
                 SIGNATURE(xcb_glx_get_tex_envfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_envfv
 
@@ -4024,7 +4024,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_tex_enviv_data),
                 SIGNATURE(xcb_glx_get_tex_enviv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_enviv
 
@@ -4106,7 +4106,7 @@ CookieFunction>
                 ::xcb_glx_float64_t,
                 SIGNATURE(xcb_glx_get_tex_gendv_data),
                 SIGNATURE(xcb_glx_get_tex_gendv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_gendv
 
@@ -4188,7 +4188,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_tex_genfv_data),
                 SIGNATURE(xcb_glx_get_tex_genfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_genfv
 
@@ -4270,7 +4270,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_tex_geniv_data),
                 SIGNATURE(xcb_glx_get_tex_geniv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_geniv
 
@@ -4352,7 +4352,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_tex_image_data),
                 SIGNATURE(xcb_glx_get_tex_image_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_image
 
@@ -4434,7 +4434,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_tex_parameterfv_data),
                 SIGNATURE(xcb_glx_get_tex_parameterfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_parameterfv
 
@@ -4516,7 +4516,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_tex_parameteriv_data),
                 SIGNATURE(xcb_glx_get_tex_parameteriv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_parameteriv
 
@@ -4598,7 +4598,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_tex_level_parameterfv_data),
                 SIGNATURE(xcb_glx_get_tex_level_parameterfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_level_parameterfv
 
@@ -4680,7 +4680,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_tex_level_parameteriv_data),
                 SIGNATURE(xcb_glx_get_tex_level_parameteriv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_tex_level_parameteriv
 
@@ -4908,7 +4908,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_are_textures_resident_data),
                 SIGNATURE(xcb_glx_are_textures_resident_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class are_textures_resident
 
@@ -5008,7 +5008,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_gen_textures_data),
                 SIGNATURE(xcb_glx_gen_textures_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class gen_textures
 
@@ -5154,7 +5154,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_color_table_data),
                 SIGNATURE(xcb_glx_get_color_table_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_color_table
 
@@ -5236,7 +5236,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_color_table_parameterfv_data),
                 SIGNATURE(xcb_glx_get_color_table_parameterfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_color_table_parameterfv
 
@@ -5318,7 +5318,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_color_table_parameteriv_data),
                 SIGNATURE(xcb_glx_get_color_table_parameteriv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_color_table_parameteriv
 
@@ -5400,7 +5400,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_convolution_filter_data),
                 SIGNATURE(xcb_glx_get_convolution_filter_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_convolution_filter
 
@@ -5482,7 +5482,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_convolution_parameterfv_data),
                 SIGNATURE(xcb_glx_get_convolution_parameterfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_convolution_parameterfv
 
@@ -5564,7 +5564,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_convolution_parameteriv_data),
                 SIGNATURE(xcb_glx_get_convolution_parameteriv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_convolution_parameteriv
 
@@ -5646,7 +5646,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_separable_filter_rows_and_cols),
                 SIGNATURE(xcb_glx_get_separable_filter_rows_and_cols_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_separable_filter
 
@@ -5728,7 +5728,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_histogram_data),
                 SIGNATURE(xcb_glx_get_histogram_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_histogram
 
@@ -5810,7 +5810,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_histogram_parameterfv_data),
                 SIGNATURE(xcb_glx_get_histogram_parameterfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_histogram_parameterfv
 
@@ -5892,7 +5892,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_histogram_parameteriv_data),
                 SIGNATURE(xcb_glx_get_histogram_parameteriv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_histogram_parameteriv
 
@@ -5974,7 +5974,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_minmax_data),
                 SIGNATURE(xcb_glx_get_minmax_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_minmax
 
@@ -6056,7 +6056,7 @@ CookieFunction>
                 ::xcb_glx_float32_t,
                 SIGNATURE(xcb_glx_get_minmax_parameterfv_data),
                 SIGNATURE(xcb_glx_get_minmax_parameterfv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_minmax_parameterfv
 
@@ -6138,7 +6138,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_minmax_parameteriv_data),
                 SIGNATURE(xcb_glx_get_minmax_parameteriv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_minmax_parameteriv
 
@@ -6220,7 +6220,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_glx_get_compressed_tex_image_arb_data),
                 SIGNATURE(xcb_glx_get_compressed_tex_image_arb_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_compressed_tex_image_arb
 
@@ -6320,7 +6320,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_gen_queries_arb_data),
                 SIGNATURE(xcb_glx_gen_queries_arb_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class gen_queries_arb
 
@@ -6466,7 +6466,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_queryiv_arb_data),
                 SIGNATURE(xcb_glx_get_queryiv_arb_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_queryiv_arb
 
@@ -6548,7 +6548,7 @@ CookieFunction>
                 int32_t,
                 SIGNATURE(xcb_glx_get_query_objectiv_arb_data),
                 SIGNATURE(xcb_glx_get_query_objectiv_arb_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_query_objectiv_arb
 
@@ -6630,7 +6630,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_glx_get_query_objectuiv_arb_data),
                 SIGNATURE(xcb_glx_get_query_objectuiv_arb_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_query_objectuiv_arb
 
@@ -7066,20 +7066,20 @@ public:
 
     template<typename ... Parameter>
     void
-    delete_checked(Parameter && ... parameter) const
+    destroy_checked(Parameter && ... parameter) const
     {
         cppual::glx::delete_window_checked(connection(),
-                                        resource(),
-                                        std::forward<Parameter>(parameter) ...);
+                                           resource(),
+                                           std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
     void
-    delete(Parameter && ... parameter) const
+    destroy(Parameter && ... parameter) const
     {
         cppual::glx::delete_window(connection(),
-                                resource(),
-                                std::forward<Parameter>(parameter) ...);
+                                   resource(),
+                                   std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -9109,8 +9109,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -9123,14 +9123,14 @@ public:
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_GLX_PBUFFER_CLOBBER:
-            handler(cppual::glx::event::pbuffer_clobber<Connection>(m_c, m_first_event, event));
+            handler(cppual::glx::event::pbuffer_clobber<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_GLX_BUFFER_SWAP_COMPLETE:
-            handler(cppual::glx::event::buffer_swap_complete<Connection>(m_c, m_first_event, event));
+            handler(cppual::glx::event::buffer_swap_complete<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -9139,8 +9139,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -9153,7 +9153,7 @@ public:
     typedef cppual::glx::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::glx::extension & extension)
@@ -9163,7 +9163,7 @@ public:
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-        switch (error->error_code - m_first_error) {
+        switch (error->error_code - _M_first_error) {
 
         case XCB_GLX_GENERIC: // -1
             throw cppual::glx::error::generic(error);
@@ -9214,7 +9214,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

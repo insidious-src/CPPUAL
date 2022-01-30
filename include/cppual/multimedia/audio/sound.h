@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,130 +31,125 @@
 #include <array>
 #include <chrono>
 
-namespace cppual { namespace Audio {
+namespace cppual { namespace audio {
 
 enum
 {
-    MaxChannels  = 7,
-    BufferLength = 1024
+    max_channels  = 7,
+    buffer_length = 1024
 };
 
-enum class OutputFormat : unsigned char
+enum class output_format : byte
 {
-    Mono,
-    Stereo,
-    Quad,
-    Side,
-    Rear,
-    CH51,
-    CH61,
-    CH71
+    mono,
+    stereo,
+    quad,
+    side,
+    rear,
+    ch51,
+    ch61,
+    ch71
 };
 
-enum class SoundState : unsigned char
+enum class sound_state : byte
 {
-    Unavailable,
-    Initial,
-    Playing,
-    Paused,
-    Stopped
+    unavailable,
+    initial,
+    playing,
+    paused,
+    stopped
 };
 
-enum class SoundQuality : unsigned char
+enum class sound_quality : byte
 {
-    Low    =  8,
-    Medium = 16,
-    High   = 32,
+    low    =  8,
+    medium = 16,
+    high   = 32,
 };
 
 // ====================================================
 
-class Sound
+class sound
 {
 public:
-    typedef std::array<double, BufferLength> buffer_type  ;
-    typedef double                           value_type   ;
-    typedef double*                          pointer      ;
-    typedef double const*                    const_pointer;
-    typedef i64                            size_type    ;
-    typedef string                           string_type  ;
+    typedef std::array<double, buffer_length> buffer_type  ;
+    typedef double                            value_type   ;
+    typedef double*                           pointer      ;
+    typedef double const*                     const_pointer;
+    typedef i64                               size_type    ;
+    typedef string                            string_type  ;
 
-    enum Attribute
+    enum attribute_type
     {
-        Title     = 0x01,
-        Copyright = 0x02,
-        Software  = 0x03,
-        Artist    = 0x04,
-        Comment   = 0x05,
-        Date      = 0x06,
-        Album     = 0x07,
-        License   = 0x08,
-        TrackNo   = 0x09,
-        Genre     = 0x10
+        title     = 0x01,
+        copyright = 0x02,
+        software  = 0x03,
+        artist    = 0x04,
+        comment   = 0x05,
+        date      = 0x06,
+        album     = 0x07,
+        license   = 0x08,
+        track_no  = 0x09,
+        genre     = 0x10
     };
 
-    class Handle
-    {
+    sound (sound&&) noexcept;
+    sound& operator = (sound&&) noexcept;
+    virtual ~sound () noexcept;
 
-    };
-
-    Sound (Sound&&) noexcept;
-    Sound& operator = (Sound&&) noexcept;
-    virtual ~Sound () noexcept;
-
-    string_type attribute (Attribute) const noexcept;
-    int  openReadOnly (string_type const& file) noexcept;
-    int  openReadOnly (cvoid* data, size_type byte_size) noexcept;
-    int  openWritable (string_type const& file, int channels, int sample_rate) noexcept;
+    string_type attribute (attribute_type) const noexcept;
+    int  open_read_only (string_type const& file) noexcept;
+    int  open_read_only (cvoid* data, size_type byte_size) noexcept;
+    int  open_writable (string_type const& file, int channels, int sample_rate) noexcept;
     bool save  (string_type const& file) noexcept;
     void seek  (std::chrono::seconds time_pos) noexcept;
     void close () noexcept;
 
-    const_pointer data         () const noexcept { return m_gBuffer.data ();     }
-    size_type     sampleCount  () const noexcept { return m_nSampleCount;        }
-    int           sampleRate   () const noexcept { return m_nSampleRate;         }
-    int           channelCount () const noexcept { return m_nChannelCount;       }
-    bool          isAvailable  () const noexcept { return m_pSndDesc != nullptr; }
+    const_pointer data          () const noexcept { return _M_gBuffer.data ();     }
+    size_type     sample_count  () const noexcept { return _M_nSampleCount;        }
+    int           sample_rate   () const noexcept { return _M_nSampleRate;         }
+    int           channel_count () const noexcept { return _M_nChannelCount;       }
+    bool          is_available  () const noexcept { return _M_pSndDesc != nullptr; }
 
-    bool isSeekable () const noexcept
-    { return m_gFlags.test (Sound::Seekable); }
+    bool is_seekable () const noexcept
+    { return _M_gFlags.test (flag::seekable); }
 
-    bool isReadable () const noexcept
-    { return m_gFlags.test (Sound::Read); }
+    bool is_readable () const noexcept
+    { return _M_gFlags.test (flag::read); }
 
-    bool isWritable () const noexcept
-    { return m_gFlags.test (Sound::Write); }
+    bool is_writable () const noexcept
+    { return _M_gFlags.test (flag::write); }
 
-    Sound () noexcept
-    : m_gBuffer       (),
-      m_pSndDesc      (),
-      m_nSampleCount  (),
-      m_nSampleRate   (),
-      m_nChannelCount (),
-      m_gFlags (nullptr)
+    sound () noexcept
+    : _M_gBuffer       (),
+      _M_pSndDesc      (),
+      _M_nSampleCount  (),
+      _M_nSampleRate   (),
+      _M_nChannelCount (),
+      _M_gFlags        ()
     { }
 
 protected:
-    virtual int  onOpen  () { return true; }
-    virtual void onSave  (string_type const &) {}
-    virtual void onClose () { }
+    virtual int  on_open  () { return true; }
+    virtual void on_save  (string_type const &) {}
+    virtual void on_close () { }
 
 private:
-    enum Flag
+    enum class flag : byte
     {
-        Read     = 1 << 0,
-        Write    = 1 << 1,
-        Seekable = 1 << 2
+        read     = 1 << 0,
+        write    = 1 << 1,
+        seekable = 1 << 2
     };
 
-    typedef BitSet<Sound::Flag> Flags;
+    typedef bitset<flag> flags;
 
 private:
-    buffer_type m_gBuffer;
-    void*       m_pSndDesc;
-    size_type   m_nSampleCount;
-    int         m_nSampleRate, m_nChannelCount;
-    Flags       m_gFlags;
+    buffer_type _M_gBuffer;
+    void*       _M_pSndDesc;
+    size_type   _M_nSampleCount;
+    int         _M_nSampleRate, _M_nChannelCount;
+    flags       _M_gFlags;
 };
 
 } } // namespace Audio

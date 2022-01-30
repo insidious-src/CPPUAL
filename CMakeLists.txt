@@ -53,18 +53,23 @@ set(CMAKE_AUTORCC OFF)
 set(LIBRARY_OUTPUT_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-include(CompilerConfig REQUIRED)
+set(EXECUTABLE_OUTPUT_PATH "${LIBRARY_OUTPUT_PATH}")
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
+include(CompilerConfig REQUIRED)
+include(CTest)
+
+find_package(RT            REQUIRED) ## run-time library
 find_package(DL            REQUIRED) ## dynamic loading of libraries
 find_package(WM            REQUIRED) ## platform window manager
 find_package(XCB COMPONENTS XCB ICCCM EWMH) ## platform window manager (Xcb)
 find_package(X11                   ) ## platform window manager (X11-xcb)
 find_package(Sockets       REQUIRED) ## network interface & interprocess
+find_package(PulseAudio            )
 find_package(OpenAL                ) ## will be dropped at some point
 find_package(SndFile               ) ## will be dropped at some point
 find_package(Freetype              ) ## will be dropped at some point
-find_package(GLEW                  ) ## will be dropped at some point
 find_package(OpenGL        REQUIRED) ## will be dropped at some point
 find_package(EGL                   ) ## will be dropped at some point
 find_package(OpenCL                ) ## backup compute api
@@ -72,6 +77,7 @@ find_package(Vulkan                ) ## primary compute & graphics api
 
 include_directories(
     include
+    RT::Library
     DL::Library
     OpenCL::Library
     Vulkan::Library
@@ -91,7 +97,6 @@ include_directories(
 # process, modules
 add_library(cppual-host SHARED
     "include/cppual/functional.h"
-    "include/cppual/tuple.h"
     "include/cppual/tuple_iterator.h"
     "include/cppual/bitfield.h"
     "include/cppual/coroutines/coroutines.h"
@@ -127,7 +132,31 @@ add_library(cppual-host SHARED
     "src/system/sysinfo.cpp"
     "include/cppual/system/sysinfo.h"
     "include/cppual/system/clock.h"
+    "include/cppual/exceptions/exception.h"
+    "include/cppual/exceptions/functional_exception.h"
+    "include/cppual/exceptions/memory_exception.h"
     "include/cppual/resource.h"
+    "include/cppual/bigint.h"
+    "include/cppual/byte.h"
+
+    "include/cppual/decl"
+    "include/cppual/resource"
+    "include/cppual/timer"
+    "include/cppual/plugin"
+    "include/cppual/system_info"
+    "include/cppual/bigint"
+    "include/cppual/circular_queue"
+    "include/cppual/concepts"
+    "include/cppual/iterator"
+    "include/cppual/containers"
+    "include/cppual/string"
+    "include/cppual/bitflags"
+    "include/cppual/functional"
+    "include/cppual/signal"
+    "include/cppual/meta"
+    "include/cppual/exception"
+    "include/cppual/reactive"
+    "include/cppual/byte"
     )
 target_compile_definitions(cppual-host PRIVATE -DAPI_EXPORT)
 
@@ -156,12 +185,17 @@ add_library(cppual-memory SHARED
     "src/memory/os/aix.h"
     "src/memory/os/solaris.h"
     "src/memory/os/bsd.h"
+
+    "include/cppual/memory_resource"
+    "include/cppual/shared_memory"
     )
 target_compile_definitions(cppual-memory PRIVATE -DAPI_EXPORT)
 
 add_library(cppual-memory-system SHARED
     "include/cppual/memory/system.h"
     "src/memory/system.cpp"
+
+    "include/cppual/system_memory"
     )
 
 # device compute, memory (Vulkan, OpenCL, Serial)
@@ -188,8 +222,26 @@ add_library(cppual-compute SHARED
     "include/cppual/compute/task.h"
     "src/compute/thread.cpp"
     "include/cppual/compute/thread.h"
+
+    "include/cppual/parallelism"
+    "include/cppual/thread"
+    "include/cppual/mutex"
     )
 target_compile_definitions(cppual-compute PRIVATE -DAPI_EXPORT)
+
+add_library(cppual-filesystem SHARED
+    "include/cppual/filesystem/file.h"
+    "src/filesystem/file.cpp"
+    "include/cppual/filesystem/directory.h"
+    "src/filesystem/directory.cpp"
+    "include/cppual/filesystem/directory_watcher.h"
+    "src/filesystem/directory_watcher.cpp"
+
+    "include/cppual/filesystem_file"
+    "include/cppual/filesystem_directory"
+    "include/cppual/filesystem_watcher"
+    )
+target_compile_definitions(cppual-filesystem PRIVATE -DAPI_EXPORT)
 
 # json
 add_library(cppual-json SHARED
@@ -232,6 +284,8 @@ add_library(cppual-json SHARED
     "include/cppual/json/writer.h"
     "include/cppual/json/json_adaptor.h"
     "src/json/json_adaptor.cpp"
+
+    "include/cppual/json_parser"
     )
 target_compile_definitions(cppual-json PRIVATE -DAPI_EXPORT)
 
@@ -274,6 +328,7 @@ endif()
 
 #add_library(cppual-db SHARED
 #	"include/cppual/db/model.h"
+#   "include/cppual/database"
 #	)
 
 # Document Object Model (xml, cmdargs, web)
@@ -311,6 +366,12 @@ add_library(cppual-dom SHARED
     "include/cppual/dom/detail/xml_parser_utils.h"
     "include/cppual/dom/detail/xml_parser_write.h"
     "include/cppual/dom/detail/xml_parser_writer_settings.h"
+
+    "include/cppual/dom_parser"
+    "include/cppual/ini_parser"
+    "include/cppual/csv_parser"
+    "include/cppual/json_parser"
+    "include/cppual/xml_parser"
     )
 target_compile_definitions(cppual-dom PRIVATE -DAPI_EXPORT)
 
@@ -347,6 +408,25 @@ add_library(cppual-network SHARED
     "include/cppual/network/protocols/ssh.h"
     "src/network/protocols/protocol.cpp"
     "include/cppual/network/protocols/protocol.h"
+    "src/network/protocols/server_protocol.cpp"
+    "include/cppual/network/protocols/server_protocol.h"
+
+    "src/network/transport/os/linux.h"
+    "src/network/transport/os/win.h"
+    "src/network/transport/os/mac.h"
+    "src/network/transport/os/android.h"
+    "src/network/transport/os/ios.h"
+    "src/network/transport/os/aix.h"
+    "src/network/transport/os/solaris.h"
+    "src/network/transport/os/bsd.h"
+
+    "include/cppual/network_protocol"
+    "include/cppual/network_http"
+    "include/cppual/network_ftp"
+    "include/cppual/network_p2p"
+    "include/cppual/network_metalink"
+    "include/cppual/network_ssh"
+    "include/cppual/network_proxy"
     )
 target_compile_definitions(cppual-network PRIVATE -DAPI_EXPORT)
 
@@ -364,6 +444,9 @@ add_library(cppual-input SHARED
     "include/cppual/input/joysticks/joy_steam.h"
     "include/cppual/input/joysticks/joy_xbox.h"
     "include/cppual/input/joysticks/joy_wheel.h"
+
+    "include/cppual/input_devices"
+    "include/cppual/input_event"
     )
 target_compile_definitions(cppual-input PRIVATE -DAPI_EXPORT)
 
@@ -373,10 +456,12 @@ add_library(cppual-mqtt SHARED
     "src/mqtt/client.cpp"
     "include/cppual/mqtt/message.h"
     "src/mqtt/message.cpp"
+
+    "include/cppual/mqtt_client"
     )
 target_compile_definitions(cppual-mqtt PRIVATE -DAPI_EXPORT)
 
-if(SNDFILE_FOUND AND OPENAL_FOUND)
+if(SNDFILE_FOUND)
 
 # audio library (OpenAL, TrueAudio, Compute)
 add_library(cppual-audio SHARED
@@ -400,8 +485,14 @@ add_library(cppual-audio SHARED
     "include/cppual/multimedia/audio/listener.h"
     "src/multimedia/audio/record.cpp"
     "include/cppual/multimedia/audio/record.h"
+
+    "include/cppual/audio"
     )
 target_compile_definitions(cppual-audio PRIVATE -DAPI_EXPORT)
+
+endif()
+
+if(TARGET cppual-audio AND OPENAL_FOUND)
 
 # audio backend OpenAL
 add_library(cppual-audio-openal MODULE
@@ -422,6 +513,29 @@ add_library(cppual-audio-openal MODULE
     "include/cppual/multimedia/audio/al/listener.h"
     "src/multimedia/audio/al/recorder.cpp"
     "include/cppual/multimedia/audio/al/recorder.h"
+    "src/multimedia/audio/backend/al/al_main.cpp"
+
+    "include/cppual/openal"
+    )
+
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND PulseAudio_FOUND)
+
+add_library(cppual-audio-compute MODULE
+    "src/multimedia/audio/backend/compute/linux/pulse.h"
+    "src/multimedia/audio/backend/compute/linux/pulse_device.h"
+    "src/multimedia/audio/backend/compute/linux/pulse_device.cpp"
+    "src/multimedia/audio/backend/compute/compute_main.cpp"
+    )
+
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+add_library(cppual-audio-compute MODULE
+    "src/multimedia/audio/backend/compute/win/win.h"
+    "src/multimedia/audio/backend/compute/win/win_device.h"
+    "src/multimedia/audio/backend/compute/win/win_device.cpp"
+    "src/multimedia/audio/backend/compute/compute_main.cpp"
     )
 
 endif()
@@ -456,14 +570,17 @@ add_library(cppual-video-compute MODULE
 
 # video library (VAAPI, XVideo, OpenGL)
 add_library(cppual-video SHARED
+    "include/cppual/multimedia/video/decoder.h"
     "src/multimedia/video/vfilter.cpp"
     "include/cppual/multimedia/video/vfilter.h"
     "src/multimedia/video/vequalizer.cpp"
     "include/cppual/multimedia/video/vequalizer.h"
+
+    "include/cppual/video"
     )
 target_compile_definitions(cppual-video PRIVATE -DAPI_EXPORT)
 
-if(FREETYPE_FOUND AND OPENGL_FOUND AND GLEW_FOUND AND EGL_FOUND)
+if(FREETYPE_FOUND)
 
 # graphics drawing library
 add_library(cppual-gfx SHARED
@@ -476,20 +593,41 @@ add_library(cppual-gfx SHARED
     "include/cppual/gfx/draw.h"
     "src/gfx/font.cpp"
     "include/cppual/gfx/font.h"
+
     "src/gfx/formats/bmp.cpp"
     "include/cppual/gfx/formats/bmp.h"
+
+    "include/cppual/gfx/drawable/shape.h"
+    "src/gfx/drawable/image.cpp"
+    "include/cppual/gfx/drawable/image.h"
+    "src/gfx/drawable/text.cpp"
+    "include/cppual/gfx/drawable/text.h"
+    "src/gfx/drawable/elipse.cpp"
+    "include/cppual/gfx/drawable/elipse.h"
+    "src/gfx/drawable/rectangle.cpp"
+    "include/cppual/gfx/drawable/rectangle.h"
+    "src/gfx/drawable/polygon.cpp"
+    "include/cppual/gfx/drawable/polygon.h"
+    "src/gfx/drawable/line.cpp"
+    "include/cppual/gfx/drawable/line.h"
+
+    "include/cppual/graphics"
     )
 target_compile_definitions(cppual-gfx PRIVATE -DAPI_EXPORT)
 
+endif()
+
+if(OPENGL_FOUND)
+
 # OpenGL/ES library
 add_library(cppual-gl SHARED
+    "include/glad/glad.h"
+    "src/gfx/gl/glad.c"
     "src/gfx/gl/gldef.h"
     "src/gfx/gl/glbase.cpp"
     "include/cppual/gfx/gl/glbase.h"
     "src/gfx/gl/runtime.cpp"
     "include/cppual/gfx/gl/runtime.h"
-    "src/gfx/gl/surface.cpp"
-    "include/cppual/gfx/gl/surface.h"
     "src/gfx/gl/glsl.cpp"
     "include/cppual/gfx/gl/glsl.h"
     "src/gfx/gl/texture.cpp"
@@ -506,81 +644,117 @@ add_library(cppual-gl SHARED
     "include/cppual/gfx/gl/batch.h"
     "src/gfx/gl/instance.cpp"
     "include/cppual/gfx/gl/instance.h"
+
+    "include/cppual/opengl"
     )
 target_compile_definitions(cppual-gl PRIVATE -DAPI_EXPORT)
 
-# gfx formats library
-add_library(cppual-gfx-formats MODULE
-    "include/cppual/gfx/formats/bmp.h"
-    "src/gfx/formats/bmp.cpp"
-    )
+endif()
 
-# drawable objects library
-add_library(cppual-gfx-drawables MODULE
-    "include/cppual/gfx/drawable/shape.h"
-    "src/gfx/drawable/image.cpp"
-    "include/cppual/gfx/drawable/image.h"
-    "src/gfx/drawable/text.cpp"
-    "include/cppual/gfx/drawable/text.h"
-    "src/gfx/drawable/elipse.cpp"
-    "include/cppual/gfx/drawable/elipse.h"
-    "src/gfx/drawable/rectangle.cpp"
-    "include/cppual/gfx/drawable/rectangle.h"
-    "src/gfx/drawable/polygon.cpp"
-    "include/cppual/gfx/drawable/polygon.h"
-    "src/gfx/drawable/line.cpp"
-    "include/cppual/gfx/drawable/line.h"
-    )
+if(TARGET cppual-gfx)
 
-# graphical user interface
-add_library(cppual-ui SHARED
-    "src/ui/manager.cpp"
-    "include/cppual/ui/manager.h"
-    "src/ui/display.cpp"
-    "include/cppual/ui/display.h"
-    "src/ui/queue.cpp"
-    "include/cppual/ui/queue.h"
-    "include/cppual/ui/wm.h"
-    "src/ui/window.cpp"
-    "include/cppual/ui/window.h"
-    "src/ui/vsurface.cpp"
-    "include/cppual/ui/vsurface.h"
-    "src/ui/animation.cpp"
-    "include/cppual/ui/animation.h"
-    "src/ui/composite.cpp"
-    "include/cppual/ui/composite.h"
-    "src/ui/view.cpp"
-    "include/cppual/ui/view.h"
-    "src/ui/skin.cpp"
-    "include/cppual/ui/skin.h"
-    "src/ui/layout.cpp"
-    "include/cppual/ui/layout.h"
-    "src/ui/hotkey.cpp"
-    "include/cppual/ui/hotkey.h"
-    #"src/ui/cmd.cpp""
-    "include/cppual/ui/cmd.h"
-    #"src/ui/groups.cpp"
-    "include/cppual/ui/groups.h"
-    )
-target_compile_definitions(cppual-ui PRIVATE -DAPI_EXPORT)
+    if(TARGET cppual-gl)
+        if(EGL_FOUND)
+            add_library(cppual-gfx-egl MODULE
+                "src/gfx/backend/egl/egl_surface.h"
+                "src/gfx/backend/egl/egl_surface.cpp"
+                "src/gfx/backend/egl/egl_main.cpp"
+                )
+        endif()
+
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND X11_FOUND)
+            add_library(cppual-gfx-glx MODULE
+                "src/gfx/backend/glx/glx_main.cpp"
+                )
+        endif()
+    endif()
+
+    if(VULKAN_FOUND)
+        add_library(cppual-gfx-vulkan MODULE
+            "src/gfx/backend/vulkan/vk_main.cpp"
+            )
+    endif()
+
+
+    # graphical user interface
+    add_library(cppual-ui SHARED
+        "src/ui/manager.cpp"
+        "include/cppual/ui/manager.h"
+        "src/ui/display.cpp"
+        "include/cppual/ui/display.h"
+        "src/ui/queue.cpp"
+        "include/cppual/ui/queue.h"
+        "include/cppual/ui/wm.h"
+        "src/ui/window.cpp"
+        "include/cppual/ui/window.h"
+        "src/ui/vsurface.cpp"
+        "include/cppual/ui/vsurface.h"
+        "src/ui/animation.cpp"
+        "include/cppual/ui/animation.h"
+        "src/ui/composite.cpp"
+        "include/cppual/ui/composite.h"
+        "src/ui/view.cpp"
+        "include/cppual/ui/view.h"
+        "src/ui/skin.cpp"
+        "include/cppual/ui/skin.h"
+        "src/ui/layout.cpp"
+        "include/cppual/ui/layout.h"
+        "src/ui/hotkey.cpp"
+        "include/cppual/ui/hotkey.h"
+        #"src/ui/cmd.cpp""
+        "include/cppual/ui/cmd.h"
+        #"src/ui/groups.cpp"
+        "include/cppual/ui/groups.h"
+        "src/ui/frame.cpp"
+        "include/cppual/ui/frame.h"
+        "src/ui/dialog.cpp"
+        "include/cppual/ui/dialog.h"
+
+        "include/cppual/ui_queue"
+        "include/cppual/ui_view"
+        "include/cppual/ui_layouts"
+        "include/cppual/ui_hotkey"
+        )
+    target_compile_definitions(cppual-ui PRIVATE -DAPI_EXPORT)
+
+endif()
+
+
+
+
+if (TARGET cppual-ui)
 
 # graphical user interface - windows and controls
 add_library(cppual-ui-views SHARED
-    "src/ui/frame.cpp"
-    "include/cppual/ui/frame.h"
-    "src/ui/dialog.cpp"
-    "include/cppual/ui/dialog.h"
     "src/ui/controls/label.cpp"
     "include/cppual/ui/controls/label.h"
     "src/ui/controls/button.cpp"
     "include/cppual/ui/controls/button.h"
     "src/ui/controls/popup.cpp"
     "include/cppual/ui/controls/popup.h"
+    "include/cppual/ui/controls/container.h"
+    "include/cppual/ui/controls/mdi.h"
+    "include/cppual/ui/controls/toolbar.h"
+    "include/cppual/ui/controls/scrollbar.h"
+    "include/cppual/ui/controls/roller.h"
+    "include/cppual/ui/controls/progress.h"
+    "include/cppual/ui/controls/combo.h"
+    "include/cppual/ui/controls/groupbox.h"
+    "include/cppual/ui/controls/tab.h"
+    "include/cppual/ui/controls/tooltip.h"
+    "include/cppual/ui/controls/tree.h"
+    "include/cppual/ui/controls/input.h"
+    "include/cppual/ui/controls/graph.h"
+    "include/cppual/ui/controls/listbox.h"
+    "include/cppual/ui/controls/slider.h"
+    "include/cppual/ui/controls/abslider.h"
+
+    "include/cppual/ui_controls"
     )
 target_compile_definitions(cppual-ui-views PRIVATE -DAPI_EXPORT)
 
 # graphical user interface - native dialogs
-add_library(cppual-ui-dialogs MODULE
+add_library(cppual-ui-dialogs SHARED
     "src/ui/dialogs/msgdlg.cpp"
     "include/cppual/ui/dialogs/msgdlg.h"
     "include/cppual/ui/dialogs/colordlg.h"
@@ -588,9 +762,14 @@ add_library(cppual-ui-dialogs MODULE
     "include/cppual/ui/dialogs/printdlg.h"
     "include/cppual/ui/dialogs/taskdlg.h"
     "include/cppual/ui/dialogs/wizarddlg.h"
-    )
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    "include/cppual/ui_dialogs"
+    )
+target_compile_definitions(cppual-ui-dialogs PRIVATE -DAPI_EXPORT)
+
+endif()
+
+if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # graphical user interface - platform Xorg
 add_library(cppual-ui-xorg MODULE
@@ -651,8 +830,8 @@ add_library(cppual-ui-xorg MODULE
     "src/ui/platform/xorg/xmain.cpp"
     "src/ui/platform/xorg/xbackend.cpp"
     "src/ui/platform/xorg/xbackend.h"
-    "src/ui/platform/xorg/xsurface.cpp"
-    "src/ui/platform/xorg/xsurface.h"
+    "src/ui/platform/xorg/xwindow.cpp"
+    "src/ui/platform/xorg/xwindow.h"
     "src/ui/platform/xorg/xinput.cpp"
     "src/ui/platform/xorg/xinput.h"
     "src/ui/platform/xorg/xcb_def.h"
@@ -672,7 +851,7 @@ add_library(cppual-ui-wayland MODULE
     "src/ui/platform/wayland/wlmain.cpp"
     )
 
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 # graphical user interface - platform Windows
 add_library(cppual-ui-win MODULE
@@ -687,18 +866,44 @@ add_library(cppual-ui-win MODULE
 
 endif()
 
-endif()
-
 
 ### link targets
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if(FREETYPE_FOUND)
+    target_link_libraries(cppual-gfx cppual-memory cppual-compute Freetype::Library)
+endif()
+
+if(TARGET cppual-gfx)
+    if(OPENGL_FOUND)
+        target_link_libraries(cppual-gl cppual-gfx OpenGL::Library)
+    endif()
+
+    if(TARGET cppual-gl AND EGL_FOUND)
+        target_link_libraries(cppual-gfx-egl cppual-gfx cppual-gl OpenGL::Library EGL::Library)
+    endif()
+
+    if(TARGET cppual-gl AND X11_FOUND)
+        target_link_libraries(cppual-gfx-glx cppual-gfx cppual-gl OpenGL::Library X11::Library)
+    endif()
+
+    if(VULKAN_FOUND)
+        target_link_libraries(cppual-gfx-vulkan cppual-gfx Vulkan::Library)
+    endif()
+
+    target_link_libraries(cppual-ui cppual-gfx cppual-memory)
+    target_link_libraries(cppual-ui-views cppual-ui)
+    target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
+endif()
+
+if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(cppual-ui-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
     target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND GLEW_FOUND AND EGL_FOUND)
+elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(cppual-ui-win cppual-memory WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 #    target_link_libraries(cppual-memory)
 endif()
+
+target_link_libraries(cppual-memory RT::Library)
 
 target_link_libraries(cppual-host cppual-memory DL::Library)
 target_link_libraries(cppual-compute cppual-memory cppual-host Sockets::Library)
@@ -708,24 +913,47 @@ target_link_libraries(cppual-json cppual-memory)
 
 target_link_libraries(cppual-video-compute cppual-compute)
 
-if(OPENCL_FOUND)
+
+if(TARGET cppual-compute AND OPENCL_FOUND)
     target_link_libraries(cppual-compute-opencl cppual-compute cppual-memory OpenCL::Library)
 endif()
 
-if(VULKAN_FOUND)
+if(TARGET cppual-compute AND VULKAN_FOUND)
     target_link_libraries(cppual-compute-vulkan cppual-compute cppual-memory Vulkan::Library)
 endif()
 
-if(SNDFILE_FOUND AND OPENAL_FOUND)
-    target_link_libraries(cppual-audio cppual-compute SndFile::Library)
+
+if(SNDFILE_FOUND)
+    target_link_libraries(cppual-audio cppual-memory SndFile::Library)
+endif()
+
+if(TARGET cppual-audio AND OPENAL_FOUND)
     target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
 endif()
 
-if(FREETYPE_FOUND AND OPENGL_FOUND AND GLEW_FOUND AND EGL_FOUND)
-    target_link_libraries(cppual-gfx cppual-memory cppual-compute Freetype::Library)
-    target_link_libraries(cppual-gfx-drawables cppual-gl cppual-gfx)
-    target_link_libraries(cppual-gl cppual-gfx EGL::Library GLEW::Library OpenGL::Library)
-    target_link_libraries(cppual-ui cppual-gfx cppual-memory)
-    target_link_libraries(cppual-ui-views cppual-ui)
-    target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
+
+if(TARGET cppual-audio AND TARGET cppual-compute)
+
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND PulseAudio_FOUND)
+        target_link_libraries(cppual-audio-compute cppual-audio cppual-compute PulseAudio::Library)
+    elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+        target_link_libraries(cppual-audio-compute cppual-audio cppual-compute)
+    endif()
+
 endif()
+
+### testing
+enable_testing()
+
+add_executable (cppual-memory-test "tests/memory_test.cpp")
+target_link_libraries(cppual-memory-test cppual-memory)
+
+add_test (NAME memory_test COMMAND cppual-memory-test)
+
+#add_test(memory_test ${CMAKE_CTEST_COMMAND}
+#   --build-and-test "${CMAKE_SOURCE_DIR}/Tests/Simple"
+#                    "${CMAKE_BINARY_DIR}/Tests/Simple"
+#   --build-generator ${CMAKE_GENERATOR}
+#   --build-makeprogram ${CMAKE_MAKE_PROGRAM}
+#   --build-project Simple
+#   --test-command memory_test)

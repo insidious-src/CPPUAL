@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,123 +19,126 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
 #include <cppual/memory/pool.h>
 
-using namespace std;
+#include <cassert>
+#include <iostream>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
-MonotonicResource::MonotonicResource (size_type  uBlkCount,
-                                      size_type  uBlkSize,
-                                      align_type uBlkAlign)
-: m_gOwner    (*this),
-  m_pBegin    (uBlkCount ? ::operator new (uBlkCount * uBlkSize) : nullptr),
-  m_pEnd      (m_pBegin != nullptr ?
-                           static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
+monotonic_pool_resource::monotonic_pool_resource (size_type  uBlkCount,
+                                                  size_type  uBlkSize,
+                                                  align_type uBlkAlign)
+: _M_gOwner    (uBlkCount && uBlkSize ? get_default_resource()->max_size() >= (uBlkCount * uBlkSize) ?
+                            *get_default_resource() : *new_delete_resource() : *this),
+  _M_pBegin    (uBlkCount && uBlkSize ? _M_gOwner.allocate (uBlkCount * uBlkSize, uBlkAlign) : nullptr),
+  _M_pEnd      (_M_pBegin != nullptr ?
+                           static_cast<math_pointer> (_M_pBegin) + (uBlkCount * uBlkSize) :
                            nullptr),
-  m_pFreeList (),
-  m_uBlkSize  (uBlkSize),
-  m_uBlkAlign (uBlkAlign),
-  m_uBlkNum   ()
+  _M_pFreeList (),
+  _M_uBlkSize  (uBlkSize),
+  _M_uBlkAlign (uBlkAlign),
+  _M_uBlkNum   (),
+  _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
     initialize ();
 }
 
-MonotonicResource::MonotonicResource (MemoryResource& pOwner,
-                                      size_type   uBlkCount,
-                                      size_type   uBlkSize,
-                                      align_type  uBlkAlign)
-: m_gOwner ((uBlkCount * uBlkSize) > pOwner.max_size () ? *this : pOwner),
-  m_pBegin (&m_gOwner != this ?
-                             (uBlkCount and uBlkSize and uBlkAlign ?
-                                  static_cast<pointer> (pOwner.allocate (
-                                                            uBlkCount * uBlkSize,
-                                                            alignof (size_type))) :
-                                  nullptr) :
-                            (uBlkCount? ::operator new (uBlkCount * uBlkSize) : nullptr)),
-  m_pEnd (m_pBegin != nullptr ? static_cast<math_pointer> (m_pBegin) + (uBlkCount * uBlkSize) :
-                                nullptr),
-  m_pFreeList (),
-  m_uBlkSize  (uBlkSize),
-  m_uBlkAlign (uBlkAlign),
-  m_uBlkNum   ()
+monotonic_pool_resource::monotonic_pool_resource (memory_resource& pOwner,
+                                                  size_type        uBlkCount,
+                                                  size_type        uBlkSize,
+                                                  align_type       uBlkAlign)
+: _M_gOwner (uBlkCount && uBlkSize ?
+                 (uBlkCount * uBlkSize) > pOwner.max_size () ?
+                     (uBlkCount * uBlkSize) > get_default_resource()->max_size() ?
+                         *new_delete_resource() : *get_default_resource() : pOwner : *this),
+  _M_pBegin (uBlkCount && uBlkSize ? _M_gOwner.allocate (uBlkCount * uBlkSize, uBlkAlign) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + (uBlkCount * uBlkSize) : nullptr),
+  _M_pFreeList (),
+  _M_uBlkSize  (uBlkSize),
+  _M_uBlkAlign (uBlkAlign),
+  _M_uBlkNum   (),
+  _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
+    if (&_M_gOwner != &pOwner)
+    {
+        std::cerr << __func__
+                  << " :: Specified owner cannot be assigned -> 'max_size' exceeded. "
+                     "Using default memory resource instead." << std::endl;
+    }
+
     initialize ();
 }
 
-//MonotonicPool::MonotonicPool (SharedObject& gObj,
-//                              size_type     uBlkCount,
-//                              size_type     uBlkSize,
-//                              align_type    uBlkAlign)
-//: m_gOwner (this),
-//  m_gSharedMem (gObj, uBlkCount * uBlkSize),
-//  m_pBegin (static_cast<pointer> (m_gSharedMem.address ())),
-//  m_pEnd (m_pBegin != nullptr ? m_pBegin + uBlkCount * uBlkSize : nullptr),
-//  m_pFreeList (),
-//  m_uBlkSize (uBlkSize),
-//  m_uBlkAlign (uBlkAlign),
-//  m_uBlkNum (true)
+//monotonic_pool_resource::monotonic_pool_resource (SharedObject& gObj,
+//                                                  size_type     uBlkCount,
+//                                                  size_type     uBlkSize,
+//                                                  align_type    uBlkAlign)
+//: _M_gOwner (this),
+//  _M_pBegin (static_cast<pointer> (_M_gSharedMem.address ())),
+//  _M_pEnd (_M_pBegin != nullptr ? _M_pBegin + uBlkCount * uBlkSize : nullptr),
+//  _M_pFreeList (),
+//  _M_uBlkSize (uBlkSize),
+//  _M_uBlkAlign (uBlkAlign),
+//  _M_uBlkNum (),
+//  _M_bIsMemShared (true)
 //{
 //    initialize ();
 //}
 
-MonotonicResource::~MonotonicResource ()
+monotonic_pool_resource::~monotonic_pool_resource ()
 {
-    if (m_pBegin == nullptr) return;
-
-    if (&m_gOwner != this) m_gOwner.deallocate (m_pBegin, capacity ());
-    else ::operator delete (m_pBegin);
+    if (&_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
 }
 
-void MonotonicResource::initialize () noexcept
+void monotonic_pool_resource::initialize () noexcept
 {
-    if (m_pBegin)
+    if (_M_pBegin)
     {
-        size_type uAdjust = alignAdjust (m_pBegin, m_uBlkAlign);
+        auto uAdjust = align_adjust (_M_pBegin, _M_uBlkAlign);
 
-        pointer* p = m_pFreeList =
-                reinterpret_cast<pointer*> (static_cast<math_pointer> (m_pBegin) + uAdjust);
+        auto p = _M_pFreeList =
+                 reinterpret_cast<pointer*> (static_cast<math_pointer> (_M_pBegin) + uAdjust);
 
-        m_uBlkNum = ((m_uBlkSize - uAdjust) / m_uBlkSize) - 1;
+        _M_uBlkNum = ((_M_uBlkSize - uAdjust) / _M_uBlkSize) - 1;
 
-        for (size_type i = 0; i < m_uBlkNum; ++i)
+        for (size_type i = 0; i < _M_uBlkNum; ++i)
         {
-            *p = reinterpret_cast<pointer>  ( p + m_uBlkSize);
+            *p = reinterpret_cast<pointer>  ( p + _M_uBlkSize);
              p = reinterpret_cast<pointer*> (*p);
         }
 
         *p = nullptr;
-        ++m_uBlkNum;
+        ++_M_uBlkNum;
     }
 }
 
-void* MonotonicResource::do_allocate (size_type uSize, align_type uAlign) noexcept
+void* monotonic_pool_resource::do_allocate (size_type uSize, align_type uAlign)
 {
     // check if size and alignment match with the ones from
     // the current pool instance
-    if (!m_pFreeList or uSize != m_uBlkSize or uAlign != m_uBlkAlign)
+    if (!_M_pFreeList || uSize != _M_uBlkSize || uAlign != _M_uBlkAlign)
         return nullptr;
 
-    pointer p   = reinterpret_cast<pointer > ( m_pFreeList);
-    m_pFreeList = reinterpret_cast<pointer*> (*m_pFreeList);
+    auto p       = reinterpret_cast<pointer > ( _M_pFreeList);
+    _M_pFreeList = reinterpret_cast<pointer*> (*_M_pFreeList);
 
     return p;
 }
 
-void MonotonicResource::do_deallocate (void* p, size_type uSize, align_type)
+void monotonic_pool_resource::do_deallocate (void* p, size_type uSize, align_type)
 {
-    if (uSize != m_uBlkSize) throw std::length_error ("not equal to blocksize");
-    if (m_pEnd <= p or p < m_pBegin) throw std::out_of_range ("pointer is outside the buffer");
+    if (uSize != _M_uBlkSize) throw std::length_error ("not equal to blocksize");
+    if (_M_pEnd <= p || p < _M_pBegin) throw std::out_of_range ("pointer is outside the buffer");
 
-    *(reinterpret_cast<pointer*> (p)) = reinterpret_cast<pointer> (m_pFreeList);
-    m_pFreeList = reinterpret_cast<pointer*> (p);
+    *(reinterpret_cast<pointer*> (p)) = reinterpret_cast<pointer> (_M_pFreeList);
+    _M_pFreeList = reinterpret_cast<pointer*> (p);
 }
 
-void MonotonicResource::clear () noexcept
+void monotonic_pool_resource::clear () noexcept
 {
-    m_pFreeList = reinterpret_cast<pointer*> (static_cast<math_pointer> (m_pBegin) +
-                                              alignAdjust (m_pBegin, m_uBlkAlign));
+    _M_pFreeList = reinterpret_cast<pointer*> (static_cast<math_pointer> (_M_pBegin) +
+                                               align_adjust (_M_pBegin, _M_uBlkAlign));
 }
 
 } } // namespace Memory

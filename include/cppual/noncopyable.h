@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,79 +25,79 @@
 
 namespace cppual {
 
-struct NonConstructible
+struct non_constructible
 {
-    NonConstructible () = delete;
-    NonConstructible (NonConstructible const&) = delete;
-    NonConstructible& operator = (NonConstructible const&) = delete;
+    non_constructible () = delete;
+    non_constructible (non_constructible const&) = delete;
+    non_constructible& operator = (non_constructible const&) = delete;
 };
 
 // ====================================================
 
-struct NonDefaultConstructible
+struct non_default_constructible
 {
-    NonDefaultConstructible () = delete;
+    non_default_constructible () = delete;
 };
 
 // ====================================================
 
-struct NonDefaultConstructibleVirtual
+struct non_default_constructible_virtual
 {
-    NonDefaultConstructibleVirtual () = delete;
-    inline virtual ~NonDefaultConstructibleVirtual () { }
+    non_default_constructible_virtual () = delete;
+    inline virtual ~non_default_constructible_virtual () { }
 };
 
 // ====================================================
 
-struct NonCopyable
+struct non_copyable
 {
-    constexpr NonCopyable () = default;
-    NonCopyable (NonCopyable const&) = delete;
-    NonCopyable& operator = (NonCopyable const&) = delete;
+    constexpr non_copyable () = default;
+    non_copyable (non_copyable const&) = delete;
+    non_copyable& operator = (non_copyable const&) = delete;
 };
 
 // ====================================================
 
-struct NonCopyableVirtual
+struct non_copyable_virtual
 {
-    constexpr NonCopyableVirtual () = default;
-    NonCopyableVirtual (NonCopyableVirtual const&) = delete;
-    NonCopyableVirtual& operator = (NonCopyableVirtual const&) = delete;
-    virtual ~NonCopyableVirtual () { }
+    constexpr non_copyable_virtual () = default;
+    non_copyable_virtual (non_copyable_virtual const&) = delete;
+    non_copyable_virtual& operator = (non_copyable_virtual const&) = delete;
+    virtual ~non_copyable_virtual () { }
 };
 
 // ====================================================
 
-struct NonCopyConstructible
+struct non_copy_constructible
 {
-    constexpr NonCopyConstructible () = default;
-    NonCopyConstructible (NonCopyConstructible const&) = delete;
+    constexpr non_copy_constructible () = default;
+    non_copy_constructible (non_copy_constructible const&) = delete;
 };
 
 // ====================================================
 
-struct NonCopyConstructibleVirtual
+struct non_copy_constructible_virtual
 {
-    constexpr NonCopyConstructibleVirtual () = default;
-    NonCopyConstructibleVirtual (NonCopyConstructibleVirtual const&) = delete;
-    virtual ~NonCopyConstructibleVirtual () noexcept { }
+    constexpr non_copy_constructible_virtual () = default;
+    non_copy_constructible_virtual (non_copy_constructible_virtual const&) = delete;
+    virtual ~non_copy_constructible_virtual () noexcept { }
 };
 
 // ====================================================
 
-struct NonCopyAssignable
+struct non_copy_assignable
 {
-    constexpr NonCopyAssignable () = default;
-    NonCopyAssignable& operator = (NonCopyAssignable  const&) = delete;
+    constexpr non_copy_assignable () = default;
+    non_copy_assignable& operator = (non_copy_assignable  const&) = delete;
 };
 
 // ====================================================
 
-struct NonCopyAssignableVirtual
+struct non_copy_assignable_virtual
 {
-    constexpr NonCopyAssignableVirtual () = default;
-    NonCopyAssignableVirtual& operator = (NonCopyAssignableVirtual const&) = delete;
-    virtual ~NonCopyAssignableVirtual () noexcept { }
+    constexpr non_copy_assignable_virtual () = default;
+    non_copy_assignable_virtual& operator = (non_copy_assignable_virtual const&) = delete;
+    virtual ~non_copy_assignable_virtual () noexcept { }
 };
 
 } // cppual

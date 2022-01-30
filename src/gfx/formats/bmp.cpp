@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,32 +23,29 @@
 
 namespace cppual {
 
-void BitmapStream::_parse_header ()
+void bitmap_stream::_parse_header ()
 {
     //! check header sizes
     seekg (0, end);
-    if (static_cast<size_type> (tellg ()) <=
-                        sizeof (Header  ) + sizeof (InfoHeader) - 1)
+    if (static_cast<size_type> (tellg ()) <= sizeof (bmp_header) + sizeof (info_header) - 1)
         return;
 
     //! read Header
     seekg (0);
-    read  (reinterpret_cast<char_type*> (&m_header),
-                                 sizeof (Header   ));
+    read  (reinterpret_cast<char_type*> (&_M_header), sizeof (bmp_header));
 
     //! read InfoHeader
-    if (header ().type == Type::BM)
-        read (reinterpret_cast<char_type*> (&m_infoHeader),
-                                    sizeof (InfoHeader   ));
+    if (header ().type == bmp_type::BM)
+        read (reinterpret_cast<char_type*> (&_M_infoHeader), sizeof (info_header));
     else
         close ();
 }
 
-BitmapStream::~BitmapStream()
+bitmap_stream::~bitmap_stream()
 {
 }
 
-BitmapStream::size_type BitmapStream::replace (rgb_type const target_clr, rgb_type const new_clr)
+bitmap_stream::size_type bitmap_stream::replace (rgb_type const target_clr, rgb_type const new_clr)
 {
     if (!valid()) return size_type ();
 
@@ -88,8 +85,7 @@ BitmapStream::size_type BitmapStream::replace (rgb_type const target_clr, rgb_ty
         auto prev_seekp = tellp ();
 
         seekp (header ().offset);
-        write (reinterpret_cast<char_type*> (pixel_data.get ()),
-                    static_cast<streamsize> (buffer_size));
+        write (reinterpret_cast<char_type*> (pixel_data.get ()), static_cast<streamsize> (buffer_size));
         seekp (prev_seekp);
     }
 

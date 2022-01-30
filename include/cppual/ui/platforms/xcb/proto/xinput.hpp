@@ -44,8 +44,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_valuator(void) {}
@@ -72,11 +72,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_valuator
 } // namespace event
 
@@ -96,8 +96,8 @@ public:
                      uint8_t first_event,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_key_press(void) {}
@@ -124,7 +124,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -135,7 +135,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -148,7 +148,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -161,14 +161,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_key_press
 
 
@@ -191,8 +191,8 @@ public:
                        uint8_t first_event,
                        const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_key_release(void) {}
@@ -219,7 +219,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -230,7 +230,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -243,7 +243,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -256,14 +256,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_key_release
 
 
@@ -286,8 +286,8 @@ public:
                         uint8_t first_event,
                         const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_button_press(void) {}
@@ -314,7 +314,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -325,7 +325,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -338,7 +338,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -351,14 +351,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_button_press
 
 
@@ -381,8 +381,8 @@ public:
                           uint8_t first_event,
                           const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_button_release(void) {}
@@ -409,7 +409,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -420,7 +420,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -433,7 +433,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -446,14 +446,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_button_release
 
 
@@ -476,8 +476,8 @@ public:
                          uint8_t first_event,
                          const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_motion_notify(void) {}
@@ -504,7 +504,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -515,7 +515,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -528,7 +528,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -541,14 +541,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_motion_notify
 
 
@@ -571,8 +571,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_focus_in(void) {}
@@ -599,7 +599,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -610,14 +610,14 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_focus_in
 
 
@@ -640,8 +640,8 @@ public:
                      uint8_t first_event,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_focus_out(void) {}
@@ -668,7 +668,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -679,14 +679,14 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_focus_out
 
 
@@ -709,8 +709,8 @@ public:
                  uint8_t first_event,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~proximity_in(void) {}
@@ -737,7 +737,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -748,7 +748,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -761,7 +761,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -774,14 +774,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class proximity_in
 
 
@@ -804,8 +804,8 @@ public:
                   uint8_t first_event,
                   const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~proximity_out(void) {}
@@ -832,7 +832,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -843,7 +843,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -856,7 +856,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -869,14 +869,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class proximity_out
 
 
@@ -899,8 +899,8 @@ public:
                         uint8_t first_event,
                         const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_state_notify(void) {}
@@ -927,11 +927,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_state_notify
 } // namespace event
 
@@ -951,8 +951,8 @@ public:
                           uint8_t first_event,
                           const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_mapping_notify(void) {}
@@ -979,11 +979,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_mapping_notify
 } // namespace event
 
@@ -1003,8 +1003,8 @@ public:
                          uint8_t first_event,
                          const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~change_device_notify(void) {}
@@ -1031,11 +1031,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class change_device_notify
 } // namespace event
 
@@ -1055,8 +1055,8 @@ public:
                             uint8_t first_event,
                             const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_key_state_notify(void) {}
@@ -1083,11 +1083,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_key_state_notify
 } // namespace event
 
@@ -1107,8 +1107,8 @@ public:
                                uint8_t first_event,
                                const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_button_state_notify(void) {}
@@ -1135,11 +1135,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_button_state_notify
 } // namespace event
 
@@ -1159,8 +1159,8 @@ public:
                            uint8_t first_event,
                            const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_presence_notify(void) {}
@@ -1187,11 +1187,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_presence_notify
 } // namespace event
 
@@ -1211,8 +1211,8 @@ public:
                            uint8_t first_event,
                            const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_property_notify(void) {}
@@ -1239,7 +1239,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_atom_t, typename ... Parameter>
@@ -1250,14 +1250,14 @@ public:
         decltype((*this)->property),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->property,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_property_notify
 
 
@@ -1280,8 +1280,8 @@ public:
                    uint8_t first_event,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~device_changed(void) {}
@@ -1308,11 +1308,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class device_changed
 } // namespace event
 
@@ -1332,8 +1332,8 @@ public:
               uint8_t first_event,
               const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~key_press(void) {}
@@ -1360,7 +1360,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1371,7 +1371,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1384,7 +1384,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1397,14 +1397,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class key_press
 
 
@@ -1427,8 +1427,8 @@ public:
                 uint8_t first_event,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~key_release(void) {}
@@ -1455,7 +1455,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1466,7 +1466,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1479,7 +1479,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1492,14 +1492,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class key_release
 
 
@@ -1522,8 +1522,8 @@ public:
                  uint8_t first_event,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~button_press(void) {}
@@ -1550,7 +1550,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1561,7 +1561,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1574,7 +1574,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1587,14 +1587,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class button_press
 
 
@@ -1617,8 +1617,8 @@ public:
                    uint8_t first_event,
                    const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~button_release(void) {}
@@ -1645,7 +1645,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1656,7 +1656,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1669,7 +1669,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1682,14 +1682,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class button_release
 
 
@@ -1712,8 +1712,8 @@ public:
            uint8_t first_event,
            const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~motion(void) {}
@@ -1740,7 +1740,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1751,7 +1751,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1764,7 +1764,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1777,14 +1777,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class motion
 
 
@@ -1807,8 +1807,8 @@ public:
           uint8_t first_event,
           const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~enter(void) {}
@@ -1835,7 +1835,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1846,7 +1846,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1859,7 +1859,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1872,14 +1872,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class enter
 
 
@@ -1902,8 +1902,8 @@ public:
           uint8_t first_event,
           const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~leave(void) {}
@@ -1930,7 +1930,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -1941,7 +1941,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1954,7 +1954,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1967,14 +1967,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class leave
 
 
@@ -1997,8 +1997,8 @@ public:
              uint8_t first_event,
              const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~focus_in(void) {}
@@ -2025,7 +2025,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2036,7 +2036,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2049,7 +2049,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2062,14 +2062,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class focus_in
 
 
@@ -2092,8 +2092,8 @@ public:
               uint8_t first_event,
               const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~focus_out(void) {}
@@ -2120,7 +2120,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2131,7 +2131,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2144,7 +2144,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2157,14 +2157,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class focus_out
 
 
@@ -2187,8 +2187,8 @@ public:
               uint8_t first_event,
               const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~hierarchy(void) {}
@@ -2215,11 +2215,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class hierarchy
 } // namespace event
 
@@ -2239,8 +2239,8 @@ public:
              uint8_t first_event,
              const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~property(void) {}
@@ -2267,7 +2267,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_atom_t, typename ... Parameter>
@@ -2278,14 +2278,14 @@ public:
         decltype((*this)->property),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->property,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class property
 
 
@@ -2308,8 +2308,8 @@ public:
                   uint8_t first_event,
                   const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~raw_key_press(void) {}
@@ -2336,11 +2336,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class raw_key_press
 } // namespace event
 
@@ -2360,8 +2360,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~raw_key_release(void) {}
@@ -2388,11 +2388,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class raw_key_release
 } // namespace event
 
@@ -2412,8 +2412,8 @@ public:
                      uint8_t first_event,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~raw_button_press(void) {}
@@ -2440,11 +2440,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class raw_button_press
 } // namespace event
 
@@ -2464,8 +2464,8 @@ public:
                        uint8_t first_event,
                        const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~raw_button_release(void) {}
@@ -2492,11 +2492,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class raw_button_release
 } // namespace event
 
@@ -2516,8 +2516,8 @@ public:
                uint8_t first_event,
                const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~raw_motion(void) {}
@@ -2544,11 +2544,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class raw_motion
 } // namespace event
 
@@ -2568,8 +2568,8 @@ public:
                 uint8_t first_event,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~touch_begin(void) {}
@@ -2596,7 +2596,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2607,7 +2607,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2620,7 +2620,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2633,14 +2633,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class touch_begin
 
 
@@ -2663,8 +2663,8 @@ public:
                  uint8_t first_event,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~touch_update(void) {}
@@ -2691,7 +2691,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2702,7 +2702,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2715,7 +2715,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2728,14 +2728,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class touch_update
 
 
@@ -2758,8 +2758,8 @@ public:
               uint8_t first_event,
               const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~touch_end(void) {}
@@ -2786,7 +2786,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2797,7 +2797,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2810,7 +2810,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2823,14 +2823,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class touch_end
 
 
@@ -2853,8 +2853,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~touch_ownership(void) {}
@@ -2881,7 +2881,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -2892,7 +2892,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2905,7 +2905,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2918,14 +2918,14 @@ public:
         decltype((*this)->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->child,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class touch_ownership
 
 
@@ -2948,8 +2948,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~raw_touch_begin(void) {}
@@ -2976,11 +2976,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class raw_touch_begin
 } // namespace event
 
@@ -3000,8 +3000,8 @@ public:
                      uint8_t first_event,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~raw_touch_update(void) {}
@@ -3028,11 +3028,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class raw_touch_update
 } // namespace event
 
@@ -3052,8 +3052,8 @@ public:
                   uint8_t first_event,
                   const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~raw_touch_end(void) {}
@@ -3080,11 +3080,11 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class raw_touch_end
 } // namespace event
 
@@ -3104,8 +3104,8 @@ public:
                 uint8_t first_event,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~barrier_hit(void) {}
@@ -3132,7 +3132,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -3143,7 +3143,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3156,7 +3156,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3169,14 +3169,14 @@ public:
         decltype((*this)->barrier),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->barrier,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class barrier_hit
 
 
@@ -3199,8 +3199,8 @@ public:
                   uint8_t first_event,
                   const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~barrier_leave(void) {}
@@ -3227,7 +3227,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -3238,7 +3238,7 @@ public:
         decltype((*this)->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3251,7 +3251,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -3264,14 +3264,14 @@ public:
         decltype((*this)->barrier),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->barrier,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class barrier_leave
 
 
@@ -3311,7 +3311,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class device
 } // namespace error
 
@@ -3347,7 +3347,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class event
 } // namespace error
 
@@ -3383,7 +3383,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class mode
 } // namespace error
 
@@ -3419,7 +3419,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class device_busy
 } // namespace error
 
@@ -3455,7 +3455,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class _class
 } // namespace error
 
@@ -3580,7 +3580,7 @@ CookieFunction>
                 ::xcb_input_device_info_t,
                 SIGNATURE(xcb_input_list_input_devices_devices),
                 SIGNATURE(xcb_input_list_input_devices_devices_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -3601,7 +3601,7 @@ CookieFunction>
                 SIGNATURE(xcb_input_input_info_next),
                 SIGNATURE(xcb_input_input_info_sizeof),
                 SIGNATURE(xcb_input_list_input_devices_infos_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -3622,7 +3622,7 @@ CookieFunction>
                 SIGNATURE(xcb_str_next),
                 SIGNATURE(xcb_str_sizeof),
                 SIGNATURE(xcb_input_list_input_devices_names_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_input_devices
 
@@ -3704,7 +3704,7 @@ CookieFunction>
                 ::xcb_input_input_class_info_t,
                 SIGNATURE(xcb_input_open_device_class_info),
                 SIGNATURE(xcb_input_open_device_class_info_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class open_device
 
@@ -3886,7 +3886,7 @@ CookieFunction>
                 ::xcb_input_event_class_t,
                 SIGNATURE(xcb_input_get_selected_extension_events_this_classes),
                 SIGNATURE(xcb_input_get_selected_extension_events_this_classes_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -3905,7 +3905,7 @@ CookieFunction>
                 ::xcb_input_event_class_t,
                 SIGNATURE(xcb_input_get_selected_extension_events_all_classes),
                 SIGNATURE(xcb_input_get_selected_extension_events_all_classes_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_selected_extension_events
 
@@ -4005,7 +4005,7 @@ CookieFunction>
                 ::xcb_input_event_class_t,
                 SIGNATURE(xcb_input_get_device_dont_propagate_list_classes),
                 SIGNATURE(xcb_input_get_device_dont_propagate_list_classes_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_device_dont_propagate_list
 
@@ -4102,7 +4102,7 @@ CookieFunction>
                 SIGNATURE(xcb_input_device_time_coord_next),
                 SIGNATURE(xcb_input_device_time_coord_sizeof),
                 SIGNATURE(xcb_input_get_device_motion_events_events_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_device_motion_events
 
@@ -4518,7 +4518,7 @@ CookieFunction>
         decltype(this->get()->focus),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->focus,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -4636,7 +4636,7 @@ CookieFunction>
                 SIGNATURE(xcb_input_feedback_state_next),
                 SIGNATURE(xcb_input_feedback_state_sizeof),
                 SIGNATURE(xcb_input_get_feedback_control_feedbacks_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_feedback_control
 
@@ -4736,7 +4736,7 @@ CookieFunction>
                 ::xcb_keysym_t,
                 SIGNATURE(xcb_input_get_device_key_mapping_keysyms),
                 SIGNATURE(xcb_input_get_device_key_mapping_keysyms_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_device_key_mapping
 
@@ -4836,7 +4836,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_input_get_device_modifier_mapping_keymaps),
                 SIGNATURE(xcb_input_get_device_modifier_mapping_keymaps_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_device_modifier_mapping
 
@@ -4982,7 +4982,7 @@ CookieFunction>
                 uint8_t,
                 SIGNATURE(xcb_input_get_device_button_mapping_map),
                 SIGNATURE(xcb_input_get_device_button_mapping_map_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_device_button_mapping
 
@@ -5130,7 +5130,7 @@ CookieFunction>
                 SIGNATURE(xcb_input_input_state_next),
                 SIGNATURE(xcb_input_input_state_sizeof),
                 SIGNATURE(xcb_input_query_device_state_classes_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_device_state
 
@@ -5423,7 +5423,7 @@ CookieFunction>
                 Atoms,
                 SIGNATURE(xcb_input_list_device_properties_atoms),
                 SIGNATURE(xcb_input_list_device_properties_atoms_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_device_properties
 
@@ -5534,7 +5534,7 @@ CookieFunction>
         decltype(this->get()->type),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->type,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -5618,7 +5618,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_input_xi_query_pointer_buttons),
                 SIGNATURE(xcb_input_xi_query_pointer_buttons_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -5629,7 +5629,7 @@ CookieFunction>
         decltype(this->get()->root),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->root,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -5642,7 +5642,7 @@ CookieFunction>
         decltype(this->get()->child),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->child,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -5946,7 +5946,7 @@ CookieFunction>
                 SIGNATURE(xcb_input_xi_device_info_next),
                 SIGNATURE(xcb_input_xi_device_info_sizeof),
                 SIGNATURE(xcb_input_xi_query_device_infos_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class xi_query_device
 
@@ -6053,7 +6053,7 @@ CookieFunction>
         decltype(this->get()->focus),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->focus,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -6304,7 +6304,7 @@ CookieFunction>
                 ::xcb_input_grab_modifier_info_t,
                 SIGNATURE(xcb_input_xi_passive_grab_device_modifiers),
                 SIGNATURE(xcb_input_xi_passive_grab_device_modifiers_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class xi_passive_grab_device
 
@@ -6405,7 +6405,7 @@ CookieFunction>
                 Properties,
                 SIGNATURE(xcb_input_xi_list_properties_properties),
                 SIGNATURE(xcb_input_xi_list_properties_properties_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class xi_list_properties
 
@@ -6516,7 +6516,7 @@ CookieFunction>
         decltype(this->get()->type),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->type,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -6602,7 +6602,7 @@ CookieFunction>
                 SIGNATURE(xcb_input_event_mask_next),
                 SIGNATURE(xcb_input_event_mask_sizeof),
                 SIGNATURE(xcb_input_xi_get_selected_events_masks_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class xi_get_selected_events
 
@@ -7914,8 +7914,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -7928,182 +7928,182 @@ public:
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_INPUT_DEVICE_VALUATOR:
-            handler(cppual::input::event::device_valuator<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_valuator<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_KEY_PRESS:
-            handler(cppual::input::event::device_key_press<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_key_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_KEY_RELEASE:
-            handler(cppual::input::event::device_key_release<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_key_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_BUTTON_PRESS:
-            handler(cppual::input::event::device_button_press<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_button_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_BUTTON_RELEASE:
-            handler(cppual::input::event::device_button_release<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_button_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_MOTION_NOTIFY:
-            handler(cppual::input::event::device_motion_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_motion_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_FOCUS_IN:
-            handler(cppual::input::event::device_focus_in<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_focus_in<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_FOCUS_OUT:
-            handler(cppual::input::event::device_focus_out<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_focus_out<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_PROXIMITY_IN:
-            handler(cppual::input::event::proximity_in<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::proximity_in<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_PROXIMITY_OUT:
-            handler(cppual::input::event::proximity_out<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::proximity_out<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_STATE_NOTIFY:
-            handler(cppual::input::event::device_state_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_state_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_MAPPING_NOTIFY:
-            handler(cppual::input::event::device_mapping_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_mapping_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_CHANGE_DEVICE_NOTIFY:
-            handler(cppual::input::event::change_device_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::change_device_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_KEY_STATE_NOTIFY:
-            handler(cppual::input::event::device_key_state_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_key_state_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_BUTTON_STATE_NOTIFY:
-            handler(cppual::input::event::device_button_state_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_button_state_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_PRESENCE_NOTIFY:
-            handler(cppual::input::event::device_presence_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_presence_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_PROPERTY_NOTIFY:
-            handler(cppual::input::event::device_property_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_property_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_MOTION:
-            handler(cppual::input::event::raw_motion<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::raw_motion<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_TOUCH_BEGIN:
-            handler(cppual::input::event::touch_begin<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::touch_begin<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_TOUCH_UPDATE:
-            handler(cppual::input::event::touch_update<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::touch_update<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_TOUCH_END:
-            handler(cppual::input::event::touch_end<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::touch_end<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_TOUCH_OWNERSHIP:
-            handler(cppual::input::event::touch_ownership<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::touch_ownership<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_TOUCH_BEGIN:
-            handler(cppual::input::event::raw_touch_begin<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::raw_touch_begin<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_TOUCH_UPDATE:
-            handler(cppual::input::event::raw_touch_update<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::raw_touch_update<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_TOUCH_END:
-            handler(cppual::input::event::raw_touch_end<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::raw_touch_end<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_BARRIER_HIT:
-            handler(cppual::input::event::barrier_hit<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::barrier_hit<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_BARRIER_LEAVE:
-            handler(cppual::input::event::barrier_leave<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::barrier_leave<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
 
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_INPUT_DEVICE_CHANGED:
-            handler(cppual::input::event::device_changed<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::device_changed<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_KEY_PRESS:
-            handler(cppual::input::event::key_press<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::key_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_KEY_RELEASE:
-            handler(cppual::input::event::key_release<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::key_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_BUTTON_PRESS:
-            handler(cppual::input::event::button_press<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::button_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_BUTTON_RELEASE:
-            handler(cppual::input::event::button_release<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::button_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_MOTION:
-            handler(cppual::input::event::motion<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::motion<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_ENTER:
-            handler(cppual::input::event::enter<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::enter<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_LEAVE:
-            handler(cppual::input::event::leave<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::leave<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_FOCUS_IN:
-            handler(cppual::input::event::focus_in<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::focus_in<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_FOCUS_OUT:
-            handler(cppual::input::event::focus_out<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::focus_out<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_HIERARCHY:
-            handler(cppual::input::event::hierarchy<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::hierarchy<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_PROPERTY:
-            handler(cppual::input::event::property<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::property<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_KEY_PRESS:
-            handler(cppual::input::event::raw_key_press<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::raw_key_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_KEY_RELEASE:
-            handler(cppual::input::event::raw_key_release<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::raw_key_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_BUTTON_PRESS:
-            handler(cppual::input::event::raw_button_press<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::raw_button_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_BUTTON_RELEASE:
-            handler(cppual::input::event::raw_button_release<Connection>(m_c, m_first_event, event));
+            handler(cppual::input::event::raw_button_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -8112,8 +8112,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -8126,7 +8126,7 @@ public:
     typedef cppual::input::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::input::extension & extension)
@@ -8136,7 +8136,7 @@ public:
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-        switch (error->error_code - m_first_error) {
+        switch (error->error_code - _M_first_error) {
 
         case XCB_INPUT_DEVICE: // 0
             throw cppual::input::error::device(error);
@@ -8157,7 +8157,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

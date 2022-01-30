@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,36 +25,43 @@
 #include <vector>
 #include <cppual/ui/skin.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class TreeView : public SkinnableView
+// =========================================================
+
+class tree_view : public skinnable_view
 {
-protected:
-    typedef struct NodeList_T
-    { string strNodeName; std::vector<NodeList_T> gChildNodeList; }
-    NodeList;
-
-    byte                  m_nTreeType;
-    std::vector<NodeList> m_gNodeList;
-
-    virtual void onPaint ();
-    virtual void onNodeClick ();
-
 public:
-    string& nodeName   (uint, uint);
-    int     find       (const string&);
-    bool    insertNode (const string&, uint);
-    bool    remove     (uint);
+    string_type& node_name   (uint, uint);
+    int          find        (string_type const&);
+    bool         insert_node (string_type const&, uint);
+    bool         remove      (uint);
 
-    TreeView () : m_nTreeType (), m_gNodeList ()
+    tree_view () : _M_nTreeType (), _M_gNodeList ()
     { }
 
-    void setType (byte nTreeType)
+    void set_type (byte nTreeType)
     {
-        m_nTreeType = nTreeType;
+        _M_nTreeType = nTreeType;
         refresh ();
     }
+
+protected:
+    struct node_list
+    {
+        string_type       name    ;
+        vector<node_list> children;
+    };
+
+    virtual void paint_event (rect const&);
+    virtual void on_node_click ();
+
+private:
+    byte              _M_nTreeType;
+    vector<node_list> _M_gNodeList;
 };
+
+// =========================================================
 
 } } // Ui
 

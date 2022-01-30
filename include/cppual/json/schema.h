@@ -1,5 +1,5 @@
 // Tencent is pleased to support the open source community by making RapidJSON available->
-// 
+//
 // Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip-> All rights reserved->
 //
 // Licensed under the MIT License (the "License"); you may not use this file except
@@ -7,9 +7,9 @@
 //
 // http://opensource->org/licenses/MIT
 //
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied-> See the License for the 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied-> See the License for the
 // specific language governing permissions and limitations under the License->
 
 #ifndef RAPIDJSON_SCHEMA_H_
@@ -68,7 +68,7 @@ RAPIDJSON_DIAG_OFF(variadic-macros)
 RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Verbose Utilities
@@ -255,10 +255,10 @@ public:
     bool Uint(unsigned u) { Number n; n.u.u = u; n.d = static_cast<double>(u); return WriteNumber(n); }
     bool Int64(int64_t i) { Number n; n.u.i = i; n.d = static_cast<double>(i); return WriteNumber(n); }
     bool Uint64(uint64_t u) { Number n; n.u.u = u; n.d = static_cast<double>(u); return WriteNumber(n); }
-    bool Double(double d) { 
-        Number n; 
+    bool Double(double d) {
+        Number n;
         if (d < 0) n.u.i = static_cast<int64_t>(d);
-        else       n.u.u = static_cast<uint64_t>(d); 
+        else       n.u.u = static_cast<uint64_t>(d);
         n.d = d;
         return WriteNumber(n);
     }
@@ -275,7 +275,7 @@ public:
 
     bool StartObject() { return true; }
     bool Key(const Ch* str, SizeType len, bool copy) { return String(str, len, copy); }
-    bool EndObject(SizeType memberCount) { 
+    bool EndObject(SizeType memberCount) {
         uint64_t h = Hash(0, kObjectType);
         uint64_t* kv = stack_.template Pop<uint64_t>(memberCount * 2);
         for (SizeType i = 0; i < memberCount; i++)
@@ -283,9 +283,9 @@ public:
         *stack_.template Push<uint64_t>() = h;
         return true;
     }
-    
+
     bool StartArray() { return true; }
-    bool EndArray(SizeType elementCount) { 
+    bool EndArray(SizeType elementCount) {
         uint64_t h = Hash(0, kArrayType);
         uint64_t* e = stack_.template Pop<uint64_t>(elementCount);
         for (SizeType i = 0; i < elementCount; i++)
@@ -312,9 +312,9 @@ private:
     };
 
     bool WriteType(Type type) { return WriteBuffer(type, 0, 0); }
-    
+
     bool WriteNumber(const Number& n) { return WriteBuffer(kNumberType, &n, sizeof(n)); }
-    
+
     bool WriteBuffer(Type type, const void* data, size_t len) {
         // FNV-1a from http://isthe.com/chongo/tech/comp/fnv/
         uint64_t h = Hash(RAPIDJSON_UINT64_C2(0x84222325, 0xcbf29ce4), type);
@@ -524,7 +524,7 @@ public:
             if (properties && properties->IsObject())
                 for (ConstMemberIterator itr = properties->MemberBegin(); itr != properties->MemberEnd(); ++itr)
                     AddUniqueElement(allProperties, itr->name);
-            
+
             if (required && required->IsArray())
                 for (ConstValueIterator itr = required->Begin(); itr != required->End(); ++itr)
                     if (itr->IsString())
@@ -826,7 +826,7 @@ public:
         }
         return CreateParallelValidator(context);
     }
-    
+
     bool Bool(Context& context, bool) const {
         if (!(type_ & (1 << kBooleanSchemaType))) {
             DisallowedType(context, GetBooleanString());
@@ -870,13 +870,13 @@ public:
 
         if (!maximum_.IsNull() && !CheckDoubleMaximum(context, d))
             return false;
-        
+
         if (!multipleOf_.IsNull() && !CheckDoubleMultipleOf(context, d))
             return false;
-        
+
         return CreateParallelValidator(context);
     }
-    
+
     bool String(Context& context, const Ch* str, SizeType length, bool) const {
         if (!(type_ & (1 << kStringSchemaType))) {
             DisallowedType(context, GetStringString());
@@ -925,7 +925,7 @@ public:
 
         return CreateParallelValidator(context);
     }
-    
+
     bool Key(Context& context, const Ch* str, SizeType len, bool) const {
         if (patternProperties_) {
             context.patternPropertiesSchemaCount = 0;
@@ -1018,7 +1018,7 @@ public:
                 }
             }
             if (context.error_handler.EndDependencyErrors())
-                RAPIDJSON_INVALID_KEYWORD_RETURN(kValidateErrorDependencies);  
+                RAPIDJSON_INVALID_KEYWORD_RETURN(kValidateErrorDependencies);
         }
 
         return true;
@@ -1038,12 +1038,12 @@ public:
 
     bool EndArray(Context& context, SizeType elementCount) const {
         context.inArray = false;
-        
+
         if (elementCount < minItems_) {
             context.error_handler.TooFewItems(elementCount, minItems_);
             RAPIDJSON_INVALID_KEYWORD_RETURN(kValidateErrorMinItems);
         }
-        
+
         if (elementCount > maxItems_) {
             context.error_handler.TooManyItems(elementCount, maxItems_);
             RAPIDJSON_INVALID_KEYWORD_RETURN(kValidateErrorMaxItems);
@@ -1274,10 +1274,10 @@ private:
 
             if (anyOf_.schemas)
                 CreateSchemaValidators(context, anyOf_, false);
-            
+
             if (oneOf_.schemas)
                 CreateSchemaValidators(context, oneOf_, false);
-            
+
             if (not_)
                 context.validators[notValidatorIndex_] = context.factory.CreateSchemaValidator(*not_, false);
 
@@ -1301,7 +1301,7 @@ private:
         SizeType len = name.GetStringLength();
         const Ch* str = name.GetString();
         for (SizeType index = 0; index < propertyCount_; index++)
-            if (properties_[index].name.GetStringLength() == len && 
+            if (properties_[index].name.GetStringLength() == len &&
                 (std::memcmp(properties_[index].name.GetString(), str, sizeof(Ch) * len) == 0))
             {
                 *outIndex = index;
@@ -1462,7 +1462,7 @@ private:
 
     struct PatternProperty {
         PatternProperty() : schema(), pattern() {}
-        ~PatternProperty() { 
+        ~PatternProperty() {
             if (pattern) {
                 pattern->~RegexType();
                 AllocatorType::Free(pattern);
@@ -1516,7 +1516,7 @@ private:
     SValue multipleOf_;
     bool exclusiveMinimum_;
     bool exclusiveMaximum_;
-    
+
     SizeType defaultValueLength_;
 };
 
@@ -1576,8 +1576,7 @@ public:
     \tparam ValueT Type of JSON value (e.g. \c Value ), which also determine the encoding.
     \tparam Allocator Allocator type for allocating memory of this document.
 */
-template <typename ValueT, typename Allocator = cppual::Memory::MemoryResource>
-class GenericSchemaDocument {
+template <typename ValueT, typename Allocator = memory::MemoryRememory_resourceGenericSchemaDocument {
 public:
     typedef ValueT ValueType;
     typedef IGenericRemoteSchemaDocumentProvider<GenericSchemaDocument> IRemoteSchemaDocumentProviderType;
@@ -1838,9 +1837,8 @@ typedef IGenericRemoteSchemaDocumentProvider<SchemaDocument> IRemoteSchemaDocume
 template <
     typename SchemaDocumentType,
     typename OutputHandler = BaseReaderHandler<typename SchemaDocumentType::SchemaType::EncodingType>,
-    typename StateAllocator = cppual::Memory::MemoryResource>
-class GenericSchemaValidator :
-    public internal::ISchemaStateFactory<typename SchemaDocumentType::SchemaType>, 
+    typename StateAllocator = memory::MemoryRememory_resourceGenericSchemaValidator :
+    public internal::ISchemaStateFactory<typename SchemaDocumentType::SchemaType>,
     public internal::ISchemaValidator,
     public internal::IValidationErrorHandler<typename SchemaDocumentType::SchemaType> {
 public:
@@ -1861,7 +1859,7 @@ public:
     */
     GenericSchemaValidator(
         const SchemaDocumentType& schemaDocument,
-        StateAllocator* allocator = 0, 
+        StateAllocator* allocator = 0,
         size_t schemaStackCapacity = kDefaultSchemaStackCapacity,
         size_t documentStackCapacity = kDefaultDocumentStackCapacity)
         :
@@ -1893,7 +1891,7 @@ public:
     GenericSchemaValidator(
         const SchemaDocumentType& schemaDocument,
         OutputHandler& outputHandler,
-        StateAllocator* allocator = 0, 
+        StateAllocator* allocator = 0,
         size_t schemaStackCapacity = kDefaultSchemaStackCapacity,
         size_t documentStackCapacity = kDefaultDocumentStackCapacity)
         :
@@ -2243,7 +2241,7 @@ RAPIDJSON_MULTILINEMACRO_END
         RAPIDJSON_SCHEMA_HANDLE_PARALLEL_(StartObject, ());
         return valid_ = !outputHandler_ || outputHandler_->StartObject();
     }
-    
+
     bool Key(const Ch* str, SizeType len, bool copy) {
         if (!valid_) return false;
         AppendToken(str, len);
@@ -2251,7 +2249,7 @@ RAPIDJSON_MULTILINEMACRO_END
         RAPIDJSON_SCHEMA_HANDLE_PARALLEL_(Key, (str, len, copy));
         return valid_ = !outputHandler_ || outputHandler_->Key(str, len, copy);
     }
-    
+
     bool EndObject(SizeType memberCount) {
         if (!valid_) return false;
         RAPIDJSON_SCHEMA_HANDLE_PARALLEL_(EndObject, (memberCount));
@@ -2264,7 +2262,7 @@ RAPIDJSON_MULTILINEMACRO_END
         RAPIDJSON_SCHEMA_HANDLE_PARALLEL_(StartArray, ());
         return valid_ = !outputHandler_ || outputHandler_->StartArray();
     }
-    
+
     bool EndArray(SizeType elementCount) {
         if (!valid_) return false;
         RAPIDJSON_SCHEMA_HANDLE_PARALLEL_(EndArray, (elementCount));
@@ -2321,7 +2319,7 @@ private:
     typedef GenericValue<UTF8<>, StateAllocator> HashCodeArray;
     typedef internal::Hasher<EncodingType, StateAllocator> HasherType;
 
-    GenericSchemaValidator( 
+    GenericSchemaValidator(
         const SchemaDocumentType& schemaDocument,
         const SchemaType& root,
         const char* basePath, size_t basePathSize,
@@ -2407,7 +2405,7 @@ private:
 #endif
         void* hasher = CurrentContext().hasher;
         uint64_t h = hasher && CurrentContext().arrayUniqueness ? static_cast<HasherType*>(hasher)->GetHashCode() : 0;
-        
+
         PopSchema();
 
         if (!schemaStack_.Empty()) {
@@ -2456,7 +2454,7 @@ private:
     }
 
     RAPIDJSON_FORCEINLINE void PushSchema(const SchemaType& schema) { new (schemaStack_.template Push<Context>()) Context(*this, *this, &schema); }
-    
+
     RAPIDJSON_FORCEINLINE void PopSchema() {
         Context* c = schemaStack_.template Pop<Context>(1);
         if (HashCodeArray* a = static_cast<HashCodeArray*>(c->arrayElementHashCodes)) {
@@ -2582,8 +2580,9 @@ template <
     typename InputStream,
     typename SourceEncoding,
     typename SchemaDocumentType = SchemaDocument,
-    typename StackAllocator = cppual::Memory::MemoryResource>
-class SchemaValidatingReader {
+    typename StackAllocator = memory::MemoryRememory_resource >
+class SchemaValidatingReader
+{
 public:
     typedef typename SchemaDocumentType::PointerType PointerType;
     typedef typename InputStream::Ch Ch;

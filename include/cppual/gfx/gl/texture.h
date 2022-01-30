@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,12 @@
 #include <cppual/gfx/gl/glbase.h>
 #include <cppual/string.h>
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
-class Texture : public Object, ITransformable2D
+class texture : public object, transformable2d_interface
 {
 public:
-    enum class MinFilter : unsigned char
+    enum class MinFilter : byte
     {
         Nearest,
         Bilinear,
@@ -41,60 +41,60 @@ public:
         TrilinearMipMap
     };
 
-    enum class MagFilter : unsigned char
+    enum class MagFilter : byte
     {
         Nearest,
         Bilinear
     };
 
-    enum class State : unsigned char
+    enum class State : byte
     {
         DirectAccess
     };
 
-    Texture  () noexcept;
-    ~Texture () noexcept;
-    static void setState (State type, bool state) noexcept;
+    texture  () noexcept;
+    ~texture () noexcept;
+    static void set_state (State type, bool state) noexcept;
     //bool loadTexture2D (RasterImage const& image, bool gen_mipmap = false);
-    void setParameter (uint name, int param) noexcept;
+    void set_parameter (uint name, int param) noexcept;
     void bind (uint texture_id) noexcept;
-    void setFiltering (MagFilter mag, MinFilter min) noexcept;
+    void set_filtering (MagFilter mag, MinFilter min) noexcept;
     void release () noexcept;
 
-    Texture (string      const& file,
-             PixelFormat const& format     = PixelFormat (),
+    texture (string      const& file,
+             pixel_format const& format     = pixel_format (),
              bool               gen_mipmap = false);
 
-    bool loadTexture2D (cvoid*             pixels,
-                        point2i     const& size,
-                        PixelFormat const& format     = PixelFormat (),
-                        bool               gen_mipmap = false);
+    bool load_texture_2d (cvoid*             pixels,
+                          point2i     const& size,
+                          pixel_format const& format     = pixel_format (),
+                          bool               gen_mipmap = false);
 
-    bool loadTexture2D (string      const& path,
-                        PixelFormat const& format     = PixelFormat (),
-                        bool               gen_mipmap = false);
+    bool load_texture_2d (string      const& path,
+                          pixel_format const& format     = pixel_format (),
+                          bool               gen_mipmap = false);
 
-    MinFilter   minFilter () const noexcept { return m_eMin; }
-    MagFilter   magFilter () const noexcept { return m_eMag; }
-    PixelFormat format    () const noexcept { return m_gFormat; }
-    uint        sample    () const noexcept { return m_uSampleId; }
+    MinFilter   min_filter () const noexcept { return _M_eMin; }
+    MagFilter   mag_filter () const noexcept { return _M_eMag; }
+    pixel_format format     () const noexcept { return _M_gFormat; }
+    uint        sample     () const noexcept { return _M_uSampleId; }
 
-    bool isLoaded () const noexcept
-    { return m_gStates.test (Texture::IsLoaded); }
+    bool is_loaded () const noexcept
+    { return _M_gStates.test (texture::IsLoaded); }
 
-    bool hasMipMaps () const noexcept
-    { return m_gStates.test (Texture::HasMipMaps); }
+    bool has_mip_maps () const noexcept
+    { return _M_gStates.test (texture::HasMipMaps); }
 
 private:
     enum    Flag { IsLoaded = 1 << 0, HasMipMaps = 1 << 1 };
-    typedef BitSet<Texture::Flag> Flags;
+    typedef bitset<texture::Flag> flags;
 
-    PixelFormat m_gFormat;
-    point2i     m_gSize;
-    uint        m_uSampleId;
-    MinFilter   m_eMin;
-    MagFilter   m_eMag;
-    Flags       m_gStates;
+    pixel_format _M_gFormat;
+    point2i     _M_gSize;
+    uint        _M_uSampleId;
+    MinFilter   _M_eMin;
+    MagFilter   _M_eMag;
+    flags       _M_gStates;
 };
 
 } } } // namespace GL

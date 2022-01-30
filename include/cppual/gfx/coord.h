@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,80 +28,80 @@
 
 namespace cppual {
 
-template <typename> struct Point2;
-template <typename> struct Point3;
-template <typename> struct Point4;
-template <typename> struct Angle ;
+template <typename> struct point2;
+template <typename> struct point3;
+template <typename> struct point4;
+template <typename> struct angle ;
 
-typedef Point2<i16 > point2i;
-typedef Point2<u16   > point2u;
-typedef Point2<u32   > point2u32;
-typedef Point2<float > point2f;
-typedef Point3<float > point3f;
-typedef Point3<float > vec3   ;
-typedef Point3<double> point3d;
-typedef Point3<i16 > point3i;
-typedef Point3<u32   > point3u32;
-typedef Point4<float > point4f;
-typedef Point4<float > vec4   ;
-typedef Point4<float > point4d;
-typedef Angle <float > anglef ;
-typedef Angle <double> angled ;
+typedef point2<i16   > point2i;
+typedef point2<u16   > point2u;
+typedef point2<u32   > point2u32;
+typedef point2<float > point2f;
+typedef point3<float > point3f;
+typedef point3<float > vec3   ;
+typedef point3<double> point3d;
+typedef point3<i16   > point3i;
+typedef point3<u32   > point3u32;
+typedef point4<float > point4f;
+typedef point4<float > vec4   ;
+typedef point4<float > point4d;
+typedef angle <float > anglef ;
+typedef angle <double> angled ;
 
 // ====================================================
 
 template <typename T>
-struct Point2 final
+struct point2 final
 {
     Arithmetic<T> x, y;
 
-    constexpr Point2 () noexcept = default;
+    constexpr point2 () noexcept = default;
 
     template <typename U>
-    constexpr Point2 (U x_, U y_) noexcept
+    constexpr point2 (U x_, U y_) noexcept
     : x (T (x_)),  y (T (y_))
     { }
 };
 
 template <typename T>
-constexpr bool operator == (Point2<T> const& gObj1,
-                            Point2<T> const& gObj2) noexcept
+constexpr bool operator == (point2<T> const& gObj1,
+                            point2<T> const& gObj2) noexcept
 { return (gObj1.x == gObj2.x and gObj1.y == gObj2.y); }
 
 template <typename T>
-constexpr bool operator != (Point2<T> const& gObj1,
-                            Point2<T> const& gObj2) noexcept
+constexpr bool operator != (point2<T> const& gObj1,
+                            point2<T> const& gObj2) noexcept
 { return (gObj1.x != gObj2.x or gObj1.y != gObj2.y); }
 
 // ====================================================
 
 template <typename T>
-struct Point3 final
+struct point3 final
 {
     Arithmetic<T> x, y, z;
 };
 
 template <typename T>
-constexpr bool operator == (Point3<T> const& gObj1,
-                            Point3<T> const& gObj2) noexcept
+constexpr bool operator == (point3<T> const& gObj1,
+                            point3<T> const& gObj2) noexcept
 { return (gObj1.x == gObj2.x and gObj1.y == gObj2.y and gObj1.z == gObj2.z); }
 
 template <typename T>
-constexpr bool operator != (Point3<T> const& gObj1,
-                            Point3<T> const& gObj2) noexcept
+constexpr bool operator != (point3<T> const& gObj1,
+                            point3<T> const& gObj2) noexcept
 { return !(gObj1 == gObj2); }
 
 // ====================================================
 
 template <typename T>
-struct Point4 final
+struct point4 final
 {
     Arithmetic<T> x, y, z, w;
 };
 
 template <typename T>
-constexpr bool operator == (Point4<T> const& gObj1,
-                            Point4<T> const& gObj2) noexcept
+constexpr bool operator == (point4<T> const& gObj1,
+                            point4<T> const& gObj2) noexcept
 {
     return (gObj1.x == gObj2.x and
             gObj1.y == gObj2.y and
@@ -110,28 +110,31 @@ constexpr bool operator == (Point4<T> const& gObj1,
 }
 
 template <typename T>
-constexpr bool operator != (Point4<T> const& gObj1,
-                            Point4<T> const& gObj2) noexcept
+constexpr bool operator != (point4<T> const& gObj1,
+                            point4<T> const& gObj2) noexcept
 { return !(gObj1 == gObj2); }
 
 // ====================================================
 
-struct Rect final
+struct rect final
 {
     typedef i16 value_type;
 
-    value_type left, top, right, bottom;
+    value_type left   { };
+    value_type top    { };
+    value_type right  { };
+    value_type bottom { };
 
-    inline Rect () noexcept = default;
+    constexpr rect () noexcept = default;
 
-    constexpr Rect (value_type x, value_type y, u16 width, u16 height) noexcept
+    constexpr rect (value_type x, value_type y, u16 width, u16 height) noexcept
     : left   (x),
       top    (y),
       right  (static_cast<value_type> (x + width )),
       bottom (static_cast<value_type> (y + height))
     { }
 
-    constexpr Rect (point2u size) noexcept
+    constexpr rect (point2u size) noexcept
     : left   (),
       top    (),
       right  (static_cast<value_type> (size.x)),
@@ -147,19 +150,19 @@ struct Rect final
     constexpr point2u size () const noexcept
     { return { width (), height () }; }
 
-    inline void setWidth  (u16 uWidth ) noexcept
+    inline void set_width  (u16 uWidth ) noexcept
     { right  = static_cast<value_type> (left + uWidth); }
 
-    inline void setHeight (u16 uHeight) noexcept
+    inline void set_height (u16 uHeight) noexcept
     { bottom = static_cast<value_type> (top + uHeight); }
 
     inline void reset () noexcept
     { left = top = right = bottom = 0; }
 
-    constexpr bool isPoint () const noexcept
+    constexpr bool is_point () const noexcept
     { return (left == right and top == bottom); }
 
-    constexpr bool intersects (Rect const& gObj) const noexcept
+    constexpr bool intersects (rect const& gObj) const noexcept
     {
         return (right > gObj.left  and bottom > gObj.top   ) or
                (left  < gObj.right and top    < gObj.bottom);
@@ -171,7 +174,7 @@ struct Rect final
                 top  < gPoint.y and gPoint.y < bottom);
     }
 
-    inline Rect& operator = (point2i gPoint) noexcept
+    inline rect& operator = (point2i gPoint) noexcept
     {
         right  = static_cast<i16> (gPoint.x + width  ());
         bottom = static_cast<i16> (gPoint.y + height ());
@@ -181,13 +184,13 @@ struct Rect final
     }
 };
 
-constexpr bool operator == (Rect const& gObj1, Rect const& gObj2) noexcept
+constexpr bool operator == (rect const& gObj1, rect const& gObj2) noexcept
 {
     return (gObj1.left  == gObj2.left  and gObj1.top    == gObj2.top and
             gObj1.right == gObj2.right and gObj1.bottom == gObj2.bottom);
 }
 
-constexpr bool operator != (Rect const& gObj1, Rect const& gObj2) noexcept
+constexpr bool operator != (rect const& gObj1, rect const& gObj2) noexcept
 { return !(gObj1 == gObj2); }
 
 //inline Rect& operator += (Rect& gObj, point2i gPoint) noexcept
@@ -211,40 +214,40 @@ constexpr bool operator != (Rect const& gObj1, Rect const& gObj2) noexcept
 // ====================================================
 
 template <typename T>
-struct Angle final
+struct angle final
 {
     Arithmetic<T> radians { };
 
-    constexpr Angle () noexcept = default;
+    constexpr angle () noexcept = default;
 
     template <typename U>
-    constexpr Angle (Angle<U> const& gObj) noexcept
+    constexpr angle (angle<U> const& gObj) noexcept
     : radians (T (gObj.radians))
     { }
 };
 
 template <typename T>
-constexpr bool operator == (Angle<T> const& a, Angle<T> const& b) noexcept
+constexpr bool operator == (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians == b.radians; }
 
 template <typename T>
-constexpr bool operator != (Angle<T> const& a, Angle<T> const& b) noexcept
+constexpr bool operator != (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians != b.radians; }
 
 template <typename T>
-constexpr bool operator < (Angle<T> const& a, Angle<T> const& b) noexcept
+constexpr bool operator < (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians < b.radians; }
 
 template <typename T>
-constexpr bool operator > (Angle<T> const& a, Angle<T> const& b) noexcept
+constexpr bool operator > (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians > b.radians; }
 
 template <typename T>
-constexpr bool operator <= (Angle<T> const& a, Angle<T> const& b) noexcept
+constexpr bool operator <= (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians <= b.radians; }
 
 template <typename T>
-constexpr bool operator >= (Angle<T> const& a, Angle<T> const& b) noexcept
+constexpr bool operator >= (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians >= b.radians; }
 
 } // cppual

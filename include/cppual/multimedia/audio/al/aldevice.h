@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,123 +25,124 @@
 
 
 #include <cppual/noncopyable.h>
+#include <cppual/containers.h>
 #include <cppual/string.h>
+
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/multimedia/audio/spatial.h>
 #include <cppual/multimedia/audio/al/alobject.h>
 
-#include <vector>
-#include <string>
+namespace cppual { namespace audio { namespace al {
 
-namespace cppual { namespace Audio { namespace AL {
+// ====================================================
 
-enum class DeviceType : unsigned char
+enum class device_type : byte
 {
-    Null,
-    Playback,
-    Capture
+    null,
+    playback,
+    capture
 };
 
-enum class StringQuery : unsigned char
+enum class string_query : byte
 {
-    Version,
-    Renderer,
-    Vendor
+    version,
+    renderer,
+    vendor
 };
 
 // ====================================================
 
-class AudioDevice : public NonCopyable
+class audio_device : public non_copyable
 {
 public:
     typedef string string_type;
 
-    AudioDevice () = delete;
-    static bool isExtensionSupported (string const& name) noexcept;
-    bool        isExtensionPresent   (string const& name) noexcept;
+    audio_device () = delete;
+    static bool is_extension_supported (string const& name) noexcept;
+    bool        is_extension_present   (string const& name) noexcept;
 
-    inline DeviceType  type   () const noexcept { return m_eType      ; }
-    inline string_type name   () const noexcept { return m_gDeviceName; }
-    inline void*       object ()       noexcept { return m_pDevObj    ; }
-    inline bool        valid  () const noexcept { return m_pDevObj    ; }
+    constexpr device_type type   () const noexcept { return _M_eType      ; }
+    inline    string_type name   () const noexcept { return _M_gDeviceName; }
+    constexpr void*       handle ()       noexcept { return _M_pDevObj    ; }
+    constexpr bool        valid  () const noexcept { return _M_pDevObj    ; }
 
 protected:
-    string_type m_gDeviceName;
-    void*       m_pDevObj;
-    DeviceType  m_eType;
+    string_type _M_gDeviceName;
+    void*       _M_pDevObj    ;
+    device_type _M_eType      ;
 
     inline
-    AudioDevice (string_type const& gName, void* pObj, DeviceType eType) noexcept
-    : m_gDeviceName (std::move (gName)),
-      m_pDevObj     (pObj),
-      m_eType       (eType)
+    audio_device (string_type const& gName, void* pObj, device_type eType) noexcept
+    : _M_gDeviceName (std::move (gName)),
+      _M_pDevObj     (pObj),
+      _M_eType       (eType)
     { }
 };
 
-class PlaybackDevice final : public AudioDevice
+class playback_device : public audio_device
 {
 public:
-    PlaybackDevice  () noexcept;
-    PlaybackDevice  (string_type const& name) noexcept;
-    ~PlaybackDevice () noexcept;
+    playback_device  () noexcept;
+    playback_device  (string_type const& name) noexcept;
+    ~playback_device () noexcept;
 };
 
-class CaptureDevice final : public AudioDevice
+class capture_device : public audio_device
 {
 public:
     typedef string string_type;
 
-    CaptureDevice  () noexcept;
-    ~CaptureDevice () noexcept;
+    capture_device  () noexcept;
+    ~capture_device () noexcept;
 
-    CaptureDevice (string_type const& name,
-                   uint               freq    = 22050,
-                   OutputFormat       format  = OutputFormat::Stereo,
-                   SoundQuality       quality = SoundQuality::Low) noexcept;
+    capture_device (string_type const& name,
+                    uint               freq    = 22050,
+                    output_format      format  = output_format::stereo,
+                    sound_quality      quality = sound_quality::low) noexcept;
 
-    SoundQuality quality () const noexcept { return m_eQuality; }
-    OutputFormat format  () const noexcept { return m_eFormat ; }
+    constexpr sound_quality quality () const noexcept { return _M_eQuality; }
+    constexpr output_format format  () const noexcept { return _M_eFormat ; }
 
 private:
-    SoundQuality m_eQuality;
-    OutputFormat m_eFormat ;
+    sound_quality _M_eQuality;
+    output_format _M_eFormat ;
 };
 
 // ====================================================
 
-class Instance final : public NonCopyable
+class instance final : public non_copyable
 {
 public:
-    typedef string                   string_type;
-    typedef std::vector<string_type> ext_list   ;
+    typedef string              string_type;
+    typedef vector<string_type> ext_list   ;
 
-    Instance () = delete;
-    Instance (PlaybackDevice& device, bool current = false) noexcept;
-    ~Instance () noexcept;
+    instance () = delete;
+    instance (playback_device& device, bool current = false) noexcept;
+    ~instance () noexcept;
 
     bool use () noexcept;
     void invalidate () noexcept;
-    bool setCapability (int cap, bool enable) noexcept;
-    bool hasCapability (int cap) noexcept;
+    bool set_capability (int cap, bool enable) noexcept;
+    bool has_capability (int cap) noexcept;
     void process () noexcept;
     void suspend () noexcept;
 
-    static DistanceModel distanceModel () noexcept;
-    static void          setDistanceModel (DistanceModel model) noexcept;
-    static Instance*     current () noexcept;
-    static string        label (StringQuery query) noexcept;
+    static distance_type distance_model () noexcept;
+    static void          set_distance_model (distance_type model) noexcept;
+    static instance*     current () noexcept;
+    static string        label (string_query query) noexcept;
     static ext_list      extensions () noexcept;
-    static void          setDopplerFactor (float factor) noexcept;
-    static float         dopplerFactor () noexcept;
-    static void          setSpeedOfSound (float speed) noexcept;
-    static float         speedOfSound () noexcept;
+    static void          set_doppler_factor (float factor) noexcept;
+    static float         doppler_factor () noexcept;
+    static void          set_speed_of_sound (float speed) noexcept;
+    static float         speed_of_sound () noexcept;
 
-    inline PlaybackDevice& device  () const noexcept { return m_gDevice; }
-    inline bool            isValid () const noexcept { return m_pDevContext; }
+    constexpr playback_device& get_device () const noexcept { return *_M_gDevice    ; }
+    constexpr bool             valid      () const noexcept { return  _M_pDevContext; }
 
 private:
-    PlaybackDevice& m_gDevice;
-    void*           m_pDevContext;
+    playback_device* _M_gDevice    ;
+    void*            _M_pDevContext;
 };
 
 } } } // namespace Audio

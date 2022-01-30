@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,20 +24,20 @@
 
 #include <cppual/ui/dialog.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-enum class MessageType : char { Plain, Information, Warning, Error };
-typedef    BitSet<Dialog::Result> Results;
+enum class message_type : byte { plain, information, warning, error };
+typedef    bitset<dialog::result> results;
 
-Dialog::Result showQuestion (string&& title,
-                             string&& question,
-                             Results  answers,
-                             Window*  owner = nullptr);
+dialog::result show_question (string&& title,
+                              string&& question,
+                              results  answers,
+                              window*  owner = nullptr);
 
-void showMessage (string&&    title,
-                  string&&    message,
-                  MessageType message_type = MessageType::Warning,
-                  Window*     owner        = nullptr);
+void show_message (string&&     title,
+                   string&&     message,
+                   message_type message_type = message_type::plain,
+                   window*      owner        = nullptr);
 
 } } // namespace Ui
 

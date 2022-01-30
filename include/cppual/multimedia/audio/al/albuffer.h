@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,48 +23,46 @@
 #define CPPUAL_AUDIO_BUFFER_H_
 #ifdef __cplusplus
 
-
-#include <cppual/common.h>
-#include <cppual/string.h>
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/multimedia/audio/al/aldevice.h>
 
-#include <vector>
+#include <cppual/common.h>
+#include <cppual/string.h>
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-class SoundSource;
+class sound_source;
 
 // ====================================================
 
-class SoundBuffer : public Object, public Sound
+class sound_buffer : public object, public sound
 {
 public:
-    typedef std::vector<SoundSource*>   vector_type;
+    typedef vector<sound_source*>        vector_type   ;
     typedef vector_type::const_iterator const_iterator;
-    typedef std::size_t                 size_type;
-    friend  class                       SoundSource;
+    typedef std::size_t                 size_type     ;
+    friend  class                       sound_source   ;
 
-    SoundBuffer () noexcept;
-    SoundBuffer (SoundBuffer&&) noexcept;
-    SoundBuffer (SoundBuffer const&) noexcept;
-    SoundBuffer& operator = (SoundBuffer&&) noexcept;
-    SoundBuffer& operator = (SoundBuffer const&) noexcept;
-    ~SoundBuffer () noexcept;
+    sound_buffer () noexcept;
+    sound_buffer (sound_buffer&&) noexcept;
+    sound_buffer (sound_buffer const&) noexcept;
+    sound_buffer& operator = (sound_buffer&&) noexcept;
+    sound_buffer& operator = (sound_buffer const&) noexcept;
+    ~sound_buffer () noexcept;
 
-    int getFrequency () const noexcept;
-    int getSize () const noexcept;
-    int getBits () const noexcept;
-    int getDuration () const noexcept;
+    int frequency () const noexcept;
+    int size () const noexcept;
+    int bits () const noexcept;
+    int duration () const noexcept;
 
-    inline Instance* getContext () const noexcept
-    { return m_pContext; }
+    inline instance* context () const noexcept
+    { return _M_pContext; }
 
 private:
-    vector_type m_gSources;
-    Instance*   m_pContext;
+    vector_type _M_gSources;
+    instance*   _M_pContext;
 
-    int onOpen () noexcept;
+    int on_open () noexcept;
 };
 
 } } } // namespace Audio

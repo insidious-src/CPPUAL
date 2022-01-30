@@ -23,7 +23,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(unreachable-code)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! Wrapper of C file stream for output using fwrite().
 /*!

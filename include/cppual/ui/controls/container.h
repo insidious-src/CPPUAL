@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,39 +25,46 @@
 #include <cppual/ui/skin.h>
 #include <cppual/ui/layout.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class Container : public SkinnableView
+// =========================================================
+
+class container_view : public skinnable_view
 {
 protected:
-    uint m_uBorderSize;
+    uint _M_uBorderSize;
 
 public:
     void setBorderSize (uint);
     void setPadding (uint);
-    Container (View*, const Rect&, uint = 0U);
+    container_view (view*, const rect&, uint = 0U);
 
-    uint borderSize () const { return m_uBorderSize; }
+    uint borderSize () const { return _M_uBorderSize; }
     uint padding () const { return 0U; }
 };
 
-class AdvTable : public Container
+// =========================================================
+
+class adv_table : public container_view
 {
-protected:
-    uint m_uNumColumns, m_uNumRows;
-    Layout m_cTableLayout;
-
 public:
-    void setNumColumns (uint);
-    void setNumRows (uint);
-    void setItemRect (const Rect&);
-    bool addView (View*, uint, uint, uint = 1U, uint = 1U);
-    bool removeView (View*);
-    AdvTable (View*, const Rect&, uint, uint, uint = 0U);
+    adv_table (view*, rect const&, uint, uint, uint = 0U);
 
-    uint numColumns () const { return m_uNumColumns; }
-    uint numRows    () const { return m_uNumRows; }
+    void set_num_columns (uint);
+    void set_num_rows (uint);
+    void set_item_rect (rect const&);
+    bool add_view (view*, uint, uint, uint = 1U, uint = 1U);
+    bool remove_view (view*);
+
+    uint num_columns () const noexcept { return _M_uNumColumns; }
+    uint num_rows    () const noexcept { return _M_uNumRows   ; }
+
+protected:
+    uint   _M_uNumColumns, _M_uNumRows;
+    layout _M_gTableLayout;
 };
+
+// =========================================================
 
 } } // Ui
 

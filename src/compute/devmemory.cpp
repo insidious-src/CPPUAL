@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,22 +22,22 @@
 #include <cppual/compute/devmemory.h>
 #include <cppual/compute/device.h>
 
-using namespace cppual::Compute;
+using namespace cppual::compute;
 
-void* operator new (std::size_t /* size */, MemoryChunk& /*obj*/, std::size_t /* align */)
+void* operator new (std::size_t /* size */, memory_chunk& /*obj*/, std::size_t /* align */)
 {
     //if (!obj.device ().valid ()) throw memory_source_not_available ();
 
     return reinterpret_cast<void*>(1);
 }
 
-void operator delete (void* /*ptr*/, MemoryChunk& /*obj*/)
+void operator delete (void* /*ptr*/, memory_chunk& /*obj*/)
 {
 
 }
 
 // =========================================================
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
 } } // namespace Compute

@@ -130,7 +130,7 @@ CookieFunction>
         decltype(this->get()->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -207,7 +207,7 @@ CookieFunction>
         decltype(this->get()->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -284,7 +284,7 @@ CookieFunction>
         decltype(this->get()->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -432,7 +432,7 @@ CookieFunction>
                 ::xcb_xinerama_screen_info_t,
                 SIGNATURE(xcb_xinerama_query_screens_screen_info),
                 SIGNATURE(xcb_xinerama_query_screens_screen_info_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_screens
 
@@ -665,8 +665,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -683,8 +683,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -697,7 +697,7 @@ public:
     typedef cppual::xinerama::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::xinerama::extension & extension)
@@ -710,7 +710,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,61 +21,75 @@
 
 #include <cppual/network/transport/tcplistener.h>
 
-#ifdef OS_STD_UNIX
-//#    include <netinet/in.h>
-//#    include <netdb.h>
-#    include <arpa/inet.h>
-#elif defined OS_WINDOWS
-#   include <windows.h>
-#   define socklen_t int
+#ifdef OS_GNU_LINUX
+#   include "os/linux.h"
+#elif defined (OS_MACX)
+#   include "os/mac.h"
+#elif defined (OS_AIX)
+#   include "os/aix.h"
+#elif defined (OS_SOLARIS)
+#   include "os/solaris.h"
+#elif defined (OS_BSD)
+#   include "os/bsd.h"
+#elif defined (OS_WINDOWS)
+#   include "os/win.h"
+#elif defined (OS_ANDROID)
+#   include "os/android.h"
+#elif defined (OS_IOS)
+#   include "os/ios.h"
 #endif
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
-TcpListener::TcpListener (Address const& gAddr) noexcept
-: TransportSocket (SocketType::Tcp),
-  m_gAddr (gAddr),
-  m_uPort (),
-  m_bIsListening ()
-{ }
+TcpListener::TcpListener()
+: TransportSocket (SocketType::Tcp)
+{
+
+}
+
+TcpListener::TcpListener (Address const& gAddr, u16 uPort) noexcept
+: TransportSocket (SocketType::Tcp)
+{
+    listen (gAddr, uPort);
+}
 
 bool TcpListener::accept (TcpStream&) noexcept
 {
-    if (!isValid () or m_bIsListening) return false;
+    if (!valid () or _M_bIsListening) return false;
 
     sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
     socklen_t   uLen  = sizeof (sockaddr_in);
 
-    replaceFromId (::accept (id (),
-                            reinterpret_cast<sockaddr*> (&gAddr),
-                            &uLen));
+    replace_from_id (::accept (id (),
+                               reinterpret_cast<sockaddr*> (&gAddr),
+                               &uLen));
     return true;
 }
 
-bool TcpListener::listen (u16 uPort) noexcept
+bool TcpListener::listen (Address const& addr, u16 uPort) noexcept
 {
-    if (!isValid () or m_bIsListening) return false;
+    if (!valid () or _M_bIsListening) return false;
 
 #   ifdef OS_STD_UNIX
     sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
     gAddr.sin_family  = PF_INET;
     gAddr.sin_port    = htons (uPort);
 
-    if (m_gAddr.toString ().size ())
-        ::inet_pton (PF_INET, m_gAddr.toString ().c_str (), &gAddr.sin_addr);
+    if (addr.to_string ().size ())
+        ::inet_pton (PF_INET, addr.to_string ().c_str (), &gAddr.sin_addr);
     else
         gAddr.sin_addr.s_addr = INADDR_ANY;
 
     int optval = 1;
     ::setsockopt (id (), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
 
-    if (::bind (id (), (sockaddr*) &gAddr, sizeof (gAddr)) > -1 or
-            ::listen (id (), 0) > -1)
-        return m_bIsListening;
+    if (::bind (id (), (sockaddr*) &gAddr, sizeof (gAddr)) > -1 || ::listen (id (), 0) > -1)
+        return _M_bIsListening;
 
-    m_uPort = uPort;
+    _M_gAddr = addr ;
+    _M_uPort = uPort;
 #   endif
-    return m_bIsListening = true;
+    return _M_bIsListening = true;
 }
 
 } } // namespace Network

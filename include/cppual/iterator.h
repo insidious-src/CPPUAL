@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ class is_forward_iterator : public
 { };
 
 template <typename T>
-class is_BidirectionalIterator : public
+class is_bidirectional_iterator : public
         std::conditional<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
         std::bidirectional_iterator_tag>::value, std::true_type, std::false_type>::type
@@ -67,7 +67,7 @@ class is_iterator : public
         std::conditional<is_input_iterator<T>::value ||
         is_output_iterator<T>::value                 ||
         is_forward_iterator<T>::value                ||
-        is_BidirectionalIterator<T>::value           ||
+        is_bidirectional_iterator<T>::value          ||
         is_random_access_iterator<T>::value, std::true_type, std::false_type>::type
 { };
 
@@ -118,7 +118,7 @@ std::random_access_iterator_tag>::value>::type;
 // ====================================================
 
 template <typename T>
-class BidirectionalIterator
+class bidirectional_iterator
 {
 public:
     typedef T                               buf_type;
@@ -129,124 +129,124 @@ public:
     typedef typename T::difference_type     difference_type;
     typedef typename T::size_type           size_type;
     typedef typename T::value_type          value_type;
-    typedef BidirectionalIterator<T>        self_type;
+    typedef bidirectional_iterator<T>       self_type;
     typedef std::bidirectional_iterator_tag iterator_category;
 
     typedef typename std::conditional<std::is_const<buf_type>::value,
     value_type const, value_type>::type
     elem_type;
 
-    friend class BidirectionalIterator<buf_type const>;
+    friend class bidirectional_iterator<buf_type const>;
 
-    constexpr elem_type& operator *  () const { return   get ()[m_uPos];  }
-    constexpr elem_type* operator -> () const { return &(get ()[m_uPos]); }
+    constexpr elem_type& operator *  () const { return   get ()[_M_uPos];  }
+    constexpr elem_type* operator -> () const { return &(get ()[_M_uPos]); }
 
-    constexpr BidirectionalIterator () noexcept
-    : m_pBuf (0), m_uPos (0)
+    constexpr bidirectional_iterator () noexcept
+    : _M_pBuf (0), _M_uPos (0)
     { }
 
-    constexpr BidirectionalIterator (buf_type& b, size_type p) noexcept
-    : m_pBuf (&b), m_uPos (p)
+    constexpr bidirectional_iterator (buf_type& b, size_type p) noexcept
+    : _M_pBuf (&b), _M_uPos (p)
     { }
 
     // Converting a non-const iterator to a const iterator
     constexpr
-    BidirectionalIterator (BidirectionalIterator<typename std::remove_const<buf_type>::type>
-                           const& other) noexcept
-    : m_pBuf (other.m_pBuf), m_uPos (other.m_uPos)
+    bidirectional_iterator (bidirectional_iterator<typename std::remove_const<buf_type>::type>
+                            const& other) noexcept
+    : _M_pBuf (other._M_pBuf), _M_uPos (other._M_uPos)
     { }
 
     inline
-    BidirectionalIterator& operator = (BidirectionalIterator<typename std::remove_const<buf_type>::type>
-                                       const& other) noexcept
+    bidirectional_iterator& operator = (bidirectional_iterator<typename std::remove_const<buf_type>::type>
+                                        const& other) noexcept
     {
-        m_pBuf = other.m_pBuf;
-        m_uPos = other.m_uPos;
+        _M_pBuf = other._M_pBuf;
+        _M_uPos = other._M_uPos;
 
         return *this;
     }
 
     inline self_type& operator ++ ()
     {
-        ++m_uPos;
+        ++_M_uPos;
         return *this;
     }
 
     inline self_type operator ++ (int)
     {
         self_type tmp (*this);
-        ++m_uPos;
+        ++_M_uPos;
         return tmp;
     }
 
     inline self_type& operator -- ()
     {
-        --m_uPos;
+        --_M_uPos;
         return *this;
     }
     inline self_type operator -- (int)
     {
         self_type tmp (*this);
-        --m_uPos;
+        --_M_uPos;
         return tmp;
     }
 
     inline self_type operator + (difference_type n) const
     {
         self_type tmp (*this);
-        tmp.m_uPos += static_cast<size_type>(n >= 0 ? n : -n);
+        tmp._M_uPos += static_cast<size_type>(n >= 0 ? n : -n);
         return tmp;
     }
 
     inline self_type& operator += (difference_type n)
     {
-        m_uPos += static_cast<size_type>(n >= 0 ? n : -n);
+        _M_uPos += static_cast<size_type>(n >= 0 ? n : -n);
         return *this;
     }
 
     inline self_type operator - (difference_type n) const
     {
         self_type tmp (*this);
-        tmp.m_uPos -= static_cast<size_type>(n >= 0 ? n : -n);
+        tmp._M_uPos -= static_cast<size_type>(n >= 0 ? n : -n);
         return tmp;
     }
 
     inline self_type& operator -= (difference_type n)
     {
-        m_uPos -= static_cast<size_type>(n >= 0 ? n : -n);
+        _M_uPos -= static_cast<size_type>(n >= 0 ? n : -n);
         return *this;
     }
 
     constexpr difference_type operator - (self_type const& c) const
-    { return difference_type (m_uPos - c.m_uPos); }
+    { return difference_type (_M_uPos - c._M_uPos); }
 
     constexpr bool operator == (self_type const& other) const
-    { return m_uPos == other.m_uPos and m_pBuf == other.m_pBuf; }
+    { return _M_uPos == other._M_uPos and _M_pBuf == other._M_pBuf; }
 
     constexpr bool operator != (self_type const& other) const
-    { return m_uPos != other.m_uPos or m_pBuf != other.m_pBuf; }
+    { return _M_uPos != other._M_uPos or _M_pBuf != other._M_pBuf; }
 
     constexpr bool operator > (self_type const& other) const
-    { return m_uPos > other.m_uPos; }
+    { return _M_uPos > other._M_uPos; }
 
     constexpr bool operator >= (self_type const& other) const
-    { return m_uPos >= other.m_uPos; }
+    { return _M_uPos >= other._M_uPos; }
 
     constexpr bool operator < (self_type const& other) const
-    { return m_uPos < other.m_uPos; }
+    { return _M_uPos < other._M_uPos; }
 
     constexpr bool operator <= (self_type const& other) const
-    { return m_uPos <= other.m_uPos; }
+    { return _M_uPos <= other._M_uPos; }
 
     constexpr buf_type& get () const noexcept
-    { return *m_pBuf; }
+    { return *_M_pBuf; }
 
     constexpr size_type pos () const noexcept
-    { return m_uPos; }
+    { return _M_uPos; }
 
 private:
-    buf_type* m_pBuf;
-    size_type m_uPos;
+    buf_type* _M_pBuf;
+    size_type _M_uPos;
 };
 
 // =========================================================

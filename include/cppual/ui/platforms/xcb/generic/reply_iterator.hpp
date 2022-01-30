@@ -130,25 +130,25 @@ protected:
     using Reply = typename std::remove_pointer<typename std::remove_const<const_reply_ptr>::type>::type;
     using XcbIterator = typename get_iterator_traits::result_type;
 
-    Connection m_c;
-    std::shared_ptr<Reply> m_reply;
-    std::stack<std::size_t> m_lengths;
-    XcbIterator m_iterator;
+    Connection _M_c;
+    std::shared_ptr<Reply> _M_reply;
+    std::stack<std::size_t> _M_lengths;
+    XcbIterator _M_iterator;
 
 public:
     iterator(void) {}
 
     template<typename C>
     iterator(C && c, const std::shared_ptr<Reply> & reply)
-        : m_c(std::forward<C>(c))
-        , m_reply(reply)
-        , m_iterator(GetIterator(reply.get()))
+        : _M_c(std::forward<C>(c))
+        , _M_reply(reply)
+        , _M_iterator(GetIterator(reply.get()))
     {}
 
     bool
     operator==(const iterator & other)
     {
-        return m_iterator.rem == other.m_iterator.rem;
+        return _M_iterator.rem == other._M_iterator.rem;
     }
 
     bool
@@ -158,17 +158,17 @@ public:
     }
 
     auto
-    operator*(void) -> decltype(get<Object>()(this->m_iterator.data))
+    operator*(void) -> decltype(get<Object>()(this->_M_iterator.data))
     {
-        return get<Object>()(m_iterator.data);
+        return get<Object>()(_M_iterator.data);
     }
 
     // prefix
     self &
     operator++(void)
     {
-        m_lengths.push(SizeOf(m_iterator.data));
-        Next(&m_iterator);
+        _M_lengths.push(SizeOf(_M_iterator.data));
+        Next(&_M_iterator);
         return *this;
     }
 
@@ -185,14 +185,14 @@ public:
     self &
     operator--(void)
     {
-        typedef typename std::remove_pointer<decltype(m_iterator.data)>::type data_t;
-        if (m_lengths.empty()) {
-            data_t * data = m_iterator.data;
-            data_t * prev = data - m_lengths.top();
-            m_lengths.pop();
-            m_iterator.index = reinterpret_cast<char*>(m_iterator.data) - reinterpret_cast<char*>(prev);
-            m_iterator.data = prev;
-            ++m_iterator.rem;
+        typedef typename std::remove_pointer<decltype(_M_iterator.data)>::type data_t;
+        if (_M_lengths.empty()) {
+            data_t * data = _M_iterator.data;
+            data_t * prev = data - _M_lengths.top();
+            _M_lengths.pop();
+            _M_iterator.index = reinterpret_cast<char*>(_M_iterator.data) - reinterpret_cast<char*>(prev);
+            _M_iterator.data = prev;
+            ++_M_iterator.rem;
         }
         return *this;
     }
@@ -220,7 +220,7 @@ public:
     end(C && c, const std::shared_ptr<Reply> & reply)
     {
         auto it = self { std::forward<C>(c), reply };
-        it.m_iterator.rem = 0;
+        it._M_iterator.rem = 0;
         return it;
     }
 }; // class iterator
@@ -254,9 +254,9 @@ protected:
     typename cppual::generic::conversion_type<Object>::type, Data>::type;
     using make = cppual::generic::factory::make<Connection, data_t, Object>;
 
-    Connection m_c;
-    std::size_t m_index = 0;
-    std::shared_ptr<Reply> m_reply;
+    Connection _M_c;
+    std::size_t _M_index = 0;
+    std::shared_ptr<Reply> _M_reply;
 
 public:
     typedef iterator<Connection,
@@ -271,18 +271,18 @@ public:
     iterator(C && c,
              const std::shared_ptr<Reply> & reply,
              std::size_t index)
-        : m_c(c)
-        , m_index(index)
-        , m_reply(reply)
+        : _M_c(c)
+        , _M_index(index)
+        , _M_reply(reply)
     {
         if (std::is_void<Data>::value) {
-            m_index /= sizeof(data_t);
+            _M_index /= sizeof(data_t);
         }
     }
 
     bool operator==(const iterator & other)
     {
-        return m_index == other.m_index;
+        return _M_index == other._M_index;
     }
 
     bool operator!=(const iterator & other)
@@ -292,13 +292,13 @@ public:
 
     Object operator*(void)
     {
-        return make()(m_c, static_cast<data_t *>(Accessor(m_reply.get()))[m_index]);
+        return make()(_M_c, static_cast<data_t *>(Accessor(_M_reply.get()))[_M_index]);
     }
 
     // prefix
     self & operator++(void)
     {
-        ++m_index;
+        ++_M_index;
         return *this;
     }
 
@@ -313,7 +313,7 @@ public:
     // prefix
     self & operator--(void)
     {
-        --m_index;
+        --_M_index;
         return *this;
     }
 
@@ -348,25 +348,25 @@ template<typename Connection, typename Reply, typename Iterator>
 class list {
 private:
     // before public part, to make decltype in begin() & end() work!
-    Connection m_c;
-    std::shared_ptr<Reply> m_reply;
+    Connection _M_c;
+    std::shared_ptr<Reply> _M_reply;
 
 public:
     template<typename C>
     list(C && c, const std::shared_ptr<Reply> & reply)
-        : m_c(std::forward<C>(c)), m_reply(reply)
+        : _M_c(std::forward<C>(c)), _M_reply(reply)
     {}
 
     auto
-    begin(void) -> decltype(Iterator::begin(this->m_c, this->m_reply))
+    begin(void) -> decltype(Iterator::begin(this->_M_c, this->_M_reply))
     {
-        return Iterator::begin(m_c, m_reply);
+        return Iterator::begin(_M_c, _M_reply);
     }
 
     auto
-    end(void) -> decltype(Iterator::end(this->m_c, this->m_reply))
+    end(void) -> decltype(Iterator::end(this->_M_c, this->_M_reply))
     {
-        return Iterator::end(m_c, m_reply);
+        return Iterator::end(_M_c, _M_reply);
     }
 }; // class list
 

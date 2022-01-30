@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,67 +24,66 @@
 #ifdef __cplusplus
 
 #include <cppual/string.h>
-#include <cppual/noncopyable.h>
 #include <cppual/memory/allocator.h>
 
-namespace cppual { namespace Memory {
+namespace cppual { namespace memory {
 
-class HeapResource final : public MemoryResource, NonCopyable
+class heap_resource final : public memory_resource
 {
 public:
-    HeapResource   (size_type size);
-    HeapResource   (MemoryResource& allocator, size_type size);
-    //HeapPool   (string& shared_name, size_type size);
-    ~HeapResource  ();
+    heap_resource   (size_type size);
+    heap_resource   (memory_resource& allocator, size_type size);
+    //heap_resource   (string& shared_name, size_type size);
+    ~heap_resource  ();
     void clear () noexcept;
 
     size_type max_size () const noexcept
-    { return m_pFreeBlocks != nullptr ? m_pFreeBlocks->size : 0; }
+    { return _M_pFreeBlocks != nullptr ? _M_pFreeBlocks->size : 0; }
 
     size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd  ) -
-                                       static_cast<math_pointer> (m_pBegin));
+        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
+                                       static_cast<math_pointer> (_M_pBegin));
     }
 
     bool is_shared () const noexcept
-    { return m_bIsMemShared; }
+    { return _M_bIsMemShared; }
 
-    MemoryResource& owner () const noexcept
-    { return m_gOwner; }
+    memory_resource& owner () const noexcept
+    { return _M_gOwner; }
 
 private:
-    struct Header    { size_type size, adjust;          };
-    struct FreeBlock { size_type size; FreeBlock* next; };
+    struct header     { size_type size, adjust;           };
+    struct free_block { size_type size; free_block* next; };
 
-    MemoryResource& m_gOwner;
-    pointer const   m_pBegin;
-    pointer const   m_pEnd;
-    FreeBlock*      m_pFreeBlocks;
-    cbool           m_bIsMemShared;
+    memory_resource& _M_gOwner      ;
+    pointer const    _M_pBegin      ;
+    pointer const    _M_pEnd        ;
+    free_block*      _M_pFreeBlocks ;
+    cbool            _M_bIsMemShared;
 
     void* do_allocate   (size_type size, align_type align)  noexcept;
     void  do_deallocate (void* p, size_type size, align_type align) ;
 
     bool do_is_equal (base_type const& gObj) const noexcept
-    { return &gObj == &m_gOwner; }
+    { return &gObj == &_M_gOwner; }
 };
 
 // =========================================================
 
-class ListResource final : public MemoryResource, NonCopyable
+class list_resource final : public memory_resource
 {
 public:
-    struct Header
+    struct header
     {
         size_type size;
-        Header*   next;
+        header*   next;
     };
 
-    ListResource (size_type size);
-    ListResource (MemoryResource& allocator, size_type size);
-    //ListPool (string& shared_name, size_type size);
-    ~ListResource ();
+    list_resource (size_type size);
+    list_resource (memory_resource& allocator, size_type size);
+    //list_resource (string& shared_name, size_type size);
+    ~list_resource ();
 
     size_type max_size   () const noexcept;
     void      defragment () noexcept;
@@ -92,38 +91,40 @@ public:
 
     size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (m_pEnd  ) -
-                                      (static_cast<math_pointer> (m_pBegin) +
-                                       sizeof (Header)));
+        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
+                                      (static_cast<math_pointer> (_M_pBegin) +
+                                       sizeof (header)));
     }
 
     bool is_shared () const noexcept
-    { return m_bIsMemShared;  }
+    { return _M_bIsMemShared; }
 
-    MemoryResource& owner () const noexcept
-    { return m_gOwner; }
+    memory_resource& owner () const noexcept
+    { return _M_gOwner; }
 
 private:
-    pointer const   m_pBegin;
-    pointer const   m_pEnd;
-    Header*         m_pFirstFreeBlock;
-    MemoryResource& m_gOwner;
-    cbool           m_bIsMemShared;
+    memory_resource& _M_gOwner         ;
+    pointer const    _M_pBegin         ;
+    pointer const    _M_pEnd           ;
+    header*          _M_pFirstFreeBlock;
+    cbool            _M_bIsMemShared   ;
 
     void* do_allocate   (size_type size, align_type align)  noexcept;
     void  do_deallocate (void* p, size_type size, size_type align)  ;
 
     bool  do_is_equal   (base_type const& gObj) const noexcept
-    { return &gObj == &m_gOwner; }
+    { return &gObj == this; }
 };
 
 // =========================================================
 
 template <class T>
-using HeapAllocator = Allocator <T, HeapResource>;
+using heap_allocator = allocator <T, heap_resource>;
 
 template <class T>
-using ListAllocator = Allocator <T, ListResource>;
+using list_allocator = allocator <T, list_resource>;
+
+// =========================================================
 
 } } // namespace Memory
 

@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@
 
 #include <xcb/xinput.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-struct SHARED_API XQueue final : public IDisplayQueue
+struct SHARED_API XQueue final : public display_queue_interface
 {
     XQueue ();
     bool set_window_events (window_type const&, mask_type) noexcept;

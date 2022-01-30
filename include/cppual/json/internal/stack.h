@@ -24,7 +24,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++98-compat)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -185,7 +185,7 @@ private:
         size_t newCapacity;
         if (stack_ == 0) {
             if (!allocator_)
-                ownAllocator_ = allocator_ = cppual::Memory::get_default_resource();
+                ownAllocator_ = allocator_ = cppual::memory::get_default_resource();
             newCapacity = initialCapacity_;
         } else {
             newCapacity = GetCapacity();

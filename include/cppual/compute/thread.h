@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,84 +23,85 @@
 #define CPPUAL_PROCESS_THREAD
 #ifdef __cplusplus
 
-#include <atomic>
 #include <cppual/functional.h>
 #include <cppual/noncopyable.h>
 #include <cppual/process/details.h>
 
+#include <atomic>
+#include <thread>
+
 using std::atomic_size_t;
 using std::atomic_bool;
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
-enum class ThreadPriority : char
+enum class thread_priority : byte
 {
-    Inherit = 0,
-    Idle,
-    Lowest,
-    VeryLow,
-    Low,
-    Normal,
-    High,
-    VeryHigh,
-    Highest
+    inherit = 0,
+    idle,
+    lowest,
+    very_low,
+    low,
+    normal,
+    high,
+    very_high,
+    highest
 };
 
 // =========================================================
 
-namespace MainThread {
+namespace main_thread {
 
-thread_handle  handle () noexcept;
-ThreadPriority priority ();
-int			   setPriority (ThreadPriority priority);
+thread_handle   handle () noexcept;
+thread_priority priority ();
+int			    set_priority (thread_priority priority);
 
 } // MainThread
 
 // =========================================================
 
-namespace ThisThread {
+namespace this_thread {
 
 thread_handle handle () noexcept;
 void		  exit ();
-int			  sleepFor (uint millisec);
+int			  sleep_for (uint millisec);
 
 } //ThisThread
 
 // =========================================================
 
-class Thread final : public NonCopyable
+class thread final : public non_copyable
 {
 public:
-    typedef Function<void()> callable ;
+    typedef function<void()> callable ;
     typedef std::size_t      size_type;
 
-    class Id final
+    class id final
     {
     public:
-        Id () noexcept : m_handle () { }
+        id () noexcept : _M_handle () { }
 
         explicit
-        Id (thread_handle __id) : m_handle (__id) { }
+        id (thread_handle __id) : _M_handle (__id) { }
 
     private:
-        friend class  Thread  ;
-        thread_handle m_handle;
+        friend class  thread  ;
+        thread_handle _M_handle;
 
-        static bool threadHandlesEqual (thread_handle h1,
-                                        thread_handle h2);
-
-        friend bool
-        operator == (Thread::Id, Thread::Id) noexcept;
+        static bool thread_handles_equal (thread_handle h1, thread_handle h2);
 
         friend bool
-        operator  < (Thread::Id, Thread::Id) noexcept;
+        operator == (thread::id, thread::id) noexcept;
+
+        friend bool
+        operator  < (thread::id, thread::id) noexcept;
     };
 
-    Thread () noexcept;
-    ~Thread ();
+    thread () noexcept;
+    ~thread ();
 
-    static uint hardwareConcurency () noexcept;
-    int         setPriority (ThreadPriority priority);
+    static uint hardware_concurency () noexcept;
+    int         set_priority (thread_priority priority);
     void        cancel ();
     void        detach ();
     void        join   ();
@@ -108,43 +109,43 @@ public:
 
     bool start (callable&      func,
                 bool           joinable   = true,
-                ThreadPriority priority   = ThreadPriority::Inherit,
+                thread_priority priority   = thread_priority::inherit,
                 size_type      stack_size = 1048576U);
 
-    inline size_type stackSize  () const noexcept { return m_uStackSize;  }
-    inline Id        id         () const noexcept { return m_gId;         }
-    inline bool      isJoinable () const noexcept { return m_bIsJoinable; }
+    inline size_type stack_size  () const noexcept { return _M_uStackSize;  }
+    inline id        handle      () const noexcept { return _M_gId;         }
+    inline bool      is_joinable () const noexcept { return _M_bIsJoinable; }
 
 private:
-    Id          m_gId        ;
-    size_type   m_uStackSize ;
-    atomic_bool m_bIsJoinable;
+    id          _M_gId        ;
+    size_type   _M_uStackSize ;
+    atomic_bool _M_bIsJoinable;
 };
 
 // =========================================================
 
 inline bool
-operator == (Thread::Id __x, Thread::Id __y) noexcept
-{ return Thread::Id::threadHandlesEqual (__x.m_handle, __y.m_handle); }
+operator == (thread::id __x, thread::id __y) noexcept
+{ return thread::id::thread_handles_equal (__x._M_handle, __y._M_handle); }
 
 inline bool
-operator < (Thread::Id __x, Thread::Id __y) noexcept
-{ return __x.m_handle < __y.m_handle; }
+operator < (thread::id __x, thread::id __y) noexcept
+{ return __x._M_handle < __y._M_handle; }
 
 inline bool
-operator!=(Thread::Id __x, Thread::Id __y) noexcept
+operator!=(thread::id __x, thread::id __y) noexcept
 { return !(__x == __y); }
 
 inline bool
-operator<=(Thread::Id __x, Thread::Id __y) noexcept
+operator<=(thread::id __x, thread::id __y) noexcept
 { return !(__y < __x); }
 
 inline bool
-operator>(Thread::Id __x, Thread::Id __y) noexcept
+operator>(thread::id __x, thread::id __y) noexcept
 { return __y < __x; }
 
 inline bool
-operator>=(Thread::Id __x, Thread::Id __y) noexcept
+operator>=(thread::id __x, thread::id __y) noexcept
 { return !(__x < __y); }
 
 } } // Concurency

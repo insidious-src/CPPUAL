@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,70 +23,84 @@
 #define CPPUAL_SYSTEM_CLOCK_H_
 #ifdef __cplusplus
 
+#include <cppual/meta.h>
+
 #include <chrono>
 
-namespace cppual { namespace Clock {
+namespace cppual { namespace clock {
 
-template <class Clock = std::chrono::steady_clock>
-class Timer
+template <typename Clock = std::chrono::steady_clock,
+          typename       = base_from_derived<Clock,
+                                             std::chrono::steady_clock,
+                                             std::chrono::system_clock,
+                                             std::chrono::high_resolution_clock
+                                             >
+          >
+class timer
 {
 public:
     typedef typename Clock::time_point time_point;
     typedef Clock                      clock_type;
 
-    Timer      () noexcept : m_epoch  (clock_type::now ()) { }
-    void reset () noexcept { m_epoch = clock_type::now (); }
+    timer      () noexcept : _M_epoch  (clock_type::now ()) { }
+    void reset () noexcept { _M_epoch = clock_type::now (); }
 
     template <typename T = std::chrono::milliseconds>
     T elapsed () const noexcept
-    { return std::chrono::duration_cast<T> (clock_type::now () - m_epoch); }
+    { return std::chrono::duration_cast<T> (clock_type::now () - _M_epoch); }
 
 private:
-    time_point m_epoch;
+    time_point _M_epoch;
 };
 
 // =========================================================
 
-template <class Clock = std::chrono::steady_clock>
-class PausableTimer
+template <typename Clock = std::chrono::steady_clock,
+          typename       = base_from_derived<Clock,
+                                             std::chrono::steady_clock,
+                                             std::chrono::system_clock,
+                                             std::chrono::high_resolution_clock
+                                             >
+          >
+class pausable_timer
 {
 public:
     typedef typename Clock::time_point time_point;
     typedef Clock                      clock_type;
 
-    PausableTimer () noexcept
-    : m_epoch (clock_type::now ()), m_pause ()
+    pausable_timer () noexcept
+    : _M_epoch (clock_type::now ()), _M_pause ()
     { }
 
     void reset () noexcept
     {
-        m_pause = time_point ();
-        m_epoch = clock_type::now ();
+        _M_pause = time_point ();
+        _M_epoch = clock_type::now ();
     }
 
     template <typename T = std::chrono::milliseconds>
     T elapsed () const noexcept
     {
         return std::chrono::duration_cast<T>
-                (m_pause.time_since_epoch ().count () ? m_pause.time_since_epoch () :
-                                                        clock_type::now () - m_epoch);
+                (_M_pause.time_since_epoch ().count () ? _M_pause.time_since_epoch () :
+                                                        clock_type::now () - _M_epoch);
     }
 
     void pause () noexcept
     {
-        if (m_pause.time_since_epoch ().count ()) return;
-        m_pause = time_point (clock_type::now () - m_epoch);
+        if (_M_pause.time_since_epoch ().count ()) return;
+        _M_pause = time_point (clock_type::now () - _M_epoch);
     }
 
     void resume () noexcept
     {
-        if (!m_pause.time_since_epoch ().count ()) return;
-        m_epoch += clock_type::now () - (m_epoch + m_pause.time_since_epoch ());
-        m_pause  = time_point ();
+        if (!_M_pause.time_since_epoch ().count ()) return;
+        _M_epoch += clock_type::now () - (_M_epoch + _M_pause.time_since_epoch ());
+        _M_pause  = time_point ();
     }
 
 private:
-    time_point m_epoch, m_pause;
+    time_point _M_epoch, _M_pause;
 };
 
 } } // namespace Clock

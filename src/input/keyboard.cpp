@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,24 +25,24 @@
 #   include <windows.h>
 #endif // OS_WINDOWS
 
-namespace cppual { namespace Input {
+namespace cppual { namespace input {
 
-bool Keyboard::isKeyPressed (int)
+bool keyboard::is_key_pressed (int)
 {
     return false;
 }
 
-bool Keyboard::isLockActive (Lock)
+bool keyboard::is_lock_active (lock)
 {
     return false;
 }
 
-bool Keyboard::isConnected () noexcept
+bool keyboard::is_connected () noexcept
 {
     return true;
 }
 
-bool KeyQueue::pop_front (event_type&, bool) noexcept
+bool key_queue::pop_front (event_type&, bool) noexcept
 {
     return false;
 }

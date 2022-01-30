@@ -44,8 +44,8 @@ public:
                      uint8_t first_event,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~selection_notify(void) {}
@@ -72,7 +72,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -83,7 +83,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -96,7 +96,7 @@ public:
         decltype((*this)->owner),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->owner,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -109,14 +109,14 @@ public:
         decltype((*this)->selection),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->selection,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class selection_notify
 
 
@@ -139,8 +139,8 @@ public:
                   uint8_t first_event,
                   const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~cursor_notify(void) {}
@@ -167,7 +167,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_window_t, typename ... Parameter>
@@ -178,7 +178,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -191,14 +191,14 @@ public:
         decltype((*this)->name),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->name,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class cursor_notify
 
 
@@ -238,7 +238,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_region
 } // namespace error
 
@@ -404,7 +404,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_xfixes_get_cursor_image_cursor_image),
                 SIGNATURE(xcb_xfixes_get_cursor_image_cursor_image_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_cursor_image
 
@@ -786,7 +786,7 @@ CookieFunction>
                 ::xcb_rectangle_t,
                 SIGNATURE(xcb_xfixes_fetch_region_rectangles),
                 SIGNATURE(xcb_xfixes_fetch_region_rectangles_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class fetch_region
 
@@ -941,7 +941,7 @@ CookieFunction>
         decltype(this->get()->atom),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->atom,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -1025,7 +1025,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_xfixes_get_cursor_image_and_name_cursor_image),
                 SIGNATURE(xcb_xfixes_get_cursor_image_and_name_cursor_image_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1045,7 +1045,7 @@ CookieFunction>
         decltype(this->get()->cursor_atom),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       this->get()->cursor_atom,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -2249,8 +2249,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -2263,14 +2263,14 @@ public:
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_XFIXES_SELECTION_NOTIFY:
-            handler(cppual::xfixes::event::selection_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xfixes::event::selection_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XFIXES_CURSOR_NOTIFY:
-            handler(cppual::xfixes::event::cursor_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xfixes::event::cursor_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -2279,8 +2279,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -2293,7 +2293,7 @@ public:
     typedef cppual::xfixes::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::xfixes::extension & extension)
@@ -2303,7 +2303,7 @@ public:
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-        switch (error->error_code - m_first_error) {
+        switch (error->error_code - _M_first_error) {
 
         case XCB_XFIXES_BAD_REGION: // 0
             throw cppual::xfixes::error::bad_region(error);
@@ -2312,7 +2312,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

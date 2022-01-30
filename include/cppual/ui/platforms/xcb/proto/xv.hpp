@@ -44,8 +44,8 @@ public:
                  uint8_t first_event,
                  const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~video_notify(void) {}
@@ -72,7 +72,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_drawable_t, typename ... Parameter>
@@ -83,7 +83,7 @@ public:
         decltype((*this)->drawable),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->drawable,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -96,14 +96,14 @@ public:
         decltype((*this)->port),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->port,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class video_notify
 
 
@@ -126,8 +126,8 @@ public:
                 uint8_t first_event,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~port_notify(void) {}
@@ -154,7 +154,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_xv_port_t, typename ... Parameter>
@@ -165,7 +165,7 @@ public:
         decltype((*this)->port),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->port,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -178,14 +178,14 @@ public:
         decltype((*this)->attribute),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->attribute,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class port_notify
 
 
@@ -225,7 +225,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_port
 } // namespace error
 
@@ -261,7 +261,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_encoding
 } // namespace error
 
@@ -297,7 +297,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class bad_control
 } // namespace error
 
@@ -411,7 +411,7 @@ CookieFunction>
                 SIGNATURE(xcb_xv_adaptor_info_next),
                 SIGNATURE(xcb_xv_adaptor_info_sizeof),
                 SIGNATURE(xcb_xv_query_adaptors_info_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_adaptors
 
@@ -495,7 +495,7 @@ CookieFunction>
                 SIGNATURE(xcb_xv_encoding_info_next),
                 SIGNATURE(xcb_xv_encoding_info_sizeof),
                 SIGNATURE(xcb_xv_query_encodings_info_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_encodings
 
@@ -937,7 +937,7 @@ CookieFunction>
                 SIGNATURE(xcb_xv_attribute_info_next),
                 SIGNATURE(xcb_xv_attribute_info_sizeof),
                 SIGNATURE(xcb_xv_query_port_attributes_attributes_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_port_attributes
 
@@ -1019,7 +1019,7 @@ CookieFunction>
                 ::xcb_xv_image_format_info_t,
                 SIGNATURE(xcb_xv_list_image_formats_format),
                 SIGNATURE(xcb_xv_list_image_formats_format_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_image_formats
 
@@ -1101,7 +1101,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_xv_query_image_attributes_pitches),
                 SIGNATURE(xcb_xv_query_image_attributes_pitches_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -1120,7 +1120,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_xv_query_image_attributes_offsets),
                 SIGNATURE(xcb_xv_query_image_attributes_offsets_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class query_image_attributes
 
@@ -2035,8 +2035,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -2049,14 +2049,14 @@ public:
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_XV_VIDEO_NOTIFY:
-            handler(cppual::xv::event::video_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xv::event::video_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_XV_PORT_NOTIFY:
-            handler(cppual::xv::event::port_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::xv::event::port_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -2065,8 +2065,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -2079,7 +2079,7 @@ public:
     typedef cppual::xv::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::xv::extension & extension)
@@ -2089,7 +2089,7 @@ public:
     void
     operator()(const std::shared_ptr<xcb_generic_error_t> & error) const
     {
-        switch (error->error_code - m_first_error) {
+        switch (error->error_code - _M_first_error) {
 
         case XCB_XV_BAD_PORT: // 0
             throw cppual::xv::error::bad_port(error);
@@ -2104,7 +2104,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

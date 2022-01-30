@@ -22,7 +22,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++98-compat)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 //! Custom swap() to avoid dependency on C++ <algorithm> header

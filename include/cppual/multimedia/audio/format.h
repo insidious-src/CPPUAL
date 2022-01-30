@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@
 
 #include <cppual/types.h>
 
-namespace cppual { namespace Audio {
+namespace cppual { namespace audio {
 
-enum AudioFormat
+enum audio_format
 {
-    Undefined =  0,
+    undefined =  0,
     WAV       =  1,
     MP3       =  2,
     FLAC      =  3,
@@ -59,36 +59,51 @@ enum AudioFormat
     RF64      = 27
 };
 
-struct Descriptor
+struct descriptor
 {
     char RIFF[4];
     u32  size;
-    char format[4];    // file audio format name
+
+    /// file audio format name
+    char format[4];
 };
 
-struct FmtSubChunk
+struct fmt_sub_chunk
 {
-    char chunkId[4];
-    u32  chunkSize;
-    u16  audioFormat;    // PCM = 1, values other than 1 indicate compression
-    u16  numChannels;    // mono = 1, stereo = 2, etc.
-    u32  sampleRate;    // 8000, 44100 Hz
-    u32  byteRate;        // (sampleRate * numChannels * bitsPerSample) / 8
-    u16  blockAlign;
-    u16  bitsPerSample;    // 8 bits = 8, 16 bits = 16, etc.
+    char chunk_id[4];
+    u32  chunk_size;
+
+    /// PCM = 1, values other than 1 indicate compression
+    u16  audio_format;
+
+    /// mono = 1, stereo = 2, etc.
+    u16  num_channels;
+
+    /// 8000, 44100 Hz
+    u32  sample_rate;
+
+    /// (sampleRate * numChannels * bitsPerSample) / 8
+    u32  byte_rate;
+    u16  block_align;
+
+    /// 8 bits = 8, 16 bits = 16, etc.
+    u16  bits_per_sample;
 };
 
-struct DataChunk
+struct data_chunk
 {
-    char chunkId[4];    // contains the letters "data"
-    u32  size;            // raw audio data size in bytes
+    /// contains the letters "data"
+    char chunk_id[4];
+
+    /// raw audio data size in bytes
+    u32 size;
 };
 
-struct FormatHeader
+struct format_header
 {
-    Descriptor  descriptor;
-    FmtSubChunk fmt;
-    DataChunk   data;
+    descriptor    descriptor;
+    fmt_sub_chunk fmt       ;
+    data_chunk    data      ;
 };
 
 } } // namespace Audio

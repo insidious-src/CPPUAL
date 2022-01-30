@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,384 +24,392 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
+#include <cppual/flags.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/input/keyboard.h>
+#include <cppual/input/pointer.h>
+#include <cppual/input/joystick.h>
 #include <cppual/noncopyable.h>
 
-namespace cppual { namespace Input {
+namespace cppual { namespace input {
 
-struct SystemMessage final
+struct system_message final
 {
-    enum
+    enum type
     {
-        Quit,
-        Child,
-        Terminate
+        quit,
+        child,
+        terminate
     };
 };
 
 // =========================================================
 
-class Event
+class event
 {
 public:
     typedef std::size_t size_type;
 
-    enum Type
+    enum bits
     {
-        Null             = 0,
-        KeyPressed       = 1 <<  0,
-        KeyReleased      = 1 <<  1,
-        MButtonDown      = 1 <<  2,
-        MButtonUp        = 1 <<  3,
-        MWheelStep       = 1 <<  4,
-        MouseMove        = 1 <<  5,
-        TouchPress       = 1 <<  6,
-        TouchRelease     = 1 <<  7,
-        TouchMove        = 1 <<  8,
-        JoyConnect       = 1 <<  9,
-        JoyDisconnect    = 1 << 10,
-        JoyButtonPress   = 1 << 11,
-        JoyButtonRelease = 1 << 12,
-        JoyMove          = 1 << 13,
-        JoyTrigger       = 1 << 14,
-        JoyTrackMove     = 1 << 15,
-        SystemMessage    = 1 << 16,
-        Paint            = 1 << 17,
-        Focus            = 1 << 18,
-        Step             = 1 << 19,
-        Size             = 1 << 20,
-        Visibility       = 1 << 21,
-        Property         = 1 << 22,
-        Destroy          = 1 << 23,
-        Key       = KeyPressed    | KeyReleased,
-        Mouse     = MButtonDown   | MButtonUp     | MouseMove | MWheelStep,
-        Touch     = TouchPress    | TouchRelease  | TouchMove,
-        Joystick  = JoyConnect    | JoyDisconnect | JoyButtonPress | JoyButtonRelease   |
-                    JoyMove       | JoyTrigger    | JoyTrackMove,
-        Window    = Paint | Focus | Size          | Visibility     | Property | Destroy | Step,
-        All       = Key   | Mouse | Touch         | Window         | SystemMessage
+        null               =       0,
+        key_pressed        = 1 <<  0,
+        key_released       = 1 <<  1,
+        mbutton_down       = 1 <<  2,
+        mbutton_up         = 1 <<  3,
+        mwheel_step        = 1 <<  4,
+        mouse_move         = 1 <<  5,
+        touch_press        = 1 <<  6,
+        touch_release      = 1 <<  7,
+        touch_move         = 1 <<  8,
+        joy_connect        = 1 <<  9,
+        joy_disconnect     = 1 << 10,
+        joy_button_press   = 1 << 11,
+        joy_button_release = 1 << 12,
+        joy_move           = 1 << 13,
+        joy_trigger        = 1 << 14,
+        joy_track_move     = 1 << 15,
+        sys_message        = 1 << 16,
+        paint              = 1 << 17,
+        focus              = 1 << 18,
+        step               = 1 << 19,
+        size               = 1 << 20,
+        visibility         = 1 << 21,
+        property           = 1 << 22,
+        destroy            = 1 << 23,
+
+        key      = key_pressed   | key_released,
+        mouse    = mbutton_down  | mbutton_up     | mouse_move | mwheel_step,
+        touch    = touch_press   | touch_release  | touch_move,
+        joystick = joy_connect   | joy_disconnect | joy_button_press | joy_button_release   |
+                   joy_move      | joy_trigger    | joy_track_move,
+        window   = paint | focus | size           | visibility     | property | destroy | step,
+        all      = key   | mouse | touch          | window         | sys_message
     };
 
-    struct KeyData
+    typedef bitset<bits> bit_flags;
+
+    struct base_data
     {
-        Keyboard::Key key ;
+        size_type first ;
+        size_type second;
+    };
+
+    struct key_data
+    {
+        keyboard::key key ;
         u16           mask;
-
-        KeyData () noexcept = default;
-
-        constexpr KeyData (Keyboard::Key nKey, u16 uMask) noexcept
-        : key (nKey), mask (uMask)
-        { }
     };
 
-    struct MButtonData
+    struct mbutton_data
     {
         point2u pos   ;
         u8      button;
-
-        MButtonData () noexcept = default;
-
-        constexpr MButtonData (point2u gPos, u8 uBtn) noexcept
-        : pos (gPos), button (uBtn)
-        { }
     };
 
-    struct MWheelData
+    struct mwheel_data
     {
         point2u pos;
         i32   delta;
     };
 
-    struct TouchData
+    struct touch_data
     {
-        i32   pid;
+        i32     pid;
         point2u pos;
     };
 
-    struct JoyButtonData
+    struct joy_button_data
     {
         size_type id;
-        i32     button;
+        i32       button;
     };
 
-    struct JoyAxisData
+    struct joy_axis_data
     {
         size_type id;
-        i16     value;
+        i16       value;
         u8        axis;
     };
 
-    struct JoyTriggerData
+    struct joy_trigger_data
     {
         size_type id;
-        i16     threshold;
+        i16       threshold;
         u8        trigger;
 
     };
 
-    struct JoyTrackData
+    struct joy_track_data
     {
         size_type id;
         point2i   pos;
         u8        track;
     };
 
-    struct JoyPlugData
+    struct joy_plug_data
     {
         size_type id;
     };
 
-    struct PaintData
+    struct paint_data
     {
-        Rect region;
+        rect region;
     };
 
-    struct PropertyData
+    struct property_data
     {
-        u32   prop;
+        u32 prop;
         i32 value;
     };
 
-    union Data
+    union data_value
     {
-        KeyData        keyCode;
-        MButtonData    mouseButton;
-        point2u        position;
-        MWheelData     wheel;
-        TouchData      touch;
-        JoyButtonData  joyButton;
-        JoyAxisData    joyAxis;
-        JoyPlugData    joyPlug;
-        JoyTriggerData joyTrigger;
-        JoyTrackData   joyTrack;
-        i32          message;
-        PaintData      paint;
-        point2u        size;
-        bool           state;
-        PropertyData   property;
+        base_data        base;
+        key_data         key_code;
+        mbutton_data     mouse_button;
+        point2u          position;
+        mwheel_data      wheel;
+        touch_data       touch;
+        joy_button_data  joy_button;
+        joy_axis_data    joy_axis;
+        joy_plug_data    joy_plug;
+        joy_trigger_data joy_trigger;
+        joy_track_data   joy_track;
+        i32              message;
+        paint_data       paint;
+        point2u          size;
+        bool             state;
+        property_data    property;
 
-        Data () noexcept = default;
+        constexpr data_value () noexcept : base { } { }
 
-        constexpr Data (KeyData const& gKeyData) noexcept
-        : keyCode (gKeyData)
+        constexpr data_value (key_data const& gKeyData) noexcept
+        : key_code (gKeyData)
         { }
 
-        constexpr Data (MButtonData const& gKeyData) noexcept
-        : mouseButton (gKeyData)
+        constexpr data_value (mbutton_data const& gKeyData) noexcept
+        : mouse_button (gKeyData)
         { }
     };
 
-    Event () noexcept = default;
-    constexpr Data const& data () const noexcept { return m_data; }
-    constexpr Type        type () const noexcept { return m_type; }
+    event () noexcept = default;
+    constexpr data_value const& data () const noexcept { return _M_data; }
+    constexpr bits              type () const noexcept { return _M_type; }
 
-    constexpr Event (Type type, Data const& data = Data()) noexcept
-    : m_data (data),
-      m_type (type)
+    constexpr event (bits type, data_value const& data = data_value()) noexcept
+    : _M_data (data),
+      _M_type (type)
     { }
 
 protected:
-    Data m_data;
-    Type m_type;
+    data_value _M_data;
+    bits       _M_type;
 };
 
 // =========================================================
 
-struct MessageEvent : public Event
+struct message_event : public event
 {
-    MessageEvent (int nMsg) noexcept
-    : Event      (Event::SystemMessage)
+    message_event (int nMsg) noexcept
+    : event       (event::sys_message)
     {
-        m_data.message = nMsg;
+        _M_data.message = nMsg;
     }
 };
 
 // =========================================================
 
-struct VisibilityEvent : public Event
+struct visibility_event : public event
 {
-    VisibilityEvent (bool bVis) noexcept
-    : Event         (Event::Visibility)
+    visibility_event (bool bVis) noexcept
+    : event          (event::visibility)
     {
-        m_data.state = bVis;
+        _M_data.state = bVis;
     }
 };
 
 // =========================================================
 
-struct PaintEvent : public Event
+struct paint_event : public event
 {
-    PaintEvent (Rect gRect) noexcept
-    : Event    (Event::Paint)
+    paint_event (rect gRect) noexcept
+    : event     (event::paint)
     {
-        m_data.paint.region = gRect;
+        _M_data.paint.region = gRect;
     }
 };
 
 // =========================================================
 
-struct SizeEvent : public Event
+struct size_event : public event
 {
-    SizeEvent (point2u size) noexcept
-    : Event   (Event::Size)
+    size_event (point2u size) noexcept
+    : event    (event::size)
     {
-        m_data.size = size;
+        _M_data.size = size;
     }
 };
 
 // =========================================================
 
-struct FocusEvent : public Event
+struct focus_event : public event
 {
-    FocusEvent (bool in) noexcept
-    : Event    (Event::Focus)
+    focus_event (bool in) noexcept
+    : event     (event::focus)
     {
-        m_data.state = in;
+        _M_data.state = in;
     }
 };
 
 // =========================================================
 
-struct StepEvent : public Event
+struct step_event : public event
 {
-    StepEvent (bool in) noexcept
-    : Event   (Event::Step)
+    step_event (bool in) noexcept
+    : event    (event::step)
     {
-        m_data.state = in;
+        _M_data.state = in;
     }
 };
 
 // =========================================================
 
-struct PropertyEvent : public Event
+struct property_event : public event
 {
-    PropertyEvent (u32 prop, i32 value) noexcept
-    : Event       (Event::Property)
+    property_event (u32 prop, i32 value) noexcept
+    : event        (event::property)
     {
-        m_data.property.prop  = prop;
-        m_data.property.value = value;
+        _M_data.property.prop  = prop;
+        _M_data.property.value = value;
     }
 };
 
 // =========================================================
 
-struct KeyEvent : public Event
+struct key_event : public event
 {
-    enum class Action : byte
-    {
-        Press,
-        Release
-    };
-
-    constexpr KeyEvent (Keyboard::Key nKey, u16 uMask = 0, Action action = Action::Press) noexcept
-    : Event (action == Action::Press ? Event::KeyPressed : Event::KeyReleased, { KeyData (nKey, uMask) })
+    constexpr key_event (keyboard::key nKey, u16 uMask = 0, bool is_pressed = true) noexcept
+    : event (is_pressed ? event::key_pressed : event::key_released, { key_data { nKey, uMask } })
     { }
 };
 
 // =========================================================
 
-struct KeyPressEvent : public KeyEvent
+struct key_press_event : public key_event
 {
-    constexpr KeyPressEvent (Keyboard::Key nKey, u16 uMask = 0) noexcept
-    : KeyEvent (nKey, uMask, Action::Press)
+    constexpr key_press_event (keyboard::key nKey, u16 uMask = 0) noexcept
+    : key_event (nKey, uMask, true)
     { }
 };
 
 // =========================================================
 
-struct KeyReleaseEvent : public KeyEvent
+struct key_release_event : public key_event
 {
-    constexpr KeyReleaseEvent (Keyboard::Key nKey, u16 uMask = 0) noexcept
-    : KeyEvent (nKey, uMask, Action::Release)
+    constexpr key_release_event (keyboard::key nKey, u16 uMask = 0) noexcept
+    : key_event (nKey, uMask, false)
     { }
 };
 
 // =========================================================
 
-struct MouseEvent : public Event
+struct mouse_event : public event
 {
-    constexpr MouseEvent (u8 nBtn, point2u gPos, bool press_or_release = true) noexcept
-    : Event (press_or_release ? Event::MButtonDown : Event::MButtonUp, { MButtonData (gPos, nBtn) })
+    constexpr mouse_event (u8 nBtn, point2u gPos, bool is_down) noexcept
+    : event (is_down ? event::mbutton_down : event::mbutton_up, { mbutton_data { gPos, nBtn } })
+    { }
+
+    inline mouse_event (point2u gPos) noexcept
+    : event (event::mouse_move)
+    {
+        _M_data.position = gPos;
+    }
+
+    inline mouse_event (i32 nDelta, point2u gPos) noexcept
+    : event (event::mwheel_step)
+    {
+        _M_data.wheel.delta = nDelta;
+        _M_data.wheel.pos   = gPos;
+    }
+};
+
+// =========================================================
+
+struct mouse_press_event : public mouse_event
+{
+    constexpr mouse_press_event (u8 nBtn, point2u gPos) noexcept
+    : mouse_event (nBtn, gPos, true)
     { }
 };
 
 // =========================================================
 
-struct MousePressEvent : public MouseEvent
+struct mouse_release_event : public mouse_event
 {
-    constexpr MousePressEvent (u8 nBtn, point2u gPos) noexcept
-    : MouseEvent (nBtn, gPos, true)
+    constexpr mouse_release_event (u8 nBtn, point2u gPos) noexcept
+    : mouse_event (nBtn, gPos, false)
     { }
 };
 
 // =========================================================
 
-struct MouseReleaseEvent : public MouseEvent
+struct mouse_move_event : public mouse_event
 {
-    constexpr MouseReleaseEvent (u8 nBtn, point2u gPos) noexcept
-    : MouseEvent (nBtn, gPos, false)
+    mouse_move_event (point2u gPos) noexcept
+    : mouse_event (gPos)
     { }
 };
 
 // =========================================================
 
-struct MouseMoveEvent : public Event
+struct wheel_event : public mouse_event
 {
-    MouseMoveEvent (point2u gPos) noexcept
-    : Event        (Event::MouseMove)
+    wheel_event (i32 nDelta, point2u gPos) noexcept
+    : mouse_event (nDelta, gPos)
+    { }
+};
+
+// =========================================================
+
+struct touch_event : public event
+{
+    touch_event (i32 pid, point2u gPos, bits action) noexcept
+    : event     (action)
     {
-        m_data.position = gPos;
+        _M_data.touch.pid = pid;
+        _M_data.touch.pos = gPos;
     }
 };
 
 // =========================================================
 
-struct WheelEvent : public Event
+struct touch_press_event : public touch_event
 {
-    WheelEvent (i32 nDelta, point2u gPos) noexcept
-    : Event    (Event::MWheelStep)
-    {
-        m_data.wheel.delta = nDelta;
-        m_data.wheel.pos   = gPos;
-    }
+    touch_press_event (i32 pid, point2u gPos) noexcept
+    : touch_event     (pid, gPos, event::touch_press)
+    { }
 };
 
 // =========================================================
 
-struct TouchPressEvent : public Event
+struct touch_release_event : public touch_event
 {
-    TouchPressEvent (i32 pid, point2u gPos) noexcept
-    : Event         (Event::TouchPress)
-    {
-        m_data.touch.pid = pid;
-        m_data.touch.pos = gPos;
-    }
+    touch_release_event (i32 pid, point2u gPos) noexcept
+    : touch_event       (pid, gPos, event::touch_release)
+    { }
 };
 
 // =========================================================
 
-struct TouchReleaseEvent : public Event
+struct touch_moved_event : public touch_event
 {
-    TouchReleaseEvent (i32 pid, point2u gPos) noexcept
-    : Event           (Event::TouchRelease)
-    {
-        m_data.touch.pid = pid;
-        m_data.touch.pos = gPos;
-    }
+    touch_moved_event (i32 pid, point2u gPos) noexcept
+    : touch_event   (pid, gPos, event::touch_move)
+    { }
 };
 
 // =========================================================
-
-struct TouchMovedEvent : public Event
-{
-    TouchMovedEvent (i32 pid, point2u gPos) noexcept
-    : Event         (Event::TouchMove)
-    {
-        m_data.touch.pid = pid;
-        m_data.touch.pos = gPos;
-    }
-};
 
 } } // namespace Input
 

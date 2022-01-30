@@ -23,7 +23,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(padded)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! Wrapper of \c std::basic_ostream into RapidJSON's Stream concept.
 /*!

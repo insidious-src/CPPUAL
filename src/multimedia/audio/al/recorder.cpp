@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,50 +25,49 @@
 
 #include "aldef.h"
 
+namespace cppual { namespace audio { namespace al {
 
-namespace cppual { namespace Audio { namespace AL {
-
-bool SoundStreamRecorder::record () noexcept
+bool sound_stream_recorder::record () noexcept
 {
-    if (m_gDevice.valid () and !m_bIsRecording)
+    if (_M_gDevice->valid () and !_M_bIsRecording)
     {
-        ::alcCaptureStart (static_cast<ALCdevice*> (m_gDevice.object ()));
-        return m_bIsRecording = true;
+        ::alcCaptureStart (static_cast<ALCdevice*> (_M_gDevice->handle ()));
+        return _M_bIsRecording = true;
     }
 
     return false;
 }
 
-void SoundStreamRecorder::stop () noexcept
+void sound_stream_recorder::stop () noexcept
 {
-    if (m_bIsRecording)
+    if (_M_bIsRecording)
     {
-        ::alcCaptureStop (static_cast<ALCdevice*> (m_gDevice.object ()));
-        m_bIsRecording = false;
+        ::alcCaptureStop (static_cast<ALCdevice*> (_M_gDevice->handle ()));
+        _M_bIsRecording = false;
     }
 }
 
-void SoundStreamRecorder::setSamples (int nSamples) noexcept
+void sound_stream_recorder::set_samples (int nSamples) noexcept
 {
-    if (m_gDevice.valid ())
+    if (_M_gDevice->valid ())
     {
-        ::alcCaptureSamples (static_cast<ALCdevice*> (m_gDevice.object ()),
+        ::alcCaptureSamples (static_cast<ALCdevice*> (_M_gDevice->handle ()),
                              nullptr,
                              nSamples);
-        m_nSamples = nSamples;
+        _M_nSamples = nSamples;
     }
 }
 
-SoundStreamRecorder::SoundStreamRecorder (CaptureDevice& gDevice) noexcept
-: m_gDevice (gDevice),
-  m_nSamples (),
-  m_bIsRecording ()
+sound_stream_recorder::sound_stream_recorder (capture_device& gDevice) noexcept
+: _M_gDevice (&gDevice),
+  _M_nSamples (),
+  _M_bIsRecording ()
 { }
 
-bool SoundStreamRecorder::isAvailable () noexcept
+bool sound_stream_recorder::is_available () noexcept
 {
-    return (AudioDevice::isExtensionSupported ("ALC_EXT_CAPTURE") or
-            AudioDevice::isExtensionSupported ("ALC_EXT_capture"));
+    return (audio_device::is_extension_supported ("ALC_EXT_CAPTURE") or
+            audio_device::is_extension_supported ("ALC_EXT_capture"));
 }
 
 } } } // namespace Audio

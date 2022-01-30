@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,59 +20,61 @@
  */
 
 #include <cppual/gfx/drawable/text.h>
+
 #include <iostream>
+
 #include "../gl/gldef.h"
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-Label2D::Label2D ()
-: m_pFont (), m_gText ()
+label2d::label2d ()
+: _M_pFont (), _M_gText ()
 {
 }
 
-Label2D::Label2D (string_type const& gName, Font& gFont)
-: m_pFont (&gFont),
-  m_gText ( gName)
+label2d::label2d (string_type const& gName, font& gFont)
+: _M_pFont (&gFont),
+  _M_gText ( gName)
 {
 }
 
-Label2D::Label2D (Label2D const& gObj)
-: m_pFont (gObj.m_pFont),
-  m_gText (gObj.m_gText)
+label2d::label2d (label2d const& gObj)
+: _M_pFont (gObj._M_pFont),
+  _M_gText (gObj._M_gText)
 {
 }
 
-Label2D::Label2D (Label2D&& gObj) noexcept
-: m_pFont (gObj.m_pFont),
-  m_gText (std::move (gObj.m_gText))
+label2d::label2d (label2d&& gObj) noexcept
+: _M_pFont (gObj._M_pFont),
+  _M_gText (std::move (gObj._M_gText))
 {
 }
 
-Label2D& Label2D::operator = (Label2D const&)
+label2d& label2d::operator = (label2d const&)
 {
     return *this;
 }
 
-Label2D& Label2D::operator = (Label2D&&) noexcept
+label2d& label2d::operator = (label2d&&) noexcept
 {
     return *this;
 }
 
-void Label2D::draw (Transform2D const& /*transform*/)
+void label2d::draw (transform2d const& /*transform*/)
 {
-    if (m_gText.empty ()) return;
+    if (_M_gText.empty ()) return;
 
 //    glBindTexture (GL::Texture2D, 0);
 //    glBegin (GL::Quads);
 
-//    for (std::size_t i = 0; i < m_gText.length (); ++i)
+//    for (std::size_t i = 0; i < _M_gText.length (); ++i)
 //    {
 //        //glTexCoord2f (glyph->tex_x1, glyph->tex_y1);
 //        glVertex2i (transform.geometry ().left, transform.geometry ().top);
 //        //glTexCoord2f (glyph->tex_x1, glyph->tex_y1 + _tex_line_height);
-//        //glVertex2i (transform.x (), transform.y () + font ().lineHeight);
+//        //glVertex2i (transform.x (), transform.y () + font ().line_height);
 //        //glTexCoord2f (glyph->tex_x2, glyph->tex_y1 + _tex_line_height);
-//        //glVertex2i (transform.x () + glyph->advance, transform.y () + m_gFont.height);
+//        //glVertex2i (transform.x () + glyph->advance, transform.y () + _M_gFont.height);
 //        //glTexCoord2f (glyph->tex_x2, glyph->tex_y1);
 //        //glVertex2i (transform.x () + glyph->advance, transform.y ());
 //    }

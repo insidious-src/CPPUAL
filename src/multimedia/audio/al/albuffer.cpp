@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 #include "aldef.h"
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
 //inline int convertQuality (OutputFormat eFormat,
 //                           SoundQuality eQuality) noexcept
@@ -116,88 +116,88 @@ namespace cppual { namespace Audio { namespace AL {
 
 // ====================================================
 
-SoundBuffer::SoundBuffer () noexcept
-: Object (ObjectType::Buffer),
-  m_gSources (),
-  m_pContext (Instance::current ())
+sound_buffer::sound_buffer () noexcept
+: object (object_type::buffer),
+  _M_gSources (),
+  _M_pContext (instance::current ())
 { }
 
-SoundBuffer::SoundBuffer (SoundBuffer&& gObj) noexcept
-: Object (gObj),
-  m_gSources (std::move (gObj.m_gSources)),
-  m_pContext (Instance::current ())
+sound_buffer::sound_buffer (sound_buffer&& gObj) noexcept
+: object (gObj),
+  _M_gSources (std::move (gObj._M_gSources)),
+  _M_pContext (instance::current ())
 {
-    for (size_type i = 0; i < m_gSources.size (); ++i)
-        if (m_gSources[i]) m_gSources[i]->m_pBuffer = this;
+    for (size_type i = 0; i < _M_gSources.size (); ++i)
+        if (_M_gSources[i]) _M_gSources[i]->_M_pBuffer = this;
 }
 
-SoundBuffer::SoundBuffer (SoundBuffer const& gObj) noexcept
-: Object (gObj),
-  Sound (),
-  m_gSources (),
-  m_pContext (Instance::current ())
+sound_buffer::sound_buffer (sound_buffer const& gObj) noexcept
+: object (gObj),
+  sound (),
+  _M_gSources (),
+  _M_pContext (instance::current ())
 { }
 
-SoundBuffer& SoundBuffer::operator = (SoundBuffer&& gObj) noexcept
+sound_buffer& sound_buffer::operator = (sound_buffer&& gObj) noexcept
 {
-    for (size_type i = 0; i < m_gSources.size (); ++i)
-        if (m_gSources[i]) m_gSources[i]->m_pBuffer = this;
+    for (size_type i = 0; i < _M_gSources.size (); ++i)
+        if (_M_gSources[i]) _M_gSources[i]->_M_pBuffer = this;
 
-    m_gSources = std::move (gObj.m_gSources);
+    _M_gSources = std::move (gObj._M_gSources);
     return *this;
 }
 
-SoundBuffer& SoundBuffer::operator = (SoundBuffer const& gObj) noexcept
+sound_buffer& sound_buffer::operator = (sound_buffer const& gObj) noexcept
 {
     if (id () and gObj.id ())
     {
-        for (size_type i = 0; i < m_gSources.size (); ++i)
-            if (m_gSources[i]) m_gSources[i]->onDetach ();
+        for (size_type i = 0; i < _M_gSources.size (); ++i)
+            if (_M_gSources[i]) _M_gSources[i]->on_detach ();
 
-        m_gSources.clear ();
+        _M_gSources.clear ();
     }
 
     return *this;
 }
 
-SoundBuffer::~SoundBuffer () noexcept
+sound_buffer::~sound_buffer () noexcept
 {
     if (id ())
     {
-        for (size_type i = 0; i < m_gSources.size (); ++i)
-            if (m_gSources[i]) m_gSources[i]->onDetach ();
+        for (size_type i = 0; i < _M_gSources.size (); ++i)
+            if (_M_gSources[i]) _M_gSources[i]->on_detach ();
     }
 }
 
-int SoundBuffer::getFrequency () const noexcept
+int sound_buffer::frequency () const noexcept
 {
     int nFreq = 0;
-    if (id ()) ::alGetBufferi (id (), AL::Frequency, &nFreq);
+    if (id ()) ::alGetBufferi (id (), al::frequency, &nFreq);
     return nFreq;
 }
 
-int SoundBuffer::getSize () const noexcept
+int sound_buffer::size () const noexcept
 {
     int nSize = 0;
-    if (id ()) ::alGetBufferi (id (), AL::Size, &nSize);
+    if (id ()) ::alGetBufferi (id (), al::size, &nSize);
     return nSize;
 }
 
-int SoundBuffer::getBits () const noexcept
+int sound_buffer::bits () const noexcept
 {
     int nBits = 0;
-    if (id ()) ::alGetBufferi (id (), AL::Bits, &nBits);
+    if (id ()) ::alGetBufferi (id (), al::bits, &nBits);
     return nBits;
 }
 
-int SoundBuffer::getDuration () const noexcept
+int sound_buffer::duration () const noexcept
 {
     return 0;
 }
 
-int SoundBuffer::onOpen () noexcept
+int sound_buffer::on_open () noexcept
 {
-    return Error::Failed;
+    return error::failed;
 }
 
 } } } // namespace Audio

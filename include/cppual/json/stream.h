@@ -19,7 +19,7 @@
 
 #include "encodings.h"
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Stream

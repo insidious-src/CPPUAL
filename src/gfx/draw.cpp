@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +22,17 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/process/plugin.h>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-namespace { namespace Internal {
+// ====================================================
 
-typedef Process::PluginManager<IDrawable2D>    manager2d_type;
-typedef Process::PluginManager<IDrawable3D>    manager3d_type;
-typedef Process::PluginManager<IDeviceContext> manager_context_type;
-typedef IDeviceContext                         context_type;
-typedef IDeviceContext*                        context_pointer;
+namespace { namespace internal {
+
+typedef process::plugin_manager<drawable2d_interface> manager2d_type      ;
+typedef process::plugin_manager<drawable3d_interface> manager3d_type      ;
+typedef process::plugin_manager<context_interface>    manager_context_type;
+typedef context_interface                             context_type        ;
+typedef context_interface*                            context_pointer     ;
 
 inline context_pointer& current () noexcept
 {
@@ -38,19 +40,19 @@ inline context_pointer& current () noexcept
     return current_dc;
 }
 
-inline manager2d_type& manager2D () noexcept
+inline manager2d_type& manager2d () noexcept
 {
     static manager2d_type drawable_mgr;
     return drawable_mgr;
 }
 
-inline manager3d_type& manager3D () noexcept
+inline manager3d_type& manager3d () noexcept
 {
     static manager3d_type drawable_mgr;
     return drawable_mgr;
 }
 
-inline manager_context_type& managerContext() noexcept
+inline manager_context_type& manager_context() noexcept
 {
     static manager_context_type context_mgr;
     return context_mgr;
@@ -60,74 +62,36 @@ inline manager_context_type& managerContext() noexcept
 
 // ====================================================
 
-IDeviceContext* IDeviceContext::current () noexcept
+context_interface* context_interface::current () noexcept
 {
-    return Internal::current ();
+    return internal::current ();
 }
 
-void IDeviceContext::acquire (IDeviceContext* pContext) noexcept
+void context_interface::acquire (context_interface* pContext) noexcept
 {
-    if (Internal::current () != pContext)
+    if (internal::current () != pContext)
     {
-        if (Internal::current () and
-                pContext         and
-                Internal::current ()->device  () != pContext->device ())
-                Internal::current ()->release ();
+        if (internal::current () && pContext) internal::current ()->release ();
 
-        Internal::current () = pContext;
+        internal::current () = pContext;
     }
 }
 
 // ====================================================
 
-cppual::Graphics::IResource::~IResource()
+shared_drawable2d drawable_factory::create2d (string_type const& gName)
 {
-
+    return internal::manager2d ().plugin (gName).interface ();
 }
 
-// ====================================================
-
-cppual::Graphics::IDrawable2D::~IDrawable2D()
+shared_drawable3d drawable_factory::create3d (string_type const& gName)
 {
-
+    return internal::manager3d ().plugin (gName).interface ();
 }
 
-// ====================================================
-
-cppual::Graphics::IDrawable3D::~IDrawable3D()
+shared_context context_factory::create (string_type const& gName)
 {
-
-}
-
-// ====================================================
-
-cppual::Graphics::ITransformable2D::~ITransformable2D()
-{
-
-}
-
-// ====================================================
-
-cppual::Graphics::ITransformable3D::~ITransformable3D()
-{
-
-}
-
-// ====================================================
-
-shared_drawable2d DrawableFactory::create2D (string_type const& gName)
-{
-    return Internal::manager2D ().plugin (gName).interface ();
-}
-
-shared_drawable3d DrawableFactory::create3D (string_type const& gName)
-{
-    return Internal::manager3D ().plugin (gName).interface ();
-}
-
-shared_context ContextFactory::create (string_type const& gName)
-{
-    return Internal::managerContext().plugin (gName).interface ();
+    return internal::manager_context().plugin (gName).interface ();
 }
 
 } } // namespace Graphics

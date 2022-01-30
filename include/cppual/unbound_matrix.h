@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <cppual/concepts.h>
 #include <cppual/functional.h>
 #include <cppual/circular_queue.h>
+#include <cppual/memory/allocator.h>
 #include <cppual/reactive.h>
 
 #include <memory>
@@ -40,19 +41,19 @@
 
 namespace cppual {
 
-template <typename T, typename Allocator = std::allocator<T> >
-class UnboundMatrix
+template <typename T, typename Allocator = memory::allocator<T> >
+class unbound_matrix
 {
 public:
-    typedef T                                value_type    ;
-    typedef Allocator                        allocator_type;
-    typedef T*                               pointer       ;
-    typedef T const*                         const_pointer ;
-    typedef std::vector  <T, allocator_type> vector_type   ;
-    typedef std::deque   <T, allocator_type> array_type    ;
-    typedef Signal    <void, allocator_type> signal_type   ;
-    typedef CircularQueue<T, allocator_type> queue_type    ;
-    typedef typename Allocator::size_type    size_type     ;
+    typedef T                                 value_type    ;
+    typedef Allocator                         allocator_type;
+    typedef T*                                pointer       ;
+    typedef T const*                          const_pointer ;
+    typedef std::vector  <T, allocator_type>  vector_type   ;
+    typedef std::deque   <T, allocator_type>  array_type    ;
+    typedef signal    <void, allocator_type>  signal_type   ;
+    typedef circular_queue<T, allocator_type> queue_type    ;
+    typedef typename Allocator::size_type     size_type     ;
 
     enum class Instructions
     {
@@ -69,77 +70,77 @@ public:
     void process ();
 
     constexpr size_type    size      () const noexcept { return rows () * cols (); }
-    constexpr size_type    cols      () const noexcept { return m_uCols;           }
-    constexpr size_type    rows      () const noexcept { return m_uRows;           }
-    constexpr size_type    maxRow    ()       noexcept { return rows () - 1;       }
-    constexpr size_type    maxCol    ()       noexcept { return cols () - 1;       }
-    constexpr signal_type& processed ()       noexcept { return m_signal;          }
+    constexpr size_type    cols      () const noexcept { return _M_uCols;          }
+    constexpr size_type    rows      () const noexcept { return _M_uRows;          }
+    constexpr size_type    max_row   ()       noexcept { return rows () - 1;       }
+    constexpr size_type    max_col   ()       noexcept { return cols () - 1;       }
+    constexpr signal_type& processed ()       noexcept { return _M_signal;         }
 
     constexpr const_pointer data () const noexcept
-    { return m_matrix.data (); }
+    { return _M_matrix.data (); }
 
-    constexpr UnboundMatrix () noexcept
-    : m_matrix (),
-      m_uCols  (),
-      m_uRows  ()
+    constexpr unbound_matrix () noexcept
+    : _M_matrix (),
+      _M_uCols  (),
+      _M_uRows  ()
     { }
 
-    UnboundMatrix (UnboundMatrix&& gObj) noexcept
-    : m_matrix (std::move (gObj.m_matrix)),
-      m_uCols  (gObj.m_uCols),
-      m_uRows  (gObj.m_uRows)
+    unbound_matrix (unbound_matrix&& gObj) noexcept
+    : _M_matrix (std::move (gObj._M_matrix)),
+      _M_uCols  (gObj._M_uCols),
+      _M_uRows  (gObj._M_uRows)
     { }
 
-    UnboundMatrix (UnboundMatrix const& gObj) noexcept
-    : m_matrix (gObj.m_matrix),
-      m_uCols  (gObj.m_uCols ),
-      m_uRows  (gObj.m_uRows )
+    unbound_matrix (unbound_matrix const& gObj) noexcept
+    : _M_matrix (gObj._M_matrix),
+      _M_uCols  (gObj._M_uCols ),
+      _M_uRows  (gObj._M_uRows )
     { }
 
     template <typename U>
-    Reactive<U> operator * (Reactive<U>); // multiply
+    reactive<U> operator * (reactive<U>); // multiply
 
     template <typename U>
-    Reactive<U> operator *= (Reactive<U>); // multiply
+    reactive<U> operator *= (reactive<U>); // multiply
 
     template <typename U>
-    Reactive<U> operator / (Reactive<U>); // divide
+    reactive<U> operator / (reactive<U>); // divide
 
     template <typename U>
-    Reactive<U> operator /= (Reactive<U>); // divide
+    reactive<U> operator /= (reactive<U>); // divide
 
     template <typename U>
-    Reactive<U> operator + (Reactive<U>); // add
+    reactive<U> operator + (reactive<U>); // add
 
     template <typename U>
-    Reactive<U> operator += (Reactive<U>); // add
+    reactive<U> operator += (reactive<U>); // add
 
     template <typename U>
-    Reactive<U> operator - (Reactive<U>); // subtract
+    reactive<U> operator - (reactive<U>); // subtract
 
     template <typename U>
-    Reactive<U> operator -= (Reactive<U>); // subtract
+    reactive<U> operator -= (reactive<U>); // subtract
 
     template <typename U>
-    Reactive<U> operator % (Reactive<U>); // modulo
+    reactive<U> operator % (reactive<U>); // modulo
 
     template <typename U>
-    Reactive<U> operator %= (Reactive<U>); // modulo
+    reactive<U> operator %= (reactive<U>); // modulo
 
     template <typename U>
-    Reactive<U> root (Reactive<U>, size_type);
+    reactive<U> root (reactive<U>, size_type);
 
     template <typename U>
-    Reactive<U> log (Reactive<U>);
+    reactive<U> log (reactive<U>);
 
     template <typename U>
-    Reactive<U> power (Reactive<U>, size_type);
+    reactive<U> power (reactive<U>, size_type);
 
 private:
-    vector_type m_matrix          ;
-    queue_type  m_instructionQueue;
-    signal_type m_signal          ;
-    size_type   m_uCols, m_uRows  ;
+    vector_type _M_matrix          ;
+    queue_type  _M_instructionQueue;
+    signal_type _M_signal          ;
+    size_type   _M_uCols, _M_uRows ;
 };
 
 } // cppual

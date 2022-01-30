@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +25,17 @@
 
 #include <cppual/multimedia/audio/al/alsource.h>
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-struct SoundPlayer final : public SoundSource
+struct sound_player final : public sound_source
 {
 public:
-    using SoundSource::SoundSource;
-    SoundPlayer () noexcept;
-    SoundPlayer (SoundBuffer&) noexcept;
+    using sound_source::sound_source;
+    sound_player () noexcept;
+    sound_player (sound_buffer&) noexcept;
 
-    inline bool isUsable () const noexcept
-    { return m_pBuffer and m_pBuffer->channelCount () > 1; }
+    inline bool is_usable () const noexcept
+    { return _M_pBuffer and _M_pBuffer->channel_count () > 1; }
 };
 
 } } } // namespace Audio

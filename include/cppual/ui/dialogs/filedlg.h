@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,19 +24,19 @@
 
 #include <cppual/ui/dialog.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class BrowserDialog final : public Dialog
+class browser_dialog final : public dialog
 {
 public:
-    enum Flag
+    enum flag
     {
-        Directory,
-        MultiSelect,
+        directory    = 1 << 0,
+        multi_select = 1 << 1,
     };
 
-    void setDirectoryDialog (bool);
-    void setMultiSelect     (bool);
+    void set_directory_dialog (bool);
+    void set_multi_select     (bool);
 };
 
 } } // namespace Ui

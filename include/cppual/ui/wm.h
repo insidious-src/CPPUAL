@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,9 @@
 #include <chrono>
 #include <memory>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-enum WindowFlag
+enum window_flag
 {
     Frame       = 1 <<  0,
     ThinFrame   = 1 <<  0 | 1 << 1,
@@ -51,24 +51,24 @@ enum WindowFlag
     ToolHints   = ThinFrame
 };
 
-class   IPlatformWindow;
-typedef std::shared_ptr<IPlatformWindow> shared_window;
-typedef std::weak_ptr  <IPlatformWindow> weak_window  ;
-typedef BitSet         <WindowFlag     > WindowFlags  ;
+class   platform_wnd_interface;
+typedef std::shared_ptr<platform_wnd_interface> shared_window;
+typedef std::weak_ptr  <platform_wnd_interface> weak_window  ;
+typedef bitset         <window_flag           > window_flags ;
 
 // ====================================================
 
-class IPlatformWindow : public Resource <IDisplay*, Handle>
+class platform_wnd_interface : public resource <shared_display, resource_handle>
 {
 public:
-    using Resource<IDisplay*, Handle>::Resource;
+    using resource<shared_display, resource_handle>::resource;
 
     typedef shared_window const& const_pointer;
     typedef std::size_t          size_type    ;
     typedef string               string_type  ;
 
     virtual weak_window owner () const = 0;
-    virtual WindowFlags flags () const = 0;
+    virtual window_flags flags () const = 0;
     virtual string_type title () const = 0;
     virtual void        setTitle (string_type const&) = 0;
     virtual void        setShaded (bool) = 0;
@@ -81,13 +81,13 @@ public:
     virtual bool        isMaximized () = 0;
     virtual void        setMinimized (bool) = 0;
     virtual bool        isMinimized () = 0;
-    virtual void        setFlags (WindowFlags) = 0;
+    virtual void        setFlags (window_flags) = 0;
     virtual void        flash (uint count = 1) = 0;
-    virtual Rect        geometry () const = 0;
+    virtual rect        geometry () const = 0;
     virtual u32         screen () const = 0;
     virtual bool        isMapped () const = 0;
     virtual void        setOwner (const_pointer) = 0;
-    virtual void        setGeometry (Rect const&) = 0;
+    virtual void        setGeometry (rect const&) = 0;
     virtual void        raise () = 0;
     virtual void        lower () = 0;
     virtual void        move (point2i) = 0;
@@ -95,10 +95,10 @@ public:
     virtual void        unmap () = 0;
 
     std::thread::id thread_id () const noexcept
-    { return m_thread; }
+    { return _M_thread; }
 
 private:
-    std::thread::id m_thread { std::this_thread::get_id () };
+    std::thread::id _M_thread { std::this_thread::get_id () };
 };
 
 } } // namespace Ui

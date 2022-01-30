@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,24 +27,24 @@
 
 namespace cppual {
 
-enum class AccessMode : byte
+enum class access_mode : byte
 {
-    Read,
-    Write,
-    ReadWrite
+    read,
+    write,
+    read_write
 };
 
-enum class LoadFrom : byte
+enum class load_from : byte
 {
-    File,
-    Memory,
-    Binary
+    file,
+    memory,
+    binary
 };
 
-enum class Orientation : byte
+enum class orientation : byte
 {
-    Horizontal,
-    Vertical
+    horizontal,
+    vertical
 };
 
 // ====================================================

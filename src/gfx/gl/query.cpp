@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,28 +23,28 @@
 #include <cppual/gfx/gl/query.h>
 #include "gldef.h"
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
 namespace {
 
-inline uint convertTargetType (Query::Type eType) noexcept
+constexpr uint convert_target_type (query::Type eType) noexcept
 {
     switch (eType)
     {
-    case Query::Type::AnySamplesPassed:
-        return GL::AnySmaplesPassed;
-    case Query::Type::AnySamplesPassedConservative:
-        return GL::AnySamplesPassedConservative;
-    case Query::Type::PrimitivesGenerated:
-        return GL::PrimitivesGenerated;
-    case Query::Type::SamplesPassed:
-        return GL::SamplesPassed;
-    case Query::Type::TimeElapsed:
-        return GL::TimeElapsed;
-    case Query::Type::Timestamp:
-        return GL::Timestamp;
-    case Query::Type::TransformFeedbackPrimitivesWritten:
-        return GL::TransformFeedbackPrimitivesWritten;
+    case query::Type::AnySamplesPassed:
+        return gl::AnySmaplesPassed;
+    case query::Type::AnySamplesPassedConservative:
+        return gl::AnySamplesPassedConservative;
+    case query::Type::PrimitivesGenerated:
+        return gl::PrimitivesGenerated;
+    case query::Type::SamplesPassed:
+        return gl::SamplesPassed;
+    case query::Type::TimeElapsed:
+        return gl::TimeElapsed;
+    case query::Type::Timestamp:
+        return gl::Timestamp;
+    case query::Type::TransformFeedbackPrimitivesWritten:
+        return gl::TransformFeedbackPrimitivesWritten;
     default:
         return 0;
     }
@@ -54,88 +54,88 @@ inline uint convertTargetType (Query::Type eType) noexcept
 
 // ====================================================
 
-Query::Query  () noexcept
-: Object      (ResourceType::Query)   ,
-  m_eType     (Query::Type::Undefined),
-  m_bHasQuery ()
+query::query   () noexcept
+: object       (resource_type::query)   ,
+  _M_eType     (query::Type::Undefined),
+  _M_bHasQuery ()
 { }
 
-Query::~Query () noexcept
+query::~query () noexcept
 {
-    if (m_bHasQuery)
+    if (_M_bHasQuery)
     {
-        if (IDeviceContext::current ()->version () < 3)
-            glEndQuery     (convertTargetType (m_eType));
+        if (context_interface::current ()->version () < 3)
+            glEndQuery     (convert_target_type (_M_eType));
         else
-            glEndQueryARB  (convertTargetType (m_eType));
+            glEndQueryARB  (convert_target_type (_M_eType));
     }
 }
 
-u64 Query::get64 () noexcept
+u64 query::get64 () noexcept
 {
-    if (m_bHasQuery)
+    if (_M_bHasQuery)
     {
         u64 uResult;
-        glGetQueryObjectui64v (handle (), GL::QueryResult, &uResult);
+        glGetQueryObjectui64v (handle (), gl::QueryResult, &uResult);
         return uResult;
     }
 
     return 0;
 }
 
-uint Query::get () noexcept
+uint query::get () noexcept
 {
-    if (m_bHasQuery)
+    if (_M_bHasQuery)
     {
         uint uResult;
-        glGetQueryObjectuiv (handle (), GL::QueryResult, &uResult);
+        glGetQueryObjectuiv (handle (), gl::QueryResult, &uResult);
         return uResult;
     }
 
     return 0;
 }
 
-bool Query::isReady () noexcept
+bool query::is_ready () noexcept
 {
-    if (m_bHasQuery)
+    if (_M_bHasQuery)
     {
         int nReady;
-        glGetQueryObjectiv (handle (), GL::QueryResult, &nReady);
+        glGetQueryObjectiv (handle (), gl::QueryResult, &nReady);
         return nReady;
     }
 
     return false;
 }
 
-void Query::beginQuery (Query::Type eType) noexcept
+void query::begin_query (query::Type eType) noexcept
 {
-    if (handle () and !m_bHasQuery)
+    if (handle () and !_M_bHasQuery)
     {
-        m_eType = eType;
-        glBeginQuery (convertTargetType (eType), handle ());
+        _M_eType = eType;
+        glBeginQuery (convert_target_type (eType), handle ());
     }
 }
 
-void Query::beginQueryIndexed (Query::Type eType, uint uIdx) noexcept
+void query::begin_query_indexed (query::Type eType, uint uIdx) noexcept
 {
-    if (handle () and !m_bHasQuery)
+    if (handle () and !_M_bHasQuery)
     {
-        m_eType = eType;
-        glBeginQueryIndexed (convertTargetType (eType), uIdx, handle ());
+        _M_eType = eType;
+        glBeginQueryIndexed (convert_target_type (eType), uIdx, handle ());
     }
 }
 
-void Query::endQuery () noexcept
+void query::end_query () noexcept
 {
-    if (m_bHasQuery) glEndQuery (convertTargetType (m_eType));
+    if (_M_bHasQuery) glEndQuery (convert_target_type (_M_eType));
 }
 
-void Query::queryCounter (Query::Type eType) noexcept
+void query::query_counter (query::Type eType) noexcept
 {
-    if (handle () and !m_bHasQuery)
+    if (handle () and !_M_bHasQuery)
     {
-        m_eType = eType;
-        glQueryCounter (handle (), convertTargetType (eType));
+        _M_eType = eType;
+        glQueryCounter (handle (), convert_target_type (eType));
     }
 }
 

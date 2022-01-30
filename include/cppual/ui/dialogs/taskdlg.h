@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,17 +26,17 @@
 #include <cppual/ui/dialog.h>
 #include <cppual/gfx/drawable/image.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class TaskDialog final : public Dialog
+class task_dialog final : public dialog
 {
 public:
-    typedef Graphics::Image image_type;
+    typedef gfx::image_interface image_type;
 
-    void setCaption (string const&);
-    void setDescription (string const&);
-    void setTaskIcon (image_type*);
-    void setProgress (int);
+    void set_caption (string_type const&);
+    void set_description (string_type const&);
+    void set_task_icon (image_type*);
+    void set_progress (int);
 };
 
 } } // namespace Ui

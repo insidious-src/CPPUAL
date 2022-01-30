@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,8 @@
  */
 
 #include <cppual/compute/thread.h>
-#include <thread>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
 namespace { // optimize for internal unit usage
 
@@ -36,31 +35,31 @@ namespace { // optimize for internal unit usage
 //    return false;
 //}
 
-enum Result
+enum result
 {
-    ResultSuccess,
-    ErrorInvalid ,
-    ErrorDenied  ,
-    ErrorUnknown
+    result_success,
+    error_invalid ,
+    error_denied  ,
+    error_unknown
 };
 
 } // anonymous
 
 // =========================================================
 
-namespace MainThread {
+namespace main_thread {
 
-const thread_handle Handle = ThisThread::handle ();
-thread_handle handle () noexcept { return MainThread::Handle; }
+const thread_handle Handle = this_thread::handle ();
+thread_handle handle () noexcept { return main_thread::Handle; }
 
 } // MainThread
 
-ThreadPriority MainThread::priority ()
+thread_priority main_thread::priority ()
 {
-    return ThreadPriority::Normal;
+    return thread_priority::normal;
 }
 
-int MainThread::setPriority (ThreadPriority ePrio)
+int main_thread::set_priority (thread_priority ePrio)
 {
     UNUSED(ePrio);
 
@@ -70,58 +69,58 @@ int MainThread::setPriority (ThreadPriority ePrio)
 
     switch (ePrio)
     {
-    case ThreadPriority::Idle:
+    case thread_priority::idle:
         nPrio = 0;
         break;
-    case ThreadPriority::Lowest:
+    case thread_priority::lowest:
         nPrio = 1;
         break;
-    case ThreadPriority::VeryLow:
+    case thread_priority::very_low:
         nPrio = 14;
         break;
-    case ThreadPriority::Low:
+    case thread_priority::low:
         nPrio = 30;
         break;
-    case ThreadPriority::Normal:
+    case thread_priority::normal:
         nPrio = 49;
         break;
-    case ThreadPriority::High:
+    case thread_priority::high:
         nPrio = 70;
         break;
-    case ThreadPriority::VeryHigh:
+    case thread_priority::very_high:
         nPrio = 84;
         break;
-    case ThreadPriority::Highest:
+    case thread_priority::highest:
         nPrio = 99;
         break;
-    case ThreadPriority::Inherit:
+    case thread_priority::inherit:
     {
         sched_param gParam;
-        pthread_getschedparam (MainThread::Handle, &nPrio, &gParam);
+        pthread_getschedparam (main_thread::Handle, &nPrio, &gParam);
         nPrio = gParam.sched_priority;
     }
         break;
     }
 
-    switch (pthread_setschedprio (MainThread::Handle, nPrio))
+    switch (pthread_setschedprio (main_thread::Handle, nPrio))
     {
     case ENOTSUP: case EINVAL:
-        return ErrorInvalid;
+        return error_invalid;
     case EPERM:
-        return ErrorDenied;
+        return error_denied;
     case 0:
-        return ResultSuccess;
+        return result_success;
     }
 
 #    elif defined (OS_WINDOWS)
 #    endif
 
-    return ErrorUnknown;
+    return error_unknown;
 }
 
 // =========================================================
 
-void ThisThread::exit ()
+void this_thread::exit ()
 {
 #ifdef OS_WINDOWS
 #elif defined (OS_STD_POSIX)
@@ -129,7 +128,7 @@ void ThisThread::exit ()
 #endif
 }
 
-int ThisThread::sleepFor (uint uMillisec)
+int this_thread::sleep_for (uint uMillisec)
 {
 #ifdef OS_WINDOWS
     Sleep (uMillisec);
@@ -139,7 +138,7 @@ int ThisThread::sleepFor (uint uMillisec)
 #endif
 }
 
-thread_handle ThisThread::handle () noexcept
+thread_handle this_thread::handle () noexcept
 {
 #ifdef OS_WINDOWS
     return GetCurrentThreadId ();
@@ -150,7 +149,7 @@ thread_handle ThisThread::handle () noexcept
 
 // =========================================================
 
-bool Thread::Id::threadHandlesEqual (thread_handle pth1, thread_handle pth2)
+bool thread::id::thread_handles_equal (thread_handle pth1, thread_handle pth2)
 {
 #ifdef OS_WINDOWS
     return (pth1 == pth2);
@@ -163,32 +162,32 @@ bool Thread::Id::threadHandlesEqual (thread_handle pth1, thread_handle pth2)
 
 static void* bind (void* p)
 {
-    Thread::callable pFunc = std::move (*static_cast<Thread::callable*> (p));
+    thread::callable pFunc = std::move (*static_cast<thread::callable*> (p));
     pFunc ();
     return nullptr;
 }
 
-uint Thread::hardwareConcurency () noexcept
+uint thread::hardware_concurency () noexcept
 {
     return std::thread::hardware_concurrency ();
 }
 
 // =========================================================
 
-Thread::Thread () noexcept
-: m_gId (),
-  m_uStackSize (),
-  m_bIsJoinable ()
+thread::thread () noexcept
+: _M_gId (),
+  _M_uStackSize (),
+  _M_bIsJoinable ()
 { }
 
-Thread::~Thread ()
+thread::~thread ()
 {
-    if (m_bIsJoinable.load ()) join ();
+    if (_M_bIsJoinable.load ()) join ();
 }
 
-bool Thread::start (callable&      gFunc,
+bool thread::start (callable&      gFunc,
                     bool           bJoinable,
-                    ThreadPriority /*ePrio*/,
+                    thread_priority /*ePrio*/,
                     size_type      uStackSize)
 {
 #    ifdef OS_STD_POSIX
@@ -203,7 +202,7 @@ bool Thread::start (callable&      gFunc,
             pthread_attr_setdetachstate (&attr, !bJoinable ?
                                          PTHREAD_CREATE_JOINABLE :
                                          PTHREAD_CREATE_DETACHED) != 0 ||
-            pthread_create (&m_gId.m_handle, &attr, &bind, &gFunc) != 0)
+            pthread_create (&_M_gId._M_handle, &attr, &bind, &gFunc) != 0)
     {
         pthread_attr_destroy (&attr);
         return false;
@@ -214,44 +213,44 @@ bool Thread::start (callable&      gFunc,
 #    elif defined (OS_WINDOWS)
 #    endif
 
-    m_bIsJoinable.store (bJoinable);
-    m_uStackSize = uStackSize;
+    _M_bIsJoinable.store (bJoinable);
+    _M_uStackSize = uStackSize;
     if (!bJoinable) detach ();
     return true;
 }
 
-void Thread::cancel ()
+void thread::cancel ()
 {
 #ifdef OS_WINDOWS
 #elif defined (OS_STD_POSIX) && !defined (OS_ANDROID)
-    pthread_cancel (m_gId.m_handle);
+    pthread_cancel (_M_gId._M_handle);
 #endif
 }
 
-void Thread::join ()
+void thread::join ()
 {
 #ifdef OS_WINDOWS
 #elif defined (OS_STD_POSIX)
-    pthread_join (m_gId.m_handle, nullptr);
+    pthread_join (_M_gId._M_handle, nullptr);
 #endif
 }
 
-void Thread::detach ()
+void thread::detach ()
 {
-    if (m_gId.m_handle and m_bIsJoinable.load ())
+    if (_M_gId._M_handle and _M_bIsJoinable.load ())
     {
 
 #ifdef OS_WINDOWS
 #elif defined (OS_STD_POSIX)
-    pthread_detach (m_gId.m_handle);
+    pthread_detach (_M_gId._M_handle);
 #endif
 
-    m_bIsJoinable.store (false);
+    _M_bIsJoinable.store (false);
 
     }
 }
 
-int Thread::setPriority (ThreadPriority ePrio)
+int thread::set_priority (thread_priority ePrio)
 {
     UNUSED(ePrio);
 
@@ -261,53 +260,53 @@ int Thread::setPriority (ThreadPriority ePrio)
 
     switch (ePrio)
     {
-    case ThreadPriority::Idle:
+    case thread_priority::idle:
         nPrio = 0;
         break;
-    case ThreadPriority::Lowest:
+    case thread_priority::lowest:
         nPrio = 1;
         break;
-    case ThreadPriority::VeryLow:
+    case thread_priority::very_low:
         nPrio = 14;
         break;
-    case ThreadPriority::Low:
+    case thread_priority::low:
         nPrio = 30;
         break;
-    case ThreadPriority::Normal:
+    case thread_priority::normal:
         nPrio = 49;
         break;
-    case ThreadPriority::High:
+    case thread_priority::high:
         nPrio = 70;
         break;
-    case ThreadPriority::VeryHigh:
+    case thread_priority::very_high:
         nPrio = 84;
         break;
-    case ThreadPriority::Highest:
+    case thread_priority::highest:
         nPrio = 99;
         break;
-    case ThreadPriority::Inherit:
+    case thread_priority::inherit:
     {
         sched_param gParam;
-        pthread_getschedparam (m_gId.m_handle, &nPrio, &gParam);
+        pthread_getschedparam (_M_gId._M_handle, &nPrio, &gParam);
         nPrio = gParam.sched_priority;
     }
         break;
     }
 
-    switch (pthread_setschedprio (m_gId.m_handle, nPrio))
+    switch (pthread_setschedprio (_M_gId._M_handle, nPrio))
     {
     case ENOTSUP: case EINVAL:
-        return ErrorInvalid;
+        return error_invalid;
     case EPERM:
-        return ErrorDenied;
+        return error_denied;
     case 0:
-        return ResultSuccess;
+        return result_success;
     }
 
 #    elif defined (OS_WINDOWS)
 #    endif
 
-    return ErrorUnknown;
+    return error_unknown;
 }
 
 } } // Concurency

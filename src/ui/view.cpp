@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,51 +27,51 @@
 #include <exception>
 #include <unordered_map>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-namespace { namespace Internal {
+namespace { namespace internal {
 
-typedef Memory::Allocator<std::pair<const uptr, View*>> map_allocator;
-typedef Memory::Allocator<ProxyRenderable>              renderable_allocator;
+typedef memory::allocator<std::pair<const uptr, view*>> map_allocator       ;
+typedef memory::allocator<proxy_renderable>             renderable_allocator;
 
 typedef std::unordered_map<
                            uptr,
-                           View*,
+                           view*,
                            std::hash<uptr>,
                            std::equal_to<uptr>,
                            map_allocator
                            >
                            map_type;
 
-inline map_type& map ()
+inline static map_type& map ()
 {
     static map_type views_map (3);
     return views_map;
 }
 
-inline shared_window createRenderable (View* pParentObj, Rect const& gRect, u32 nScreen)
+inline shared_window create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
 {
-    return pParentObj ? std::allocate_shared<ProxyRenderable> (renderable_allocator(),
-                                                               pParentObj->renderable ().lock (),
-                                                               gRect) :
-                        Platform::Factory::instance ()->createWindow (gRect, nScreen);
+    return pParentObj ? std::allocate_shared<proxy_renderable> (renderable_allocator(),
+                                                                pParentObj->renderable ().lock (),
+                                                                gRect) :
+                        platform::factory::instance ()->createWindow (gRect, nScreen);
 }
 
 } } // anonymous namespace Internal
 
 // =========================================================
 
-View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type const& gAtor)
-: m_gChildrenList (gAtor),
-  m_gMinSize { 0, 0 },
-  m_gMaxSize { 0, 0 },
-  m_pRenderable (Internal::createRenderable (pParentObj, gRect, nScreen)),
-  m_pParentObj  (),
-  m_gStateFlags ()
+view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type const& gAtor)
+: _M_gChildrenList (gAtor),
+  _M_gMinSize { 0, 0 },
+  _M_gMaxSize { 0, 0 },
+  _M_pRenderable (internal::create_renderable (pParentObj, gRect, nScreen)),
+  _M_pParentObj  (),
+  _M_gStateFlags ()
 {
-    if (m_pRenderable == nullptr or !m_pRenderable->valid ())
+    if (_M_pRenderable == nullptr or !_M_pRenderable->valid ())
     {
-        m_pRenderable.reset ();
+        _M_pRenderable.reset ();
         throw std::logic_error ("failed to create renderable");
     }
     else
@@ -80,77 +80,89 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 
         if (!bRegEvents)
         {
-            connect (EventQueue::events ().mouseMove,
-                     [](EventQueue::window_type wnd, point2u pos)
+            connect (event_queue::events ().mouseMove,
+                     [](event_queue::window_type wnd, point2u pos)
             {
-                Internal::map ()[wnd]->mouseMovedEvent (pos);
+                internal::map ()[wnd]->mouse_moved_event (pos);
             });
 
-            connect (EventQueue::events ().mousePress,
-                    [](EventQueue::window_type wnd, event_type::MButtonData data)
+            connect (event_queue::events ().mousePress,
+                    [](event_queue::window_type wnd, event_type::mbutton_data data)
             {
-                Internal::map ()[wnd]->mousePressedEvent (data);
+                internal::map ()[wnd]->mouse_pressed_event (data);
             });
 
-            connect (EventQueue::events ().mouseRelease,
-                    [](EventQueue::window_type wnd, event_type::MButtonData data)
+            connect (event_queue::events ().mouseRelease,
+                    [](event_queue::window_type wnd, event_type::mbutton_data data)
             {
-                Internal::map ()[wnd]->mouseReleasedEvent (data);
+                internal::map ()[wnd]->mouse_released_event (data);
             });
 
-            connect (EventQueue::events ().scroll,
-                    [](EventQueue::window_type wnd, event_type::MWheelData data)
+            connect (event_queue::events ().keyPress,
+                    [](event_queue::window_type wnd, event_type::key_data data)
             {
-                Internal::map ()[wnd]->mouseWheelEvent (data);
+                internal::map ()[wnd]->key_pressed_event (data);
             });
 
-            connect (EventQueue::events ().winPaint,
-                    [](EventQueue::window_type wnd, event_type::PaintData data)
+            connect (event_queue::events ().keyRelease,
+                    [](event_queue::window_type wnd, event_type::key_data data)
             {
-                Internal::map ()[wnd]->paint (data.region);
+                internal::map ()[wnd]->key_released_event (data);
             });
 
-            connect (EventQueue::events ().winFocus,
-                    [](EventQueue::window_type wnd, bool state)
+            connect (event_queue::events ().scroll,
+                    [](event_queue::window_type wnd, event_type::mwheel_data data)
             {
-                Internal::map ()[wnd]->focusEvent (state);
+                internal::map ()[wnd]->mouse_wheel_event (data);
             });
 
-            connect (EventQueue::events ().winSize,
-                    [](EventQueue::window_type wnd, point2u size)
+            connect (event_queue::events ().winPaint,
+                    [](event_queue::window_type wnd, event_type::paint_data data)
             {
-                Internal::map ()[wnd]->size (size);
+                internal::map ()[wnd]->paint (data.region);
             });
 
-            connect (EventQueue::events ().winVisible,
-                    [](EventQueue::window_type wnd, bool state)
+            connect (event_queue::events ().winFocus,
+                    [](event_queue::window_type wnd, bool state)
             {
-                Internal::map ()[wnd]->showEvent (state);
+                internal::map ()[wnd]->focus_event (state);
             });
 
-            connect(EventQueue::events ().winStep,
-                    [](EventQueue::window_type wnd, bool state)
+            connect (event_queue::events ().winSize,
+                    [](event_queue::window_type wnd, point2u size)
             {
-                Internal::map()[wnd]->enterLeaveEvent (state);
+                internal::map ()[wnd]->size (size);
             });
 
-            connect (EventQueue::events ().winProperty,
-                    [](EventQueue::window_type wnd, event_type::PropertyData data)
+            connect (event_queue::events ().winVisible,
+                    [](event_queue::window_type wnd, bool state)
+            {
+                internal::map ()[wnd]->show_event (state);
+            });
+
+            connect(event_queue::events ().winStep,
+                    [](event_queue::window_type wnd, bool state)
+            {
+                internal::map()[wnd]->enter_leave_event (state);
+            });
+
+            connect (event_queue::events ().winProperty,
+                    [](event_queue::window_type wnd, event_type::property_data data)
             {
                 switch (data.prop)
                 {
                 case 0:
-                    Internal::map ()[wnd]->minMaxSizeEvent (point2u ());
+                    internal::map ()[wnd]->min_max_size_event (point2u ());
                     break;
                 default:
                     break;
                 }
             });
 
-            connect (EventQueue::events ().winDestroy,
-                    [](EventQueue::window_type wnd)
+            connect (event_queue::events ().winDestroy,
+                    [](event_queue::window_type wnd)
             {
-                Internal::map ()[wnd]->destroyEvent ();
+                internal::map ()[wnd]->destroy_event ();
             });
 
             bRegEvents = true;
@@ -158,374 +170,388 @@ View::View (View* pParentObj, Rect const& gRect, u32 nScreen, allocator_type con
 
         if (!pParentObj)
         {
-            uptr key = m_pRenderable->handle ();
+            uptr key = _M_pRenderable->handle ();
 
-            if (Internal::map ().count (key) == 1) Internal::map ()[key] = this;
-            else if (!Internal::map ().emplace (std::make_pair (key, this)).second)
+            if (internal::map ().count (key) == 1) internal::map ()[key] = this;
+            else if (!internal::map ().emplace (std::make_pair (key, this)).second)
             {
-                m_pRenderable.reset ();
+                _M_pRenderable.reset ();
                 throw std::runtime_error ("failed to register view object");
             }
 
-            IDisplayQueue::primary ()->
-                    set_window_events (*m_pRenderable,
-                                        event_type::Key   |
-                                        event_type::Mouse |
-                                        event_type::Window);
+            display_queue_interface::primary ()->
+                    set_window_events (*_M_pRenderable,
+                                        event_type::key   |
+                                        event_type::mouse |
+                                        event_type::window);
         }
 
     }
 
     if (pParentObj)
     {
-        m_pRenderable->setOwner (pParentObj->renderable ().lock ());
-        m_pParentObj = pParentObj;
+        _M_pRenderable->setOwner (pParentObj->renderable ().lock ());
+        _M_pParentObj = pParentObj;
 
-        pParentObj->m_gChildrenList.push_back (this);
-        m_gItFromParent = --pParentObj->m_gChildrenList.end ();
+        pParentObj->_M_gChildrenList.push_back (this);
+        _M_gItFromParent = --pParentObj->_M_gChildrenList.end ();
     }
 
-    m_gStateFlags = View::Valid | View::Enabled;
+    _M_gStateFlags = view::is_valid | view::enabled;
 }
 
-View::View (View const& gObj) noexcept
-: View (gObj.m_pParentObj,
-        gObj.m_pRenderable->geometry (),
-        gObj.m_pRenderable->screen   ())
+view::view (view const& gObj) noexcept
+: view (gObj._M_pParentObj,
+        gObj._M_pRenderable->geometry (),
+        gObj._M_pRenderable->screen   ())
 {
     if (gObj.valid ())
     {
-        if (!gObj.isEnabled ()) disable ();
-        if (!gObj.isHidden  ()) show    ();
+        if (!gObj.is_enabled ()) disable ();
+        if (!gObj.is_hidden  ()) show    ();
     }
 }
 
-View& View::operator = (View const& gObj) noexcept
+view& view::operator = (view const& gObj) noexcept
 {
     if (this == &gObj) return *this;
 
     if (gObj.valid ())
     {
-        if (Internal::createRenderable (gObj.m_pParentObj,
-                                        gObj.m_pRenderable->geometry (),
-                                        gObj.m_pRenderable->screen   ()))
+        if (internal::create_renderable (gObj._M_pParentObj,
+                                        gObj._M_pRenderable->geometry (),
+                                        gObj._M_pRenderable->screen   ()))
         {
-            if (!gObj.isEnabled ()) disable ();
-            if (!gObj.isHidden  ()) show    ();
+            if (!gObj.is_enabled ()) disable ();
+            if (!gObj.is_hidden  ()) show    ();
         }
     }
 
     return *this;
 }
 
-View::~View ()
+view::~view ()
 {
-    if (m_gStateFlags.test (View::Valid)) destroyResources ();
+    if (_M_gStateFlags.test (view::is_valid)) destroy_resources ();
 }
 
-void View::destroyChildren ()
+void view::destroy_children ()
 {
-    if (m_gChildrenList.empty ()) return;
+    if (_M_gChildrenList.empty ()) return;
 
-    for (auto pChild : m_gChildrenList) if (pChild != nullptr) pChild->destroy ();
-    m_gChildrenList.clear ();
+    for (auto pChild : _M_gChildrenList) if (pChild != nullptr) pChild->destroy ();
+    _M_gChildrenList.clear ();
 }
 
-void View::destroyResources ()
+void view::destroy_resources ()
 {
-    auto uId = m_pRenderable->handle ();
+    auto uId = _M_pRenderable->handle ();
 
     //! destroy all child virtual surfaces
-    destroyChildren ();
+    destroy_children ();
 
     //! if the object is a child then remove it from
     //! the parent
-    if (m_pParentObj) *m_gItFromParent = nullptr;
+    if (_M_pParentObj) *_M_gItFromParent = nullptr;
 
     //! if the surface is unique it gets deleted
-    m_pRenderable.reset ();
+    _M_pRenderable.reset ();
 
-    Internal::map ().erase (uId);
+    internal::map ().erase (uId);
 }
 
-void View::invalidate () noexcept
+void view::invalidate () noexcept
 {
-    m_pParentObj  = nullptr;
-    m_gMinSize    = m_gMaxSize    = { 0, 0 };
-    m_gStateFlags = m_gStateFlags = false;
+    _M_pParentObj  = nullptr;
+    _M_gMinSize    = _M_gMaxSize    = { 0, 0 };
+    _M_gStateFlags = _M_gStateFlags = false;
 }
 
-void View::destroy ()
+void view::destroy ()
 {
-    if (!m_gStateFlags.test (View::Valid)) return;
-    destroyResources ();
+    if (!_M_gStateFlags.test (view::is_valid)) return;
+    destroy_resources ();
     invalidate ();
 }
 
-void View::show ()
+void view::show ()
 {
     if (!valid ()) return;
-    m_pRenderable->map ();
+    _M_pRenderable->map ();
 }
 
-void View::hide ()
+void view::hide ()
 {
     if (!valid ()) return;
-    m_pRenderable->unmap ();
+    _M_pRenderable->unmap ();
 }
 
-void View::setMinimumSize (point2u gSize)
+void view::set_minimum_size (point2u gSize)
 {
-    if (m_gStateFlags.test (View::Valid))
+    if (_M_gStateFlags.test (view::is_valid))
     {
         //m_pRenderable->setMimimumSize (gSize);
-        m_gMinSize = gSize;
+        _M_gMinSize = gSize;
     }
 }
 
-void View::setMaximumSize (point2u gSize)
+void view::set_maximum_size (point2u gSize)
 {
-    if (m_gStateFlags.test (View::Valid))
+    if (_M_gStateFlags.test (view::is_valid))
     {
         //m_pRenderable->setMaximumSize (gSize);
-        m_gMinSize = gSize;
+        _M_gMinSize = gSize;
     }
 }
 
-bool View::setParent (View* pParentObj, point2i /*gPos*/)
+bool view::set_parent (view* pParentObj, point2i /*gPos*/)
 {
-    if (!m_gStateFlags.test (View::Valid) or m_pParentObj == pParentObj)
+    if (!_M_gStateFlags.test (view::is_valid) or _M_pParentObj == pParentObj)
         return false;
 
     if (pParentObj)
     {
-        if (m_pParentObj != nullptr) *m_gItFromParent = nullptr;
-        m_pRenderable->setOwner (pParentObj->m_pRenderable);
+        if (_M_pParentObj != nullptr) *_M_gItFromParent = nullptr;
+        _M_pRenderable->setOwner (pParentObj->_M_pRenderable);
 
-        pParentObj->m_gChildrenList.push_back (this);
+        pParentObj->_M_gChildrenList.push_back (this);
         //pParentObj->paint ();
 
-        m_gItFromParent = std::move (pParentObj->m_gChildrenList.end ());
+        _M_gItFromParent = std::move (pParentObj->_M_gChildrenList.end ());
     }
-    //! pParentObj is invalid and m_pParentObj is NOT nullptr
+    //! pParentObj is invalid and _M_pParentObj is NOT nullptr
     else
     {
         //! recreate using physical surface
-        m_pRenderable = Platform::Factory::instance ()->
-                        createWindow (m_pRenderable->geometry (),
-                                      m_pRenderable->screen (),
-                                      m_pRenderable->connection ());
-        if (m_pRenderable == nullptr) return false;
+        _M_pRenderable = platform::factory::instance ()->
+                        createWindow (_M_pRenderable->geometry (),
+                                      _M_pRenderable->screen (),
+                                      _M_pRenderable->connection ());
+        if (_M_pRenderable == nullptr) return false;
 
-        *m_gItFromParent = nullptr;
+        *_M_gItFromParent = nullptr;
     }
 
-    m_pParentObj = pParentObj;
+    _M_pParentObj = pParentObj;
     return true;
 }
 
-void View::paint (Rect const& gRect)
+void view::paint (rect const& gRect)
 {
-    paintEvent (gRect);
+    paint_event (gRect);
 
-    if (m_gChildrenList.size ())
-        for (auto pChild : m_gChildrenList) pChild->paint (Rect ());
+    if (_M_gChildrenList.size ())
+        for (auto pChild : _M_gChildrenList) pChild->paint (rect ());
 }
 
-void View::size (point2u gSize)
+void view::size (point2u gSize)
 {
-    sizeEvent (gSize);
+    size_event (gSize);
 
-    if (m_gChildrenList.size ())
-        for (auto pChild : m_gChildrenList) pChild->onParentSize (gSize);
+    if (_M_gChildrenList.size ())
+        for (auto pChild : _M_gChildrenList) pChild->on_parent_size (gSize);
 }
 
-void View::setGeometry (Rect const& gRect)
+void view::set_geometry (rect const& gRect)
 {
-    if (m_gStateFlags.test (View::Valid))
+    if (_M_gStateFlags.test (view::is_valid))
     {
-        Rect gNewRect (gRect);
+        rect gNewRect (gRect);
 
         //! width
-        if (gNewRect.width () < m_gMinSize.x)
+        if (gNewRect.width () < _M_gMinSize.x)
         {
-            gNewRect.right = static_cast<Rect::value_type> (gNewRect.left + m_gMinSize.x);
+            gNewRect.right = static_cast<rect::value_type> (gNewRect.left + _M_gMinSize.x);
         }
-        else if (m_gMaxSize != point2u () and gNewRect.width () < m_gMaxSize.x)
+        else if (_M_gMaxSize != point2u () and gNewRect.width () < _M_gMaxSize.x)
         {
-            gNewRect.right = static_cast<Rect::value_type> (gNewRect.left + m_gMinSize.x);
+            gNewRect.right = static_cast<rect::value_type> (gNewRect.left + _M_gMinSize.x);
         }
 
         //! height
-        if (gNewRect.height () > m_gMinSize.y)
+        if (gNewRect.height () > _M_gMinSize.y)
         {
-            gNewRect.bottom = static_cast<Rect::value_type> (gNewRect.top + m_gMinSize.y);
+            gNewRect.bottom = static_cast<rect::value_type> (gNewRect.top + _M_gMinSize.y);
         }
-        else if (m_gMaxSize != point2u () and gNewRect.height () > m_gMaxSize.y)
+        else if (_M_gMaxSize != point2u () and gNewRect.height () > _M_gMaxSize.y)
         {
-            gNewRect.bottom = static_cast<Rect::value_type> (gNewRect.top + m_gMinSize.y);
+            gNewRect.bottom = static_cast<rect::value_type> (gNewRect.top + _M_gMinSize.y);
         }
 
-        m_pRenderable->setGeometry (gNewRect);
+        _M_pRenderable->setGeometry (gNewRect);
     }
 }
 
-void View::move (point2i gPoint)
+void view::move (point2i gPoint)
 {
-    if (m_gStateFlags.test (View::Valid))
+    if (_M_gStateFlags.test (view::is_valid))
     {
-        m_pRenderable->move (gPoint);
-        moveEvent (gPoint);
+        _M_pRenderable->move (gPoint);
+        move_event (gPoint);
     }
 }
 
-void View::mouseMovedEvent (point2u)
+void view::mouse_moved_event (point2u)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::mouseWheelEvent (event_type::MWheelData const&)
+void view::mouse_wheel_event (event_type::mwheel_data const&)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::mousePressedEvent (event_type::MButtonData const&)
+void view::mouse_pressed_event (event_type::mbutton_data const&)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::mouseReleasedEvent (event_type::MButtonData const&)
+void view::mouse_released_event (event_type::mbutton_data const&)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::setFocus ()
+void view::key_pressed_event (event_type::key_data const&)
 {
-    if (m_gStateFlags.test (View::Valid))
+#   ifdef DEBUG_MODE
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+#   endif
+}
+
+void view::key_released_event (event_type::key_data const&)
+{
+#   ifdef DEBUG_MODE
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+#   endif
+}
+
+void view::set_focus ()
+{
+    if (_M_gStateFlags.test (view::is_valid))
     {
-        //if (m_gChildrenList.size ())
-            //for (pointer pChild : m_gChildrenList) pChild->setFocus ();
-        m_pRenderable->raise ();
-        focusEvent (true);
+        //if (_M_gChildrenList.size ())
+            //for (pointer pChild : _M_gChildrenList) pChild->set_focus ();
+        _M_pRenderable->raise ();
+        focus_event (true);
     }
 }
 
-void View::killFocus ()
+void view::kill_focus ()
 {
-    if (m_gStateFlags.test (View::Valid))
+    if (_M_gStateFlags.test (view::is_valid))
     {
-        for (View* pChild : m_gChildrenList) pChild->killFocus ();
-        focusEvent (false);
+        for (view* pChild : _M_gChildrenList) pChild->kill_focus ();
+        focus_event (false);
     }
 }
 
-void View::enable ()
+void view::enable ()
 {
-    if (m_gStateFlags.test (View::Valid))
-        for (View* pChild : m_gChildrenList) pChild->enable ();
+    if (_M_gStateFlags.test (view::is_valid))
+        for (view* pChild : _M_gChildrenList) pChild->enable ();
 }
 
-void View::disable ()
+void view::disable ()
 {
-    if (m_gStateFlags.test (View::Valid))
-        for (View* pChild : m_gChildrenList) pChild->disable ();
+    if (_M_gStateFlags.test (view::is_valid))
+        for (view* pChild : _M_gChildrenList) pChild->disable ();
 }
 
-void View::refresh ()
+void view::refresh ()
 {
-    if (m_gStateFlags.test (View::Valid))
+    if (_M_gStateFlags.test (view::is_valid))
     {
-        paintEvent (geometry ());
-        for (View* pChild : m_gChildrenList) pChild->refresh ();
+        paint_event (geometry ());
+        for (view* pChild : _M_gChildrenList) pChild->refresh ();
     }
 }
 
-void View::destroyEvent()
+void view::destroy_event()
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::showEvent(bool)
+void view::show_event(bool)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::paintEvent(Rect const&)
+void view::paint_event(rect const&)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::onEnable(bool)
+void view::on_enable(bool)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::sizeEvent(point2u)
+void view::size_event(point2u)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::moveEvent(point2i)
+void view::move_event(point2i)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::enterLeaveEvent(bool)
+void view::enter_leave_event(bool)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::beginSizeMoveEvent(Rect const&)
+void view::begin_size_move_event(rect const&)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::endSizeMoveEvent(Rect const&)
+void view::end_size_move_event(rect const&)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::minMaxSizeEvent(point2u)
+void view::min_max_size_event(point2u)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::focusEvent(bool)
+void view::focus_event(bool)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
 }
 
-void View::onParentSize(point2u)
+void view::on_parent_size(point2u)
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;

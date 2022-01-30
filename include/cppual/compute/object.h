@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,45 +29,49 @@
 #include <cppual/string.h>
 #include <cppual/resource.h>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
-struct Factory;
-class  HostConnection; // application instance info
-class  Device;
-class  Behaviour;      // device and queue load balancing
-class  MixedQueue;     // host and multiple devices
-class  HostQueue;      // thread queue
-class  DeviceQueue;
-class  DeviceSurface;
-class  Pipeline;
-class  Image;
-class  Render;         // render passes and states
-class  Command;
-class  CommandSequence;
-class  Event;
+/// application instance info
+class host_connection;
+class device;
+/// device and queue load balancing
+class behaviour;
+/// difference types of devices in one queue
+class mixed_queue;
+/// thread queue
+class host_queue;
+class device_queue;
+class device_surface;
+class pipeline;
+class image;
+/// render passes and states
+class render;
+class command;
+class command_sequence;
+class event;
 
 // =========================================================
 
-template <ResourceType Type>
-class Object : public Resource<void, void*>
+template <resource_type Type>
+class object : public resource<void, void*>
 {
 public:
     typedef std::size_t size_type  ;
     typedef string      string_type;
 
-    constexpr Object () noexcept = default;
+    constexpr object () noexcept = default;
 
-    Object (Object&&) noexcept = default;
-    Object& operator = (Object&&) = default;
+    object (object&&) noexcept = default;
+    object& operator = (object&&) = default;
 
-    constexpr static ResourceType type () noexcept { return Type; }
+    constexpr static resource_type type () noexcept { return Type; }
 
     constexpr operator handle_type::pointer () const noexcept
     { return handle<handle_type::pointer>(); }
 
 protected:
-    constexpr Object (handle_type handle) noexcept
-    : Resource (handle)
+    constexpr object (handle_type handle) noexcept
+    : resource (handle)
     { }
 };
 

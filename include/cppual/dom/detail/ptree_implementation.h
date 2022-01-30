@@ -59,10 +59,10 @@ namespace boost { namespace property_tree
 
         // Access functions for getting to the children of a tree.
         static base_container& ch(self_type *s) {
-            return *static_cast<base_container*>(s->m_children);
+            return *static_cast<base_container*>(s->_M_children);
         }
         static const base_container& ch(const self_type *s) {
-            return *static_cast<const base_container*>(s->m_children);
+            return *static_cast<const base_container*>(s->_M_children);
         }
         static by_name_index& assoc(self_type *s) {
             return ch(s).BOOST_NESTED_TEMPLATE get<by_name>();
@@ -177,20 +177,20 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C> inline
     basic_ptree<K, D, C>::basic_ptree()
-        : m_children(new typename subs::base_container)
+        : _M_children(new typename subs::base_container)
     {
     }
 
     template<class K, class D, class C> inline
     basic_ptree<K, D, C>::basic_ptree(const data_type &d)
-        : m_data(d), m_children(new typename subs::base_container)
+        : _M_data(d), _M_children(new typename subs::base_container)
     {
     }
 
     template<class K, class D, class C> inline
     basic_ptree<K, D, C>::basic_ptree(const basic_ptree<K, D, C> &rhs)
-        : m_data(rhs.m_data),
-          m_children(new typename subs::base_container(subs::ch(&rhs)))
+        : _M_data(rhs._M_data),
+          _M_children(new typename subs::base_container(subs::ch(&rhs)))
     {
     }
 
@@ -211,9 +211,9 @@ namespace boost { namespace property_tree
     template<class K, class D, class C> inline
     void basic_ptree<K, D, C>::swap(basic_ptree<K, D, C> &rhs)
     {
-        boost::swap(m_data, rhs.m_data);
+        boost::swap(_M_data, rhs._M_data);
         // Void pointers, no ADL necessary
-        std::swap(m_children, rhs.m_children);
+        std::swap(_M_children, rhs._M_children);
     }
 
     // Container view
@@ -549,20 +549,20 @@ namespace boost { namespace property_tree
     typename basic_ptree<K, D, C>::data_type &
         basic_ptree<K, D, C>::data()
     {
-        return m_data;
+        return _M_data;
     }
 
     template<class K, class D, class C> inline
     const typename basic_ptree<K, D, C>::data_type &
         basic_ptree<K, D, C>::data() const
     {
-        return m_data;
+        return _M_data;
     }
 
     template<class K, class D, class C> inline
     void basic_ptree<K, D, C>::clear()
     {
-        m_data = data_type();
+        _M_data = data_type();
         subs::ch(this).clear();
     }
 

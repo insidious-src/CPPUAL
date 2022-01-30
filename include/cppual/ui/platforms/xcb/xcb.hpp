@@ -1,5 +1,5 @@
-#ifndef CPPUAL_HPP
-#define CPPUAL_HPP
+#ifndef CPPUAL_XCB
+#define CPPUAL_XCB
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
 
@@ -15,4 +15,4 @@
 #include <cppual/ui/platforms/xcb/event.hpp>
 #include <cppual/ui/platforms/xcb/connection.hpp>
 
-#endif // CPPUAL_HPP
+#endif // CPPUAL_XCB

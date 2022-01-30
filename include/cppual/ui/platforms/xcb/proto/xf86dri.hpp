@@ -527,7 +527,7 @@ CookieFunction>
                 ::xcb_xf86dri_drm_clip_rect_t,
                 SIGNATURE(xcb_xf86dri_get_drawable_info_clip_rects),
                 SIGNATURE(xcb_xf86dri_get_drawable_info_clip_rects_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 
 
@@ -546,7 +546,7 @@ CookieFunction>
                 ::xcb_xf86dri_drm_clip_rect_t,
                 SIGNATURE(xcb_xf86dri_get_drawable_info_back_clip_rects),
                 SIGNATURE(xcb_xf86dri_get_drawable_info_back_clip_rects_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_drawable_info
 
@@ -628,7 +628,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_xf86dri_get_device_info_device_private),
                 SIGNATURE(xcb_xf86dri_get_device_info_device_private_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class get_device_info
 
@@ -1039,8 +1039,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -1057,8 +1057,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -1071,7 +1071,7 @@ public:
     typedef cppual::xf86dri::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::xf86dri::extension & extension)
@@ -1084,7 +1084,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

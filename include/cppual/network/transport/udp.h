@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,37 +28,47 @@
 #include <cppual/network/packet.h>
 #include <cppual/string.h>
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
-class UdpStream final : public virtual TransportSocket
+class UdpStream : public virtual TransportSocket
 {
 public:
-    typedef std::size_t size_type;
+    typedef std::size_t size_type  ;
     typedef ssize_t     stream_size;
 
+    /// send
     UdpStream& operator << (Packet const&) noexcept;
+
+    /// receive
     UdpStream& operator >> (Packet&) noexcept;
+
     UdpStream  () noexcept;
-    ~UdpStream () noexcept;
+    virtual ~UdpStream () noexcept;
 
-    inline Address getPeerIp   () const noexcept { return m_gPeerAddr; }
-    inline int     getPeerPort () const noexcept { return m_nPeerPort; }
+    virtual void start_session(ProtocolContext&, Packet& outgoing_packet);
+    virtual bool read_data(ProtocolContext&, Packet& incoming_packet);
+    virtual byte try_decode(ProtocolContext&, Packet& output_packet);
+    virtual byte encode_content(ProtocolContext&, Packet& input_packet, Packet& output_packet);
 
-    inline void setPeer (Address const& gAddr, u16 uPort) noexcept
-    { m_gPeerAddr = gAddr; m_nPeerPort = uPort; }
+    inline Address peer_address () const noexcept { return _M_gPeerAddr; }
+    inline int     peer_port    () const noexcept { return _M_nPeerPort; }
 
-    inline void setPeerIp (Address const& gAddr) noexcept
-    { m_gPeerAddr = gAddr; }
+    inline void set_peer (Address const& gAddr, u16 uPort) noexcept
+    { _M_gPeerAddr = gAddr; _M_nPeerPort = uPort; }
 
-    inline void setPeerPort (u16 uPort) noexcept
-    { m_nPeerPort = uPort; }
+    inline void set_peer_address (Address const& gAddr) noexcept
+    { _M_gPeerAddr = gAddr; }
 
-private:
-    Address m_gPeerAddr;
-    u16     m_nPeerPort;
+    inline void set_peer_port (u16 uPort) noexcept
+    { _M_nPeerPort = uPort; }
 
+protected:
     UdpStream (UdpStream&& stream) noexcept;
     UdpStream (Address const& address, u16 port = AnyPort) noexcept;
+
+private:
+    Address _M_gPeerAddr;
+    u16     _M_nPeerPort;
 };
 
 } } // namespace Network

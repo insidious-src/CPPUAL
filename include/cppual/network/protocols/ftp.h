@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,15 +23,11 @@
 #define CPPUAL_NETWORK_PROTOCOL_FTP_H_
 #ifdef __cplusplus
 
-#include <string>
-#include <vector>
 #include <cppual/network/address.h>
 #include <cppual/network/transport/tcp.h>
+#include <cppual/containers.h>
 
-using string;
-using std::vector;
-
-namespace cppual { namespace Network { namespace Ftp {
+namespace cppual { namespace network { namespace ftp {
 
 enum class TransferMode : unsigned char
 {
@@ -107,12 +103,12 @@ public:
 
     bool isValid () const noexcept;
 
-    inline string const& message () const noexcept { return m_gMsg; }
-    inline u16           status () const noexcept { return m_uStatus; }
+    inline string const& message () const noexcept { return _M_gMsg; }
+    inline u16           status () const noexcept { return _M_uStatus; }
 
 private:
-    string m_gMsg;
-    u16    m_uStatus;
+    string _M_gMsg;
+    u16    _M_uStatus;
 };
 
 class Directory final : public Response
@@ -121,7 +117,7 @@ public:
     string getDirectory () noexcept;
 
 private:
-    string m_gDir;
+    string _M_gDir;
 };
 
 class Listing final : public Response
@@ -130,7 +126,7 @@ public:
     vector<string> const& list () noexcept;
 
 private:
-    vector<string> m_gList;
+    vector<string> _M_gList;
 };
 
 // =========================================================
@@ -160,7 +156,7 @@ public:
                      TransferMode  mode = TransferMode::Binary);
 
 private:
-    TcpStream m_gStream;
+    TcpStream _M_gStream;
 };
 
 } } } // Http

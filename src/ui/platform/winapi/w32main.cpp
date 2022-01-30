@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,11 +58,11 @@ shared_window Win32Factory::createWindow (Rect const& gRect, u32 nScreen, IDispl
 // =========================================================
 
 using cppual::Ui::Platform::Win32Factory;
-using cppual::Process::Plugin           ;
-using cppual::Memory::MemoryResource    ;
-using cppual::Memory::Allocator         ;
+using cppual::process::Plugin           ;
+using cppual::memory::memory_resource    ;
+using cppual::memory::allocator         ;
 
-extern "C" Plugin* plugin_main (MemoryResource* rc)
+extern "C" Plugin* plugin_main (memory_resource* rc)
 {
     static Plugin plugin;
 

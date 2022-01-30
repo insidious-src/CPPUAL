@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,296 +25,296 @@
 
 using std::mutex;
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-inline int convertEmitterState (Audio::SoundState eState) noexcept
+inline int convert_emitter_state (audio::sound_state eState) noexcept
 {
     switch (eState)
     {
-    case Audio::SoundState::Unavailable:
+    case audio::sound_state::unavailable:
         return 0;
-    case Audio::SoundState::Initial:
-        return AL::SoundInitial;
-    case Audio::SoundState::Playing:
-        return AL::SoundPlaying;
-    case Audio::SoundState::Paused:
-        return AL::SoundPaused;
-    case Audio::SoundState::Stopped:
-        return AL::SoundStopped;
+    case audio::sound_state::initial:
+        return al::sound_initial;
+    case audio::sound_state::playing:
+        return al::sound_playing;
+    case audio::sound_state::paused:
+        return al::sound_paused;
+    case audio::sound_state::stopped:
+        return al::sound_stopped;
     }
 
     return 0;
 }
 
-inline Audio::SoundState convertEmitterState (int nState) noexcept
+inline audio::sound_state convert_emitter_state (int nState) noexcept
 {
     switch (nState)
     {
-    case AL::SoundInitial:
-        return Audio::SoundState::Initial;
-    case AL::SoundPlaying:
-        return Audio::SoundState::Playing;
-    case AL::SoundPaused:
-        return Audio::SoundState::Paused;
-    case AL::SoundStopped:
-        return Audio::SoundState::Stopped;
+    case al::sound_initial:
+        return audio::sound_state::initial;
+    case al::sound_playing:
+        return audio::sound_state::playing;
+    case al::sound_paused:
+        return audio::sound_state::paused;
+    case al::sound_stopped:
+        return audio::sound_state::stopped;
     }
 
-    return Audio::SoundState::Unavailable;
+    return audio::sound_state::unavailable;
 }
 
 // ====================================================
 
-SoundSource::SoundSource () noexcept
-: Object        (ObjectType::Source),
-  m_gMutex      (),
-  m_pBuffer     (),
-  m_uBufferSlot (),
-  m_fVolume     ()
+sound_source::sound_source () noexcept
+: object        (object_type::source),
+  _M_gMutex      (),
+  _M_pBuffer     (),
+  _M_uBufferSlot (),
+  _M_fVolume     ()
 { }
 
-SoundSource::SoundSource (SoundBuffer& gBuffer) noexcept
-: Object        (ObjectType::Source),
-  m_gMutex      (),
-  m_pBuffer     (),
-  m_uBufferSlot (gBuffer.m_gSources.size ()),
-  m_fVolume     ()
+sound_source::sound_source (sound_buffer& gBuffer) noexcept
+: object        (object_type::source),
+  _M_gMutex      (),
+  _M_pBuffer     (),
+  _M_uBufferSlot (gBuffer._M_gSources.size ()),
+  _M_fVolume     ()
 {
     if (id () and gBuffer.valid ())
     {
-        m_pBuffer = &gBuffer;
-        gBuffer.m_gSources.push_back (this); // attach
+        _M_pBuffer = &gBuffer;
+        gBuffer._M_gSources.push_back (this); // attach
     }
 }
 
-SoundSource::SoundSource (SoundSource&& gObj) noexcept
-: Object        (gObj),
-  m_gMutex      (),
-  m_pBuffer     (gObj.m_pBuffer),
-  m_uBufferSlot (gObj.m_uBufferSlot),
-  m_fVolume     (gObj.m_fVolume)
+sound_source::sound_source (sound_source&& gObj) noexcept
+: object         (gObj),
+  _M_gMutex      (),
+  _M_pBuffer     (gObj._M_pBuffer),
+  _M_uBufferSlot (gObj._M_uBufferSlot),
+  _M_fVolume     (gObj._M_fVolume)
 {
-    gObj.m_pBuffer = nullptr;
-    if (m_pBuffer) m_pBuffer->m_gSources[m_uBufferSlot] = this;
+    gObj._M_pBuffer = nullptr;
+    if (_M_pBuffer) _M_pBuffer->_M_gSources[_M_uBufferSlot] = this;
 }
 
-SoundSource::SoundSource (SoundSource const& gObj) noexcept
-: Object        (gObj),
-  m_gMutex      (),
-  m_pBuffer     (gObj.m_pBuffer),
-  m_uBufferSlot (gObj.m_pBuffer ? gObj.m_pBuffer->m_gSources.size () : 0),
-  m_fVolume     (gObj.m_fVolume)
+sound_source::sound_source (sound_source const& gObj) noexcept
+: object         (gObj),
+  _M_gMutex      (),
+  _M_pBuffer     (gObj._M_pBuffer),
+  _M_uBufferSlot (gObj._M_pBuffer ? gObj._M_pBuffer->_M_gSources.size () : 0),
+  _M_fVolume     (gObj._M_fVolume)
 {
-    setVolume       (gObj.getVolume    ());
-    setLooping      (gObj.isLooping    ());
-    setPlayingSpeed (gObj.playingSpeed ());
-    if (m_pBuffer) m_pBuffer->m_gSources.push_back (this);
+    set_volume        (gObj.volume        ());
+    set_looping       (gObj.is_looping    ());
+    set_playing_speed (gObj.playing_speed ());
+    if (_M_pBuffer) _M_pBuffer->_M_gSources.push_back (this);
 }
 
-SoundSource& SoundSource::operator = (SoundSource&& gObj) noexcept
+sound_source& sound_source::operator = (sound_source&& gObj) noexcept
 {
-    m_pBuffer      = gObj.m_pBuffer;
-    m_uBufferSlot  = gObj.m_uBufferSlot;
-    m_fVolume      = gObj.m_fVolume;
-    gObj.m_pBuffer = nullptr;
+    _M_pBuffer      = gObj._M_pBuffer;
+    _M_uBufferSlot  = gObj._M_uBufferSlot;
+    _M_fVolume      = gObj._M_fVolume;
+    gObj._M_pBuffer = nullptr;
 
-    if (m_pBuffer) m_pBuffer->m_gSources[m_uBufferSlot] = this;
+    if (_M_pBuffer) _M_pBuffer->_M_gSources[_M_uBufferSlot] = this;
     return *this;
 }
 
-SoundSource& SoundSource::operator = (SoundSource const& gObj) noexcept
+sound_source& sound_source::operator = (sound_source const& gObj) noexcept
 {
     if (id ())
     {
-        if (gObj.m_pBuffer and gObj.m_pBuffer->valid ())
+        if (gObj._M_pBuffer and gObj._M_pBuffer->valid ())
         {
-            m_pBuffer     = gObj.m_pBuffer;
-            m_uBufferSlot = gObj.m_pBuffer->m_gSources.size ();
-            gObj.m_pBuffer->m_gSources.push_back (this);
+            _M_pBuffer     = gObj._M_pBuffer;
+            _M_uBufferSlot = gObj._M_pBuffer->_M_gSources.size ();
+            gObj._M_pBuffer->_M_gSources.push_back (this);
         }
 
-        setVolume       (gObj.getVolume    ());
-        setLooping      (gObj.isLooping    ());
-        setPlayingSpeed (gObj.playingSpeed ());
+        set_volume        (gObj.volume        ());
+        set_looping       (gObj.is_looping    ());
+        set_playing_speed (gObj.playing_speed ());
     }
 
     return *this;
 }
 
-SoundSource::~SoundSource () noexcept
+sound_source::~sound_source () noexcept
 {
     if (id ())
     {
-        if (m_pBuffer)
+        if (_M_pBuffer)
         {
             stop ();
-            m_pBuffer->m_gSources[m_uBufferSlot] = nullptr; // detach
+            _M_pBuffer->_M_gSources[_M_uBufferSlot] = nullptr; // detach
         }
     }
 }
 
-SoundState SoundSource::state () const noexcept
+sound_state sound_source::state () const noexcept
 {
     int nState = 0;
-    ::alGetSourcei (id (), AL::CurrentEmitterState, &nState);
-    return convertEmitterState (nState);
+    ::alGetSourcei (id (), al::current_emitter_state, &nState);
+    return convert_emitter_state (nState);
 }
 
-void SoundSource::play () noexcept
+void sound_source::play () noexcept
 {
     int nState = 0;
-    ::alGetSourcei (id (), AL::CurrentEmitterState, &nState);
-    if (m_pBuffer and nState and nState != AL::SoundPlaying) ::alSourcePlay (id ());
+    ::alGetSourcei (id (), al::current_emitter_state, &nState);
+    if (_M_pBuffer and nState and nState != al::sound_playing) ::alSourcePlay (id ());
 }
 
-void SoundSource::replay () noexcept
+void sound_source::replay () noexcept
 {
     int nState = 0;
-    ::alGetSourcei (id (), AL::CurrentEmitterState, &nState);
+    ::alGetSourcei (id (), al::current_emitter_state, &nState);
 
-    if (nState and m_pBuffer)
+    if (nState and _M_pBuffer)
     {
         ::alSourceRewind (id ());
-        if (nState != AL::SoundPlaying) ::alSourcePlay (id ());
+        if (nState != al::sound_playing) ::alSourcePlay (id ());
     }
 }
 
-void SoundSource::pause () noexcept
+void sound_source::pause () noexcept
 {
     int nState = 0;
-    ::alGetSourcei (id (), AL::CurrentEmitterState, &nState);
-    if (nState == AL::SoundPlaying) ::alSourcePause (id ());
+    ::alGetSourcei (id (), al::current_emitter_state, &nState);
+    if (nState == al::sound_playing) ::alSourcePause (id ());
 }
 
-void SoundSource::stop () noexcept
+void sound_source::stop () noexcept
 {
     int nState = 0;
-    ::alGetSourcei (id (), AL::CurrentEmitterState, &nState);
+    ::alGetSourcei (id (), al::current_emitter_state, &nState);
 
-    if ((nState == AL::SoundPlaying or nState == AL::SoundPaused))
+    if ((nState == al::sound_playing or nState == al::sound_paused))
         ::alSourceStop (id ());
 }
 
-void SoundSource::rewind () noexcept
+void sound_source::rewind () noexcept
 {
-    if (m_pBuffer and m_pBuffer->valid () and state () != SoundState::Initial)
+    if (_M_pBuffer and _M_pBuffer->valid () and state () != sound_state::initial)
         ::alSourceRewind (id ());
 }
 
-bool SoundSource::isPlaying () const noexcept
+bool sound_source::is_playing () const noexcept
 {
     int nState = 0;
-    ::alGetSourcei (id (), AL::CurrentEmitterState, &nState);
-    return nState == AL::SoundPlaying;
+    ::alGetSourcei (id (), al::current_emitter_state, &nState);
+    return nState == al::sound_playing;
 }
 
-void SoundSource::setLooping (bool bLoop) noexcept
+void sound_source::set_looping (bool bLoop) noexcept
 {
-    if (id ()) ::alSourcei (id (), AL::Looping, bLoop);
+    if (id ()) ::alSourcei (id (), al::looping, bLoop);
 }
 
-bool SoundSource::isLooping () const noexcept
+bool sound_source::is_looping () const noexcept
 {
     int nIsLooping = 0;
-    if (id ()) ::alGetSourcei (id (), AL::Looping, &nIsLooping);
+    if (id ()) ::alGetSourcei (id (), al::looping, &nIsLooping);
     return nIsLooping == true;
 }
 
-bool SoundSource::attach (SoundBuffer& gBuffer) noexcept
+bool sound_source::attach (sound_buffer& gBuffer) noexcept
 {
     if (!id () or !gBuffer.valid ()) return false;
 
-    m_pBuffer     = &gBuffer;
-    m_uBufferSlot =  gBuffer.m_gSources.size ();
-    gBuffer.m_gSources.push_back (this); // attach
+    _M_pBuffer     = &gBuffer;
+    _M_uBufferSlot =  gBuffer._M_gSources.size ();
+    gBuffer._M_gSources.push_back (this); // attach
     return true;
 }
 
-void SoundSource::detach () noexcept
+void sound_source::detach () noexcept
 {
-    if (m_pBuffer)
+    if (_M_pBuffer)
     {
-        m_pBuffer->m_gSources[m_uBufferSlot] = nullptr;
-        onDetach ();
+        _M_pBuffer->_M_gSources[_M_uBufferSlot] = nullptr;
+        on_detach ();
     }
 }
 
-void SoundSource::onDetach () noexcept
+void sound_source::on_detach () noexcept
 {
     stop ();
-    ::alSourcei (id (), AL::Buffer, 0);
-    m_pBuffer = nullptr;
+    ::alSourcei (id (), al::buffer, 0);
+    _M_pBuffer = nullptr;
 }
 
-void SoundSource::setVolume (float fValue) noexcept
+void sound_source::set_volume (float fValue) noexcept
 {
     if (id ())
     {
-        ::alSourcef     (id (), AL::Volume, fValue);
-        m_gMutex.lock   ();
-        m_fVolume = fValue;
-        m_gMutex.unlock ();
+        ::alSourcef     (id (), al::volume, fValue);
+        _M_gMutex.lock   ();
+        _M_fVolume = fValue;
+        _M_gMutex.unlock ();
     }
 }
 
-float SoundSource::getVolume () const noexcept
+float sound_source::volume () const noexcept
 {
-    std::lock_guard<mutex> gLock (m_gMutex);
-    return m_fVolume;
+    std::lock_guard<mutex> gLock (_M_gMutex);
+    return _M_fVolume;
 }
 
-void SoundSource::setPlayingSpeed (float fValue) noexcept
+void sound_source::set_playing_speed (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::Pitch, fValue);
+    if (id ()) ::alSourcef (id (), al::pitch, fValue);
 }
 
-float SoundSource::playingSpeed () const noexcept
+float sound_source::playing_speed () const noexcept
 {
     float fValue = .0f;
-    if (id ()) ::alGetSourcef (id (), AL::Pitch, &fValue);
+    if (id ()) ::alGetSourcef (id (), al::pitch, &fValue);
     return fValue;
 }
 
-void SoundSource::setPlayingOffset (std::chrono::seconds nValue) noexcept
+void sound_source::set_playing_offset (std::chrono::seconds nValue) noexcept
 {
-    if (id ()) ::alSourcei (id (), AL::SecOffset, static_cast<int> (nValue.count ()));
+    if (id ()) ::alSourcei (id (), al::sec_offset, static_cast<int> (nValue.count ()));
 }
 
-int SoundSource::playingOffset () noexcept
+int sound_source::playing_offset () noexcept
 {
     int nValue = 0;
-    if (id ()) ::alGetSourcei (id (), AL::SecOffset, &nValue);
+    if (id ()) ::alGetSourcei (id (), al::sec_offset, &nValue);
     return nValue;
 }
 
-void SoundSource::setSampleOffset (float fValue) noexcept
+void sound_source::set_sample_offset (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::SampleOffset, fValue);
+    if (id ()) ::alSourcef (id (), al::sample_offset, fValue);
 }
 
-void SoundSource::setByteOffset (float fValue) noexcept
+void sound_source::set_byte_offset (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::ByteOffset, fValue);
+    if (id ()) ::alSourcef (id (), al::byte_offset, fValue);
 }
 
-void SoundSource::mute () noexcept
+void sound_source::mute () noexcept
 {
-    m_gMutex.lock ();
-    if (m_fVolume > .0f) ::alListenerf (AL::Volume, .0f);
-    m_gMutex.unlock ();
+    _M_gMutex.lock ();
+    if (_M_fVolume > .0f) ::alListenerf (al::volume, .0f);
+    _M_gMutex.unlock ();
 }
 
-void SoundSource::unmute () noexcept
+void sound_source::unmute () noexcept
 {
-    m_gMutex.lock ();
-    if (m_fVolume > .0f) ::alListenerf (AL::Volume, m_fVolume);
-    m_gMutex.unlock ();
+    _M_gMutex.lock ();
+    if (_M_fVolume > .0f) ::alListenerf (al::volume, _M_fVolume);
+    _M_gMutex.unlock ();
 }
 
-void SoundSource::enqueue (SoundBuffer& gBuffer) noexcept
+void sound_source::enqueue (sound_buffer& gBuffer) noexcept
 {
     uint uBuffId = gBuffer.id ();
-    m_gQueue.push_back (&gBuffer);
+    _M_gQueue.push_back (&gBuffer);
     ::alSourceQueueBuffers (id (), 1, &uBuffId);
 }
 

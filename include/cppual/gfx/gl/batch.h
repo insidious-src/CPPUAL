@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,22 +28,22 @@
 #include <cppual/gfx/matrix.h>
 #include <cppual/gfx/gl/glbase.h>
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
-struct BatchConfig
+struct batch_config
 {
     uint    uRenderType;
     int     iPriority;
     uint    uTextureId;
-    Matrix4 transformMatrix; //initialized as identity matrix
+    matrix4 transformMatrix; //initialized as identity matrix
 
-    BatchConfig (unsigned uRenderTypeIn, int iPriorityIn, unsigned uTextureIdIn)
+    batch_config (unsigned uRenderTypeIn, int iPriorityIn, unsigned uTextureIdIn)
     : uRenderType (uRenderTypeIn),
       iPriority   (iPriorityIn),
       uTextureId  (uTextureIdIn)
     { }
 
-    bool operator == (BatchConfig const& other) const
+    bool operator == (batch_config const& other) const
     {
         return uRenderType      == other.uRenderType and
                 iPriority       == other.iPriority   and
@@ -51,11 +51,11 @@ struct BatchConfig
                 transformMatrix == other.transformMatrix*/;
     }
 
-    bool operator != (BatchConfig const& other) const
+    bool operator != (batch_config const& other) const
     { return !(*this == other); }
 };
 
-struct GuiVertex
+struct gui_vertex
 {
 //    glm::vec2 position;
 //    glm::vec4 color;
@@ -68,32 +68,32 @@ struct GuiVertex
 //    { }
 };
 
-class Batch final : NonCopyable
+class batch final : non_copyable
 {
 public:
-    Batch  (uint uMaxNumVertices);
-    ~Batch ();
+    batch  (uint uMaxNumVertices);
+    ~batch ();
 
-    Batch* fullest (Batch*);
+    batch* fullest (batch*);
     int    priority () const;
     bool   empty () const;
-    bool   isBatchConfig (BatchConfig const&) const;
-    bool   isEnoughRoom (uint uNumVertices) const;
+    bool   is_batch_config (batch_config const&) const;
+    bool   is_enough_room (uint uNumVertices) const;
 
-    void add (std::vector<GuiVertex> const& vertices, BatchConfig const&);
-    void add (std::vector<GuiVertex> const& vertices);
+    void add (vector<gui_vertex> const& vertices, batch_config const&);
+    void add (vector<gui_vertex> const& vertices);
     void render ();
 
 private:
     void clean ();
 
 private:
-    uint        m_uMaxNumVertices;
-    uint        m_uNumUsedVertices;
-    uint        m_vao; //only used in OpenGL v3.x +
-    uint        m_vbo;
-    BatchConfig m_config;
-    GuiVertex   m_lastVertex;
+    uint         _M_uMaxNumVertices;
+    uint         _M_uNumUsedVertices;
+    uint         _M_vao; //only used in OpenGL v3.x +
+    uint         _M_vbo;
+    batch_config _M_config;
+    gui_vertex   _M_lastVertex;
 };
 
 } } } // namespace GL

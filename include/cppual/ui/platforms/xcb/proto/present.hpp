@@ -44,8 +44,8 @@ public:
             uint8_t first_event,
             const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~generic(void) {}
@@ -72,7 +72,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_present_event_t, typename ... Parameter>
@@ -83,14 +83,14 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class generic
 
 
@@ -113,8 +113,8 @@ public:
                      uint8_t first_event,
                      const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~configure_notify(void) {}
@@ -141,7 +141,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_present_event_t, typename ... Parameter>
@@ -152,7 +152,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -165,14 +165,14 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class configure_notify
 
 
@@ -195,8 +195,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~complete_notify(void) {}
@@ -223,7 +223,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_present_event_t, typename ... Parameter>
@@ -234,7 +234,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -247,14 +247,14 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class complete_notify
 
 
@@ -277,8 +277,8 @@ public:
                 uint8_t first_event,
                 const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~idle_notify(void) {}
@@ -305,7 +305,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_present_event_t, typename ... Parameter>
@@ -316,7 +316,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -329,7 +329,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -342,7 +342,7 @@ public:
         decltype((*this)->pixmap),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->pixmap,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -355,14 +355,14 @@ public:
         decltype((*this)->idle_fence),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->idle_fence,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class idle_notify
 
 
@@ -385,8 +385,8 @@ public:
                     uint8_t first_event,
                     const std::shared_ptr<xcb_generic_event_t> & event)
         : base(event)
-        , m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        , _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     virtual ~redirect_notify(void) {}
@@ -413,7 +413,7 @@ public:
 
     uint8_t first_event(void)
     {
-        return m_first_event;
+        return _M_first_event;
     }
 
     template<typename ReturnType = ::xcb_present_event_t, typename ... Parameter>
@@ -424,7 +424,7 @@ public:
         decltype((*this)->event),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -437,7 +437,7 @@ public:
         decltype((*this)->event_window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->event_window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -450,7 +450,7 @@ public:
         decltype((*this)->window),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->window,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -463,7 +463,7 @@ public:
         decltype((*this)->pixmap),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->pixmap,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -476,7 +476,7 @@ public:
         decltype((*this)->valid_region),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->valid_region,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -489,7 +489,7 @@ public:
         decltype((*this)->update_region),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->update_region,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -502,7 +502,7 @@ public:
         decltype((*this)->target_crtc),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->target_crtc,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -515,7 +515,7 @@ public:
         decltype((*this)->wait_fence),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->wait_fence,
                       std::forward<Parameter>(parameter) ...);
     }
@@ -528,14 +528,14 @@ public:
         decltype((*this)->idle_fence),
         ReturnType,
         Parameter ...>;
-        return make()(this->m_c,
+        return make()(this->_M_c,
                       (*this)->idle_fence,
                       std::forward<Parameter>(parameter) ...);
     }
 
 protected:
-    Connection m_c;
-    const uint8_t m_first_event;
+    Connection _M_c;
+    const uint8_t _M_first_event;
 }; // class redirect_notify
 
 
@@ -951,8 +951,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -965,22 +965,22 @@ public:
     operator()(Handler handler,
                const std::shared_ptr<xcb_generic_event_t> & event) const
     {
-        switch ((event->response_type & ~0x80) - m_first_event) {
+        switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_PRESENT_CONFIGURE_NOTIFY:
-            handler(cppual::present::event::configure_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::present::event::configure_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_PRESENT_COMPLETE_NOTIFY:
-            handler(cppual::present::event::complete_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::present::event::complete_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_PRESENT_IDLE_NOTIFY:
-            handler(cppual::present::event::idle_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::present::event::idle_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_PRESENT_REDIRECT_NOTIFY:
-            handler(cppual::present::event::redirect_notify<Connection>(m_c, m_first_event, event));
+            handler(cppual::present::event::redirect_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -989,8 +989,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -1003,7 +1003,7 @@ public:
     typedef cppual::present::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::present::extension & extension)
@@ -1016,7 +1016,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

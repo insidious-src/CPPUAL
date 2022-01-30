@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,39 +26,44 @@
 #include <cppual/common.h>
 #include <cppual/signal.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class ScrollBar : public AbstractSlider
+class scrollbar : public abstract_slider
 {
 public:
-    enum class Arrows : unsigned char
+    typedef orientation orientation_type;
+
+    enum class arrows : byte
     {
-        NoArrows,
-        DoubleSided,
-        DoubleSidedExtra
+        none,
+        double_sided,
+        double_sided_extra
     };
 
-    ScrollBar (View*, Orientation = Orientation::Vertical);
-    void setArrowStyle (Arrows);
-    void setRange (int min, int max);
-    void setPosition (int);
-    void setOrientation (Orientation);
+    scrollbar (view*, orientation = orientation::vertical);
 
-    inline Orientation getOrientation () const noexcept
-    { return m_eOrientation; }
+    void set_arrow_style (arrows);
+    void set_range (int min, int max);
+    void set_position (int);
+    void set_orientation (orientation_type);
 
-    inline Arrows getArrowStyle () const noexcept
-    { return m_eArrows; }
+    inline orientation_type orientation () const noexcept
+    { return _M_eOrientation; }
 
-    Signal<void(int)> positionChanged;
+    inline arrows arrow_style () const noexcept
+    { return _M_eArrows; }
+
+public:
+    signal<void(int)> position_changed;
+
+protected:
+    virtual void paint_event (rect const&);
+    virtual void size_event  (point2u);
+    virtual void on_enable   (bool);
 
 private:
-    Arrows      m_eArrows;
-    Orientation m_eOrientation;
-
-    void onPaint  ();
-    void onEnable (bool);
-    void onSize   (Rect const&);
+    arrows           _M_eArrows     ;
+    orientation_type _M_eOrientation;
 };
 
 } } // Ui

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,36 +27,46 @@
 
 #include <cstddef>
 
-namespace cppual { namespace Graphics { namespace GL {
-
-class BufferObject;
-class Shader;
-class SLProgram;
-class Query;
-class Texture;
-class FrameBuffer;
-class VertexBuffer;
-class VertexArray;
+namespace cppual { namespace gfx { namespace gl {
 
 // ====================================================
 
-class Object : public Resource <void, uint>
+class buffer_object         ;
+class shader                ;
+class fragment_shader       ;
+class vertex_shader         ;
+class geometry_shader       ;
+class compute_shader        ;
+class tess_control_shader   ;
+class tess_evaluation_shader;
+class sl_program            ;
+class query                 ;
+class texture               ;
+class frame_buffer          ;
+class vertex_buffer         ;
+class vertex_array          ;
+
+// ====================================================
+
+class object : public resource<void, uint>
 {
 public:
-    typedef std::ptrdiff_t ptrdiff;
-    typedef std::size_t    size_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef std::size_t    size_type      ;
 
-    Object  () noexcept = default;
-    Object  (ResourceType type);
-    Object  (uint  shader_type);
-    ~Object () noexcept;
+    object  () noexcept = default;
+    object  (resource_type type);
+    object  (uint  shader_type);
+    ~object () noexcept;
 
-    ResourceType resType () const noexcept
-    { return m_eResType; }
+    resource_type type () const noexcept
+    { return _M_eResType; }
 
 private:
-    ResourceType m_eResType;
+    resource_type _M_eResType;
 };
+
+// ====================================================
 
 } } } // namespace GL
 

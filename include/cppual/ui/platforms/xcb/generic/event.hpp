@@ -10,7 +10,7 @@ template<typename Event>
 class event {
 public:
     event(const std::shared_ptr<xcb_generic_event_t> & event)
-        : m_event(event)
+        : _M_event(event)
     {}
 
     virtual
@@ -19,25 +19,25 @@ public:
     virtual
     operator const Event &(void) const
     {
-        return reinterpret_cast<const Event &>(*m_event);
+        return reinterpret_cast<const Event &>(*_M_event);
     }
 
     virtual
     const Event &
     operator*(void) const
     {
-        return reinterpret_cast<const Event &>(*m_event);
+        return reinterpret_cast<const Event &>(*_M_event);
     }
 
     virtual
     Event *
     operator->(void) const
     {
-        return reinterpret_cast<Event * const>(m_event.get());
+        return reinterpret_cast<Event * const>(_M_event.get());
     }
 
 protected:
-    std::shared_ptr<xcb_generic_event_t> m_event;
+    std::shared_ptr<xcb_generic_event_t> _M_event;
 }; // class event
 
 } } // namespace cppual::generic

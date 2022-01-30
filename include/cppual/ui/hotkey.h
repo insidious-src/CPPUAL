@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,47 +23,41 @@
 #define CPPUAL_UI_HOTKEY_H_
 #ifdef __cplusplus
 
-#include <atomic>
-#include <iostream>
-#include <functional>
 #include <cppual/signal.h>
 #include <cppual/input/event.h>
 
-using std::function;
-using std::atomic_bool;
-using std::istream;
-using std::ostream;
+#include <atomic>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class HotKey
+class hotkey
 {
 public:
-    typedef Input::Event::KeyData value_type;
+    typedef input::event::key_data value_type;
+    typedef std::atomic_bool       bool_type ;
 
-    HotKey () noexcept;
-    HotKey (value_type const) noexcept;
-    void setKeyCode (value_type const) noexcept;
+    hotkey () noexcept;
+    hotkey (value_type const) noexcept;
+    void set_key_code (value_type const) noexcept;
 
-    inline value_type getKeyCode () const noexcept
-    { return m_gKeyCode; }
+    inline value_type key_code () const noexcept
+    { return _M_gKeyCode; }
 
-    inline bool isTriggered () const noexcept
-    { return m_bIsTriggered.load (std::memory_order_consume); }
+    inline bool is_triggered () const noexcept
+    { return _M_bIsTriggered.load (std::memory_order_consume); }
 
-    Signal<void()> signalTriggered;
-    Signal<void()> signalReleased;
+    signal<void()> signal_triggered;
+    signal<void()> signal_released ;
 
 private:
-    value_type  m_gKeyCode;
-    atomic_bool m_bIsTriggered;
+    void on_key_press (u8) noexcept;
+    void on_key_release (u8) noexcept;
+    void on_key_notify (value_type const) noexcept;
 
-    void onKeyPress (u8) noexcept;
-    void onKeyRelease (u8) noexcept;
-    void onKeyNotify (value_type const) noexcept;
+private:
+    value_type _M_gKeyCode    ;
+    bool_type  _M_bIsTriggered;
 };
-
-
 
 } } // namespace Ui
 

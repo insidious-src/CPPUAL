@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,40 +23,41 @@
 #define CPPUAL_BEHAVIOR_H_
 #ifdef __cplusplus
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
-class DeviceGroup { };
-
-class VBlankOffload : public DeviceGroup
+class device_group
 { };
 
-class ParallelOffload : public DeviceGroup
+class vblank_offload : public device_group
 { };
 
-class CPU : public DeviceGroup
+class parallel_offload : public device_group
 { };
 
-class GPU : public DeviceGroup
+class cpu : public device_group
 { };
 
-class All : public DeviceGroup
+class gpu : public device_group
 { };
 
-class Behaviour
+class all : public device_group
+{ };
+
+class behaviour
 {
 public:
-    Behaviour (DeviceGroup&);
-    Behaviour (Behaviour&&) = default;
-    Behaviour& operator = (Behaviour&&) = default;
-    ~Behaviour ();
+    behaviour (device_group&);
+    behaviour (behaviour&&) = default;
+    behaviour& operator = (behaviour&&) = default;
+    ~behaviour ();
 
-    bool set (DeviceGroup&);
+    bool set (device_group&);
 
-    DeviceGroup& devices () const noexcept
-    { return *m_gDevice; }
+    device_group& devices () const noexcept
+    { return *_M_gDevice; }
 
 private:
-    DeviceGroup* m_gDevice;
+    device_group* _M_gDevice;
 };
 
 } } // namespace Compute

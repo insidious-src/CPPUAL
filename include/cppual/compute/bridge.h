@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,19 +26,19 @@
 #include <cppual/types.h>
 #include <cppual/compute/device.h>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
-class HostConnection : public NonCopyable
+class host_connection : public non_copyable
 {
 public:
-    typedef u32    size_type;
-    typedef Handle pointer;
+    typedef u32             size_type;
+    typedef resource_handle pointer  ;
 
     template <typename T>
-    T handle () const noexcept { return m_pConn.get<T> (); }
+    T handle () const noexcept { return _M_pConn.get<T> (); }
 
 private:
-    pointer m_pConn;
+    pointer _M_pConn;
 };
 
 } } // namespace Platform

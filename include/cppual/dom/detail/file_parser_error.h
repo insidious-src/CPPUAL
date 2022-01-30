@@ -30,7 +30,7 @@ namespace boost { namespace property_tree
                           const string &file,
                           unsigned long l) :
             ptree_error(format_what(msg, file, l)),
-            m_message(msg), m_filename(file), m_line(l)
+            _M_message(msg), _M_filename(file), _M_line(l)
         {
         }
 
@@ -47,26 +47,26 @@ namespace boost { namespace property_tree
         // full message)
         string message() const
         {
-            return m_message;
+            return _M_message;
         }
 
         // Get error filename
         string filename() const
         {
-            return m_filename;
+            return _M_filename;
         }
 
         // Get error line number
         unsigned long line() const
         {
-            return m_line;
+            return _M_line;
         }
 
     private:
 
-        string m_message;
-        string m_filename;
-        unsigned long m_line;
+        string _M_message;
+        string _M_filename;
+        unsigned long _M_line;
 
         // Format error message to be returned by std::runtime_error::what()
         static string format_what(const string &msg,

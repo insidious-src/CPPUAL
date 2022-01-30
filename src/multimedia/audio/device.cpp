@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <regex>
 #include <cppual/multimedia/audio/device.h>
 
-namespace cppual { namespace Audio {
+#include <regex>
+
+namespace cppual { namespace audio {
 
 namespace { namespace Internal { // optimize for internal unit usage
 
@@ -30,17 +31,17 @@ namespace { namespace Internal { // optimize for internal unit usage
 
 } } // anonymous namespace Internal
 
-Device::Device (string_type const&, Type)
+device::device (string_type const&, device_type)
 {
 
 }
 
-bool Device::isExtensionSupported (string_type const&) noexcept
+bool device::is_extension_supported (string_type const&) noexcept
 {
     return false;
 }
 
-bool Device::isExtensionPresent (string_type const&) noexcept
+bool device::is_extension_present (string_type const&) noexcept
 {
     return false;
 }
@@ -60,12 +61,12 @@ bool Device::isExtensionPresent (string_type const&) noexcept
 
 //}
 
-CaptureDevice::~CaptureDevice () noexcept
+capture_device::~capture_device () noexcept
 {
 
 }
 
-bool CaptureDevice::busy () noexcept
+bool capture_device::busy () noexcept
 {
     return false;
 }
@@ -82,49 +83,49 @@ bool CaptureDevice::busy () noexcept
 
 //}
 
-PlaybackDevice::~PlaybackDevice () noexcept
+playback_device::~playback_device () noexcept
 {
 
 }
 
 // ====================================================
 
-Context::Context (PlaybackDevice&, bool) noexcept
+context::context (playback_device&, bool) noexcept
 {
 
 }
 
-Context::~Context () noexcept
+context::~context () noexcept
 {
 
 }
 
-void Context::use ()
+void context::use ()
 {
 
 }
 
-void Context::invalidate () noexcept
+void context::invalidate () noexcept
 {
 
 }
 
-bool Context::setCapability (int, bool) noexcept
-{
-    return false;
-}
-
-bool Context::hasCapability (int) noexcept
+bool context::set_capability (int, bool) noexcept
 {
     return false;
 }
 
-void Context::process () noexcept
+bool context::has_capability (int) noexcept
+{
+    return false;
+}
+
+void context::process () noexcept
 {
 
 }
 
-void Context::suspend () noexcept
+void context::suspend () noexcept
 {
 
 }

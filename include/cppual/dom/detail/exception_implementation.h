@@ -44,7 +44,7 @@ namespace boost { namespace property_tree
 
     template<class D> inline
     ptree_bad_data::ptree_bad_data(const string &w, const D &d):
-        ptree_error(w), m_data(d)
+        ptree_error(w), _M_data(d)
     {
     }
 
@@ -55,7 +55,7 @@ namespace boost { namespace property_tree
     template<class D> inline
     D ptree_bad_data::data() const
     {
-        return boost::any_cast<D>(m_data);
+        return boost::any_cast<D>(_M_data);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ namespace boost { namespace property_tree
 
     template<class P> inline
     ptree_bad_path::ptree_bad_path(const string &w, const P &p):
-        ptree_error(detail::prepare_bad_path_what(w, p)), m_path(p)
+        ptree_error(detail::prepare_bad_path_what(w, p)), _M_path(p)
     {
 
     }
@@ -75,7 +75,7 @@ namespace boost { namespace property_tree
     template<class P> inline
     P ptree_bad_path::path() const
     {
-        return boost::any_cast<P>(m_path);
+        return boost::any_cast<P>(_M_path);
     }
 
 }}

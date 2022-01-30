@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,42 +22,42 @@
 
 #include <cppual/network/protocols/p2p.h>
 
-namespace cppual { namespace Network { namespace P2P {
+namespace cppual { namespace network { namespace p2p {
 
-void TorrentClient::startSession (ProtocolContext&, Packet& /*outgoing_packet*/)
+void TorrentClient::start_session (ProtocolContext&, Packet& /*outgoing_packet*/)
 {
 }
 
-bool TorrentClient::readData (ProtocolContext&, Packet& /*incoming_packet*/)
-{
-    return false;
-}
-
-byte TorrentClient::tryDecode (ProtocolContext&, Packet& /*output_packet*/)
-{
-    return byte ();
-}
-
-byte TorrentClient::encodeContent (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
-{
-    return byte ();
-}
-
-void MagnetClient::startSession (ProtocolContext&, Packet& /*outgoing_packet*/)
-{
-}
-
-bool MagnetClient::readData (ProtocolContext&, Packet& /*incoming_packet*/)
+bool TorrentClient::read_data (ProtocolContext&, Packet& /*incoming_packet*/)
 {
     return false;
 }
 
-byte MagnetClient::tryDecode (ProtocolContext&, Packet& /*output_packet*/)
+byte TorrentClient::try_decode (ProtocolContext&, Packet& /*output_packet*/)
 {
     return byte ();
 }
 
-byte MagnetClient::encodeContent (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
+byte TorrentClient::encode_content (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
+{
+    return byte ();
+}
+
+void MagnetClient::start_session (ProtocolContext&, Packet& /*outgoing_packet*/)
+{
+}
+
+bool MagnetClient::read_data (ProtocolContext&, Packet& /*incoming_packet*/)
+{
+    return false;
+}
+
+byte MagnetClient::try_decode (ProtocolContext&, Packet& /*output_packet*/)
+{
+    return byte ();
+}
+
+byte MagnetClient::encode_content (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
 {
     return byte ();
 }

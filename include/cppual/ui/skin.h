@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,107 +27,126 @@
 #include <cppual/gfx/font.h>
 #include <cppual/ui/view.h>
 
-using cppual::Graphics::Color;
-
-namespace cppual { namespace Ui {
-
-class SkinnableView;
-
-enum class SkinElement : unsigned char
-{
-    Toolbar,
-    Menu,
-    Button,
-    Radio,
-    CheckBox,
-    GroupBox,
-    Combo,
-    List,
-    Tree,
-    Progress,
-    TabView,
-    Slider,
-    ScrollBar,
-    Tooltip,
-    Switch,
-    Roller,
-    Separator,
-    Window
-};
-
-enum class IconGroup : unsigned char
-{
-    Actions,
-    Animations,
-    Apps,
-    Categories,
-    Devices,
-    Emblems,
-    MIMETypes,
-    Places,
-    States
-};
-
-// Static - always stays the same; Dynamic - changes its properties on specific events
-enum class SkinType : bool { Static, Dynamic };
+namespace cppual { namespace ui {
 
 // =========================================================
 
-class ISkin : public NonCopyableVirtual
+class skinnable_view;
+
+// =========================================================
+
+enum class skin_element : byte
 {
-public:
-    typedef Graphics::Font::Format font_format;
-    typedef Graphics::Image        image_type ;
-    typedef Handle                 window_type;
-
-    virtual image_type* getIcon (IconGroup     group,
-                                 string const& icon_name,
-                                 Rect const&   size) = 0;
-
-    virtual image_type* getImage (SkinElement element,
-                                  int         image_id) = 0;
-
-    virtual font_format getFont  (SkinElement element, int font_id)  = 0;
-    virtual Color       getColor (SkinElement element, int color_id) = 0;
-    virtual int         getValue (SkinElement element, int value_id) = 0;
-    virtual SkinType    getType  () const = 0;
-    virtual bool        reload   () = 0;
-
-    static ISkin* getDefault () noexcept;
-    static bool   setDefault (ISkin* skin) noexcept;
+    toolbar,
+    menu,
+    button,
+    radio,
+    check_box,
+    group_box,
+    combo,
+    list,
+    tree,
+    progress,
+    tab_view,
+    slider,
+    scrollbar,
+    tooltip,
+    switcher,
+    roller,
+    separator,
+    window
 };
 
 // =========================================================
 
-class SkinnableView : public View
+enum class icon_group : byte
+{
+    action,
+    alert,
+    av,
+    common,
+    communication,
+    content,
+    animation,
+    apps,
+    categories,
+    device,
+    emblem,
+    editor,
+    file,
+    hardware,
+    image,
+    maps,
+    mime_types,
+    navigation,
+    notification,
+    places,
+    social,
+    states,
+    toggle
+};
+
+// =========================================================
+
+/// statically - always stays the same; dynamically - changes its properties on specific events
+enum class skin_loading : byte { statically, dynamically };
+
+// =========================================================
+
+class skin_interface : public non_copyable_virtual
 {
 public:
-    typedef View::event_type                                        event_type;
-    //typedef typename Signal<void(event_type::PaintData)>::slot_type skin_conn;
+    typedef gfx::font::format_type font_format;
+    typedef gfx::image_interface   image_type ;
+    typedef gfx::color             color_type ;
+    typedef resource_handle        window_type;
+    typedef string                 string_type;
 
-    SkinnableView ();
-    SkinnableView (SkinnableView&&);
-    SkinnableView (SkinnableView const&);
-    SkinnableView& operator = (SkinnableView&&);
-    SkinnableView& operator = (SkinnableView const&);
+    virtual image_type* icon (icon_group         group,
+                              string_type const& icon_name,
+                              rect const&        size) = 0;
 
-    SkinnableView (View* pParent, Rect const& gRect, u32 uScreen = 0)
-    : View (pParent, gRect, uScreen),
-      m_pSkin ()
+    virtual image_type*  image (skin_element element, int image_id) = 0;
+    virtual font_format  font  (skin_element element, int font_id ) = 0;
+    virtual color_type   color (skin_element element, int color_id) = 0;
+    virtual int          value (skin_element element, int value_id) = 0;
+    virtual skin_loading loading_type () const = 0;
+    virtual bool         reload () = 0;
+
+    static skin_interface* get_default () noexcept;
+    static bool            set_default (skin_interface* skin) noexcept;
+};
+
+// =========================================================
+
+class skinnable_view : public view
+{
+public:
+    typedef view::event_type event_type;
+
+    skinnable_view ();
+    skinnable_view (skinnable_view&&);
+    skinnable_view (skinnable_view const&);
+    skinnable_view& operator = (skinnable_view&&);
+    skinnable_view& operator = (skinnable_view const&);
+
+    skinnable_view (view* pParent, rect const& gRect, u32 uScreen = 0)
+    : view (pParent, gRect, uScreen),
+      _M_pSkin ()
     { }
 
-    void setSkin (ISkin*) noexcept;
+    void set_skin (skin_interface*) noexcept;
 
-    inline ISkin* getSkin () noexcept
-    { return m_pSkin; }
+    inline skin_interface* skin () noexcept
+    { return _M_pSkin; }
 
 protected:
-    ISkin* m_pSkin;
+    skin_interface* _M_pSkin;
 
-    virtual void onSkinChange () { }
+    virtual void on_skin_change () { }
 
 private:
-    void changeSkin ();
+    void change_skin ();
 };
 
 } } // namespace Ui

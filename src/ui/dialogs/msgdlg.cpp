@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,54 +23,54 @@
 #include <cppual/ui/controls/label.h>
 #include <cppual/ui/controls/button.h>
 
-using namespace cppual::Graphics;
+using namespace cppual::gfx;
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class MessageBox final : public Dialog
+class message_box final : public dialog
 {
-    //Label m_gMessage;
+    //Label _M_gMessage;
 
-    void onInit ();
-    void onEnd  ();
+    void on_init ();
+    void on_end  ();
 
-    using Dialog::Dialog;
+    using dialog::dialog;
 };
 
-Dialog::Result showQuestion (string&& gTitle,
-                             string&& /*gQuestion*/,
-                             Results  /*gAnswers*/,
-                             Window*  pOwner)
+dialog::result show_question (string&& gTitle,
+                              string&& /*gQuestion*/,
+                              results  /*gAnswers*/,
+                              window*  pOwner)
 {
-    MessageBox gQuestionBox (nullptr, Rect (), std::forward<string> (gTitle), nullptr);
+    message_box gQuestionBox (nullptr, rect (), std::forward<string> (gTitle), nullptr);
 
     if (gQuestionBox.valid ())
     {
-        gQuestionBox.showInTaskbar (false);
-        gQuestionBox.showModal (pOwner);
-        return gQuestionBox.getResult ();
+        gQuestionBox.show_in_taskbar (false);
+        gQuestionBox.show_modal (pOwner);
+        return gQuestionBox.get_result ();
     }
 
-    return Dialog::Close;
+    return dialog::result::close;
 }
 
-void showMessage (string&&    gTitle,
-                  string&&    /*gMessage*/,
-                  MessageType /*eType*/,
-                  Window*     pOwner)
+void show_message (string&&    gTitle,
+                   string&&    /*gMessage*/,
+                   message_type /*eType*/,
+                   window*     pOwner)
 {
-    MessageBox gMessageBox (nullptr, Rect (), std::forward<string> (gTitle), nullptr);
+    message_box gMessageBox (nullptr, rect (), std::forward<string> (gTitle), nullptr);
 
     if (gMessageBox.valid ())
     {
-        gMessageBox.showInTaskbar (false);
-        gMessageBox.showModal (pOwner);
+        gMessageBox.show_in_taskbar (false);
+        gMessageBox.show_modal (pOwner);
     }
 }
 
-void MessageBox::onInit ()
+void message_box::on_init ()
 {
-//    m_gMessage.create (this,
+//    _M_gMessage.create (this,
 //                       "",
 //                       Rect (100, 100,
 //                             static_cast<u16> (geometry ().width  () - 20u),
@@ -78,7 +78,7 @@ void MessageBox::onInit ()
 //                       );
 }
 
-void MessageBox::onEnd ()
+void message_box::on_end ()
 {
 }
 

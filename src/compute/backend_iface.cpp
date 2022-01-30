@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,14 @@
 #include <cppual/compute/backend_iface.h>
 #include <cppual/process/plugin.h>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
 namespace { // optimize for internal unit usage
 
-class Initializer final
+class initializer final
 {
 private:
-    Factory::manager_type mgr    ;
+    factory::manager_type mgr    ;
     shared_factory        factory;
 
     constexpr cchar* platform_name () noexcept
@@ -37,13 +37,13 @@ private:
         return "libcppual-compute-opencl";
     }
 
-    inline static Initializer& platform () noexcept
+    inline static initializer& platform () noexcept
     {
-        static Initializer init;
+        static initializer init;
         return init;
     }
 
-    inline Initializer ()
+    inline initializer ()
     {
         if (mgr.load_plugin(platform_name())) factory = mgr.plugin(platform_name()).interface();
     }
@@ -57,14 +57,14 @@ public:
 
 } // anonymous namespace
 
-shared_factory Factory::instance ()
+shared_factory factory::instance ()
 {
-    return Initializer::instance ();
+    return initializer::instance ();
 }
 
-bool Factory::hasValidInstance () noexcept
+bool factory::has_valid_instance () noexcept
 {
-    return Initializer::instance () != nullptr;
+    return initializer::instance () != nullptr;
 }
 
 } } // namespace Compute

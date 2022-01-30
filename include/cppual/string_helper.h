@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 namespace cppual {
 
 template <typename T = char,
-          typename Allocator = Memory::Allocator<T>,
+          typename Allocator = memory::allocator<T>,
           typename  = typename std::enable_if<is_char<T>::value>::type>
 auto split_string(std::basic_string<T, std::char_traits<T>, Allocator> const& str,
                   T delim)

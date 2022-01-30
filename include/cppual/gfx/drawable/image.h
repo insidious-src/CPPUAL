@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,110 +27,116 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/memory/allocator.h>
 
-using cppual::Memory::MemoryResource;
+namespace cppual { namespace gfx {
 
-namespace cppual { namespace Graphics {
+// =========================================================
 
-class Image : public IDrawable2D, public ITransformable2D
+using memory::memory_resource;
+
+// =========================================================
+
+class image_interface : public drawable2d_interface, public transformable2d_interface
 {
 public:
     typedef string string_type;
 
-    virtual VirtualBuffer* map () noexcept = 0;
-    virtual bool           isLoaded () const noexcept = 0;
+    virtual virtual_buffer* map () noexcept = 0;
+    virtual bool           is_loaded () const noexcept = 0;
 };
 
 // =========================================================
 
 /**
- * @class RasterImage
+ * @class raster_image
  * @brief Raster image parser for jpg, png, bmp, tga, gif
  */
 
-class RasterImage final : public Image, private Memory::Allocator<RasterImage, MemoryResource>
+class raster_image final : public image_interface, private memory::allocator<raster_image, memory_resource>
 {
 public:
-    RasterImage  () = delete;
-    ~RasterImage ();
-    void draw (Transform2D const& info);
+    raster_image  () = delete;
+    ~raster_image ();
 
-    inline RasterImage (string_type const& gPath,
-                        MemoryResource&        pAtor,
-                        PixelFormat const& gFomat = PixelFormat (),
-                        Color              gMask  = Color       ())
-    : Allocator (pAtor),
-      m_gPixBuffer ({ 0, 0 }, gFomat),
-      m_gColorMask (gMask),
-      m_bIsLoaded  (parseImage (gPath))
+    void draw (transform2d const& info);
+
+    inline raster_image (string_type  const& gPath,
+                         memory_resource&    pAtor  = *memory::get_default_resource (),
+                         pixel_format const& gFomat = pixel_format (),
+                         color               gMask  = color        ())
+    : allocator (pAtor),
+      _M_gPixBuffer ({ 0, 0 }, gFomat),
+      _M_gColorMask (gMask),
+      _M_bIsLoaded  (parse_image (gPath))
     { }
 
-    inline Color mask     () const noexcept { return m_gColorMask; }
-    inline bool  isLoaded () const noexcept { return m_bIsLoaded ; }
+    inline color mask      () const noexcept { return _M_gColorMask; }
+    inline bool  is_loaded () const noexcept { return _M_bIsLoaded ; }
 
-    inline DeviceType type () const noexcept
-    { return DeviceType::GL; }
+    inline device_backend type () const noexcept
+    { return device_backend::gl; }
 
-    inline void setMask (Color gMask) noexcept
-    { m_gColorMask = gMask; }
+    inline void set_mask (color gMask) noexcept
+    { _M_gColorMask = gMask; }
 
-    inline VirtualBuffer* map () noexcept
-    { return &m_gPixBuffer; }
+    inline virtual_buffer* map () noexcept
+    { return &_M_gPixBuffer; }
 
 private:
-    VirtualBuffer m_gPixBuffer;
-    Color         m_gColorMask;
-    cbool         m_bIsLoaded ;
+    virtual_buffer _M_gPixBuffer;
+    color          _M_gColorMask;
+    cbool          _M_bIsLoaded ;
 
-    bool parseImage (string_type const&);
+    bool parse_image (string_type const&);
 };
 
 // =========================================================
 
 /**
- * @class VectorImage
+ * @class vector_image
  * @brief Vector image parser for svg
  */
 
-class VectorImage final : public Image, private Memory::Allocator<VectorImage, MemoryResource>
+class vector_image final : public image_interface, private memory::allocator<vector_image, memory_resource>
 {
 public:
-    VectorImage  () = delete;
-    ~VectorImage ();
-    void draw (Transform2D const& info);
+    vector_image  () = delete;
+    ~vector_image ();
 
-    inline DeviceType type () const noexcept
-    { return DeviceType::GL; }
+    void draw (transform2d const& info);
 
-    inline VirtualBuffer* map () noexcept
-    { return &m_gPixBuffer; }
+    inline device_backend type () const noexcept
+    { return device_backend::gl; }
 
-    inline bool isLoaded () const noexcept
-    { return m_bIsLoaded; }
+    inline virtual_buffer* map () noexcept
+    { return &_M_gPixBuffer; }
 
-    inline VectorImage (string_type const& gPath,
-                        MemoryResource&        pAtor,
-                        PixelFormat const& gFomat = PixelFormat ())
-    : Allocator (pAtor),
-      m_gPixBuffer ({ 0, 0 },   gFomat),
-      m_bIsLoaded  (parseImage (gPath))
+    inline bool is_loaded () const noexcept
+    { return _M_bIsLoaded; }
+
+    inline vector_image (string_type const&  gPath,
+                         memory_resource&    pAtor  = *memory::get_default_resource (),
+                         pixel_format const& gFomat = pixel_format ())
+    : allocator (pAtor),
+      _M_gPixBuffer ({ 0, 0 },   gFomat),
+      _M_bIsLoaded  (parse_image (gPath))
     { }
 
 private:
-    VirtualBuffer m_gPixBuffer;
-    cbool         m_bIsLoaded ;
+    virtual_buffer _M_gPixBuffer;
+    cbool          _M_bIsLoaded ;
 
-    bool parseImage (string_type const&);
+    bool parse_image (string_type const&);
 };
 
 // =========================================================
 
-class Icon final
+class icon
 {
 public:
     typedef string string_type;
 
-    Icon () { }
-    Icon (string_type const&) { }
+    icon () { }
+    icon (string_type const&) { }
     bool load (string_type const&) { return false; }
 };
 

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@
 
 #include <iostream>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-namespace { namespace FreeType { // optimize for internal unit usage
+namespace { namespace freetype { // optimize for internal unit usage
 
 typedef ::FT_Library   library_pointer ;
 typedef ::FT_Face      face_pointer    ;
@@ -52,30 +52,30 @@ inline library_pointer instance () noexcept
 
 // =========================================================
 
-Font::Atlas::Atlas (string_type const& gName)
-: m_gName (gName),
-  m_pFace ()
+font::atlas::atlas (string_type const& gName)
+: _M_gName (gName),
+  _M_pFace ()
 {
-    FreeType::face_pointer tmp_handle;
+    freetype::face_pointer tmp_handle;
 
-    if (::FT_New_Face (FreeType::instance (), gName.c_str (), 0, &tmp_handle))
+    if (::FT_New_Face (freetype::instance (), gName.c_str (), 0, &tmp_handle))
         std::cerr << "Couldn't load font " << gName << std::endl;
     else
-        m_pFace = tmp_handle;
+        _M_pFace = tmp_handle;
 }
 
-Font::Atlas::~Atlas ()
+font::atlas::~atlas ()
 {
-    if (m_pFace) ::FT_Done_Face (static_cast<FreeType::face_pointer> (m_pFace));
+    if (_M_pFace) ::FT_Done_Face (static_cast<freetype::face_pointer> (_M_pFace));
 }
 
 // =========================================================
 
-Font::Font ()
+font::font ()
 {
 }
 
-Font::~Font ()
+font::~font ()
 {
 }
 

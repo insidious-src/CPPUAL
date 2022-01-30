@@ -115,10 +115,10 @@
     \see RAPIDJSON_NAMESPACE
 */
 #ifndef RAPIDJSON_NAMESPACE
-#define RAPIDJSON_NAMESPACE cppual::Json
+#define RAPIDJSON_NAMESPACE cppual::json
 #endif
 #ifndef RAPIDJSON_NAMESPACE_BEGIN
-#define RAPIDJSON_NAMESPACE_BEGIN namespace cppual { namespace Json {
+#define RAPIDJSON_NAMESPACE_BEGIN namespace cppual { namespace json {
 #endif
 #ifndef RAPIDJSON_NAMESPACE_END
 #define RAPIDJSON_NAMESPACE_END } } // namespace Json
@@ -406,7 +406,7 @@
 #ifdef RAPIDJSON_DOXYGEN_RUNNING
 #define RAPIDJSON_NO_SIZETYPEDEFINE
 #endif
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 //! Size type (for string lengths, array sizes, etc.)
 /*! RapidJSON uses 32-bit array/string indices even on 64-bit platforms,
     instead of using \c size_t. Users may override the SizeType by defining
@@ -417,7 +417,7 @@ typedef unsigned SizeType;
 #endif
 
 // always import std::size_t to rapidjson namespace
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 using std::size_t;
 } } // namespace Json
 
@@ -723,7 +723,7 @@ template <size_t x> struct StaticAssertTest {};
     \brief main RapidJSON namespace
     \see RAPIDJSON_NAMESPACE
 */
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! Type of JSON value
 enum Type {

@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class SHARED_API XDisplay final : public IDisplay
+class SHARED_API XDisplay final : public display_interface
 {
 public:
     XDisplay () = delete;
@@ -39,10 +39,10 @@ public:
     uint screenCount () const noexcept;
     void flush       () noexcept;
 
-    string_type name () const { return m_gName; }
+    string_type name () const { return _M_gName; }
 
 private:
-    string_type m_gName;
+    string_type _M_gName;
 };
 
 } } // namespace Ui

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,89 +26,96 @@
 #include <cppual/ui/skin.h>
 #include <cppual/string.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class AbstractButton : public SkinnableView
+// =========================================================
+
+class abstract_button : public skinnable_view
 {
 public:
-    void setLabel (string const&);
-    ~AbstractButton () noexcept;
+    void set_label (string_type const&);
+    ~abstract_button () noexcept;
 
-    inline string getLabel () const noexcept
-    { return m_gLabel; }
+    inline string_type label () const noexcept
+    { return _M_gLabel; }
 
 protected:
-    Graphics::Font m_gFont;
-    string         m_gLabel;
+    gfx::font _M_gFont ;
+    string    _M_gLabel;
 };
 
 // =========================================================
 
-class PushButton : public AbstractButton
+class push_button : public abstract_button
 {
 public:
-    PushButton (View* parent, string const& text);
+    push_button (view* parent, string const& text);
     void press ();
     void release ();
 
-    inline bool isPushed () const noexcept
-    { return m_bIsPushed; }
+    inline bool is_pushed () const noexcept
+    { return _M_bIsPushed; }
+
+protected:
+    void paint_event (rect const&);
+    void size_event (point2u);
+    void focus_event (bool);
 
 private:
-    bool m_bIsPushed;
-
-    void paintEvent (Rect const&);
-    void sizeEvent (point2u);
-    void focusEvent (bool);
+    bool _M_bIsPushed;
 };
 
 // =========================================================
 
-class RadioBox : public AbstractButton
+class radio_box : public abstract_button
 {
 public:
-    RadioBox (View* parent, string const& text, bool selected = false);
+    radio_box (view* parent, string const& text, bool selected = false);
     void select ();
     void clear ();
 
-    inline bool isSelected () const noexcept
-    { return m_bIsSelected; }
+    inline bool is_selected () const noexcept
+    { return _M_bIsSelected; }
+
+protected:
+    void paint_event (rect const&);
+    void size_event (point2u);
+    void focus_event (bool);
 
 private:
-    bool m_bIsSelected;
-
-    void paintEvent (Rect const&);
-    void sizeEvent (point2u);
-    void focusEvent (bool);
+    bool _M_bIsSelected;
 };
 
 // =========================================================
 
-enum class CheckState : unsigned char
+enum class check_state : byte
 {
-    Unchecked,
-    Checked,
-    Intermediate
+    unchecked,
+    checked,
+    intermediate
 };
 
-class CheckBox : public AbstractButton
+// =========================================================
+
+class check_box : public abstract_button
 {
 public:
-    CheckBox (View*         parent,
-              string const& text  ,
-              CheckState    state = CheckState::Unchecked);
+    check_box (view*         parent,
+               string const& text  ,
+               check_state   state = check_state::unchecked);
 
-    void setCheckState (CheckState);
+    void set_state (check_state);
 
-    inline CheckState getCheckState () const noexcept
-    { return m_eCheckState; }
+    inline check_state state () const noexcept
+    { return _M_eCheckState; }
+
+protected:
+    void paint_event (rect const&);
+    void size_event  (point2u);
+    void focus_event (bool);
 
 private:
-    CheckState m_eCheckState;
-
-    void paintEvent (Rect const&);
-    void sizeEvent  (point2u);
-    void focusEvent (bool);
+    check_state _M_eCheckState;
 };
 
 } } // namespace Ui

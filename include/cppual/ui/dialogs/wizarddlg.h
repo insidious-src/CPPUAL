@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,20 +24,20 @@
 
 #include <cppual/ui/dialog.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-class WizardPage
+class wizard_page
 {
 public:
-    enum Type
+    enum type
     {
-        Introduction = 1 << 0,
-        License,
-        InstallDir
+        introduction = 1 << 0,
+        license      = 1 << 1,
+        install_dir  = 1 << 2
     };
 };
 
-class WizardDialog : public Dialog
+class wizard_dialog : public dialog
 {
 };
 

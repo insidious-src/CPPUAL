@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,24 +26,24 @@
 #include <cppual/network/transport/socket.h>
 #include <cppual/network/transport/tcp.h>
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
-class TcpListener final : public TransportSocket
+class TcpListener : public TransportSocket
 {
 public:
-    TcpListener () = delete;
-    TcpListener (Address const&) noexcept;
+    TcpListener ();
+    TcpListener (Address const& addr, u16 port) noexcept;
 
     bool accept (TcpStream&) noexcept;
-    bool listen (u16 port) noexcept;
+    bool listen (Address const& addr, u16 port) noexcept;
 
     bool isListening () const noexcept
-    { return m_bIsListening; }
+    { return _M_bIsListening; }
 
 private:
-    Address m_gAddr;
-    ushort  m_uPort;
-    bool    m_bIsListening;
+    Address _M_gAddr        { };
+    ushort  _M_uPort        { };
+    bool    _M_bIsListening { };
 };
 
 } } // namespace Network

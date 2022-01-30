@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,98 +21,98 @@
 
 #include <cppual/ui/controls/button.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-void AbstractButton::setLabel (string const& gText)
+void abstract_button::set_label (string_type const& gText)
 {
-    m_gLabel = gText;
-    if (valid () and isHidden ()) refresh ();
+    _M_gLabel = gText;
+    if (valid () and is_hidden ()) refresh ();
 }
 
-AbstractButton::~AbstractButton () noexcept
+abstract_button::~abstract_button () noexcept
 {
 }
 
 // =========================================================
 
-PushButton::PushButton (View*, string const&)
+push_button::push_button (view*, string_type const&)
 {
 }
 
-void PushButton::press ()
+void push_button::press ()
 {
 }
 
-void PushButton::release ()
+void push_button::release ()
 {
 }
 
-void PushButton::paintEvent (Rect const&)
+void push_button::paint_event (rect const&)
 {
 //    Rect gBtnRect (getSurface ()->getRect ());
-//    IAbstractImage* pBackImage = m_pSkin->getImage (SkinElement::Button, 0);
-//    CPaintWorker cPainter (m_pSurface, true);
+//    IAbstractImage* pBackImage = _M_pSkin->getImage (SkinElement::Button, 0);
+//    CPaintWorker cPainter (_M_pSurface, true);
 
 //    if (!cPainter.IsActive ()) return;
 //    cPainter.SetActiveObject (pBackImage);
 //    cPainter.DrawImage (gBtnRect);
-//    cPainter.SetActiveObject (&m_gFont);
-    //    cPainter.DrawText (gBtnRect, &m_Label);
+//    cPainter.SetActiveObject (&_M_gFont);
+    //    cPainter.DrawText (gBtnRect, &_M_Label);
 }
 
-void PushButton::sizeEvent (point2u)
+void push_button::size_event (point2u)
 {
 }
 
-void PushButton::focusEvent (bool)
-{
-}
-
-// =========================================================
-
-RadioBox::RadioBox (View*, string const&, bool)
-{
-}
-
-void RadioBox::select ()
-{
-}
-
-void RadioBox::clear ()
-{
-}
-
-void RadioBox::paintEvent (Rect const&)
-{
-}
-
-void RadioBox::sizeEvent (point2u)
-{
-}
-
-void RadioBox::focusEvent (bool)
+void push_button::focus_event (bool)
 {
 }
 
 // =========================================================
 
-CheckBox::CheckBox (View*, string const&, CheckState)
+radio_box::radio_box (view*, string_type const&, bool)
 {
 }
 
-void CheckBox::setCheckState (CheckState)
+void radio_box::select ()
 {
 }
 
-void CheckBox::paintEvent (Rect const&)
+void radio_box::clear ()
 {
 }
 
-void CheckBox::sizeEvent (point2u)
+void radio_box::paint_event (rect const&)
 {
 }
 
-void CheckBox::focusEvent (bool)
+void radio_box::size_event (point2u)
+{
+}
+
+void radio_box::focus_event (bool)
+{
+}
+
+// =========================================================
+
+check_box::check_box (view*, string_type const&, check_state)
+{
+}
+
+void check_box::set_state (check_state)
+{
+}
+
+void check_box::paint_event (rect const&)
+{
+}
+
+void check_box::size_event (point2u)
+{
+}
+
+void check_box::focus_event (bool)
 {
 }
 

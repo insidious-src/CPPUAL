@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,35 +24,37 @@
 #ifdef __cplusplus
 
 #include <cppual/network/packet.h>
+#include <cppual/noncopyable.h>
 
-namespace cppual { namespace Network {
+namespace cppual { namespace network {
 
 class ProtocolContext;
 
-class IProtocol
+class Protocol : public non_copyable_virtual
 {
 public:
-    ProtocolContext* createContext  ();
-    bool             addLowerLayer  (IProtocol*);
-    IProtocol*       getLowestLayer () const;
+    ProtocolContext* create_context  ();
+    bool             add_lower_layer  (Protocol*);
+    Protocol*        lowest_layer () const;
 
-    virtual uint getRequiredOutputSize        (uint max_input);
-    virtual uint getRequiredRecyclableStreams (uint max_connections,
-                                               uint max_concurrent_calls);
+    virtual uint required_output_size        (uint max_input);
+    virtual uint required_recyclable_streams (uint max_connections,
+                                              uint max_concurrent_calls);
 
-    virtual void startSession  (ProtocolContext&, Packet& outgoing_packet) = 0;
-    virtual bool readData      (ProtocolContext&, Packet& incoming_packet) = 0;
-    virtual byte tryDecode     (ProtocolContext&, Packet&   output_packet) = 0;
-    virtual byte encodeContent (ProtocolContext&,
-                                Packet&  input_packet,
-                                Packet& output_packet) = 0;
+    virtual void start_session  (ProtocolContext&, Packet& outgoing_packet) = 0;
+    virtual bool read_data      (ProtocolContext&, Packet& incoming_packet) = 0;
+    virtual byte try_decode     (ProtocolContext&, Packet&   output_packet) = 0;
 
-    IProtocol* getUpperLayer () const { return m_pUpperProt; }
-    IProtocol* getLowerLayer () const { return m_pLowerProt; }
+    virtual byte encode_content (ProtocolContext&,
+                                 Packet&  input_packet,
+                                 Packet& output_packet) = 0;
+
+    Protocol* upper_layer () const { return _M_pUpperProt; }
+    Protocol* lower_layer () const { return _M_pLowerProt; }
 
 private:
-    IProtocol* m_pUpperProt;
-    IProtocol* m_pLowerProt;
+    Protocol* _M_pUpperProt;
+    Protocol* _M_pLowerProt;
 };
 
 } } // Network

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,67 +21,66 @@
 
 #include <cppual/ui/skin.h>
 #include <cppual/ui/queue.h>
-#include <functional>
 
-using std::placeholders::_1;
+namespace cppual { namespace ui {
 
-namespace cppual { namespace Ui {
+// =========================================================
 
-bool ISkin::setDefault (ISkin* pSkin) noexcept
+bool skin_interface::set_default (skin_interface* pSkin) noexcept
 {
     if (!pSkin) return false;
 
-    EventQueue::events ().winPaint (window_type (),
-                                    Input::PaintEvent (Rect ()).data ().paint);
+    event_queue::events ().winPaint (window_type (),
+                                     input::paint_event (rect ()).data ().paint);
     return true;
 }
 
-ISkin* ISkin::getDefault () noexcept
+skin_interface* skin_interface::get_default () noexcept
 {
     return nullptr;
 }
 
 // =========================================================
 
-SkinnableView::SkinnableView ()
-: m_pSkin ()
+skinnable_view::skinnable_view ()
+: _M_pSkin ()
 {
 }
 
-SkinnableView::SkinnableView (SkinnableView&& gObj)
-: View (gObj),
-  m_pSkin (gObj.m_pSkin)
+skinnable_view::skinnable_view (skinnable_view&& gObj)
+: view (gObj),
+  _M_pSkin (gObj._M_pSkin)
 {
 }
 
-SkinnableView::SkinnableView (SkinnableView const& gObj)
-: View (gObj),
-  m_pSkin (gObj.m_pSkin)
+skinnable_view::skinnable_view (skinnable_view const& gObj)
+: view (gObj),
+  _M_pSkin (gObj._M_pSkin)
 {
 }
 
-SkinnableView& SkinnableView::operator = (SkinnableView&& gObj)
+skinnable_view& skinnable_view::operator = (skinnable_view&& gObj)
 {
     if (this == &gObj) return *this;
     return *this;
 }
 
-SkinnableView& SkinnableView::operator = (SkinnableView const& gObj)
+skinnable_view& skinnable_view::operator = (skinnable_view const& gObj)
 {
     if (this == &gObj) return *this;
     return *this;
 }
 
-void SkinnableView::setSkin (ISkin* pNewSkin) noexcept
+void skinnable_view::set_skin (skin_interface* pNewSkin) noexcept
 {
-    m_pSkin = pNewSkin;
+    _M_pSkin = pNewSkin;
     if (valid ()) refresh ();
 }
 
-void SkinnableView::changeSkin ()
+void skinnable_view::change_skin ()
 {
     refresh ();
-    onSkinChange ();
+    on_skin_change ();
 }
 
 } } // namespace Ui

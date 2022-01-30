@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,101 +27,101 @@ namespace cppual { namespace Compute {
 //template <>
 //Object<Device>::~Object () noexcept
 //{
-//    if (m_object != nullptr) ::clReleaseDevice (m_object.get<CL::device_type> ());
+//    if (_M_object != nullptr) ::clReleaseDevice (_M_object.get<CL::device_type> ());
 //}
 
 //template <>
 //Object<Behaviour>::~Object () noexcept
 //{
-//    if (m_object != nullptr) ::clReleaseContext (m_object.get<CL::context_type> ());
+//    if (_M_object != nullptr) ::clReleaseContext (_M_object.get<CL::context_type> ());
 //}
 
 //template <>
 //Object<Kernel>::~Object () noexcept
 //{
-//    if (m_object != nullptr) ::clReleaseKernel (m_object.get<CL::kernel_type> ());
+//    if (_M_object != nullptr) ::clReleaseKernel (_M_object.get<CL::kernel_type> ());
 //}
 
 //template <>
 //Object<Program>::~Object () noexcept
 //{
-//    if (m_object != nullptr) ::clReleaseProgram (m_object.get<CL::program_type> ());
+//    if (_M_object != nullptr) ::clReleaseProgram (_M_object.get<CL::program_type> ());
 //}
 
 //template <>
 //Object<DeviceQueue>::~Object () noexcept
 //{
-//    if (m_object != nullptr) ::clReleaseCommandQueue (m_object.get<CL::queue_type> ());
+//    if (_M_object != nullptr) ::clReleaseCommandQueue (_M_object.get<CL::queue_type> ());
 //}
 
 //template <>
 //Object<GlobalMemory>::~Object () noexcept
 //{
-//    if (m_object != nullptr) ::clReleaseMemObject (m_object.get<CL::memory_type> ());
+//    if (_M_object != nullptr) ::clReleaseMemObject (_M_object.get<CL::memory_type> ());
 //}
 
 //template <>
 //Object<Event>::~Object () noexcept
 //{
-//    if (m_object != nullptr) ::clReleaseEvent (m_object.get<cl_event> ());
+//    if (_M_object != nullptr) ::clReleaseEvent (_M_object.get<cl_event> ());
 //}
 
 //template <>
 //Object<Device>::Object (Object const& rhs) noexcept
-//: m_object (rhs.m_object)
+//: _M_object (rhs._M_object)
 //{
-//    if (m_object != nullptr) ::clRetainDevice (m_object.get<CL::device_type> ());
+//    if (_M_object != nullptr) ::clRetainDevice (_M_object.get<CL::device_type> ());
 //}
 
 //template <>
 //Object<Behaviour>::Object (Object const& rhs) noexcept
-//: m_object (rhs.m_object)
+//: _M_object (rhs._M_object)
 //{
-//    if (m_object != nullptr) ::clRetainContext (m_object.get<CL::context_type> ());
+//    if (_M_object != nullptr) ::clRetainContext (_M_object.get<CL::context_type> ());
 //}
 
 //template <>
 //Object<Kernel>::Object (Object const& rhs) noexcept
-//: m_object (rhs.m_object)
+//: _M_object (rhs._M_object)
 //{
-//    if (m_object != nullptr) ::clRetainKernel (m_object.get<CL::kernel_type> ());
+//    if (_M_object != nullptr) ::clRetainKernel (_M_object.get<CL::kernel_type> ());
 //}
 
 //template <>
 //Object<Program>::Object (Object const& rhs) noexcept
-//: m_object (rhs.m_object)
+//: _M_object (rhs._M_object)
 //{
-//    if (m_object != nullptr) ::clRetainProgram (m_object.get<CL::program_type> ());
+//    if (_M_object != nullptr) ::clRetainProgram (_M_object.get<CL::program_type> ());
 //}
 
 //template <>
 //Object<DeviceQueue>::Object (Object const& rhs) noexcept
-//: m_object (rhs.m_object)
+//: _M_object (rhs._M_object)
 //{
-//    if (m_object != nullptr) ::clRetainCommandQueue (m_object.get<CL::queue_type> ());
+//    if (_M_object != nullptr) ::clRetainCommandQueue (_M_object.get<CL::queue_type> ());
 //}
 
 //template <>
 //Object<Event>::Object (Object const& rhs) noexcept
-//: m_object (rhs.m_object)
+//: _M_object (rhs._M_object)
 //{
-//    if (m_object != nullptr) ::clRetainEvent (m_object.get<CL::event_type> ());
+//    if (_M_object != nullptr) ::clRetainEvent (_M_object.get<CL::event_type> ());
 //}
 
 //template <>
 //Object<GlobalMemory>::Object (Object const& rhs) noexcept
-//: m_object (rhs.m_object)
+//: _M_object (rhs._M_object)
 //{
-//    if (m_object != nullptr) ::clRetainMemObject (m_object.get<CL::memory_type> ());
+//    if (_M_object != nullptr) ::clRetainMemObject (_M_object.get<CL::memory_type> ());
 //}
 
 //template <>
 //Object<Device>& Object<Device>::operator = (Object const& rhs) noexcept
 //{
 //    if (this == &rhs) return *this;
-//    if (m_object != nullptr) ::clReleaseDevice (m_object.get<CL::device_type> ());
-//    m_object = rhs.m_object;
-//    if (m_object != nullptr) ::clRetainDevice  (m_object.get<CL::device_type> ());
+//    if (_M_object != nullptr) ::clReleaseDevice (_M_object.get<CL::device_type> ());
+//    _M_object = rhs._M_object;
+//    if (_M_object != nullptr) ::clRetainDevice  (_M_object.get<CL::device_type> ());
 //    return *this;
 //}
 
@@ -129,9 +129,9 @@ namespace cppual { namespace Compute {
 //Object<Behaviour>& Object<Behaviour>::operator = (Object const& rhs) noexcept
 //{
 //    if (this == &rhs) return *this;
-//    if (m_object != nullptr) ::clReleaseContext (m_object.get<CL::context_type> ());
-//    m_object = rhs.m_object;
-//    if (m_object != nullptr) ::clRetainContext  (m_object.get<CL::context_type> ());
+//    if (_M_object != nullptr) ::clReleaseContext (_M_object.get<CL::context_type> ());
+//    _M_object = rhs._M_object;
+//    if (_M_object != nullptr) ::clRetainContext  (_M_object.get<CL::context_type> ());
 //    return *this;
 //}
 
@@ -139,9 +139,9 @@ namespace cppual { namespace Compute {
 //Object<Kernel>& Object<Kernel>::operator = (Object const& rhs) noexcept
 //{
 //    if (this == &rhs) return *this;
-//    if (m_object != nullptr) ::clReleaseKernel (m_object.get<CL::kernel_type> ());
-//    m_object = rhs.m_object;
-//    if (m_object != nullptr) ::clRetainKernel  (m_object.get<CL::kernel_type> ());
+//    if (_M_object != nullptr) ::clReleaseKernel (_M_object.get<CL::kernel_type> ());
+//    _M_object = rhs._M_object;
+//    if (_M_object != nullptr) ::clRetainKernel  (_M_object.get<CL::kernel_type> ());
 //    return *this;
 //}
 
@@ -149,9 +149,9 @@ namespace cppual { namespace Compute {
 //Object<Program>& Object<Program>::operator = (Object const& rhs) noexcept
 //{
 //    if (this == &rhs) return *this;
-//    if (m_object != nullptr) ::clReleaseProgram (m_object.get<CL::program_type> ());
-//    m_object = rhs.m_object;
-//    if (m_object != nullptr) ::clRetainProgram  (m_object.get<CL::program_type> ());
+//    if (_M_object != nullptr) ::clReleaseProgram (_M_object.get<CL::program_type> ());
+//    _M_object = rhs._M_object;
+//    if (_M_object != nullptr) ::clRetainProgram  (_M_object.get<CL::program_type> ());
 //    return *this;
 //}
 
@@ -159,9 +159,9 @@ namespace cppual { namespace Compute {
 //Object<DeviceQueue>& Object<DeviceQueue>::operator = (Object const& rhs) noexcept
 //{
 //    if (this == &rhs) return *this;
-//    if (m_object != nullptr) ::clReleaseCommandQueue (m_object.get<CL::queue_type> ());
-//    m_object = rhs.m_object;
-//    if (m_object != nullptr) ::clRetainCommandQueue  (m_object.get<CL::queue_type> ());
+//    if (_M_object != nullptr) ::clReleaseCommandQueue (_M_object.get<CL::queue_type> ());
+//    _M_object = rhs._M_object;
+//    if (_M_object != nullptr) ::clRetainCommandQueue  (_M_object.get<CL::queue_type> ());
 //    return *this;
 //}
 
@@ -169,9 +169,9 @@ namespace cppual { namespace Compute {
 //Object<Event>& Object<Event>::operator = (Object const& rhs) noexcept
 //{
 //    if (this == &rhs) return *this;
-//    if (m_object != nullptr) ::clReleaseEvent (m_object.get<CL::event_type> ());
-//    m_object = rhs.m_object;
-//    if (m_object != nullptr) ::clRetainEvent  (m_object.get<CL::event_type> ());
+//    if (_M_object != nullptr) ::clReleaseEvent (_M_object.get<CL::event_type> ());
+//    _M_object = rhs._M_object;
+//    if (_M_object != nullptr) ::clRetainEvent  (_M_object.get<CL::event_type> ());
 //    return *this;
 //}
 
@@ -179,9 +179,9 @@ namespace cppual { namespace Compute {
 //Object<GlobalMemory>& Object<GlobalMemory>::operator = (Object const& rhs) noexcept
 //{
 //    if (this == &rhs) return *this;
-//    if (m_object != nullptr) ::clReleaseMemObject (m_object.get<CL::memory_type> ());
-//    m_object = rhs.m_object;
-//    if (m_object != nullptr) ::clRetainMemObject  (m_object.get<CL::memory_type> ());
+//    if (_M_object != nullptr) ::clReleaseMemObject (_M_object.get<CL::memory_type> ());
+//    _M_object = rhs._M_object;
+//    if (_M_object != nullptr) ::clRetainMemObject  (_M_object.get<CL::memory_type> ());
 //    return *this;
 //}
 

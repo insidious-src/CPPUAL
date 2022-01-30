@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,13 @@
 
 #include <cppual/ui/manager.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
+
+// ====================================================
 
 namespace { // optimize for internal unit usage
 
-inline shared_display& backend () noexcept
+inline static shared_display& backend () noexcept
 {
     static shared_display back;
     return back;
@@ -35,41 +37,36 @@ inline shared_display& backend () noexcept
 
 // ====================================================
 
-IDisplay::~IDisplay ()
-{
-
-}
-
-IDisplay* IDisplay::primary ()
+display_interface::pointer display_interface::primary ()
 {
     if (backend () == nullptr) primary ("");
-    return backend ().get ();
+    return backend ();
 }
 
-bool IDisplay::hasValidInstance () noexcept
+bool display_interface::has_valid_instance () noexcept
 {
     return backend () != nullptr;
 }
 
-bool IDisplay::primary (string_type const& pDevName)
+bool display_interface::primary (string_type const& pDevName)
 {
     static bool bConnected = false;
 
-    if (Platform::Factory::hasValidInstance ())
-        backend () = Platform::Factory::instance ()->connectDisplay (pDevName);
+    if (platform::factory::has_valid_instance ())
+        backend () = platform::factory::instance ()->connectDisplay (pDevName);
 
     if (!bConnected and backend () != nullptr) return (bConnected = true);
     return backend () != nullptr;
 }
 
-IDisplay::pointer IDisplay::connect (string_type const& pDevName)
+display_interface::pointer display_interface::connect (string_type const& pDevName)
 {
     if (backend () != nullptr and backend ()->name () == pDevName)
         return backend ();
 
-    return Platform::Factory::hasValidInstance () ?
-                Platform::Factory::instance ()->connectDisplay (pDevName) :
-                IDisplay::pointer ();
+    return platform::factory::has_valid_instance () ?
+                platform::factory::instance ()->connectDisplay (pDevName) :
+                shared_display ();
 }
 
 } } // namespace Ui

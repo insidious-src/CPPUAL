@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,54 +21,54 @@
 
 #include <cppual/ui/dialog.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-Dialog& Dialog::operator = (Dialog&& gObj) noexcept
+dialog& dialog::operator = (dialog&& gObj) noexcept
 {
     if (this == &gObj) return *this;
     return *this;
 }
 
-Dialog& Dialog::operator = (Dialog const& gObj) noexcept
+dialog& dialog::operator = (dialog const& gObj) noexcept
 {
     if (this == &gObj) return *this;
     return *this;
 }
 
-Dialog::Result Dialog::getResult() noexcept
+dialog::result dialog::get_result() noexcept
 {
-    return Dialog::Close;
+    return dialog::result::close;
 }
 
-void Dialog::showModal (Ui::Window* pOwner) noexcept
+void dialog::show_modal (ui::window* pOwner) noexcept
 {
     if (valid ())
     {
         if (pOwner and pOwner->valid ())
         {
-            m_pOwnerWnd = pOwner;
+            _M_pOwnerWnd = pOwner;
             pOwner->disable ();
         }
 
         show ();
-        setFocus ();
+        set_focus ();
     }
 }
 
-void Dialog::onCreate ()
+void dialog::on_create ()
 {
-    onInit ();
+    on_init ();
 }
 
-void Dialog::destroyEvent ()
+void dialog::destroy_event ()
 {
-    onEnd ();
+    on_end ();
 
-    if (m_pOwnerWnd)
+    if (_M_pOwnerWnd)
     {
-        m_pOwnerWnd->enable ();
-        m_pOwnerWnd->setFocus ();
-        m_pOwnerWnd = nullptr;
+        _M_pOwnerWnd->enable ();
+        _M_pOwnerWnd->set_focus ();
+        _M_pOwnerWnd = nullptr;
     }
 }
 

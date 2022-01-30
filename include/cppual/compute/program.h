@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,25 +30,25 @@
 
 #include <vector>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
-class Program : public Object <ResourceType::Program>
+class program : public object <resource_type::program>
 {
 public:
     typedef std::size_t size_type;
 
-    Program ();
-    Program (Behaviour const&, string const& binary_path);
-    Program (Behaviour const&, std::vector<string> const& source);
-    Program (Program&&);
-    Program (Program const&);
-    Program& operator = (Program&&);
-    Program& operator = (Program const&);
+    program ();
+    program (behaviour const&, string const& binary_path);
+    program (behaviour const&, std::vector<string> const& source);
+    program (program&&);
+    program (program const&);
+    program& operator = (program&&);
+    program& operator = (program const&);
 
-    void bind  (DeviceQueue const& queue);
+    void bind  (device_queue const& queue);
     bool build ();
 
-    static Program* current () noexcept;
+    static program* current () noexcept;
 };
 
 } } // namespace Compute

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,60 +21,64 @@
 
 #include <cppual/ui/vsurface.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
-ProxyRenderable::ProxyRenderable (shared_window const& pParent, Rect const& gRect) noexcept
-: IPlatformWindow (pParent != nullptr ? pParent->connection () : nullptr,
-                   pParent != nullptr ? pParent->handle () : Handle (nullptr)),
-  m_pParent (pParent),
-  m_gRect (gRect),
-  m_bIsVisible ()
+// ====================================================
+
+proxy_renderable::proxy_renderable (shared_window const& pParent, rect const& gRect) noexcept
+: platform_wnd_interface (pParent != nullptr ? pParent->connection () : nullptr,
+                   pParent != nullptr ? pParent->handle () : nullptr),
+  _M_pParent (pParent),
+  _M_gRect (gRect),
+  _M_bIsVisible ()
 {
 }
 
-ProxyRenderable::ProxyRenderable (IPlatformWindow*) noexcept
+proxy_renderable::proxy_renderable (platform_wnd_interface*) noexcept
 {
 }
 
-ProxyRenderable::ProxyRenderable (ProxyRenderable const&) noexcept
+proxy_renderable::proxy_renderable (proxy_renderable const&) noexcept
 {
 }
 
-ProxyRenderable& ProxyRenderable::operator = (IPlatformWindow*) noexcept
+proxy_renderable& proxy_renderable::operator = (platform_wnd_interface*) noexcept
 {
     return *this;
 }
 
-ProxyRenderable& ProxyRenderable::operator = (ProxyRenderable const& gObj) noexcept
+proxy_renderable& proxy_renderable::operator = (proxy_renderable const& gObj) noexcept
 {
     if (this == &gObj) return *this;
     return *this;
 }
 
-void ProxyRenderable::setGeometry (Rect const&) noexcept
+void proxy_renderable::setGeometry (rect const&) noexcept
 {
 }
 
-void ProxyRenderable::setOwner (const_pointer) noexcept
+void proxy_renderable::setOwner (const_pointer) noexcept
 {
 }
 
-void ProxyRenderable::map () noexcept
+void proxy_renderable::map () noexcept
 {
-    if (m_pParent == nullptr) return;
+    if (_M_pParent == nullptr) return;
 }
 
-void ProxyRenderable::unmap () noexcept
+void proxy_renderable::unmap () noexcept
 {
-    if (m_pParent == nullptr) return;
+    if (_M_pParent == nullptr) return;
 }
 
-void ProxyRenderable::move (point2i gPos) noexcept
+void proxy_renderable::move (point2i gPos) noexcept
 {
-    if (m_pParent != nullptr)
+    if (_M_pParent != nullptr)
     {
-        m_gRect = Rect (gPos.x, gPos.y, m_gRect.width (), m_gRect.height ());
+        _M_gRect = rect (gPos.x, gPos.y, _M_gRect.width (), _M_gRect.height ());
     }
 }
+
+// ====================================================
 
 } } // namespace Ui

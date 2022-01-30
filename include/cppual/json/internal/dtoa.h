@@ -23,7 +23,7 @@
 #include "diyfp.h"
 #include "ieee754.h"
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 namespace internal {
 
 #ifdef __GNUC__

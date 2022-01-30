@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,252 +22,250 @@
 #include <cppual/multimedia/audio/al/emitter.h>
 #include "aldef.h"
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-inline int convertEmitterType (Audio::EmitType eType) noexcept
+constexpr int convert_emitter_type (audio::emit_type eType) noexcept
 {
     switch (eType)
     {
-    case Audio::EmitType::Undetermined:
-        return AL::Undetermined;
-    case Audio::EmitType::Static:
-        return AL::Static;
-    case Audio::EmitType::Streaming:
-        return AL::Streaming;
+    case audio::emit_type::statically:
+        return al::static_source;
+    case audio::emit_type::streaming:
+        return al::streaming_source;
+    default:
+        return al::undetermined_source;
     }
-
-    return 0;
 }
 
-inline Audio::EmitType convertEmitterType (int nType) noexcept
+constexpr audio::emit_type convert_emitter_type (int nType) noexcept
 {
     switch (nType)
     {
-    case AL::Static:
-        return Audio::EmitType::Static;
-    case AL::Streaming:
-        return Audio::EmitType::Streaming;
+    case al::static_source:
+        return audio::emit_type::statically;
+    case al::streaming_source:
+        return audio::emit_type::streaming;
+    default:
+        return audio::emit_type::undetermined;
     }
-
-    return Audio::EmitType::Undetermined;
 }
 
 // ====================================================
 
-SoundEmitter::SoundEmitter (SoundEmitter const& gObj) noexcept
-: SoundSource (gObj)
+sound_emitter::sound_emitter (sound_emitter const& gObj) noexcept
+: sound_source (gObj)
 {
-    if (id () and gObj.id ()) copyEmitterState (gObj);
+    if (id () and gObj.id ()) copy_emitter_state (gObj);
 }
 
-SoundEmitter& SoundEmitter::operator = (SoundEmitter const& gObj) noexcept
+sound_emitter& sound_emitter::operator = (sound_emitter const& gObj) noexcept
 {
-    if (id () and gObj.id ()) copyEmitterState (gObj);
+    if (id () and gObj.id ()) copy_emitter_state (gObj);
     return *this;
 }
 
-EmitType SoundEmitter::getType () const noexcept
+emit_type sound_emitter::type () const noexcept
 {
     int nType = 0;
-    if (id ()) ::alGetSourcei (id (), AL::CurrentEmitterType, &nType);
-    return convertEmitterType (nType);
+    if (id ()) ::alGetSourcei (id (), al::current_emitter_type, &nType);
+    return convert_emitter_type (nType);
 }
 
-void SoundEmitter::setRelativeToListener (bool bRel) noexcept
+void sound_emitter::set_relative_to_listener (bool bRel) noexcept
 {
-    if (id ()) ::alSourcei (id (), AL::IsRelativeToListener, bRel);
+    if (id ()) ::alSourcei (id (), al::is_relative_to_listener, bRel);
 }
 
-bool SoundEmitter::isRelativeToListener () const noexcept
+bool sound_emitter::is_relative_to_listener () const noexcept
 {
     int nIsRelative = 0;
-    if (id ()) ::alGetSourceiv (id (), AL::IsRelativeToListener, &nIsRelative);
+    if (id ()) ::alGetSourceiv (id (), al::is_relative_to_listener, &nIsRelative);
     return nIsRelative == 1;
 }
 
-void SoundEmitter::setType (Audio::EmitType eType) noexcept
+void sound_emitter::set_type (audio::emit_type eType) noexcept
 {
     if (id ())
-        ::alSourcei (id (), AL::CurrentEmitterType, convertEmitterType (eType));
+        ::alSourcei (id (), al::current_emitter_type, convert_emitter_type (eType));
 }
 
-void SoundEmitter::setMinVolume (float fValue) noexcept
+void sound_emitter::set_min_volume (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::MinVolume, fValue);
+    if (id ()) ::alSourcef (id (), al::min_volume, fValue);
 }
 
-float SoundEmitter::getMinVolume () const noexcept
+float sound_emitter::min_volume () const noexcept
 {
     float fValue = .0f;
-    if (id ()) ::alGetSourcef (id (), AL::MinVolume, &fValue);
+    if (id ()) ::alGetSourcef (id (), al::min_volume, &fValue);
     return fValue;
 }
 
-void SoundEmitter::setMaxVolume (float fValue) noexcept
+void sound_emitter::set_max_volume (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::MaxVolume, fValue);
+    if (id ()) ::alSourcef (id (), al::max_volume, fValue);
 }
 
-float SoundEmitter::getMaxVolume () const noexcept
+float sound_emitter::max_volume () const noexcept
 {
     float fValue = .0f;
-    if (id ()) ::alGetSourcef (id (), AL::MaxVolume, &fValue);
+    if (id ()) ::alGetSourcef (id (), al::max_volume, &fValue);
     return fValue;
 }
 
-void SoundEmitter::setReferenceDistance (float fValue) noexcept
+void sound_emitter::set_reference_distance (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::ReferenceDistance, fValue);
+    if (id ()) ::alSourcef (id (), al::reference_distance, fValue);
 }
 
-float SoundEmitter::getReferenceDistance () const noexcept
+float sound_emitter::reference_distance () const noexcept
 {
     float fValue = .0f;
-    if (id ()) ::alGetSourcef (id (), AL::ReferenceDistance, &fValue);
+    if (id ()) ::alGetSourcef (id (), al::reference_distance, &fValue);
     return fValue;
 }
 
-void SoundEmitter::setCancelation (float fValue) noexcept
+void sound_emitter::set_cancelation (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::RolloffFactor, fValue);
+    if (id ()) ::alSourcef (id (), al::rolloff_factor, fValue);
 }
 
-float SoundEmitter::getCancelation () const noexcept
+float sound_emitter::cancelation () const noexcept
 {
     float fValue = .0f;
-    if (id ()) ::alGetSourcef (id (), AL::RolloffFactor, &fValue);
+    if (id ()) ::alGetSourcef (id (), al::rolloff_factor, &fValue);
     return fValue;
 }
 
-void SoundEmitter::setMaxDistance (float fValue) noexcept
+void sound_emitter::set_max_distance (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::MaxDistance, fValue);
+    if (id ()) ::alSourcef (id (), al::max_distance, fValue);
 }
 
-float SoundEmitter::getMaxDistance () const noexcept
+float sound_emitter::max_distance () const noexcept
 {
     float fValue = .0f;
-    if (id ()) ::alGetSourcef (id (), AL::MaxDistance, &fValue);
+    if (id ()) ::alGetSourcef (id (), al::max_distance, &fValue);
     return fValue;
 }
 
-void SoundEmitter::setPosition (point3f const& gValue) noexcept
+void sound_emitter::set_position (point3f const& gValue) noexcept
 {
-    if (id ()) ::alSourcefv (id (), AL::Position, &gValue.x);
+    if (id ()) ::alSourcefv (id (), al::position, &gValue.x);
 }
 
-point3f SoundEmitter::getPosition () const noexcept
+point3f sound_emitter::position () const noexcept
 {
     point3f gValue;
-    if (id ()) ::alGetSourcefv (id (), AL::Position, &gValue.x);
+    if (id ()) ::alGetSourcefv (id (), al::position, &gValue.x);
     return gValue;
 }
 
-void SoundEmitter::setVelocity (point3f const& gValue) noexcept
+void sound_emitter::set_velocity (point3f const& gValue) noexcept
 {
-    if (id ()) ::alSourcefv (id (), AL::Velocity, &gValue.x);
+    if (id ()) ::alSourcefv (id (), al::velocity, &gValue.x);
 }
 
-point3f SoundEmitter::getVelocity () const noexcept
+point3f sound_emitter::velocity () const noexcept
 {
     point3f gValue;
-    if (id ()) ::alGetSourcefv (id (), AL::Velocity, &gValue.x);
+    if (id ()) ::alGetSourcefv (id (), al::velocity, &gValue.x);
     return gValue;
 }
 
-void SoundEmitter::setDirection (point3f const& gValue) noexcept
+void sound_emitter::set_direction (point3f const& gValue) noexcept
 {
-    if (id ()) ::alSourcefv (id (), AL::Direction, &gValue.x);
+    if (id ()) ::alSourcefv (id (), al::direction, &gValue.x);
 }
 
-point3f SoundEmitter::getDirection () const noexcept
+point3f sound_emitter::direction () const noexcept
 {
     point3f gValue;
-    if (id ()) ::alGetSourcefv (id (), AL::Direction, &gValue.x);
+    if (id ()) ::alGetSourcefv (id (), al::direction, &gValue.x);
     return gValue;
 }
 
-void SoundEmitter::setConeInnerAngle (anglef gAngle) noexcept
+void sound_emitter::set_cone_inner_angle (anglef gAngle) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::ConeInnerAngle, gAngle.radians);
+    if (id ()) ::alSourcef (id (), al::cone_inner_angle, gAngle.radians);
 }
 
-anglef SoundEmitter::getConeInnerAngle () const noexcept
+anglef sound_emitter::cone_inner_angle () const noexcept
 {
     anglef gAngle;
-    if (id ()) ::alGetSourcef (id (), AL::ConeInnerAngle, &gAngle.radians);
+    if (id ()) ::alGetSourcef (id (), al::cone_inner_angle, &gAngle.radians);
     return gAngle;
 }
 
-void SoundEmitter::setConeOuterAngle (anglef gAngle) noexcept
+void sound_emitter::set_cone_outer_angle (anglef gAngle) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::ConeOuterAngle, gAngle.radians);
+    if (id ()) ::alSourcef (id (), al::cone_outer_angle, gAngle.radians);
 }
 
-anglef SoundEmitter::getConeOuterAngle () const noexcept
+anglef sound_emitter::cone_outer_angle () const noexcept
 {
     anglef gAngle;
-    if (id ()) ::alGetSourcef (id (), AL::ConeOuterAngle, &gAngle.radians);
+    if (id ()) ::alGetSourcef (id (), al::cone_outer_angle, &gAngle.radians);
     return gAngle;
 }
 
-void SoundEmitter::setConeOuterVolume (float fValue) noexcept
+void sound_emitter::set_cone_outer_volume (float fValue) noexcept
 {
-    if (id ()) ::alSourcef (id (), AL::ConeOuterVolume, fValue);
+    if (id ()) ::alSourcef (id (), al::cone_outer_volume, fValue);
 }
 
-float SoundEmitter::getConeOuterVolume () const noexcept
+float sound_emitter::cone_outer_volume () const noexcept
 {
     float fValue = .0f;
-    if (id ()) ::alGetSourcef (id (), AL::ConeOuterVolume, &fValue);
+    if (id ()) ::alGetSourcef (id (), al::cone_outer_volume, &fValue);
     return fValue;
 }
 
-void SoundEmitter::copyEmitterState (SoundEmitter const& gObj) noexcept
+void sound_emitter::copy_emitter_state (sound_emitter const& gObj) noexcept
 {
     point3f gValue;
     anglef  gAngle;
     float   fValue;
     int     nValue;
 
-    ::alGetSourcei (gObj.id (), AL::CurrentEmitterType, &nValue);
-    ::alSourcei (id (), AL::CurrentEmitterType, nValue);
+    ::alGetSourcei (gObj.id (), al::current_emitter_type, &nValue);
+    ::alSourcei (id (), al::current_emitter_type, nValue);
 
-    ::alGetSourceiv (gObj.id (), AL::IsRelativeToListener, &nValue);
-    ::alSourcei (id (), AL::IsRelativeToListener, nValue);
+    ::alGetSourceiv (gObj.id (), al::is_relative_to_listener, &nValue);
+    ::alSourcei (id (), al::is_relative_to_listener, nValue);
 
-    ::alGetSourcef (gObj.id (), AL::MinVolume, &fValue);
-    ::alSourcef (id (), AL::MinVolume, fValue);
+    ::alGetSourcef (gObj.id (), al::min_volume, &fValue);
+    ::alSourcef (id (), al::min_volume, fValue);
 
-    ::alGetSourcef (gObj.id (), AL::MaxVolume, &fValue);
-    ::alSourcef (id (), AL::MaxVolume, fValue);
+    ::alGetSourcef (gObj.id (), al::max_volume, &fValue);
+    ::alSourcef (id (), al::max_volume, fValue);
 
-    ::alGetSourcef (gObj.id (), AL::ReferenceDistance, &fValue);
-    ::alSourcef (id (), AL::ReferenceDistance, fValue);
+    ::alGetSourcef (gObj.id (), al::reference_distance, &fValue);
+    ::alSourcef (id (), al::reference_distance, fValue);
 
-    ::alGetSourcef (gObj.id (), AL::RolloffFactor, &fValue);
-    ::alSourcef (id (), AL::RolloffFactor, fValue);
+    ::alGetSourcef (gObj.id (), al::rolloff_factor, &fValue);
+    ::alSourcef (id (), al::rolloff_factor, fValue);
 
-    ::alGetSourcef (gObj.id (), AL::MaxDistance, &fValue);
-    ::alSourcef (id (), AL::MaxDistance, fValue);
+    ::alGetSourcef (gObj.id (), al::max_distance, &fValue);
+    ::alSourcef (id (), al::max_distance, fValue);
 
-    ::alGetSourcefv (gObj.id (), AL::Position, &gValue.x);
-    ::alSourcefv (id (), AL::Position, &gValue.x);
+    ::alGetSourcefv (gObj.id (), al::position, &gValue.x);
+    ::alSourcefv (id (), al::position, &gValue.x);
 
-    ::alGetSourcefv (gObj.id (), AL::Velocity, &gValue.x);
-    ::alSourcefv (id (), AL::Velocity, &gValue.x);
+    ::alGetSourcefv (gObj.id (), al::velocity, &gValue.x);
+    ::alSourcefv (id (), al::velocity, &gValue.x);
 
-    ::alGetSourcefv (gObj.id (), AL::Direction, &gValue.x);
-    ::alSourcefv (id (), AL::Direction, &gValue.x);
+    ::alGetSourcefv (gObj.id (), al::direction, &gValue.x);
+    ::alSourcefv (id (), al::direction, &gValue.x);
 
-    ::alGetSourcef (gObj.id (), AL::ConeInnerAngle, &gAngle.radians);
-    ::alSourcef (id (), AL::ConeInnerAngle, gAngle.radians);
+    ::alGetSourcef (gObj.id (), al::cone_inner_angle, &gAngle.radians);
+    ::alSourcef (id (), al::cone_inner_angle, gAngle.radians);
 
-    ::alGetSourcef (gObj.id (), AL::ConeOuterAngle, &gAngle.radians);
-    ::alSourcef (id (), AL::ConeOuterAngle, gAngle.radians);
+    ::alGetSourcef (gObj.id (), al::cone_outer_angle, &gAngle.radians);
+    ::alSourcef (id (), al::cone_outer_angle, gAngle.radians);
 
-    ::alGetSourcef (gObj.id (), AL::ConeOuterVolume, &fValue);
-    ::alSourcef (id (), AL::ConeOuterVolume, fValue);
+    ::alGetSourcef (gObj.id (), al::cone_outer_volume, &fValue);
+    ::alSourcef (id (), al::cone_outer_volume, fValue);
 }
 
 } } } // namespace Audio

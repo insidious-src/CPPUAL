@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,20 +28,22 @@
 
 #include <new>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
+
+// =========================================================
 
 struct memory_source_not_available : std::bad_alloc { };
 
 // =========================================================
 
-class MemoryChunk : public Object<ResourceType::Buffer>
+class memory_chunk : public object<resource_type::buffer>
 {
 public:
-    typedef Device        device_type           ;
-    typedef Device&       device_reference      ;
-    typedef Device*       device_pointer        ;
-    typedef Device const* device_const_pointer  ;
-    typedef Device const& device_const_reference;
+    typedef device        device_type           ;
+    typedef device&       device_reference      ;
+    typedef device*       device_pointer        ;
+    typedef device const* device_const_pointer  ;
+    typedef device const& device_const_reference;
 
     enum class Type : unsigned char
     {
@@ -50,29 +52,33 @@ public:
         Global
     };
 
-    MemoryChunk (device_const_reference, size_type size);
+    memory_chunk (device_const_reference, size_type size);
 
-    device_const_reference device () const noexcept
-    { return *m_pDevice; }
+    device_const_reference get_device () const noexcept
+    { return *_M_pDevice; }
 
 private:
-    device_const_pointer m_pDevice;
+    device_const_pointer _M_pDevice;
 };
 
 } } // namespace Compute
 
 // =========================================================
 
-using cppual::Compute::MemoryChunk;
+using cppual::compute::memory_chunk;
 
-void* operator new    (std::size_t size, MemoryChunk& source, std::size_t align = 0);
-void  operator delete (void* ptr, MemoryChunk& source);
+// =========================================================
 
-inline void* operator new[] (std::size_t size, MemoryChunk& source, std::size_t align = 0)
+void* operator new    (std::size_t size, memory_chunk& source, std::size_t align = 0);
+void  operator delete (void* ptr, memory_chunk& source);
+
+inline void* operator new[] (std::size_t size, memory_chunk& source, std::size_t align = 0)
 { return ::operator new (size, source, align); }
 
-inline void  operator delete[] (void* ptr, MemoryChunk& source)
+inline void  operator delete[] (void* ptr, memory_chunk& source)
 { ::operator delete (ptr, source); }
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_MEMORY_H_

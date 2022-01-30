@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 namespace cppual {
 
 template <typename T>
-class BitSet
+class bitset
 {
 public:
     static_assert (std::is_enum<T>::value, "T is not an enumeration!");
@@ -40,8 +40,8 @@ public:
     typedef ulong_t                                size_type ;
     typedef typename std::underlying_type<T>::type value_type;
 
-    constexpr BitSet () noexcept = default;
-    constexpr BitSet (std::nullptr_t) noexcept : _M_flags () { }
+    constexpr bitset () noexcept = default;
+    constexpr bitset (std::nullptr_t) noexcept : _M_flags () { }
 
     void flip  (enum_type const eFlag) noexcept { _M_flags ^= static_cast<value_type> (eFlag); }
     void flip  () noexcept { _M_flags = _M_flags ^ _M_flags; }
@@ -59,32 +59,32 @@ public:
     constexpr bool test (value_type const flags) const noexcept
     { return (_M_flags & flags) == flags; }
 
-    constexpr bool test (BitSet const& gObj) const noexcept
+    constexpr bool test (bitset const& gObj) const noexcept
     { return (_M_flags & gObj._M_flags) == gObj._M_flags; }
 
-    inline BitSet& operator += (enum_type const eFlag) noexcept
+    inline bitset& operator += (enum_type const eFlag) noexcept
     { _M_flags |= static_cast<value_type> (eFlag); return *this; }
 
-    inline BitSet& operator += (value_type const flags) noexcept
+    inline bitset& operator += (value_type const flags) noexcept
     { _M_flags |= flags; return *this; }
 
-    inline BitSet& operator -= (enum_type const eFlag) noexcept
+    inline bitset& operator -= (enum_type const eFlag) noexcept
     { _M_flags &= ~static_cast<value_type> (eFlag); return *this; }
 
-    inline BitSet& operator -= (value_type const flags) noexcept
+    inline bitset& operator -= (value_type const flags) noexcept
     { _M_flags &= ~flags; return *this; }
 
-    inline BitSet& operator = (enum_type const eFlag) noexcept
+    inline bitset& operator = (enum_type const eFlag) noexcept
     { _M_flags = static_cast<value_type> (eFlag); return *this; }
 
-    inline BitSet& operator = (value_type const nFlags) noexcept
+    inline bitset& operator = (value_type const nFlags) noexcept
     { _M_flags = nFlags; return *this; }
 
-    constexpr BitSet (enum_type const eFlag) noexcept
+    constexpr bitset (enum_type const eFlag) noexcept
     : _M_flags (static_cast<value_type> (eFlag))
     { }
 
-    constexpr BitSet (value_type const flags) noexcept
+    constexpr bitset (value_type const flags) noexcept
     : _M_flags (flags)
     { }
 
@@ -92,36 +92,36 @@ public:
 
     template <typename U>
     friend
-    constexpr bool operator == (BitSet<U> const&, U const) noexcept;
+    constexpr bool operator == (bitset<U> const&, U const) noexcept;
 
     template <typename U>
     friend
-    constexpr bool operator == (BitSet<U> const&,
-                                typename BitSet<U>::value_type const) noexcept;
+    constexpr bool operator == (bitset<U> const&,
+                                typename bitset<U>::value_type const) noexcept;
 
     template <typename U>
     friend
-    constexpr bool operator == (BitSet<U> const&, BitSet<U> const&) noexcept;
+    constexpr bool operator == (bitset<U> const&, bitset<U> const&) noexcept;
 
     template <typename U>
     friend
-    constexpr BitSet<U> operator + (BitSet<U> const&,
-                                    typename BitSet<U>::enum_type const) noexcept;
+    constexpr bitset<U> operator + (bitset<U> const&,
+                                    typename bitset<U>::enum_type const) noexcept;
 
     template <typename U>
     friend
-    constexpr BitSet<U> operator + (BitSet<U> const&,
-                                    typename BitSet<U>::value_type const) noexcept;
+    constexpr bitset<U> operator + (bitset<U> const&,
+                                    typename bitset<U>::value_type const) noexcept;
 
     template <typename U>
     friend
-    constexpr BitSet<U> operator - (BitSet<U> const&,
-                                    typename BitSet<U>::enum_type const) noexcept;
+    constexpr bitset<U> operator - (bitset<U> const&,
+                                    typename bitset<U>::enum_type const) noexcept;
 
     template <typename U>
     friend
-    constexpr BitSet<U> operator - (BitSet<U> const&,
-                                    typename BitSet<U>::value_type const) noexcept;
+    constexpr bitset<U> operator - (bitset<U> const&,
+                                    typename bitset<U>::value_type const) noexcept;
 
 private:
     value_type _M_flags;
@@ -130,51 +130,51 @@ private:
 // =========================================================
 
 template <typename T>
-constexpr BitSet<T> operator + (BitSet<T> const& lh,
-                                typename BitSet<T>::enum_type const eFlag) noexcept
-{ return lh._M_flags | static_cast<typename BitSet<T>::value_type> (eFlag); }
+constexpr bitset<T> operator + (bitset<T> const& lh,
+                                typename bitset<T>::enum_type const eFlag) noexcept
+{ return lh._M_flags | static_cast<typename bitset<T>::value_type> (eFlag); }
 
 template <typename T>
-constexpr BitSet<T> operator + (BitSet<T> const& lh,
-                                typename BitSet<T>::value_type const flags) noexcept
+constexpr bitset<T> operator + (bitset<T> const& lh,
+                                typename bitset<T>::value_type const flags) noexcept
 { return lh._M_flags | flags; }
 
 template <typename T>
-constexpr BitSet<T> operator - (BitSet<T> const& lh,
-                                typename BitSet<T>::enum_type const eFlag) noexcept
-{ return lh._M_flags & ~static_cast<typename BitSet<T>::value_type> (eFlag); }
+constexpr bitset<T> operator - (bitset<T> const& lh,
+                                typename bitset<T>::enum_type const eFlag) noexcept
+{ return lh._M_flags & ~static_cast<typename bitset<T>::value_type> (eFlag); }
 
 template <typename T>
-constexpr BitSet<T> operator - (BitSet<T> const& lh,
-                                typename BitSet<T>::value_type const flags) noexcept
+constexpr bitset<T> operator - (bitset<T> const& lh,
+                                typename bitset<T>::value_type const flags) noexcept
 { return lh._M_flags & ~flags; }
 
 // =========================================================
 
 template <typename T>
-constexpr bool operator == (BitSet<T> const& lh, T const eFlag) noexcept
+constexpr bool operator == (bitset<T> const& lh, T const eFlag) noexcept
 { return lh._M_flags == eFlag; }
 
 template <typename T>
-constexpr bool operator == (BitSet<T> const& lh,
-                            typename BitSet<T>::value_type const flags) noexcept
+constexpr bool operator == (bitset<T> const& lh,
+                            typename bitset<T>::value_type const flags) noexcept
 { return lh._M_flags == flags; }
 
 template <typename T>
-constexpr bool operator == (BitSet<T> const& lh, BitSet<T> const& rh) noexcept
+constexpr bool operator == (bitset<T> const& lh, bitset<T> const& rh) noexcept
 { return lh._M_flags == rh._M_flags; }
 
 template <typename T>
-constexpr bool operator != (BitSet<T> const& lh, T const eFlag) noexcept
+constexpr bool operator != (bitset<T> const& lh, T const eFlag) noexcept
 { return !(lh == eFlag); }
 
 template <typename T>
-constexpr bool operator != (BitSet<T> const& lh,
-                            typename BitSet<T>::value_type const flags) noexcept
+constexpr bool operator != (bitset<T> const& lh,
+                            typename bitset<T>::value_type const flags) noexcept
 { return !(lh == flags); }
 
 template <typename T>
-constexpr bool operator != (BitSet<T> const& lh, BitSet<T> const& rh) noexcept
+constexpr bool operator != (bitset<T> const& lh, bitset<T> const& rh) noexcept
 { return !(lh == rh); }
 
 } // cppual

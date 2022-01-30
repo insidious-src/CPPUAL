@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,36 +27,36 @@
 
 #include <atomic>
 
-namespace cppual { namespace Audio { namespace AL {
+namespace cppual { namespace audio { namespace al {
 
-class Object
+class object
 {
 public:
-    Object (ObjectType type) noexcept;
-    Object (Object&&) noexcept;
-    Object (Object const&) noexcept;
-    Object& operator = (Object&&) noexcept;
-    Object& operator = (Object const&) noexcept;
+    object (object_type type) noexcept;
+    object (object&&) noexcept;
+    object (object const&) noexcept;
+    object& operator = (object&&) noexcept;
+    object& operator = (object const&) noexcept;
 
-    inline   Object () noexcept : m_uObjId (), m_eObjType () { }
-    virtual ~Object () noexcept { reset (); }
+    constexpr object () noexcept : _M_uObjId (), _M_eObjType () { }
+    virtual  ~object () noexcept { reset (); }
 
-    inline ObjectType type  () const noexcept { return m_eObjType; }
-    inline uint       id    () const noexcept { return m_uObjId;   }
-    inline bool       valid () const noexcept { return m_uObjId;   }
+    inline object_type type  () const noexcept { return _M_eObjType; }
+    inline uint        id    () const noexcept { return _M_uObjId;   }
+    inline bool        valid () const noexcept { return _M_uObjId;   }
 
     inline static uint count () noexcept
     { return sm_uALObjCount.load (std::memory_order_consume); }
 
 private:
     static std::atomic_uint sm_uALObjCount;
-    uint                     m_uObjId     ;
-    ObjectType               m_eObjType   ;
+    uint                     _M_uObjId    ;
+    object_type              _M_eObjType  ;
 
     void reset () noexcept;
 };
 
-} } } // namespace Audio
+} } } // namespace al
 
 #endif // __cplusplus
 #endif // CPPUAL_AUDIO_BASE_H_

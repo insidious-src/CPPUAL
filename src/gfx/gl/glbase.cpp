@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,43 +23,43 @@
 
 #include <cppual/gfx/gl/glbase.h>
 #include <cppual/gfx/gl/runtime.h>
-#include <cppual/gfx/gl/surface.h>
+#include <cppual/gfx/draw.h>
 
 #include "gldef.h"
 
-namespace cppual { namespace Graphics { namespace GL {
+namespace cppual { namespace gfx { namespace gl {
 
 namespace { // optimize for internal unit usage
 
-inline uint generateObject (ResourceType eType)
+inline uint generate_object (resource_type eType)
 {
-    IDeviceContext* pContext = IDeviceContext::current ();
+    context_interface* pContext = context_interface::current ();
 
-    if (!pContext or pContext->device () != DeviceType::GL)
+    if (!pContext or pContext->device () != device_backend::gl)
         throw bad_context ("NO GL context bound to thread");
 
     uint uId;
 
     switch (eType)
     {
-    case ResourceType::Buffer:
+    case resource_type::buffer:
         pContext->version () < 3 ?
                     glGenBuffers (1, &uId) : glGenBuffersARB (1, &uId);
         break;
-    case ResourceType::Macro:
+    case resource_type::macro:
         glGenVertexArrays (1, &uId);
         break;
-    case ResourceType::Program:
+    case resource_type::program:
         uId = pContext->version () < 3 ?
                   glCreateProgram () : glCreateProgramObjectARB ();
         break;
-    case ResourceType::Query:
+    case resource_type::query:
         pContext->version () < 3 ?
                     glGenQueries (1, &uId) : glGenQueriesARB (1, &uId);
         break;
-    case ResourceType::Texture:
+    case resource_type::texture:
         glGenTextures (1, &uId);
-        if (uId) glBindTexture (GL::Texture2D, uId);
+        if (uId) glBindTexture (gl::Texture2D, uId);
         break;
     default:
         uId = 0;
@@ -69,11 +69,11 @@ inline uint generateObject (ResourceType eType)
     return uId;
 }
 
-inline uint generateShader (uint uType)
+inline uint generate_shader (uint uType)
 {
-    IDeviceContext* pContext = IDeviceContext::current ();
+    context_interface* pContext = context_interface::current ();
 
-    if (!pContext or pContext->device () != DeviceType::GL)
+    if (!pContext or pContext->device () != device_backend::gl)
         throw bad_context ("NO GL context bound to thread");
 
     return pContext->version () < 3 ?
@@ -84,42 +84,42 @@ inline uint generateShader (uint uType)
 
 // ====================================================
 
-Object::Object (ResourceType eType)
-: Resource   (generateObject (eType)),
-  m_eResType (eType)
+object::object (resource_type eType)
+: resource     (generate_object (eType)),
+  _M_eResType  (eType)
 { }
 
-Object::Object (uint uShaderType)
-: Resource   (generateShader (uShaderType)),
-  m_eResType (ResourceType::Shader)
+object::object (uint uShaderType)
+: resource     (generate_shader (uShaderType)),
+  _M_eResType  (resource_type::shader)
 { }
 
-Object::~Object () noexcept
+object::~object () noexcept
 {
     uint uId = handle ();
 
     if (uId)
     {
-        if (IDeviceContext::current ()->version () < 3)
+        if (context_interface::current ()->version () < 3)
         {
-            switch (resType ())
+            switch (type ())
             {
-            case ResourceType::Buffer:
+            case resource_type::buffer:
                 glDeleteBuffers (1, &uId);
                 break;
-            case ResourceType::Macro:
+            case resource_type::macro:
                 glDeleteVertexArrays (1, &uId);
                 break;
-            case ResourceType::Program:
+            case resource_type::program:
                 glDeleteProgram (uId);
                 break;
-            case ResourceType::Query:
+            case resource_type::query:
                 glDeleteQueries (1, &uId);
                 break;
-            case ResourceType::Shader:
+            case resource_type::shader:
                 glDeleteShader (uId);
                 break;
-            case ResourceType::Texture:
+            case resource_type::texture:
                 glDeleteTextures (1, &uId);
                 break;
             default:
@@ -128,15 +128,15 @@ Object::~Object () noexcept
         }
         else
         {
-            switch (resType ())
+            switch (type ())
             {
-            case ResourceType::Buffer:
+            case resource_type::buffer:
                 glDeleteBuffersARB (1, &uId);
                 break;
-            case ResourceType::Program:
+            case resource_type::program:
                 glDeleteProgramsARB (1, &uId);
                 break;
-            case ResourceType::Query:
+            case resource_type::query:
                 glDeleteQueriesARB (1, &uId);
                 break;
             default:

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,110 +28,110 @@
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/multimedia/audio/spatial.h>
 
-namespace cppual { namespace Audio {
+namespace cppual { namespace audio {
 
-enum class StringQuery : unsigned char
+enum class string_query : byte
 {
-    Version,
-    Renderer,
-    Vendor
+    version,
+    renderer,
+    vendor
 };
 
 // ====================================================
 
-class Device : public NonCopyable
+class device : public non_copyable
 {
 public:
-    typedef std::size_t size_type;
-    typedef string string_type;
+    typedef std::size_t size_type  ;
+    typedef string      string_type;
 
-    enum Type
+    enum device_type
     {
-        Null,
-        Playback,
-        Capture
+        null,
+        playback,
+        capture
     };
 
-    Device(string_type const &, Type);
+    device(string_type const&, device_type);
 
-    static bool isExtensionSupported(string_type const &name) noexcept;
-    bool        isExtensionPresent  (string_type const &name) noexcept;
+    static bool is_extension_supported(string_type const& name) noexcept;
+    bool        is_extension_present  (string_type const& name) noexcept;
 
-    inline Type        type () const noexcept { return m_eType                ; }
-    inline string_type name () const noexcept { return m_gDeviceName          ; }
-    inline bool     isValid () const noexcept { return m_eType != Device::Null; }
+    inline device_type type () const noexcept { return _M_eType                ; }
+    inline string_type name () const noexcept { return _M_gDeviceName          ; }
+    inline bool       valid () const noexcept { return _M_eType != device::null; }
 
 protected:
-    string_type m_gDeviceName;
-    size_type   m_uId;
-    Type        m_eType;
+    string_type _M_gDeviceName;
+    size_type   _M_uId        ;
+    device_type _M_eType      ;
 
 };
 
-class PlaybackDevice : public virtual Device
+class playback_device : public virtual device
 {
 public:
-    PlaybackDevice  () noexcept;
-    PlaybackDevice  (string_type const &name) noexcept;
-    ~PlaybackDevice () noexcept;
+    playback_device  () noexcept;
+    playback_device  (string_type const &name) noexcept;
+    ~playback_device () noexcept;
 };
 
-class CaptureDevice : public virtual Device
+class capture_device : public virtual device
 {
 public:
-    CaptureDevice  () noexcept;
-    ~CaptureDevice () noexcept;
-    bool busy      () noexcept;
+    capture_device  () noexcept;
+    ~capture_device () noexcept;
+    bool busy       () noexcept;
 
-    CaptureDevice (string_type const&,
-                   uint = 22050,
-                   SoundQuality = SoundQuality::Low,
-                   OutputFormat = OutputFormat::Stereo) noexcept;
+    capture_device (string_type const&,
+                    uint = 22050,
+                    sound_quality = sound_quality::low,
+                    output_format = output_format::stereo) noexcept;
 
-    SoundQuality quality () const noexcept { return m_eQuality; }
-    OutputFormat format  () const noexcept { return m_eFormat;  }
+    sound_quality quality () const noexcept { return _M_eQuality; }
+    output_format format  () const noexcept { return _M_eFormat;  }
 
 private:
-    SoundQuality m_eQuality;
-    OutputFormat m_eFormat;
+    sound_quality _M_eQuality;
+    output_format _M_eFormat;
 };
 
 // ====================================================
 
-class Context
+class context
 {
 public:
     typedef string string_type;
 
-    Context () = delete;
-    Context (PlaybackDevice& device, bool make_current = false) noexcept;
-    ~Context () noexcept;
+    context () = delete;
+    context (playback_device& device, bool make_current = false) noexcept;
+    ~context () noexcept;
 
-    using Scenario = Compute::DeviceGroup;
+    using scenario_type = compute::device_group;
 
     void use ();
     void invalidate () noexcept;
-    bool setCapability (int cap, bool enable) noexcept;
-    bool hasCapability (int cap) noexcept;
+    bool set_capability (int cap, bool enable) noexcept;
+    bool has_capability (int cap) noexcept;
     void process () noexcept;
     void suspend () noexcept;
 
-    static DistanceModel distanceModel () noexcept;
-    static void          setDistanceModel (DistanceModel model) noexcept;
-    static Context*      current () noexcept;
-    static string_type   label(StringQuery query) noexcept;
-    static void          setDopplerFactor (float factor) noexcept;
-    static float         dopplerFactor () noexcept;
-    static void          setSpeedOfSound (float speed) noexcept;
-    static float         speedOfSound () noexcept;
-    static Scenario      scenario () noexcept;
-    static bool          setScenario (Scenario&) noexcept;
+    static distance_type distance_model () noexcept;
+    static void          set_distance_model (distance_type model) noexcept;
+    static context*      current () noexcept;
+    static string_type   label(string_query query) noexcept;
+    static void          set_doppler_factor (float factor) noexcept;
+    static float         doppler_factor () noexcept;
+    static void          set_speed_of_sound (float speed) noexcept;
+    static float         speed_of_sound () noexcept;
+    static scenario_type scenario () noexcept;
+    static bool          set_scenario (scenario_type&) noexcept;
 
-    PlaybackDevice& device () const noexcept
-    { return *m_gDevice; }
+    playback_device& get_device () const noexcept
+    { return *_M_gDevice; }
 
 private:
-    PlaybackDevice* m_gDevice;
+    playback_device* _M_gDevice;
 };
 
 } } // namespace Audio

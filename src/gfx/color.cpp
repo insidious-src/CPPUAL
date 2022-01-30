@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,41 +21,41 @@
 
 #include <cppual/gfx/color.h>
 
-namespace cppual { namespace Graphics {
+namespace cppual { namespace gfx {
 
-Color colorFromName (ColorName eName) noexcept
+color color_from_name (color_name eName) noexcept
 {
     switch (eName)
     {
-    case ColorName::White:
+    case color_name::white:
         return { 255, 255, 255 };
-    case ColorName::Grey:
+    case color_name::grey:
         return { 150, 150, 150 };
-    case ColorName::Red:
+    case color_name::red:
         return { 255, 0, 0 };
-    case ColorName::Green:
+    case color_name::green:
         return { 0, 255, 0 };
-    case ColorName::Blue:
+    case color_name::blue:
         return { 0, 0, 255 };
-    case ColorName::Yellow:
+    case color_name::yellow:
         return { 0, 0, 0 };
-    case ColorName::Brown:
+    case color_name::brown:
         return { 0, 0, 0 };
-    case ColorName::Orange:
+    case color_name::orange:
         return { 0, 0, 0 };
     default:
         return { 0, 0, 0 };
     }
 }
 
-Color colorFromHexValue (u8) noexcept
+color color_from_hex_value (byte) noexcept
 {
-    return Color ();
+    return color ();
 }
 
 // =========================================================
 
-Color CMYKtoRGBColor (CMYKColor const& gCMYK) noexcept
+color cmyk_to_rgb_color (cmyk_color const& gCMYK) noexcept
 {
     return
     {
@@ -65,7 +65,7 @@ Color CMYKtoRGBColor (CMYKColor const& gCMYK) noexcept
     };
 }
 
-Color YUVtoRGBColor (const YUVColor& gYUV) noexcept
+color yuv_to_rgb_color  (const yuv_color& gYUV) noexcept
 {
     return
     {
@@ -75,32 +75,32 @@ Color YUVtoRGBColor (const YUVColor& gYUV) noexcept
     };
 }
 
-Color HSLtoRGBColor (const HSLColor&) noexcept
+color hsl_to_rgb_color (const hsl_color&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-Color YCbCrtoRGBColor (const YCbCrColor&) noexcept
+color ycb_cr_to_rgb_color  (const ycb_cr_color&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-Color YPbPrtoRGBColor (const YPbPrColor&) noexcept
+color ypb_pr_to_rgb_color  (const ypb_pr_color&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-Color YCbCrtoRGBColorHDTV (const YCbCrColor&) noexcept
+color ycb_cr_to_rgb_color_hdtv (const ycb_cr_color&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-Color YPbPrtoRGBColorHDTV (const YPbPrColor&) noexcept
+color ypb_pr_to_rgb_color_hdtv (const ypb_pr_color&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-CMYKColor RGBtoCMYKColor (Color const& gRgb) noexcept
+cmyk_color rgb_to_cmyk_color (color const& gRgb) noexcept
 {
     return
     {
@@ -111,12 +111,12 @@ CMYKColor RGBtoCMYKColor (Color const& gRgb) noexcept
     };
 }
 
-HSLColor RGBtoHSLColor (Color const&) noexcept
+hsl_color rgb_to_hsl_color (color const&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-YUVColor RGBtoYUVColor (Color const& gRgb) noexcept
+yuv_color rgb_to_yuv_color (color const& gRgb) noexcept
 {
     return
     {
@@ -126,22 +126,22 @@ YUVColor RGBtoYUVColor (Color const& gRgb) noexcept
     };
 }
 
-YCbCrColor RGBtoYCbCrColor (Color const&) noexcept
+ycb_cr_color rgb_to_ycb_cr_color (color const&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-YPbPrColor RGBtoYPbPrColor (Color const&) noexcept
+ypb_pr_color rgb_to_ypb_pr_color (color const&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-YCbCrColor RGBtoYCbCrColorHDTV (Color const&) noexcept
+ycb_cr_color rgb_to_ycb_cr_color_hdtv (color const&) noexcept
 {
     return { 0, 0, 0 };
 }
 
-YPbPrColor RGBtoYPbPrColorHDTV (Color const&) noexcept
+ypb_pr_color rgb_to_ypb_pr_color_hdtv (color const&) noexcept
 {
     return { 0, 0, 0 };
 }

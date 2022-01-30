@@ -25,7 +25,7 @@ RAPIDJSON_DIAG_OFF(unreachable-code)
 RAPIDJSON_DIAG_OFF(missing-noreturn)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! File byte stream for input using fread().
 /*!

@@ -23,7 +23,7 @@ RAPIDJSON_DIAG_OFF(unreachable-code)
 RAPIDJSON_DIAG_OFF(missing-noreturn)
 #endif
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 //! Represents an in-memory input byte stream.
 /*!

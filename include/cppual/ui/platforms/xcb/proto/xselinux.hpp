@@ -875,7 +875,7 @@ CookieFunction>
                 SIGNATURE(xcb_selinux_list_item_next),
                 SIGNATURE(xcb_selinux_list_item_sizeof),
                 SIGNATURE(xcb_selinux_list_properties_properties_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_properties
 
@@ -1311,7 +1311,7 @@ CookieFunction>
                 SIGNATURE(xcb_selinux_list_item_next),
                 SIGNATURE(xcb_selinux_list_item_sizeof),
                 SIGNATURE(xcb_selinux_list_selections_selections_iterator)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_selections
 
@@ -1945,8 +1945,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -1963,8 +1963,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -1977,7 +1977,7 @@ public:
     typedef cppual::selinux::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::selinux::extension & extension)
@@ -1990,7 +1990,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

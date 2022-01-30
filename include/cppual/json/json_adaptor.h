@@ -23,7 +23,7 @@
 
 class QString;
 
-namespace cppual { namespace Json {
+namespace cppual { namespace json {
 
 // ====================================================
 
@@ -151,13 +151,13 @@ class TemplateObject;
 class TemplateArray ;
 
 template <typename T,
-          typename A = Memory::Allocator<Reference<T>>,
+          typename A = memory::allocator<Reference<T>>,
           typename   = typename std::enable_if<is_json_value<T>::value>::type
           >
 class ValuesArray;
 
 template <typename T,
-          typename A = Memory::Allocator<T>,
+          typename A = memory::allocator<T>,
           typename   = typename std::enable_if<std::is_base_of<TemplateObject, T>::value ||
                                                std::is_base_of<TemplateArray , T>::value>::type
           >
@@ -207,8 +207,8 @@ public:
     const_reference operator [] (size_type idx) const;
     reference       operator [] (size_type idx);
 
-    Signal<void()> changed;
-    Signal<void()> aboutToSave;
+    signal<void()> changed;
+    signal<void()> aboutToSave;
 
     friend class TemplateObject;
     friend class TemplateArray ;
@@ -362,9 +362,9 @@ public:
     void onArrayChanged();
     void onRemoved(size_type idx);
 
-    Signal<void()> aboutToSave;
-    Signal<void()> changed;
-    Signal<void()> invalidated;
+    signal<void()> aboutToSave;
+    signal<void()> changed;
+    signal<void()> invalidated;
 
 private:
     pointer parentObjectRef() const;
@@ -477,15 +477,15 @@ public:
     void onArrayChanged();
     void onRemoved(size_type idx);
 
-    Signal<void()>          aboutToSave;
-    Signal<void()>          aboutToAppend;
-    Signal<void()>          appended;
-    Signal<void(size_type)> aboutToRemove;
-    Signal<void(size_type)> removed;
-    Signal<void()>          aboutToClear;
-    Signal<void()>          cleared;
-    Signal<void()>          changed;
-    Signal<void()>          invalidated;
+    signal<void()>          aboutToSave;
+    signal<void()>          aboutToAppend;
+    signal<void()>          appended;
+    signal<void(size_type)> aboutToRemove;
+    signal<void(size_type)> removed;
+    signal<void()>          aboutToClear;
+    signal<void()>          cleared;
+    signal<void()>          changed;
+    signal<void()>          invalidated;
 
 private:
     pointer parentObjectRef() const;
@@ -527,7 +527,7 @@ public:
 
     typedef T                          base_type;
     typedef ReferenceBase<T>           self_type;
-    typedef Function<void(self_type*)> func_type;
+    typedef function<void(self_type*)> func_type;
 
     typedef typename std::conditional<std::is_same<i16, T>::value ||
                                       std::is_enum<T>::value,
@@ -600,7 +600,7 @@ public:
         return _M_owner;
     }
 
-    Signal<void()> changed;
+    signal<void()> changed;
 
 protected:
     inline ReferenceBase (TemplateObject*     owner,
@@ -738,7 +738,7 @@ public:
     typedef Parser::string_type                value_type ;
     typedef Parser::value_type                 json_type  ;
     typedef Parser::string_type                string_type;
-    typedef Function<void(self_type*)>         func_type  ;
+    typedef function<void(self_type*)>         func_type  ;
 
     static constexpr auto npos = static_cast<size_type>(-1);
 
@@ -798,7 +798,7 @@ public:
         return _M_owner;
     }
 
-    Signal<void()> changed;
+    signal<void()> changed;
 
 protected:
     ReferenceBase (TemplateObject*    owner,
@@ -1520,8 +1520,8 @@ public:
     }
 
 private:
-    Signal<void(int&)>         jsonEnumInvoked  ;
-    Signal<void(string_type&)> jsonStringInvoked;
+    signal<void(int&)>         jsonEnumInvoked  ;
+    signal<void(string_type&)> jsonStringInvoked;
 };
 
 //======================================================
@@ -2051,7 +2051,7 @@ public:
             if (it_key == _M_objects[type].end())
             {
                 _M_objects[type].emplace(key,
-                                         Memory::allocate_shared<T>(Memory::Allocator<T>(),
+                                         memory::allocate_shared<T>(memory::allocator<T>(),
                                                                     *json->second.second.get(),
                                                                     std::forward<Args>(args)...));
             }
@@ -2081,7 +2081,7 @@ public:
             if (it_key == _M_arrays[type].end())
             {
                 _M_arrays[type].emplace(key,
-                                        Memory::allocate_shared<T>(Memory::Allocator<T>(),
+                                        memory::allocate_shared<T>(memory::allocator<T>(),
                                                                    *json->second.second.get(),
                                                                    std::forward<Args>(args)...));
             }
@@ -2140,11 +2140,11 @@ public:
         return (*this)[key].first;
     }
 
-    Signal<void()> aboutToReset;
-    Signal<void()> afterReset  ;
+    signal<void()> aboutToReset;
+    signal<void()> afterReset  ;
 
-    Signal<void(size_type)> aboutToResetDoc;
-    Signal<void(size_type)> afterResetDoc  ;
+    signal<void(size_type)> aboutToResetDoc;
+    signal<void(size_type)> afterResetDoc  ;
 
 private:
     mutable json_map    _M_jsonDocs;

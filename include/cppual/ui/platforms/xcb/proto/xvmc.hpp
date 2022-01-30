@@ -137,7 +137,7 @@ CookieFunction>
                 ::xcb_xvmc_surface_info_t,
                 SIGNATURE(xcb_xvmc_list_surface_types_surfaces),
                 SIGNATURE(xcb_xvmc_list_surface_types_surfaces_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_surface_types
 
@@ -219,7 +219,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_xvmc_create_context_priv_data),
                 SIGNATURE(xcb_xvmc_create_context_priv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class create_context
 
@@ -319,7 +319,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_xvmc_create_surface_priv_data),
                 SIGNATURE(xcb_xvmc_create_surface_priv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class create_surface
 
@@ -419,7 +419,7 @@ CookieFunction>
                 uint32_t,
                 SIGNATURE(xcb_xvmc_create_subpicture_priv_data),
                 SIGNATURE(xcb_xvmc_create_subpicture_priv_data_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class create_subpicture
 
@@ -519,7 +519,7 @@ CookieFunction>
                 ::xcb_xv_image_format_info_t,
                 SIGNATURE(xcb_xvmc_list_subpicture_types_types),
                 SIGNATURE(xcb_xvmc_list_subpicture_types_types_length)>
-                >(this->m_c, this->get());
+                >(this->_M_c, this->get());
     }
 }; // class list_subpicture_types
 
@@ -992,8 +992,8 @@ public:
 
     template<typename C>
     dispatcher(C && c, uint8_t first_event)
-        : m_c(std::forward<C>(c))
-        , m_first_event(first_event)
+        : _M_c(std::forward<C>(c))
+        , _M_first_event(first_event)
     {}
 
     template<typename C>
@@ -1010,8 +1010,8 @@ public:
     }
 
 protected:
-    Connection m_c;
-    uint8_t m_first_event;
+    Connection _M_c;
+    uint8_t _M_first_event;
 }; // class dispatcher
 
 } // namespace event
@@ -1024,7 +1024,7 @@ public:
     typedef cppual::xvmc::extension extension;
 
     dispatcher(uint8_t first_error)
-        : m_first_error(first_error)
+        : _M_first_error(first_error)
     {}
 
     dispatcher(const cppual::xvmc::extension & extension)
@@ -1037,7 +1037,7 @@ public:
     }
 
 protected:
-    uint8_t m_first_error;
+    uint8_t _M_first_error;
 }; // class dispatcher
 
 } // namespace error

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,85 +21,83 @@
 
 #include <cppual/ui/animation.h>
 
-namespace cppual { namespace Ui {
-
-float IAnimation::defaultSpeed = 1.0;
+namespace cppual { namespace ui {
 
 // =========================================================
 
-void Motion::play (int nRepeat)
+void motion::play (int nRepeat)
 {
-    if (!m_bIsPlaying.load () and m_pObject and m_pObject->valid ())
+    if (!_M_bIsPlaying.load () and _M_pObject and _M_pObject->valid ())
     {
-        m_bIsPlaying.store (true);
+        _M_bIsPlaying.store (true);
 
         do
         {
         }
         while (nRepeat < 0 ? true : --nRepeat);
 
-        m_bIsPlaying.store (false);
+        _M_bIsPlaying.store (false);
     }
 }
 
-void Motion::pause ()
+void motion::pause ()
 {
 }
 
-void Motion::resume ()
+void motion::resume ()
 {
 }
 
 // =========================================================
 
-void Fade::play (int)
+void fade::play (int)
 {
-    if (!m_bIsPlaying and m_pObject and m_pObject->valid ())
+    if (!_M_bIsPlaying and _M_pObject and _M_pObject->valid ())
     {
     }
 }
 
-void Fade::pause ()
+void fade::pause ()
 {
 }
 
-void Fade::resume ()
+void fade::resume ()
 {
 }
 
 // =========================================================
 
-void Rotation::play (int)
+void rotation::play (int)
 {
-    if (!m_bIsPlaying.load (std::memory_order_consume) and
-            m_pObject and m_pObject->valid ())
+    if (!_M_bIsPlaying.load (std::memory_order_consume) and
+            _M_pObject and _M_pObject->valid ())
     {
     }
 }
 
-void Rotation::pause ()
+void rotation::pause ()
 {
 }
 
-void Rotation::resume ()
+void rotation::resume ()
 {
 }
 
 // =========================================================
 
-void Pulse::play (int)
+void pulse::play (int)
 {
-    if (!m_bIsPlaying.load (std::memory_order_consume) and
-            m_pObject and m_pObject->valid ())
+    if (!_M_bIsPlaying.load (std::memory_order_consume) and
+            _M_pObject and _M_pObject->valid ())
     {
     }
 }
 
-void Pulse::pause ()
+void pulse::pause ()
 {
 }
 
-void Pulse::resume ()
+void pulse::resume ()
 {
 }
 

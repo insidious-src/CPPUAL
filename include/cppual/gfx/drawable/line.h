@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2018 insidious
+ * Copyright (C) 2012 - 2022 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,50 +25,56 @@
 
 #include <cppual/gfx/draw.h>
 
-namespace cppual { namespace Graphics {
-
-enum class LineStyle : char { Solid, Dash, Dot, DashDotDot };
+namespace cppual { namespace gfx {
 
 /**
- * @class Line
+ * @class line
  * @brief A drawable that creates non-transformable line using
- * CRect coordinates
+ * rect coordinates
  */
 
-class Line : public IDrawable2D
+class line : public drawable2d_interface
 {
 public:
-    void draw (Transform2D const& transform_info);
-
-    Color     getColor ()              const noexcept { return m_gColor;   }
-    uint      getSize  ()              const noexcept { return m_uSize;    }
-    LineStyle getStyle ()              const noexcept { return m_eStyle;   }
-    void      setColor (Color const& gColor) noexcept { m_gColor = gColor; }
-    void      setSize  (uint uSize)          noexcept { m_uSize = uSize;   }
-    void      setStyle (LineStyle eStyle)    noexcept { m_eStyle = eStyle; }
-
-    Line (const Color& gFillColor,
-          uint         uLineSize = 1U,
-          LineStyle    eStyle    = LineStyle::Solid) noexcept
-    : m_gColor (gFillColor), m_uSize (uLineSize), m_eStyle (eStyle)
-    { }
-
-    Line (Line const& gObj) noexcept
-    : m_gColor (gObj.m_gColor), m_uSize (gObj.m_uSize), m_eStyle (gObj.m_eStyle)
-    { }
-
-    Line& operator = (Line const& gObj) noexcept
+    enum class style_type : byte
     {
-        m_gColor = gObj.m_gColor;
-        m_uSize  = gObj.m_uSize ;
-        m_eStyle = gObj.m_eStyle;
+        solid,
+        dash,
+        dot,
+        dash_dot_dot
+    };
+
+    void draw (transform2d const& transform_info);
+
+    color      getColor ()               const noexcept { return _M_gColor;   }
+    uint       size  ()                  const noexcept { return _M_uSize;    }
+    style_type style ()                  const noexcept { return _M_eStyle;   }
+    void       set_color (color const& gColor) noexcept { _M_gColor = gColor; }
+    void       set_size  (uint uSize)          noexcept { _M_uSize = uSize;   }
+    void       set_style (style_type eStyle)   noexcept { _M_eStyle = eStyle; }
+
+    line (color const& gFillColor,
+          uint         uLineSize = 1U,
+          style_type   eStyle    = style_type::solid) noexcept
+    : _M_gColor (gFillColor), _M_uSize (uLineSize), _M_eStyle (eStyle)
+    { }
+
+    line (line const& gObj) noexcept
+    : _M_gColor (gObj._M_gColor), _M_uSize (gObj._M_uSize), _M_eStyle (gObj._M_eStyle)
+    { }
+
+    line& operator = (line const& gObj) noexcept
+    {
+        _M_gColor = gObj._M_gColor;
+        _M_uSize  = gObj._M_uSize ;
+        _M_eStyle = gObj._M_eStyle;
         return *this;
     }
 
 private:
-    Color     m_gColor;
-    uint      m_uSize ;
-    LineStyle m_eStyle;
+    color      _M_gColor;
+    uint       _M_uSize ;
+    style_type _M_eStyle;
 };
 
 } } // Graphics
