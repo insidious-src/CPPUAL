@@ -20,7 +20,7 @@
  */
 
 #include <cppual/ui/manager.h>
-#include <cppual/memory/static.h>
+#include <cppual/memory/stacked.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
@@ -57,15 +57,17 @@ shared_window WlFactory::createWindow (rect const& gRect, u32 nScreen, shared_di
 
 // =========================================================
 
-using cppual::ui::platform::WlFactory;
-using cppual::process::Plugin        ;
+using cppual::ui::platform::WlFactory ;
+using cppual::process::Plugin         ;
 using cppual::memory::memory_resource ;
-using cppual::memory::stacked_static_resource ;
-using cppual::memory::allocator      ;
+using cppual::memory::stacked_resource;
+using cppual::memory::allocator       ;
+using cppual::memory::allocate_shared ;
 
 extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
 {
-    static stacked_static_resource<sizeof (WlFactory)> static_resource;
+    static char buffer[sizeof (WlFactory) + memory_resource::max_align * 2];
+    static stacked_resource static_resource (buffer, sizeof (buffer));
     static Plugin plugin;
 
     plugin.name     = "WlFactory"         ;
@@ -74,8 +76,7 @@ extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
     plugin.verMajor = 1                   ;
     plugin.verMinor = 0                   ;
 
-    plugin.iface    = std::static_pointer_cast<void>
-            (std::allocate_shared<WlFactory>(allocator<WlFactory>(static_resource)));
+    plugin.iface    = allocate_shared<WlFactory, void> (&static_resource);
 
     return &plugin;
 }

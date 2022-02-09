@@ -20,7 +20,7 @@
  */
 
 #include <cppual/ui/manager.h>
-#include <cppual/memory/static.h>
+#include <cppual/memory/stacked.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
@@ -57,17 +57,18 @@ shared_window XFactory::createWindow (rect const& gRect, u32 nScreen, shared_dis
 
 // =========================================================
 
-using cppual::process::plugin_manager;
-using cppual::ui::platform::factory ;
-using cppual::ui::platform::XFactory;
-using cppual::process::Plugin       ;
-using cppual::memory::memory_resource;
-using cppual::memory::stacked_static_resource;
-using cppual::memory::allocator     ;
+using cppual::process::plugin_manager ;
+using cppual::ui::platform::factory   ;
+using cppual::ui::platform::XFactory  ;
+using cppual::process::Plugin         ;
+using cppual::memory::memory_resource ;
+using cppual::memory::stacked_resource;
+using cppual::memory::allocate_shared ;
 
 extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
 {
-    static stacked_static_resource<sizeof (XFactory)> static_resource;
+    static char buffer[sizeof (XFactory) + memory_resource::max_align * 2];
+    static stacked_resource static_resource (buffer, sizeof (buffer));
     static Plugin plugin;
 
     plugin.name     = "XFactory"       ;
@@ -76,8 +77,7 @@ extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
     plugin.verMajor = 1                ;
     plugin.verMinor = 0                ;
 
-    plugin.iface    = std::static_pointer_cast<void>
-            (std::allocate_shared<XFactory>(allocator<XFactory>(static_resource)));
+    plugin.iface    = allocate_shared<XFactory, void> (&static_resource);
 
     return &plugin;
 }

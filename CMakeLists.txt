@@ -165,7 +165,6 @@ add_library(cppual-memory SHARED
     "include/cppual/memory/allocator.h"
     "src/memory/allocator.cpp"
     "include/cppual/memory/mop.h"
-    "include/cppual/memory/static.h"
     "src/memory/stacked.cpp"
     "include/cppual/memory/stacked.h"
     "src/memory/pool.cpp"
@@ -421,6 +420,7 @@ add_library(cppual-network SHARED
     "src/network/transport/os/bsd.h"
 
     "include/cppual/network_protocol"
+    "include/cppual/network_tcp_protocol"
     "include/cppual/network_http"
     "include/cppual/network_ftp"
     "include/cppual/network_p2p"

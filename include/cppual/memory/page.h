@@ -32,9 +32,9 @@ class page_resource final : public memory_resource
 {
 public:
     page_resource (size_type size);
-    page_resource (memory_resource* allocator, size_type size);
-    //page_resource (string&& shared_name, size_type size);
-    void clear    () noexcept;
+    //page_resource (memory_resource& allocator, size_type size);
+
+    void clear () noexcept;
 
     inline size_type count () const noexcept
     { return 0; }
@@ -46,8 +46,8 @@ public:
     { return 0; }
 
 private:
-    void* do_allocate   (size_type size, align_type align)  noexcept;
-    void  do_deallocate (void* p, size_type size, align_type align) ;
+    void* do_allocate   (size_type size, align_type align);
+    void  do_deallocate (void* p, size_type size, align_type align);
 
     bool  do_is_equal   (base_type const& gObj) const noexcept
     { return &gObj == this; }
@@ -56,7 +56,7 @@ private:
 // =========================================================
 
 template <typename T>
-using page_allocator = allocator<T, memory_resource>;
+using page_allocator = allocator<T, page_resource>;
 
 } } // Memory
 

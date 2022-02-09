@@ -27,10 +27,12 @@
 namespace cppual { namespace memory {
 
 heap_resource::heap_resource (size_type uSize)
-: _M_gOwner (uSize > sizeof(free_block) ? get_default_resource()->max_size() >= uSize ?
+: _M_gOwner (uSize > sizeof (free_block) ? get_default_resource()->max_size() >= uSize ?
                            *get_default_resource() : *new_delete_resource() : *this),
-  _M_pBegin (uSize > sizeof(free_block) ? _M_gOwner.allocate (uSize, alignof (uptr)) : nullptr),
-  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize) : nullptr),
+  _M_pBegin (&_M_gOwner != this ?
+                 _M_gOwner.allocate (uSize + max_align * 2, alignof (uptr)) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ?
+            static_cast<math_pointer> (_M_pBegin) + uSize + max_align * 2 : nullptr),
   _M_pFreeBlocks (reinterpret_cast<free_block*> (_M_pBegin)),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
@@ -41,12 +43,32 @@ heap_resource::heap_resource (size_type uSize)
     }
 }
 
+heap_resource::heap_resource (pointer buffer, size_type uSize)
+: _M_gOwner (*this),
+  _M_pBegin (buffer && uSize > sizeof (free_block) ? buffer : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (buffer) + uSize : nullptr),
+  _M_pFreeBlocks (reinterpret_cast<free_block*> (_M_pBegin)),
+  _M_bIsMemShared ()
+{
+    if (_M_pFreeBlocks != nullptr)
+    {
+        _M_pFreeBlocks->size = uSize;
+        _M_pFreeBlocks->next = nullptr;
+    }
+    else
+    {
+        throw std::bad_alloc ();
+    }
+}
+
 heap_resource::heap_resource (memory_resource& pOwner, size_type uSize)
 : _M_gOwner (uSize > sizeof(free_block) ? uSize > pOwner.max_size () ?
                                           uSize > get_default_resource()->max_size() ?
                             *new_delete_resource() : *get_default_resource() : pOwner : *this),
-  _M_pBegin (uSize > sizeof(free_block) ? _M_gOwner.allocate (uSize, alignof (uptr)) : nullptr),
-  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize) : nullptr),
+  _M_pBegin (&_M_gOwner != this ?
+                 _M_gOwner.allocate (uSize + max_align * 2, alignof (uptr)) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ?
+            static_cast<math_pointer> (_M_pBegin) + uSize + max_align * 2 : nullptr),
   _M_pFreeBlocks (static_cast<free_block*> (_M_pBegin)),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
@@ -64,24 +86,9 @@ heap_resource::heap_resource (memory_resource& pOwner, size_type uSize)
     }
 }
 
-//heap_resource::heap_resource (string& gName, size_type uSize)
-//: _M_gSharedName (std::move (gName)),
-//  _M_gOwner (*this),
-//  _M_pBegin (uSize > sizeof (FreeBlock) ? new (gName) u8[uSize] : nullptr),
-//  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize) : nullptr),
-//  _M_pFreeBlocks (reinterpret_cast<FreeBlock*> (_M_pBegin)),
-//  _M_bIsMemShared (true)
-//{
-//    if (_M_pFreeBlocks != nullptr)
-//    {
-//        _M_pFreeBlocks->size = uSize;
-//        _M_pFreeBlocks->next = nullptr;
-//    }
-//}
-
 heap_resource::~heap_resource ()
 {
-    if (&_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
+    if (_M_pBegin && &_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity (), alignof (uptr));
 }
 
 void* heap_resource::do_allocate (size_type uSize, align_type uAlign) noexcept
@@ -273,10 +280,12 @@ inline list_resource::header* find (list_resource::header*          hdr,
 // =========================================================
 
 list_resource::list_resource (size_type uSize)
-: _M_gOwner(uSize > sizeof (header) ? get_default_resource()->max_size() >= uSize ?
-                                     *get_default_resource() : *new_delete_resource() : *this),
-  _M_pBegin (uSize > sizeof (header) ? _M_gOwner.allocate (uSize, alignof (header)) : nullptr),
-  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize + sizeof (header)) : nullptr),
+: _M_gOwner (uSize > sizeof (header) ? get_default_resource ()->max_size () >= uSize + max_align * 2 ?
+                                      *get_default_resource () : *new_delete_resource () : *this),
+  _M_pBegin (&_M_gOwner != this ?
+                 _M_gOwner.allocate (uSize + max_align * 2, alignof (header)) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ?
+            static_cast<math_pointer> (_M_pBegin) + uSize + max_align * 2 : nullptr),
   _M_pFirstFreeBlock (static_cast<header*> (_M_pBegin)),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
@@ -287,12 +296,32 @@ list_resource::list_resource (size_type uSize)
     }
 }
 
+list_resource::list_resource (pointer buffer, size_type uSize)
+: _M_gOwner(*this),
+  _M_pBegin (buffer && uSize > sizeof (header) ? buffer : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + uSize : nullptr),
+  _M_pFirstFreeBlock (static_cast<header*> (_M_pBegin)),
+  _M_bIsMemShared ()
+{
+    if (_M_pFirstFreeBlock != nullptr)
+    {
+        _M_pFirstFreeBlock->size = capacity () - sizeof (header);
+        _M_pFirstFreeBlock->next = nullptr;
+    }
+    else
+    {
+        throw std::bad_alloc ();
+    }
+}
+
 list_resource::list_resource (memory_resource& pOwner, size_type uSize)
-: _M_gOwner (uSize > sizeof (header) ? uSize > pOwner.max_size () ?
-                                       uSize > get_default_resource()->max_size() ?
-                                      *new_delete_resource() : *get_default_resource() : pOwner : *this),
-  _M_pBegin (uSize > sizeof (header) ? _M_gOwner.allocate (uSize, alignof (header)) : nullptr),
-  _M_pEnd (_M_pBegin != nullptr ? address (_M_pBegin, uSize) : nullptr),
+: _M_gOwner (uSize > sizeof (header) ? (uSize + max_align * 2) >  pOwner.max_size () ?
+                                       (uSize + max_align * 2) >  get_default_resource ()->max_size () ?
+                                       *new_delete_resource () : *get_default_resource () : pOwner : *this),
+  _M_pBegin (&_M_gOwner != this ?
+                 _M_gOwner.allocate (uSize + max_align * 2, alignof (header)) : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ?
+          static_cast<math_pointer> (_M_pBegin) + uSize + max_align * 2 : nullptr),
   _M_pFirstFreeBlock (static_cast<header*> (_M_pBegin)),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
@@ -312,7 +341,7 @@ list_resource::list_resource (memory_resource& pOwner, size_type uSize)
 
 list_resource::~list_resource ()
 {
-    if (&_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
+    if (_M_pBegin && &_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
 }
 
 void list_resource::defragment () noexcept

@@ -31,27 +31,33 @@ namespace cppual { namespace memory {
 
 // =========================================================
 
-class monotonic_pool_resource final : public memory_resource
+class uniform_pool_resource final : public memory_resource
 {
 public:
     /// local memory
-    monotonic_pool_resource (size_type  blk_count,
-                             size_type  blk_size,
-                             align_type blk_align = alignof(uptr));
+    uniform_pool_resource (size_type  blk_count,
+                           size_type  blk_size,
+                           align_type blk_align = alignof(uptr));
+
+    /// local memory from allocated buffer (stack or heap)
+    uniform_pool_resource (pointer    buffer,
+                           size_type  blk_count,
+                           size_type  blk_size,
+                           align_type blk_align = alignof(uptr));
 
     /// nested allocators
-    monotonic_pool_resource (memory_resource& allocator,
-                             size_type        blk_count,
-                             size_type        blk_size,
-                             align_type       blk_align = alignof(uptr));
+    uniform_pool_resource (memory_resource& allocator,
+                           size_type        blk_count,
+                           size_type        blk_size,
+                           align_type       blk_align = alignof(uptr));
 
     /// shared memory
-    monotonic_pool_resource (shared_object& shared_obj,
-                             size_type     blk_count,
-                             size_type     blk_size,
-                             align_type    blk_align = alignof(uptr));
+    uniform_pool_resource (shared_object& shared_obj,
+                           size_type     blk_count,
+                           size_type     blk_size,
+                           align_type    blk_align = alignof(uptr));
 
-    ~monotonic_pool_resource ();
+    ~uniform_pool_resource ();
     void clear () noexcept;
 
     size_type block_size  () const noexcept { return _M_uBlkSize ; }
@@ -75,6 +81,14 @@ public:
     { return _M_gOwner; }
 
 private:
+    void  initialize    () noexcept;
+    void* do_allocate   (size_type size, align_type align);
+    void  do_deallocate (void* p, size_type size, align_type align) ;
+
+    bool  do_is_equal   (base_const_reference gObj) const noexcept
+    { return &gObj == this; }
+
+private:
     memory_resource& _M_gOwner      ;
     pointer const    _M_pBegin      ;
     pointer const    _M_pEnd        ;
@@ -83,19 +97,12 @@ private:
     align_type const _M_uBlkAlign   ;
     size_type        _M_uBlkNum     ;
     cbool            _M_bIsMemShared;
-
-    void  initialize    () noexcept;
-    void* do_allocate   (size_type size, align_type align);
-    void  do_deallocate (void* p, size_type size, align_type align) ;
-
-    bool  do_is_equal   (base_const_reference gObj) const noexcept
-    { return &gObj == this; }
 };
 
 // =========================================================
 
 template <typename T>
-using monotonic_pool_allocator = allocator <T, monotonic_pool_resource>;
+using uniform_pool_allocator = allocator <T, uniform_pool_resource>;
 
 // =========================================================
 

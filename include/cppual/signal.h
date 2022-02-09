@@ -477,10 +477,7 @@ void
 disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
             typename signal<TRetType(TArgs...), Allocator>::slot_type& it)
 {
-    if (it != gSignal.end())
-    {
-        gSignal._M_slots.erase(it);
-    }
+    if (it != gSignal.cend ()) gSignal._M_slots.erase (it);
 }
 
 template <typename TRetType,
@@ -492,12 +489,9 @@ void
 disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
             typename signal<TRetType(TArgs...), Allocator>::const_reference fn)
 {
-    auto it = std::find(gSignal.begin(), gSignal.end(), fn);
+    auto it = std::find(gSignal.cbegin (), gSignal.cend (), fn);
 
-    if (it != gSignal.end())
-    {
-        gSignal._M_slots.erase(it);
-    }
+    if (it != gSignal.cend ()) gSignal._M_slots.erase (it);
 }
 
 template <typename TClass  ,
@@ -513,12 +507,9 @@ disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
 {
     using value_type = typename signal<TRetType(TArgs...), Allocator>::value_type;
 
-    auto it = std::find(gSignal.begin(), gSignal.end(), value_type(&pObj, fn));
+    auto it = std::find (gSignal.cbegin (), gSignal.cend (), value_type (&pObj, fn));
 
-    if (it != gSignal.end())
-    {
-        gSignal._M_slots.erase(it);
-    }
+    if (it != gSignal.cend ()) gSignal._M_slots.erase (it);
 }
 
 // =========================================================

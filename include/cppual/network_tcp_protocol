@@ -19,4 +19,4 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/network/protocols/http.h>
+#include <cppual/network/protocols/server_protocol.h>

@@ -20,7 +20,7 @@
  */
 
 #include <cppual/ui/manager.h>
-#include <cppual/memory/static.h>
+#include <cppual/memory/stacked.h>
 
 #include "cldevice.h"
 #include "clcontext.h"
@@ -120,18 +120,19 @@ factory::size_type cl_factory::device_count(device_categories types)
 
 // =========================================================
 
-using cppual::compute::cl::cl_factory        ;
-using cppual::process::Plugin                ;
-using cppual::memory::memory_resource        ;
-using cppual::memory::allocator              ;
-using cppual::memory::stacked_static_resource;
-using cppual::memory::allocate_shared        ;
+using cppual::compute::cl::cl_factory ;
+using cppual::process::Plugin         ;
+using cppual::memory::memory_resource ;
+using cppual::memory::allocator       ;
+using cppual::memory::stacked_resource;
+using cppual::memory::allocate_shared ;
 
 // =========================================================
 
 extern "C" Plugin* plugin_main (memory_resource* rc)
 {
-    static stacked_static_resource<sizeof (cl_factory)> static_resource;
+    static char buffer[sizeof (cl_factory) + memory_resource::max_align * 2];
+    static stacked_resource static_resource (buffer, sizeof (buffer));
     static Plugin plugin;
 
     plugin.name     = "cl_factory"      ;

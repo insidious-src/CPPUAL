@@ -32,6 +32,7 @@ class heap_resource final : public memory_resource
 {
 public:
     heap_resource   (size_type size);
+    heap_resource   (pointer buffer, size_type size);
     heap_resource   (memory_resource& allocator, size_type size);
     //heap_resource   (string& shared_name, size_type size);
     ~heap_resource  ();
@@ -56,17 +57,18 @@ private:
     struct header     { size_type size, adjust;           };
     struct free_block { size_type size; free_block* next; };
 
-    memory_resource& _M_gOwner      ;
-    pointer const    _M_pBegin      ;
-    pointer const    _M_pEnd        ;
-    free_block*      _M_pFreeBlocks ;
-    cbool            _M_bIsMemShared;
-
     void* do_allocate   (size_type size, align_type align)  noexcept;
     void  do_deallocate (void* p, size_type size, align_type align) ;
 
     bool do_is_equal (base_type const& gObj) const noexcept
     { return &gObj == &_M_gOwner; }
+
+private:
+    memory_resource& _M_gOwner      ;
+    pointer const    _M_pBegin      ;
+    pointer const    _M_pEnd        ;
+    free_block*      _M_pFreeBlocks ;
+    cbool            _M_bIsMemShared;
 };
 
 // =========================================================
@@ -74,13 +76,10 @@ private:
 class list_resource final : public memory_resource
 {
 public:
-    struct header
-    {
-        size_type size;
-        header*   next;
-    };
+    struct header { size_type size; header* next; };
 
     list_resource (size_type size);
+    list_resource (pointer buffer, size_type size);
     list_resource (memory_resource& allocator, size_type size);
     //list_resource (string& shared_name, size_type size);
     ~list_resource ();
@@ -103,17 +102,18 @@ public:
     { return _M_gOwner; }
 
 private:
-    memory_resource& _M_gOwner         ;
-    pointer const    _M_pBegin         ;
-    pointer const    _M_pEnd           ;
-    header*          _M_pFirstFreeBlock;
-    cbool            _M_bIsMemShared   ;
-
     void* do_allocate   (size_type size, align_type align)  noexcept;
     void  do_deallocate (void* p, size_type size, size_type align)  ;
 
     bool  do_is_equal   (base_type const& gObj) const noexcept
     { return &gObj == this; }
+
+private:
+    memory_resource& _M_gOwner         ;
+    pointer const    _M_pBegin         ;
+    pointer const    _M_pEnd           ;
+    header*          _M_pFirstFreeBlock;
+    cbool            _M_bIsMemShared   ;
 };
 
 // =========================================================

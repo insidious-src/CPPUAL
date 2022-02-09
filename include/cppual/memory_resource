@@ -20,7 +20,6 @@
  */
 
 #include <cppual/memory/allocator.h>
-#include <cppual/memory/static.h>
 #include <cppual/memory/heap.h>
 #include <cppual/memory/pool.h>
 #include <cppual/memory/stacked.h>

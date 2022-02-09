@@ -43,7 +43,7 @@ auto split_string(std::basic_string<T, std::char_traits<T>, Allocator> const& st
     typedef std::basic_string<T, std::char_traits<T>, Allocator> string_type;
     using allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<string_type>;
 
-    std::vector<string_type, allocator_type> out (str.get_allocator());
+    std::vector<string_type, allocator_type> out (allocator_type(str.get_allocator()));
 
     std::size_t start;
     std::size_t end = 0;

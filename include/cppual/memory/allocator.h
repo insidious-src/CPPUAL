@@ -51,6 +51,8 @@ public:
     typedef cvoid*           const_pointer         ;
     typedef std::ptrdiff_t   difference_type       ;
 
+    static constexpr const align_type max_align = alignof(std::max_align_t);
+
     virtual ~memory_resource() { }
 
     constexpr memory_resource () = default;
@@ -73,22 +75,26 @@ public:
     virtual size_type capacity () const
     { return std::numeric_limits<size_type>::max () - max_align; }
 
+    inline
     void* allocate(size_type bytes, size_type alignment = max_align)
     { return do_allocate(bytes, alignment); }
 
+    inline
     void* reallocate(void* p, size_type old_size, size_type new_size, size_type alignment = max_align)
     { return do_reallocate(p, old_size, new_size, alignment); }
 
+    inline
     void deallocate(void* p, size_type bytes = size_type(), size_type alignment = max_align)
     { do_deallocate(p, bytes, alignment); }
 
-    bool is_equal(memory_resource const& other) const
+    inline
+    bool is_equal(base_const_reference other) const
     { return do_is_equal(other); }
 
 protected:
     virtual void* do_allocate(size_type bytes, align_type alignment) = 0;
     virtual void  do_deallocate(void* p, size_type bytes, align_type alignment) = 0;
-    virtual bool  do_is_equal(base_type const& other) const = 0;
+    virtual bool  do_is_equal(base_const_reference other) const = 0;
 
     virtual void* do_reallocate(void* p, size_type old_size, size_type new_size, align_type alignment)
     {
@@ -106,9 +112,6 @@ protected:
 
         return new_p;
     }
-
-protected:
-    static constexpr align_type max_align = alignof(std::max_align_t);
 };
 
 // =========================================================
@@ -124,6 +127,7 @@ operator != (memory_resource const& a, memory_resource const& b) noexcept
 // =========================================================
 
 memory_resource* new_delete_resource        () noexcept;
+memory_resource* null_memory_resource       () noexcept;
 memory_resource* malloc_resource            () noexcept;
 memory_resource* get_default_resource       () noexcept;
 memory_resource* get_default_thread_resource() noexcept;
@@ -148,7 +152,7 @@ struct is_memory_resource : public is_memory_resource_helper<T>
 { static_assert (is_memory_resource<T>::value, "invalid memory resource object type!"); };
 
 template <class T>
-using memory_resourceType = typename
+using ResourceType = typename
 std::enable_if<is_memory_resource<T>::value, T>::type;
 
 // =========================================================
@@ -159,50 +163,46 @@ template <typename T, typename R = memory_resource>
 class allocator
 {
 public:
-    typedef T               value_type;
-    typedef T *             pointer;
-    typedef T const*        const_pointer;
-    typedef T &             reference;
-    typedef T const&        const_reference;
-    typedef R               resource_type;
-    typedef R*              resource_pointer;
-    typedef R&              resource_reference;
-    typedef std::size_t     size_type;
-    typedef std::ptrdiff_t  difference_type;
+    typedef T               value_type                            ;
+    typedef T *             pointer                               ;
+    typedef T const*        const_pointer                         ;
+    typedef T &             reference                             ;
+    typedef T const&        const_reference                       ;
+    typedef R               resource_type                         ;
+    typedef R*              resource_pointer                      ;
+    typedef R&              resource_reference                    ;
+    typedef std::size_t     size_type                             ;
+    typedef std::ptrdiff_t  difference_type                       ;
     typedef std::false_type propagate_on_container_copy_assignment;
     typedef std::true_type  propagate_on_container_move_assignment;
-    typedef std::true_type  propagate_on_container_swap;
+    typedef std::true_type  propagate_on_container_swap           ;
 
     static_assert (is_memory_resource<resource_type>::value, "R is not derived from memory_resource!");
-
-    inline    allocator (allocator &&    )             noexcept = default;
-    constexpr allocator (allocator const&)             noexcept = default;
-    inline    allocator& operator = (allocator &&    ) noexcept = default;
-    inline    allocator& operator = (allocator const&) noexcept = default;
-
-    inline ~allocator() { }
 
     template <class U>
     struct rebind { typedef allocator<U, resource_type> other; };
 
     inline void deallocate (pointer p, size_type n)
-    { resource ()->deallocate (p, n * sizeof (value_type)); }
+    { resource ()->deallocate (p, n * sizeof (value_type), alignof (value_type)); }
 
-    inline pointer allocate (size_type n, cvoid* = nullptr)
+    inline
+    pointer allocate (size_type n, cvoid* = nullptr)
     {
         return static_cast<pointer> (resource ()->allocate (sizeof (value_type) * n,
                                                             alignof(value_type)));
     }
 
-    inline pointer reallocate (pointer p, size_type old_n, size_type n)
+    inline
+    pointer reallocate (pointer p, size_type old_n, size_type n)
     {
-        return static_cast<pointer> (resource ()->reallocate (p, old_n * sizeof(value_type),
+        return static_cast<pointer> (resource ()->reallocate (p,
+                                                              sizeof (value_type) * old_n,
                                                               sizeof (value_type) * n,
                                                               alignof(value_type)));
     }
 
     inline size_type max_size () const noexcept
-    { return resource ()->max_size () / sizeof (T); }
+    { return resource ()->max_size () / sizeof (value_type); }
 
     inline static pointer address (reference x) noexcept
     { return std::addressof (x); }
@@ -211,26 +211,59 @@ public:
     { return std::addressof (x); }
 
     template <typename... Args>
-    inline static void construct (pointer p, Args... args)
+    inline static void construct (pointer p, Args&&... args)
     { ::new (p) value_type (std::forward<Args> (args)...); }
 
-    static void destroy (pointer p)
+    inline static void destroy (pointer p)
     { p->~value_type (); }
 
-    constexpr allocator select_on_container_copy_construction() const
-    { return allocator (); }
+    constexpr allocator select_on_container_copy_construction () const
+    { return allocator (*this); }
 
     constexpr resource_pointer resource () const noexcept
     { return _M_pRc; }
 
-    constexpr explicit allocator (resource_reference rc)
-    : _M_pRc (&rc)
+    constexpr
+    explicit
+    allocator (resource_reference rc)
+    : _M_pRc  (&rc)
     { }
 
     template <typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type>
-    constexpr allocator () noexcept
-    : _M_pRc (get_default_resource())
+    constexpr
+    allocator () noexcept
+    : _M_pRc  (get_default_resource ())
     { }
+
+    inline
+    allocator (allocator&& ator) noexcept
+    : _M_pRc  (ator._M_pRc)
+    {
+        ator._M_pRc = nullptr;
+    }
+
+    constexpr
+    allocator (allocator const& ator) noexcept
+    : _M_pRc  (ator._M_pRc)
+    { }
+
+    inline
+    allocator& operator = (allocator&& ator) noexcept
+    {
+        if (this == &ator) return *this;
+
+        _M_pRc      = ator._M_pRc;
+        ator._M_pRc = nullptr    ;
+
+        return *this;
+    }
+
+    inline
+    allocator& operator = (allocator const& ator) noexcept
+    {
+        if (this != &ator) _M_pRc = ator._M_pRc;
+        return *this;
+    }
 
     template <typename U,
               typename M,
@@ -239,7 +272,7 @@ public:
     constexpr
     explicit
     allocator (allocator<U, M> const& ator) noexcept
-    : _M_pRc (ator._M_pRc)
+    : _M_pRc  (ator._M_pRc)
     { }
 
     template <typename U,
@@ -249,7 +282,7 @@ public:
     inline
     explicit
     allocator (allocator<U, M>&& ator) noexcept
-    : _M_pRc (ator._M_pRc)
+    : _M_pRc  (ator._M_pRc)
     {
         ator._M_pRc = nullptr;
     }
@@ -272,8 +305,9 @@ public:
     inline
     allocator& operator = (allocator<U, M>&& ator) noexcept
     {
-        _M_pRc = ator._M_pRc;
-        ator._M_pRc = nullptr;
+        _M_pRc      = ator._M_pRc;
+        ator._M_pRc = nullptr    ;
+
         return *this;
     }
 
@@ -283,7 +317,7 @@ public:
     constexpr
     explicit
     allocator (std::allocator<U> const&) noexcept
-    : _M_pRc (new_delete_resource())
+    : _M_pRc  (new_delete_resource ())
     { }
 
     template <typename U,
@@ -292,7 +326,7 @@ public:
     constexpr
     explicit
     allocator (std::allocator<U>&&) noexcept
-    : _M_pRc (new_delete_resource())
+    : _M_pRc  (new_delete_resource ())
     { }
 
     template <typename U,
@@ -301,7 +335,7 @@ public:
     inline
     allocator& operator = (std::allocator<U> const&) noexcept
     {
-        _M_pRc = new_delete_resource();
+        _M_pRc = new_delete_resource ();
         return *this;
     }
 
@@ -311,7 +345,7 @@ public:
     inline
     allocator& operator = (std::allocator<U>&&) noexcept
     {
-        _M_pRc = new_delete_resource();
+        _M_pRc = new_delete_resource ();
         return *this;
     }
 
