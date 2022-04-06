@@ -25,6 +25,7 @@
 
 #include <cppual/types.h>
 
+#include <thread>
 #include <memory>
 #include <limits>
 #include <algorithm>
@@ -32,9 +33,8 @@
 namespace cppual { namespace memory {
 
 // =========================================================
-// std::memory_resource replaced for compute usage
-// =========================================================
 
+/// std::pmr::memory_resource replacement for compute usage
 class memory_resource
 {
 public:
@@ -51,7 +51,12 @@ public:
     typedef cvoid*           const_pointer         ;
     typedef std::ptrdiff_t   difference_type       ;
 
-    static constexpr const align_type max_align = alignof(std::max_align_t);
+    /// maximum alignment depending on memory width
+    static constexpr const align_type max_align  = alignof (std::max_align_t);
+
+    /// maximum align ajustment for memory allocation
+    /// using smart pointers (ex. std::shared_ptr & std::unique_ptr)
+    static constexpr const align_type max_adjust = alignof (std::max_align_t) * 2;
 
     virtual ~memory_resource() { }
 
@@ -62,52 +67,57 @@ public:
     memory_resource (memory_resource const&) = delete;
     memory_resource& operator = (memory_resource const&) = delete;
 
-    virtual bool is_thread_safe () const noexcept { return false; }
-    virtual bool   is_lock_free () const noexcept { return false; }
-    virtual bool      is_shared () const noexcept { return false; }
+    /// is thread safe (ex. using mutex)
+    inline virtual bool is_thread_safe () const noexcept { return false; }
 
-    virtual base_reference owner () const noexcept
+    /// is inter-process shared memory
+    inline virtual bool is_shared () const noexcept { return false; }
+
+    /// upstream memory_resource owne
+    inline virtual base_reference owner () const noexcept
     { return const_cast<base_reference> (*this); }
 
-    virtual size_type max_size () const
+    /// maximum bytes that can be allocated
+    inline virtual size_type max_size () const
     { return std::numeric_limits<size_type>::max () - max_align; }
 
-    virtual size_type capacity () const
+    /// memory capacity in bytes
+    inline virtual size_type capacity () const
     { return std::numeric_limits<size_type>::max () - max_align; }
 
     inline
-    void* allocate(size_type bytes, size_type alignment = max_align)
-    { return do_allocate(bytes, alignment); }
+    void* allocate (size_type bytes, size_type alignment = max_align)
+    { return do_allocate (bytes, alignment); }
 
     inline
-    void* reallocate(void* p, size_type old_size, size_type new_size, size_type alignment = max_align)
-    { return do_reallocate(p, old_size, new_size, alignment); }
+    void* reallocate (void* p, size_type old_size, size_type new_size, size_type alignment = max_align)
+    { return do_reallocate (p, old_size, new_size, alignment); }
 
     inline
-    void deallocate(void* p, size_type bytes = size_type(), size_type alignment = max_align)
-    { do_deallocate(p, bytes, alignment); }
+    void deallocate (void* p, size_type bytes = size_type(), size_type alignment = max_align)
+    { do_deallocate (p, bytes, alignment); }
 
     inline
-    bool is_equal(base_const_reference other) const
-    { return do_is_equal(other); }
+    bool is_equal (base_const_reference other) const
+    { return do_is_equal (other); }
 
 protected:
-    virtual void* do_allocate(size_type bytes, align_type alignment) = 0;
-    virtual void  do_deallocate(void* p, size_type bytes, align_type alignment) = 0;
-    virtual bool  do_is_equal(base_const_reference other) const = 0;
+    virtual void* do_allocate (size_type bytes, align_type alignment) = 0;
+    virtual void  do_deallocate (void* p, size_type bytes, align_type alignment) = 0;
+    virtual bool  do_is_equal (base_const_reference other) const = 0;
 
-    virtual void* do_reallocate(void* p, size_type old_size, size_type new_size, align_type alignment)
+    virtual void* do_reallocate (void* p, size_type old_size, size_type new_size, align_type alignment)
     {
         if (p && old_size && old_size == new_size) return p;
 
-        auto old_p = static_cast<math_pointer>(p);
+        auto old_p = static_cast<math_pointer> (p);
         auto new_p = static_cast<math_pointer>
-                (allocate(new_size > old_size ? new_size : old_size, alignment));
+                (allocate (new_size > old_size ? new_size : old_size, alignment));
 
         if (p)
         {
-            std::copy(old_p, old_p + (old_size <= new_size ? old_size : new_size), new_p);
-            deallocate(p, old_size, alignment);
+            std::copy (old_p, old_p + (old_size <= new_size ? old_size : new_size), new_p);
+            deallocate (p, old_size, alignment);
         }
 
         return new_p;
@@ -126,14 +136,30 @@ operator != (memory_resource const& a, memory_resource const& b) noexcept
 
 // =========================================================
 
-memory_resource* new_delete_resource        () noexcept;
-memory_resource* null_memory_resource       () noexcept;
-memory_resource* malloc_resource            () noexcept;
-memory_resource* get_default_resource       () noexcept;
-memory_resource* get_default_thread_resource() noexcept;
+/// statically constructed memory_resource using new & delete operators
+memory_resource* new_delete_resource () noexcept;
 
-void set_default_resource(memory_resource& resource) noexcept;
-void set_default_thread_resource(memory_resource& resource) noexcept;
+/// statically constructed memory_resource for testing purposes.
+/// on allocation throws std::bad_alloc on deallocation does nothing
+memory_resource* null_resource () noexcept;
+
+/// statically constructed memory_resource using malloc & free functions
+memory_resource* malloc_resource () noexcept;
+
+/// get the default memory_resource
+memory_resource* get_default_resource () noexcept;
+
+/// get the default memory_resource for the current thread
+memory_resource* get_default_thread_resource () noexcept;
+
+/// set the default memory_resource
+void set_default_resource (memory_resource& resource) noexcept;
+
+/// set the default memory_resource for the current thread
+void set_default_thread_resource (memory_resource& resource) noexcept;
+
+/// get main thread id
+std::thread::id main_thread_id () noexcept;
 
 // =========================================================
 // memory_resource Concept
@@ -149,16 +175,16 @@ struct is_memory_resource_helper <memory_resource> : public std::true_type
 
 template <class T>
 struct is_memory_resource : public is_memory_resource_helper<T>
-{ static_assert (is_memory_resource<T>::value, "invalid memory resource object type!"); };
+{ static_assert (is_memory_resource<T>::value, "invalid memory_resource object type!"); };
 
+/// memory_resource concept type
 template <class T>
 using ResourceType = typename
 std::enable_if<is_memory_resource<T>::value, T>::type;
 
 // =========================================================
-// Redefined memory allocator
-// =========================================================
 
+/// redefined polymorphic memory allocator
 template <typename T, typename R = memory_resource>
 class allocator
 {
@@ -173,7 +199,7 @@ public:
     typedef R&              resource_reference                    ;
     typedef std::size_t     size_type                             ;
     typedef std::ptrdiff_t  difference_type                       ;
-    typedef std::false_type propagate_on_container_copy_assignment;
+    typedef std::true_type  propagate_on_container_copy_assignment;
     typedef std::true_type  propagate_on_container_move_assignment;
     typedef std::true_type  propagate_on_container_swap           ;
 
@@ -232,7 +258,8 @@ public:
     template <typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type>
     constexpr
     allocator () noexcept
-    : _M_pRc  (get_default_resource ())
+    : _M_pRc  (std::this_thread::get_id () == main_thread_id () ?
+                   get_default_resource ()  : get_default_thread_resource ())
     { }
 
     inline
@@ -242,7 +269,7 @@ public:
         ator._M_pRc = nullptr;
     }
 
-    constexpr
+    inline
     allocator (allocator const& ator) noexcept
     : _M_pRc  (ator._M_pRc)
     { }
@@ -360,11 +387,22 @@ private:
 // Allocator Comparisons
 // =========================================================
 
+template <typename T>
+inline bool operator == (allocator<T> const& lhs, allocator<T> const& rhs) noexcept
+{
+    return lhs.resource () == rhs.resource () ||
+          (lhs.resource () && rhs.resource () && *lhs.resource () == *rhs.resource ());
+}
+
+template <typename T>
+inline bool operator != (allocator<T> const& lhs, allocator<T> const& rhs) noexcept
+{ return !(lhs == rhs); }
+
 template <typename T1, typename T2>
 inline bool operator == (allocator<T1> const& lhs, allocator<T2> const& rhs) noexcept
 {
-    return lhs.resource() == rhs.resource() ||
-          (lhs.resource() && rhs.resource() && *lhs.resource() == *rhs.resource());
+    return lhs.resource () == rhs.resource () ||
+          (lhs.resource () && rhs.resource () && *lhs.resource () == *rhs.resource ());
 }
 
 template <typename T1, typename T2>
@@ -374,8 +412,8 @@ inline bool operator != (allocator<T1> const& lhs, allocator<T2> const& rhs) noe
 template <typename T, typename R>
 inline bool operator == (allocator<T, R> const& lhs, allocator<T, R> const& rhs) noexcept
 {
-    return lhs.resource() == rhs.resource() ||
-          (lhs.resource() && rhs.resource() && *lhs.resource() == *rhs.resource());
+    return lhs.resource () == rhs.resource () ||
+          (lhs.resource () && rhs.resource () && *lhs.resource () == *rhs.resource ());
 }
 
 template <typename T, typename R>
@@ -385,8 +423,8 @@ inline bool operator != (allocator<T, R> const& lhs, allocator<T, R> const& rhs)
 template <typename T1, typename T2, typename R2>
 inline bool operator == (allocator<T1> const& lhs, allocator<T2, R2> const& rhs) noexcept
 {
-    return lhs.resource() == rhs.resource() ||
-          (lhs.resource() && rhs.resource() && *lhs.resource() == *rhs.resource());
+    return lhs.resource () == rhs.resource () ||
+          (lhs.resource () && rhs.resource () && *lhs.resource () == *rhs.resource ());
 }
 
 template <typename T1, typename T2, typename R2>
@@ -396,18 +434,38 @@ inline bool operator != (allocator<T1> const& lhs, allocator<T2, R2> const& rhs)
 template <typename T1, typename R1, typename T2>
 inline bool operator == (allocator<T1, R1> const& lhs, allocator<T2> const& rhs) noexcept
 {
-    return lhs.resource() == rhs.resource() ||
-          (lhs.resource() && rhs.resource() && *lhs.resource() == *rhs.resource());
+    return lhs.resource () == rhs.resource () ||
+          (lhs.resource () && rhs.resource () && *lhs.resource () == *rhs.resource ());
 }
 
 template <typename T1, typename R1, typename T2>
 inline bool operator != (allocator<T1, R1> const& lhs, allocator<T2> const& rhs) noexcept
 { return !(lhs == rhs); }
 
+template <typename T>
+constexpr bool operator == (allocator<T> const& lhs, std::allocator<T> const&) noexcept
+{
+    return lhs.resource () == new_delete_resource ();
+}
+
+template <typename T>
+constexpr bool operator != (allocator<T> const& lhs, std::allocator<T> const& rhs) noexcept
+{ return !(lhs == rhs); }
+
+template <typename T>
+constexpr bool operator == (std::allocator<T> const&, allocator<T> const& rhs) noexcept
+{
+    return rhs.resource () == new_delete_resource ();
+}
+
+template <typename T>
+constexpr bool operator != (std::allocator<T> const& lhs, allocator<T> const& rhs) noexcept
+{ return !(lhs == rhs); }
+
 template <typename T1, typename T2>
 constexpr bool operator == (allocator<T1> const& lhs, std::allocator<T2> const&) noexcept
 {
-    return lhs.resource() == new_delete_resource();
+    return lhs.resource () == new_delete_resource ();
 }
 
 template <typename T1, typename T2>
@@ -417,7 +475,7 @@ constexpr bool operator != (allocator<T1> const& lhs, std::allocator<T2> const& 
 template <typename T1, typename T2>
 constexpr bool operator == (std::allocator<T1> const&, allocator<T2> const& rhs) noexcept
 {
-    return rhs.resource() == new_delete_resource();
+    return rhs.resource () == new_delete_resource ();
 }
 
 template <typename T1, typename T2>
@@ -440,10 +498,16 @@ template <typename T, typename U>
 struct is_allocator_helper < allocator<T, U> > : public std::is_base_of<memory_resource, U>
 { };
 
+/// is allocator helper
 template <typename T>
 struct is_allocator : public is_allocator_helper<T>
 { static_assert (is_allocator<T>::value, "invalid allocator object type!"); };
 
+/// is allocator helper -> value
+template <typename T>
+inline constexpr auto const is_allocator_v = is_allocator<T>::value;
+
+/// polymorphic allocator concept type
 template <typename T>
 using AllocatorType = typename
 std::enable_if<is_allocator<T>::value, T>::type;

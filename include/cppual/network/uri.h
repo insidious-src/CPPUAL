@@ -28,7 +28,7 @@
 
 namespace cppual { namespace network {
 
-class Uri
+class uri
 {
 public:
     typedef string                      string_type   ;
@@ -38,11 +38,11 @@ public:
     typedef string_type::const_iterator iterator      ;
     typedef string_type::const_iterator const_iterator;
 
-    inline Uri () = default;
-    inline Uri (Uri&&) noexcept = default;
-    inline Uri (Uri const&) = default;
-    inline Uri& operator = (Uri&&) = default;
-    inline Uri& operator = (Uri const&) = default;
+    inline uri () = default;
+    inline uri (uri&&) noexcept = default;
+    inline uri (uri const&) = default;
+    inline uri& operator = (uri&&) = default;
+    inline uri& operator = (uri const&) = default;
 
     bool valid       () const;
     bool is_absolute () const;
@@ -75,7 +75,7 @@ public:
     { return _M_gUri.substr (_M_uQueryEnd + 1); }
 
     template <typename T>
-    inline Uri (T const&);
+    inline uri (T const&);
 
     inline const_pointer c_str () const noexcept
     { return _M_gUri.c_str (); }
@@ -95,7 +95,7 @@ public:
     inline u32string to_u32string () const
     { return u32string (); }
 
-    void swap (Uri& gObj) noexcept
+    void swap (uri& gObj) noexcept
     {
         _M_gUri.swap (gObj._M_gUri);
         std::swap_ranges (&_M_uProtEnd, &_M_uQueryEnd, &gObj._M_uProtEnd);
@@ -111,17 +111,17 @@ private:
     size_type   _M_uQueryEnd   { };
 };
 
-bool operator == (Uri const& lhs, Uri const& rhs);
-bool operator != (Uri const& lhs, Uri const& rhs);
-bool operator <  (Uri const& lhs, Uri const& rhs);
-bool operator <= (Uri const& lhs, Uri const& rhs);
-bool operator >  (Uri const& lhs, Uri const& rhs);
-bool operator >= (Uri const& lhs, Uri const& rhs);
+bool operator == (uri const& lhs, uri const& rhs);
+bool operator != (uri const& lhs, uri const& rhs);
+bool operator <  (uri const& lhs, uri const& rhs);
+bool operator <= (uri const& lhs, uri const& rhs);
+bool operator >  (uri const& lhs, uri const& rhs);
+bool operator >= (uri const& lhs, uri const& rhs);
 
-std::ostream & operator << (std::ostream & os, Uri const& u);
-std::wostream& operator << (std::wostream& os, Uri const& u);
-std::istream & operator >> (std::istream & os, Uri& u);
-std::wistream& operator >> (std::wistream& os, Uri& u);
+std::ostream & operator << (std::ostream & os, uri const& u);
+std::wostream& operator << (std::wostream& os, uri const& u);
+std::istream & operator >> (std::istream & os, uri& u);
+std::wistream& operator >> (std::wistream& os, uri& u);
 
 } } // namespace Network
 

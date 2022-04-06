@@ -41,26 +41,26 @@
 
 namespace cppual { namespace network {
 
-TcpStream::TcpStream () noexcept
-: TransportSocket (SocketType::Tcp)
+tcp_stream::tcp_stream () noexcept
+: transport_socket (socket_type::tcp)
 {
 }
 
-TcpStream::TcpStream (TcpStream&&) noexcept
-: TransportSocket (SocketType::Tcp)
+tcp_stream::tcp_stream (tcp_stream&&) noexcept
+: transport_socket (socket_type::tcp)
 {
 }
 
-TcpStream::TcpStream (Address const&, u16) noexcept
-: TransportSocket (SocketType::Tcp)
+tcp_stream::tcp_stream (address const&, u16) noexcept
+: transport_socket (socket_type::tcp)
 {
 }
 
-TcpStream::~TcpStream () noexcept
+tcp_stream::~tcp_stream () noexcept
 {
 }
 
-void TcpStream::disconnect () noexcept
+void tcp_stream::disconnect () noexcept
 {
     if (_M_bIsConnected)
     {
@@ -68,7 +68,27 @@ void TcpStream::disconnect () noexcept
     }
 }
 
-TcpStream& TcpStream::operator << (Packet const&) noexcept // send
+void tcp_stream::start_session(protocol_context&, packet& /*outgoing_packet*/)
+{
+
+}
+
+bool tcp_stream::read_data(protocol_context&, packet& /*incoming_packet*/)
+{
+    return false;
+}
+
+byte tcp_stream::try_decode(protocol_context&, packet& /*output_packet*/)
+{
+    return byte ();
+}
+
+byte tcp_stream::encode_content(protocol_context&, packet& /*input_packet*/, packet& /*output_packet*/)
+{
+    return byte ();
+}
+
+tcp_stream& tcp_stream::operator << (packet const&) noexcept // send
 {
     if (_M_bIsConnected)
     {
@@ -77,7 +97,7 @@ TcpStream& TcpStream::operator << (Packet const&) noexcept // send
     return *this;
 }
 
-TcpStream& TcpStream::operator >> (Packet&) noexcept // receive
+tcp_stream& tcp_stream::operator >> (packet&) noexcept // receive
 {
     if (_M_bIsConnected)
     {

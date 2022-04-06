@@ -28,50 +28,69 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
+#include "xbackend.h"
+
 namespace cppual { namespace ui {
 
-class SHARED_API XWindow final : public platform_wnd_interface
+// =========================================================
+
+class SHARED_API xcb_window final : public platform_wnd_interface
 {
 public:
-    XWindow () = delete;
-    XWindow (rect const& rect, u32 screen, shared_display display) noexcept;
-    ~XWindow() noexcept;
+    typedef x::display_data const& data_const_reference;
 
-    string_type title () const noexcept;
-    void        setTitle (string_type const&) noexcept;
-    void        setShaded (bool) noexcept;
-    bool        isShaded () noexcept;
-    void        setModal (bool) noexcept;
-    bool        isModal () noexcept;
-    void        setFullscreen (bool) noexcept;
-    bool        isFullscreen () noexcept;
-    void        setMaximized (bool) noexcept;
-    bool        isMaximized () noexcept;
-    void        setMinimized (bool) noexcept;
-    bool        isMinimized () noexcept;
-    void        setVisibleInTaskbar (bool) noexcept;
-    bool        isVisibleInTaskbar () noexcept;
-    void        setVisibleInPager (bool) noexcept;
-    bool        isVisibleInPager () noexcept;
-    void        flash (uint) noexcept;
+    xcb_window () = delete;
+    xcb_window (rect const& rect, u32 screen, shared_display display) noexcept;
+    ~xcb_window() noexcept;
+
+    string_type title () const;
+    void        set_title (string_type const&);
+    void        set_shaded (bool);
+    bool        is_shaded () const;
+    void        set_modal (bool);
+    bool        is_modal () const;
+    void        set_fullscreen (bool);
+    bool        is_fullscreen () const;
+    void        set_maximized (bool);
+    bool        is_maximized () const;
+    void        set_minimized (bool);
+    bool        is_minimized () const;
+    void        set_visible_in_taskbar (bool);
+    bool        is_visible_in_taskbar () const;
+    void        set_visible_in_pager (bool);
+    bool        is_visible_in_pager () const;
+    void        flash (uint);
     rect        geometry () const;
-    bool        isMapped () const;
-    void        setOwner (const_pointer);
-    void        setGeometry (rect const&);
+    bool        is_mapped () const;
+    void        set_owner (const_pointer);
+    void        set_geometry (rect const&);
     void        raise ();
     void        lower ();
     void        move (point2i);
     void        map ();
+    void        map_minimized ();
+    void        map_maximized ();
     void        unmap ();
-    void        setFlags (window_flags) noexcept;
+    void        set_flags (window_flags);
+    void        keep_above (bool);
+    bool        is_above () const;
+    void        keep_below (bool);
+    bool        is_below () const;
 
     window_flags flags  () const noexcept { return _M_eFlags     ; }
-    weak_window owner  () const noexcept { return  weak_window(); }
-    u32         screen () const noexcept { return _M_uScreen    ; }
+    weak_window  owner  () const noexcept { return  weak_window(); }
+    u32          screen () const noexcept { return _M_uScreen    ; }
+
+    inline x::display_type* display () const noexcept
+    { return connection ()->native<x::display_type> (); }
+
+    inline data_const_reference data () const noexcept
+    { return static_cast<xcb_display&> (*connection ()).data (); }
 
 private:
-    window_flags _M_eFlags ;
-    u32         _M_uScreen;
+    window_flags    _M_eFlags ;
+    u32             _M_uScreen;
+    x::screen_type* _M_pScreen;
 };
 
 } } // namespace Ui

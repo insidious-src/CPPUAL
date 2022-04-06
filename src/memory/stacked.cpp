@@ -46,30 +46,16 @@ constexpr memory_resource::math_pointer to_math_ptr (memory_resource::pointer p)
     return static_cast<memory_resource::math_pointer> (p);
 }
 
-//class math_ptr
-//{
-//public:
-//    constexpr math_ptr () noexcept = default;
-
-//    constexpr math_ptr (memory_resource::pointer p) noexcept : _M_ptr (p) { }
-
-//    constexpr operator memory_resource::math_pointer () const noexcept
-//    { return static_cast<memory_resource::math_pointer> (_M_ptr); }
-
-//private:
-//    memory_resource::pointer _M_ptr { };
-//};
-
 } // anonymous namespace
 
 // =========================================================
 
 stacked_resource::stacked_resource (size_type uSize)
-: _M_gOwner (uSize ? get_default_resource()->max_size() >= (uSize + max_align * 2) ?
+: _M_gOwner (uSize ? get_default_resource()->max_size() >= (uSize + max_adjust) ?
                     *get_default_resource() : *new_delete_resource() : *this),
-  _M_pMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_align * 2, alignof (uptr)) : nullptr),
+  _M_pMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBegin (_M_pMarker),
-  _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + uSize + max_align * 2 : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + uSize + max_adjust : nullptr),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
     if (!_M_pBegin) throw std::bad_alloc ();
@@ -86,12 +72,12 @@ stacked_resource::stacked_resource (pointer buffer, size_type uSize)
 }
 
 stacked_resource::stacked_resource (memory_resource& pOwner, size_type uSize)
-: _M_gOwner (uSize ? (uSize + max_align * 2) > pOwner.max_size () ?
-                         (uSize + max_align * 2) > get_default_resource()->max_size() ?
+: _M_gOwner (uSize ? (uSize + max_adjust) > pOwner.max_size () ?
+                         (uSize + max_adjust) > get_default_resource()->max_size() ?
                             *new_delete_resource() : *get_default_resource() : pOwner : *this),
-  _M_pMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_align * 2, alignof (uptr)) : nullptr),
+  _M_pMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBegin (_M_pMarker),
-  _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + uSize + max_align * 2 : nullptr),
+  _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + uSize + max_adjust : nullptr),
 
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
@@ -119,9 +105,6 @@ void* stacked_resource::do_allocate (size_type uBytes, align_type uAlign)
     auto pMarker   = _M_pMarker;
 
     if (!std::align (uAlign, uBytes, pMarker, max_bytes)) throw std::bad_alloc ();
-
-    if (uBytes == capacity ())
-        std::cerr << "capacity allocated at once :: " << capacity () << " bytes" << std::endl;
 
     auto const pNewMarker = to_math_ptr (pMarker) + uBytes;
 
@@ -202,11 +185,11 @@ void stacked_resource::do_deallocate (void* p, size_type uSize, align_type)
 // =========================================================
 
 dstacked_resource::dstacked_resource (size_type uSize, size_type uHint)
-: _M_gOwner (uSize ? get_default_resource()->max_size() >= (uSize + max_align * 2) ?
+: _M_gOwner (uSize ? get_default_resource()->max_size() >= (uSize + max_adjust) ?
                 *get_default_resource() : *new_delete_resource() : *this),
-  _M_pTopMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_align * 2, alignof (uptr)) : nullptr),
+  _M_pTopMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBottomMarker (_M_pTopMarker != nullptr ?
-            static_cast<math_pointer> (_M_pTopMarker) + uSize + max_align * 2 : nullptr),
+            static_cast<math_pointer> (_M_pTopMarker) + uSize + max_adjust : nullptr),
   _M_pBegin (_M_pTopMarker),
   _M_uHint (uHint),
   _M_pEnd (_M_pBottomMarker),
@@ -229,11 +212,11 @@ dstacked_resource::dstacked_resource (pointer buffer, size_type uSize, size_type
 
 dstacked_resource::dstacked_resource (memory_resource& pOwner, size_type uSize, size_type uHint)
 : _M_gOwner (uSize ? uSize > pOwner.max_size () ?
-                         (uSize + max_align * 2) > get_default_resource()->max_size() ?
+                         (uSize + max_adjust) > get_default_resource()->max_size() ?
                                          *new_delete_resource() : *get_default_resource() : pOwner : *this),
-  _M_pTopMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_align * 2, alignof (uptr)) : nullptr),
+  _M_pTopMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBottomMarker (_M_pTopMarker != nullptr ?
-            static_cast<math_pointer> (_M_pTopMarker) + uSize + max_align * 2 : nullptr),
+            static_cast<math_pointer> (_M_pTopMarker) + uSize + max_adjust : nullptr),
   _M_pBegin (_M_pTopMarker),
   _M_uHint (uHint),
   _M_pEnd (_M_pBottomMarker),
@@ -262,7 +245,7 @@ void* dstacked_resource::do_allocate (size_type uBytes, align_type uAlign)
     if (!_M_pBegin or !uBytes) throw std::bad_alloc ();
     if (!uAlign || uAlign > max_align) uAlign = alignof (uptr);
 
-    auto max = max_size();
+    auto max = max_size ();
 
     if (uBytes < _M_uHint)
     {

@@ -23,7 +23,7 @@
 #define CPPUAL_BYTE_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
+#include <cppual/types.h>
 
 #include <cstddef>
 #include <type_traits>
@@ -37,12 +37,26 @@ template <typename T  ,
           typename = typename std::enable_if<std::is_same<Out, char>::value ||
                                              std::is_same<Out, byte>::value>::type
           >
-inline Out* binary_to_bytes (T value, Out* str) noexcept
+inline Out* binary_to_bytes (T value, Out* str, bool littleEndian = false) noexcept
 {
     auto p = reinterpret_cast<byte*> (str);
 
-    for(auto i = static_cast<std::ptrdiff_t>(sizeof(T) - 1); i >= 0; --i)
-        *p++ = *(reinterpret_cast<byte*>(&value) + i);
+    std::ptrdiff_t i;
+
+    if(!littleEndian)
+    {
+        for (i = static_cast<std::ptrdiff_t> (sizeof (T) - 1); i >= 0; --i)
+        {
+            *p++ = *(reinterpret_cast<byte*> (&value) + i);
+        }
+    }
+    else
+    {
+        for (i = 0; i < static_cast<std::ptrdiff_t> (sizeof (T)); ++i)
+        {
+            *p++ = *(reinterpret_cast<byte*> (&value) + i);
+        }
+    }
 
     return str;
 }
@@ -56,18 +70,31 @@ template <typename T ,
                                              std::is_same<In, byte >::value ||
                                              std::is_same<In, cbyte>::value>::type
           >
-inline T bytes_to_binary (In* str) noexcept
+inline T bytes_to_binary (In* str, bool littleEndian = false)
 {
     static_assert (!std::is_void<T>::value, "T cannot be void!");
 
     typedef typename std::conditional<std::is_const<In>::value, cbyte, byte>::type byte_type;
 
-    T value = T ();
+    std::ptrdiff_t i;
+    T              x;
 
-    for(auto i = static_cast<std::ptrdiff_t>(sizeof(T) - 1); i >= 0; --i)
-        *(reinterpret_cast<byte*>(&value) + i) = static_cast<byte_type>(*str++);
+    if (!littleEndian)
+    {
+        for (i = (static_cast<std::ptrdiff_t> (sizeof (T)) - 1); i >= 0; --i)
+        {
+            *(reinterpret_cast<byte*> (&x) + i) = static_cast<byte_type> (*str++);
+        }
+    }
+    else
+    {
+        for (i = 0; i < static_cast<std::ptrdiff_t> (sizeof (T)); ++i)
+        {
+            *(reinterpret_cast<byte*> (&x) + i) = static_cast<byte_type> (*str++);
+        }
+    }
 
-    return value;
+    return x;
 }
 
 // =========================================================

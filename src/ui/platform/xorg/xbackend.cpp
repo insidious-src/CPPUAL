@@ -32,53 +32,54 @@ namespace cppual { namespace ui {
 
 namespace { // optimize for internal unit usage
 
-inline XDisplay::handle_type x11_connection (cchar* pName) noexcept
+inline xcb_display::handle_type x11_connection (cchar* pName) noexcept
 {
-    static XDisplay::handle_type pDisplay    = nullptr;
-    static cchar*                pCachedName = "";
+    static xcb_display::handle_type pDisplay    = nullptr;
+    static cchar*                   pCachedName = "";
 
-    return pDisplay and pName == pCachedName ?
-                                 pDisplay :
-                                 pDisplay = ::XOpenDisplay (pCachedName = pName);
+    return pDisplay && pName == pCachedName ?
+                                pDisplay :
+                                pDisplay = ::XOpenDisplay (pCachedName = pName);
 }
 
-inline xcb::display_type* get_connection (cchar* pName) noexcept
+inline x::display_type* get_connection (cchar* pName) noexcept
 {
-    return ::XGetXCBConnection (x11_connection (pName).get<xcb::legacy_type> ());
+    return ::XGetXCBConnection (x11_connection (pName).get<x::legacy_type> ());
 }
 
 } // anonymous namespace
 
-XDisplay::XDisplay (string_type const& name) noexcept
+xcb_display::xcb_display (string_type const& name)
 : display_interface (get_connection (name.c_str()), x11_connection (name.c_str())),
-  _M_gName  (native () ? name : nullptr)
+  _M_gName (native () ? name : nullptr),
+  _M_data  (native<x::display_type> ())
 {
     if (!native ()) return;
 
     // take ownership of the event queue
-    ::XSetEventQueueOwner (legacy<xcb::legacy_type> (), XCBOwnsEventQueue);
+    ::XSetEventQueueOwner (legacy<x::legacy_type> (), XCBOwnsEventQueue);
 
-    if (::xcb_connection_has_error (native<xcb::display_type> ()))
+    if (::xcb_connection_has_error (native<x::display_type> ()))
     {
-        std::cout << "error when connecting to display: "
+        std::cerr << "error when connecting to display: "
                   << name << std::endl;
     }
 }
 
-XDisplay::~XDisplay ()
+xcb_display::~xcb_display ()
 {
-    if (native ()) ::XCloseDisplay (legacy<xcb::legacy_type> ());
+    if (native ()) ::XCloseDisplay (legacy<x::legacy_type> ());
 }
 
-uint XDisplay::screenCount () const noexcept
+uint xcb_display::screen_count () const noexcept
 {
     return static_cast<uint>
-            (::xcb_setup_roots_length (::xcb_get_setup (native<xcb::display_type> ())));
+            (::xcb_setup_roots_length (::xcb_get_setup (native<x::display_type> ())));
 }
 
-void XDisplay::flush () noexcept
+void xcb_display::flush () noexcept
 {
-    ::xcb_flush (native<xcb::display_type> ());
+    ::xcb_flush (native<x::display_type> ());
 }
 
 } } // namespace Ui

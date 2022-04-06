@@ -20,7 +20,6 @@
  */
 
 #include <cppual/ui/window.h>
-#include <cppual/ui/manager.h>
 
 namespace cppual { namespace ui {
 
@@ -35,22 +34,28 @@ namespace { namespace internal {
 window::window (view* parent,
                 rect const& rect,
                 string_type const& title,
-                window::image_type*,
-                u32 screen)
-: view(parent, rect, screen)
+                window::image_type* icon,
+                u32 screen,
+                allocator_type const& ator)
+: view (parent, rect, screen, ator),
+  _M_gFrame (),
+  _M_pIcon ()
 {
-    set_title(title);
+    set_title (title);
+    set_icon (icon);
 }
-
-
 
 window::window ()
-: view()
+: view (),
+  _M_gFrame (),
+  _M_pIcon ()
 {
 }
 
-window::window(window const&)
-: view()
+window::window (window const& obj)
+: view (obj),
+  _M_gFrame (),
+  _M_pIcon ()
 {
 }
 
@@ -58,58 +63,130 @@ window::~window ()
 {
 }
 
-window& window::operator = (window const&)
+void window::show_minimized ()
 {
+    renderable_unsafe ()->map_minimized ();
+}
+
+void window::show_maximized ()
+{
+    renderable_unsafe ()->map_maximized ();
+}
+
+window& window::operator = (window const& obj)
+{
+    view::operator = (obj);
     return *this;
 }
 
-bool window::set_icon(window::image_type*)
+bool window::set_icon (window::image_type*)
 {
     return false;
 }
 
-void window::set_title (string_type const& strTitle)
+void window::set_title (string_type const& name)
 {
-    renderable_unsafe ()->setTitle (strTitle);
+    renderable_unsafe ()->set_title (name);
 }
 
-void window::set_fullscreen(bool bFullscreen)
+void window::set_fullscreen (bool bFullscreen)
 {
-    renderable_unsafe ()->setFullscreen (bFullscreen);
+    renderable_unsafe ()->set_fullscreen (bFullscreen);
 }
 
-void window::flash(ushort)
+void window::flash (uint count)
+{
+    renderable_unsafe ()->flash (count);
+}
+
+void window::show_in_taskbar (bool bVis)
+{
+    renderable_unsafe ()->set_visible_in_taskbar (bVis);
+}
+
+bool window::is_visible_in_taskbar () const
+{
+    return renderable_unsafe ()->is_visible_in_taskbar ();
+}
+
+void window::show_in_pager (bool bVis)
+{
+    renderable_unsafe ()->set_visible_in_pager (bVis);
+}
+
+bool window::is_visible_in_pager () const
+{
+    return renderable_unsafe ()->is_visible_in_pager ();
+}
+
+void window::set_shaded (bool bShaded)
+{
+    renderable_unsafe ()->set_shaded (bShaded);
+}
+
+bool window::is_shaded () const
+{
+    return renderable_unsafe ()->is_shaded ();
+}
+
+void window::keep_above (bool above)
+{
+    renderable_unsafe ()->keep_above (above);
+}
+
+bool window::is_above () const
+{
+    return renderable_unsafe ()->is_above ();
+}
+
+void window::keep_below (bool below)
+{
+    renderable_unsafe ()->keep_below (below);
+}
+
+bool window::is_below () const
+{
+    return renderable_unsafe ()->is_below ();
+}
+
+void window::restore ()
+{
+    if (renderable_unsafe ()->is_minimized ()) renderable_unsafe ()->set_minimized (false);
+    else if (renderable_unsafe ()->is_maximized ()) renderable_unsafe ()->set_maximized (false);
+}
+
+void window::minimize ()
+{
+    renderable_unsafe ()->set_minimized (true);
+}
+
+void window::maximize ()
+{
+    renderable_unsafe ()->set_maximized (true);
+}
+
+void window::close ()
 {
 
 }
 
-void window::show_in_taskbar(bool)
-{
-}
-
-void window::restore()
-{
-
-}
-
-void window::minimize()
-{
-
-}
-
-void window::maximize()
-{
-
-}
-
-void window::close()
-{
-
-}
-
-window::string_type window::title() const
+window::string_type window::title () const
 {
     return renderable_unsafe ()->title ();
+}
+
+bool window::is_minimized () const noexcept
+{
+    return renderable_unsafe ()->is_minimized ();
+
+    //return _M_gFrame && _M_gFrame->attached () == this && _M_gFrame->is_hidden ();
+}
+
+bool window::is_maximized () const noexcept
+{
+    return renderable_unsafe ()->is_maximized ();
+
+    //return _M_gFrame && _M_gFrame->attached () == this && _M_gFrame->is_stretched ();
 }
 
 } } // namespace Ui

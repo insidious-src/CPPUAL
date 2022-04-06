@@ -40,8 +40,7 @@ public:
     { return _M_gLabel; }
 
 protected:
-    gfx::font _M_gFont ;
-    string    _M_gLabel;
+    string _M_gLabel;
 };
 
 // =========================================================

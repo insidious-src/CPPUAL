@@ -55,7 +55,9 @@ template <std::size_t N>
 struct simplify_mem_func
 {
     template <class X, class XFuncType>
-    inline static any_object* convert (X const*, XFuncType, any_member_fn&) noexcept
+    constexpr
+    static
+    any_object* convert (X const*, XFuncType, any_member_fn&) noexcept
     {
         static_assert (N - 100, "unsupported member function pointer on this compiler");
         return nullptr;
@@ -141,23 +143,27 @@ public:
     {
         _M_pObj = nullptr;
         _M_fn   = nullptr;
-        return * this   ;
+        return  * this   ;
     }
 
     inline closure& operator = (closure const& mRhs) noexcept
     {
+        if (this == &mRhs) return *this;
+
         _M_pObj = mRhs._M_pObj;
         _M_fn   = mRhs._M_fn  ;
-        return * this       ;
+        return  * this        ;
     }
 
     inline closure& operator = (closure&& mRhs) noexcept
     {
+        if (this == &mRhs) return *this;
+
         _M_pObj = mRhs._M_pObj;
         _M_fn   = mRhs._M_fn  ;
 
-        mRhs = nullptr;
-        return * this;
+        mRhs   = nullptr;
+        return * this   ;
     }
 
     template <class X, class XMemFunc>
@@ -212,19 +218,19 @@ public:
     inline bool operator > (closure const& mRhs) const
     { return mRhs < *this; }
 
-    inline size_type hash () const noexcept
+    constexpr size_type hash () const noexcept
     {
-        return reinterpret_cast  <size_type> (_M_pObj) ^
+        return unsafe_direct_cast<size_type> (_M_pObj) ^
                unsafe_direct_cast<size_type> (_M_fn  ) ;
     }
 
-    inline pointer object () const noexcept
+    constexpr pointer object () const noexcept
     { return _M_pObj; }
 
-    inline TMemFunc ptr_function () const noexcept
+    constexpr TMemFunc ptr_function () const noexcept
     { return direct_cast<TMemFunc> (_M_fn); }
 
-    inline TStaticFunc static_func () const noexcept
+    constexpr TStaticFunc static_func () const noexcept
     { return direct_cast<TStaticFunc> (this); }
 
 private:
@@ -249,7 +255,7 @@ public:
     template <typename X>
     using mem_fn_type = T (X::*)(Args...);
 
-    // capture lambda constructor
+    /// capture lambda constructor
     template <typename Callable,
               typename Allocator = memory::allocator<Callable>,
               typename =
@@ -265,7 +271,7 @@ public:
         _M_closure.bind_mem_func (static_cast<FuncType*>(_M_storage.get ()), &FuncType::operator ());
     }
 
-    // callable constructor
+    /// callable constructor
     template <typename Callable,
               typename =
               typename std::enable_if<!std::is_same<function, typename std::decay<Callable>::type>{}>::type>
@@ -310,16 +316,16 @@ public:
       _M_storage { std::move (mImpl._M_storage) }
     { }
 
-    // static function constructor
+    /// static function constructor
     inline function (static_fn_type mFuncToBind) noexcept
     : _M_storage ()
     { bind (mFuncToBind); }
 
-    // member function constructor
+    /// member function constructor
     template <typename X, typename Object>
     inline function (Object* pThis, mem_fn_type<X> mFuncToBind) noexcept
     : _M_storage ()
-    { bind (mFuncToBind, pThis); }
+    { bind (pThis, mFuncToBind); }
 
     inline function& operator = (function const& mImpl)
     {
@@ -397,8 +403,8 @@ private:
     { _M_closure.bind_static_func (this, &function::invoke_static_func, mFuncToBind); }
 
     template<typename X, typename Object>
-    inline void bind (mem_fn_type<X> mFuncToBind, Object* pThis) noexcept
-    { _M_closure.bind_mem_func (reinterpret_cast<const Object*> (pThis), mFuncToBind); }
+    inline void bind (Object* pThis, mem_fn_type<X> mFuncToBind) noexcept
+    { _M_closure.bind_mem_func (const_cast<const Object*> (pThis), mFuncToBind); }
 
 private:
     closure_type _M_closure { };

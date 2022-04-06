@@ -30,16 +30,18 @@ uniform_pool_resource::uniform_pool_resource (size_type  uBlkCount,
                                               size_type  uBlkSize,
                                               align_type uBlkAlign)
 : _M_gOwner (uBlkCount && uBlkSize ?
-                 get_default_resource()->max_size() >= (uBlkCount * uBlkSize + max_align * 2) ?
+                 get_default_resource()->max_size() >= (uBlkCount * uBlkSize + max_adjust) ?
                 *get_default_resource() : *new_delete_resource() : *this),
   _M_pBegin (uBlkCount && uBlkSize ?
-                    _M_gOwner.allocate (uBlkCount * uBlkSize + max_align * 2, uBlkAlign) : nullptr),
+                    _M_gOwner.allocate (uBlkCount * uBlkSize + max_adjust, uBlkAlign) : nullptr),
   _M_pEnd (_M_pBegin != nullptr ?
-            static_cast<math_pointer> (_M_pBegin) + (uBlkCount * uBlkSize + max_align * 2) : nullptr),
+            static_cast<math_pointer> (_M_pBegin) + (uBlkCount * uBlkSize + max_adjust) : nullptr),
   _M_pFreeList (),
   _M_uBlkSize  (uBlkSize),
   _M_uBlkAlign (uBlkAlign),
-  _M_uBlkNum   (uBlkCount),
+  _M_uBlkNum   (),
+
+  _M_usedMemory (),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
     initialize ();
@@ -55,7 +57,9 @@ uniform_pool_resource::uniform_pool_resource (pointer    buffer,
   _M_pFreeList (),
   _M_uBlkSize  (uBlkSize),
   _M_uBlkAlign (uBlkAlign),
-  _M_uBlkNum (uBlkCount),
+  _M_uBlkNum (),
+
+  _M_usedMemory (),
   _M_bIsMemShared ()
 {
     initialize ();
@@ -66,17 +70,18 @@ uniform_pool_resource::uniform_pool_resource (memory_resource& pOwner,
                                               size_type        uBlkSize,
                                               align_type       uBlkAlign)
 : _M_gOwner (uBlkCount && uBlkSize ?
-                 (uBlkCount * uBlkSize + max_align * 2) > pOwner.max_size () ?
-                     (uBlkCount * uBlkSize + max_align * 2) > get_default_resource()->max_size () ?
+                 (uBlkCount * uBlkSize + max_adjust) > pOwner.max_size () ?
+                     (uBlkCount * uBlkSize + max_adjust) > get_default_resource()->max_size () ?
                          *new_delete_resource () : *get_default_resource () : pOwner : *this),
   _M_pBegin (uBlkCount && uBlkSize ?
-                 _M_gOwner.allocate (uBlkCount * uBlkSize + max_align * 2, uBlkAlign) : nullptr),
+                 _M_gOwner.allocate (uBlkCount * uBlkSize + max_adjust, uBlkAlign) : nullptr),
   _M_pEnd (_M_pBegin != nullptr ?
-            static_cast<math_pointer> (_M_pBegin) + (uBlkCount * uBlkSize + max_align * 2) : nullptr),
+            static_cast<math_pointer> (_M_pBegin) + (uBlkCount * uBlkSize + max_adjust) : nullptr),
   _M_pFreeList (),
   _M_uBlkSize  (uBlkSize),
   _M_uBlkAlign (uBlkAlign),
-  _M_uBlkNum   (uBlkCount),
+  _M_uBlkNum   (),
+  _M_usedMemory (),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
     if (&_M_gOwner != &pOwner)
@@ -103,16 +108,18 @@ void uniform_pool_resource::initialize () noexcept
         auto p = _M_pFreeList =
                  reinterpret_cast<pointer*> (static_cast<math_pointer> (_M_pBegin) + uAdjust);
 
-        _M_uBlkNum = ((_M_uBlkSize - uAdjust) / _M_uBlkSize) - 1;
+        auto const uSize = static_cast<size_type> (static_cast<math_pointer> (_M_pEnd) -
+                                                   static_cast<math_pointer> (_M_pBegin));
 
-        for (size_type i = 0; i < _M_uBlkNum; ++i)
+        _M_uBlkNum = (uSize - uAdjust) / _M_uBlkSize;
+
+        for (size_type i = 0; i < _M_uBlkNum - 1U; ++i)
         {
-            *p = reinterpret_cast<pointer>  ( p + _M_uBlkSize);
+            *p = reinterpret_cast<pointer>  (direct_cast<uptr> (p) + _M_uBlkSize);
              p = reinterpret_cast<pointer*> (*p);
         }
 
         *p = nullptr;
-        ++_M_uBlkNum;
     }
 }
 
@@ -120,22 +127,28 @@ void* uniform_pool_resource::do_allocate (size_type uSize, align_type uAlign)
 {
     // check if size and alignment match with the ones from
     // the current pool instance
-    if (!_M_pFreeList || uSize != _M_uBlkSize || uAlign != _M_uBlkAlign)
-        return nullptr;
+    if (!_M_pFreeList) throw std::bad_alloc ();
+    if (uSize  != _M_uBlkSize ) throw std::length_error ("not equal to block size");
+    if (uAlign != _M_uBlkAlign) throw std::length_error ("wrong alignment");
 
-    auto p       = reinterpret_cast<pointer > ( _M_pFreeList);
-    _M_pFreeList = reinterpret_cast<pointer*> (*_M_pFreeList);
+    auto p       = direct_cast<pointer > ( _M_pFreeList);
+    _M_pFreeList = direct_cast<pointer*> (*_M_pFreeList);
+
+    _M_usedMemory += uSize;
 
     return p;
 }
 
-void uniform_pool_resource::do_deallocate (void* p, size_type uSize, align_type)
+void uniform_pool_resource::do_deallocate (void* p, size_type uSize, align_type uAlign)
 {
-    if (uSize != _M_uBlkSize) throw std::length_error ("not equal to blocksize");
+    if (uSize  != _M_uBlkSize ) throw std::length_error ("not equal to block size");
+    if (uAlign != _M_uBlkAlign) throw std::length_error ("wrong alignment");
     if (_M_pEnd <= p || p < _M_pBegin) throw std::out_of_range ("pointer is outside the buffer");
 
-    *(reinterpret_cast<pointer*> (p)) = reinterpret_cast<pointer> (_M_pFreeList);
-    _M_pFreeList = reinterpret_cast<pointer*> (p);
+    *(direct_cast<pointer*> (p)) = direct_cast<pointer> (_M_pFreeList);
+    _M_pFreeList = direct_cast<pointer*> (p);
+
+    _M_usedMemory -= uSize;
 }
 
 void uniform_pool_resource::clear () noexcept

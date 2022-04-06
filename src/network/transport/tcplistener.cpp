@@ -41,39 +41,39 @@
 
 namespace cppual { namespace network {
 
-TcpListener::TcpListener()
-: TransportSocket (SocketType::Tcp)
+tcp_listener::tcp_listener()
+: transport_socket (socket_type::tcp)
 {
 
 }
 
-TcpListener::TcpListener (Address const& gAddr, u16 uPort) noexcept
-: TransportSocket (SocketType::Tcp)
+tcp_listener::tcp_listener (address const& gAddr, u16 uPort) noexcept
+: transport_socket (socket_type::tcp)
 {
     listen (gAddr, uPort);
 }
 
-bool TcpListener::accept (TcpStream&) noexcept
+bool tcp_listener::accept (tcp_stream&) noexcept
 {
     if (!valid () or _M_bIsListening) return false;
 
-    sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
-    socklen_t   uLen  = sizeof (sockaddr_in);
+    ::sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
+    ::socklen_t   uLen  = sizeof (::sockaddr_in);
 
     replace_from_id (::accept (id (),
-                               reinterpret_cast<sockaddr*> (&gAddr),
+                               reinterpret_cast<::sockaddr*> (&gAddr),
                                &uLen));
     return true;
 }
 
-bool TcpListener::listen (Address const& addr, u16 uPort) noexcept
+bool tcp_listener::listen (address const& addr, u16 uPort) noexcept
 {
     if (!valid () or _M_bIsListening) return false;
 
 #   ifdef OS_STD_UNIX
-    sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
+    ::sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
     gAddr.sin_family  = PF_INET;
-    gAddr.sin_port    = htons (uPort);
+    gAddr.sin_port    = ::htons (uPort);
 
     if (addr.to_string ().size ())
         ::inet_pton (PF_INET, addr.to_string ().c_str (), &gAddr.sin_addr);
@@ -83,13 +83,34 @@ bool TcpListener::listen (Address const& addr, u16 uPort) noexcept
     int optval = 1;
     ::setsockopt (id (), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
 
-    if (::bind (id (), (sockaddr*) &gAddr, sizeof (gAddr)) > -1 || ::listen (id (), 0) > -1)
+    if (::bind (id (), (::sockaddr*) &gAddr, sizeof (gAddr)) == -1 || ::listen (id (), 0) == -1)
         return _M_bIsListening;
+#   endif
 
     _M_gAddr = addr ;
     _M_uPort = uPort;
-#   endif
+
     return _M_bIsListening = true;
+}
+
+void tcp_listener::start_session(protocol_context&, packet& /*outgoing_packet*/)
+{
+
+}
+
+bool tcp_listener::read_data(protocol_context&, packet& /*incoming_packet*/)
+{
+    return false;
+}
+
+byte tcp_listener::try_decode(protocol_context&, packet& /*output_packet*/)
+{
+    return byte ();
+}
+
+byte tcp_listener::encode_content(protocol_context&, packet& /*input_packet*/, packet& /*output_packet*/)
+{
+    return byte ();
 }
 
 } } // namespace Network

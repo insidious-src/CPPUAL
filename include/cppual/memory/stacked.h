@@ -25,6 +25,7 @@
 
 #include <cppual/string.h>
 #include <cppual/memory/allocator.h>
+#include <cppual/memory/shared.h>
 
 namespace cppual { namespace memory {
 
@@ -34,7 +35,7 @@ public:
     stacked_resource  (size_type capacity);
     stacked_resource  (pointer buffer, size_type capacity);
     stacked_resource  (memory_resource& allocator, size_type capacity);
-    //stacked_resource  (string& shared_name, size_type size);
+    stacked_resource  (shared_memory& shared_name, size_type size);
     ~stacked_resource ();
 
     void   clear  ()       noexcept {        _M_pMarker = _M_pBegin; }
@@ -82,7 +83,7 @@ public:
     dstacked_resource  (size_type capacity, size_type hint);
     dstacked_resource  (pointer buffer, size_type capacity, size_type hint);
     dstacked_resource  (memory_resource& allocator, size_type capacity, size_type hint);
-    //dstacked_resource  (string& shared, size_type size, size_type hint);
+    dstacked_resource  (shared_memory& shared, size_type size, size_type hint);
     ~dstacked_resource ();
 
     size_type hint () const noexcept { return _M_uHint; }

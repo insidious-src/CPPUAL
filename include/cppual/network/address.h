@@ -30,7 +30,7 @@
 
 namespace cppual { namespace network {
 
-class Address
+class address
 {
 private:
     constexpr static cu16 v4_mapped_prefix[12] =
@@ -39,14 +39,14 @@ private:
 public:
     typedef string string_type;
 
-    constexpr Address () noexcept = default;
-    Address (string_type const&) noexcept;
-    Address (u8 byte1, u8 byte2, u8 byte3, u8 byte4) noexcept;
+    constexpr address () noexcept = default;
+    address (string_type const&) noexcept;
+    address (u8 byte1, u8 byte2, u8 byte3, u8 byte4) noexcept;
     string_type to_string () const noexcept;
     bool        valid () const noexcept;
 
-    static Address local_address  () noexcept;
-    static Address public_address () noexcept;
+    static address local_address  () noexcept;
+    static address public_address () noexcept;
 
     bool is_v4 () const noexcept
     { return std::memcmp (&_M_uBytes[0], &v4_mapped_prefix[0], 12) == 0; }
@@ -74,21 +74,21 @@ public:
                _M_uBytes[14] == 0xff && _M_uBytes[15] == 0xff;
     }
 
-    friend bool operator != (Address const&, Address const&) noexcept;
-    friend bool operator <  (Address const&, Address const&) noexcept;
-    friend bool operator <= (Address const&, Address const&) noexcept;
-    friend bool operator == (Address const&, Address const&) noexcept;
-    friend bool operator >  (Address const&, Address const&) noexcept;
-    friend bool operator >= (Address const&, Address const&) noexcept;
+    friend bool operator != (address const&, address const&) noexcept;
+    friend bool operator <  (address const&, address const&) noexcept;
+    friend bool operator <= (address const&, address const&) noexcept;
+    friend bool operator == (address const&, address const&) noexcept;
+    friend bool operator >  (address const&, address const&) noexcept;
+    friend bool operator >= (address const&, address const&) noexcept;
 
 private:
     byte _M_uBytes[16] { };
 };
 
-std::istream& operator >> (std::istream& stream, Address& address);
-std::ostream& operator << (std::ostream& stream, Address const& address);
+std::istream& operator >> (std::istream& stream, address& address);
+std::ostream& operator << (std::ostream& stream, address const& address);
 
-inline bool operator != (Address const& gObj1, Address const& gObj2) noexcept
+inline bool operator != (address const& gObj1, address const& gObj2) noexcept
 {
     return gObj1.is_v4 () != gObj2.is_v4 () ?
                                 true :
@@ -110,7 +110,7 @@ inline bool operator != (Address const& gObj1, Address const& gObj2) noexcept
                                 gObj1._M_uBytes[15] != gObj2._M_uBytes[15];
 }
 
-inline bool operator < (Address const& gObj1, Address const& gObj2) noexcept
+inline bool operator < (address const& gObj1, address const& gObj2) noexcept
 {
     return gObj1.is_v4 () != gObj2.is_v4 () ?
                                 false :
@@ -132,7 +132,7 @@ inline bool operator < (Address const& gObj1, Address const& gObj2) noexcept
                                 gObj1._M_uBytes[ 0] < gObj2._M_uBytes[ 0];
 }
 
-inline bool operator > (Address const& gObj1, Address const& gObj2) noexcept
+inline bool operator > (address const& gObj1, address const& gObj2) noexcept
 {
     return gObj1.is_v4 () != gObj2.is_v4 () ?
                                 false :
@@ -154,13 +154,13 @@ inline bool operator > (Address const& gObj1, Address const& gObj2) noexcept
                                 gObj1._M_uBytes[ 0] > gObj2._M_uBytes[ 0];
 }
 
-inline bool operator <= (Address const& gObj1, Address const& gObj2) noexcept
+inline bool operator <= (address const& gObj1, address const& gObj2) noexcept
 { return gObj1 < gObj2 || gObj1 == gObj1; }
 
-inline bool operator == (Address const& gObj1, Address const& gObj2) noexcept
+inline bool operator == (address const& gObj1, address const& gObj2) noexcept
 { return !(gObj1 != gObj2); }
 
-inline bool operator >= (Address const& gObj1, Address const& gObj2) noexcept
+inline bool operator >= (address const& gObj1, address const& gObj2) noexcept
 { return gObj1 > gObj2 || gObj1 == gObj1; }
 
 // =========================================================

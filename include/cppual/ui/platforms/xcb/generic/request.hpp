@@ -63,7 +63,7 @@ public:
     reply(C && c, Parameter && ... parameter)
         : _M_c(std::forward<C>(c))
         , _M_cookie(Derived::cookie(std::forward<C>(c),
-                                   std::forward<Parameter>(parameter) ...))
+                                    std::forward<Parameter>(parameter) ...))
     {}
 
     operator bool(void)

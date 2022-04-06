@@ -53,8 +53,10 @@ constexpr uint get_buffer_type (BufferType eType) noexcept
         return GL_COPY_READ_BUFFER;
     case BufferType::CopyWrite:
         return GL_COPY_WRITE_BUFFER;
+#ifndef OS_ANDROID
     case BufferType::DispatchIndirect:
         return GL_DISPATCH_INDIRECT_BUFFER;
+#endif
     case BufferType::DrawIndirect:
         return GL_DRAW_INDIRECT_BUFFER;
     case BufferType::ElementArray:
@@ -63,10 +65,12 @@ constexpr uint get_buffer_type (BufferType eType) noexcept
         return GL_PIXEL_PACK_BUFFER;
     case BufferType::PixelUnpack:
         return GL_PIXEL_UNPACK_BUFFER;
+#ifndef OS_ANDROID
     case BufferType::Query:
         return GL_QUERY_BUFFER;
     case BufferType::ShaderStorage:
         return GL_SHADER_STORAGE_BUFFER;
+#endif
     case BufferType::Texture:
         return GL_TEXTURE_BUFFER;
     case BufferType::TransformFeedback:

@@ -23,18 +23,20 @@
 #define CPPUAL_PLATFORM_XCB_ITERATOR_H_
 #ifdef __cplusplus
 
-#include <iterator>
 #include <cppual/decl.h>
-#include <xcb/xcb_icccm.h>
+
+#include <iterator>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-namespace cppual { namespace ui { namespace xcb {
+#include <xcb/xcb.h>
 
-class ScreenForwardIterator
+namespace cppual { namespace x {
+
+class screen_iterator
 {
 public:
-    typedef ScreenForwardIterator          self_type        ;
+    typedef screen_iterator                self_type        ;
     typedef ::xcb_setup_t                  handle_type      ;
     typedef ::xcb_setup_t const            const_handle     ;
     typedef ::xcb_screen_iterator_t        value_type       ;
@@ -43,15 +45,19 @@ public:
     typedef ::xcb_screen_iterator_t const& const_reference  ;
     typedef std::forward_iterator_tag      iterator_category;
 
-    constexpr reference operator *  () { return  _M_gPos; }
-    constexpr pointer   operator -> () { return &_M_gPos; }
+    constexpr reference operator *  () noexcept { return  _M_gPos; }
+    constexpr pointer   operator -> () noexcept { return &_M_gPos; }
 
-    constexpr ScreenForwardIterator () noexcept
+    constexpr screen_iterator () noexcept
     : _M_gPos { }
     { }
 
-    ScreenForwardIterator (const_handle& handle) noexcept
-    : _M_gPos (::xcb_setup_roots_iterator (&handle))
+    constexpr screen_iterator (const_handle& setup) noexcept
+    : _M_gPos (::xcb_setup_roots_iterator (&setup))
+    { }
+
+    constexpr screen_iterator (const_reference ref) noexcept
+    : _M_gPos (ref)
     { }
 
     self_type& operator ++ ()
@@ -73,29 +79,29 @@ public:
     constexpr const_reference pos () const noexcept
     { return _M_gPos; }
 
-    constexpr bool operator == (self_type const& other) const
+    constexpr bool operator == (self_type const& other) const noexcept
     { return _M_gPos.index == other._M_gPos.index; }
 
-    constexpr bool operator != (self_type const& other) const
+    constexpr bool operator != (self_type const& other) const noexcept
     { return !(*this == other); }
 
-    constexpr bool operator > (self_type const& other) const
+    constexpr bool operator > (self_type const& other) const noexcept
     { return _M_gPos.index > other._M_gPos.index; }
 
-    constexpr bool operator >= (self_type const& other) const
+    constexpr bool operator >= (self_type const& other) const noexcept
     { return _M_gPos.index >= other._M_gPos.index; }
 
-    constexpr bool operator < (self_type const& other) const
+    constexpr bool operator < (self_type const& other) const noexcept
     { return _M_gPos.index < other._M_gPos.index; }
 
-    constexpr bool operator <= (self_type const& other) const
+    constexpr bool operator <= (self_type const& other) const noexcept
     { return _M_gPos.index <= other._M_gPos.index; }
 
 private:
     value_type _M_gPos;
 };
 
-} } } // namespace x
+} } // namespace x
 
 #endif // OS_GNU_LINUX or OS_BSD
 #endif // __cplusplus

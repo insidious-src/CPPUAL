@@ -43,6 +43,7 @@ class dyn_loader : public non_copyable
 {
 public:
     typedef call_ret_t (DLCALL * function_type)();
+
     typedef string          string_type;
     typedef resource_handle handle_type;
 
@@ -62,9 +63,9 @@ public:
     bool attach () noexcept;
     void detach () noexcept;
 
-    dyn_loader (string_type   path,
-               bool          attach = true,
-               resolve_policy policy = resolve_policy::lazy) noexcept;
+    dyn_loader (string_type    path,
+                bool           attach = true,
+                resolve_policy policy = resolve_policy::lazy) noexcept;
 
     static string_type extension () noexcept;
 
@@ -108,8 +109,8 @@ private:
     function_type get_function (string_type::const_pointer name) const noexcept;
 
 private:
-    handle_type   _M_pHandle ;
-    string_type   _M_gLibPath;
+    handle_type    _M_pHandle ;
+    string_type    _M_gLibPath;
     resolve_policy _M_eResolve;
 };
 
@@ -243,7 +244,10 @@ public:
     template <typename... Args>
     bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args... args)
     {
-        static_assert (!are_any_references<Args...>::value, "References are not a 'C' concept!");
+        static_assert (!are_any_references_v<Args...>,
+                "References are not a 'C' concept!");
+        static_assert (!are_any_objects_v<Args...>,
+                "Class instances are not allowed as C function arguments!");
 
         loader_type loader (path);
 

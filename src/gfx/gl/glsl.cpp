@@ -96,8 +96,10 @@ constexpr static shader::Type convert_shader_type (int nType) noexcept
         return shader::TessControl;
     case gl::TessEvaluationShaderARB:
         return shader::TessEvaluation;
+#ifndef OS_ANDROID
     case gl::ComputeShaderARB:
         return shader::Compute;
+#endif
     default:
         return shader::Fragment;
     }

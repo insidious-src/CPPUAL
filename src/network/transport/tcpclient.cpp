@@ -43,14 +43,14 @@ namespace cppual { namespace network {
 
 namespace { // internal unit optimization
 
-inline bool resolve_host_name (cchar* hostname, in_addr* addr) noexcept
+inline bool resolve_host_name (cchar* hostname, ::in_addr* addr) noexcept
 {
 #   ifdef OS_STD_UNIX
-    addrinfo* res;
+    ::addrinfo* res;
 
     if (::getaddrinfo (hostname, nullptr, nullptr, &res) == 0)
     {
-        *addr = reinterpret_cast<sockaddr_in*> (res->ai_addr)->sin_addr;
+        *addr = reinterpret_cast<::sockaddr_in*> (res->ai_addr)->sin_addr;
         ::freeaddrinfo (res);
         return true;
     }
@@ -61,12 +61,12 @@ inline bool resolve_host_name (cchar* hostname, in_addr* addr) noexcept
 
 } // anonymous namespace
 
-bool TcpClient::connect (TcpStream& gStream, Address const& server, u16 port) noexcept
+bool tcp_client::connect (tcp_stream& stream, address const& server, u16 port) noexcept
 {
-    sockaddr_in gAddr;
+    ::sockaddr_in gAddr;
 
     gAddr.sin_family = AF_INET;
-    gAddr.sin_port   = htons (port);
+    gAddr.sin_port   = ::htons (port);
 
     if (resolve_host_name (server.to_string ().c_str (), &gAddr.sin_addr))
     {
@@ -75,10 +75,10 @@ bool TcpClient::connect (TcpStream& gStream, Address const& server, u16 port) no
 #       endif
     }
 
-    if (gStream.valid ())
-        ::connect (gStream.id (),
-                   reinterpret_cast<sockaddr*> (&gAddr),
-                   sizeof (sockaddr_in));
+    if (stream.valid ())
+        ::connect (stream.id (),
+                   reinterpret_cast<::sockaddr*> (&gAddr),
+                   sizeof (::sockaddr_in));
     return true;
 }
 

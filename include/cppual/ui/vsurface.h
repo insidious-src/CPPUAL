@@ -40,37 +40,43 @@ public:
     proxy_renderable& operator = (proxy_renderable const&) noexcept;
 
     string title () const noexcept { return string (); }
-    void   setTitle (string const&) noexcept { }
-    void   setShaded (bool) noexcept { }
-    bool   isShaded () noexcept { return false; }
-    void   setModal (bool) noexcept { }
-    bool   isModal () noexcept { return false; }
-    void   setFullscreen (bool) noexcept { }
-    bool   isFullscreen () noexcept { return false; }
-    void   setMaximized (bool) noexcept { }
-    bool   isMaximized () noexcept { return false; }
-    void   setMinimized (bool) noexcept { }
-    bool   isMinimized () noexcept { return false; }
-    void   setVisibleInTaskbar (bool) noexcept { }
-    bool   isVisibleInTaskbar () noexcept { return false; }
-    void   setVisibleInPager (bool) noexcept { }
-    bool   isVisibleInPager () noexcept { return false; }
+    void   set_title (string const&) noexcept { }
+    void   set_shaded (bool) noexcept { }
+    bool   is_shaded () const noexcept { return false; }
+    void   set_modal (bool) noexcept { }
+    bool   is_modal () const noexcept { return false; }
+    void   set_fullscreen (bool) noexcept { }
+    bool   is_fullscreen () const noexcept { return false; }
+    void   set_maximized (bool) noexcept { }
+    bool   is_maximized () const noexcept { return false; }
+    void   set_minimized (bool) noexcept { }
+    bool   is_minimized () const noexcept { return false; }
+    void   set_visible_in_taskbar (bool) noexcept { }
+    bool   is_visible_in_taskbar () const noexcept { return false; }
+    void   set_visible_in_pager (bool) noexcept { }
+    bool   is_visible_in_pager () const noexcept { return false; }
     void   setMimimumSize (point2u) noexcept { }
     void   setMaximumSize (point2u) noexcept { }
     void   flash (uint) noexcept { }
-    void   setGeometry (rect const&) noexcept;
-    void   setOwner (const_pointer) noexcept;
+    void   set_geometry (rect const&) noexcept;
+    void   set_owner (const_pointer) noexcept;
     void   move (point2i) noexcept;
     void   map () noexcept;
+    void   map_minimized () noexcept { }
+    void   map_maximized () noexcept { }
     void   unmap () noexcept;
+    void   keep_above (bool) { }
+    bool   is_above () const { return false; }
+    void   keep_below (bool) { }
+    bool   is_below () const { return false; }
 
     window_flags flags () const { return window_flags (); }
-    void        setFlags (window_flags) { }
+    void        set_flags (window_flags) { }
 
     inline ~proxy_renderable    ()       noexcept { unmap ();            }
     inline weak_window owner    () const noexcept { return _M_pParent;    }
     inline rect        geometry () const noexcept { return _M_gRect;      }
-    inline bool        isMapped () const noexcept { return _M_bIsVisible; }
+    inline bool        is_mapped () const noexcept { return _M_bIsVisible; }
 
     inline u32 screen () const noexcept
     { return _M_pParent != nullptr ? _M_pParent->screen () : 0; }

@@ -31,9 +31,9 @@
 
 namespace cppual { namespace ui {
 
-struct SHARED_API XQueue final : public display_queue_interface
+struct SHARED_API xcb_queue final : public display_queue_interface
 {
-    XQueue ();
+    xcb_queue ();
     bool set_window_events (window_type const&, mask_type) noexcept;
     bool pop_front         (bool) noexcept;
     int  poll              (bool_type&);
@@ -41,7 +41,7 @@ struct SHARED_API XQueue final : public display_queue_interface
     void post              (window_type const&, event_type const&);
 };
 
-} } // namespace Input
+} } // namespace ui
 
 #endif // OS_GNU_LINUX or OS_BSD
 #endif // __cplusplus

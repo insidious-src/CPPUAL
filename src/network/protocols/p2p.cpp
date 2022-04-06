@@ -24,40 +24,40 @@
 
 namespace cppual { namespace network { namespace p2p {
 
-void TorrentClient::start_session (ProtocolContext&, Packet& /*outgoing_packet*/)
+void TorrentClient::start_session (protocol_context&, packet& /*outgoing_packet*/)
 {
 }
 
-bool TorrentClient::read_data (ProtocolContext&, Packet& /*incoming_packet*/)
-{
-    return false;
-}
-
-byte TorrentClient::try_decode (ProtocolContext&, Packet& /*output_packet*/)
-{
-    return byte ();
-}
-
-byte TorrentClient::encode_content (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
-{
-    return byte ();
-}
-
-void MagnetClient::start_session (ProtocolContext&, Packet& /*outgoing_packet*/)
-{
-}
-
-bool MagnetClient::read_data (ProtocolContext&, Packet& /*incoming_packet*/)
+bool TorrentClient::read_data (protocol_context&, packet& /*incoming_packet*/)
 {
     return false;
 }
 
-byte MagnetClient::try_decode (ProtocolContext&, Packet& /*output_packet*/)
+byte TorrentClient::try_decode (protocol_context&, packet& /*output_packet*/)
 {
     return byte ();
 }
 
-byte MagnetClient::encode_content (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
+byte TorrentClient::encode_content (protocol_context&, packet& /*input_packet*/, packet& /*output_packet*/)
+{
+    return byte ();
+}
+
+void MagnetClient::start_session (protocol_context&, packet& /*outgoing_packet*/)
+{
+}
+
+bool MagnetClient::read_data (protocol_context&, packet& /*incoming_packet*/)
+{
+    return false;
+}
+
+byte MagnetClient::try_decode (protocol_context&, packet& /*output_packet*/)
+{
+    return byte ();
+}
+
+byte MagnetClient::encode_content (protocol_context&, packet& /*input_packet*/, packet& /*output_packet*/)
 {
     return byte ();
 }

@@ -23,8 +23,6 @@
 #include <cppual/ui/controls/label.h>
 #include <cppual/ui/controls/button.h>
 
-using namespace cppual::gfx;
-
 namespace cppual { namespace ui {
 
 class message_box final : public dialog

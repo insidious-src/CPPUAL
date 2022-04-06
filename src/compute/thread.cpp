@@ -49,17 +49,19 @@ enum result
 
 namespace main_thread {
 
-const thread_handle Handle = this_thread::handle ();
-thread_handle handle () noexcept { return main_thread::Handle; }
+const thread_handle main_thread_handle = this_thread::handle ();
 
-} // MainThread
+thread_handle handle () noexcept
+{
+    return main_thread::main_thread_handle;
+}
 
-thread_priority main_thread::priority ()
+thread_priority priority ()
 {
     return thread_priority::normal;
 }
 
-int main_thread::set_priority (thread_priority ePrio)
+int set_priority (thread_priority ePrio)
 {
     UNUSED(ePrio);
 
@@ -96,13 +98,13 @@ int main_thread::set_priority (thread_priority ePrio)
     case thread_priority::inherit:
     {
         sched_param gParam;
-        pthread_getschedparam (main_thread::Handle, &nPrio, &gParam);
+        pthread_getschedparam (main_thread::main_thread_handle, &nPrio, &gParam);
         nPrio = gParam.sched_priority;
     }
         break;
     }
 
-    switch (pthread_setschedprio (main_thread::Handle, nPrio))
+    switch (pthread_setschedprio (main_thread::main_thread_handle, nPrio))
     {
     case ENOTSUP: case EINVAL:
         return error_invalid;
@@ -117,6 +119,8 @@ int main_thread::set_priority (thread_priority ePrio)
 
     return error_unknown;
 }
+
+} // namespace main_thread
 
 // =========================================================
 
@@ -185,10 +189,10 @@ thread::~thread ()
     if (_M_bIsJoinable.load ()) join ();
 }
 
-bool thread::start (callable&      gFunc,
-                    bool           bJoinable,
+bool thread::start (callable&       gFunc,
+                    bool            bJoinable,
                     thread_priority /*ePrio*/,
-                    size_type      uStackSize)
+                    size_type       uStackSize)
 {
 #    ifdef OS_STD_POSIX
 

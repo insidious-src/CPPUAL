@@ -24,21 +24,21 @@
 
 namespace cppual { namespace network { namespace http {
 
-void Client::start_session (ProtocolContext&, Packet& /*outgoing_packet*/)
+void Client::start_session (protocol_context&, packet& /*outgoing_packet*/)
 {
 }
 
-bool Client::read_data (ProtocolContext&, Packet& /*incoming_packet*/)
+bool Client::read_data (protocol_context&, packet& /*incoming_packet*/)
 {
     return false;
 }
 
-byte Client::try_decode (ProtocolContext&, Packet& /*output_packet*/)
+byte Client::try_decode (protocol_context&, packet& /*output_packet*/)
 {
     return byte ();
 }
 
-byte Client::encode_content (ProtocolContext&, Packet& /*input_packet*/, Packet& /*output_packet*/)
+byte Client::encode_content (protocol_context&, packet& /*input_packet*/, packet& /*output_packet*/)
 {
     return byte ();
 }

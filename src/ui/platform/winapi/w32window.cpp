@@ -123,8 +123,8 @@ inline long_t toExStyles (WindowFlags flags) noexcept
 
 // ====================================================
 
-Win32Window::Win32Window (Rect const& gRect, u32, IDisplay* pDisplay)
-: IPlatformWindow (pDisplay,
+win32_window::win32_window (Rect const& gRect, u32, IDisplay* pDisplay)
+: platform_wnd_interface (pDisplay,
            ::CreateWindowExA (0, WindowClass::registered ().name (), nullptr, WS_OVERLAPPEDWINDOW,
                               gRect.left, gRect.top, gRect.width (), gRect.height (),
                               0, 0, WindowClass::registered ().instance (), 0),
@@ -132,12 +132,12 @@ Win32Window::Win32Window (Rect const& gRect, u32, IDisplay* pDisplay)
 {
 }
 
-Win32Window::~Win32Window ()
+win32_window::~win32_window ()
 {
     if (id ()) ::DestroyWindow (id ().get<handle_type> ());
 }
 
-string Win32Window::title () const
+string win32_window::title () const
 {
     string gTitle (::GetWindowTextLengthA (id ().get<handle_type> ()),
                    string::value_type ());
@@ -146,71 +146,71 @@ string Win32Window::title () const
     return std::move (gTitle);
 }
 
-void Win32Window::setTitle (string const& gText) noexcept
+void win32_window::set_title (string const& gText) noexcept
 {
     ::SetWindowTextA (id ().get<handle_type> (), &gText[0]);
 }
 
-void Win32Window::setShaded (bool) noexcept
+void win32_window::set_shaded (bool) noexcept
 {
 
 }
 
-bool Win32Window::isShaded () noexcept
+bool win32_window::is_shaded () noexcept
 {
     return false;
 }
 
-void Win32Window::setModal (bool bModal) noexcept
+void win32_window::set_modal (bool bModal) noexcept
 {
     if (!owner ().expired ())
         ::EnableWindow (owner ().lock ()->id().get<handle_type> (), bModal ? false : true);
 }
 
-bool Win32Window::isModal () noexcept
+bool win32_window::is_modal () noexcept
 {
     return !owner ().expired () and !::IsWindowEnabled (owner ().lock ()->id().get<handle_type> ());
 }
 
-void Win32Window::setFullscreen (bool) noexcept
+void win32_window::set_fullscreen (bool) noexcept
 {
 
 }
 
-bool Win32Window::isFullscreen () noexcept
+bool win32_window::is_fullscreen () noexcept
 {
     return false;
 }
 
-void Win32Window::setMaximized (bool bMaximized) noexcept
+void win32_window::set_maximized (bool bMaximized) noexcept
 {
     ::ShowWindowAsync (id ().get<handle_type> (), bMaximized ? SW_MAXIMIZE : SW_SHOWNORMAL);
 }
 
-bool Win32Window::isMaximized () noexcept
+bool win32_window::is_maximized () noexcept
 {
     return ::IsZoomed (id ().get<handle_type> ());
 }
 
-void Win32Window::setMinimized (bool bMinimized) noexcept
+void win32_window::set_minimized (bool bMinimized) noexcept
 {
     if (bMinimized) ::CloseWindow (id ().get<handle_type> ());
     else ::OpenIcon (id ().get<handle_type> ());
 }
 
-bool Win32Window::isMinimized () noexcept
+bool win32_window::is_minimized () noexcept
 {
     return ::IsIconic (id ().get<handle_type> ());
 }
 
-void Win32Window::setFlags (WindowFlags flags) noexcept
+void win32_window::set_flags (WindowFlags flags) noexcept
 {
     ::SetWindowLongA (id ().get<handle_type> (),
                       GWL_EXSTYLE,
                       toExStyles (flags));
 }
 
-void Win32Window::setVisibleInTaskbar (bool bVis) noexcept
+void win32_window::set_visible_in_taskbar (bool bVis) noexcept
 {
     long_t uStyles = ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE);
 
@@ -219,12 +219,12 @@ void Win32Window::setVisibleInTaskbar (bool bVis) noexcept
                       bVis ? uStyles | WS_EX_APPWINDOW : uStyles | ~WS_EX_APPWINDOW);
 }
 
-bool Win32Window::isVisibleInTaskbar () noexcept
+bool win32_window::is_visible_in_taskbar () noexcept
 {
     return ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE) & WS_EX_APPWINDOW;
 }
 
-void Win32Window::setVisibleInPager (bool bVis) noexcept
+void win32_window::set_visible_in_pager (bool bVis) noexcept
 {
     long_t uStyles = ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE);
 
@@ -233,12 +233,12 @@ void Win32Window::setVisibleInPager (bool bVis) noexcept
                       bVis ? uStyles | WS_EX_TOOLWINDOW : uStyles | ~WS_EX_TOOLWINDOW);
 }
 
-bool Win32Window::isVisibleInPager () noexcept
+bool win32_window::is_visible_in_pager () noexcept
 {
     return ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE) & WS_EX_TOOLWINDOW;
 }
 
-void Win32Window::flash (uint count) noexcept
+void win32_window::flash (uint count) noexcept
 {
     FLASHWINFO info;
 
@@ -251,7 +251,7 @@ void Win32Window::flash (uint count) noexcept
     ::FlashWindowEx (&info);
 }
 
-Rect Win32Window::geometry () const
+Rect win32_window::geometry () const
 {
     Win32Rect rect;
 
@@ -260,32 +260,32 @@ Rect Win32Window::geometry () const
                  rect.width_unsafe (), rect.height_unsafe ());
 }
 
-bool Win32Window::isMapped () const
+bool win32_window::is_mapped () const
 {
     return ::IsWindowVisible (id ().get<handle_type> ());
 }
 
-void Win32Window::setOwner (const_pointer pWnd)
+void win32_window::set_owner (const_pointer pWnd)
 {
     ::SetParent (id ().get<handle_type> (), pWnd == nullptr ? handle_type () : pWnd->id ().get<handle_type> ());
 }
 
-void Win32Window::setGeometry (Rect const& rect)
+void win32_window::set_geometry (Rect const& rect)
 {
     ::SetWindowPos (id ().get<handle_type> (), handle_type (), rect.left, rect.top, rect.right, rect.bottom, 0);
 }
 
-void Win32Window::raise ()
+void win32_window::raise ()
 {
     ::BringWindowToTop (id ().get<handle_type> ());
 }
 
-void Win32Window::lower ()
+void win32_window::lower ()
 {
     ::SetForegroundWindow (::GetWindow (id ().get<handle_type> (), GW_HWNDPREV));
 }
 
-void Win32Window::move (point2i gPos)
+void win32_window::move (point2i gPos)
 {
     Win32Rect rect;
 
@@ -293,12 +293,12 @@ void Win32Window::move (point2i gPos)
     ::MoveWindow    (id ().get<handle_type> (), gPos.x, gPos.y, rect.width (), rect.height (), false);
 }
 
-void Win32Window::map ()
+void win32_window::map ()
 {
     ::ShowWindowAsync (id ().get<handle_type> (), SW_SHOW);
 }
 
-void Win32Window::unmap ()
+void win32_window::unmap ()
 {
     ::ShowWindowAsync (id ().get<handle_type> (), SW_HIDE);
 }

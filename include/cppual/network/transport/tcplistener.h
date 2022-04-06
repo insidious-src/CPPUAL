@@ -28,20 +28,25 @@
 
 namespace cppual { namespace network {
 
-class TcpListener : public TransportSocket
+class tcp_listener : public transport_socket
 {
 public:
-    TcpListener ();
-    TcpListener (Address const& addr, u16 port) noexcept;
+    tcp_listener ();
+    tcp_listener (address const& addr, u16 port) noexcept;
 
-    bool accept (TcpStream&) noexcept;
-    bool listen (Address const& addr, u16 port) noexcept;
+    virtual void start_session(protocol_context&, packet& outgoing_packet);
+    virtual bool read_data(protocol_context&, packet& incoming_packet);
+    virtual byte try_decode(protocol_context&, packet& output_packet);
+    virtual byte encode_content(protocol_context&, packet& input_packet, packet& output_packet);
 
-    bool isListening () const noexcept
+    bool accept (tcp_stream&) noexcept;
+    bool listen (address const& addr, u16 port) noexcept;
+
+    bool is_listening () const noexcept
     { return _M_bIsListening; }
 
 private:
-    Address _M_gAddr        { };
+    address _M_gAddr        { };
     ushort  _M_uPort        { };
     bool    _M_bIsListening { };
 };

@@ -40,17 +40,17 @@ struct Win32Factory final : Factory
 
 shared_display Win32Factory::connectDisplay (string_type const&)
 {
-    return shared_display (new Win32Display);
+    return shared_display (new win32_display);
 }
 
 shared_queue Win32Factory::createQueueInstance ()
 {
-    return shared_queue (new Win32Queue);
+    return shared_queue (new win32_queue);
 }
 
 shared_window Win32Factory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
 {
-    return shared_window (new Win32Window (gRect, nScreen, pDisplay));
+    return shared_window (new win32_window (gRect, nScreen, pDisplay));
 }
 
 } } } // namespace Platform

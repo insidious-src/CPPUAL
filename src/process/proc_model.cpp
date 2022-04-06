@@ -40,6 +40,7 @@ process_handle This::handle () noexcept
 
 process_handle create (cchar* path, char* args[])
 {
+    UNUSED (path); UNUSED (args);
 #   if defined (OS_STD_POSIX) && !defined (OS_ANDROID)
     process_handle id = 0;
     ::posix_spawn (&id, path, nullptr, nullptr, args, nullptr);
@@ -50,6 +51,8 @@ process_handle create (cchar* path, char* args[])
                            0, nullptr, nullptr, nullptr, &info))
         return process_handle ();
     return info.hProcess;
+#   else
+    return process_handle ();
 #   endif
 }
 

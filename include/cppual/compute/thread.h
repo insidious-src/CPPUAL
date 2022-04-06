@@ -56,7 +56,7 @@ thread_handle   handle () noexcept;
 thread_priority priority ();
 int			    set_priority (thread_priority priority);
 
-} // MainThread
+} // namespace main_thread
 
 // =========================================================
 
@@ -66,7 +66,7 @@ thread_handle handle () noexcept;
 void		  exit ();
 int			  sleep_for (uint millisec);
 
-} //ThisThread
+} // namespace this_thread
 
 // =========================================================
 
@@ -107,10 +107,10 @@ public:
     void        join   ();
     //bool        tryJoinFor (uint millisec);
 
-    bool start (callable&      func,
-                bool           joinable   = true,
+    bool start (callable&       func,
+                bool            joinable   = true,
                 thread_priority priority   = thread_priority::inherit,
-                size_type      stack_size = 1048576U);
+                size_type       stack_size = 1048576U);
 
     inline size_type stack_size  () const noexcept { return _M_uStackSize;  }
     inline id        handle      () const noexcept { return _M_gId;         }

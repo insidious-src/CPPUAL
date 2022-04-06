@@ -97,8 +97,8 @@ public:
 
     struct key_data
     {
-        keyboard::key key ;
-        u16           mask;
+        keyboard::key      key ;
+        keyboard::modifier mask;
     };
 
     struct mbutton_data
@@ -280,7 +280,7 @@ struct property_event : public event
     property_event (u32 prop, i32 value) noexcept
     : event        (event::property)
     {
-        _M_data.property.prop  = prop;
+        _M_data.property.prop  = prop ;
         _M_data.property.value = value;
     }
 };
@@ -289,7 +289,9 @@ struct property_event : public event
 
 struct key_event : public event
 {
-    constexpr key_event (keyboard::key nKey, u16 uMask = 0, bool is_pressed = true) noexcept
+    constexpr key_event (keyboard::key nKey,
+                         keyboard::modifier uMask = keyboard::modifier::none,
+                         bool is_pressed = true) noexcept
     : event (is_pressed ? event::key_pressed : event::key_released, { key_data { nKey, uMask } })
     { }
 };
@@ -298,7 +300,8 @@ struct key_event : public event
 
 struct key_press_event : public key_event
 {
-    constexpr key_press_event (keyboard::key nKey, u16 uMask = 0) noexcept
+    constexpr key_press_event (keyboard::key nKey,
+                               keyboard::modifier uMask = keyboard::modifier::none) noexcept
     : key_event (nKey, uMask, true)
     { }
 };
@@ -307,7 +310,8 @@ struct key_press_event : public key_event
 
 struct key_release_event : public key_event
 {
-    constexpr key_release_event (keyboard::key nKey, u16 uMask = 0) noexcept
+    constexpr key_release_event (keyboard::key nKey,
+                                 keyboard::modifier uMask = keyboard::modifier::none) noexcept
     : key_event (nKey, uMask, false)
     { }
 };

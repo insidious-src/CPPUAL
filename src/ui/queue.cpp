@@ -36,11 +36,6 @@ inline static const shared_queue& queue ()
 
 // =========================================================
 
-display_queue_interface::~display_queue_interface()
-{
-
-}
-
 shared_queue display_queue_interface::primary () noexcept
 {
     return internal::queue ();

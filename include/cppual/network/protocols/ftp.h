@@ -134,7 +134,7 @@ private:
 class Client final
 {
 public:
-    Response  connect (Address const& server, u16 port = 21) noexcept;
+    Response  connect (address const& server, u16 port = 21) noexcept;
     Response  disconnect () noexcept;
     Response  login () noexcept;
     Response  login (string const& name, string const& password) noexcept;
@@ -156,7 +156,7 @@ public:
                      TransferMode  mode = TransferMode::Binary);
 
 private:
-    TcpStream _M_gStream;
+    tcp_stream _M_gStream;
 };
 
 } } } // Http

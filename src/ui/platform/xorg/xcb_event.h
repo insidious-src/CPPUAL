@@ -32,65 +32,58 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-#include "xcb_window.h"
+#include "xcb_def.h"
+#include "xbackend.h"
 
-#include <xcb/xcb_icccm.h>
+namespace cppual { namespace x {
 
-
-namespace cppual { namespace ui { namespace xcb {
-
-typedef ::xcb_button_t     button_type ;
-typedef ::xcb_keysym_t     keysym_type ;
-typedef ::xcb_keycode_t    keycode_type;
-typedef ::xcb_connection_t display_type;
-
-typedef ::xcb_generic_event_t           base_event_type;
-typedef ::xcb_button_press_event_t      btn_event_type;
-typedef ::xcb_motion_notify_event_t     mouse_move_event_type;
-typedef ::xcb_key_press_event_t         key_event_type;
-typedef ::xcb_keymap_notify_event_t     keymap_notify_event_type;
-typedef ::xcb_expose_event_t            expose_event_type;
-typedef ::xcb_focus_in_event_t          focus_event_type;
-typedef ::xcb_enter_notify_event_t      step_event_type;
-typedef ::xcb_resize_request_event_t    resize_event_type;
-typedef ::xcb_map_notify_event_t        map_event_type;
-typedef ::xcb_unmap_notify_event_t      unmap_event_type;
-typedef ::xcb_property_notify_event_t   property_event_type;
-typedef ::xcb_destroy_notify_event_t    destroy_event_type;
-typedef ::xcb_visibility_notify_event_t visibility_event_type;
-typedef ::xcb_ge_generic_event_t        ge_generic_event_type;
-typedef ::xcb_client_message_event_t    client_msg_event_type;
-
-enum Key
+enum class key : u8
 {
-    UndefinedKey = 0,
+    undefined_key = 0,
+    Escape = 9,
     One = 10,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Zero,
+    Exclamation = 10,
+    Two = 11,
+    At = 11,
+    Three = 12,
+    Hash = 12,
+    Four = 13,
+    Dollar = 13,
+    Five = 14,
+    Percent = 14,
+    Six = 15,
+    Caret = 15,
+    Seven = 16,
+    Ampersand = 16,
+    Eight = 17,
+    Asterisk = 17,
+    Nine = 18,
+    LParen = 18,
+    Zero = 19,
+    RParen = 19,
+    Dash = 20,
+    Underscore = 20,
+    Plus = 21,
+    Equal = 21,
+    BackSpace = 22,
+    Tab = 23,
     Num0 = 90,
-    Num1 = 87,
-    Num2 = 88,
-    Num3 = 89,
+    Num8 = 80,
+    Num9 = 81,
+    NumMinus = 82,
     Num4 = 83,
     Num5 = 84,
     Num6 = 85,
-    Num7 = 79,
-    Num8 = 80,
-    Num9 = 81,
     NumPlus = 86,
-    NumMinus = 82,
-    NumMultiply = 63,
+    Num1 = 87,
+    Num2 = 88,
+    Num3 = 89,
+    Num7 = 79,
     NumDivide = 106,
     NumEnter = 104,
     NumDot = 91,
-    NumEqual = UndefinedKey,
+    NumEqual = undefined_key,
+    LControl = 37,
     A = 38,
     B = 56,
     C = 54,
@@ -117,56 +110,40 @@ enum Key
     X = 53,
     Y = 29,
     Z = 52,
-    Escape = 9,
-    LControl = 37,
-    LShift = 50,
-    LAlt = 64,
     LSystem = 133,
     RControl = 105,
-    RShift = 62,
     RAlt = 108,
     RSystem = 133,
     Menu = 135,
     LBracket = 34,
     RBracket = 35,
-    LParen = UndefinedKey,
-    RParen = UndefinedKey,
     SemiColon = 47,
-    Colon = UndefinedKey,
-    Comma = 59,
-    Dot = 60,
+    Colon = 47,
     Quote = 48,
-    DoubleQuote = UndefinedKey,
-    Slash = 61,
+    DoubleQuote = 48,
+    BackQuote = 49,
+    Tilde = 49,
+    LShift = 50,
     BackSlash = 51,
-    Tilde = UndefinedKey,
-    Separator = UndefinedKey,
-    Equal = 21,
-    Greater = UndefinedKey,
-    Less = UndefinedKey,
-    Dash = 20,
+    Separator = 51,
+    Comma = 59,
+    Less = 59,
+    Dot = 60,
+    Greater = 60,
+    Slash = 61,
+    Question = 61,
+    RShift = 62,
+    NumMultiply = 63,
+    LAlt = 64,
     Space = 65,
+    CapsLock = 66,
     Return = 36,
-    BackSpace = 22,
-    Tab = 23,
     PageUp = 112,
     PageDown = 117,
     End = 115,
     Home = 110,
     Insert = 118,
     Delete = 119,
-    Plus = UndefinedKey,
-    Asterisk = UndefinedKey,
-    At = UndefinedKey,
-    Exclamation = UndefinedKey,
-    Question = UndefinedKey,
-    Underscore = UndefinedKey,
-    Caret = UndefinedKey,
-    BackQuote = 49,
-    Dollar = UndefinedKey,
-    Hash = UndefinedKey,
-    Ampersand = UndefinedKey,
-    Percent = UndefinedKey,
     Left = 113,
     Right = 114,
     Up = 111,
@@ -183,16 +160,24 @@ enum Key
     F10 = 76,
     F11 = 95,
     F12 = 96,
-    Pause = UndefinedKey,
+    Pause = undefined_key,
     PrintScr = 107,
-    CapsLock = 66,
     NumLock = 77,
     ScrollLock = 78
 };
 
+enum class key_state : u16
+{
+    none      = 16,
+    shift     = 17,
+    caps_lock = 18,
+    alt       = 24,
+    ctrl      = 20
+};
+
 // ====================================================
 
-inline u8 button (button_type uId) noexcept
+constexpr u8 button (button_type uId) noexcept
 {
     switch (uId)
     {
@@ -215,160 +200,164 @@ inline u8 button (button_type uId) noexcept
     }
 }
 
-input::keyboard::key keyCode (keycode_type keycode) noexcept
+input::keyboard::key get_key (keycode_type keycode) noexcept
 {
     switch (keycode)
     {
-    case Zero: return input::keyboard::Zero;
-    case One: return input::keyboard::One;
-    case Two: return input::keyboard::Two;
-    case Three: return input::keyboard::Three;
-    case Four: return input::keyboard::Four;
-    case Five: return input::keyboard::Five;
-    case Six: return input::keyboard::Six;
-    case Seven: return input::keyboard::Seven;
-    case Eight: return input::keyboard::Eight;
-    case Nine: return input::keyboard::Nine;
-    case Num0: return input::keyboard::Numpad0;
-    case Num1: return input::keyboard::Numpad1;
-    case Num2: return input::keyboard::Numpad2;
-    case Num3: return input::keyboard::Numpad3;
-    case Num4: return input::keyboard::Numpad4;
-    case Num5: return input::keyboard::Numpad5;
-    case Num6: return input::keyboard::Numpad6;
-    case Num7: return input::keyboard::Numpad7;
-    case Num8: return input::keyboard::Numpad8;
-    case Num9: return input::keyboard::Numpad9;
-    case NumPlus: return input::keyboard::NumpadPlus;
-    case NumMinus: return input::keyboard::NumpadMinus;
-    case NumMultiply: return input::keyboard::NumpadMultiply;
-    case NumDivide: return input::keyboard::NumpadDivide;
-    case NumEnter: return input::keyboard::NumpadEnter;
-    case NumDot: return input::keyboard::NumpadDot;
-    case NumEqual: return input::keyboard::undefined_key;
-    case A: return input::keyboard::A;
-    case B: return input::keyboard::B;
-    case C: return input::keyboard::C;
-    case D: return input::keyboard::D;
-    case E: return input::keyboard::E;
-    case F: return input::keyboard::F;
-    case G: return input::keyboard::G;
-    case H: return input::keyboard::H;
-    case I: return input::keyboard::I;
-    case J: return input::keyboard::J;
-    case K: return input::keyboard::K;
-    case L: return input::keyboard::L;
-    case M: return input::keyboard::M;
-    case N: return input::keyboard::N;
-    case O: return input::keyboard::O;
-    case P: return input::keyboard::P;
-    case Q: return input::keyboard::Q;
-    case R: return input::keyboard::R;
-    case S: return input::keyboard::S;
-    case T: return input::keyboard::T;
-    case U: return input::keyboard::U;
-    case V: return input::keyboard::V;
-    case W: return input::keyboard::W;
-    case X: return input::keyboard::X;
-    case Y: return input::keyboard::Y;
-    case Z: return input::keyboard::Z;
-    case Escape: return input::keyboard::Escape;
-    case LControl: return input::keyboard::LControl;
-    case LShift: return input::keyboard::LShift;
-    case LAlt: return input::keyboard::LAlt;
-    case LSystem: return input::keyboard::LSystem;
-    case RControl: return input::keyboard::RControl;
-    case RShift: return input::keyboard::RShift;
-    case RAlt: return input::keyboard::RAlt;
-    case Menu: return input::keyboard::Menu;
-    case LBracket: return input::keyboard::LBracket;
-    case RBracket: return input::keyboard::RBracket;
-    case SemiColon: return input::keyboard::SemiColon;
-    case Comma: return input::keyboard::Comma;
-    case Dot: return input::keyboard::Dot;
-    case Quote: return input::keyboard::Quote;
-    case Slash: return input::keyboard::Slash;
-    case BackSlash: return input::keyboard::BackSlash;
-    case Equal: return input::keyboard::Equal;
-    case Dash: return input::keyboard::Dash;
-    case Space: return input::keyboard::Space;
-    case Return: return input::keyboard::Return;
-    case BackSpace: return input::keyboard::BackSpace;
-    case Tab: return input::keyboard::Tab;
-    case PageUp: return input::keyboard::PageUp;
-    case PageDown: return input::keyboard::PageDown;
-    case End: return input::keyboard::End;
-    case Home: return input::keyboard::Home;
-    case Insert: return input::keyboard::Insert;
-    case Delete: return input::keyboard::Delete;
-    case BackQuote: return input::keyboard::BackQuote;
-    case Left: return input::keyboard::Left;
-    case Right: return input::keyboard::Right;
-    case Up: return input::keyboard::Up;
-    case Down: return input::keyboard::Down;
-    case F1: return input::keyboard::F1;
-    case F2: return input::keyboard::F2;
-    case F3: return input::keyboard::F3;
-    case F4: return input::keyboard::F4;
-    case F5: return input::keyboard::F5;
-    case F6: return input::keyboard::F6;
-    case F7: return input::keyboard::F7;
-    case F8: return input::keyboard::F8;
-    case F9: return input::keyboard::F9;
-    case F10: return input::keyboard::F10;
-    case F11: return input::keyboard::F11;
-    case F12: return input::keyboard::F12;
-    case PrintScr: return input::keyboard::PrintScr;
-    case CapsLock: return input::keyboard::CapsLock;
-    case NumLock: return input::keyboard::NumLock;
-    case ScrollLock: return input::keyboard::ScrollLock;
-    default: return input::keyboard::undefined_key;
+    case u8 (key::Zero): return input::keyboard::key::Zero;
+    case u8 (key::One): return input::keyboard::key::One;
+    case u8 (key::Two): return input::keyboard::key::Two;
+    case u8 (key::Three): return input::keyboard::key::Three;
+    case u8 (key::Four): return input::keyboard::key::Four;
+    case u8 (key::Five): return input::keyboard::key::Five;
+    case u8 (key::Six): return input::keyboard::key::Six;
+    case u8 (key::Seven): return input::keyboard::key::Seven;
+    case u8 (key::Eight): return input::keyboard::key::Eight;
+    case u8 (key::Nine): return input::keyboard::key::Nine;
+    case u8 (key::Num0): return input::keyboard::key::Numpad0;
+    case u8 (key::Num1): return input::keyboard::key::Numpad1;
+    case u8 (key::Num2): return input::keyboard::key::Numpad2;
+    case u8 (key::Num3): return input::keyboard::key::Numpad3;
+    case u8 (key::Num4): return input::keyboard::key::Numpad4;
+    case u8 (key::Num5): return input::keyboard::key::Numpad5;
+    case u8 (key::Num6): return input::keyboard::key::Numpad6;
+    case u8 (key::Num7): return input::keyboard::key::Numpad7;
+    case u8 (key::Num8): return input::keyboard::key::Numpad8;
+    case u8 (key::Num9): return input::keyboard::key::Numpad9;
+    case u8 (key::NumPlus): return input::keyboard::key::NumpadPlus;
+    case u8 (key::NumMinus): return input::keyboard::key::NumpadMinus;
+    case u8 (key::NumMultiply): return input::keyboard::key::NumpadMultiply;
+    case u8 (key::NumDivide): return input::keyboard::key::NumpadDivide;
+    case u8 (key::NumEnter): return input::keyboard::key::NumpadEnter;
+    case u8 (key::NumDot): return input::keyboard::key::NumpadDot;
+    case u8 (key::NumEqual): return input::keyboard::key::undefined_key;
+    case u8 (key::A): return input::keyboard::key::A;
+    case u8 (key::B): return input::keyboard::key::B;
+    case u8 (key::C): return input::keyboard::key::C;
+    case u8 (key::D): return input::keyboard::key::D;
+    case u8 (key::E): return input::keyboard::key::E;
+    case u8 (key::F): return input::keyboard::key::F;
+    case u8 (key::G): return input::keyboard::key::G;
+    case u8 (key::H): return input::keyboard::key::H;
+    case u8 (key::I): return input::keyboard::key::I;
+    case u8 (key::J): return input::keyboard::key::J;
+    case u8 (key::K): return input::keyboard::key::K;
+    case u8 (key::L): return input::keyboard::key::L;
+    case u8 (key::M): return input::keyboard::key::M;
+    case u8 (key::N): return input::keyboard::key::N;
+    case u8 (key::O): return input::keyboard::key::O;
+    case u8 (key::P): return input::keyboard::key::P;
+    case u8 (key::Q): return input::keyboard::key::Q;
+    case u8 (key::R): return input::keyboard::key::R;
+    case u8 (key::S): return input::keyboard::key::S;
+    case u8 (key::T): return input::keyboard::key::T;
+    case u8 (key::U): return input::keyboard::key::U;
+    case u8 (key::V): return input::keyboard::key::V;
+    case u8 (key::W): return input::keyboard::key::W;
+    case u8 (key::X): return input::keyboard::key::X;
+    case u8 (key::Y): return input::keyboard::key::Y;
+    case u8 (key::Z): return input::keyboard::key::Z;
+    case u8 (key::Escape): return input::keyboard::key::Escape;
+    case u8 (key::LControl): return input::keyboard::key::LControl;
+    case u8 (key::LShift): return input::keyboard::key::LShift;
+    case u8 (key::LAlt): return input::keyboard::key::LAlt;
+    case u8 (key::LSystem): return input::keyboard::key::LSystem;
+    case u8 (key::RControl): return input::keyboard::key::RControl;
+    case u8 (key::RShift): return input::keyboard::key::RShift;
+    case u8 (key::RAlt): return input::keyboard::key::RAlt;
+    case u8 (key::Menu): return input::keyboard::key::Menu;
+    case u8 (key::LBracket): return input::keyboard::key::LBracket;
+    case u8 (key::RBracket): return input::keyboard::key::RBracket;
+    case u8 (key::SemiColon): return input::keyboard::key::SemiColon;
+    case u8 (key::Comma): return input::keyboard::key::Comma;
+    case u8 (key::Dot): return input::keyboard::key::Dot;
+    case u8 (key::Quote): return input::keyboard::key::Quote;
+    case u8 (key::Slash): return input::keyboard::key::Slash;
+    case u8 (key::BackSlash): return input::keyboard::key::BackSlash;
+    case u8 (key::Equal): return input::keyboard::key::Equal;
+    case u8 (key::Dash): return input::keyboard::key::Dash;
+    case u8 (key::Space): return input::keyboard::key::Space;
+    case u8 (key::Return): return input::keyboard::key::Return;
+    case u8 (key::BackSpace): return input::keyboard::key::BackSpace;
+    case u8 (key::Tab): return input::keyboard::key::Tab;
+    case u8 (key::PageUp): return input::keyboard::key::PageUp;
+    case u8 (key::PageDown): return input::keyboard::key::PageDown;
+    case u8 (key::End): return input::keyboard::key::End;
+    case u8 (key::Home): return input::keyboard::key::Home;
+    case u8 (key::Insert): return input::keyboard::key::Insert;
+    case u8 (key::Delete): return input::keyboard::key::Delete;
+    case u8 (key::BackQuote): return input::keyboard::key::BackQuote;
+    case u8 (key::Left): return input::keyboard::key::Left;
+    case u8 (key::Right): return input::keyboard::key::Right;
+    case u8 (key::Up): return input::keyboard::key::Up;
+    case u8 (key::Down): return input::keyboard::key::Down;
+    case u8 (key::F1): return input::keyboard::key::F1;
+    case u8 (key::F2): return input::keyboard::key::F2;
+    case u8 (key::F3): return input::keyboard::key::F3;
+    case u8 (key::F4): return input::keyboard::key::F4;
+    case u8 (key::F5): return input::keyboard::key::F5;
+    case u8 (key::F6): return input::keyboard::key::F6;
+    case u8 (key::F7): return input::keyboard::key::F7;
+    case u8 (key::F8): return input::keyboard::key::F8;
+    case u8 (key::F9): return input::keyboard::key::F9;
+    case u8 (key::F10): return input::keyboard::key::F10;
+    case u8 (key::F11): return input::keyboard::key::F11;
+    case u8 (key::F12): return input::keyboard::key::F12;
+    case u8 (key::PrintScr): return input::keyboard::key::PrintScr;
+    case u8 (key::CapsLock): return input::keyboard::key::CapsLock;
+    case u8 (key::NumLock): return input::keyboard::key::NumLock;
+    case u8 (key::ScrollLock): return input::keyboard::key::ScrollLock;
+    default: return input::keyboard::key::undefined_key;
     }
 }
 
 // ====================================================
 
-class EventPtr final
+constexpr input::keyboard::modifier get_modifier (u16 mod)
+{
+    switch (mod)
+    {
+    case int (key_state::shift):
+        return input::keyboard::modifier::shift;
+    case int (key_state::caps_lock):
+        return input::keyboard::modifier::caps_lock;
+    case int (key_state::alt):
+        return input::keyboard::modifier::alt;
+    case int (key_state::ctrl):
+        return input::keyboard::modifier::ctrl;
+    default:
+        return input::keyboard::modifier::none;
+    }
+}
+
+// ====================================================
+
+union event_data
+{
+    base_event_type          generic;
+    btn_event_type           mouseButton;
+    mouse_move_event_type    mouseMove;
+    key_event_type           key;
+    keymap_notify_event_type keymap;
+    expose_event_type        paint;
+    focus_event_type         focus;
+    step_event_type          step;
+    resize_event_type        size;
+    map_event_type           map;
+    unmap_event_type         unmap;
+    property_event_type      property;
+    destroy_event_type       destroy;
+    visibility_event_type    visibility;
+    ge_generic_event_type    geGeneric;
+    client_msg_event_type    clientMessage;
+};
+
+// ====================================================
+
+class event_ptr final
 {
 public:
-    typedef ::xcb_generic_event_t           base_type;
-    typedef ::xcb_button_press_event_t      btn_type;
-    typedef ::xcb_motion_notify_event_t     mouse_move_type;
-    typedef ::xcb_key_press_event_t         key_type;
-    typedef ::xcb_keymap_notify_event_t     keymap_notify_type;
-    typedef ::xcb_expose_event_t            expose_type;
-    typedef ::xcb_focus_in_event_t          focus_type;
-    typedef ::xcb_enter_notify_event_t      step_type;
-    typedef ::xcb_resize_request_event_t    resize_type;
-    typedef ::xcb_map_notify_event_t        map_type;
-    typedef ::xcb_unmap_notify_event_t      unmap_type;
-    typedef ::xcb_property_notify_event_t   property_type;
-    typedef ::xcb_destroy_notify_event_t    destroy_type;
-    typedef ::xcb_visibility_notify_event_t visibility_type;
-    typedef ::xcb_ge_generic_event_t        ge_generic_type;
-    typedef ::xcb_client_message_event_t    client_msg_type;
-
-    union Data
-    {
-        base_type          generic;
-        btn_type           mouseButton;
-        mouse_move_type    mouseMove;
-        key_type           key;
-        keymap_notify_type keymap;
-        expose_type        paint;
-        focus_type         focus;
-        step_type          step;
-        resize_type        size;
-        map_type           map;
-        unmap_type         unmap;
-        property_type      property;
-        destroy_type       destroy;
-        visibility_type    visibility;
-        ge_generic_type    geGeneric;
-        client_msg_type    clientMessage;
-    };
-
-    typedef Data* pointer;
+    typedef event_data* pointer;
 
     constexpr operator pointer () const noexcept
     { return _M_handle; }
@@ -378,11 +367,11 @@ public:
 
     constexpr pointer operator -> () const { return _M_handle; }
 
-    ~EventPtr ()
-    { std::free (_M_handle); }
+    ~event_ptr ()
+    { if (_M_handle) std::free (_M_handle); }
 
-    inline EventPtr (base_type* pEvent) noexcept
-    : _M_handle (reinterpret_cast<pointer> (pEvent))
+    constexpr event_ptr (base_event_type* pEvent) noexcept
+    : _M_handle (direct_cast<pointer> (pEvent))
     { }
 
 private:
@@ -391,53 +380,16 @@ private:
 
 // ====================================================
 
-union EventData
-{
-    base_event_type*          generic;
-    btn_event_type*           mouseButton;
-    mouse_move_event_type*    mouseMove;
-    key_event_type*           key;
-    keymap_notify_event_type* keymap;
-    expose_event_type*        paint;
-    focus_event_type*         focus;
-    step_event_type*          step;
-    resize_event_type*        size;
-    map_event_type*           map;
-    unmap_event_type*         unmap;
-    property_event_type*      property;
-    destroy_event_type*       destroy;
-    visibility_event_type*    visibility;
-    ge_generic_event_type*    geGeneric;
-    client_msg_event_type*    clientMessage;
-
-    constexpr u32 type () const noexcept
-    { return generic->response_type & ~0x80; }
-
-    constexpr EventData (base_event_type* event) noexcept
-    : generic (event)
-    { }
-};
-
-class EventNew final
+class event_handle final
 {
 public:
-    EventNew (EventData event) noexcept
-    : _M_data (event)
-    { }
-
-private:
-    EventData _M_data;
-};
-
-// ====================================================
-
-class Event final
-{
-public:
-    typedef ::xcb_generic_event_t base_type;
-    typedef input::event          event_type;
-    typedef Event                 self_type;
-    typedef Event*                pointer;
+    typedef base_event_type        base_type              ;
+    typedef input::event           event_type             ;
+    typedef event_handle           self_type              ;
+    typedef event_handle*          pointer                ;
+    typedef ui::shared_display     display_pointer        ;
+    typedef display_pointer&       display_reference      ;
+    typedef display_pointer const& display_const_reference;
 
     enum Type
     {
@@ -485,14 +437,14 @@ public:
         MouseWheelDown = 5
     };
 
-    inline Event (base_type* base) noexcept
+    constexpr event_handle (base_type* base) noexcept
     : _M_pEvent (base)
     { }
 
-    constexpr auto get () const noexcept
-    { return _M_pEvent.get(); }
+    constexpr event_ptr::pointer get () const noexcept
+    { return _M_pEvent.get (); }
 
-    inline u32 type () const noexcept
+    constexpr u32 type () const noexcept
     { return _M_pEvent->generic.response_type & ~0x80; }
 
     handle_type window () const noexcept
@@ -541,12 +493,19 @@ public:
         }
     }
 
-    static base_type toXcbEvent (event_type const&) noexcept
+    static base_type to_xcb_event (event_type const&) noexcept
     {
         return base_type ();
     }
 
-    inline event_type toEvent (display_interface::handle_type connection) const noexcept
+    constexpr
+    static
+    ui::xcb_display::data_const_reference data (display_const_reference conn) noexcept
+    {
+        return static_cast<ui::xcb_display&> (*conn).data ();
+    }
+
+    inline event_type to_event (display_const_reference conn) const noexcept
     {
         switch (type ())
         {
@@ -555,10 +514,10 @@ public:
             {
             case MouseWheelUp:
                 return input::wheel_event ( 1, { get ()->mouseButton.event_x,
-                                                get ()->mouseButton.event_y });
+                                                 get ()->mouseButton.event_y });
             case MouseWheelDown:
                 return input::wheel_event (-1, { get ()->mouseButton.event_x,
-                                                get ()->mouseButton.event_y });
+                                                 get ()->mouseButton.event_y });
             default:
                 return input::mouse_press_event (button (get ()->mouseButton.detail),
                                               { get ()->mouseButton.event_x,
@@ -575,14 +534,14 @@ public:
             return input::mouse_move_event ({ get ()->mouseMove.event_x,
               get ()->mouseMove.event_y });
         case TKeyPress:
-            return input::key_press_event ({ keyCode(get ()->key.detail), 0 });
+            return input::key_press_event ({ get_key (get ()->key.detail), get_modifier (get ()->key.state) });
         case TKeyRelease:
-            return input::key_release_event ({ keyCode(get ()->key.detail), 0 });
+            return input::key_release_event ({ get_key(get ()->key.detail), get_modifier (get ()->key.state) });
         case TExpose:
             return input::paint_event (rect (static_cast<i16> (get ()->paint.x),
-                                            static_cast<i16> (get ()->paint.y),
-                                            get ()->paint.width,
-                                            get ()->paint.height));
+                                             static_cast<i16> (get ()->paint.y),
+                                             get ()->paint.width,
+                                             get ()->paint.height));
         case TEnter:
             return input::step_event (true);
         case TLeave:
@@ -593,10 +552,10 @@ public:
             return input::focus_event (false);
         case TSize:
             return input::size_event ({ get ()->size.width,
-                                       get ()->size.height });
+                                        get ()->size.height });
         case TProperty:
             return input::property_event (get ()->property.atom,
-                                         get ()->property.state);
+                                          get ()->property.state);
         case TMap:
             return input::visibility_event (true);
         case TUnmap:
@@ -618,17 +577,12 @@ public:
         case TChangeKbCtrl:
             return event_type (event_type::null);
         case TClientMessage:
+            if (get ()->clientMessage.data.data32[0] == data(conn).WM_DELETE_WINDOW)
             {
-                auto destroyReply = xcb::internAtomHelper(connection.get<display_type>(),
-                                                          "WM_DELETE_WINDOW");
-
-                if (get ()->clientMessage.data.data32[0] == destroyReply->atom)
-                {
-                    return event_type (event_type::destroy);
-                }
-
-                return event_type (event_type::null);
+                return event_type (event_type::destroy);
             }
+
+            return event_type (event_type::null);
         default:
             #ifdef DEBUG_MODE
             std::cout << __PRETTY_FUNCTION__ << " :: unhandled event: " << type () << std::endl;
@@ -639,7 +593,7 @@ public:
         return event_type (event_type::null);
     }
 
-    inline void operator ()(display_interface::handle_type connection) const
+    inline void operator () (display_const_reference conn) const
     {
         switch (type ())
         {
@@ -647,15 +601,15 @@ public:
             switch (get ()->mouseButton.detail)
             {
             case MouseWheelUp:
-                event_queue::events ().scroll (window (),
+                ui::event_queue::events ().scroll (window (),
                 {{ get ()->mouseButton.event_x, get ()->mouseButton.event_y }, 1 });
                 break;
             case MouseWheelDown:
-                event_queue::events ().scroll (window (),
+                ui::event_queue::events ().scroll (window (),
                 {{ get ()->mouseButton.event_x, get ()->mouseButton.event_y }, -1 });
                 break;
             default:
-                event_queue::events ().mousePress (window (),
+                ui::event_queue::events ().mousePress (window (),
                 {{ get ()->mouseButton.event_x, get ()->mouseButton.event_y },
                  button (get ()->mouseButton.detail) });
                 break;
@@ -668,68 +622,133 @@ public:
             case MouseWheelDown:
                 break;
             default:
-                event_queue::events ().mouseRelease (window (),
+                ui::event_queue::events ().mouseRelease (window (),
                 {{ get ()->mouseButton.event_x, get ()->mouseButton.event_y },
                  button (get ()->mouseButton.detail) });
                 break;
             }
             break;
         case TMouseMove:
-            event_queue::events ().mouseMove (window (),
+            ui::event_queue::events ().mouseMove (window (),
             { get ()->mouseMove.event_x, get ()->mouseMove.event_y });
             break;
         case TKeyPress:
-            event_queue::events ().keyPress (window (),
-            { keyCode(get ()->key.detail), 0 });
+            ui::event_queue::events ().keyPress (window (),
+            { get_key (get ()->key.detail), get_modifier (get ()->key.state) });
             break;
         case TKeyRelease:
-            event_queue::events ().keyPress (window (),
-            { keyCode(get ()->key.detail), 0 });
+            ui::event_queue::events ().keyPress (window (),
+            { get_key (get ()->key.detail), get_modifier (get ()->key.state) });
             break;
-        case Expose:
-            event_queue::events ().winPaint (window (),
+        case TExpose:
+            ui::event_queue::events ().winPaint (window (),
             { rect (static_cast<i16> (get ()->paint.x),
               static_cast<i16> (get ()->paint.y),
               get ()->paint.width,
               get ()->paint.height) });
             break;
         case TEnter:
-            event_queue::events ().winStep (window (), true);
+            ui::event_queue::events ().winStep (window (), true);
             break;
         case TLeave:
-            event_queue::events ().winStep (window (), false);
+            ui::event_queue::events ().winStep (window (), false);
             break;
         case TFocusIn:
-            event_queue::events ().winFocus (window (), true);
+            ui::event_queue::events ().winFocus (window (), true);
             break;
         case TFocusOut:
-            event_queue::events ().winFocus (window (), false);
+            ui::event_queue::events ().winFocus (window (), false);
             break;
         case TSize:
-            event_queue::events ().winSize (window (),
+            ui::event_queue::events ().winSize (window (),
             { get ()->size.width, get ()->size.height });
             break;
         case TProperty:
-            event_queue::events ().winProperty (window (),
-            { get ()->property.atom, get ()->property.state });
+            if (get ()->property.atom == data (conn)._NET_WM_STATE)
+            {
+                std::cout << "_NET_WM_STATE property changed" << std::endl;
+
+                auto prop = x::get_property (conn->native<x::display_type> (),
+                                             x::dont_delete,
+                                             get ()->property.window,
+                                             data (conn)._NET_WM_STATE,
+                                             XCB_ATOM_ATOM,
+                                             x::offset_begin,
+                                             x::atom_max_len);
+
+                auto const states     = static_cast<x::atom_type*> (::xcb_get_property_value (&(*prop)));
+                auto const states_end = states + prop->length;
+
+                vector<x::atom_type> atoms (states, states_end);
+
+                for (auto atom : atoms)
+                {
+                    std::cout << " :: "
+                              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                }
+
+                std::cout << std::endl;
+
+                if  (prop->format == x::atom_format &&
+                    (states_end   != std::find (states, states_end,
+                                                data (conn)._NET_WM_STATE_MAXIMIZED_HORZ) ||
+                     states_end   != std::find (states, states_end,
+                                                data (conn)._NET_WM_STATE_MAXIMIZED_VERT)))
+                {
+                     ui::event_queue::events ().winMaximize (window ());
+                }
+            }
+            else if (get ()->property.atom == data (conn).WM_STATE)
+            {
+                std::cout << "WM_STATE property changed" << std::endl;
+
+                auto prop = x::get_property (conn->native<x::display_type> (),
+                                             x::dont_delete,
+                                             window (),
+                                             data (conn)._NET_WM_STATE,
+                                             XCB_ATOM_ATOM,
+                                             x::offset_begin,
+                                             x::atom_max_len);
+
+                auto const states     = static_cast<x::atom_type*> (::xcb_get_property_value (&(*prop)));
+                auto const states_end = states + prop->length;
+
+                vector<x::atom_type> atoms (states, states_end);
+
+                for (auto atom : atoms)
+                {
+                    std::cout << " :: "
+                              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                }
+
+                std::cout << std::endl;
+
+                if (prop->format == x::atom_format &&
+                    states_end   != std::find (states, states_end, data (conn)._NET_WM_STATE_HIDDEN))
+                {
+                    ui::event_queue::events ().winMinimize (window ());
+                }
+            }
+            else
+            {
+                ui::event_queue::events ().winProperty (window (),
+                { get ()->property.atom, get ()->property.state });
+            }
             break;
         case TMap:
-            event_queue::events ().winVisible (window (), true);
+            ui::event_queue::events ().winVisible (window (), true);
             break;
         case TUnmap:
-            event_queue::events ().winVisible (window (), false);
+            ui::event_queue::events ().winVisible (window (), false);
             break;
         case TDestroy:
-            event_queue::events ().winDestroy (window ());
+            ui::event_queue::events ().winClose (window ());
             break;
         case TClientMessage:
             {
-                xcb::intern_ptr destroyReply (xcb::internAtomHelper(connection.get<display_type>(),
-                                                                    "WM_DELETE_WINDOW"));
-
-                if (get ()->clientMessage.data.data32[0] == destroyReply->atom)
+                if (get ()->clientMessage.data.data32[0] == data(conn).WM_DELETE_WINDOW)
                 {
-                    event_queue::events ().winDestroy (window ());
+                    ui::event_queue::events ().winClose (window ());
                 }
             }
             break;
@@ -760,10 +779,10 @@ public:
     }
 
 private:
-    EventPtr _M_pEvent;
+    event_ptr _M_pEvent;
 };
 
-} } } // namespace x
+} } // namespace x
 
 #endif // OS_GNU_LINUX or OS_BSD
 #endif // __cplusplus

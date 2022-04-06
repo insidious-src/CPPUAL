@@ -23,7 +23,7 @@
 #define CPPUAL_AUDIO_SPATIAL_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
+#include <cppual/types.h>
 
 namespace cppual { namespace audio {
 

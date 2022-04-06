@@ -27,22 +27,31 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
+#include "xcb_def.h"
+
 namespace cppual { namespace ui {
 
-class SHARED_API XDisplay final : public display_interface
+class SHARED_API xcb_display final : public display_interface
 {
 public:
-    XDisplay () = delete;
-    XDisplay (string_type const&) noexcept;
-    ~XDisplay ();
+    typedef x::display_data&       data_reference      ;
+    typedef x::display_data const& data_const_reference;
 
-    uint screenCount () const noexcept;
-    void flush       () noexcept;
+    xcb_display () = delete;
+    xcb_display (string_type const& name);
+    ~xcb_display ();
+
+    uint screen_count () const noexcept;
+    void flush        () noexcept;
 
     string_type name () const { return _M_gName; }
 
+    constexpr data_const_reference data () const noexcept
+    { return _M_data; }
+
 private:
-    string_type _M_gName;
+    string_type     _M_gName;
+    x::display_data _M_data ;
 };
 
 } } // namespace Ui

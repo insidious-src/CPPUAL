@@ -25,6 +25,7 @@
 
 #include <cppual/string.h>
 #include <cppual/memory/allocator.h>
+#include <cppual/memory/shared.h>
 
 namespace cppual { namespace memory {
 
@@ -34,12 +35,11 @@ public:
     heap_resource   (size_type size);
     heap_resource   (pointer buffer, size_type size);
     heap_resource   (memory_resource& allocator, size_type size);
-    //heap_resource   (string& shared_name, size_type size);
+    heap_resource   (shared_memory& shared_name, size_type size);
     ~heap_resource  ();
     void clear () noexcept;
 
-    size_type max_size () const noexcept
-    { return _M_pFreeBlocks != nullptr ? _M_pFreeBlocks->size : 0; }
+    size_type max_size () const noexcept;
 
     size_type capacity () const noexcept
     {
@@ -57,8 +57,8 @@ private:
     struct header     { size_type size, adjust;           };
     struct free_block { size_type size; free_block* next; };
 
-    void* do_allocate   (size_type size, align_type align)  noexcept;
-    void  do_deallocate (void* p, size_type size, align_type align) ;
+    void* do_allocate   (size_type size, align_type align);
+    void  do_deallocate (void* p, size_type size, align_type align);
 
     bool do_is_equal (base_type const& gObj) const noexcept
     { return &gObj == &_M_gOwner; }
@@ -81,7 +81,7 @@ public:
     list_resource (size_type size);
     list_resource (pointer buffer, size_type size);
     list_resource (memory_resource& allocator, size_type size);
-    //list_resource (string& shared_name, size_type size);
+    list_resource (shared_memory& shared_name, size_type size);
     ~list_resource ();
 
     size_type max_size   () const noexcept;
@@ -102,8 +102,8 @@ public:
     { return _M_gOwner; }
 
 private:
-    void* do_allocate   (size_type size, align_type align)  noexcept;
-    void  do_deallocate (void* p, size_type size, size_type align)  ;
+    void* do_allocate   (size_type size, align_type align);
+    void  do_deallocate (void* p, size_type size, size_type align);
 
     bool  do_is_equal   (base_type const& gObj) const noexcept
     { return &gObj == this; }

@@ -49,8 +49,9 @@ public:
         default_height = 600
     };
 
-    view (view const&) noexcept;
-    view& operator = (view const&) noexcept;
+    view ();
+    view (view const&);
+    view& operator = (view const&);
     virtual ~view ();
 
     view (view*       parent,
@@ -88,14 +89,10 @@ public:
     { return _M_gStateFlags.test (view::focus); }
 
     inline bool is_hidden () const noexcept
-    { return !_M_gStateFlags.test (view::is_valid) or !_M_pRenderable->isMapped (); }
+    { return !_M_gStateFlags.test (view::is_valid) or !_M_pRenderable->is_mapped (); }
 
     inline rect geometry () const noexcept
     { return _M_gStateFlags.test (view::is_valid) ? _M_pRenderable->geometry () : rect (); }
-
-    inline view () noexcept
-    : view (nullptr, rect (0, 0, default_width, default_height))
-    { }
 
 protected:
     virtual void mouse_moved_event (point2u);
@@ -104,7 +101,6 @@ protected:
     virtual void mouse_released_event (event_type::mbutton_data const&);
     virtual void key_pressed_event(event_type::key_data const&);
     virtual void key_released_event(event_type::key_data const&);
-    virtual void destroy_event ();
     virtual void show_event (bool);
     virtual void paint_event (rect const&);
     virtual void size_event (point2u);
@@ -114,6 +110,10 @@ protected:
     virtual void end_size_move_event (rect const&);
     virtual void min_max_size_event (point2u);
     virtual void focus_event (bool);
+    virtual void help_event ();
+    virtual void minimize_event ();
+    virtual void maximize_event ();
+    virtual void close_event ();
 
     virtual void on_enable (bool);
     virtual void on_parent_size (point2u);

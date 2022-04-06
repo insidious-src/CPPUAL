@@ -28,33 +28,33 @@
 
 namespace cppual { namespace network {
 
-class ProtocolContext;
+class protocol_context;
 
-class Protocol : public non_copyable_virtual
+class protocol : public non_copyable_virtual
 {
 public:
-    ProtocolContext* create_context  ();
-    bool             add_lower_layer  (Protocol*);
-    Protocol*        lowest_layer () const;
+    protocol_context* create_context  ();
+    bool              add_lower_layer (protocol*);
+    protocol*         lowest_layer    () const;
 
     virtual uint required_output_size        (uint max_input);
     virtual uint required_recyclable_streams (uint max_connections,
                                               uint max_concurrent_calls);
 
-    virtual void start_session  (ProtocolContext&, Packet& outgoing_packet) = 0;
-    virtual bool read_data      (ProtocolContext&, Packet& incoming_packet) = 0;
-    virtual byte try_decode     (ProtocolContext&, Packet&   output_packet) = 0;
+    virtual void start_session  (protocol_context&, packet& outgoing_packet) = 0;
+    virtual bool read_data      (protocol_context&, packet& incoming_packet) = 0;
+    virtual byte try_decode     (protocol_context&, packet&   output_packet) = 0;
 
-    virtual byte encode_content (ProtocolContext&,
-                                 Packet&  input_packet,
-                                 Packet& output_packet) = 0;
+    virtual byte encode_content (protocol_context&,
+                                 packet&  input_packet,
+                                 packet& output_packet) = 0;
 
-    Protocol* upper_layer () const { return _M_pUpperProt; }
-    Protocol* lower_layer () const { return _M_pLowerProt; }
+    protocol* upper_layer () const { return _M_pUpperProt; }
+    protocol* lower_layer () const { return _M_pLowerProt; }
 
 private:
-    Protocol* _M_pUpperProt;
-    Protocol* _M_pLowerProt;
+    protocol* _M_pUpperProt;
+    protocol* _M_pLowerProt;
 };
 
 } } // Network

@@ -38,7 +38,7 @@ public:
 
 
     string_type name        () const noexcept { return _M_gName;        }
-    uint        screenCount () const noexcept { return _M_nScreenCount; }
+    uint        screen_count () const noexcept { return _M_nScreenCount; }
 
     void flush () noexcept
     { ::wl_display_flush (native<::wl_display> ()); }

@@ -80,12 +80,12 @@ frame_view::~frame_view () noexcept
 
 void frame_view::stretch ()
 {
-    renderable ().lock ().get ()->setMaximized (true);
+    renderable ().lock ().get ()->set_maximized (true);
 }
 
 void frame_view::unstretch ()
 {
-    renderable ().lock ().get ()->setMaximized (false);
+    renderable ().lock ().get ()->set_maximized (false);
 }
 
 void frame_view::attach (view* pView)
@@ -96,11 +96,11 @@ void frame_view::attach (view* pView)
     {
         if (_M_pTarget && _M_pTarget->valid ())
         {
-            _M_pTarget->renderable_unsafe ()->setFlags
+            _M_pTarget->renderable_unsafe ()->set_flags
                     (_M_pTarget->renderable_unsafe ()->flags () -= window_flag::Frame);
         }
 
-        pView->renderable_unsafe ()->setFlags
+        pView->renderable_unsafe ()->set_flags
                 (pView->renderable_unsafe ()->flags () += window_flag::Frame);
 
     }
@@ -114,7 +114,7 @@ void frame_view::detach ()
 
     if (!is_using_internal_compositor ())
     {
-        _M_pTarget->renderable_unsafe ()->setFlags
+        _M_pTarget->renderable_unsafe ()->set_flags
                 (_M_pTarget->renderable_unsafe ()->flags () -= Frame);
     }
     else

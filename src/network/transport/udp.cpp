@@ -41,33 +41,53 @@
 
 namespace cppual { namespace network {
 
-UdpStream::UdpStream () noexcept
-: TransportSocket (SocketType::Udp)
+udp_stream::udp_stream () noexcept
+: transport_socket (socket_type::udp)
 {
 }
 
-UdpStream::UdpStream (UdpStream&&) noexcept
-: TransportSocket (SocketType::Udp)
+udp_stream::udp_stream (udp_stream&&) noexcept
+: transport_socket (socket_type::udp)
 {
 }
 
-UdpStream::UdpStream (Address const&, u16) noexcept
-: TransportSocket (SocketType::Udp)
+udp_stream::udp_stream (address const&, u16) noexcept
+: transport_socket (socket_type::udp)
 {
 }
 
-UdpStream::~UdpStream () noexcept
+udp_stream::~udp_stream () noexcept
 {
 }
 
-UdpStream& UdpStream::operator << (Packet const&) noexcept
+udp_stream& udp_stream::operator << (packet const&) noexcept
 {
     return *this;
 }
 
-UdpStream& UdpStream::operator >> (Packet&) noexcept
+udp_stream& udp_stream::operator >> (packet&) noexcept
 {
     return *this;
+}
+
+void udp_stream::start_session(protocol_context&, packet& /*outgoing_packet*/)
+{
+
+}
+
+bool udp_stream::read_data(protocol_context&, packet& /*incoming_packet*/)
+{
+    return false;
+}
+
+byte udp_stream::try_decode(protocol_context&, packet& /*output_packet*/)
+{
+    return byte ();
+}
+
+byte udp_stream::encode_content(protocol_context&, packet& /*input_packet*/, packet& /*output_packet*/)
+{
+    return byte ();
 }
 
 } } // namespace Network

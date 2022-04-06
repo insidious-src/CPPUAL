@@ -32,7 +32,6 @@ class page_resource final : public memory_resource
 {
 public:
     page_resource (size_type size);
-    //page_resource (memory_resource& allocator, size_type size);
 
     void clear () noexcept;
 

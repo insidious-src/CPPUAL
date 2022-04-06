@@ -26,7 +26,7 @@
 #include <algorithm>
 
 #include <EGL/egl.h>
-#include <GL/gl.h>
+#include "../../gl/glad.h"
 
 namespace cppual { namespace gfx { namespace gl {
 
@@ -72,18 +72,18 @@ enum
     NotInitialized      = EGL_NOT_INITIALIZED,
     ContextLost         = EGL_CONTEXT_LOST,
     ANGLEFixedSize      = /*EGL_FIXED_SIZE_ANGLE*/ 0x3201,
-    NONE                = EGL_NONE,
+    none                = EGL_NONE,
     IntTrue             = EGL_TRUE,
     IntFalse            = EGL_FALSE
 };
 
-enum ErrorType
+enum class error_type : byte
 {
-    Initialize,
-    Terminate,
-    MakeCurrent,
-    Create,
-    Destroy
+    initialize,
+    terminate,
+    make_current,
+    create,
+    destroy
 };
 
 inline version_type& version () noexcept
@@ -94,11 +94,11 @@ inline version_type& version () noexcept
 
 // ====================================================
 
-template <ErrorType>
+template <error_type>
 void error ();
 
 template <>
-inline void error <Initialize> ()
+inline void error <error_type::initialize> ()
 {
     switch (::eglGetError ())
     {
@@ -110,7 +110,7 @@ inline void error <Initialize> ()
 }
 
 template <>
-inline void error <MakeCurrent> ()
+inline void error <error_type::make_current> ()
 {
     switch (::eglGetError ())
     {
@@ -139,7 +139,7 @@ inline void error <MakeCurrent> ()
 }
 
 template <>
-inline void error <Create> ()
+inline void error <error_type::create> ()
 {
     switch (::eglGetError ())
     {
@@ -166,7 +166,7 @@ inline void error <Create> ()
 }
 
 template <>
-inline void error <Destroy> ()
+inline void error <error_type::destroy> ()
 {
     switch (::eglGetError ())
     {
@@ -184,7 +184,7 @@ inline void error <Destroy> ()
 inline void initialize (display_pointer dsp)
 {
     if (!::eglInitialize (dsp, &egl::version ().major, &egl::version ().minor))
-        error<Initialize> ();
+        error<error_type::initialize> ();
 
     if (egl::version ().minor < 4)
     {
@@ -198,13 +198,13 @@ inline void initialize (display_pointer dsp)
 constexpr uint api (API eAPI) noexcept
 {
     return eAPI == API::OpenGL ? GLID :
-                                 eAPI == API::OpenGLES ? GLESID : NONE;
+                                 eAPI == API::OpenGLES ? GLESID : none;
 }
 
 constexpr value_type api_bits (API eAPI) noexcept
 {
     return eAPI == API::OpenGL ? GLBit :
-                                 eAPI == API::OpenGLES ? GLESBit : NONE;
+                                 eAPI == API::OpenGLES ? GLESBit : none;
 }
 
 constexpr uint const_hash (cchar* input)
@@ -251,7 +251,7 @@ inline config::feature_types convert_extensions (display_pointer dsp)
 }
 
 inline surface_pointer create_drawable (config const&                   gConf,
-                                        point2u                         gSize,
+                                        point2u                         /*gSize*/,
                                         resource_interface::handle_type uWndHandle,
                                         bool                            bDouble)
 {
@@ -260,27 +260,20 @@ inline surface_pointer create_drawable (config const&                   gConf,
     nSurfaceAttribs[0] = EGL_RENDER_BUFFER;
     nSurfaceAttribs[1] = bDouble ? EGL_BACK_BUFFER : EGL_SINGLE_BUFFER;
 
-    if (gConf.features ().test (config::feature::scalable_surface))
-    {
-        nSurfaceAttribs[2] = egl::ANGLEFixedSize;
-        nSurfaceAttribs[3] = egl::IntTrue;
-        nSurfaceAttribs[4] = egl::Width;
-        nSurfaceAttribs[5] = gSize.x;
-        nSurfaceAttribs[6] = egl::Height;
-        nSurfaceAttribs[7] = gSize.y;
-        nSurfaceAttribs[8] = egl::NONE;
-    }
-    else
-    {
-        nSurfaceAttribs[2] = egl::NONE;
-    }
+    //nSurfaceAttribs[2] = egl::ANGLEFixedSize;
+    //nSurfaceAttribs[3] = egl::IntTrue;
+    //nSurfaceAttribs[2] = egl::Width;
+    //nSurfaceAttribs[3] = static_cast<value_type> (gSize.x);
+    //nSurfaceAttribs[4] = egl::Height;
+    //nSurfaceAttribs[5] = static_cast<value_type> (gSize.y);
+    nSurfaceAttribs[2] = egl::none;
 
     surface_pointer pSurface = ::eglCreateWindowSurface (gConf.display (),
                                                          gConf,
                                                          uWndHandle.get<EGLNativeWindowType> (),
                                                          nSurfaceAttribs);
 
-    if (!pSurface) error<Create> ();
+    if (!pSurface) error<error_type::create> ();
     return pSurface;
 }
 
@@ -294,14 +287,14 @@ inline surface_pointer create_pbuffer (config const& gConf, point2u gSize)
         EGL_ALPHA_FORMAT,   EGL_ALPHA_FORMAT_NONPRE,
         EGL_TEXTURE_FORMAT, EGL_TEXTURE_RGBA,
         EGL_TEXTURE_TARGET, EGL_TEXTURE_2D,
-        egl::NONE
+        egl::none
     };
 
     surface_pointer _M_pPixelBuffer = ::eglCreatePbufferSurface (gConf.display (),
                                                                  gConf,
                                                                  nPBufferAttribs);
 
-    if (!_M_pPixelBuffer) error<Create> ();
+    if (!_M_pPixelBuffer) error<error_type::create> ();
     return _M_pPixelBuffer;
 }
 
@@ -312,23 +305,23 @@ inline surface_pointer create_pixmap (config const& gConf)
                                                             0,
                                                             nullptr);
 
-    if (!_M_pSurface) error<Create> ();
+    if (!_M_pSurface) error<error_type::create> ();
     return _M_pSurface;
 }
 
 inline surface_pointer create_surface (config const&         gConf,
                                        point2u               size,
-                                       surface::surface_type type,
+                                       surface_type          type,
                                        surface::handle_type  owner)
 {
     switch (type)
     {
-    case surface::surface_type::back_buffer:
+    case surface_type::back_buffer:
         return egl::create_pbuffer (gConf, size);
-    case surface::surface_type::pixmap:
+    case surface_type::pixmap:
         return egl::create_pixmap (gConf);
     default:
-        return egl::create_drawable (gConf, size, owner, type == surface::surface_type::double_buffer);
+        return egl::create_drawable (gConf, size, owner, type == surface_type::double_buffer);
     }
 }
 
@@ -342,13 +335,13 @@ inline context_pointer create_gc (config const& gConf, version_type version, voi
         nContextAttribs[1] = version.major;
         nContextAttribs[2] = egl::ContextMinorVersion;
         nContextAttribs[3] = version.minor;
-        nContextAttribs[4] = egl::NONE;
+        nContextAttribs[4] = egl::none;
     }
     else
     {
         nContextAttribs[0] = egl::BasicContextVersion;
         nContextAttribs[1] = version.major;
-        nContextAttribs[2] = egl::NONE;
+        nContextAttribs[2] = egl::none;
     }
 
     if(!::eglBindAPI (api (API::OpenGL)))
@@ -360,7 +353,7 @@ inline context_pointer create_gc (config const& gConf, version_type version, voi
                                               pShared,
                                               &nContextAttribs[0]);
 
-    if   (!pContext) error<Create> ();
+    if   (!pContext) error<error_type::create> ();
     return pContext;
 }
 
@@ -381,7 +374,7 @@ inline point2u getSize (config const& config, surface::handle_type surface) noex
 
 // ====================================================
 
-config::config (controller dsp, format_type gFormat)
+config::config (connection_type dsp, format_type gFormat)
 : _M_pDisplay   (::eglGetDisplay (dsp.get<egl::native_display> ())),
   _M_pCfg       (),
   _M_gFormat    (),
@@ -405,7 +398,7 @@ config::config (controller dsp, format_type gFormat)
                         EGL_PBUFFER_BIT : gFormat.flags.test (pixel_flag::bitmap) ?
                             EGL_PIXMAP_BIT : 0,
         EGL_RENDERABLE_TYPE, egl::api_bits (egl::API::OpenGL),
-        egl::NONE
+        egl::none
     };
 
     egl::initialize (_M_pDisplay);
@@ -413,7 +406,7 @@ config::config (controller dsp, format_type gFormat)
     ::eglGetConfigs   (_M_pDisplay, &ptr, 1, &nNumConfigs);
     ::eglChooseConfig (_M_pDisplay, nConfigAttribs, &ptr, 1, &nNumConfigs);
 
-    _M_pCfg = handle_type(ptr);
+    _M_pCfg = handle_type (ptr);
 
     _M_eFeatures = egl::convert_extensions (_M_pDisplay);
     _M_gFormat   = to_format ();
@@ -477,11 +470,11 @@ void config::print ()
 
     switch (value)
     {
-    case egl::NONE:
-        std::cout << "EGL_CONFIG_CAVEAT: EGL_NONE\n";
+    case egl::none:
+        std::cout << "EGL_CONFIG_CAVEAT: EGL_NONE" << std::endl;
         break;
     case EGL_SLOW_CONFIG:
-        std::cout << "EGL_CONFIG_CAVEAT: EGL_SLOW_CONFIG\n";
+        std::cout << "EGL_CONFIG_CAVEAT: EGL_SLOW_CONFIG" << std::endl;
         break;
     }
 
@@ -511,16 +504,16 @@ void config::print ()
 
 config::~config ()
 {
-    if (!_M_pDisplay || !_M_pCfg) return;
+    //if (!_M_pDisplay || !_M_pCfg) return;
 
-    ::eglTerminate (_M_pDisplay);
-    ::eglReleaseThread ();
+    //::eglTerminate (_M_pDisplay);
+    //::eglReleaseThread ();
 }
 
 // ====================================================
 
 surface::surface (conf_reference gConf, point2u size, handle_type wnd, surface_type type)
-: _M_pConf   (&gConf),
+: _M_pConf   (gConf),
   _M_pHandle (egl::create_surface (gConf, size, type, wnd)),
   _M_pWnd    (_M_pHandle ? wnd : handle_type ()),
   _M_eType   (type)
@@ -528,7 +521,7 @@ surface::surface (conf_reference gConf, point2u size, handle_type wnd, surface_t
 
 surface::surface (surface const& obj)
 : _M_pConf   (obj._M_pConf),
-  _M_pHandle (egl::create_surface (*_M_pConf, obj.size (), obj._M_eType, obj._M_pWnd)),
+  _M_pHandle (egl::create_surface (_M_pConf, obj.size (), obj._M_eType, obj._M_pWnd)),
   _M_pWnd    (_M_pHandle ? obj._M_pWnd : nullptr),
   _M_eType   (obj._M_eType)
 { }
@@ -539,15 +532,15 @@ surface& surface::operator = (surface&& obj) noexcept
 
     if (_M_pHandle)
     {
-        if(!::eglDestroySurface (config ().display (), _M_pHandle))
-            egl::error<egl::Destroy>();
+        if(!::eglDestroySurface (config ().display (), handle ().get<egl::surface_pointer> ()))
+            egl::error<egl::error_type::destroy>();
     }
 
     _M_pConf       = obj._M_pConf  ;
     _M_pHandle     = obj._M_pHandle;
     _M_pWnd        = obj._M_pWnd   ;
 
-    obj._M_pConf   = nullptr;
+    obj._M_pConf   = conf_value ();
     obj._M_pHandle = nullptr;
     obj._M_pWnd    = nullptr;
 
@@ -558,14 +551,14 @@ surface::~surface ()
 {
     if (!_M_pHandle) return;
 
-    if(!::eglDestroySurface (config ().display (), _M_pHandle))
-        egl::error<egl::Destroy>();
+    if(!::eglDestroySurface (config ().display (), surface::handle ().get<egl::surface_pointer> ()))
+        egl::error<egl::error_type::destroy>();
 }
 
 void surface::flush ()
 {
     if (_M_eType == surface_type::double_buffer)
-        ::eglSwapBuffers (config ().display (), _M_pHandle);
+        ::eglSwapBuffers (config ().display (), handle ().get<egl::surface_pointer> ());
     else
         ::glFlush ();
 }
@@ -575,39 +568,39 @@ point2u surface::size () const noexcept
     return egl::getSize (config (), _M_pHandle);
 }
 
-// TODO: finish egl resizing
+/// TODO: finish egl resizing
 void surface::scale (point2u gSize)
 {
-    if(context_interface::current ())
+    if (context_interface::current ())
     {
         auto drawable = context_interface::current ()->drawable ();
         auto readable = context_interface::current ()->readable ();
 
-        if(drawable == this || readable == this)
+        if (drawable == this && readable == this)
         {
-            if (!::eglMakeCurrent (config ().display (),
-                                   drawable != nullptr ?
-                                   drawable->handle ().get<egl::surface_pointer> () : nullptr,
-                                   readable != nullptr ?
-                                   readable->handle ().get<egl::surface_pointer> () : nullptr,
-                                   context_interface::current()->handle().get<egl::context_pointer>()))
-                egl::error<egl::MakeCurrent> ();
-            else
-            {
-                ::glScissor  (0, 0, gSize.x, gSize.y);
-                ::glViewport (0, 0, gSize.x, gSize.y);
+            ::glMatrixMode (GL_PROJECTION);
+            ::glPushMatrix ();
+            ::glLoadIdentity ();
 
+            ::glViewport (0, 0, gSize.x, gSize.y);
+
+            ::glMatrixMode (GL_MODELVIEW);
+            ::glPushMatrix ();
+            ::glLoadIdentity ();
+
+            if (_M_eType == surface_type::double_buffer)
                 ::eglSwapBuffers (config ().display (), handle ().get<egl::surface_pointer> ());
-            }
+            else
+                ::glFlush ();
         }
     }
 }
 
 // ====================================================
 
-context::context (conf_reference conf, version_type const& version, context* shared)
-: _M_pConf        (&conf),
-  _M_pGC          (egl::create_gc (conf, version, shared ? shared->_M_pGC : nullptr)),
+context::context (conf_reference conf, version_type const& version, shared_context shared)
+: _M_pConf        (conf),
+  _M_pGC          (egl::create_gc (conf, version, shared ? shared->handle () : nullptr)),
   _M_pDrawTarget  (),
   _M_pReadTarget  (),
   _M_pShared      (shared),
@@ -615,12 +608,14 @@ context::context (conf_reference conf, version_type const& version, context* sha
 { }
 
 context::context (context const& obj)
-: _M_pConf        (obj._M_pConf),
-  _M_pGC          (egl::create_gc (*_M_pConf, obj._M_nVersion, obj._M_pShared)),
-  _M_pDrawTarget  (),
-  _M_pReadTarget  (),
-  _M_pShared      (obj._M_pShared),
-  _M_nVersion     (_M_pGC ? obj._M_nVersion : version ())
+: _M_pConf       (obj._M_pConf),
+  _M_pGC         (egl::create_gc (_M_pConf,
+                                  obj._M_nVersion,
+                                  obj._M_pShared ? obj._M_pShared->handle () : nullptr)),
+  _M_pDrawTarget (),
+  _M_pReadTarget (),
+  _M_pShared     (obj._M_pShared),
+  _M_nVersion    (_M_pGC ? obj._M_nVersion : version_type ())
 { }
 
 context& context::operator = (context&& obj) noexcept
@@ -629,7 +624,7 @@ context& context::operator = (context&& obj) noexcept
 
     if (_M_pGC)
     {
-        release ();
+        if (active ()) release ();
         ::eglDestroyContext (config ().display (), _M_pGC);
     }
 
@@ -642,7 +637,7 @@ context& context::operator = (context&& obj) noexcept
 
     obj._M_nVersion    = version ();
     obj._M_pGC         = nullptr;
-    obj._M_pConf       = nullptr;
+    obj._M_pConf       = conf_value ();
     obj._M_pShared     = nullptr;
     obj._M_pDrawTarget = nullptr;
     obj._M_pReadTarget = nullptr;
@@ -656,12 +651,14 @@ context& context::operator = (context const& obj)
 
     if (_M_pGC)
     {
-        release ();
+        if (active ()) release ();
         ::eglDestroyContext (config ().display (), _M_pGC);
     }
 
-    _M_pGC = obj._M_pGC ? egl::create_gc (obj.config (), obj._M_nVersion, obj._M_pShared) :
-                         nullptr;
+    _M_pGC = obj._M_pGC ? egl::create_gc (obj.config (),
+                                          obj._M_nVersion,
+                                          obj._M_pShared ? obj._M_pShared->handle () : nullptr) :
+                          nullptr;
 
     _M_pReadTarget = _M_pDrawTarget = nullptr;
     _M_nVersion    = obj._M_nVersion;
@@ -674,7 +671,9 @@ context& context::operator = (context const& obj)
 context::~context () noexcept
 {
     if (!_M_pGC) return;
-    context::release ();
+
+    if (active ()) acquire (nullptr);
+
     ::eglDestroyContext (config ().display (), _M_pGC);
 }
 
@@ -704,7 +703,7 @@ bool context::assign () noexcept
                            _M_pReadTarget != nullptr ?
                            _M_pReadTarget->handle ().get<egl::surface_pointer> () : nullptr,
                            _M_pGC))
-        egl::error<egl::MakeCurrent> ();
+        egl::error<egl::error_type::make_current> ();
 
     acquire (this);
     return true;
@@ -712,10 +711,8 @@ bool context::assign () noexcept
 
 void context::release () noexcept
 {
-    if (!active () or !::eglMakeCurrent (config ().display (), nullptr, nullptr, nullptr))
-        return;
-
-    acquire (nullptr);
+    if (!::eglMakeCurrent (config ().display (), nullptr, nullptr, nullptr))
+        egl::error<egl::error_type::make_current> ();
 }
 
 void context::flush () noexcept

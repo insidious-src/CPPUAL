@@ -40,20 +40,20 @@ typedef std::weak_ptr  <display_interface> weak_display  ;
 class display_interface : public non_copyable_virtual
 {
 public:
-    typedef connection_type handle_type;
-    typedef string          string_type;
-    typedef shared_display  pointer    ;
+    typedef resource_connection handle_type;
+    typedef string              string_type;
+    typedef shared_display      pointer    ;
 
     constexpr display_interface () noexcept = default;
 
     virtual string_type name             () const = 0;
-    virtual uint        screenCount      () const = 0;
+    virtual uint        screen_count     () const = 0;
     virtual void        flush            ()       = 0;
 
     static  pointer primary            ();
     static  bool    has_valid_instance () noexcept;
-    static  bool    primary            (string_type const&);
-    static  pointer connect            (string_type const&);
+    static  bool    primary            (string_type const& name);
+    static  pointer connect            (string_type const& name);
 
     handle_type native () const noexcept { return _M_native; }
     handle_type legacy () const noexcept { return _M_legacy; }

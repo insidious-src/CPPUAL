@@ -207,7 +207,7 @@ template_object::template_object(template_array* _owner, size_type _idx)
   _M_category(),
   _M_index(_idx)
 {
-    assignFromArray();
+    assign_from_array();
     connections();
 }
 
@@ -273,7 +273,8 @@ template_object& template_object::operator = (template_object&& obj)
 
 template_object::~template_object()
 {
-    disconnections();
+    disconnections ();
+    destroyed ();
 }
 
 template_object::const_reference template_object::operator [] (string_type const& key) const
@@ -290,7 +291,7 @@ template_object::reference template_object::operator [] (string_type const& key)
 
 void template_object::connections()
 {
-    if (!_M_owner)
+    if (_M_owner == nullptr && _M_parser)
     {
         connect(_M_parser->changed, *this, &template_object::on_parser_data_changed);
         connect(_M_parser->about_to_save, *this, &template_object::on_about_to_save);
@@ -299,18 +300,22 @@ void template_object::connections()
     {
         connect(_M_owner.object()->changed, *this, &template_object::on_object_changed);
         connect(_M_owner.object()->about_to_save, *this, &template_object::on_about_to_save);
+        connect(_M_owner.object()->destroyed, *this, &template_object::disconnections);
     }
     else if (_M_owner.type() == doc_parser::doc_type::array)
     {
         connect(_M_owner.array()->changed, *this, &template_object::on_array_changed);
         connect(_M_owner.array()->removed, *this, &template_object::on_removed);
         connect(_M_owner.array()->about_to_save, *this, &template_object::on_about_to_save);
+        connect(_M_owner.array()->destroyed, *this, &template_object::disconnections);
     }
 }
 
 void template_object::disconnections()
 {
-    if (!_M_owner)
+    if (!_M_ref) return;
+
+    if (_M_owner == nullptr && _M_parser)
     {
         disconnect(_M_parser->changed, *this, &template_object::on_parser_data_changed);
         disconnect(_M_parser->about_to_save, *this, &template_object::on_about_to_save);
@@ -319,22 +324,25 @@ void template_object::disconnections()
     {
         disconnect(_M_owner.object()->changed, *this, &template_object::on_object_changed);
         disconnect(_M_owner.object()->about_to_save, *this, &template_object::on_about_to_save);
+        disconnect(_M_owner.object()->destroyed, *this, &template_object::invalidate);
     }
     else if (_M_owner.type() == doc_parser::doc_type::array)
     {
         disconnect(_M_owner.array()->changed, *this, &template_object::on_array_changed);
         disconnect(_M_owner.array()->removed, *this, &template_object::on_removed);
         disconnect(_M_owner.array()->about_to_save, *this, &template_object::on_about_to_save);
+        disconnect(_M_owner.array()->destroyed, *this, &template_object::invalidate);
     }
 }
 
 void template_object::invalidate()
 {
-    if (!(*this)) return;
+    if (!_M_ref) return;
 
     disconnections();
 
     _M_ref      = nullptr;
+    _M_parser   = nullptr;
     _M_category = string_type();
     _M_index    = npos;
     _M_owner    = template_owner();
@@ -377,7 +385,7 @@ void template_object::assign_from_parser_array()
 
         _M_parser->PushBack(value_type(kObjectType), _M_parser->GetAllocator());
 
-        _M_index =  _M_parser->size() - 1;
+        _M_index = _M_parser->size() - 1;
     }
 
     _M_ref = &(*_M_parser)[_M_index];
@@ -396,10 +404,10 @@ void template_object::assign_from_object()
                   << "exist. Creating a new one." << std::endl;
 
         parent_object_ref()->AddMember(value_type(_M_category.c_str(),
-                                                static_cast<size_type>(_M_category.size()),
-                                                _M_parser->GetAllocator()),
-                                     value_type(kObjectType),
-                                     _M_parser->GetAllocator());
+                                                  static_cast<size_type>(_M_category.size()),
+                                                  _M_parser->GetAllocator()),
+                                       value_type(kObjectType),
+                                       _M_parser->GetAllocator());
     }
 
     _M_ref = &(*_M_owner.object())[_M_category];
@@ -408,7 +416,7 @@ void template_object::assign_from_object()
     assert(_M_ref->IsObject());
 }
 
-void template_object::assignFromArray()
+void template_object::assign_from_array()
 {
     if (parent_array_ref()->Size() <= _M_index)
     {
@@ -417,7 +425,7 @@ void template_object::assignFromArray()
                   << "." << std::endl;
 
         parent_array_ref()->PushBack(value_type(kObjectType),
-                                   _M_parser->GetAllocator());
+                                     _M_parser->GetAllocator());
 
         _M_index = parent_array_ref()->Size() - 1;
     }
@@ -476,7 +484,7 @@ void template_object::on_about_to_save()
 
 void template_object::on_object_changed()
 {
-    if (!(*_M_owner.object())) invalidate();
+    if (_M_owner == nullptr) invalidate();
     else
     {
         assign_from_object();
@@ -486,10 +494,10 @@ void template_object::on_object_changed()
 
 void template_object::on_array_changed()
 {
-    if (!(*_M_owner.array())) invalidate();
+    if (_M_owner == nullptr) invalidate();
     else
     {
-        assignFromArray();
+        assign_from_array();
         changed();
     }
 }
@@ -551,7 +559,6 @@ template_array::template_array(template_array const& obj)
   _M_ref(obj._M_ref),
   _M_category(obj._M_category),
   _M_index(obj._M_index)
-
 {
     connections();
 }
@@ -608,7 +615,8 @@ template_array& template_array::operator = (template_array&& obj)
 
 template_array::~template_array()
 {
-    disconnections();
+    disconnections ();
+    destroyed ();
 }
 
 template_array::const_reference template_array::operator [] (size_type idx) const
@@ -625,7 +633,7 @@ template_array::reference template_array::operator [] (size_type idx)
 
 void template_array::connections()
 {
-    if (!_M_owner)
+    if (_M_owner == nullptr && _M_parser)
     {
         connect(_M_parser->changed, *this, &template_array::on_parser_data_changed);
         connect(_M_parser->about_to_save, *this, &template_array::on_about_to_save);
@@ -634,18 +642,22 @@ void template_array::connections()
     {
         connect(_M_owner.object()->changed, *this, &template_array::on_object_changed);
         connect(_M_owner.object()->about_to_save, *this, &template_array::on_about_to_save);
+        connect(_M_owner.object()->destroyed, *this, &template_array::invalidate);
     }
     else if (_M_owner.type() == doc_parser::doc_type::array)
     {
         connect(_M_owner.array()->changed, *this, &template_array::on_array_changed);
         connect(_M_owner.array()->removed, *this, &template_array::on_removed);
         connect(_M_owner.array()->about_to_save, *this, &template_array::on_about_to_save);
+        connect(_M_owner.array()->destroyed, *this, &template_array::invalidate);
     }
 }
 
 void template_array::disconnections()
 {
-    if (!_M_owner)
+    if (!_M_ref) return;
+
+    if (_M_owner == nullptr && _M_parser)
     {
         disconnect(_M_parser->changed, *this, &template_array::on_parser_data_changed);
         disconnect(_M_parser->about_to_save, *this, &template_array::on_about_to_save);
@@ -654,22 +666,25 @@ void template_array::disconnections()
     {
         disconnect(_M_owner.object()->changed, *this, &template_array::on_object_changed);
         disconnect(_M_owner.object()->about_to_save, *this, &template_array::on_about_to_save);
+        disconnect(_M_owner.object()->destroyed, *this, &template_array::invalidate);
     }
     else if (_M_owner.type() == doc_parser::doc_type::array)
     {
         disconnect(_M_owner.array()->changed, *this, &template_array::on_array_changed);
         disconnect(_M_owner.array()->removed, *this, &template_array::on_removed);
         disconnect(_M_owner.array()->about_to_save, *this, &template_array::on_about_to_save);
+        disconnect(_M_owner.array()->destroyed, *this, &template_array::invalidate);
     }
 }
 
 void template_array::invalidate()
 {
-    if (!(*this)) return;
+    if (!_M_ref) return;
 
     disconnections();
 
     _M_ref      = nullptr;
+    _M_parser   = nullptr;
     _M_category = string_type();
     _M_index    = npos;
     _M_owner    = template_owner();
@@ -731,10 +746,10 @@ void template_array::assign_from_object()
                   << "exist. Creating a new one." << std::endl;
 
         parent_object_ref()->AddMember(value_type(_M_category.c_str(),
-                                                static_cast<size_type>(_M_category.size()),
-                                                _M_parser->GetAllocator()),
-                                     value_type(kArrayType),
-                                     _M_parser->GetAllocator());
+                                                  static_cast<size_type>(_M_category.size()),
+                                                  _M_parser->GetAllocator()),
+                                       value_type(kArrayType),
+                                       _M_parser->GetAllocator());
     }
 
     _M_ref = &(*_M_owner.object())[_M_category];
@@ -752,9 +767,9 @@ void template_array::assign_from_array()
                   << "." << std::endl;
 
         parent_array_ref()->PushBack(value_type(kArrayType),
-                                   _M_parser->GetAllocator());
+                                     _M_parser->GetAllocator());
 
-        _M_index =  parent_array_ref()->Size() - 1;
+        _M_index = parent_array_ref()->Size() - 1;
     }
 
     _M_ref = &(*_M_owner.array())[_M_index];
@@ -777,7 +792,7 @@ bool template_array::empty() const
 
 void template_array::append()
 {
-    assert(_M_ref != nullptr);
+    assert(_M_ref != nullptr && _M_parser != nullptr);
 
     about_to_append();
     _M_ref->PushBack(value_type(kNullType), _M_parser->GetAllocator());
@@ -817,6 +832,8 @@ template_array::pointer template_array::parent_array_ref() const
 
 void template_array::on_parser_data_changed()
 {
+    assert(_M_parser != nullptr);
+
     switch (_M_parser->type())
     {
     case doc_parser::doc_type::array:
@@ -839,7 +856,7 @@ void template_array::on_about_to_save()
 
 void template_array::on_object_changed()
 {
-    if (!(*_M_owner.object())) invalidate();
+    if (_M_owner == nullptr) invalidate();
     else
     {
         assign_from_object();
@@ -849,7 +866,7 @@ void template_array::on_object_changed()
 
 void template_array::on_array_changed()
 {
-    if (!(*_M_owner.array())) invalidate();
+    if (_M_owner == nullptr) invalidate();
     else
     {
         assign_from_array();
@@ -864,9 +881,9 @@ void template_array::on_removed(size_type idx)
 
 // ======================================================================
 
-value_reference_base<doc_parser::string_type>::value_reference_base (template_object*    owner,
-                                                   string_type const& key,
-                                                   value_type  const& default_val)
+value_reference_base<doc_parser::string_type>::value_reference_base (template_object*   owner,
+                                                                     string_type const& key,
+                                                                     value_type  const& default_val)
 : _M_ref(),
   _M_owner(*owner)
 {
@@ -876,17 +893,17 @@ value_reference_base<doc_parser::string_type>::value_reference_base (template_ob
 
         if (!(*ptr->_M_owner.object())->HasMember(def_key.c_str()))
         {
-            std::cout << "Json::" << __func__ << ": invalid reference "
+            std::cout << "json::" << __func__ << ": invalid reference "
                       << def_key  << " with default value: "
                       << def      << ". Trying to create a new one." << std::endl;
 
-            //! try to obtain a valid reference
+            /// try to obtain a valid reference
             (*ptr->_M_owner.object())->AddMember(json_type(def_key.c_str(),
                                                  static_cast<size_type>(def_key.size()),
-                                                 ptr->_M_owner.object()->parser()->GetAllocator()).Move(),
+                                                 ptr->_M_owner.object()->parser()->GetAllocator()),
                                                  json_type(def.c_str(),
                                                  static_cast<size_type>(def.size()),
-                                                 ptr->_M_owner.object()->parser()->GetAllocator()).Move(),
+                                                 ptr->_M_owner.object()->parser()->GetAllocator()),
                                                  ptr->_M_owner.object()->parser()->GetAllocator());
         }
 
@@ -903,8 +920,8 @@ value_reference_base<doc_parser::string_type>::value_reference_base (template_ob
 }
 
 value_reference_base<doc_parser::string_type>::value_reference_base (template_array* owner,
-                                                   size_type idx,
-                                                   value_type const& default_val)
+                                                                     size_type idx,
+                                                                     value_type const& default_val)
 : _M_ref(),
   _M_owner(*owner)
 {
@@ -912,19 +929,19 @@ value_reference_base<doc_parser::string_type>::value_reference_base (template_ar
     {
         auto new_idx = idx;
 
-        if (ptr->_M_owner.array()->size() <= idx)
+        if ((*ptr->_M_owner.array())->Size() <= idx)
         {
-            std::cout << "Json::" << __func__ << ": invalid reference index "
+            std::cout << "json::" << __func__ << ": invalid reference index "
                       << idx      << " with default value: "
                       << def      << ". Trying to create a new one." << std::endl;
 
-            //! try to obtain a valid reference
+            /// try to obtain a valid reference
             (*ptr->_M_owner.array())->PushBack(json_type(def.c_str(),
                                                static_cast<size_type>(def.size()),
-                                               ptr->_M_owner.array()->parser()->GetAllocator()).Move(),
+                                               ptr->_M_owner.array()->parser()->GetAllocator()),
                                                ptr->_M_owner.array()->parser()->GetAllocator());
 
-            new_idx = (*ptr->_M_owner.array()).size() - 1;
+            new_idx = (*ptr->_M_owner.array())->Size() - 1;
         }
 
         ptr->_M_ref = &(ptr->_M_owner.array()->operator[](new_idx));
@@ -939,41 +956,56 @@ value_reference_base<doc_parser::string_type>::value_reference_base (template_ar
     connections();
 }
 
-void cppual::json::value_reference_base<doc_parser::string_type>::connections()
+void value_reference_base<doc_parser::string_type>::connections()
 {
     if (_M_owner.type() == doc_parser::doc_type::object)
     {
         connect(_M_owner.object()->changed, *this, &value_reference_base::assign);
+        connect(_M_owner.object()->destroyed, *this, &value_reference_base::invalidate);
     }
     else if (_M_owner.type() == doc_parser::doc_type::array)
     {
         connect(_M_owner.array()->changed, *this, &value_reference_base::assign);
+        connect(_M_owner.array()->destroyed, *this, &value_reference_base::invalidate);
     }
 }
 
-void cppual::json::value_reference_base<doc_parser::string_type>::disconnections()
+void value_reference_base<doc_parser::string_type>::disconnections()
 {
     if (_M_owner.type() == doc_parser::doc_type::object)
     {
         disconnect(_M_owner.object()->changed, *this, &value_reference_base::assign);
+        disconnect(_M_owner.object()->destroyed, *this, &value_reference_base::invalidate);
     }
     else if (_M_owner.type() == doc_parser::doc_type::array)
     {
         disconnect(_M_owner.array()->changed, *this, &value_reference_base::assign);
+        disconnect(_M_owner.array()->destroyed, *this, &value_reference_base::invalidate);
     }
 }
 
-void cppual::json::value_reference_base<doc_parser::string_type>::assign()
+void value_reference_base<doc_parser::string_type>::assign()
 {
-    if(_M_fn != nullptr) _M_fn(this);
+    if(_M_fn == nullptr) return;
+
+    _M_fn(this);
     changed();
+}
+
+void value_reference_base<doc_parser::string_type>::invalidate()
+{
+    disconnections();
+
+    _M_ref   = nullptr;
+    _M_owner = template_owner ();
+    _M_fn    = func_type ();
 }
 
 // ======================================================================
 
-value_reference<bool>::value_reference(template_object*    owner,
-                           string_type const& name,
-                           value_type const&  default_val)
+value_reference<bool>::value_reference(template_object*   owner,
+                                       string_type const& name,
+                                       value_type const&  default_val)
 : reference_base(owner, name, default_val)
 {
     if (!ref()->IsBool())
@@ -983,10 +1015,10 @@ value_reference<bool>::value_reference(template_object*    owner,
     }
 }
 
-value_reference<bool>::value_reference(template_array*    owner,
-                           size_type         idx,
-                           value_type const& default_val)
-    : reference_base(owner, idx, default_val)
+value_reference<bool>::value_reference(template_array*   owner,
+                                       size_type         idx,
+                                       value_type const& default_val)
+: reference_base(owner, idx, default_val)
 {
     if (!ref()->IsBool())
     {
@@ -997,9 +1029,9 @@ value_reference<bool>::value_reference(template_array*    owner,
 
 // ======================================================================
 
-value_reference<u16>::value_reference(template_object*    owner,
-                          string_type const& name,
-                          value_type         default_val)
+value_reference<u16>::value_reference(template_object*   owner,
+                                      string_type const& name,
+                                      value_type         default_val)
 : reference_base(owner, name, static_cast<default_type>(default_val))
 {
     if (!ref()->IsUint())
@@ -1023,9 +1055,9 @@ value_reference<u16>::value_reference(template_array* owner,
 
 // ======================================================================
 
-value_reference<i16>::value_reference (template_object*     owner,
-                             string_type  const& name,
-                             value_type          default_val)
+value_reference<i16>::value_reference (template_object*    owner,
+                                       string_type  const& name,
+                                       value_type          default_val)
 : reference_base(owner, name, static_cast<default_type>(default_val))
 {
     if (!ref()->IsInt())
@@ -1036,8 +1068,8 @@ value_reference<i16>::value_reference (template_object*     owner,
 }
 
 value_reference<i16>::value_reference (template_array* owner,
-                             size_type      idx,
-                             value_type     default_val)
+                                       size_type       idx,
+                                       value_type      default_val)
 : reference_base(owner, idx, static_cast<default_type>(default_val))
 {
     if (!ref()->IsInt())
@@ -1049,9 +1081,9 @@ value_reference<i16>::value_reference (template_array* owner,
 
 // ======================================================================
 
-value_reference<uint>::value_reference (template_object*    owner,
-                            string_type const& name,
-                            value_type         default_val)
+value_reference<uint>::value_reference (template_object*   owner,
+                                        string_type const& name,
+                                        value_type         default_val)
 : reference_base(owner, name, default_val)
 {
     if (!ref()->IsUint())
@@ -1062,8 +1094,8 @@ value_reference<uint>::value_reference (template_object*    owner,
 }
 
 value_reference<uint>::value_reference (template_array* owner,
-                            size_type      idx,
-                            value_type     default_val)
+                                        size_type       idx,
+                                        value_type      default_val)
 : reference_base(owner, idx, default_val)
 {
     if (!ref()->IsUint())
@@ -1075,9 +1107,9 @@ value_reference<uint>::value_reference (template_array* owner,
 
 // ======================================================================
 
-value_reference<int>::value_reference (template_object*    owner,
-                           string_type const& name,
-                           value_type  const& default_val)
+value_reference<int>::value_reference (template_object*   owner,
+                                       string_type const& name,
+                                       value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
     if (!ref()->IsInt())
@@ -1087,9 +1119,9 @@ value_reference<int>::value_reference (template_object*    owner,
     }
 }
 
-value_reference<int>::value_reference (template_array*    owner,
-                           size_type         idx,
-                           value_type const& default_val)
+value_reference<int>::value_reference (template_array*   owner,
+                                       size_type         idx,
+                                       value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
     if (!ref()->IsInt())
@@ -1101,9 +1133,9 @@ value_reference<int>::value_reference (template_array*    owner,
 
 // ======================================================================
 
-value_reference<u64>::value_reference (template_object*    owner,
-                           string_type const& name,
-                           value_type  const& default_val)
+value_reference<u64>::value_reference (template_object*   owner,
+                                       string_type const& name,
+                                       value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
     if (!ref()->IsUint64())
@@ -1113,9 +1145,9 @@ value_reference<u64>::value_reference (template_object*    owner,
     }
 }
 
-value_reference<u64>::value_reference (template_array*    owner,
-                           size_type         idx,
-                           value_type const& default_val)
+value_reference<u64>::value_reference (template_array*   owner,
+                                       size_type         idx,
+                                       value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
     if (!ref()->IsUint64())
@@ -1127,9 +1159,9 @@ value_reference<u64>::value_reference (template_array*    owner,
 
 // ======================================================================
 
-value_reference<i64>::value_reference (template_object*    owner,
-                             string_type const& name,
-                             value_type  const& default_val)
+value_reference<i64>::value_reference (template_object*   owner,
+                                       string_type const& name,
+                                       value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
     if (!ref()->IsInt64())
@@ -1139,9 +1171,9 @@ value_reference<i64>::value_reference (template_object*    owner,
     }
 }
 
-value_reference<i64>::value_reference (template_array*    owner,
-                             size_type         idx,
-                             value_type const& default_val)
+value_reference<i64>::value_reference (template_array*   owner,
+                                       size_type         idx,
+                                       value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
     if (!ref()->IsInt64())
@@ -1153,9 +1185,9 @@ value_reference<i64>::value_reference (template_array*    owner,
 
 // ======================================================================
 
-value_reference<float>::value_reference (template_object*    owner,
-                             string_type const& name,
-                             value_type  const& default_val)
+value_reference<float>::value_reference (template_object*   owner,
+                                         string_type const& name,
+                                         value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
     if (!ref()->IsNumber())
@@ -1165,9 +1197,9 @@ value_reference<float>::value_reference (template_object*    owner,
     }
 }
 
-value_reference<float>::value_reference (template_array*    owner,
-                             size_type         idx,
-                             value_type const& default_val)
+value_reference<float>::value_reference (template_array*   owner,
+                                         size_type         idx,
+                                         value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
     if (!ref()->IsNumber())
@@ -1179,9 +1211,9 @@ value_reference<float>::value_reference (template_array*    owner,
 
 // ======================================================================
 
-value_reference<double>::value_reference (template_object*    owner,
-                              string_type const& name,
-                              value_type  const& default_val)
+value_reference<double>::value_reference (template_object*   owner,
+                                          string_type const& name,
+                                          value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
     if (!ref()->IsNumber())
@@ -1191,9 +1223,9 @@ value_reference<double>::value_reference (template_object*    owner,
     }
 }
 
-value_reference<double>::value_reference (template_array*    owner,
-                              size_type         idx,
-                              value_type const& default_val)
+value_reference<double>::value_reference (template_array*   owner,
+                                          size_type         idx,
+                                          value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
     if (!ref()->IsNumber())
@@ -1205,9 +1237,9 @@ value_reference<double>::value_reference (template_array*    owner,
 
 // ======================================================================
 
-value_reference<doc_parser::string_type>::value_reference (template_object*    owner,
-                                           string_type const& name,
-                                           value_type  const& default_val)
+value_reference<doc_parser::string_type>::value_reference (template_object*   owner,
+                                                           string_type const& name,
+                                                           value_type  const& default_val)
 : reference_base(owner, name, default_val)
 {
     if (!ref()->IsString())
@@ -1217,9 +1249,9 @@ value_reference<doc_parser::string_type>::value_reference (template_object*    o
     }
 }
 
-value_reference<doc_parser::string_type>::value_reference (template_array*    owner,
-                                           size_type         idx,
-                                           value_type const& default_val)
+value_reference<doc_parser::string_type>::value_reference (template_array*   owner,
+                                                           size_type         idx,
+                                                           value_type const& default_val)
 : reference_base(owner, idx, default_val)
 {
     if (!ref()->IsString())
@@ -1233,6 +1265,8 @@ value_reference<doc_parser::string_type>::value_reference (template_array*    ow
 
 factory::factory(std::initializer_list<file_tuple> json_files)
 {
+    typedef memory::allocator<doc_parser> doc_allocator;
+
     _M_jsonDocs.reserve(json_files.size());
 
     for (const auto& item : json_files)
@@ -1244,9 +1278,11 @@ factory::factory(std::initializer_list<file_tuple> json_files)
             file.open(std::get<1>(item).c_str(), std::ios::out | std::ios::app);
         }
 
-        _M_jsonDocs.emplace(std::get<0>(item), std::make_pair(std::get<1>(item),
-                                                              json_ptr(new doc_parser(std::get<1>(item),
-                                                                                  std::get<2>(item)))));
+        _M_jsonDocs.emplace(std::get<0>(item),
+                            std::make_pair(std::get<1>(item),
+                                           memory::allocate_shared<doc_parser> (doc_allocator(),
+                                                                                std::get<1>(item),
+                                                                                std::get<2>(item))));
     }
 }
 
@@ -1254,7 +1290,7 @@ void factory::reset()
 {
     about_to_reset();
 
-    /*for (auto& item : _M_objects)
+    for (auto& item : _M_objects)
     {
         item.second.clear();
     }
@@ -1262,11 +1298,11 @@ void factory::reset()
     for (auto& item : _M_arrays)
     {
         item.second.clear();
-    }*/
+    }
 
     for (auto& item : _M_jsonDocs)
     {
-        item.second.second->create_document(item.second.first);
+        item.second.second->create_document(item.second.first, item.second.second->type ());
     }
 
     after_reset();
@@ -1276,87 +1312,88 @@ void factory::reset(size_type key)
 {
     about_to_reset_doc(key);
 
-    auto it_obj_type   = _M_objects.find(key);
-    auto it_array_type = _M_arrays.find(key);
+    auto it_obj   = _M_objects.find  (key);
+    auto it_array = _M_arrays.find   (key);
+    auto it_doc   = _M_jsonDocs.find (key);
 
-    if (it_obj_type != _M_objects.end())
+    if (it_obj != _M_objects.end ())
     {
-        it_obj_type->second.clear();
+        it_obj->second.clear ();
     }
 
-    if (it_array_type != _M_arrays.end())
+    if (it_array != _M_arrays.end ())
     {
-        it_array_type->second.clear();
+        it_array->second.clear ();
     }
 
-    for (auto& item : _M_jsonDocs)
+    if (it_doc != _M_jsonDocs.end ())
     {
-        item.second.second->create_document(item.second.first);
+        it_doc->second.second->create_document (it_doc->second.first, it_doc->second.second->type ());
     }
 
-    after_reset_doc(key);
+    after_reset_doc (key);
 }
 
-bool factory::save(size_type key)
+bool factory::save (size_type key)
 {
-    auto json = _M_jsonDocs.find(key);
+    auto json = _M_jsonDocs.find (key);
 
-    if (json != _M_jsonDocs.end())
+    if (json != _M_jsonDocs.end ())
     {
         std::ofstream file;
 
-        file.open(json->second.first.c_str(), std::ios::out | std::ios::trunc);
+        file.open (json->second.first.c_str (), std::ios::out | std::ios::trunc);
 
-        return json->second.second->save(file);
+        return json->second.second->save (file);
     }
 
     return false;
 }
 
-void factory::save()
+void factory::save ()
 {
     for (auto& json : _M_jsonDocs)
     {
         std::ofstream file;
 
-        file.open(json.second.first.c_str(), std::ios::out | std::ios::trunc);
+        file.open (json.second.first.c_str (), std::ios::out | std::ios::trunc);
 
-        json.second.second->save(file);
+        json.second.second->save (file);
     }
 }
 
-factory::generic_object_ptr factory::get_object(size_type type, size_type key) const
+factory::generic_object_ptr factory::get_object (size_type type, size_type key) const
 {
-    auto const it_type = _M_objects.find(type);
+    auto const it_type = _M_objects.find (type);
 
-    if (it_type != _M_objects.end())
+    if (it_type != _M_objects.end ())
     {
-        auto const it_key = _M_objects[type].find(key);
+        auto const it_key = _M_objects[type].find (key);
 
-        if (it_key != _M_objects[type].end())
+        if (it_key != _M_objects[type].end ())
         {
             return it_key->second;
         }
     }
 
-    return generic_object_ptr();
+    return generic_object_ptr ();
 }
 
-factory::generic_array_ptr factory::get_array(size_type type, size_type key) const
+factory::generic_array_ptr factory::get_array (size_type type, size_type key) const
 {
-    auto const it_type = _M_arrays.find(type);
+    auto const it_type = _M_arrays.find (type);
 
-    if (it_type != _M_arrays.end())
+    if (it_type != _M_arrays.end ())
     {
-        auto const it_key = _M_arrays[type].find(key);
+        auto const it_key = _M_arrays[type].find (key);
 
-        if (it_key != _M_arrays[type].end())
+        if (it_key != _M_arrays[type].end ())
         {
             return it_key->second;
         }
     }
 
-    return generic_array_ptr();
+    return generic_array_ptr ();
 }
 
 } } // namespace Json

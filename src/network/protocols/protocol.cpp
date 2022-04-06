@@ -24,11 +24,11 @@
 
 namespace cppual { namespace network {
 
-Protocol* Protocol::lowest_layer () const
+protocol* protocol::lowest_layer () const
 {
     if (_M_pLowerProt != nullptr)
     {
-        Protocol* pLowestProt = _M_pLowerProt->lower_layer ();
+        protocol* pLowestProt = _M_pLowerProt->lower_layer ();
 
         while (pLowestProt != nullptr) pLowestProt = pLowestProt->lower_layer ();
         return pLowestProt;
@@ -37,12 +37,12 @@ Protocol* Protocol::lowest_layer () const
     return nullptr;
 }
 
-uint Protocol::required_output_size (uint)
+uint protocol::required_output_size (uint)
 {
     return 0;
 }
 
-uint Protocol::required_recyclable_streams (uint, uint)
+uint protocol::required_recyclable_streams (uint, uint)
 {
     return 0;
 }

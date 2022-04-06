@@ -6,6 +6,7 @@
 #include <cppual/memory/allocator.h>
 #include <cppual/functional.h>
 #include <cppual/signal.h>
+#include <cppual/types.h>
 #include <cppual/meta.h>
 #include <cppual/string.h>
 #include <cppual/containers.h>
@@ -16,10 +17,7 @@
 #include <fstream>
 #include <utility>
 #include <cassert>
-#include <vector>
-#include <deque>
 #include <tuple>
-#include <unordered_map>
 
 class QString;
 
@@ -213,6 +211,12 @@ public:
     friend class template_object;
     friend class template_array ;
 
+    template <typename, typename, typename>
+    friend class values_array;
+
+    template <typename, typename, typename>
+    friend class objects_array;
+
     template <typename T>
     friend class value_reference_base;
 
@@ -225,9 +229,54 @@ private:
 
 // ======================================================================
 
+union SHARED_API template_pointer
+{
+    template_object* object;
+    template_array*  array ;
+    void*            ptr   ;
+
+    constexpr template_pointer () noexcept : ptr () { }
+    constexpr template_pointer (template_object* ptr) noexcept : object (ptr) { }
+    constexpr template_pointer (template_array * ptr) noexcept : array  (ptr) { }
+
+    friend
+    constexpr bool operator == (template_pointer const&, template_pointer const&) noexcept;
+
+    friend
+    constexpr bool operator == (template_pointer const&, std::nullptr_t) noexcept;
+
+    friend
+    constexpr bool operator == (std::nullptr_t, template_pointer const&) noexcept;
+};
+
+// =========================================================
+
+constexpr bool operator == (template_pointer const& lh, template_pointer const& rh) noexcept
+{ return lh.ptr == rh.ptr; }
+
+constexpr bool operator == (template_pointer const& lh, std::nullptr_t) noexcept
+{ return lh.ptr == nullptr; }
+
+constexpr bool operator == (std::nullptr_t, template_pointer const& rh) noexcept
+{ return rh.ptr == nullptr; }
+
+constexpr bool operator != (template_pointer const& lh, template_pointer const& rh) noexcept
+{ return !(lh == rh); }
+
+constexpr bool operator != (template_pointer const& lh, std::nullptr_t) noexcept
+{ return !(lh == nullptr); }
+
+constexpr bool operator != (std::nullptr_t, template_pointer const& rh) noexcept
+{ return !(rh == nullptr); }
+
+// ======================================================================
+
 class SHARED_API template_owner
 {
 public:
+    typedef template_pointer          pointer  ;
+    typedef pointer template_owner::* safe_bool;
+
     constexpr template_owner () noexcept
     : _M_owner (),
       _M_type  ()
@@ -245,24 +294,25 @@ public:
         assert(_M_owner != nullptr);
     }
 
-    constexpr template_object* object( ) const
+    constexpr template_object* object () const
     {
         assert(_M_owner != nullptr);
         assert(_M_type  == doc_parser::doc_type::object);
-        return static_cast<template_object*> (_M_owner);
+        return _M_owner.object;
     }
 
     constexpr template_array* array () const
     {
         assert(_M_owner != nullptr);
         assert(_M_type  == doc_parser::doc_type::array);
-        return static_cast<template_array*> (_M_owner);
+        return _M_owner.array;
     }
 
-    constexpr explicit operator bool () const noexcept
+    constexpr explicit operator safe_bool () const noexcept
     {
         return _M_owner != nullptr &&
-              (_M_type  == doc_parser::doc_type::object || _M_type == doc_parser::doc_type::array);
+              (_M_type  == doc_parser::doc_type::object || _M_type == doc_parser::doc_type::array) ?
+               &template_owner::_M_owner : nullptr;
     }
 
     constexpr bool operator == (std::nullptr_t) const noexcept
@@ -281,7 +331,7 @@ public:
     }
 
 private:
-    void*                _M_owner;
+    pointer              _M_owner;
     doc_parser::doc_type _M_type ;
 };
 
@@ -290,15 +340,15 @@ private:
 class SHARED_API template_object
 {
 public:
-    typedef doc_parser::size_type                          size_type      ;
-    typedef doc_parser::value_type                         value_type     ;
-    typedef doc_parser::reference                          reference      ;
-    typedef doc_parser::pointer                            pointer        ;
-    typedef doc_parser::const_reference                    const_reference;
-    typedef doc_parser::ValueIterator                      iterator       ;
-    typedef doc_parser::ConstValueIterator                 const_iterator ;
-    typedef doc_parser::string_type                        string_type    ;
-    typedef std::pair<string_type, doc_parser::value_type> pair_type      ;
+    typedef doc_parser::size_type              size_type      ;
+    typedef doc_parser::value_type             value_type     ;
+    typedef doc_parser::reference              reference      ;
+    typedef doc_parser::pointer                pointer        ;
+    typedef doc_parser::const_reference        const_reference;
+    typedef doc_parser::ValueIterator          iterator       ;
+    typedef doc_parser::ConstValueIterator     const_iterator ;
+    typedef doc_parser::string_type            string_type    ;
+    typedef std::pair<string_type, value_type> pair_type      ;
 
     static constexpr auto npos = static_cast<size_type> (-1);
 
@@ -318,8 +368,8 @@ public:
     const_reference operator [] (string_type const& key) const;
     reference       operator [] (string_type const& key);
 
-    size_type size () const;
-    bool      empty() const;
+    virtual size_type size () const;
+    virtual bool      empty() const;
 
     constexpr pointer operator -> () const
     {
@@ -332,7 +382,7 @@ public:
         return _M_ref;
     }
 
-    inline doc_parser* parser () const noexcept
+    constexpr doc_parser* parser () const noexcept
     {
         return _M_parser;
     }
@@ -366,6 +416,7 @@ public:
     signal<void()> about_to_save;
     signal<void()> changed;
     signal<void()> invalidated;
+    signal<void()> destroyed;
 
 private:
     pointer parent_object_ref() const;
@@ -376,7 +427,7 @@ private:
     void    assign_from_parser_object();
     void    assign_from_parser_array();
     void    assign_from_object();
-    void    assignFromArray();
+    void    assign_from_array();
 
 private:
     template_owner _M_owner   ;
@@ -402,15 +453,15 @@ private:
 class SHARED_API template_array
 {
 public:
-    typedef doc_parser::size_type                          size_type      ;
-    typedef doc_parser::value_type                         value_type     ;
-    typedef doc_parser::reference                          reference      ;
-    typedef doc_parser::pointer                            pointer        ;
-    typedef doc_parser::const_reference                    const_reference;
-    typedef doc_parser::iterator                           iterator       ;
-    typedef doc_parser::const_iterator                     const_iterator ;
-    typedef doc_parser::string_type                        string_type    ;
-    typedef std::pair<string_type, doc_parser::value_type> pair_type      ;
+    typedef doc_parser::size_type              size_type      ;
+    typedef doc_parser::value_type             value_type     ;
+    typedef doc_parser::reference              reference      ;
+    typedef doc_parser::pointer                pointer        ;
+    typedef doc_parser::const_reference        const_reference;
+    typedef doc_parser::iterator               iterator       ;
+    typedef doc_parser::const_iterator         const_iterator ;
+    typedef doc_parser::string_type            string_type    ;
+    typedef std::pair<string_type, value_type> pair_type      ;
 
     static constexpr auto npos = static_cast<size_type> (-1);
 
@@ -430,11 +481,11 @@ public:
     const_reference operator [] (size_type idx) const;
     reference       operator [] (size_type idx);
 
-    size_type size   () const;
-    bool      empty  () const;
-    void      append ();
-    void      remove (size_type idx);
-    void      clear  ();
+    virtual size_type size   () const;
+    virtual bool      empty  () const;
+    virtual void      append ();
+    virtual void      remove (size_type idx);
+    virtual void      clear  ();
 
     constexpr pointer operator -> () const
     {
@@ -487,6 +538,7 @@ public:
     signal<void()>          cleared;
     signal<void()>          changed;
     signal<void()>          invalidated;
+    signal<void()>          destroyed;
 
 private:
     pointer parent_object_ref() const;
@@ -521,27 +573,27 @@ private:
 // ======================================================================
 
 template <typename T>
-class value_reference_base
+class SHARED_API value_reference_base
 {
 public:
     static_assert (is_json_value<T>::value, "invalid type!");
 
-    typedef T                          base_type;
-    typedef value_reference_base<T>    self_type;
-    typedef function<void(self_type*)> func_type;
+    typedef typename std::remove_cv_t<T> base_type;
+    typedef value_reference_base<T>      self_type;
+    typedef function<void(self_type*)>   func_type;
 
     typedef typename std::conditional<std::is_same<i16, T>::value ||
                                       std::is_enum<T>::value,
-            int,
+            typename std::conditional<sizeof (T) <= sizeof (i32), i32, i64>::type,
             typename std::conditional<std::is_same<u16, T>::value, uint, T>::type
             >::type
             default_type;
 
-    typedef base_type               value_type ;
-    typedef doc_parser::pointer     pointer    ;
-    typedef doc_parser::size_type   size_type  ;
-    typedef doc_parser::value_type  json_type  ;
-    typedef doc_parser::string_type string_type;
+    typedef base_type                       value_type ;
+    typedef doc_parser::pointer             pointer    ;
+    typedef doc_parser::size_type           size_type  ;
+    typedef doc_parser::value_type          json_type  ;
+    typedef doc_parser::string_type         string_type;
 
     static constexpr auto npos = static_cast<size_type> (-1);
 
@@ -575,7 +627,7 @@ public:
 
     inline value_reference_base& operator = (value_reference_base const& obj) noexcept
     {
-        if (this != &obj && _M_ref != obj._M_ref)
+        if (this != &obj && obj._M_ref && _M_ref != obj._M_ref)
         {
             disconnections();
 
@@ -607,7 +659,7 @@ protected:
     inline value_reference_base (template_object*    owner,
                                  string_type  const& key,
                                  default_type const& default_val = default_type ())
-    : _M_ref(),
+    : _M_ref  (),
       _M_owner(*owner)
     {
         _M_fn = func_type([def_key = key, def = default_val](self_type* ptr)
@@ -643,14 +695,14 @@ protected:
     inline value_reference_base (template_array*     owner,
                                  size_type           idx,
                                  default_type const& default_val = default_type ())
-    : _M_ref(),
+    : _M_ref  (),
       _M_owner(*owner)
     {
         _M_fn = func_type([idx, def = default_val](self_type* ptr)
         {
             auto new_idx = idx;
 
-            if (ptr->_M_owner.array()->size() <= idx)
+            if ((*ptr->_M_owner.array())->Size() <= idx)
             {
                 std::cout << "Json::" << __func__ << ": invalid reference index "
                           << idx      << " with default value: "
@@ -660,7 +712,7 @@ protected:
                 (*ptr->_M_owner.array())->PushBack(json_type(def).Move(),
                                                    ptr->_M_owner.array()->parser()->GetAllocator());
 
-                new_idx = (*ptr->_M_owner.array()).size() - 1;
+                new_idx = (*ptr->_M_owner.array())->Size() - 1;
             }
 
             ptr->_M_ref = &(ptr->_M_owner.array()->operator[](new_idx));
@@ -675,12 +727,12 @@ protected:
         connections();
     }
 
-    inline pointer parent_object_ref() const
+    constexpr pointer parent_object_ref() const
     {
         return _M_owner.object()->_M_ref;
     }
 
-    inline pointer parent_array_ref() const
+    constexpr pointer parent_array_ref() const
     {
         return _M_owner.array()->_M_ref;
     }
@@ -691,10 +743,12 @@ private:
         if (_M_owner.type() == doc_parser::doc_type::object)
         {
             connect(_M_owner.object()->changed, *this, &value_reference_base::assign);
+            connect(_M_owner.object()->destroyed, *this, &value_reference_base::invalidate);
         }
         else if (_M_owner.type() == doc_parser::doc_type::array)
         {
             connect(_M_owner.array()->changed, *this, &value_reference_base::assign);
+            connect(_M_owner.array()->destroyed, *this, &value_reference_base::invalidate);
         }
     }
 
@@ -703,17 +757,30 @@ private:
         if (_M_owner.type() == doc_parser::doc_type::object)
         {
             disconnect(_M_owner.object()->changed, *this, &value_reference_base::assign);
+            disconnect(_M_owner.object()->destroyed, *this, &value_reference_base::invalidate);
         }
         else if (_M_owner.type() == doc_parser::doc_type::array)
         {
             disconnect(_M_owner.array()->changed, *this, &value_reference_base::assign);
+            disconnect(_M_owner.array()->destroyed, *this, &value_reference_base::invalidate);
         }
     }
 
     void assign()
     {
-        if (_M_fn != nullptr) _M_fn(this);
+        if(_M_fn == nullptr) return;
+
+        _M_fn(this);
         changed();
+    }
+
+    void invalidate()
+    {
+        disconnections();
+
+        _M_ref   = nullptr;
+        _M_owner = template_owner ();
+        _M_fn    = func_type ();
     }
 
 private:
@@ -725,6 +792,9 @@ private:
 
     template <typename, typename, typename>
     friend class values_array;
+
+    template <typename, typename, typename>
+    friend class objects_array;
 };
 
 // ======================================================================
@@ -773,7 +843,7 @@ public:
 
     inline value_reference_base& operator = (value_reference_base const& obj) noexcept
     {
-        if (this != &obj && _M_ref != obj._M_ref)
+        if (this != &obj && obj._M_ref && _M_ref != obj._M_ref)
         {
             disconnections();
 
@@ -810,12 +880,12 @@ protected:
                           size_type         idx,
                           value_type const& default_val = value_type ());
 
-    inline pointer parent_object_ref() const
+    constexpr pointer parent_object_ref() const
     {
         return _M_owner.object()->_M_ref;
     }
 
-    inline pointer parent_array_ref() const
+    constexpr pointer parent_array_ref() const
     {
         return _M_owner.array()->_M_ref;
     }
@@ -824,6 +894,7 @@ private:
     void connections();
     void disconnections();
     void assign();
+    void invalidate();
 
 private:
     pointer        _M_ref   ;
@@ -834,12 +905,15 @@ private:
 
     template <typename, typename, typename>
     friend class values_array;
+
+    template <typename, typename, typename>
+    friend class objects_array;
 };
 
 //======================================================
 
 template <typename T>
-class value_reference<T> : public value_reference_base<T>
+class SHARED_API value_reference<T> : public value_reference_base<T>
 {
 public:
     static_assert (std::is_enum_v<T>, "T is NOT an enum!");
@@ -869,12 +943,15 @@ public:
 
     inline operator value_type () const noexcept
     {
-        return static_cast<value_type>(this->ref()->GetInt());
+        return static_cast<value_type>(sizeof (default_type) <= sizeof (i32) ? this->ref()->GetInt   () :
+                                                                               this->ref()->GetInt64 ());
     }
 
     inline auto value () const noexcept
     {
-        return static_cast<std::underlying_type_t<value_type>>(this->ref()->GetInt());
+        return static_cast<std::underlying_type_t<value_type>>
+                          (sizeof (default_type) <= sizeof (i32) ? this->ref()->GetInt   () :
+                                                                   this->ref()->GetInt64 ());
     }
 
     inline value_reference& operator = (value_reference const& ref)
@@ -885,7 +962,10 @@ public:
 
     inline value_reference& operator = (value_type value)
     {
-        this->ref()->SetInt(static_cast<int>(value));
+        if (sizeof (default_type) <= sizeof (i32))
+            this->ref()->SetInt (static_cast<i32> (value));
+        else
+            this->ref()->SetInt64 (static_cast<i64>(value));
 
         return *this;
     }
@@ -950,9 +1030,9 @@ public:
     typedef typename reference_base::value_type   value_type    ;
     typedef typename reference_base::default_type default_type  ;
 
-    value_reference (template_object*     owner,
-                     string_type   const& name,
-                     value_type           default_val = value_type());
+    value_reference (template_object*   owner,
+                     string_type const& name,
+                     value_type         default_val = value_type());
 
     value_reference (template_array* owner,
                      size_type       idx,
@@ -998,9 +1078,9 @@ public:
     typedef typename reference_base::value_type   value_type    ;
     typedef typename reference_base::default_type default_type  ;
 
-    value_reference (template_object*    owner,
-                     string_type  const& name,
-                     value_type          default_val = value_type());
+    value_reference (template_object*   owner,
+                     string_type const& name,
+                     value_type         default_val = value_type());
 
     value_reference (template_array* owner,
                      size_type       idx,
@@ -1037,10 +1117,10 @@ public:
 //======================================================
 
 template <>
-class SHARED_API value_reference<uint> : public value_reference_base<uint>
+class SHARED_API value_reference<u32> : public value_reference_base<u32>
 {
 public:
-    typedef value_reference_base<uint>           reference_base;
+    typedef value_reference_base<u32>            reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1084,10 +1164,10 @@ public:
 //======================================================
 
 template <>
-class SHARED_API value_reference<int> : public value_reference_base<int>
+class SHARED_API value_reference<i32> : public value_reference_base<i32>
 {
 public:
-    typedef value_reference_base<int>            reference_base;
+    typedef value_reference_base<i32>            reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1472,11 +1552,11 @@ public:
 
     inline value_reference& operator = (value_reference const& rh) noexcept
     {
-        if (this != &rh && ref() != rh.ref())
+        if (this != &rh)
         {
             reference_base::operator = (rh);
 
-            json_enum_invoked   = rh.json_enum_invoked;
+            json_enum_invoked   = rh.json_enum_invoked  ;
             json_string_invoked = rh.json_string_invoked;
         }
 
@@ -1649,7 +1729,7 @@ operator + (value_reference<doc_parser::string_type>::value_type::value_type con
 // ======================================================================
 
 template <typename T, typename Allocator>
-class objects_array<T, Allocator> : public template_array, public Allocator
+class SHARED_API objects_array<T, Allocator> : public template_array, public Allocator
 {
 public:
     typedef T                                           value_type            ;
@@ -1667,23 +1747,23 @@ public:
     typedef typename array_type::const_reverse_iterator const_reverse_iterator;
 
     objects_array (doc_parser&           prsr,
-                   string_type const&    category,
+                   string_type    const& category,
                    allocator_type const& ator = allocator_type())
     : template_array (prsr, category),
-      allocator_type(ator)
+      allocator_type (ator)
     {
-        for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
+        for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back(this, i);
 
         connections ();
     }
 
     objects_array (template_object*      owner,
-                   string_type const&    category,
+                   string_type    const& category,
                    allocator_type const& ator = allocator_type())
     : template_array (owner, category),
-      allocator_type(ator)
+      allocator_type (ator)
     {
-        for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
+        for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
 
         connections ();
     }
@@ -1692,11 +1772,18 @@ public:
                    size_type             id,
                    allocator_type const& ator = allocator_type())
     : template_array (owner, id),
-      allocator_type(ator)
+      allocator_type (ator)
     {
-        for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
+        for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
 
         connections ();
+    }
+
+    inline ~objects_array ()
+    {
+        disconnections ();
+        destroyed ();
+        destroyed.clear ();
     }
 
     inline iterator begin ()
@@ -1776,25 +1863,60 @@ public:
         return _M_values[i];
     }
 
-private:
-    void on_index_appended()
+    bool empty () const
     {
-        _M_values.emplace_back(this, size() - 1);
+        return _M_values.empty ();
     }
 
-    void on_index_removed(size_type idx)
+    size_type size () const
     {
-        auto it = std::find_if (_M_values.cbegin(), _M_values.cend(), [this, idx](const_reference elem)
+        return static_cast<size_type> (_M_values.size ());
+    }
+
+    void append ()
+    {
+        assert(_M_ref != nullptr && _M_parser != nullptr);
+
+        about_to_append ();
+        _M_ref->PushBack (template_array::value_type(kNullType), _M_parser->GetAllocator());
+        _M_values.emplace_back (this, _M_ref->Size () - 1);
+        appended ();
+    }
+
+    void remove (size_type idx)
+    {
+        assert(_M_ref != nullptr);
+        assert(_M_ref->Size() > idx);
+
+        auto it = std::find_if (_M_values.cbegin (), _M_values.cend (), [this, idx](const_reference elem)
         {
             return elem._M_ref == (*this)[idx]._M_ref;
         });
 
-        _M_values.erase(it);
+        if (it == _M_values.cend ()) return;
+
+        about_to_remove (idx);
+        _M_values.erase (it);
+        _M_ref->Erase (&_M_ref->operator [] (idx));
+        removed (idx);
     }
 
-    void on_changed()
+    void clear ()
     {
-        if(!(*this))
+        if (empty ()) return;
+
+        assert(_M_ref != nullptr);
+
+        about_to_clear ();
+        _M_values.clear ();
+        _M_ref->Clear ();
+        cleared ();
+    }
+
+private:
+    void on_changed ()
+    {
+        if(_M_ref == nullptr)
         {
             disconnections();
             _M_values.clear();
@@ -1802,24 +1924,20 @@ private:
         else
         {
             _M_values.clear();
-            for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
+            for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
         }
     }
 
-    void connections()
+    void connections ()
     {
-        connect(appended, *this, &objects_array::on_index_appended);
-        connect(about_to_remove, *this, &objects_array::on_index_removed);
-        connect(about_to_clear, _M_values, &array_type::clear);
         connect(changed, *this, &objects_array::on_changed);
+        connect(destroyed, *this, &objects_array::clear);
     }
 
-    void disconnections()
+    void disconnections ()
     {
-        disconnect(appended, *this, &objects_array::on_index_appended);
-        disconnect(about_to_remove, *this, &objects_array::on_index_removed);
-        disconnect(about_to_clear, _M_values, &array_type::clear);
         disconnect(changed, *this, &objects_array::on_changed);
+        disconnect(destroyed, *this, &objects_array::clear);
     }
 
 private:
@@ -1829,7 +1947,7 @@ private:
 // ======================================================================
 
 template <typename T, typename Allocator>
-class values_array<T, Allocator> : public template_array, public Allocator
+class SHARED_API values_array<T, Allocator> : public template_array, public Allocator
 {
 public:
     typedef value_reference<T>                          value_type            ;
@@ -1847,25 +1965,32 @@ public:
     typedef typename array_type::const_reverse_iterator const_reverse_iterator;
 
     values_array (doc_parser&           prsr,
-                  string_type const&    category,
+                  string_type    const& category,
                   allocator_type const& ator = allocator_type())
     : template_array (prsr, category),
-      allocator_type(ator)
+      allocator_type (ator)
     {
-        for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
+        for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
 
         connections ();
     }
 
     values_array (template_object*      owner,
-                  string_type const&    category,
+                  string_type    const& category,
                   allocator_type const& ator = allocator_type())
     : template_array (owner, category),
-      allocator_type(ator)
+      allocator_type (ator)
     {
-        for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
+        for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
 
         connections ();
+    }
+
+    inline ~values_array ()
+    {
+        disconnections ();
+        destroyed ();
+        destroyed.clear ();
     }
 
     inline iterator begin ()
@@ -1945,25 +2070,60 @@ public:
         return _M_values[i];
     }
 
-private:
-    void on_index_appended()
+    bool empty () const
     {
-        _M_values.emplace_back(this, size() - 1);
+        return _M_values.empty ();
     }
 
-    void on_index_removed(size_type idx)
+    size_type size () const
     {
-        auto it = std::find_if (_M_values.cbegin(), _M_values.cend(), [this, idx](const_reference elem)
+        return static_cast<size_type> (_M_values.size ());
+    }
+
+    void append ()
+    {
+        assert(_M_ref != nullptr && _M_parser != nullptr);
+
+        about_to_append ();
+        _M_ref->PushBack (template_array::value_type(kNullType), _M_parser->GetAllocator());
+        _M_values.emplace_back (this, _M_ref->Size () - 1);
+        appended ();
+    }
+
+    void remove (size_type idx)
+    {
+        assert(_M_ref != nullptr);
+        assert(_M_ref->Size() > idx);
+
+        auto it = std::find_if (_M_values.cbegin (), _M_values.cend (), [this, idx](const_reference elem)
         {
             return elem._M_ref == (*this)[idx]._M_ref;
         });
 
-        _M_values.erase(it);
+        if (it == _M_values.cend ()) return;
+
+        about_to_remove (idx);
+        _M_values.erase (it);
+        _M_ref->Erase (&_M_ref->operator [] (idx));
+        removed (idx);
     }
 
+    void clear ()
+    {
+        if (empty ()) return;
+
+        assert(_M_ref != nullptr);
+
+        about_to_clear ();
+        _M_values.clear ();
+        _M_ref->Clear ();
+        cleared ();
+    }
+
+private:
     void on_changed()
     {
-        if(!(*this))
+        if(_M_ref == nullptr)
         {
             disconnections();
             _M_values.clear();
@@ -1971,24 +2131,20 @@ private:
         else
         {
             _M_values.clear();
-            for (size_type i = 0; i < size(); ++i) _M_values.emplace_back(this, i);
+            for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
         }
     }
 
-    void connections()
+    void connections ()
     {
-        connect(appended, *this, &values_array::on_index_appended);
-        connect(about_to_remove , *this, &values_array::on_index_removed);
-        connect(about_to_clear, _M_values, &array_type::clear);
-        connect(changed , *this, &values_array::on_changed);
+        connect(changed, *this, &values_array::on_changed);
+        connect(destroyed, *this, &values_array::clear);
     }
 
-    void disconnections()
+    void disconnections ()
     {
-        disconnect(appended, *this, &values_array::on_index_appended);
-        disconnect(about_to_remove , *this, &values_array::on_index_removed);
-        disconnect(about_to_clear, _M_values, &array_type::clear);
-        disconnect(changed , *this, &values_array::on_changed);
+        disconnect(changed, *this, &values_array::on_changed);
+        disconnect(destroyed, *this, &values_array::clear);
     }
 
 private:

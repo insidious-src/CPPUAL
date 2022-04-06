@@ -70,7 +70,7 @@ protected:
 
 private:
     void on_create ();
-    void destroy_event ();
+    void close_event ();
 
 private:
     window* _M_pOwnerWnd;

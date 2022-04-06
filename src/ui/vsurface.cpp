@@ -53,11 +53,11 @@ proxy_renderable& proxy_renderable::operator = (proxy_renderable const& gObj) no
     return *this;
 }
 
-void proxy_renderable::setGeometry (rect const&) noexcept
+void proxy_renderable::set_geometry (rect const&) noexcept
 {
 }
 
-void proxy_renderable::setOwner (const_pointer) noexcept
+void proxy_renderable::set_owner (const_pointer) noexcept
 {
 }
 

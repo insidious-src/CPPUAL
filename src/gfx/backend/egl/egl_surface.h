@@ -41,11 +41,11 @@ class context_mutex;
 class config
 {
 public:
-    typedef resource_handle                          handle_type;
-    typedef i32                                      int_type   ;
-    typedef handle_type  config::*                   safe_bool  ;
-    typedef typename resource_interface::controller  controller ;
-    typedef typename resource_interface::format_type format_type;
+    typedef resource_handle                     handle_type    ;
+    typedef i32                                 int_type       ;
+    typedef handle_type  config::*              safe_bool      ;
+    typedef resource_interface::connection_type connection_type;
+    typedef resource_interface::format_type     format_type    ;
 
     enum
     {
@@ -74,20 +74,28 @@ public:
     int_type id    () const;
     void     print ();
 
-    config () = delete;
     ~config();
 
-    config (controller  display,
-            format_type format = format_type::default2d ());
+    config (connection_type display,
+            format_type     format = format_type::default2d ());
 
     constexpr config (config const&) noexcept = default;
     inline    config& operator = (config const&) noexcept = default;
 
-    constexpr controller    display  ()   const noexcept { return _M_pDisplay ; }
-    constexpr feature_types features ()   const noexcept { return _M_eFeatures; }
-    constexpr format_type   format   ()   const noexcept { return _M_gFormat  ; }
-    constexpr handle_type   operator ()() const noexcept { return _M_pCfg     ; }
-    constexpr operator      void*    ()   const noexcept { return _M_pCfg     ; }
+
+    /// null config constructor
+    constexpr config () noexcept
+    : _M_pDisplay    (),
+      _M_pCfg        (),
+      _M_gFormat     (),
+      _M_eFeatures   ()
+    { }
+
+    constexpr connection_type display  ()   const noexcept { return _M_pDisplay ; }
+    constexpr feature_types   features ()   const noexcept { return _M_eFeatures; }
+    constexpr format_type     format   ()   const noexcept { return _M_gFormat  ; }
+    constexpr handle_type     operator ()() const noexcept { return _M_pCfg     ; }
+    constexpr operator        void*    ()   const noexcept { return _M_pCfg     ; }
 
     constexpr explicit operator safe_bool () const noexcept
     { return _M_pCfg ? &config::_M_pCfg : nullptr; }
@@ -123,12 +131,13 @@ constexpr bool operator != (config const& lh, config const& rh) noexcept
 class surface : public surface_interface
 {
 public:
+    typedef config        conf_value    ;
     typedef config const* conf_pointer  ;
     typedef config const& conf_reference;
 
     surface (surface const&);
     surface (surface&&) noexcept = default;
-    surface (conf_reference, point2u size, handle_type wnd, surface_type type = surface_type::drawable);
+    surface (conf_reference cfg, point2u size, handle_type wnd, surface_type type = surface_type::double_buffer);
     surface& operator = (surface&&) noexcept;
     ~surface ();
 
@@ -136,15 +145,15 @@ public:
     void    scale (point2u size);
     void    flush ();
 
-    conf_reference config     () const noexcept { return *_M_pConf;             }
-    device_backend device     () const noexcept { return  device_backend::gl;   }
-    handle_type    handle     () const noexcept { return  _M_pHandle;           }
-    controller     connection () const noexcept { return  _M_pConf->display (); }
-    format_type    format     () const noexcept { return  _M_pConf->format  (); }
-    surface_type   type       () const noexcept { return  _M_eType;             }
+    conf_reference  config     () const noexcept { return  _M_pConf;             }
+    device_backend  device     () const noexcept { return  device_backend::gl;   }
+    handle_type     handle     () const noexcept { return  _M_pHandle;           }
+    connection_type connection () const noexcept { return  _M_pConf.display ();  }
+    format_type     format     () const noexcept { return  _M_pConf.format  ();  }
+    surface_type    type       () const noexcept { return  _M_eType;             }
 
 private:
-    conf_pointer _M_pConf  ;
+    conf_value   _M_pConf  ;
     handle_type  _M_pHandle;
     handle_type  _M_pWnd   ;
     surface_type _M_eType  ;
@@ -155,6 +164,7 @@ private:
 class context : public context_interface
 {
 public:
+    typedef config        conf_value    ;
     typedef config const* conf_pointer  ;
     typedef config const& conf_reference;
 
@@ -164,9 +174,9 @@ public:
     context (context&&) noexcept = default;
     ~context () noexcept;
 
-    context (config       const& config,
+    context (conf_reference      config,
              version_type const& version = default_version (),
-             context*            shared  = nullptr);
+             shared_context      shared  = nullptr);
 
     static version_type platform_version () noexcept;
 
@@ -176,25 +186,25 @@ public:
     void finish  () noexcept;
     void release () noexcept;
 
-    conf_reference config     () const noexcept { return *_M_pConf;             }
-    const_pointer  readable   () const noexcept { return  _M_pReadTarget;       }
-    pointer        drawable   () const noexcept { return  _M_pDrawTarget;       }
-    version_type   version    () const noexcept { return  _M_nVersion;          }
-    device_backend device     () const noexcept { return  device_backend::gl;   }
-    handle_type    handle     () const noexcept { return  _M_pGC;               }
-    controller     connection () const noexcept { return  _M_pConf->display (); }
-    format_type    format     () const noexcept { return  _M_pConf->format  (); }
+    conf_reference  config     () const noexcept { return  _M_pConf;             }
+    const_pointer   readable   () const noexcept { return  _M_pReadTarget;       }
+    pointer         drawable   () const noexcept { return  _M_pDrawTarget;       }
+    version_type    version    () const noexcept { return  _M_nVersion;          }
+    device_backend  device     () const noexcept { return  device_backend::gl;   }
+    handle_type     handle     () const noexcept { return  _M_pGC;               }
+    connection_type connection () const noexcept { return  _M_pConf.display ();  }
+    format_type     format     () const noexcept { return  _M_pConf.format  ();  }
 
     static constexpr version_type default_version () noexcept
     { return version_type { 3, 0 }; }
 
 private:
-    conf_pointer  _M_pConf      ;
-    handle_type   _M_pGC        ;
-    pointer       _M_pDrawTarget;
-    const_pointer _M_pReadTarget;
-    context*      _M_pShared    ;
-    version_type  _M_nVersion   ;
+    conf_value     _M_pConf      ;
+    handle_type    _M_pGC        ;
+    pointer        _M_pDrawTarget;
+    const_pointer  _M_pReadTarget;
+    shared_context _M_pShared    ;
+    version_type   _M_nVersion   ;
 };
 
 // ====================================================
@@ -231,7 +241,9 @@ private:
     context*             _M_context;
 };
 
-} } } // namespace EGL
+// ====================================================
+
+} } } // namespace gl
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_EGL_SURFACE_H_

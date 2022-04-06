@@ -33,21 +33,21 @@
 
 namespace cppual { namespace gfx { namespace gl {
 
-enum class TessGenType : unsigned char
+enum class TessGenType : byte
 {
     Quads    ,
     Triangles,
     Isolines
 };
 
-enum class TessGenSpacing : unsigned char
+enum class TessGenSpacing : byte
 {
     Equal         ,
     FractionalEven,
     FractionalOdd
 };
 
-enum class VertexOrder : bool
+enum class VertexOrder : byte
 {
     OrientCW,
     OrientCCW

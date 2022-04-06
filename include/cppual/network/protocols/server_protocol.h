@@ -23,7 +23,7 @@
 #define CPPUAL_NETWORK_PROTOCOL_SERVER_H_
 #ifdef __cplusplus
 
-#include <cppual/network/protocols/protocol.h>
+#include <cppual/network/transport/tcplistener.h>
 #include <cppual/containers.h>
 #include <cppual/string.h>
 
@@ -31,7 +31,7 @@ namespace cppual { namespace network {
 
 //================================================
 
-class DataProtocol
+class data_protocol
 {
 public:
     typedef string       string_type;
@@ -51,7 +51,7 @@ public:
         MQTTUnsubscribe
     };
 
-    struct PACKED Header
+    struct PACKED header
     {
         size_type firstStringSize  { };
         size_type secondStringSize { };
@@ -59,9 +59,9 @@ public:
         size_type dataSize         { };
     };
 
-    DataProtocol(string_type const& firstString, string_type const& secondString, Type type = Type::Upload);
-    DataProtocol(stream_type const& bytes);
-    DataProtocol() = default;
+    data_protocol(string_type const& firstString, string_type const& secondString, Type type = Type::Upload);
+    data_protocol(stream_type const& bytes);
+    data_protocol() = default;
     stream_type operator ()() const;
 
     size_type   first_str_size () const noexcept;
@@ -78,21 +78,17 @@ public:
     void set_type(Type) noexcept;
 
 private:
-    Header      _M_gHeader;
+    header      _M_gHeader;
     stream_type _M_gData  ;
 };
 
-static_assert (sizeof(DataProtocol::Header) == 16, "DataProtocol::Header is not 16 bytes!");
+static_assert (sizeof(data_protocol::header) == 16, "data_protocol::header is not 16 bytes!");
 
 //================================================
 
-class ServerProtocol : Protocol
+class server_protocol : tcp_listener
 {
 public:
-    void start_session  (ProtocolContext&, Packet& outgoing_packet);
-    bool read_data      (ProtocolContext&, Packet& incoming_packet);
-    byte try_decode     (ProtocolContext&, Packet& output_packet);
-    byte encode_content (ProtocolContext&, Packet& input_packet, Packet& output_packet);
 
 private:
 };

@@ -29,37 +29,37 @@
 
 namespace cppual { namespace network {
 
-class TcpStream : public virtual TransportSocket
+class tcp_stream : public virtual transport_socket
 {
 public:
-    typedef std::size_t size_type;
+    typedef std::size_t size_type  ;
     typedef ssize_t     stream_size;
 
     /// send
-    TcpStream& operator << (Packet const&) noexcept;
+    tcp_stream& operator << (packet const&) noexcept;
 
     /// receive
-    TcpStream& operator >> (Packet&) noexcept;
+    tcp_stream& operator >> (packet&) noexcept;
 
-    TcpStream  () noexcept;
-    virtual ~TcpStream () noexcept;
+    tcp_stream  () noexcept;
+    virtual ~tcp_stream () noexcept;
 
     void disconnect () noexcept;
 
-    virtual void start_session(ProtocolContext&, Packet& outgoing_packet);
-    virtual bool read_data(ProtocolContext&, Packet& incoming_packet);
-    virtual byte try_decode(ProtocolContext&, Packet& output_packet);
-    virtual byte encode_content(ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    virtual void start_session(protocol_context&, packet& outgoing_packet);
+    virtual bool read_data(protocol_context&, packet& incoming_packet);
+    virtual byte try_decode(protocol_context&, packet& output_packet);
+    virtual byte encode_content(protocol_context&, packet& input_packet, packet& output_packet);
 
-    Address peer_address () const noexcept { return _M_gPeerAddr; }
+    address peer_address () const noexcept { return _M_gPeerAddr; }
     u16     peer_port    () const noexcept { return _M_nPeerPort; }
 
 protected:
-    TcpStream (TcpStream&& stream) noexcept;
-    TcpStream (Address const& address, u16 port) noexcept;
+    tcp_stream (tcp_stream&& stream) noexcept;
+    tcp_stream (address const& address, u16 port) noexcept;
 
 private:
-    Address _M_gPeerAddr    { };
+    address _M_gPeerAddr    { };
     u16     _M_nPeerPort    { };
     bool    _M_bIsConnected { };
 

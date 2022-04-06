@@ -25,11 +25,11 @@
 
 namespace cppual { namespace network {
 
-Address::Address (string_type const&) noexcept
+address::address (string_type const&) noexcept
 {
 }
 
-Address::string_type Address::to_string () const noexcept
+address::string_type address::to_string () const noexcept
 {
     stringstream output;
 
@@ -47,14 +47,14 @@ Address::string_type Address::to_string () const noexcept
     return output.str ();
 }
 
-Address Address::local_address () noexcept
+address address::local_address () noexcept
 {
-    return Address ();
+    return address ();
 }
 
-Address Address::public_address () noexcept
+address address::public_address () noexcept
 {
-    return Address ();
+    return address ();
 }
 
 } } // namespace Network

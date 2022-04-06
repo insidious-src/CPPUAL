@@ -32,52 +32,47 @@ namespace cppual { namespace network {
 
 // ====================================================
 
-enum class SocketType : byte
+enum class socket_type : byte
 {
-    Tcp,
-    Udp
+    tcp,
+    udp
 };
 
 // ====================================================
 
-class TransportSocket : public Protocol
+class transport_socket : public protocol
 {
 public:
-    typedef int             socket_id;
-    typedef socket_id const const_id ;
+    typedef int            socket_id;
+    typedef socket_id const const_id;
 
     constexpr static socket_id null_socket = -1;
 
-    TransportSocket () = delete;
-    TransportSocket (SocketType) noexcept;
-    TransportSocket (TransportSocket&&) noexcept;
-    TransportSocket& operator = (TransportSocket&&) noexcept;
+    transport_socket () = delete;
+    transport_socket (socket_type) noexcept;
+    transport_socket (transport_socket&&) noexcept;
+    transport_socket& operator = (transport_socket&&) noexcept;
 
     void set_blocking (bool) noexcept;
 
-    enum
-    {
-        AnyPort = 0
-    };
-
-    inline ~TransportSocket ()             noexcept { close ();                     }
-    inline socket_id  id ()          const noexcept { return _M_nId;                }
-    inline SocketType type ()        const noexcept { return _M_eProtocol;          }
-    inline bool       valid ()       const noexcept { return _M_nId != null_socket; }
-    inline bool       is_blocking () const noexcept { return _M_bIsBlocking;        }
+    inline ~transport_socket       ()       noexcept { close ();                     }
+    inline socket_id   id          () const noexcept { return _M_nId;                }
+    inline socket_type type        () const noexcept { return _M_eProtocol;          }
+    inline bool        valid       () const noexcept { return _M_nId != null_socket; }
+    inline bool        is_blocking () const noexcept { return _M_bIsBlocking;        }
 
 protected:
-    static socket_id create (SocketType) noexcept;
-    void replace_from_id (socket_id) noexcept;
-    void close () noexcept;
+    static socket_id create (socket_type) noexcept;
+    void   replace_from_id (socket_id) noexcept;
+    void   close () noexcept;
 
 private:
     void init_socket () noexcept;
 
 private:
-    socket_id  _M_nId;
-    SocketType _M_eProtocol;
-    bool       _M_bIsBlocking;
+    socket_id   _M_nId        ;
+    socket_type _M_eProtocol  ;
+    bool        _M_bIsBlocking;
 };
 
 } } // namespace Network

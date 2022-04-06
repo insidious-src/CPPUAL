@@ -28,12 +28,12 @@
 
 namespace cppual { namespace Ui {
 
-struct DECL_EXPORT Win32Queue final : public IDisplayQueue
+struct DECL_EXPORT win32_queue final : public display_queue_interface
 {
-    Win32Queue () noexcept;
-    bool set_window_events (IPlatformWindow const&, mask_type);
+    win32_queue () noexcept;
+    bool set_window_events (platform_wnd_interface const&, mask_type);
     bool pop_front         (event_type&, bool);
-    int  poll              (IPlatformWindow const&, atomic_bool&);
+    int  poll              (platform_wnd_interface const&, atomic_bool&);
     void send              (event_type const&);
     void post              (event_type const&);
 };

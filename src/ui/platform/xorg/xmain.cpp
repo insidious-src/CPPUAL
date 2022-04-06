@@ -31,43 +31,43 @@
 
 namespace cppual { namespace ui { namespace platform {
 
-struct XFactory final : factory
+struct xcb_factory final : factory
 {
     shared_queue   createQueueInstance ();
     shared_display connectDisplay      (string_type const&);
     shared_window  createWindow        (rect const&, u32, shared_display);
 };
 
-shared_display XFactory::connectDisplay (string_type const& name)
+shared_display xcb_factory::connectDisplay (string_type const& name)
 {
-    return shared_display (new XDisplay (name));
+    return shared_display (new xcb_display (name));
 }
 
-shared_queue XFactory::createQueueInstance ()
+shared_queue xcb_factory::createQueueInstance ()
 {
-    return shared_queue (new XQueue);
+    return shared_queue (new xcb_queue);
 }
 
-shared_window XFactory::createWindow (rect const& gRect, u32 nScreen, shared_display pDisplay)
+shared_window xcb_factory::createWindow (rect const& gRect, u32 nScreen, shared_display pDisplay)
 {
-    return shared_window (new XWindow (gRect, nScreen, pDisplay));
+    return shared_window (new xcb_window (gRect, nScreen, pDisplay));
 }
 
 } } } // namespace Platform
 
 // =========================================================
 
-using cppual::process::plugin_manager ;
-using cppual::ui::platform::factory   ;
-using cppual::ui::platform::XFactory  ;
-using cppual::process::Plugin         ;
-using cppual::memory::memory_resource ;
-using cppual::memory::stacked_resource;
-using cppual::memory::allocate_shared ;
+using cppual::process::plugin_manager  ;
+using cppual::ui::platform::factory    ;
+using cppual::ui::platform::xcb_factory;
+using cppual::process::Plugin          ;
+using cppual::memory::memory_resource  ;
+using cppual::memory::stacked_resource ;
+using cppual::memory::allocate_shared  ;
 
 extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
 {
-    static char buffer[sizeof (XFactory) + memory_resource::max_align * 2];
+    static char buffer[sizeof (xcb_factory) + memory_resource::max_adjust];
     static stacked_resource static_resource (buffer, sizeof (buffer));
     static Plugin plugin;
 
@@ -77,7 +77,7 @@ extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
     plugin.verMajor = 1                ;
     plugin.verMinor = 0                ;
 
-    plugin.iface    = allocate_shared<XFactory, void> (&static_resource);
+    plugin.iface    = allocate_shared<xcb_factory, void> (&static_resource);
 
     return &plugin;
 }

@@ -40,13 +40,15 @@ public:
       _M_uScreen      (nScreen)
     { }
 
-    bool isMapped    () const noexcept { return false; }
-    void setOwner    (const_pointer) noexcept { }
+    bool is_mapped    () const noexcept { return false; }
+    void set_owner    (const_pointer) noexcept { }
     void move        (point2i) noexcept { }
-    void setGeometry (rect const&) noexcept { }
+    void set_geometry (rect const&) noexcept { }
     void raise () noexcept { }
     void lower () noexcept { }
     void map   () noexcept { }
+    void map_minimized () noexcept { }
+    void map_maximized () noexcept { }
     void unmap () noexcept { }
 
     weak_window owner    () const noexcept { return weak_window(); }
@@ -54,25 +56,29 @@ public:
     u32         screen   () const noexcept { return _M_uScreen    ; }
 
     window_flags flags () const { return window_flags (); }
-    void setFlags (window_flags) { }
+    void set_flags (window_flags) { }
 
     string_type title () const { return string_type (); }
-    void setTitle (string_type const&) { }
-    void setShaded (bool) { }
-    bool isShaded () { return false; }
-    void setModal (bool) { }
-    bool isModal () { return false; }
-    void setFullscreen (bool) { }
-    bool isFullscreen () { return false; }
-    void setMaximized (bool) { }
-    bool isMaximized () { return false; }
-    void setMinimized (bool) { }
-    bool isMinimized () { return false; }
-    void setVisibleInTaskbar (bool) { }
-    bool isVisibleInTaskbar () { return false; }
-    void setVisibleInPager (bool) { }
-    bool isVisibleInPager () { return false; }
+    void set_title (string_type const&) { }
+    void set_shaded (bool) { }
+    bool is_shaded () const { return false; }
+    void set_modal (bool) { }
+    bool is_modal () const { return false; }
+    void set_fullscreen (bool) { }
+    bool is_fullscreen () const { return false; }
+    void set_maximized (bool) { }
+    bool is_maximized () const { return false; }
+    void set_minimized (bool) { }
+    bool is_minimized () const { return false; }
+    void set_visible_in_taskbar (bool) { }
+    bool is_visible_in_taskbar () const { return false; }
+    void set_visible_in_pager (bool) { }
+    bool is_visible_in_pager () const { return false; }
     void flash (uint) { }
+    void keep_above (bool) { }
+    bool is_above () const { return false; }
+    void keep_below (bool) { }
+    bool is_below () const { return false; }
 
 private:
     rect _M_gRect;

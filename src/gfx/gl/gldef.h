@@ -23,7 +23,9 @@
 #define CPPUAL_GFX_GL_DEFINES_H_
 #ifdef __cplusplus
 
-#include <glad/glad.h>
+#include <cppual/decl.h>
+
+#include "glad.h"
 
 namespace cppual { namespace gfx { namespace gl {
 
@@ -70,7 +72,6 @@ enum
 
     // formats
     FragmentShaderARB          = GL_FRAGMENT_SHADER,
-    FragmentShaderATI          = GL_FRAGMENT_SHADER_ATI,
     VertexShaderARB            = GL_VERTEX_SHADER,
     GeometryShaderARB          = GL_GEOMETRY_SHADER,
     TessControlShaderARB       = GL_TESS_CONTROL_SHADER,

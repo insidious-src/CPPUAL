@@ -24,13 +24,13 @@
 #ifdef __cplusplus
 
 #include <cppual/flags.h>
-#include <cppual/gfx/color.h>
-#include <cppual/gfx/coord.h>
 #include <cppual/resource.h>
 #include <cppual/containers.h>
+#include <cppual/noncopyable.h>
 #include <cppual/string.h>
+#include <cppual/gfx/color.h>
+#include <cppual/gfx/coord.h>
 
-#include <vector>
 #include <memory>
 
 namespace cppual { namespace gfx {
@@ -48,6 +48,14 @@ struct pixel_flag final
         /// support off-screen buffer
         palette  = 1 << 2
     };
+};
+
+enum class surface_type : byte
+{
+    drawable     ,
+    double_buffer,
+    back_buffer  ,
+    pixmap
 };
 
 enum class device_backend : byte
@@ -75,9 +83,11 @@ struct  context_interface;
 struct  surface_interface;
 struct  drawable2d_interface;
 struct  drawable3d_interface;
-struct  draw_fractory;
+struct  painter_interface;
+struct  draw_factory;
 typedef bitset<pixel_flag::type>              pixel_flags      ;
-typedef std::shared_ptr<draw_fractory>        shared_factory   ;
+typedef std::shared_ptr<painter_interface>    shared_painter   ;
+typedef std::shared_ptr<draw_factory>         shared_factory   ;
 typedef std::shared_ptr<context_interface>    shared_context   ;
 typedef std::shared_ptr<surface_interface>    shared_surface   ;
 typedef std::shared_ptr<drawable2d_interface> shared_drawable2d;
@@ -212,31 +222,23 @@ class transform3d
 
 struct resource_interface
 {
-    typedef connection_type controller ;
-    typedef resource_handle handle_type;
-    typedef pixel_format    format_type;
+    typedef resource_connection connection_type;
+    typedef resource_handle     handle_type    ;
+    typedef pixel_format        format_type    ;
 
     virtual ~resource_interface () { }
 
-    virtual controller     connection () const = 0;
-    virtual format_type    format     () const = 0;
-    virtual handle_type    handle     () const = 0;
-    virtual device_backend device     () const = 0;
-    virtual void           flush      ()       = 0;
+    virtual connection_type     connection () const = 0;
+    virtual format_type         format     () const = 0;
+    virtual handle_type         handle     () const = 0;
+    virtual device_backend      device     () const = 0;
+    virtual void                flush      ()       = 0;
 };
 
 // =========================================================
 
 struct surface_interface : public resource_interface
 {
-    enum class surface_type : byte
-    {
-        drawable     ,
-        double_buffer,
-        back_buffer  ,
-        pixmap
-    };
-
     virtual point2u      size  () const = 0;
     virtual surface_type type  () const = 0;
     virtual void         scale (point2u size) = 0;
@@ -301,20 +303,31 @@ struct transformable3d_interface
 
 // ====================================================
 
-struct draw_fractory
+struct draw_factory : public non_copyable_virtual
 {
-    typedef string string_type;
+    typedef string                              string_type    ;
+    typedef resource_interface::connection_type connection_type;
+    typedef resource_interface::handle_type     handle_type    ;
 
-    virtual shared_surface create_surface() = 0;
-    virtual shared_context create_context() = 0;
-    virtual device_backend backend() = 0;
+    virtual shared_surface create_surface (connection_type conn,
+                                           pixel_format format,
+                                           point2u size,
+                                           handle_type wnd,
+                                           surface_type type = surface_type::double_buffer) = 0;
 
-    virtual shared_drawable2d create_image() = 0;
-    virtual shared_drawable2d create_line() = 0;
-    virtual shared_drawable2d create_elipse() = 0;
-    virtual shared_drawable2d create_polygon() = 0;
-    virtual shared_drawable2d create_rectangle() = 0;
-    virtual shared_drawable2d create_text() = 0;
+    virtual shared_context create_context (connection_type conn,
+                                           pixel_format format,
+                                           shared_context shared = nullptr) = 0;
+
+    virtual device_backend backend () = 0;
+    virtual shared_painter create_painter () = 0;
+
+    //virtual shared_drawable2d create_image () = 0;
+    //virtual shared_drawable2d create_line () = 0;
+    //virtual shared_drawable2d create_elipse () = 0;
+    //virtual shared_drawable2d create_polygon () = 0;
+    //virtual shared_drawable2d create_rectangle () = 0;
+    //virtual shared_drawable2d create_text () = 0;
 
     static shared_factory instance ();
     static bool           has_valid_instance () noexcept;
@@ -322,24 +335,7 @@ struct draw_fractory
 
 // ====================================================
 
-struct drawable_factory
-{
-    typedef string string_type;
-
-    static shared_drawable2d create2d (string_type const& name);
-    static shared_drawable3d create3d (string_type const& name);
-};
-
-// ====================================================
-
-struct context_factory
-{
-    typedef string string_type;
-
-    static shared_context create (string_type const& name);
-};
-
-} } // namespace Graphics
+} } // namespace gfx
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_DRAW_H_

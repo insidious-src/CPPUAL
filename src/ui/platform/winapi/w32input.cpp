@@ -34,8 +34,8 @@ typedef ::UINT message_value;
 
 struct Win32Event final : public message_type
 {
-    typedef IDisplayQueue::event_type::window_type window_type;
-    typedef IDisplayQueue::event_type              event_type;
+    typedef display_queue_interface::event_type::window_type window_type;
+    typedef display_queue_interface::event_type              event_type ;
 
     enum
     {
@@ -158,27 +158,27 @@ struct Win32Event final : public message_type
 
 // ====================================================
 
-Win32Queue::Win32Queue () noexcept
-: IDisplayQueue (::GetDC (handle_type ()))
+win32_queue::win32_queue () noexcept
+: display_queue_interface (::GetDC (handle_type ()))
 {
 }
 
-bool Win32Queue::set_window_events (IPlatformWindow const&, mask_type)
+bool win32_queue::set_window_events (platform_wnd_interface const&, mask_type)
 {
     return false;
 }
 
-void Win32Queue::send (event_type const& event)
+void win32_queue::send (event_type const& event)
 {
     ::SendMessageA (event.window ().get<handle_type> (), event.type (), 0, 0);
 }
 
-void Win32Queue::post (event_type const& event)
+void win32_queue::post (event_type const& event)
 {
     ::PostMessageA (event.window ().get<handle_type> (), event.type (), 0, 0);
 }
 
-bool Win32Queue::pop_front (event_type& event, bool wait)
+bool win32_queue::pop_front (event_type& event, bool wait)
 {
     static Win32Event internal_event;
 
@@ -191,7 +191,7 @@ bool Win32Queue::pop_front (event_type& event, bool wait)
     return true;
 }
 
-int Win32Queue::poll (IPlatformWindow const& window, atomic_bool& polling)
+int win32_queue::poll (platform_wnd_interface const& window, atomic_bool& polling)
 {
     Win32Event event;
 

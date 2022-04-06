@@ -51,7 +51,7 @@ class shared_object final : public non_copyable
 {
 public:
     typedef std::size_t size_type;
-    typedef u16         offset;
+    typedef u16         offset   ;
 
     shared_object  (string const&, Mode = Mode::CreateOrOpen, State = State::ReadWrite);
     ~shared_object () noexcept;
@@ -83,7 +83,7 @@ public:
     typedef std::size_t size_type;
     typedef u16         offset   ;
 
-    shared_memory (shared_object&, size_type, bool writable = true);
+    shared_memory (shared_object& obj, size_type size, bool writable = true);
     ~shared_memory () noexcept;
 
     inline bool writable () const noexcept

@@ -44,8 +44,9 @@ enum window_flag
     Help        = 1 <<  6,
     Transparent = 1 <<  7,
     TopMost     = 1 <<  8,
-    Taskbar     = 1 <<  9,
-    Pager       = 1 << 10,
+    BelowOthers = 1 <<  9,
+    Taskbar     = 1 << 10,
+    Pager       = 1 << 11,
     WindowHints = Resizable | Maximize | Taskbar | Pager,
     DialogHints = Resizable | Maximize | Taskbar,
     ToolHints   = ThinFrame
@@ -67,32 +68,42 @@ public:
     typedef std::size_t          size_type    ;
     typedef string               string_type  ;
 
-    virtual weak_window owner () const = 0;
+    virtual weak_window  owner () const = 0;
     virtual window_flags flags () const = 0;
-    virtual string_type title () const = 0;
-    virtual void        setTitle (string_type const&) = 0;
-    virtual void        setShaded (bool) = 0;
-    virtual bool        isShaded () = 0;
-    virtual void        setModal (bool) = 0;
-    virtual bool        isModal () = 0;
-    virtual void        setFullscreen (bool) = 0;
-    virtual bool        isFullscreen () = 0;
-    virtual void        setMaximized (bool) = 0;
-    virtual bool        isMaximized () = 0;
-    virtual void        setMinimized (bool) = 0;
-    virtual bool        isMinimized () = 0;
-    virtual void        setFlags (window_flags) = 0;
-    virtual void        flash (uint count = 1) = 0;
-    virtual rect        geometry () const = 0;
-    virtual u32         screen () const = 0;
-    virtual bool        isMapped () const = 0;
-    virtual void        setOwner (const_pointer) = 0;
-    virtual void        setGeometry (rect const&) = 0;
-    virtual void        raise () = 0;
-    virtual void        lower () = 0;
-    virtual void        move (point2i) = 0;
-    virtual void        map () = 0;
-    virtual void        unmap () = 0;
+    virtual string_type  title () const = 0;
+    virtual void         set_title (string_type const&) = 0;
+    virtual void         set_shaded (bool) = 0;
+    virtual bool         is_shaded () const = 0;
+    virtual void         set_modal (bool) = 0;
+    virtual bool         is_modal () const = 0;
+    virtual void         set_fullscreen (bool) = 0;
+    virtual bool         is_fullscreen () const = 0;
+    virtual void         set_maximized (bool) = 0;
+    virtual bool         is_maximized () const = 0;
+    virtual void         set_minimized (bool) = 0;
+    virtual bool         is_minimized () const = 0;
+    virtual void         set_flags (window_flags) = 0;
+    virtual void         set_visible_in_taskbar (bool) = 0;
+    virtual bool         is_visible_in_taskbar () const = 0;
+    virtual void         set_visible_in_pager (bool) = 0;
+    virtual bool         is_visible_in_pager () const = 0;
+    virtual void         flash (uint count = 1) = 0;
+    virtual rect         geometry () const = 0;
+    virtual u32          screen () const = 0;
+    virtual bool         is_mapped () const = 0;
+    virtual void         set_owner (const_pointer) = 0;
+    virtual void         set_geometry (rect const&) = 0;
+    virtual void         raise () = 0;
+    virtual void         lower () = 0;
+    virtual void         move (point2i) = 0;
+    virtual void         map () = 0;
+    virtual void         map_minimized () = 0;
+    virtual void         map_maximized () = 0;
+    virtual void         unmap () = 0;
+    virtual void         keep_above (bool) = 0;
+    virtual bool         is_above () const = 0;
+    virtual void         keep_below (bool) = 0;
+    virtual bool         is_below () const = 0;
 
     std::thread::id thread_id () const noexcept
     { return _M_thread; }

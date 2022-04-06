@@ -28,13 +28,13 @@
 
 namespace cppual { namespace Ui {
 
-struct DECL_EXPORT Win32Display final : public IDisplay
+struct DECL_EXPORT win32_display final : public display_interface
 {
-    Win32Display       () noexcept;
-    ~Win32Display      () noexcept;
-    string name        () const noexcept;
-    uint   screenCount () const noexcept;
-    void   flush       () noexcept;
+    win32_display       () noexcept;
+    ~win32_display      () noexcept;
+    string name         () const noexcept;
+    uint   screen_count () const noexcept;
+    void   flush        () noexcept;
 };
 
 } } // namespace Input

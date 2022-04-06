@@ -42,13 +42,15 @@ private:
                                                      "libcppual-ui-xorg"    ;
     #   elif defined OS_WINDOWS
             return "libcppual-ui-win";
+    #   elif defined OS_ANDROID
+            return "libcppual-ui-android";
     #   endif
     }
 
 public:
     inline initializer ()
     {
-        if (mgr.load_plugin(platform_name())) factory = mgr.plugin(platform_name()).interface();
+        if (mgr.load_plugin (platform_name ())) factory = mgr.plugin (platform_name ()).interface ();
     }
 
     inline operator shared_manager () const

@@ -30,57 +30,53 @@
 
 namespace cppual { namespace network {
 
-class Packet
+// =========================================================
+
+class packet
 {
 public:
     typedef std::size_t  size_type  ;
-    typedef vector<char> vector_type;
-    typedef bool (Packet::* safe_bool)(size_type);
+    typedef vector<char> stream_type;
 
-    virtual ~Packet() { }
-
-    bool operator == (Packet const&) const = delete;
-    bool operator != (Packet const&) const = delete;
+    typedef bool (packet::* safe_bool)(size_type);
 
     void append (cvoid* data, size_type size_in_bytes) noexcept;
 
-    Packet& operator >> (bool&)      noexcept;
-    Packet& operator >> (i8&)        noexcept;
-    Packet& operator >> (u8&)        noexcept;
-    Packet& operator >> (i16&)       noexcept;
-    Packet& operator >> (u16&)       noexcept;
-    Packet& operator >> (i32&)       noexcept;
-    Packet& operator >> (u32&)       noexcept;
-    Packet& operator >> (float&)     noexcept;
-    Packet& operator >> (double&)    noexcept;
-    Packet& operator >> (ldouble&)   noexcept;
-    Packet& operator >> (char*)      noexcept;
-    Packet& operator >> (string&)    noexcept;
-    Packet& operator >> (wchar*)     noexcept;
-    Packet& operator >> (wstring&)   noexcept;
-    Packet& operator >> (char16*)    noexcept;
-    Packet& operator >> (u16string&) noexcept;
-    Packet& operator >> (char32*)    noexcept;
-    Packet& operator >> (u32string&) noexcept;
+    packet& operator << (cbool)              noexcept;
+    packet& operator << (ci8)                noexcept;
+    packet& operator << (cu8)                noexcept;
+    packet& operator << (ci16)               noexcept;
+    packet& operator << (cu16)               noexcept;
+    packet& operator << (ci32)               noexcept;
+    packet& operator << (cu32)               noexcept;
+    packet& operator << (ci64&)              noexcept;
+    packet& operator << (cu64&)              noexcept;
+    packet& operator << (cfloat&)            noexcept;
+    packet& operator << (cdouble&)           noexcept;
+    packet& operator << (cldouble&)          noexcept;
+    packet& operator << (string const&)      noexcept;
+    packet& operator << (stream_type const&) noexcept;
+    packet& operator << (wstring const&)     noexcept;
+    packet& operator << (u16string const&)   noexcept;
+    packet& operator << (u32string const&)   noexcept;
 
-    Packet& operator << (bool)             noexcept;
-    Packet& operator << (i8)               noexcept;
-    Packet& operator << (u8)               noexcept;
-    Packet& operator << (i16)              noexcept;
-    Packet& operator << (u16)              noexcept;
-    Packet& operator << (i32)              noexcept;
-    Packet& operator << (u32)              noexcept;
-    Packet& operator << (float)            noexcept;
-    Packet& operator << (double)           noexcept;
-    Packet& operator << (ldouble)          noexcept;
-    Packet& operator << (cchar*)           noexcept;
-    Packet& operator << (string const&)    noexcept;
-    Packet& operator << (cwchar*)          noexcept;
-    Packet& operator << (wstring const&)   noexcept;
-    Packet& operator << (cchar16*)         noexcept;
-    Packet& operator << (u16string const&) noexcept;
-    Packet& operator << (cchar32*)         noexcept;
-    Packet& operator << (u32string const&) noexcept;
+    packet& operator >> (bool&)        noexcept;
+    packet& operator >> (i8&)          noexcept;
+    packet& operator >> (u8&)          noexcept;
+    packet& operator >> (i16&)         noexcept;
+    packet& operator >> (u16&)         noexcept;
+    packet& operator >> (i32&)         noexcept;
+    packet& operator >> (u32&)         noexcept;
+    packet& operator >> (i64&)         noexcept;
+    packet& operator >> (u64&)         noexcept;
+    packet& operator >> (float&)       noexcept;
+    packet& operator >> (double&)      noexcept;
+    packet& operator >> (ldouble&)     noexcept;
+    packet& operator >> (string&)      noexcept;
+    packet& operator >> (stream_type&) noexcept;
+    packet& operator >> (wstring&)     noexcept;
+    packet& operator >> (u16string&)   noexcept;
+    packet& operator >> (u32string&)   noexcept;
 
     constexpr size_type size () const noexcept
     { return _M_gData.size (); }
@@ -92,7 +88,7 @@ public:
     { return _M_uPos >= _M_gData.size (); }
 
     constexpr operator safe_bool () const noexcept
-    { return _M_bIsValid ? &Packet::can_exchange : nullptr; }
+    { return _M_bIsValid ? &packet::can_exchange : nullptr; }
 
     inline void flush () noexcept
     {
@@ -108,10 +104,12 @@ private:
     bool can_exchange (size_type size_in_bytes) noexcept;
 
 private:
-    vector_type _M_gData   ;
+    stream_type _M_gData   ;
     size_type   _M_uPos    ;
     bool        _M_bIsValid;
 };
+
+// =========================================================
 
 } } // namespace Network
 

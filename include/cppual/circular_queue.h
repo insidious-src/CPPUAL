@@ -256,14 +256,14 @@ public:
                            const_array_range ();
     }
 
-    array_range array_two () noexcept
+    constexpr array_range array_two () noexcept
     {
         return !is_linearized () && !empty () ?
                     array_range (_M_pArray, index_to_subscript (size () - 1) + 1) :
                     array_range ();
     }
 
-    const_array_range array_two () const noexcept
+    constexpr const_array_range array_two () const noexcept
     {
         return !is_linearized () && !empty () ?
                     const_array_range (_M_pArray, index_to_subscript (size () - 1) + 1) :
@@ -272,7 +272,7 @@ public:
 
     constexpr size_type size () const noexcept
     {
-        return !empty () ?
+        return !empty () && capacity () ?
                     static_cast<size_type> ((((_M_endPos - _M_beginPos) + _capacity()) % _capacity()) + 1) :
                     size_type ();
     }

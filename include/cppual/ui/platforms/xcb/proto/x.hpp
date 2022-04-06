@@ -3207,8 +3207,8 @@ CookieFunction>
     string
             name(void)
     {
-        return string(xcb_get_atom_name_name(this->get().get()),
-                           ::xcb_get_atom_name_name_length(this->get().get()));
+        return string(::xcb_get_atom_name_name(this->get().get()),
+                      static_cast<string::size_type> (::xcb_get_atom_name_name_length(this->get().get())));
     }
 
 }; // class get_atom_name

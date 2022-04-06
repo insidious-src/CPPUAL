@@ -28,7 +28,7 @@
 #include <cppual/memory/allocator.h>
 
 #include <vector>
-#include <memory>
+#include <deque>
 
 namespace cppual {
 
@@ -162,17 +162,6 @@ public:
     connect (signal<TRetType_(TArgs_...), Allocator_>&,
              Call&&,
              bool,
-             LambdaNonCapturePtr<Call>);
-
-    template <typename Call,
-              typename TRetType_,
-              typename... TArgs_,
-              typename Allocator_
-              >
-    friend typename signal<TRetType_(TArgs_...), Allocator_>::slot_type
-    connect (signal<TRetType_(TArgs_...), Allocator_>&,
-             Call&&,
-             bool,
              LambdaCapturePtr<Call>);
 
     template <typename TClass,
@@ -184,6 +173,15 @@ public:
     connect (signal<TRetType_(TArgs_...), Allocator_>&,
              ClassType<TClass>&,
              TRetType_ (TClass::*)(TArgs_...),
+             bool);
+
+    template <typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (signal<TRetType_(TArgs_...), Allocator_>&,
+             TRetType_ (*)(TArgs_...),
              bool);
 
     template <typename TClass,
@@ -212,6 +210,14 @@ public:
     disconnect (signal<TRetType_(TArgs_...), Allocator_>&,
                 ClassType<TClass>&,
                 TRetType_ (TClass::*)(TArgs_...));
+
+    template <typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend void
+    disconnect (signal<TRetType_(TArgs_...), Allocator_>&,
+                TRetType_ (*)(TArgs_...));
 
 private:
     container_type _M_slots;
@@ -355,6 +361,14 @@ public:
                 ClassType<TClass>&,
                 TRetType_ (TClass::*)(TArgs_...));
 
+    template <typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend void
+    disconnect (signal<TRetType_(TArgs_...), Allocator_>&,
+                TRetType_ (*)(TArgs_...));
+
 private:
     container_type _M_slots;
 };
@@ -370,14 +384,20 @@ connect (signal<TRetType(TArgs...), Allocator>& gSignal,
          typename signal<TRetType(TArgs...), Allocator>::const_reference val,
          bool bTop = false)
 {
+    auto it = std::find (gSignal.begin (),
+                         gSignal.end (),
+                         val);
+
+    if (it != gSignal.end ()) return it;
+
     if (bTop)
     {
         gSignal._M_slots.push_front (val);
-        return gSignal._M_slots.cbegin ();
+        return gSignal._M_slots.begin ();
     }
 
     gSignal._M_slots.push_back (val);
-    return --gSignal._M_slots.cend ();
+    return --gSignal._M_slots.end ();
 }
 
 template <typename Call,
@@ -392,14 +412,21 @@ connect (signal<TRetType(TArgs...), Allocator>& gSignal,
          bool bTop = false,
          LambdaNonCapturePtr<Call> = nullptr)
 {
+    auto it = std::find (gSignal.begin (),
+                         gSignal.end   (),
+                         typename signal<TRetType(TArgs...), Allocator>::value_type
+                         (std::forward<Call> (gFunc)));
+
+    if (it != gSignal.end ()) return it;
+
     if (bTop)
     {
         gSignal._M_slots.emplace_front (std::forward<Call> (gFunc));
-        return gSignal._M_slots.cbegin ();
+        return gSignal._M_slots.begin ();
     }
 
     gSignal._M_slots.emplace_back (std::forward<Call> (gFunc));
-    return --gSignal._M_slots.cend ();
+    return --gSignal._M_slots.end ();
 }
 
 template <typename Call,
@@ -414,14 +441,21 @@ connect (signal<TRetType(TArgs...), Allocator>& gSignal,
          bool bTop = false,
          LambdaCapturePtr<Call> = nullptr)
 {
+    auto it = std::find (gSignal.begin (),
+                               gSignal.end   (),
+                               typename signal<TRetType(TArgs...), Allocator>::value_type
+                               (std::forward<Call> (gFunc)));
+
+    if (it != gSignal.end ()) return it;
+
     if (bTop)
     {
         gSignal._M_slots.emplace_front (std::forward<Call> (gFunc));
-        return gSignal._M_slots.cbegin ();
+        return gSignal._M_slots.begin ();
     }
 
     gSignal._M_slots.emplace_back (std::forward<Call> (gFunc));
-    return --gSignal._M_slots.cend ();
+    return --gSignal._M_slots.end ();
 }
 
 template <typename TClass  ,
@@ -436,14 +470,20 @@ connect (signal<TRetType(TArgs...), Allocator>& gSignal,
          TRetType (TClass::* fn)(TArgs...),
          bool bTop = false)
 {
+    auto it = std::find (gSignal.begin (),
+                         gSignal.end   (),
+                         typename signal<TRetType(TArgs...), Allocator>::value_type (&pObj, fn));
+
+    if (it != gSignal.end ()) return it;
+
     if (bTop)
     {
         gSignal._M_slots.emplace_front (&pObj, fn);
-        return --gSignal._M_slots.cbegin ();
+        return --gSignal._M_slots.begin ();
     }
 
     gSignal._M_slots.emplace_back (&pObj, fn);
-    return --gSignal._M_slots.cend ();
+    return --gSignal._M_slots.end ();
 }
 
 template <typename TRetType,
@@ -456,14 +496,20 @@ connect (signal<TRetType(TArgs...), Allocator>& gSignal,
          TRetType (* fn)(TArgs...),
          bool bTop = false)
 {
+    auto it = std::find (gSignal.begin (),
+                         gSignal.end (),
+                         typename signal<TRetType(TArgs...), Allocator>::value_type (fn));
+
+    if (it != gSignal.end ()) return it;
+
     if (bTop)
     {
         gSignal._M_slots.emplace_front (fn);
-        return gSignal._M_slots.cbegin ();
+        return gSignal._M_slots.begin ();
     }
 
     gSignal._M_slots.emplace_back (fn);
-    return --gSignal._M_slots.cend ();
+    return --gSignal._M_slots.end ();
 }
 
 // =========================================================
@@ -477,7 +523,7 @@ void
 disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
             typename signal<TRetType(TArgs...), Allocator>::slot_type& it)
 {
-    if (it != gSignal.cend ()) gSignal._M_slots.erase (it);
+    if (it != gSignal.end ()) gSignal._M_slots.erase (it);
 }
 
 template <typename TRetType,
@@ -489,9 +535,9 @@ void
 disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
             typename signal<TRetType(TArgs...), Allocator>::const_reference fn)
 {
-    auto it = std::find(gSignal.cbegin (), gSignal.cend (), fn);
+    auto it = std::find (gSignal.begin (), gSignal.end (), fn);
 
-    if (it != gSignal.cend ()) gSignal._M_slots.erase (it);
+    if (it != gSignal.end ()) gSignal._M_slots.erase (it);
 }
 
 template <typename TClass  ,
@@ -507,15 +553,31 @@ disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
 {
     using value_type = typename signal<TRetType(TArgs...), Allocator>::value_type;
 
-    auto it = std::find (gSignal.cbegin (), gSignal.cend (), value_type (&pObj, fn));
+    auto it = std::find (gSignal.begin (), gSignal.end (), value_type (&pObj, fn));
 
-    if (it != gSignal.cend ()) gSignal._M_slots.erase (it);
+    if (it != gSignal.end ()) gSignal._M_slots.erase (it);
+}
+
+template <typename TRetType,
+          typename... TArgs,
+          typename Allocator
+          >
+inline
+void
+disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
+            TRetType (* fn)(TArgs...))
+{
+    using value_type = typename signal<TRetType(TArgs...), Allocator>::value_type;
+
+    auto it = std::find (gSignal.begin (), gSignal.end (), value_type (fn));
+
+    if (it != gSignal.end ()) gSignal._M_slots.erase (it);
 }
 
 // =========================================================
 
 template <typename T, typename... TArgs, typename Allocator>
-class scoped_connection <T(TArgs...), Allocator>
+class scoped_connection <T(TArgs...), Allocator> : public non_copyable
 {
 public:
     typedef signal<T(TArgs...), Allocator>   signal_type;
@@ -525,6 +587,7 @@ public:
 
     scoped_connection () = delete;
     scoped_connection (scoped_connection&&) noexcept = default;
+    scoped_connection& operator = (scoped_connection&&) noexcept = default;
 
     //! move constructor
     inline scoped_connection (reference gSignal, value_type&& gFunc, bool bTop = false)
@@ -555,13 +618,15 @@ public:
     }
 
     //! capture lambda constructor
-    template <typename Call>
+    template <typename Call,
+              typename CallableAllocator>
     inline scoped_connection (reference gSignal,
                               Call&& fn,
                               bool bTop = false,
+                              CallableAllocator const& call_ator = CallableAllocator (),
                               LambdaCapturePtr<Call> = nullptr)
     : _M_signal (&gSignal),
-      _M_fn (std::forward<Call> (fn))
+      _M_fn (std::forward<Call> (fn), call_ator)
     {
         connect (gSignal, _M_fn, bTop);
     }
@@ -607,7 +672,8 @@ make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                typename signal<T(TArgs...), Allocator>::value_type&& fn,
                                bool top = false)
 {
-    return new scoped_connection<T(TArgs...), Allocator>(_signal, fn, top);
+    typedef std::shared_ptr< scoped_connection<T(TArgs...), Allocator> > pointer;
+    return pointer (new scoped_connection<T(TArgs...), Allocator>(_signal, fn, top));
 }
 
 template <typename Call,
@@ -621,13 +687,15 @@ make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                bool top = false,
                                LambdaNonCapturePtr<Call> = nullptr)
 {
-    return new scoped_connection<T(TArgs...), Allocator>(_signal, std::forward<Call>(fn), top);
+    typedef std::shared_ptr< scoped_connection<T(TArgs...), Allocator> > pointer;
+    return pointer (new scoped_connection<T(TArgs...), Allocator>(_signal, std::forward<Call>(fn), top));
 }
 
 template <typename Call,
           typename T,
           typename... TArgs,
-          typename Allocator
+          typename Allocator,
+          typename CallableAllocator
           >
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
@@ -635,7 +703,8 @@ make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                bool top = false,
                                LambdaCapturePtr<Call> = nullptr)
 {
-    return new scoped_connection<T(TArgs...), Allocator>(_signal, std::forward<Call>(fn), top);
+    typedef std::shared_ptr<scoped_connection<T(TArgs...), Allocator> > pointer;
+    return pointer (new scoped_connection<T(TArgs...), Allocator>(_signal, std::forward<Call>(fn), top));
 }
 
 template <typename T,
@@ -647,7 +716,8 @@ make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                typename signal<T(TArgs...), Allocator>::const_reference fn,
                                bool top = false)
 {
-    return new scoped_connection<T(TArgs...), Allocator>(_signal, fn, top);
+    typedef std::shared_ptr<scoped_connection<T(TArgs...), Allocator> > pointer;
+    return pointer (new scoped_connection<T(TArgs...), Allocator>(_signal, fn, top));
 }
 
 template <typename TClass,
@@ -661,7 +731,8 @@ make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                T (TClass::* fn)(TArgs...),
                                bool top = false)
 {
-    return new scoped_connection<T(TArgs...), Allocator>(_signal, pObj, fn, top);
+    typedef std::shared_ptr<scoped_connection<T(TArgs...), Allocator> > pointer;
+    return pointer (new scoped_connection<T(TArgs...), Allocator>(_signal, pObj, fn, top));
 }
 
 template <typename T,
@@ -673,7 +744,8 @@ make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                T (* fn)(TArgs...),
                                bool top = false)
 {
-    return new scoped_connection<T(TArgs...), Allocator>(_signal, fn, top);
+    typedef std::shared_ptr<scoped_connection<T(TArgs...), Allocator> > pointer;
+    return pointer (new scoped_connection<T(TArgs...), Allocator>(_signal, fn, top));
 }
 
 // =========================================================
@@ -715,18 +787,20 @@ template <typename Call,
           typename T,
           typename... TArgs,
           typename Allocator,
-          typename SharedAllocator
+          typename SharedAllocator,
+          typename CallableAllocator
           >
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 allocate_shared_scoped_connection (SharedAllocator alloc,
                                    signal<T(TArgs...), Allocator>& _signal,
                                    Call&& fn,
                                    bool top = false,
+                                   CallableAllocator const& call_ator = CallableAllocator (),
                                    LambdaCapturePtr<Call> = nullptr)
 {
     return std::allocate_shared (alloc,
                                  std::move(scoped_connection<T(TArgs...), Allocator>
-                                           (_signal, std::forward<Call>(fn), top)));
+                                           (_signal, std::forward<Call>(fn), top, call_ator)));
 }
 
 template <typename T,
@@ -777,7 +851,9 @@ allocate_shared_scoped_connection (SharedAllocator alloc,
                                  std::move(scoped_connection<T(TArgs...), Allocator>(_signal, fn, top)));
 }
 
-} // cppual
+// =========================================================
+
+} // namespace cppual
 
 #endif // __cplusplus
 #endif // CPPUAL_SIGNAL_H_

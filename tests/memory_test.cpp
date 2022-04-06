@@ -5,7 +5,7 @@
 
 void test1 ()
 {
-    typedef int                                  value_type  ;
+    typedef long double                          value_type  ;
     typedef cppual::circular_queue<value_type  > value_vector;
     typedef cppual::circular_queue<value_vector> vectors     ;
 
@@ -55,7 +55,7 @@ void test1 ()
 
 void test2 ()
 {
-    typedef int                                  value_type  ;
+    typedef long double                          value_type  ;
     typedef cppual::circular_queue<value_type  > value_vector;
     typedef cppual::circular_queue<value_vector> vectors     ;
 
@@ -108,6 +108,44 @@ void test2 ()
 
 void test3 ()
 {
+    typedef int                                value_type  ;
+    typedef cppual::circular_queue<value_type> value_vector;
+
+    constexpr const value_vector::size_type max_vectors = 1000U;
+
+    cppual::memory::set_default_resource (*cppual::memory::new_delete_resource ());
+
+    cppual::memory::heap_resource res (max_vectors * max_vectors * sizeof (value_type));
+
+    cppual::memory::set_default_resource (res);
+
+    std::cout << "heap_resource max_size: " << cppual::memory::get_default_resource ()->max_size ()
+              << " bytes" << std::endl;
+
+    value_vector vec;
+
+    std::cout << "vec max_size: " << vec.get_allocator ().max_size ()
+              << " elements remaining" << std::endl;
+
+    for (auto i = 0U; i < max_vectors; ++i)
+    {
+        vec.emplace_back (static_cast<value_type>(i));
+
+        std::cout << "vec[" << i << "] value: " << vec[i] << std::endl;
+
+        std::cout << "vec size: " << vec.size ()
+                  << " elements\nvec max_size: " << vec.get_allocator ().max_size ()
+                  << " elements remaining" << std::endl;
+    }
+
+    for (auto i = 0U; i < max_vectors; ++i)
+    {
+        vec.pop_back ();
+    }
+}
+
+void test4 ()
+{
     auto size_val1 = static_cast<std::size_t>(-1);
     auto size_val2 = std::size_t () - 1;
 
@@ -140,6 +178,10 @@ int main (int /*argc*/, char** /*argv*/)
     std::cout << "\n============ Test 3 ============\n" << std::endl;
 
     test3 ();
+
+    std::cout << "\n============ Test 4 ============\n" << std::endl;
+
+    test4 ();
 
     return 0;
 }

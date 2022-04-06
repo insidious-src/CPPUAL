@@ -28,33 +28,33 @@
 
 namespace cppual { namespace Ui {
 
-class DECL_EXPORT Win32Window final : public IPlatformWindow
+class DECL_EXPORT win32_window final : public platform_wnd_interface
 {
 public:
-    Win32Window  (Rect const& rect, u32 screen, IDisplay* display);
-    ~Win32Window ();
+    win32_window  (Rect const& rect, u32 screen, IDisplay* display);
+    ~win32_window ();
 
     string title () const;
-    void   setTitle (string const&) noexcept;
-    void   setShaded (bool) noexcept;
-    bool   isShaded () noexcept;
-    void   setModal (bool) noexcept;
-    bool   isModal () noexcept;
-    void   setFullscreen (bool) noexcept;
-    bool   isFullscreen () noexcept;
-    void   setMaximized (bool) noexcept;
-    bool   isMaximized () noexcept;
-    void   setMinimized (bool) noexcept;
-    bool   isMinimized () noexcept;
-    void   setVisibleInTaskbar (bool) noexcept;
-    bool   isVisibleInTaskbar () noexcept;
-    void   setVisibleInPager (bool) noexcept;
-    bool   isVisibleInPager () noexcept;
+    void   set_title (string const&) noexcept;
+    void   set_shaded (bool) noexcept;
+    bool   is_shaded () noexcept;
+    void   set_modal (bool) noexcept;
+    bool   is_modal () noexcept;
+    void   set_fullscreen (bool) noexcept;
+    bool   is_fullscreen () noexcept;
+    void   set_maximized (bool) noexcept;
+    bool   is_maximized () noexcept;
+    void   set_minimized (bool) noexcept;
+    bool   is_minimized () noexcept;
+    void   set_visible_in_taskbar (bool) noexcept;
+    bool   is_visible_in_taskbar () noexcept;
+    void   set_visible_in_pager (bool) noexcept;
+    bool   is_visible_in_pager () noexcept;
     void   flash (uint) noexcept;
     Rect   geometry () const;
-    bool   isMapped () const;
-    void   setOwner (const_pointer);
-    void   setGeometry (Rect const&);
+    bool   is_mapped () const;
+    void   set_owner (const_pointer);
+    void   set_geometry (Rect const&);
     void   raise ();
     void   lower ();
     void   move (point2i);
@@ -62,7 +62,7 @@ public:
     void   unmap ();
 
     WindowFlags flags () const noexcept { return _M_eFlags; }
-    void        setFlags (WindowFlags) noexcept;
+    void        set_flags (WindowFlags) noexcept;
 
     weak_window owner  () const noexcept { return shared_window (); }
     u32         screen () const noexcept { return 0; }

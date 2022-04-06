@@ -48,24 +48,24 @@ bool display_interface::has_valid_instance () noexcept
     return backend () != nullptr;
 }
 
-bool display_interface::primary (string_type const& pDevName)
+bool display_interface::primary (string_type const& dsp_name)
 {
     static bool bConnected = false;
 
     if (platform::factory::has_valid_instance ())
-        backend () = platform::factory::instance ()->connectDisplay (pDevName);
+        backend () = platform::factory::instance ()->connectDisplay (dsp_name);
 
     if (!bConnected and backend () != nullptr) return (bConnected = true);
     return backend () != nullptr;
 }
 
-display_interface::pointer display_interface::connect (string_type const& pDevName)
+display_interface::pointer display_interface::connect (string_type const& dsp_name)
 {
-    if (backend () != nullptr and backend ()->name () == pDevName)
+    if (backend () != nullptr and backend ()->name () == dsp_name)
         return backend ();
 
     return platform::factory::has_valid_instance () ?
-                platform::factory::instance ()->connectDisplay (pDevName) :
+                platform::factory::instance ()->connectDisplay (dsp_name) :
                 shared_display ();
 }
 

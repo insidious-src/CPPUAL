@@ -33,43 +33,52 @@ namespace cppual { namespace ui {
 class window : public view
 {
 public:
-    typedef gfx::image_interface image_type ;
-    typedef string               string_type;
+    typedef gfx::image_interface image_type;
+
+    window (view*                 parent,
+            rect        const&    rect,
+            string_type const&    title,
+            image_type*           icon   = nullptr,
+            u32                   screen = 0,
+            allocator_type const& ator   = allocator_type ());
 
     window ();
     window (window const&);
     window& operator = (window const&);
     ~window ();
 
+    void show_minimized ();
+    void show_maximized ();
     bool set_icon (image_type*);
     void set_title (string_type const&);
     void set_fullscreen (bool);
-    void flash (ushort);
+    void flash (uint count);
     void show_in_taskbar (bool);
+    bool is_visible_in_taskbar () const;
+    void show_in_pager (bool);
+    bool is_visible_in_pager () const;
+    void set_shaded (bool);
+    bool is_shaded () const;
+    void keep_above (bool);
+    bool is_above () const;
+    void keep_below (bool);
+    bool is_below () const;
     void restore ();
     void minimize ();
     void maximize ();
     void close ();
 
-    window (view*              parent,
-            rect   const&      rect,
-            string_type const& title,
-            image_type*        icon   = nullptr,
-            u32                screen = 0);
-
     string_type title () const;
 
-    inline frame_view* frame () noexcept { return _M_gFrame; }
-    inline image_type* icon  () const noexcept { return _M_pIcon; }
+    inline frame_view* frame () const noexcept { return _M_gFrame; }
+    inline image_type* icon  () const noexcept { return _M_pIcon ; }
 
     inline bool is_fullscreen () const noexcept
-    { return renderable_unsafe()->isFullscreen(); }
+    { return renderable_unsafe()->is_fullscreen (); }
 
-    inline bool is_minimized () const noexcept
-    { return _M_gFrame->attached () == this and _M_gFrame->is_hidden (); }
+    bool is_minimized () const noexcept;
 
-    inline bool is_maximized () const noexcept
-    { return _M_gFrame->attached () == this and _M_gFrame->is_stretched (); }
+    bool is_maximized () const noexcept;
 
 protected:
     virtual bool on_close    () { return true; }

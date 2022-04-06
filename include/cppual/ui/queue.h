@@ -35,6 +35,8 @@
 
 namespace cppual { namespace ui {
 
+// =========================================================
+
 class   display_queue_interface;
 class   view;
 typedef std::shared_ptr<display_queue_interface> shared_queue;
@@ -45,12 +47,10 @@ class display_queue_interface : public non_copyable_virtual
 {
 public:
     typedef input::event             event_type     ;
-    typedef connection_type          connection_type;
-    typedef platform_wnd_interface          window_type    ;
+    typedef shared_display           connection_type;
+    typedef platform_wnd_interface   window_type    ;
     typedef std::atomic_bool         bool_type      ;
     typedef bitset<event_type::bits> mask_type      ;
-
-    ~display_queue_interface();
 
     virtual bool set_window_events (window_type const&, mask_type)         = 0;
     virtual bool pop_front         (bool wait)                             = 0;
@@ -61,11 +61,11 @@ public:
     static shared_queue primary            () noexcept;
     static bool         has_valid_instance () noexcept;
 
-    connection_type display () const noexcept { return _M_display; }
-    bool            valid   () const noexcept { return _M_display; }
+    connection_type display () const noexcept { return _M_display       ; }
+    bool            valid   () const noexcept { return _M_display.get (); }
 
 protected:
-    constexpr display_queue_interface (connection_type display) noexcept
+    inline display_queue_interface (connection_type const& display) noexcept
     : _M_display (display)
     { }
 
@@ -79,29 +79,32 @@ class event_queue : public non_copyable
 {
 public:
     typedef display_queue_interface::event_type event_type  ;
-    typedef resource_handle                     window_type ;
+    typedef resource_handle                     handle_type ;
     typedef std::atomic_bool                    bool_type   ;
     typedef view                                control_type;
 
     struct event_signals final : non_copyable
     {
-        signal<void(window_type, event_type::key_data)>      keyPress;
-        signal<void(window_type, event_type::key_data)>      keyRelease;
-        signal<void(window_type, event_type::mbutton_data)>  mousePress;
-        signal<void(window_type, event_type::mbutton_data)>  mouseRelease;
-        signal<void(window_type, point2u)>                   mouseMove;
-        signal<void(window_type, event_type::mwheel_data)>   scroll;
-        signal<void(window_type, event_type::touch_data)>    touchPress;
-        signal<void(window_type, event_type::touch_data)>    touchRelease;
-        signal<void(window_type, event_type::touch_data)>    touchMove;
-        signal<void(window_type, i32)>                       sysMessage;
-        signal<void(window_type, event_type::paint_data)>    winPaint;
-        signal<void(window_type, point2u)>                   winSize;
-        signal<void(window_type, bool)>                      winFocus;
-        signal<void(window_type, bool)>                      winStep;
-        signal<void(window_type, event_type::property_data)> winProperty;
-        signal<void(window_type, bool)>                      winVisible;
-        signal<void(window_type)>                            winDestroy;
+        signal<void(handle_type, event_type::key_data)>      keyPress;
+        signal<void(handle_type, event_type::key_data)>      keyRelease;
+        signal<void(handle_type, event_type::mbutton_data)>  mousePress;
+        signal<void(handle_type, event_type::mbutton_data)>  mouseRelease;
+        signal<void(handle_type, point2u)>                   mouseMove;
+        signal<void(handle_type, event_type::mwheel_data)>   scroll;
+        signal<void(handle_type, event_type::touch_data)>    touchPress;
+        signal<void(handle_type, event_type::touch_data)>    touchRelease;
+        signal<void(handle_type, event_type::touch_data)>    touchMove;
+        signal<void(handle_type, i32)>                       sysMessage;
+        signal<void(handle_type, event_type::paint_data)>    winPaint;
+        signal<void(handle_type, point2u)>                   winSize;
+        signal<void(handle_type, bool)>                      winFocus;
+        signal<void(handle_type, bool)>                      winStep;
+        signal<void(handle_type, event_type::property_data)> winProperty;
+        signal<void(handle_type, bool)>                      winVisible;
+        signal<void(handle_type)>                            winHelp;
+        signal<void(handle_type)>                            winMinimize;
+        signal<void(handle_type)>                            winMaximize;
+        signal<void(handle_type)>                            winClose;
     };
 
     inline static event_signals& events ()

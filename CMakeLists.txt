@@ -42,7 +42,7 @@ elseif(WIN64)
     set(CMAKE_TOOLCHAIN_FILE "/usr/share/mingw/toolchain-${TOOLCHAIN_PREFIX}.cmake")
 endif()
 
-project("C++ UAL" VERSION 1.0.5 LANGUAGES CXX)
+project("C++ UAL" VERSION 1.0.5)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -63,13 +63,14 @@ include(CTest)
 find_package(RT            REQUIRED) ## run-time library
 find_package(DL            REQUIRED) ## dynamic loading of libraries
 find_package(WM            REQUIRED) ## platform window manager
-find_package(XCB COMPONENTS XCB ICCCM EWMH) ## platform window manager (Xcb)
+find_package(XCB COMPONENTS XCB ICCCM EWMH GLX) ## platform window manager (Xcb)
 find_package(X11                   ) ## platform window manager (X11-xcb)
 find_package(Sockets       REQUIRED) ## network interface & interprocess
 find_package(PulseAudio            )
 find_package(OpenAL                ) ## will be dropped at some point
 find_package(SndFile               ) ## will be dropped at some point
 find_package(Freetype              ) ## will be dropped at some point
+find_package(GLEW                  )
 find_package(OpenGL        REQUIRED) ## will be dropped at some point
 find_package(EGL                   ) ## will be dropped at some point
 find_package(OpenCL                ) ## backup compute api
@@ -330,7 +331,7 @@ endif()
 #   "include/cppual/database"
 #	)
 
-# Document Object Model (xml, cmdargs, web)
+# Document Object Model (xml, cmdargs, ini, json)
 add_library(cppual-dom SHARED
     "include/cppual/dom/cmdline.h"
     "include/cppual/dom/csv.h"
@@ -420,7 +421,7 @@ add_library(cppual-network SHARED
     "src/network/transport/os/bsd.h"
 
     "include/cppual/network_protocol"
-    "include/cppual/network_tcp_protocol"
+    "include/cppual/network_basic_protocol"
     "include/cppual/network_http"
     "include/cppual/network_ftp"
     "include/cppual/network_p2p"
@@ -580,8 +581,6 @@ add_library(cppual-video SHARED
     )
 target_compile_definitions(cppual-video PRIVATE -DAPI_EXPORT)
 
-if(FREETYPE_FOUND)
-
 # graphics drawing library
 add_library(cppual-gfx SHARED
     "include/cppual/gfx/coord.h"
@@ -591,12 +590,8 @@ add_library(cppual-gfx SHARED
     "include/cppual/gfx/matrix.h"
     "src/gfx/draw.cpp"
     "include/cppual/gfx/draw.h"
-    "src/gfx/font.cpp"
-    "include/cppual/gfx/font.h"
-
     "src/gfx/formats/bmp.cpp"
     "include/cppual/gfx/formats/bmp.h"
-
     "include/cppual/gfx/drawable/shape.h"
     "src/gfx/drawable/image.cpp"
     "include/cppual/gfx/drawable/image.h"
@@ -615,14 +610,23 @@ add_library(cppual-gfx SHARED
     )
 target_compile_definitions(cppual-gfx PRIVATE -DAPI_EXPORT)
 
+if(TARGET cppual-gfx AND FREETYPE_FOUND)
+
+add_library (cppual-gfx-font SHARED
+    "src/gfx/font.cpp"
+    "include/cppual/gfx/font.h"
+    )
+target_compile_definitions(cppual-gfx-font PRIVATE -DAPI_EXPORT)
+
 endif()
 
-if(OPENGL_FOUND)
+if(TARGET cppual-gfx AND OPENGL_FOUND)
 
 # OpenGL/ES library
 add_library(cppual-gl SHARED
-    "include/glad/glad.h"
+    "src/gfx/gl/glad.h"
     "src/gfx/gl/glad.c"
+    "src/gfx/gl/khrplatform.h"
     "src/gfx/gl/gldef.h"
     "src/gfx/gl/glbase.cpp"
     "include/cppual/gfx/gl/glbase.h"
@@ -662,7 +666,7 @@ if(TARGET cppual-gfx)
                 )
         endif()
 
-        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND X11_FOUND)
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND XCB_GLX_FOUND)
             add_library(cppual-gfx-glx MODULE
                 "src/gfx/backend/glx/glx_main.cpp"
                 )
@@ -685,8 +689,6 @@ if(TARGET cppual-gfx)
         "src/ui/queue.cpp"
         "include/cppual/ui/queue.h"
         "include/cppual/ui/wm.h"
-        "src/ui/window.cpp"
-        "include/cppual/ui/window.h"
         "src/ui/vsurface.cpp"
         "include/cppual/ui/vsurface.h"
         "src/ui/animation.cpp"
@@ -705,10 +707,6 @@ if(TARGET cppual-gfx)
         "include/cppual/ui/cmd.h"
         #"src/ui/groups.cpp"
         "include/cppual/ui/groups.h"
-        "src/ui/frame.cpp"
-        "include/cppual/ui/frame.h"
-        "src/ui/dialog.cpp"
-        "include/cppual/ui/dialog.h"
 
         "include/cppual/ui_queue"
         "include/cppual/ui_view"
@@ -726,6 +724,12 @@ if (TARGET cppual-ui)
 
 # graphical user interface - windows and controls
 add_library(cppual-ui-views SHARED
+    "src/ui/window.cpp"
+    "include/cppual/ui/window.h"
+    "src/ui/frame.cpp"
+    "include/cppual/ui/frame.h"
+    "src/ui/dialog.cpp"
+    "include/cppual/ui/dialog.h"
     "src/ui/controls/label.cpp"
     "include/cppual/ui/controls/label.h"
     "src/ui/controls/button.cpp"
@@ -749,6 +753,7 @@ add_library(cppual-ui-views SHARED
     "include/cppual/ui/controls/slider.h"
     "include/cppual/ui/controls/abslider.h"
 
+    "include/cppual/ui_window"
     "include/cppual/ui_controls"
     )
 target_compile_definitions(cppual-ui-views PRIVATE -DAPI_EXPORT)
@@ -868,29 +873,31 @@ endif()
 
 
 ### link targets
-if(FREETYPE_FOUND)
-    target_link_libraries(cppual-gfx cppual-memory cppual-compute Freetype::Library)
-endif()
-
 if(TARGET cppual-gfx)
+    target_link_libraries(cppual-gfx cppual-host cppual-memory)
+
+    if(FREETYPE_FOUND)
+        target_link_libraries(cppual-gfx-font cppual-gfx cppual-memory Freetype::Library)
+    endif()
+
     if(OPENGL_FOUND)
-        target_link_libraries(cppual-gl cppual-gfx OpenGL::Library)
+        target_link_libraries(cppual-gl cppual-gfx cppual-memory OpenGL::Library)
     endif()
 
     if(TARGET cppual-gl AND EGL_FOUND)
         target_link_libraries(cppual-gfx-egl cppual-gfx cppual-gl OpenGL::Library EGL::Library)
     endif()
 
-    if(TARGET cppual-gl AND X11_FOUND)
-        target_link_libraries(cppual-gfx-glx cppual-gfx cppual-gl OpenGL::Library X11::Library)
+    if(TARGET cppual-gl AND XCB_GLX_FOUND)
+        target_link_libraries(cppual-gfx-glx cppual-gfx cppual-gl OpenGL::Library XCB_GLX::Library)
     endif()
 
     if(VULKAN_FOUND)
         target_link_libraries(cppual-gfx-vulkan cppual-gfx Vulkan::Library)
     endif()
 
-    target_link_libraries(cppual-ui cppual-gfx cppual-memory)
-    target_link_libraries(cppual-ui-views cppual-ui)
+    target_link_libraries(cppual-ui cppual-host cppual-gfx cppual-memory)
+    target_link_libraries(cppual-ui-views cppual-ui cppual-memory)
     target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
 endif()
 
@@ -900,12 +907,12 @@ if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(cppual-ui-win cppual-memory WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
-#    target_link_libraries(cppual-memory)
+#    target_link_libraries(cppual-ui-android cppual-memory WM::Library)
 endif()
 
+target_link_libraries(cppual-host DL::Library cppual-memory)
 target_link_libraries(cppual-memory RT::Library)
 
-target_link_libraries(cppual-host cppual-memory DL::Library)
 target_link_libraries(cppual-compute cppual-memory cppual-host Sockets::Library)
 target_link_libraries(cppual-network cppual-memory Sockets::Library)
 target_link_libraries(cppual-dom cppual-memory)

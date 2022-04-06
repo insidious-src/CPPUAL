@@ -22,7 +22,6 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <cppual/gfx/gl/glbase.h>
-#include <cppual/gfx/gl/runtime.h>
 #include <cppual/gfx/draw.h>
 
 #include "gldef.h"

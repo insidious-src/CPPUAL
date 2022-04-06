@@ -60,7 +60,7 @@ void dialog::on_create ()
     on_init ();
 }
 
-void dialog::destroy_event ()
+void dialog::close_event ()
 {
     on_end ();
 

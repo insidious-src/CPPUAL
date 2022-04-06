@@ -52,10 +52,10 @@ public:
                            align_type       blk_align = alignof(uptr));
 
     /// shared memory
-    uniform_pool_resource (shared_object& shared_obj,
-                           size_type     blk_count,
-                           size_type     blk_size,
-                           align_type    blk_align = alignof(uptr));
+    uniform_pool_resource (shared_memory& shared_obj,
+                           size_type      blk_count,
+                           size_type      blk_size,
+                           align_type     blk_align = alignof(uptr));
 
     ~uniform_pool_resource ();
     void clear () noexcept;
@@ -65,7 +65,9 @@ public:
     size_type block_count () const noexcept { return _M_uBlkNum  ; }
 
     size_type max_size () const noexcept
-    { return _M_pBegin != nullptr ? _M_uBlkSize : 0; }
+    {
+        return capacity () - _M_usedMemory;
+    }
 
     size_type capacity () const noexcept
     {
@@ -89,14 +91,15 @@ private:
     { return &gObj == this; }
 
 private:
-    memory_resource& _M_gOwner      ;
-    pointer const    _M_pBegin      ;
-    pointer const    _M_pEnd        ;
-    pointer*         _M_pFreeList   ;
-    size_type  const _M_uBlkSize    ;
-    align_type const _M_uBlkAlign   ;
-    size_type        _M_uBlkNum     ;
-    cbool            _M_bIsMemShared;
+    memory_resource& _M_gOwner        ;
+    pointer const    _M_pBegin        ;
+    pointer const    _M_pEnd          ;
+    pointer*         _M_pFreeList     ;
+    size_type  const _M_uBlkSize      ;
+    align_type const _M_uBlkAlign     ;
+    size_type        _M_uBlkNum       ;
+    size_type        _M_usedMemory    ;
+    cbool            _M_bIsMemShared  ;
 };
 
 // =========================================================

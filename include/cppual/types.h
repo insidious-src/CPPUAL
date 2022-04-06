@@ -28,8 +28,11 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace cppual
-{
+namespace cppual {
+
+// 1 byte size typedefs
+typedef std::uint8_t byte;
+typedef std::uint8_t const cbyte;
 
 // int typedefs
 typedef std::int8_t i8;
@@ -75,26 +78,28 @@ typedef const std::uintptr_t cuptr;
 typedef std::ptrdiff_t ptrdiff;
 typedef const std::ptrdiff_t cptrdiff;
 
-template<class Out, class In>
+template <class Out, class In>
 union cast_union
 {
     Out out;
     In  in ;
 
     cast_union () = delete;
-    constexpr cast_union (In in_t) noexcept : in (in_t) { }
+    constexpr cast_union (In val) noexcept : in (val) { }
 };
 
-template<class Out, class In>
-constexpr Out direct_cast (In in) noexcept
+template <class Out, class In>
+constexpr Out direct_cast (In val) noexcept
 {
     static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are not equal!");
-    return cast_union<Out, In>(in).out;
+    return cast_union<Out, In> (val).out;
 }
 
-template<class Out, class In>
-constexpr Out unsafe_direct_cast (In in) noexcept
-{ return cast_union<Out, In>(in).out; }
+template <class Out, class In>
+constexpr Out unsafe_direct_cast (In val) noexcept
+{
+    return cast_union<Out, In> (val).out;
+}
 
 } // cppual
 

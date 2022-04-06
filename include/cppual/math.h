@@ -24,13 +24,16 @@
 #ifdef __cplusplus
 
 #include <cppual/decl.h>
+#include <cppual/meta.h>
 
 #include <cmath>
 
 namespace cppual {
 
-template <typename T = int, typename U>
-T round(U value)
+template <typename T = int,
+          typename U,
+          typename = typename std::enable_if<is_float_v<U>>::type>
+T round(U const& value)
 {
     return static_cast<T>(std::round(value));
 }

@@ -86,3 +86,4 @@ CMakeLists.txt.user
 tags
 .tags*
 *.sublime-workspace
+*.sublime-project

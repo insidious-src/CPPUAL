@@ -28,11 +28,46 @@ namespace cppual { namespace gfx {
 
 namespace { namespace internal {
 
-typedef process::plugin_manager<drawable2d_interface> manager2d_type      ;
-typedef process::plugin_manager<drawable3d_interface> manager3d_type      ;
-typedef process::plugin_manager<context_interface>    manager_context_type;
-typedef context_interface                             context_type        ;
-typedef context_interface*                            context_pointer     ;
+typedef process::plugin_manager<draw_factory> manager_type   ;
+typedef context_interface                     context_type   ;
+typedef context_interface*                    context_pointer;
+
+// ====================================================
+
+class initializer final
+{
+private:
+    manager_type   mgr    ;
+    shared_factory factory;
+
+    inline static cchar* plugin_name () noexcept
+    {
+    #   if defined OS_GNU_LINUX || defined OS_BSD || defined OS_ANDROID
+            return "libcppual-gfx-egl";
+    #   elif defined OS_WINDOWS
+            return "libcppual-gfx-wgl";
+    #   endif
+    }
+
+public:
+    inline initializer ()
+    {
+        if (mgr.load_plugin (plugin_name ())) factory = mgr.plugin (plugin_name ()).interface ();
+    }
+
+    inline operator shared_factory () const
+    {
+        return factory;
+    }
+};
+
+// ====================================================
+
+inline static shared_factory plugin_instance ()
+{
+    static auto inst = initializer ();
+    return inst;
+}
 
 inline context_pointer& current () noexcept
 {
@@ -40,25 +75,20 @@ inline context_pointer& current () noexcept
     return current_dc;
 }
 
-inline manager2d_type& manager2d () noexcept
+
+} } // anonymous namespace internal
+
+// ====================================================
+
+shared_factory draw_factory::instance ()
 {
-    static manager2d_type drawable_mgr;
-    return drawable_mgr;
+    return internal::plugin_instance ();
 }
 
-inline manager3d_type& manager3d () noexcept
+bool draw_factory::has_valid_instance () noexcept
 {
-    static manager3d_type drawable_mgr;
-    return drawable_mgr;
+    return internal::plugin_instance () != nullptr;
 }
-
-inline manager_context_type& manager_context() noexcept
-{
-    static manager_context_type context_mgr;
-    return context_mgr;
-}
-
-} } // anonymous namespace Internal
 
 // ====================================================
 
@@ -71,7 +101,7 @@ void context_interface::acquire (context_interface* pContext) noexcept
 {
     if (internal::current () != pContext)
     {
-        if (internal::current () && pContext) internal::current ()->release ();
+        if (internal::current ()) internal::current ()->release ();
 
         internal::current () = pContext;
     }
@@ -79,19 +109,4 @@ void context_interface::acquire (context_interface* pContext) noexcept
 
 // ====================================================
 
-shared_drawable2d drawable_factory::create2d (string_type const& gName)
-{
-    return internal::manager2d ().plugin (gName).interface ();
-}
-
-shared_drawable3d drawable_factory::create3d (string_type const& gName)
-{
-    return internal::manager3d ().plugin (gName).interface ();
-}
-
-shared_context context_factory::create (string_type const& gName)
-{
-    return internal::manager_context().plugin (gName).interface ();
-}
-
-} } // namespace Graphics
+} } // namespace gfx

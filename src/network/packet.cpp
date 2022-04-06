@@ -23,133 +23,284 @@
 
 namespace cppual { namespace network {
 
-void Packet::append (cvoid* pData, size_type uSize) noexcept
+// =========================================================
+
+void packet::append (cvoid* pData, size_type uSize) noexcept
 {
     if (pData && uSize > 0)
     {
-        std::size_t start = _M_gData.size ();
-        _M_gData.reserve (start + uSize);
-        std::copy(static_cast<cu8*> (pData), static_cast<cu8*> (pData) + uSize, &_M_gData[start]);
+        _M_gData.reserve (_M_gData.size () + uSize);
+        _M_gData.insert  (_M_gData.end (),
+                          static_cast<cchar*> (pData),
+                          static_cast<cchar*> (pData) + uSize);
     }
 }
 
-Packet& Packet::operator >> (bool& bData) noexcept
+// =========================================================
+
+packet& packet::operator << (cbool bData) noexcept
+{
+    append (&bData, sizeof (cbool));
+    return *this;
+}
+
+packet& packet::operator << (ci8 nData) noexcept
+{
+    append (&nData, sizeof (ci8));
+    return *this;
+}
+
+packet& packet::operator << (cu8 uData) noexcept
+{
+    append (&uData, sizeof (cu8));
+    return *this;
+}
+
+packet& packet::operator << (ci16 nData) noexcept
+{
+    append (&nData, sizeof (ci16));
+    return *this;
+}
+
+packet& packet::operator << (cu16 uData) noexcept
+{
+    append (&uData, sizeof (cu16));
+    return *this;
+}
+
+packet& packet::operator << (ci32 nData) noexcept
+{
+    append (&nData, sizeof (ci32));
+    return *this;
+}
+
+packet& packet::operator << (cu32 uData) noexcept
+{
+    append (&uData, sizeof (cu32));
+    return *this;
+}
+
+packet& packet::operator << (ci64& nData) noexcept
+{
+    append (&nData, sizeof (ci64));
+    return *this;
+}
+
+packet& packet::operator << (cu64& uData) noexcept
+{
+    append (&uData, sizeof (cu64));
+    return *this;
+}
+
+packet& packet::operator << (cfloat& fData) noexcept
+{
+    append (&fData, sizeof (cfloat));
+    return *this;
+}
+
+packet& packet::operator << (cdouble& dData) noexcept
+{
+    append (&dData, sizeof (cdouble));
+    return *this;
+}
+
+packet& packet::operator << (cldouble& dData) noexcept
+{
+    append (&dData, sizeof (cldouble));
+    return *this;
+}
+
+packet& packet::operator << (stream_type const& gData) noexcept
+{
+    cu32 size = static_cast<u32> (gData.size ());
+
+    append (&size, sizeof (cu32));
+    append (&gData, gData.size ());
+    return *this;
+}
+
+packet& packet::operator << (string const& gData) noexcept
+{
+    cu32 size = static_cast<u32> (gData.size ());
+
+    append (&size, sizeof (cu32));
+    append (&gData, gData.size ());
+    return *this;
+}
+
+packet& packet::operator << (wstring const& gData) noexcept
+{
+    cu32 size = static_cast<u32> (sizeof (wchar) * gData.size ());
+
+    append (&size, sizeof (cu32));
+    append (&gData, size);
+    return *this;
+}
+
+packet& packet::operator << (u16string const& gData) noexcept
+{
+    cu32 size = static_cast<u32> (sizeof (char16) * gData.size ());
+
+    append (&size, sizeof (cu32));
+    append (&gData, size);
+    return *this;
+}
+
+packet& packet::operator << (u32string const& gData) noexcept
+{
+    cu32 size = static_cast<u32> (sizeof (char32) * gData.size ());
+
+    append (&size, sizeof (cu32));
+    append (&gData, size);
+    return *this;
+}
+
+// =========================================================
+
+packet& packet::operator >> (bool& bData) noexcept
 {
     u8 value = 0;
     if (*this >> value) bData = (value > 0);
     return *this;
 }
 
-Packet& Packet::operator >> (i8& nData) noexcept
+packet& packet::operator >> (i8& nData) noexcept
 {
     if (can_exchange (sizeof (nData)))
     {
-        nData   = *reinterpret_cast<ci8*> (&_M_gData[_M_uPos]);
+        nData    = *direct_cast<ci8*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (nData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (u8& uData) noexcept
+packet& packet::operator >> (u8& uData) noexcept
 {
     if (can_exchange (sizeof (uData)))
     {
-        uData   = *reinterpret_cast<cu8*> (&_M_gData[_M_uPos]);
+        uData    = *direct_cast<cu8*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (uData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (i16& nData) noexcept
+packet& packet::operator >> (i16& nData) noexcept
 {
     if (can_exchange (sizeof (nData)))
     {
-        nData   = *reinterpret_cast<ci16*> (&_M_gData[_M_uPos]);
+        nData    = *direct_cast<ci16*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (nData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (u16& uData) noexcept
+packet& packet::operator >> (u16& uData) noexcept
 {
     if (can_exchange (sizeof (uData)))
     {
-        uData    = *reinterpret_cast<cu16*> (&_M_gData[_M_uPos]);
+        uData    = *direct_cast<cu16*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (uData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (i32& nData) noexcept
+packet& packet::operator >> (i32& nData) noexcept
 {
     if (can_exchange (sizeof (nData)))
     {
-        nData    = *reinterpret_cast<ci32*> (&_M_gData[_M_uPos]);
+        nData    = *direct_cast<ci32*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (nData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (u32& uData) noexcept
+packet& packet::operator >> (u32& uData) noexcept
 {
     if (can_exchange (sizeof (uData)))
     {
-        uData    = *reinterpret_cast<cu32*> (&_M_gData[_M_uPos]);
+        uData    = *direct_cast<cu32*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (uData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (float& fData) noexcept
+packet& packet::operator >> (i64& nData) noexcept
+{
+    if (can_exchange (sizeof (nData)))
+    {
+        nData    = *direct_cast<ci64*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (nData);
+    }
+
+    return *this;
+}
+
+packet& packet::operator >> (u64& uData) noexcept
+{
+    if (can_exchange (sizeof (uData)))
+    {
+        uData    = *direct_cast<cu64*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (uData);
+    }
+
+    return *this;
+}
+
+packet& packet::operator >> (float& fData) noexcept
 {
     if (can_exchange (sizeof (fData)))
     {
-        fData    = *reinterpret_cast<cfloat*> (&_M_gData[_M_uPos]);
+        fData    = *direct_cast<cfloat*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (fData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (double& dData) noexcept
+packet& packet::operator >> (double& dData) noexcept
 {
     if (can_exchange (sizeof (dData)))
     {
-        dData    = *reinterpret_cast<cdouble*> (&_M_gData[_M_uPos]);
+        dData    = *direct_cast<cdouble*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (dData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (ldouble& dData) noexcept
+packet& packet::operator >> (ldouble& dData) noexcept
 {
     if (can_exchange (sizeof (dData)))
     {
-        dData    = *reinterpret_cast<cu32*> (&_M_gData[_M_uPos]);
+        dData    = *direct_cast<cldouble*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (dData);
     }
 
     return *this;
 }
 
-Packet& Packet::operator >> (char* pData) noexcept
+packet& packet::operator >> (stream_type& gData) noexcept
 {
     // First extract string uLength
     u32 uLength = 0;
     *this >> uLength;
 
-    if ((uLength > 0) and can_exchange (uLength))
+    gData.clear ();
+
+    if ((uLength > 0) && can_exchange (uLength))
     {
         // Then extract characters
-        ::memcpy (pData, &_M_gData[_M_uPos], uLength);
-        pData[uLength] = '\0';
+        gData.reserve (gData.size () + uLength);
+
+        gData.insert  (gData.end (),
+                       &_M_gData[_M_uPos],
+                       &_M_gData[_M_uPos] + uLength);
 
         // Update reading position
         _M_uPos += uLength;
@@ -158,14 +309,15 @@ Packet& Packet::operator >> (char* pData) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (string& gData) noexcept
+packet& packet::operator >> (string& gData) noexcept
 {
     // First extract string uLength
     u32 uLength = 0;
     *this >> uLength;
 
     gData.clear ();
-    if ((uLength > 0) and can_exchange (uLength))
+
+    if ((uLength > 0) && can_exchange (uLength))
     {
         // Then extract characters
         gData.assign (&_M_gData[_M_uPos], uLength);
@@ -177,50 +329,84 @@ Packet& Packet::operator >> (string& gData) noexcept
     return *this;
 }
 
-Packet& Packet::operator >> (wchar*) noexcept
+packet& packet::operator >> (wstring& gData) noexcept
 {
+    // First extract size
+    u32 uLength = 0;
+    *this >> uLength;
+
+    gData.clear ();
+
+    if ((uLength > 0) && can_exchange (uLength))
+    {
+        // Then extract characters
+        gData.assign (direct_cast<wchar*> (&_M_gData[_M_uPos]), uLength / sizeof (wchar));
+
+        // Update reading position
+        _M_uPos += uLength;
+    }
+
     return *this;
 }
 
-Packet& Packet::operator >> (wstring&) noexcept
+packet& packet::operator >> (u16string& gData) noexcept
 {
+    // First extract size
+    u32 uLength = 0;
+    *this >> uLength;
+
+    gData.clear ();
+
+    if ((uLength > 0) && can_exchange (uLength))
+    {
+        // Then extract characters
+        gData.assign (direct_cast<char16*> (&_M_gData[_M_uPos]), uLength / sizeof (char16));
+
+        // Update reading position
+        _M_uPos += uLength;
+    }
+
     return *this;
 }
 
-Packet& Packet::operator >> (char16*) noexcept
+packet& packet::operator >> (u32string& gData) noexcept
 {
+    // First extract size
+    u32 uLength = 0;
+    *this >> uLength;
+
+    gData.clear ();
+
+    if ((uLength > 0) && can_exchange (uLength))
+    {
+        // Then extract characters
+        gData.assign (direct_cast<char32*> (&_M_gData[_M_uPos]), uLength / sizeof (char32));
+
+        // Update reading position
+        _M_uPos += uLength;
+    }
+
     return *this;
 }
 
-Packet& Packet::operator >> (u16string&) noexcept
-{
-    return *this;
-}
+// =========================================================
 
-Packet& Packet::operator >> (char32*) noexcept
-{
-    return *this;
-}
-
-Packet& Packet::operator >> (u32string&) noexcept
-{
-    return *this;
-}
-
-cvoid* Packet::on_send (size_type& uSize)
+cvoid* packet::on_send (size_type& uSize)
 {
     uSize = size ();
     return  data ();
 }
 
-void Packet::on_receive (cvoid* pData, size_type uSize)
+void packet::on_receive (cvoid* pData, size_type uSize)
 {
     append (pData, uSize);
 }
 
-bool Packet::can_exchange (size_type uSize) noexcept
+bool packet::can_exchange (size_type uSize) noexcept
 {
-    return _M_bIsValid && (_M_uPos + uSize <= _M_gData.size ());
+    return _M_bIsValid && ((_M_uPos + uSize) < _M_gData.size ());
 }
+
+// =========================================================
 
 } } // namespace Network

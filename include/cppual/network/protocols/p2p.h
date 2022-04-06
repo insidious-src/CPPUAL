@@ -27,31 +27,31 @@
 
 namespace cppual { namespace network { namespace p2p {
 
-class BaseClient : public Protocol
+class BaseClient : public protocol
 {
 public:
-    void start_session  (ProtocolContext&, Packet& outgoing_packet);
-    bool read_data      (ProtocolContext&, Packet& incoming_packet);
-    byte try_decode     (ProtocolContext&, Packet& output_packet);
-    byte encode_content (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    void start_session  (protocol_context&, packet& outgoing_packet);
+    bool read_data      (protocol_context&, packet& incoming_packet);
+    byte try_decode     (protocol_context&, packet& output_packet);
+    byte encode_content (protocol_context&, packet& input_packet, packet& output_packet);
 };
 
-class TorrentClient : public Protocol
+class TorrentClient : public protocol
 {
 public:
-    void start_session  (ProtocolContext&, Packet& outgoing_packet);
-    bool read_data      (ProtocolContext&, Packet& incoming_packet);
-    byte try_decode     (ProtocolContext&, Packet& output_packet);
-    byte encode_content (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    void start_session  (protocol_context&, packet& outgoing_packet);
+    bool read_data      (protocol_context&, packet& incoming_packet);
+    byte try_decode     (protocol_context&, packet& output_packet);
+    byte encode_content (protocol_context&, packet& input_packet, packet& output_packet);
 };
 
-class MagnetClient : public Protocol
+class MagnetClient : public protocol
 {
 public:
-    void start_session  (ProtocolContext&, Packet& outgoing_packet);
-    bool read_data      (ProtocolContext&, Packet& incoming_packet);
-    byte try_decode     (ProtocolContext&, Packet& output_packet);
-    byte encode_content (ProtocolContext&, Packet& input_packet, Packet& output_packet);
+    void start_session  (protocol_context&, packet& outgoing_packet);
+    bool read_data      (protocol_context&, packet& incoming_packet);
+    byte try_decode     (protocol_context&, packet& output_packet);
+    byte encode_content (protocol_context&, packet& input_packet, packet& output_packet);
 };
 
 } } } // P2P

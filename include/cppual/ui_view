@@ -20,5 +20,3 @@
  */
 
 #include <cppual/ui/view.h>
-#include <cppual/ui/window.h>
-#include <cppual/ui/dialog.h>

@@ -45,13 +45,14 @@ typedef std::unordered_map<
 
 inline static map_type& map ()
 {
-    static map_type views_map (3);
+    static map_type views_map;
     return views_map;
 }
 
 inline shared_window create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
 {
-    return pParentObj ? std::allocate_shared<proxy_renderable> (renderable_allocator(),
+    return pParentObj ? memory::allocate_shared<proxy_renderable, platform_wnd_interface>
+                                                               (renderable_allocator (),
                                                                 pParentObj->renderable ().lock (),
                                                                 gRect) :
                         platform::factory::instance ()->createWindow (gRect, nScreen);
@@ -61,6 +62,10 @@ inline shared_window create_renderable (view* pParentObj, rect const& gRect, u32
 
 // =========================================================
 
+view::view ()
+: view (nullptr, rect (0, 0, default_width, default_height))
+{ }
+
 view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type const& gAtor)
 : _M_gChildrenList (gAtor),
   _M_gMinSize { 0, 0 },
@@ -69,7 +74,7 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
   _M_pParentObj  (),
   _M_gStateFlags ()
 {
-    if (_M_pRenderable == nullptr or !_M_pRenderable->valid ())
+    if (_M_pRenderable == nullptr || !_M_pRenderable->valid ())
     {
         _M_pRenderable.reset ();
         throw std::logic_error ("failed to create renderable");
@@ -81,73 +86,73 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
         if (!bRegEvents)
         {
             connect (event_queue::events ().mouseMove,
-                     [](event_queue::window_type wnd, point2u pos)
+                     [](event_queue::handle_type wnd, point2u pos)
             {
                 internal::map ()[wnd]->mouse_moved_event (pos);
             });
 
             connect (event_queue::events ().mousePress,
-                    [](event_queue::window_type wnd, event_type::mbutton_data data)
+                    [](event_queue::handle_type wnd, event_type::mbutton_data data)
             {
                 internal::map ()[wnd]->mouse_pressed_event (data);
             });
 
             connect (event_queue::events ().mouseRelease,
-                    [](event_queue::window_type wnd, event_type::mbutton_data data)
+                    [](event_queue::handle_type wnd, event_type::mbutton_data data)
             {
                 internal::map ()[wnd]->mouse_released_event (data);
             });
 
             connect (event_queue::events ().keyPress,
-                    [](event_queue::window_type wnd, event_type::key_data data)
+                    [](event_queue::handle_type wnd, event_type::key_data data)
             {
                 internal::map ()[wnd]->key_pressed_event (data);
             });
 
             connect (event_queue::events ().keyRelease,
-                    [](event_queue::window_type wnd, event_type::key_data data)
+                    [](event_queue::handle_type wnd, event_type::key_data data)
             {
                 internal::map ()[wnd]->key_released_event (data);
             });
 
             connect (event_queue::events ().scroll,
-                    [](event_queue::window_type wnd, event_type::mwheel_data data)
+                    [](event_queue::handle_type wnd, event_type::mwheel_data data)
             {
                 internal::map ()[wnd]->mouse_wheel_event (data);
             });
 
             connect (event_queue::events ().winPaint,
-                    [](event_queue::window_type wnd, event_type::paint_data data)
+                    [](event_queue::handle_type wnd, event_type::paint_data data)
             {
                 internal::map ()[wnd]->paint (data.region);
             });
 
             connect (event_queue::events ().winFocus,
-                    [](event_queue::window_type wnd, bool state)
+                    [](event_queue::handle_type wnd, bool state)
             {
                 internal::map ()[wnd]->focus_event (state);
             });
 
             connect (event_queue::events ().winSize,
-                    [](event_queue::window_type wnd, point2u size)
+                    [](event_queue::handle_type wnd, point2u size)
             {
                 internal::map ()[wnd]->size (size);
             });
 
             connect (event_queue::events ().winVisible,
-                    [](event_queue::window_type wnd, bool state)
+                    [](event_queue::handle_type wnd, bool state)
             {
                 internal::map ()[wnd]->show_event (state);
             });
 
             connect(event_queue::events ().winStep,
-                    [](event_queue::window_type wnd, bool state)
+                    [](event_queue::handle_type wnd, bool state)
             {
                 internal::map()[wnd]->enter_leave_event (state);
             });
 
             connect (event_queue::events ().winProperty,
-                    [](event_queue::window_type wnd, event_type::property_data data)
+                    [](event_queue::handle_type wnd, event_type::property_data data)
             {
                 switch (data.prop)
                 {
@@ -159,10 +164,28 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
                 }
             });
 
-            connect (event_queue::events ().winDestroy,
-                    [](event_queue::window_type wnd)
+            connect (event_queue::events ().winHelp,
+                    [](event_queue::handle_type wnd)
             {
-                internal::map ()[wnd]->destroy_event ();
+                internal::map ()[wnd]->help_event ();
+            });
+
+            connect (event_queue::events ().winMinimize,
+                    [](event_queue::handle_type wnd)
+            {
+                internal::map ()[wnd]->minimize_event ();
+            });
+
+            connect (event_queue::events ().winMaximize,
+                    [](event_queue::handle_type wnd)
+            {
+                internal::map ()[wnd]->maximize_event ();
+            });
+
+            connect (event_queue::events ().winClose,
+                    [](event_queue::handle_type wnd)
+            {
+                internal::map ()[wnd]->close_event ();
             });
 
             bRegEvents = true;
@@ -190,7 +213,7 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
 
     if (pParentObj)
     {
-        _M_pRenderable->setOwner (pParentObj->renderable ().lock ());
+        _M_pRenderable->set_owner (pParentObj->renderable ().lock ());
         _M_pParentObj = pParentObj;
 
         pParentObj->_M_gChildrenList.push_back (this);
@@ -200,7 +223,7 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
     _M_gStateFlags = view::is_valid | view::enabled;
 }
 
-view::view (view const& gObj) noexcept
+view::view (view const& gObj)
 : view (gObj._M_pParentObj,
         gObj._M_pRenderable->geometry (),
         gObj._M_pRenderable->screen   ())
@@ -212,15 +235,15 @@ view::view (view const& gObj) noexcept
     }
 }
 
-view& view::operator = (view const& gObj) noexcept
+view& view::operator = (view const& gObj)
 {
     if (this == &gObj) return *this;
 
     if (gObj.valid ())
     {
         if (internal::create_renderable (gObj._M_pParentObj,
-                                        gObj._M_pRenderable->geometry (),
-                                        gObj._M_pRenderable->screen   ()))
+                                         gObj._M_pRenderable->geometry (),
+                                         gObj._M_pRenderable->screen   ()))
         {
             if (!gObj.is_enabled ()) disable ();
             if (!gObj.is_hidden  ()) show    ();
@@ -232,7 +255,7 @@ view& view::operator = (view const& gObj) noexcept
 
 view::~view ()
 {
-    if (_M_gStateFlags.test (view::is_valid)) destroy_resources ();
+    if (valid ()) destroy_resources ();
 }
 
 void view::destroy_children ()
@@ -269,7 +292,7 @@ void view::invalidate () noexcept
 
 void view::destroy ()
 {
-    if (!_M_gStateFlags.test (view::is_valid)) return;
+    if (!valid ()) return;
     destroy_resources ();
     invalidate ();
 }
@@ -312,7 +335,7 @@ bool view::set_parent (view* pParentObj, point2i /*gPos*/)
     if (pParentObj)
     {
         if (_M_pParentObj != nullptr) *_M_gItFromParent = nullptr;
-        _M_pRenderable->setOwner (pParentObj->_M_pRenderable);
+        _M_pRenderable->set_owner (pParentObj->_M_pRenderable);
 
         pParentObj->_M_gChildrenList.push_back (this);
         //pParentObj->paint ();
@@ -378,7 +401,7 @@ void view::set_geometry (rect const& gRect)
             gNewRect.bottom = static_cast<rect::value_type> (gNewRect.top + _M_gMinSize.y);
         }
 
-        _M_pRenderable->setGeometry (gNewRect);
+        _M_pRenderable->set_geometry (gNewRect);
     }
 }
 
@@ -474,7 +497,28 @@ void view::refresh ()
     }
 }
 
-void view::destroy_event()
+void view::help_event()
+{
+#   ifdef DEBUG_MODE
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+#   endif
+}
+
+void view::minimize_event()
+{
+#   ifdef DEBUG_MODE
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+#   endif
+}
+
+void view::maximize_event()
+{
+#   ifdef DEBUG_MODE
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+#   endif
+}
+
+void view::close_event()
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;

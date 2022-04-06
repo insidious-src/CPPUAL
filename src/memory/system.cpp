@@ -69,44 +69,45 @@ public:
     using base_type::base_type;
     using base_type::operator=;
 
-    bool is_thread_safe () const noexcept
-    {
-        return true;
-    }
+    inline bool is_thread_safe () const noexcept { return true; }
 
-    size_type max_size () const noexcept
+    inline size_type max_size () const noexcept
     {
         auto const max = memory::max_size ();
-        return max ? max : memory_resource::max_size();
+        return max ? max : memory_resource::max_size ();
     }
 
-    size_type capacity () const noexcept
+    inline size_type capacity () const noexcept
     {
         auto const cap = memory::capacity ();
-        return cap ? cap : memory_resource::capacity();
+        return cap ? cap : memory_resource::capacity ();
     }
 
 private:
-    void* do_allocate(size_type bytes, size_type /*alignment*/)
+    inline
+    void* do_allocate (size_type bytes, size_type /*alignment*/)
     {
         if (!memory::model::is_thread_initialized ()) initializer ();
         return memory::model::allocate (bytes);
     }
 
-    void* do_reallocate(void* p, size_type old_size, size_type new_size, size_type /*alignment*/)
+    inline
+    void* do_reallocate (void* p, size_type old_size, size_type new_size, size_type /*alignment*/)
     {
         if (!memory::model::is_thread_initialized ()) initializer ();
-        return p != nullptr ? memory::model::reallocate(p, old_size, new_size) :
-                              memory::model::allocate(new_size);
+        return p != nullptr ? memory::model::reallocate (p, old_size, new_size) :
+                              memory::model::allocate (new_size);
     }
 
-    void do_deallocate(void* p, size_type /*bytes*/, size_type /*alignment*/)
+    inline
+    void do_deallocate (void* p, size_type /*bytes*/, size_type /*alignment*/)
     {
         if (!memory::model::is_thread_initialized ()) initializer ();
         memory::model::deallocate (p);
     }
 
-    bool do_is_equal(base_type const& other) const noexcept
+    inline
+    bool do_is_equal (base_type const& other) const noexcept
     {
         return this == &other;
     }
@@ -120,63 +121,63 @@ private:
 
 void* operator new (std::size_t size)
 {
-    if (!cppual::memory::Model::is_thread_initialized ()) initializer ();
-    return cppual::memory::Model::alloc (size);
+    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
+    return cppual::memory::model::alloc (size);
 }
 
 void operator delete (void* ptr) noexcept
 {
-    if (cppual::memory::Model::is_thread_initialized ())
-        cppual::memory::Model::free (ptr);
+    if (cppual::memory::model::is_thread_initialized ())
+        cppual::memory::model::free (ptr);
 }
 
 void*
 operator new [] (std::size_t size)
 {
-    if (!cppual::memory::Model::is_thread_initialized ()) initializer ();
-    return cppual::memory::Model::alloc (size);
+    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
+    return cppual::memory::model::alloc (size);
 }
 
 void operator delete [] (void* ptr) noexcept
 {
-    if (!cppual::memory::Model::is_thread_initialized ()) initializer ();
-    cppual::memory::Model::free (ptr);
+    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
+    cppual::memory::model::free (ptr);
 }
 
 void* operator new (std::size_t size, const std::nothrow_t&) noexcept
 {
-    if (!cppual::memory::Model::is_thread_initialized ()) initializer();
-    return cppual::memory::Model::alloc (size);
+    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
+    return cppual::memory::model::alloc (size);
 }
 
 void* operator new [] (std::size_t size, const std::nothrow_t&) noexcept
 {
-    if (!cppual::memory::Model::is_thread_initialized ()) initializer();
-    return cppual::memory::Model::alloc (size);
+    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
+    return cppual::memory::model::alloc (size);
 }
 
 void operator delete (void* ptr, const std::nothrow_t&) noexcept
 {
-    if (cppual::memory::Model::is_thread_initialized ())
-        cppual::memory::Model::free (ptr);
+    if (cppual::memory::model::is_thread_initialized ())
+        cppual::memory::model::free (ptr);
 }
 
 void operator delete [] (void* ptr, const std::nothrow_t&) noexcept
 {
-    if (cppual::memory::Model::is_thread_initialized ())
-        cppual::memory::Model::free (ptr);
+    if (cppual::memory::model::is_thread_initialized ())
+        cppual::memory::model::free (ptr);
 }
 
 void operator delete (void* ptr, std::size_t) noexcept
 {
-    if (cppual::memory::Model::is_thread_initialized ())
-        cppual::memory::Model::free (ptr);
+    if (cppual::memory::model::is_thread_initialized ())
+        cppual::memory::model::free (ptr);
 }
 
 void operator delete [] (void* ptr, std::size_t) noexcept
 {
-    if (cppual::memory::Model::is_thread_initialized ())
-        cppual::memory::Model::free (ptr);
+    if (cppual::memory::model::is_thread_initialized ())
+        cppual::memory::model::free (ptr);
 }
 
 #endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
@@ -201,18 +202,18 @@ std::size_t capacity ()
 
     /* Cygwin under Windows. ------------------------------------ */
     /* New 64-bit MEMORYSTATUSEX isn't available.  Use old 32.bit */
-    MEMORYSTATUS status;
+    ::MEMORYSTATUS status;
     status.dwLength = sizeof (status);
-    GlobalMemoryStatus (&status);
+    ::GlobalMemoryStatus (&status);
     return static_cast<std::size_t> (status.dwTotalPhys);
 
 #elif defined(OS_WINDOWS)
 
     /* Windows. ------------------------------------------------- */
     /* Use new 64-bit MEMORYSTATUSEX, not old 32-bit MEMORYSTATUS */
-    MEMORYSTATUSEX status;
+    ::MEMORYSTATUSEX status;
     status.dwLength = sizeof (status);
-    GlobalMemoryStatusEx (&status);
+    ::GlobalMemoryStatusEx (&status);
     return static_cast<std::size_t> (status.ullTotalPhys);
 
 #elif defined (OS_STD_UNIX) or defined (OS_STD_MAC)
@@ -231,7 +232,7 @@ std::size_t capacity ()
 #endif
     i64 size = 0;               /* 64-bit */
     std::size_t len = sizeof (size);
-    if (sysctl (mib, 2, &size, &len, nullptr, 0) == 0)
+    if (::sysctl (mib, 2, &size, &len, nullptr, 0) == 0)
         return static_cast<std::size_t> (size);
 
     std::cerr << __func__ << " :: Error :: failed to read system memory size!" << std::endl;
@@ -239,19 +240,19 @@ std::size_t capacity ()
 
 #elif defined(_SC_AIX_REALMEM)
     /* AIX. ----------------------------------------------------- */
-    return static_cast<std::size_t> (sysconf (_SC_AIX_REALMEM)) * 1024;
+    return static_cast<std::size_t> (::sysconf (_SC_AIX_REALMEM)) * 1024;
 
 #elif defined (_SC_PHYS_PAGES) && defined (_SC_PAGESIZE)
 
     /* FreeBSD, Linux, OpenBSD, and Solaris. -------------------- */
-    return static_cast<std::size_t> (sysconf (_SC_PHYS_PAGES) *
-                                     sysconf (_SC_PAGESIZE  ));
+    return static_cast<std::size_t> (::sysconf (_SC_PHYS_PAGES) *
+                                     ::sysconf (_SC_PAGESIZE  ));
 
 #elif defined (_SC_PHYS_PAGES) && defined (_SC_PAGE_SIZE)
 
     /* Legacy. -------------------------------------------------- */
-    return static_cast<std::size_t> (sysconf (_SC_PHYS_PAGES) *
-                                     sysconf (_SC_PAGE_SIZE ));
+    return static_cast<std::size_t> (::sysconf (_SC_PHYS_PAGES) *
+                                     ::sysconf (_SC_PAGE_SIZE ));
 
 #elif defined(CTL_HW) and (defined(HW_PHYSMEM) or defined(HW_REALMEM))
     /* DragonFly BSD, FreeBSD, NetBSD, OpenBSD, and OSX. -------- */
@@ -264,7 +265,7 @@ std::size_t capacity ()
 #endif
     u32 size = 0;        /* 32-bit */
     std::size_t len = sizeof (size);
-    if (sysctl (mib, 2, &size, &len, NULL, 0) == 0) return size;
+    if (::sysctl (mib, 2, &size, &len, NULL, 0) == 0) return size;
 
     std::cerr << __func__ << " :: Error :: failed to read system memory size!" << std::endl;
     return 0;            /* Failed? */
@@ -283,7 +284,7 @@ std::size_t max_size ()
 #   elif defined (OS_WINDOWS)
 #   endif
 
-    return capacity();
+    return capacity ();
 }
 
 // =========================================================
@@ -293,17 +294,17 @@ std::size_t working_size ()
 #if defined (OS_WINDOWS)
 
     /* Windows -------------------------------------------------- */
-    PROCESS_MEMORY_COUNTERS info;
-    GetProcessMemoryInfo (GetCurrentProcess (), &info, sizeof (info));
+    ::PROCESS_MEMORY_COUNTERS info;
+    ::GetProcessMemoryInfo (::GetCurrentProcess (), &info, sizeof (info));
     return static_cast<std::size_t> (info.WorkingSetSize);
 
 #elif defined (OS_STD_APPLE)
 
     /* OSX ------------------------------------------------------ */
-    mach_task_basic_info info;
-    mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
-    if (task_info (mach_task_self (), MACH_TASK_BASIC_INFO,
-                   (task_info_t)&info, &infoCount) != KERN_SUCCESS)
+    ::mach_task_basic_info info;
+    ::mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+    if (::task_info (mach_task_self (), MACH_TASK_BASIC_INFO,
+                   (::task_info_t)&info, &infoCount) != KERN_SUCCESS)
     {
         std::cerr << __func__ << " :: Error :: Cannot access working memory size!" << std::endl;
         return 0;        /* Can't access? */
@@ -317,7 +318,7 @@ std::size_t working_size ()
     long  rss = 0;
     FILE* fp  = nullptr;
 
-    if (!(fp = ::fopen ("/proc/self/statm", "r")))
+    if (!(fp = ::fopen ("/proc/self/statm", "re")))
     {
         std::cerr << __func__ << " :: Error :: Cannot access '/proc/self/statm'!" << std::endl;
         return 0;
@@ -331,7 +332,7 @@ std::size_t working_size ()
     }
 
     ::fclose (fp);
-    return static_cast<std::size_t> (rss * sysconf (_SC_PAGESIZE));
+    return static_cast<std::size_t> (rss * ::sysconf (_SC_PAGESIZE));
 
 #else
 

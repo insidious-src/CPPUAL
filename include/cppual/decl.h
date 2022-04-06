@@ -374,10 +374,6 @@ typedef uchar8 utchar;
 typedef cuchar8 cutchar;
 #endif
 
-// 1 byte size typedefs
-typedef uchar8 byte;
-typedef cuchar8 cbyte;
-
 // short int typedefs
 typedef const short cshort;
 typedef unsigned short ushort;

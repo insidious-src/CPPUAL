@@ -22,8 +22,6 @@
 #include <cppual/compute/devmemory.h>
 #include <cppual/compute/device.h>
 
-using namespace cppual::compute;
-
 void* operator new (std::size_t /* size */, memory_chunk& /*obj*/, std::size_t /* align */)
 {
     //if (!obj.device ().valid ()) throw memory_source_not_available ();

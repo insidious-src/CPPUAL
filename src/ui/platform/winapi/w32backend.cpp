@@ -46,28 +46,28 @@ inline handle_type desktop_window () noexcept
 
 } // anonymous namespace
 
-Win32Display::Win32Display () noexcept
+win32_display::win32_display () noexcept
 : IDisplay (get_display (), get_display ())
 {
 }
 
-Win32Display::~Win32Display () noexcept
+win32_display::~win32_display () noexcept
 {
     if (native () and ::ReleaseDC (desktop_window (), native ().get<display_type> ()) != 1)
         std::cerr << "failed to release display handle: " << name () << std::endl;
 }
 
-string Win32Display::name () const noexcept
+string win32_display::name () const noexcept
 {
     return "WINDISPLAY";
 }
 
-uint Win32Display::screenCount () const noexcept
+uint win32_display::screen_count () const noexcept
 {
     return 1;
 }
 
-void Win32Display::flush () noexcept
+void win32_display::flush () noexcept
 {
     ::UpdateWindow (desktop_window ());
 }
