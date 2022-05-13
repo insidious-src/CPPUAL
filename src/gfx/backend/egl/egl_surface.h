@@ -76,7 +76,7 @@ public:
 
     ~config();
 
-    config (connection_type display,
+    config (connection_type legacy,
             format_type     format = format_type::default2d ());
 
     constexpr config (config const&) noexcept = default;

@@ -21,12 +21,13 @@
 
 #include "egl_surface.h"
 
+#include <cppual/gfx/gl/gldef.h>
+
 #include <cstring>
 #include <iostream>
 #include <algorithm>
 
 #include <EGL/egl.h>
-#include "../../gl/glad.h"
 
 namespace cppual { namespace gfx { namespace gl {
 
@@ -374,8 +375,8 @@ inline point2u getSize (config const& config, surface::handle_type surface) noex
 
 // ====================================================
 
-config::config (connection_type dsp, format_type gFormat)
-: _M_pDisplay   (::eglGetDisplay (dsp.get<egl::native_display> ())),
+config::config (connection_type legacy, format_type gFormat)
+: _M_pDisplay   (::eglGetDisplay (legacy.get<egl::native_display> ())),
   _M_pCfg       (),
   _M_gFormat    (),
   _M_eFeatures  ()
@@ -383,7 +384,7 @@ config::config (connection_type dsp, format_type gFormat)
     if (!_M_pDisplay) throw std::logic_error ("invalid display");
 
     egl::value_type nNumConfigs = 0;
-    handle_type::pointer    ptr = nullptr;
+    handle_type::pointer ptr = handle_type::pointer ();
 
     egl::value_type const nConfigAttribs[]
     {
@@ -412,7 +413,7 @@ config::config (connection_type dsp, format_type gFormat)
     _M_gFormat   = to_format ();
 
 #   ifdef DEBUG_MODE
-    std::cout << ::eglQueryString (display (), egl::Extensions) << std::endl;
+    std::cout << ::eglQueryString (_M_pDisplay, egl::Extensions) << std::endl;
 #   endif
 }
 

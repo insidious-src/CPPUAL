@@ -20,10 +20,9 @@
  */
 
 #include <cppual/gfx/drawable/text.h>
+#include <cppual/gfx/gl/gldef.h>
 
 #include <iostream>
-
-#include "../gl/gldef.h"
 
 namespace cppual { namespace gfx {
 

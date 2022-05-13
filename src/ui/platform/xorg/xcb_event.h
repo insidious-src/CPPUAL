@@ -32,8 +32,11 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-#include "xcb_def.h"
+#include <cppual/ui/platforms/xcb/xcb_def.h>
+
 #include "xbackend.h"
+
+#include <X11/Xlibint.h>
 
 namespace cppual { namespace x {
 
@@ -444,6 +447,9 @@ public:
     constexpr event_ptr::pointer get () const noexcept
     { return _M_pEvent.get (); }
 
+    constexpr event_ptr::pointer get () noexcept
+    { return _M_pEvent.get (); }
+
     constexpr u32 type () const noexcept
     { return _M_pEvent->generic.response_type & ~0x80; }
 
@@ -503,6 +509,109 @@ public:
     ui::xcb_display::data_const_reference data (display_const_reference conn) noexcept
     {
         return static_cast<ui::xcb_display&> (*conn).data ();
+    }
+
+    constexpr
+    static
+    ui::xcb_display::atoms_refrence prev_atoms (display_const_reference conn) noexcept
+    {
+        return static_cast<ui::xcb_display&> (*conn).prev_atoms ();
+    }
+
+    void handle_secret_xlib_event (x::legacy_type* dpy, base_type* ev)
+    {
+        auto const response_type = ev->response_type & ~0x80;
+        Bool (* proc)(x::legacy_type*, ::XEvent*, ::xEvent*);
+
+        ::XLockDisplay (dpy);
+
+        proc = ::XESetWireToEvent (dpy, response_type, nullptr);
+
+        if (proc)
+        {
+            ::XESetWireToEvent (dpy, response_type, proc);
+            ::XEvent xev;
+
+            ev->sequence = static_cast<u16> (LastKnownRequestProcessed (dpy));
+            proc (dpy, &xev, (::xEvent*)(ev));
+        }
+
+        ::XUnlockDisplay (dpy);
+
+        //if (proc) return 1;
+
+        //return 0;
+    }
+
+    static
+    circular_queue<std::pair<x::atom_type, bool>> handle_wm_state (display_const_reference     conn,
+                                                                   vector<x::atom_type> const& atoms)
+    {
+        circular_queue<std::pair<x::atom_type, bool>> ret_atoms;
+        auto&                                         prev_atom_vector = prev_atoms (conn);
+
+        ret_atoms.reserve (prev_atom_vector.size () <= atoms.size () ?
+                           atoms.size () : prev_atom_vector.size  ());
+
+        if (prev_atom_vector.empty ())
+        {
+            for (auto i = 0U; i < atoms.size (); ++i)
+            {
+                prev_atom_vector.push_back (atoms[i]);
+                ret_atoms.push_back (std::make_pair (atoms[i], true));
+            }
+
+            return ret_atoms;
+        }
+
+        if (atoms.empty ())
+        {
+            for (auto n = 0U; n < prev_atom_vector.size (); ++n)
+            {
+                ret_atoms.push_back (std::make_pair (prev_atom_vector[n], false));
+            }
+
+            return ret_atoms;
+        }
+
+        for (auto i = 0U; i < atoms.size (); ++i)
+        {
+            for (auto n = 0U; n < prev_atom_vector.size (); ++n)
+            {
+                if (atoms[i] == prev_atom_vector[n]) continue;
+
+                auto state_it = std::find (atoms.cbegin (), atoms.cend (),
+                                           prev_atom_vector[n]);
+
+                auto atom_it = std::find (prev_atom_vector.begin (), prev_atom_vector.end (),
+                                          atoms[i]);
+
+                if (state_it == atoms.cend ())
+                {
+                    typedef circular_queue<x::atom_type>::const_iterator const_iterator;
+
+                    auto const prev_atom = prev_atom_vector[n];
+                    auto const pair = std::pair<x::atom_type, bool> (prev_atom, false);
+
+                    prev_atom_vector.erase (const_iterator (prev_atom_vector, n));
+
+                    if (ret_atoms.empty ()) ret_atoms.push_back (pair);
+                    else if (ret_atoms.back () != pair) ret_atoms.push_back (pair);
+                }
+
+                if (atom_it == prev_atom_vector.end ())
+                {
+                    auto const pair = std::pair<x::atom_type, bool> (atoms[i], true);
+
+                    prev_atom_vector.push_back (atoms[i]);
+
+                    if (ret_atoms.empty ()) ret_atoms.push_back (pair);
+                    else if (ret_atoms.back () != pair) ret_atoms.push_back (pair);
+                }
+            }
+        }
+
+        return ret_atoms;
     }
 
     inline event_type to_event (display_const_reference conn) const noexcept
@@ -593,7 +702,7 @@ public:
         return event_type (event_type::null);
     }
 
-    inline void operator () (display_const_reference conn) const
+    inline void operator () (display_const_reference conn)
     {
         switch (type ())
         {
@@ -660,14 +769,14 @@ public:
             ui::event_queue::events ().winFocus (window (), false);
             break;
         case TSize:
+            handle_secret_xlib_event (conn->legacy<x::legacy_type> (), &get ()->generic);
+
             ui::event_queue::events ().winSize (window (),
             { get ()->size.width, get ()->size.height });
             break;
         case TProperty:
             if (get ()->property.atom == data (conn)._NET_WM_STATE)
             {
-                std::cout << "_NET_WM_STATE property changed" << std::endl;
-
                 auto prop = x::get_property (conn->native<x::display_type> (),
                                              x::dont_delete,
                                              get ()->property.window,
@@ -676,32 +785,59 @@ public:
                                              x::offset_begin,
                                              x::atom_max_len);
 
+                if (prop->format != x::atom_format) break;
+
+                //std::cout << "_NET_WM_STATE property changed" << std::endl;
+
                 auto const states     = static_cast<x::atom_type*> (::xcb_get_property_value (&(*prop)));
                 auto const states_end = states + prop->length;
 
-                vector<x::atom_type> atoms (states, states_end);
+                vector<x::atom_type> const atoms (states, states_end);
+
+                std::cout << "prev_atoms";
+
+                for (auto atom : prev_atoms (conn))
+                {
+                    if (atom == x::atom_type ()) continue;
+
+                    std::cout << " :: [" << atom << "] "
+                              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                }
+
+                std::cout << "\n_NET_WM_STATE";
 
                 for (auto atom : atoms)
                 {
-                    std::cout << " :: "
+                    std::cout << " :: [" << atom << "] "
                               << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
                 }
 
                 std::cout << std::endl;
 
-                if  (prop->format == x::atom_format &&
-                    (states_end   != std::find (states, states_end,
-                                                data (conn)._NET_WM_STATE_MAXIMIZED_HORZ) ||
-                     states_end   != std::find (states, states_end,
-                                                data (conn)._NET_WM_STATE_MAXIMIZED_VERT)))
+                auto const changed_vector = handle_wm_state (conn, atoms);
+
+                for (auto& state : changed_vector)
                 {
-                     ui::event_queue::events ().winMaximize (window ());
+                    if (state.first == data (conn)._NET_WM_STATE_MAXIMIZED_HORZ ||
+                        state.first == data (conn)._NET_WM_STATE_MAXIMIZED_VERT)
+                    {
+                        ui::event_queue::events ().winMaximize (window (), state.second);
+                        //break;
+                    }
+                    else if (state.first == data (conn)._NET_WM_STATE_FULLSCREEN)
+                    {
+                        ui::event_queue::events ().winFullscreen (window (), state.second);
+                        //break;
+                    }
+                    else if (state.first == data (conn)._NET_WM_STATE_HIDDEN)
+                    {
+                        ui::event_queue::events ().winMinimize (window (), state.second);
+                        //break;
+                    }
                 }
             }
-            else if (get ()->property.atom == data (conn).WM_STATE)
+            /*else if (get ()->property.atom == data (conn).WM_STATE)
             {
-                std::cout << "WM_STATE property changed" << std::endl;
-
                 auto prop = x::get_property (conn->native<x::display_type> (),
                                              x::dont_delete,
                                              window (),
@@ -710,25 +846,48 @@ public:
                                              x::offset_begin,
                                              x::atom_max_len);
 
+                if (prop->format != x::atom_format) break;
+
+                //std::cout << "WM_STATE property changed" << std::endl;
+
                 auto const states     = static_cast<x::atom_type*> (::xcb_get_property_value (&(*prop)));
                 auto const states_end = states + prop->length;
 
-                vector<x::atom_type> atoms (states, states_end);
+                vector<x::atom_type> const atoms (states, states_end);
 
-                for (auto atom : atoms)
+                //std::cout << "prev_atoms";
+
+                //for (auto atom : prev_atoms (conn))
+                //{
+                      if (atom == x::atom_type ()) continue;
+                //
+                //    std::cout << " :: [" << atom << "] "
+                //              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                //}
+
+                //std::cout << std::endl;
+
+                //std::cout << "WM_STATE";
+
+                //for (auto atom : atoms)
+                //{
+                //    std::cout << " :: [" << atom << "] "
+                //              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                //}
+
+                //std::cout << std::endl;
+
+                auto const changed_vector = handle_wm_state (conn, atoms);
+
+                for (auto& state : changed_vector)
                 {
-                    std::cout << " :: "
-                              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                    if (state.first == data (conn)._NET_WM_STATE_HIDDEN)
+                    {
+                        ui::event_queue::events ().winMinimize (window (), state.second);
+                        //break;
+                    }
                 }
-
-                std::cout << std::endl;
-
-                if (prop->format == x::atom_format &&
-                    states_end   != std::find (states, states_end, data (conn)._NET_WM_STATE_HIDDEN))
-                {
-                    ui::event_queue::events ().winMinimize (window ());
-                }
-            }
+            }*/
             else
             {
                 ui::event_queue::events ().winProperty (window (),

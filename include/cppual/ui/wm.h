@@ -26,7 +26,6 @@
 #include <cppual/flags.h>
 #include <cppual/resource.h>
 #include <cppual/gfx/coord.h>
-#include <cppual/gfx/color.h>
 #include <cppual/ui/display.h>
 
 #include <thread>

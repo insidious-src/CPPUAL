@@ -102,8 +102,9 @@ public:
         signal<void(handle_type, event_type::property_data)> winProperty;
         signal<void(handle_type, bool)>                      winVisible;
         signal<void(handle_type)>                            winHelp;
-        signal<void(handle_type)>                            winMinimize;
-        signal<void(handle_type)>                            winMaximize;
+        signal<void(handle_type, bool)>                      winMinimize;
+        signal<void(handle_type, bool)>                      winMaximize;
+        signal<void(handle_type, bool)>                      winFullscreen;
         signal<void(handle_type)>                            winClose;
     };
 

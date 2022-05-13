@@ -157,7 +157,7 @@ public:
       _M_endPos      (),
       _M_uCapacity   (_M_pArray ? list.size() : size_type())
     {
-        if (_M_pArray && list.size ()) for (reference val : list) push_back (std::move(val));
+        if (_M_pArray && list.size ()) for (auto val : list) push_back (std::move(val));
     }
 
     inline
@@ -405,7 +405,7 @@ private:
     constexpr
     size_type index_to_subscript (size_type uIdx) const noexcept
     {
-        return !empty () ?
+        return !empty () && capacity () ?
                     static_cast<size_type> (((_M_beginPos + uIdx) - _M_pArray) % _capacity ()) :
                     npos;
     }

@@ -66,8 +66,8 @@ public:
 
     constexpr static resource_type type () noexcept { return Type; }
 
-    constexpr operator handle_type::pointer () const noexcept
-    { return handle<handle_type::pointer>(); }
+    constexpr operator handle_type::value_type () const noexcept
+    { return handle<handle_type::value_type>(); }
 
 protected:
     constexpr object (handle_type handle) noexcept

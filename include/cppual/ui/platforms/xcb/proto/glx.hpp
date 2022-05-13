@@ -1560,7 +1560,7 @@ CookieFunction>
             SIGNATURE(xcb_glx_get_fb_configs_property_list),
             SIGNATURE(xcb_glx_get_fb_configs_property_list_length)>
             >
-            property_list(void)
+            property_list()
     {
         return cppual::generic::list<Connection,
                 ::xcb_glx_get_fb_configs_reply_t,
@@ -7086,10 +7086,6 @@ public:
 
 }; // class window
 
-
-
-
-
 template<typename Derived, typename Connection>
 class interface
 {
@@ -7102,7 +7098,6 @@ protected:
 
 public:
     typedef cppual::glx::extension extension;
-
 
     virtual ~interface(void) {}
 
@@ -7125,7 +7120,7 @@ public:
     render(Parameter && ... parameter) const
     {
         cppual::glx::render(connection(),
-                         std::forward<Parameter>(parameter) ...);
+                            std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7134,7 +7129,7 @@ public:
     render_large_checked(Parameter && ... parameter) const
     {
         cppual::glx::render_large_checked(connection(),
-                                       std::forward<Parameter>(parameter) ...);
+                                          std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7142,7 +7137,7 @@ public:
     render_large(Parameter && ... parameter) const
     {
         cppual::glx::render_large(connection(),
-                               std::forward<Parameter>(parameter) ...);
+                                  std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7151,7 +7146,7 @@ public:
     create_context_checked(Parameter && ... parameter) const
     {
         cppual::glx::create_context_checked(connection(),
-                                         std::forward<Parameter>(parameter) ...);
+                                            std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7159,7 +7154,7 @@ public:
     create_context(Parameter && ... parameter) const
     {
         cppual::glx::create_context(connection(),
-                                 std::forward<Parameter>(parameter) ...);
+                                    std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7176,7 +7171,7 @@ public:
     destroy_context(Parameter && ... parameter) const
     {
         cppual::glx::destroy_context(connection(),
-                                  std::forward<Parameter>(parameter) ...);
+                                     std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7248,7 +7243,7 @@ public:
     wait_gl_checked(Parameter && ... parameter) const
     {
         cppual::glx::wait_gl_checked(connection(),
-                                  std::forward<Parameter>(parameter) ...);
+                                     std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7256,7 +7251,7 @@ public:
     wait_gl(Parameter && ... parameter) const
     {
         cppual::glx::wait_gl(connection(),
-                          std::forward<Parameter>(parameter) ...);
+                             std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7265,7 +7260,7 @@ public:
     wait_x_checked(Parameter && ... parameter) const
     {
         cppual::glx::wait_x_checked(connection(),
-                                 std::forward<Parameter>(parameter) ...);
+                                    std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7273,7 +7268,7 @@ public:
     wait_x(Parameter && ... parameter) const
     {
         cppual::glx::wait_x(connection(),
-                         std::forward<Parameter>(parameter) ...);
+                            std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7282,7 +7277,7 @@ public:
     copy_context_checked(Parameter && ... parameter) const
     {
         cppual::glx::copy_context_checked(connection(),
-                                       std::forward<Parameter>(parameter) ...);
+                                          std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7290,7 +7285,7 @@ public:
     copy_context(Parameter && ... parameter) const
     {
         cppual::glx::copy_context(connection(),
-                               std::forward<Parameter>(parameter) ...);
+                                  std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7299,7 +7294,7 @@ public:
     swap_buffers_checked(Parameter && ... parameter) const
     {
         cppual::glx::swap_buffers_checked(connection(),
-                                       std::forward<Parameter>(parameter) ...);
+                                          std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7307,7 +7302,7 @@ public:
     swap_buffers(Parameter && ... parameter) const
     {
         cppual::glx::swap_buffers(connection(),
-                               std::forward<Parameter>(parameter) ...);
+                                  std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7333,7 +7328,7 @@ public:
     create_glx_pixmap_checked(Parameter && ... parameter) const
     {
         cppual::glx::create_glx_pixmap_checked(connection(),
-                                            std::forward<Parameter>(parameter) ...);
+                                               std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7341,7 +7336,7 @@ public:
     create_glx_pixmap(Parameter && ... parameter) const
     {
         cppual::glx::create_glx_pixmap(connection(),
-                                    std::forward<Parameter>(parameter) ...);
+                                       std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7379,7 +7374,7 @@ public:
     destroy_glx_pixmap(Parameter && ... parameter) const
     {
         cppual::glx::destroy_glx_pixmap(connection(),
-                                     std::forward<Parameter>(parameter) ...);
+                                        std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7388,7 +7383,7 @@ public:
     vendor_private_checked(Parameter && ... parameter) const
     {
         cppual::glx::vendor_private_checked(connection(),
-                                         std::forward<Parameter>(parameter) ...);
+                                            std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7396,7 +7391,7 @@ public:
     vendor_private(Parameter && ... parameter) const
     {
         cppual::glx::vendor_private(connection(),
-                                 std::forward<Parameter>(parameter) ...);
+                                    std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7506,7 +7501,7 @@ public:
     create_pixmap_checked(Parameter && ... parameter) const
     {
         cppual::glx::create_pixmap_checked(connection(),
-                                        std::forward<Parameter>(parameter) ...);
+                                           std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7514,7 +7509,7 @@ public:
     create_pixmap(Parameter && ... parameter) const
     {
         cppual::glx::create_pixmap(connection(),
-                                std::forward<Parameter>(parameter) ...);
+                                   std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7523,7 +7518,7 @@ public:
     destroy_pixmap_checked(Parameter && ... parameter) const
     {
         cppual::glx::destroy_pixmap_checked(connection(),
-                                         std::forward<Parameter>(parameter) ...);
+                                            std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7531,7 +7526,7 @@ public:
     destroy_pixmap(Parameter && ... parameter) const
     {
         cppual::glx::destroy_pixmap(connection(),
-                                 std::forward<Parameter>(parameter) ...);
+                                    std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7540,7 +7535,7 @@ public:
     create_new_context_checked(Parameter && ... parameter) const
     {
         cppual::glx::create_new_context_checked(connection(),
-                                             std::forward<Parameter>(parameter) ...);
+                                                std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7548,7 +7543,7 @@ public:
     create_new_context(Parameter && ... parameter) const
     {
         cppual::glx::create_new_context(connection(),
-                                     std::forward<Parameter>(parameter) ...);
+                                        std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7599,7 +7594,7 @@ public:
     create_pbuffer_checked(Parameter && ... parameter) const
     {
         cppual::glx::create_pbuffer_checked(connection(),
-                                         std::forward<Parameter>(parameter) ...);
+                                            std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7607,7 +7602,7 @@ public:
     create_pbuffer(Parameter && ... parameter) const
     {
         cppual::glx::create_pbuffer(connection(),
-                                 std::forward<Parameter>(parameter) ...);
+                                    std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7616,7 +7611,7 @@ public:
     destroy_pbuffer_checked(Parameter && ... parameter) const
     {
         cppual::glx::destroy_pbuffer_checked(connection(),
-                                          std::forward<Parameter>(parameter) ...);
+                                             std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7624,7 +7619,7 @@ public:
     destroy_pbuffer(Parameter && ... parameter) const
     {
         cppual::glx::destroy_pbuffer(connection(),
-                                  std::forward<Parameter>(parameter) ...);
+                                     std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7654,7 +7649,7 @@ public:
     change_drawable_attributes_checked(Parameter && ... parameter) const
     {
         cppual::glx::change_drawable_attributes_checked(connection(),
-                                                     std::forward<Parameter>(parameter) ...);
+                                                        std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7662,7 +7657,7 @@ public:
     change_drawable_attributes(Parameter && ... parameter) const
     {
         cppual::glx::change_drawable_attributes(connection(),
-                                             std::forward<Parameter>(parameter) ...);
+                                                std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7671,7 +7666,7 @@ public:
     create_window_checked(Parameter && ... parameter) const
     {
         cppual::glx::create_window_checked(connection(),
-                                        std::forward<Parameter>(parameter) ...);
+                                           std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7679,7 +7674,7 @@ public:
     create_window(Parameter && ... parameter) const
     {
         cppual::glx::create_window(connection(),
-                                std::forward<Parameter>(parameter) ...);
+                                   std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7688,7 +7683,7 @@ public:
     delete_window_checked(Parameter && ... parameter) const
     {
         cppual::glx::delete_window_checked(connection(),
-                                        std::forward<Parameter>(parameter) ...);
+                                           std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7696,7 +7691,7 @@ public:
     delete_window(Parameter && ... parameter) const
     {
         cppual::glx::delete_window(connection(),
-                                std::forward<Parameter>(parameter) ...);
+                                   std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7705,7 +7700,7 @@ public:
     set_client_info_arb_checked(Parameter && ... parameter) const
     {
         cppual::glx::set_client_info_arb_checked(connection(),
-                                              std::forward<Parameter>(parameter) ...);
+                                                 std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7713,7 +7708,7 @@ public:
     set_client_info_arb(Parameter && ... parameter) const
     {
         cppual::glx::set_client_info_arb(connection(),
-                                      std::forward<Parameter>(parameter) ...);
+                                         std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7722,7 +7717,7 @@ public:
     create_context_attribs_arb_checked(Parameter && ... parameter) const
     {
         cppual::glx::create_context_attribs_arb_checked(connection(),
-                                                     std::forward<Parameter>(parameter) ...);
+                                                        std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7730,7 +7725,7 @@ public:
     create_context_attribs_arb(Parameter && ... parameter) const
     {
         cppual::glx::create_context_attribs_arb(connection(),
-                                             std::forward<Parameter>(parameter) ...);
+                                                std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7739,7 +7734,7 @@ public:
     set_client_info_2arb_checked(Parameter && ... parameter) const
     {
         cppual::glx::set_client_info_2arb_checked(connection(),
-                                               std::forward<Parameter>(parameter) ...);
+                                                  std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7747,7 +7742,7 @@ public:
     set_client_info_2arb(Parameter && ... parameter) const
     {
         cppual::glx::set_client_info_2arb(connection(),
-                                       std::forward<Parameter>(parameter) ...);
+                                          std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7756,7 +7751,7 @@ public:
     new_list_checked(Parameter && ... parameter) const
     {
         cppual::glx::new_list_checked(connection(),
-                                   std::forward<Parameter>(parameter) ...);
+                                      std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7764,7 +7759,7 @@ public:
     new_list(Parameter && ... parameter) const
     {
         cppual::glx::new_list(connection(),
-                           std::forward<Parameter>(parameter) ...);
+                              std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7773,7 +7768,7 @@ public:
     end_list_checked(Parameter && ... parameter) const
     {
         cppual::glx::end_list_checked(connection(),
-                                   std::forward<Parameter>(parameter) ...);
+                                      std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7781,7 +7776,7 @@ public:
     end_list(Parameter && ... parameter) const
     {
         cppual::glx::end_list(connection(),
-                           std::forward<Parameter>(parameter) ...);
+                              std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7790,7 +7785,7 @@ public:
     delete_lists_checked(Parameter && ... parameter) const
     {
         cppual::glx::delete_lists_checked(connection(),
-                                       std::forward<Parameter>(parameter) ...);
+                                          std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7798,7 +7793,7 @@ public:
     delete_lists(Parameter && ... parameter) const
     {
         cppual::glx::delete_lists(connection(),
-                               std::forward<Parameter>(parameter) ...);
+                                  std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7828,7 +7823,7 @@ public:
     feedback_buffer_checked(Parameter && ... parameter) const
     {
         cppual::glx::feedback_buffer_checked(connection(),
-                                          std::forward<Parameter>(parameter) ...);
+                                             std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7836,7 +7831,7 @@ public:
     feedback_buffer(Parameter && ... parameter) const
     {
         cppual::glx::feedback_buffer(connection(),
-                                  std::forward<Parameter>(parameter) ...);
+                                     std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7845,7 +7840,7 @@ public:
     select_buffer_checked(Parameter && ... parameter) const
     {
         cppual::glx::select_buffer_checked(connection(),
-                                        std::forward<Parameter>(parameter) ...);
+                                           std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7853,7 +7848,7 @@ public:
     select_buffer(Parameter && ... parameter) const
     {
         cppual::glx::select_buffer(connection(),
-                                std::forward<Parameter>(parameter) ...);
+                                   std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7904,7 +7899,7 @@ public:
     pixel_storef_checked(Parameter && ... parameter) const
     {
         cppual::glx::pixel_storef_checked(connection(),
-                                       std::forward<Parameter>(parameter) ...);
+                                          std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7912,7 +7907,7 @@ public:
     pixel_storef(Parameter && ... parameter) const
     {
         cppual::glx::pixel_storef(connection(),
-                               std::forward<Parameter>(parameter) ...);
+                                  std::forward<Parameter>(parameter) ...);
     }
 
 
@@ -7921,7 +7916,7 @@ public:
     pixel_storei_checked(Parameter && ... parameter) const
     {
         cppual::glx::pixel_storei_checked(connection(),
-                                       std::forward<Parameter>(parameter) ...);
+                                          std::forward<Parameter>(parameter) ...);
     }
 
     template<typename ... Parameter>
@@ -7929,7 +7924,7 @@ public:
     pixel_storei(Parameter && ... parameter) const
     {
         cppual::glx::pixel_storei(connection(),
-                               std::forward<Parameter>(parameter) ...);
+                                  std::forward<Parameter>(parameter) ...);
     }
 
 

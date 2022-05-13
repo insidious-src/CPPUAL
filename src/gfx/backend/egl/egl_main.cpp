@@ -33,13 +33,15 @@ namespace cppual { namespace gfx {
 
 struct egl_factory final : public draw_factory
 {
-    shared_surface create_surface (connection_type conn,
+    shared_surface create_surface (connection_type native,
+                                   connection_type legacy,
                                    pixel_format format,
                                    point2u size,
                                    handle_type wnd,
                                    surface_type type);
 
-    shared_context create_context (connection_type conn,
+    shared_context create_context (connection_type native,
+                                   connection_type legacy,
                                    pixel_format format,
                                    shared_context shared);
 
@@ -47,23 +49,25 @@ struct egl_factory final : public draw_factory
     shared_painter create_painter ();
 };
 
-shared_surface egl_factory::create_surface (connection_type conn,
+shared_surface egl_factory::create_surface (connection_type /*native*/,
+                                            connection_type legacy,
                                             pixel_format    format,
                                             point2u         size,
                                             handle_type     wnd,
                                             surface_type    type)
 {
-    return shared_surface (new gl::surface (gl::config (conn, format),
+    return shared_surface (new gl::surface (gl::config (legacy, format),
                                             size,
                                             wnd,
                                             type));
 }
 
-shared_context egl_factory::create_context (connection_type conn,
+shared_context egl_factory::create_context (connection_type /*native*/,
+                                            connection_type legacy,
                                             pixel_format    format,
                                             shared_context  shared)
 {
-    return shared_context (new gl::context (gl::config(conn, format),
+    return shared_context (new gl::context (gl::config(legacy, format),
                                             gl::context::default_version (),
                                             shared));
 }

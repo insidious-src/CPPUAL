@@ -27,15 +27,19 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-#include "xcb_def.h"
+#include <cppual/ui/platforms/xcb/xcb_def.h>
+#include <cppual/circular_queue.h>
 
 namespace cppual { namespace ui {
 
 class SHARED_API xcb_display final : public display_interface
 {
 public:
-    typedef x::display_data&       data_reference      ;
-    typedef x::display_data const& data_const_reference;
+    typedef x::display_data&             data_reference      ;
+    typedef x::display_data const&       data_const_reference;
+    typedef circular_queue<x::atom_type> atoms_container     ;
+    typedef atoms_container&             atoms_refrence      ;
+    typedef atoms_container const&       atoms_const_refrence;
 
     xcb_display () = delete;
     xcb_display (string_type const& name);
@@ -49,9 +53,16 @@ public:
     constexpr data_const_reference data () const noexcept
     { return _M_data; }
 
+    constexpr atoms_refrence prev_atoms () noexcept
+    { return _M_prevAtoms; }
+
+    constexpr atoms_const_refrence prev_atoms () const noexcept
+    { return _M_prevAtoms; }
+
 private:
-    string_type     _M_gName;
-    x::display_data _M_data ;
+    string_type     _M_gName    ;
+    x::display_data _M_data     ;
+    atoms_container _M_prevAtoms;
 };
 
 } } // namespace Ui

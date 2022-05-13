@@ -111,8 +111,9 @@ protected:
     virtual void min_max_size_event (point2u);
     virtual void focus_event (bool);
     virtual void help_event ();
-    virtual void minimize_event ();
-    virtual void maximize_event ();
+    virtual void minimize_event (bool is_minimized);
+    virtual void maximize_event (bool is_maximized);
+    virtual void fullscreen_event (bool is_fullscreen);
     virtual void close_event ();
 
     virtual void on_enable (bool);

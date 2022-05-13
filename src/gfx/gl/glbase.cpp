@@ -23,8 +23,7 @@
 
 #include <cppual/gfx/gl/glbase.h>
 #include <cppual/gfx/draw.h>
-
-#include "gldef.h"
+#include <cppual/gfx/gl/gldef.h>
 
 namespace cppual { namespace gfx { namespace gl {
 

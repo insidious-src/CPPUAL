@@ -23,13 +23,10 @@
 #include <cppual/gfx/gl/ext.h>
 #include <cppual/func.h>
 
-#include <fstream>
-
 #define GL_GLEXT_PROTOTYPES
-#include "gldef.h"
+#include <cppual/gfx/gl/gldef.h>
 
-using std::ios_base;
-using std::ifstream;
+#include <fstream>
 
 namespace cppual { namespace gfx { namespace gl {
 
@@ -116,7 +113,7 @@ bool texture::load_texture_2d (string const&      gFilePath,
                                bool               bGenMipMaps)
 {
     if (!handle () or _M_gStates.test (texture::IsLoaded)) return false;
-    ifstream gFile (gFilePath.c_str(), ios_base::binary);
+    std::ifstream gFile (gFilePath.c_str(), std::ios_base::binary);
     uint     uFormat;
 
     if (gFile.is_open ())

@@ -22,8 +22,7 @@
 #include <cppual/gfx/gl/glsl.h>
 #include <cppual/string.h>
 #include <cppual/gfx/draw.h>
-
-#include "gldef.h"
+#include <cppual/gfx/gl/gldef.h>
 
 #include <fstream>
 #include <algorithm>

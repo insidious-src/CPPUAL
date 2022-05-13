@@ -24,7 +24,7 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-#include "xcb_def.h"
+//#include <cppual/ui/platforms/xcb/xcb_def.h>
 
 #include <iostream>
 
@@ -64,6 +64,8 @@ xcb_display::xcb_display (string_type const& name)
         std::cerr << "error when connecting to display: "
                   << name << std::endl;
     }
+
+    _M_prevAtoms.reserve (15);
 }
 
 xcb_display::~xcb_display ()

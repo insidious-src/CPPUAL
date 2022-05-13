@@ -21,7 +21,7 @@
 
 #include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/query.h>
-#include "gldef.h"
+#include <cppual/gfx/gl/gldef.h>
 
 namespace cppual { namespace gfx { namespace gl {
 

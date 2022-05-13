@@ -22,8 +22,7 @@
 #include <cppual/gfx/gl/runtime.h>
 #include <cppual/gfx/draw.h>
 #include <cppual/containers.h>
-
-#include "gldef.h"
+#include <cppual/gfx/gl/gldef.h>
 
 #include <algorithm>
 #include <vector>

@@ -71,33 +71,35 @@ typedef bitset<resource_type> resource_types;
 
 // =========================================================
 
-class resource_handle final
+class resource_handle
 {
 public:
-    typedef void*                      pointer  ;
-    typedef pointer resource_handle::* safe_bool;
+    typedef uptr  value_type;
+    typedef void* pointer   ;
 
     constexpr resource_handle () noexcept = default;
-    constexpr resource_handle (pointer _handle) noexcept : _M_handle (_handle) { }
-    constexpr resource_handle (std::nullptr_t ) noexcept : _M_handle ()        { }
-    inline    resource_handle (resource_handle&&) noexcept         = default;
-    constexpr resource_handle (resource_handle const&) noexcept    = default;
-    inline    resource_handle& operator = (resource_handle&&)      = default;
-    inline    resource_handle& operator = (resource_handle const&) = default;
+    constexpr resource_handle (value_type _handle) noexcept : _M_handle (_handle) { }
+    constexpr resource_handle (pointer    _handle) noexcept : _M_handle (direct_cast<uptr> (_handle)) { }
+    constexpr resource_handle (std::nullptr_t    ) noexcept : _M_handle ()  { }
+
+    inline    resource_handle (resource_handle&&)                  noexcept = default;
+    constexpr resource_handle (resource_handle const&)             noexcept = default;
+    inline    resource_handle& operator = (resource_handle&&)      noexcept = default;
+    inline    resource_handle& operator = (resource_handle const&) noexcept = default;
 
     template <typename T,
               typename = typename std::enable_if<is_integer<T>::value>::type
               >
-    constexpr resource_handle (T _handle) noexcept : _M_handle (unsafe_direct_cast<pointer> (_handle))
+    constexpr resource_handle (T _handle) noexcept : _M_handle (static_cast<value_type> (_handle))
     {
         static_assert (sizeof (T) <= sizeof (pointer), "T is bigger than the size of a pointer!");
     }
 
     constexpr operator pointer () const noexcept
-    { return _M_handle; }
+    { return direct_cast<pointer> (_M_handle); }
 
-    constexpr operator uptr () const noexcept
-    { return direct_cast<uptr> (_M_handle); }
+    constexpr operator value_type () const noexcept
+    { return _M_handle; }
 
     template <typename T,
               typename =
@@ -106,7 +108,7 @@ public:
     constexpr T get () const noexcept
     {
         static_assert (sizeof (T) <= sizeof (pointer), "T is bigger than the size of a pointer!");
-        return unsafe_direct_cast<T> (_M_handle);
+        return static_cast<T> (_M_handle);
     }
 
     template <typename T,
@@ -118,7 +120,7 @@ public:
               >
     constexpr typename std::remove_pointer<T>::type* get () const noexcept
     {
-        return static_cast<typename std::remove_pointer<T>::type*> (_M_handle);
+        return direct_cast<typename std::remove_pointer<T>::type*> (_M_handle);
     }
 
     template <typename T,
@@ -131,9 +133,9 @@ public:
         return *this;
     }
 
-    constexpr explicit operator safe_bool () const noexcept
+    constexpr explicit operator bool () const noexcept
     {
-        return _M_handle ? &resource_handle::_M_handle : nullptr;
+        return _M_handle;
     }
 
     friend
@@ -145,8 +147,16 @@ public:
     friend
     constexpr bool operator == (std::nullptr_t, resource_handle const&) noexcept;
 
+    template <typename T, typename>
+    friend
+    constexpr bool operator == (resource_handle const&, T) noexcept;
+
+    template <typename T, typename>
+    friend
+    constexpr bool operator == (T, resource_handle const&) noexcept;
+
 private:
-    pointer _M_handle { };
+    value_type _M_handle { };
 };
 
 // =========================================================
@@ -155,10 +165,34 @@ constexpr bool operator == (resource_handle const& lh, resource_handle const& rh
 { return lh._M_handle == rh._M_handle; }
 
 constexpr bool operator == (resource_handle const& lh, std::nullptr_t) noexcept
-{ return lh._M_handle == nullptr; }
+{ return lh._M_handle == resource_handle::value_type (); }
 
 constexpr bool operator == (std::nullptr_t, resource_handle const& rh) noexcept
-{ return rh._M_handle == nullptr; }
+{ return rh._M_handle == resource_handle::value_type (); }
+
+template <typename T,
+          typename =
+          typename std::enable_if<is_integer<T>::value>::type
+          >
+constexpr bool operator == (resource_handle const& lh, T rh) noexcept
+{
+    static_assert (sizeof (T) <= sizeof (resource_handle::pointer),
+                   "T is bigger than the size of a pointer!");
+
+    return lh._M_handle == static_cast<resource_handle::value_type> (rh);
+}
+
+template <typename T,
+          typename =
+          typename std::enable_if<is_integer<T>::value>::type
+          >
+constexpr bool operator == (T lh, resource_handle const& rh) noexcept
+{
+    static_assert (sizeof (T) <= sizeof (resource_handle::pointer),
+                   "T is bigger than the size of a pointer!");
+
+    return static_cast<resource_handle::value_type> (lh) == rh._M_handle;
+}
 
 constexpr bool operator != (resource_handle const& lh, resource_handle const& rh) noexcept
 { return !(lh == rh); }
@@ -168,6 +202,20 @@ constexpr bool operator != (resource_handle const& lh, std::nullptr_t) noexcept
 
 constexpr bool operator != (std::nullptr_t, resource_handle const& rh) noexcept
 { return !(rh == nullptr); }
+
+template <typename U,
+          typename =
+          typename std::enable_if<is_integer<U>::value>::type
+          >
+constexpr bool operator != (resource_handle const& lh, U const& rh) noexcept
+{ return !(lh == rh); }
+
+template <typename U,
+          typename =
+          typename std::enable_if<is_integer<U>::value>::type
+          >
+constexpr bool operator != (U const& lh, resource_handle const& rh) noexcept
+{ return !(lh == rh); }
 
 // =========================================================
 
@@ -272,9 +320,9 @@ template <class ID>
 class resource <void, ID>
 {
 public:
-    typedef ID                       value_type ;
-    typedef resource_handle          handle_type;
-    typedef handle_type* resource::* safe_bool  ;
+    typedef ID                    value_type ;
+    typedef resource_handle       handle_type;
+    typedef resource* resource::* safe_bool  ;
 
     constexpr resource () noexcept = default;
     resource (resource&&) = default;
@@ -297,7 +345,7 @@ public:
 
     constexpr explicit operator safe_bool () const noexcept
     {
-        return _M_handle ? &resource::_M_handle : nullptr;
+        return _M_handle ? this : nullptr;
     }
 
     template <class ID_>

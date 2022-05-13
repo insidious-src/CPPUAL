@@ -375,7 +375,13 @@ public:
     }
 
     constexpr bool operator == (function const& mImpl) const noexcept
-    { return _M_closure == mImpl._M_closure && _M_storage == mImpl._M_storage; }
+    {
+        return _M_storage == mImpl._M_storage ?
+                    _M_storage.get () == nullptr ?
+                        _M_closure == mImpl._M_closure :
+                        _M_closure.ptr_function () == mImpl._M_closure.ptr_function () :
+                        _M_closure == mImpl._M_closure;
+    }
 
     constexpr bool operator == (static_fn_type mFuncPtr) const noexcept
     { return _M_closure == mFuncPtr; }

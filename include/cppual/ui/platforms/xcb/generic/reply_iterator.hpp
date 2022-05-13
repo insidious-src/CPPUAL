@@ -92,7 +92,23 @@ struct function_traits<R(Args...)>
         using type = typename std::tuple_element<I, std::tuple<Args...>>::type;
     };
 };
+
 }
+
+/// iterator reimplementation
+template<class _Category,
+         class _Tp,
+         class _Distance  = ptrdiff_t,
+         class _Pointer   = _Tp*,
+         class _Reference = _Tp&>
+struct basic_iterator
+{
+    typedef _Tp        value_type;
+    typedef _Distance  difference_type;
+    typedef _Pointer   pointer;
+    typedef _Reference reference;
+    typedef _Category  iterator_category;
+};
 
 // iterator for variable size data fields
 
@@ -112,7 +128,7 @@ class iterator<Connection,
         cppual::generic::signature<NextTemplate, Next>,
         cppual::generic::signature<SizeOfTemplate, SizeOf>,
         cppual::generic::signature<GetIteratorTemplate, GetIterator>>
-        : public std::iterator<typename std::input_iterator_tag,
+        : public basic_iterator<typename std::input_iterator_tag,
         Object,
         typename std::size_t,
         Object *,
@@ -237,7 +253,7 @@ class iterator<Connection,
         Object,
         signature<AccessorTemplate, Accessor>,
         signature<LengthTemplate, Length>>
-        : public std::iterator<typename std::input_iterator_tag,
+        : public basic_iterator<typename std::input_iterator_tag,
         Object,
         typename std::size_t,
         Object *,

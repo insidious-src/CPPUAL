@@ -624,10 +624,10 @@ if(TARGET cppual-gfx AND OPENGL_FOUND)
 
 # OpenGL/ES library
 add_library(cppual-gl SHARED
-    "src/gfx/gl/glad.h"
+    "include/cppual/gfx/gl/glad.h"
     "src/gfx/gl/glad.c"
-    "src/gfx/gl/khrplatform.h"
-    "src/gfx/gl/gldef.h"
+    "include/cppual/gfx/gl/khrplatform.h"
+    "include/cppual/gfx/gl/gldef.h"
     "src/gfx/gl/glbase.cpp"
     "include/cppual/gfx/gl/glbase.h"
     "src/gfx/gl/runtime.cpp"
@@ -669,6 +669,8 @@ if(TARGET cppual-gfx)
         if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND XCB_GLX_FOUND)
             add_library(cppual-gfx-glx MODULE
                 "src/gfx/backend/glx/glx_main.cpp"
+                "src/gfx/backend/glx/glx_surface.h"
+                "src/gfx/backend/glx/glx_surface.cpp"
                 )
         endif()
     endif()
@@ -832,6 +834,8 @@ add_library(cppual-ui-xorg MODULE
     "include/cppual/ui/platforms/xcb/valueparam.hpp"
     "include/cppual/ui/platforms/xcb/window.hpp"
     "include/cppual/ui/platforms/xcb/xcb.hpp"
+    "include/cppual/ui/platforms/xcb/xcb_def.h"
+    "include/cppual/ui/platforms/xcb/xcb_iterator.h"
     "src/ui/platform/xorg/xmain.cpp"
     "src/ui/platform/xorg/xbackend.cpp"
     "src/ui/platform/xorg/xbackend.h"
@@ -839,10 +843,8 @@ add_library(cppual-ui-xorg MODULE
     "src/ui/platform/xorg/xwindow.h"
     "src/ui/platform/xorg/xinput.cpp"
     "src/ui/platform/xorg/xinput.h"
-    "src/ui/platform/xorg/xcb_def.h"
     "src/ui/platform/xorg/xcb_event.h"
     "src/ui/platform/xorg/xcb_window.h"
-    "src/ui/platform/xorg/xcb_iterator.h"
     )
 
 # graphical user interface - platform Wayland
@@ -881,15 +883,15 @@ if(TARGET cppual-gfx)
     endif()
 
     if(OPENGL_FOUND)
-        target_link_libraries(cppual-gl cppual-gfx cppual-memory OpenGL::Library)
+        target_link_libraries(cppual-gl cppual-gfx cppual-memory OpenGL::Library GLEW::Library)
     endif()
 
     if(TARGET cppual-gl AND EGL_FOUND)
-        target_link_libraries(cppual-gfx-egl cppual-gfx cppual-gl OpenGL::Library EGL::Library)
+        target_link_libraries(cppual-gfx-egl cppual-gfx cppual-gl OpenGL::Library EGL::Library GLEW::Library)
     endif()
 
     if(TARGET cppual-gl AND XCB_GLX_FOUND)
-        target_link_libraries(cppual-gfx-glx cppual-gfx cppual-gl OpenGL::Library XCB_GLX::Library)
+        target_link_libraries(cppual-gfx-glx cppual-gfx cppual-gl OpenGL::Library X11::Library GLEW::Library)
     endif()
 
     if(VULKAN_FOUND)

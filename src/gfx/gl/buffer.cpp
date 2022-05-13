@@ -20,7 +20,7 @@
  */
 
 #include <cppual/gfx/gl/buffer.h>
-#include "gldef.h"
+#include <cppual/gfx/gl/gldef.h>
 
 namespace cppual { namespace gfx { namespace gl {
 

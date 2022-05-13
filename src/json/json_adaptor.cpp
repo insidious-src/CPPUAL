@@ -111,8 +111,21 @@ bool doc_parser::create_document(string_type const& file_path, doc_type type)
             _M_type = doc_type::object;
         }
     }
-
-    if (!IsArray() && !IsObject()) _M_type = doc_type::null;
+    else
+    {
+        switch (GetType ())
+        {
+        case kObjectType:
+            _M_type = doc_type::object;
+            break;
+        case kArrayType:
+            _M_type = doc_type::array;
+            break;
+        default:
+            _M_type = doc_type::null;
+            break;
+        }
+    }
 
     changed();
 
@@ -167,61 +180,52 @@ doc_parser::reference doc_parser::operator [] (size_type idx)
 
 // ======================================================================
 
-template_object::template_object(doc_parser& _parser, string_type const& _category)
+template_base::template_base(doc_parser& _parser, string_type const& _category)
 : _M_owner(),
   _M_parser(&_parser),
   _M_ref(),
   _M_category(_category),
   _M_index(npos)
 {
-    assign_from_parser_object();
-    connections();
 }
 
-template_object::template_object(doc_parser& _parser, size_type _index)
+template_base::template_base(doc_parser& _parser, size_type _index)
 : _M_owner(),
   _M_parser(&_parser),
   _M_ref(),
   _M_category(),
   _M_index(_index)
 {
-    assign_from_parser_array();
-    connections();
 }
 
-template_object::template_object(template_object* _owner, string_type const& _category)
+template_base::template_base(template_object* _owner, string_type const& _category)
 : _M_owner(*_owner),
   _M_parser(_owner->parser()),
   _M_ref(),
   _M_category(_category),
   _M_index(npos)
 {
-    assign_from_object();
-    connections();
 }
 
-template_object::template_object(template_array* _owner, size_type _idx)
+template_base::template_base(template_array* _owner, size_type _idx)
 : _M_owner(*_owner),
   _M_parser(_owner->parser()),
   _M_ref(),
   _M_category(),
   _M_index(_idx)
 {
-    assign_from_array();
-    connections();
 }
 
-template_object::template_object(template_object const& obj)
+template_base::template_base(template_base const& obj)
 : _M_owner(obj._M_owner),
   _M_parser(obj._M_parser),
   _M_ref(obj._M_ref),
   _M_category(obj._M_category),
   _M_index(obj._M_index)
 {
-    connections();
 }
 
-template_object::template_object(template_object&& obj)
+template_base::template_base(template_base&& obj)
 : _M_owner(obj._M_owner),
   _M_parser(obj._M_parser),
   _M_ref(obj._M_ref),
@@ -229,10 +233,9 @@ template_object::template_object(template_object&& obj)
   _M_index(obj._M_index)
 {
     obj.invalidate();
-    connections();
 }
 
-template_object& template_object::operator = (template_object const& obj)
+template_base& template_base::operator = (template_base const& obj)
 {
     if (this == &obj) return *this;
 
@@ -248,33 +251,146 @@ template_object& template_object::operator = (template_object const& obj)
 
     changed();
 
+    return *this;
+}
+
+template_base& template_base::operator = (template_base&& obj)
+{
+    if (this == &obj) return *this;
+
+    disconnections();
+
+    _M_parser   = obj._M_parser;
+    _M_ref      = obj._M_ref;
+    _M_category = obj._M_category;
+    _M_index    = obj._M_index;
+    _M_owner    = obj._M_owner;
+
+    obj.invalidate();
+    connections();
+
+    changed();
+
+    return *this;
+}
+
+template_base::~template_base()
+{
+    destroyed ();
+}
+
+template_base::size_type template_base::size() const
+{
+    assert(_M_ref != nullptr);
+    return type () == doc_parser::doc_type::object ?
+                _M_ref->MemberCount () :
+                type () == doc_parser::doc_type::array ?
+                    _M_ref->Size () :
+                    size_type ();
+}
+
+bool template_base::empty() const
+{
+    assert(_M_ref != nullptr);
+    return type () == doc_parser::doc_type::object ?
+                _M_ref->MemberCount () == 0 :
+                type () == doc_parser::doc_type::array ?
+                    _M_ref->Size ()  == 0 :
+                    true;
+}
+
+void template_base::invalidate()
+{
+    if (_M_ref == nullptr) return;
+
+    _M_owner    = template_owner ();
+    _M_parser   = nullptr;
+    _M_ref      = nullptr;
+    _M_category = string_type ();
+    _M_index    = size_type ();
+
+    invalidated ();
+}
+
+template_base::pointer template_base::parent_object_ref() const
+{
+    assert(_M_owner.object()->_M_ref != nullptr);
+    return _M_owner.object()->_M_ref;
+}
+
+template_base::pointer template_base::parent_array_ref() const
+{
+    assert(_M_owner.array()->_M_ref != nullptr);
+    return _M_owner.array()->_M_ref;
+}
+
+void template_base::connections()
+{
+
+}
+
+void template_base::disconnections()
+{
+
+}
+
+// ======================================================================
+
+template_object::template_object(doc_parser& _parser, string_type const& _category)
+: template_base (_parser, _category)
+{
+    assign_from_parser_object();
+    template_object::connections();
+}
+
+template_object::template_object(doc_parser& _parser, size_type _index)
+: template_base (_parser, _index)
+{
+    assign_from_parser_array();
+    template_object::connections();
+}
+
+template_object::template_object(template_object* _owner, string_type const& _category)
+: template_base (_owner, _category)
+{
+    assign_from_object();
+    template_object::connections();
+}
+
+template_object::template_object(template_array* _owner, size_type _idx)
+: template_base (_owner, _idx)
+{
+    assign_from_array();
+    template_object::connections();
+}
+
+template_object::template_object(template_object const& obj)
+: template_base (obj)
+{
+    template_object::connections();
+}
+
+template_object::template_object(template_object&& obj)
+: template_base (std::move (obj))
+{
+    template_object::connections();
+}
+
+template_object& template_object::operator = (template_object const& obj)
+{
+    template_base::operator = (obj);
     return *this;
 }
 
 template_object& template_object::operator = (template_object&& obj)
 {
-    if (this == &obj) return *this;
-
-    disconnections();
-
-    _M_parser   = obj._M_parser;
-    _M_ref      = obj._M_ref;
-    _M_category = obj._M_category;
-    _M_index    = obj._M_index;
-    _M_owner    = obj._M_owner;
-
-    obj.invalidate();
-    connections();
-
-    changed();
-
+    template_base::operator = (std::move (obj));
     return *this;
 }
 
 template_object::~template_object()
 {
-    disconnections ();
-    destroyed ();
+    template_object::disconnections ();
 }
 
 template_object::const_reference template_object::operator [] (string_type const& key) const
@@ -300,14 +416,14 @@ void template_object::connections()
     {
         connect(_M_owner.object()->changed, *this, &template_object::on_object_changed);
         connect(_M_owner.object()->about_to_save, *this, &template_object::on_about_to_save);
-        connect(_M_owner.object()->destroyed, *this, &template_object::disconnections);
+        connect(_M_owner.object()->destroyed, *this, &template_object::invalidate);
     }
     else if (_M_owner.type() == doc_parser::doc_type::array)
     {
         connect(_M_owner.array()->changed, *this, &template_object::on_array_changed);
         connect(_M_owner.array()->removed, *this, &template_object::on_removed);
         connect(_M_owner.array()->about_to_save, *this, &template_object::on_about_to_save);
-        connect(_M_owner.array()->destroyed, *this, &template_object::disconnections);
+        connect(_M_owner.array()->destroyed, *this, &template_object::invalidate);
     }
 }
 
@@ -333,21 +449,6 @@ void template_object::disconnections()
         disconnect(_M_owner.array()->about_to_save, *this, &template_object::on_about_to_save);
         disconnect(_M_owner.array()->destroyed, *this, &template_object::invalidate);
     }
-}
-
-void template_object::invalidate()
-{
-    if (!_M_ref) return;
-
-    disconnections();
-
-    _M_ref      = nullptr;
-    _M_parser   = nullptr;
-    _M_category = string_type();
-    _M_index    = npos;
-    _M_owner    = template_owner();
-
-    invalidated();
 }
 
 void template_object::assign_from_parser_object()
@@ -436,30 +537,6 @@ void template_object::assign_from_array()
     assert(_M_ref->IsObject());
 }
 
-template_object::size_type template_object::size() const
-{
-    assert(_M_ref != nullptr);
-    return _M_ref->MemberCount();
-}
-
-bool template_object::empty() const
-{
-    assert(_M_ref != nullptr);
-    return _M_ref->MemberCount() == 0;
-}
-
-template_object::pointer template_object::parent_object_ref() const
-{
-    assert(_M_owner.object()->_M_ref != nullptr);
-    return _M_owner.object()->_M_ref;
-}
-
-template_object::pointer template_object::parent_array_ref() const
-{
-    assert(_M_owner.array()->_M_ref != nullptr);
-    return _M_owner.array()->_M_ref;
-}
-
 void template_object::on_parser_data_changed()
 {
     switch (_M_parser->type())
@@ -510,113 +587,60 @@ void template_object::on_removed(size_type idx)
 // ======================================================================
 
 template_array::template_array(doc_parser& _parser, string_type const& _category)
-: _M_owner(),
-  _M_parser(&_parser),
-  _M_ref(),
-  _M_category(_category),
-  _M_index(npos)
+: template_base (_parser, _category)
 {
     assign_from_parser_object();
-    connections();
+    template_array::connections();
 }
 
 template_array::template_array(doc_parser& _parser, size_type _index)
-: _M_owner(),
-  _M_parser(&_parser),
-  _M_ref(),
-  _M_category(),
-  _M_index(_index)
+: template_base (_parser, _index)
 {
     assign_from_parser_array();
-    connections();
+    template_array::connections();
 }
 
 template_array::template_array(template_object* _owner, string_type const& _category)
-: _M_owner(*_owner),
-  _M_parser(_owner->parser()),
-  _M_ref(),
-  _M_category(_category),
-  _M_index(npos)
+: template_base (_owner, _category)
 {
     assign_from_object();
-    connections();
+    template_array::connections();
 }
 
 template_array::template_array(template_array* _owner, size_type _idx)
-: _M_owner(*_owner),
-  _M_parser(_owner->parser()),
-  _M_ref(),
-  _M_category(),
-  _M_index(_idx)
+: template_base (_owner, _idx)
 {
     assign_from_array();
-    connections();
+    template_array::connections();
 }
 
 template_array::template_array(template_array const& obj)
-: _M_owner(obj._M_owner),
-  _M_parser(obj._M_parser),
-  _M_ref(obj._M_ref),
-  _M_category(obj._M_category),
-  _M_index(obj._M_index)
+: template_base (obj)
 {
-    connections();
+    template_array::connections();
 }
 
 template_array::template_array(template_array&& obj)
-: _M_owner(obj._M_owner),
-  _M_parser(obj._M_parser),
-  _M_ref(obj._M_ref),
-  _M_category(obj._M_category),
-  _M_index(obj._M_index)
+: template_base (obj)
 {
-    obj.invalidate();
-    connections();
+    template_array::connections();
 }
 
 template_array& template_array::operator = (template_array const& obj)
 {
-    if (this == &obj) return *this;
-
-    disconnections();
-
-    _M_parser   = obj._M_parser;
-    _M_ref      = obj._M_ref;
-    _M_category = obj._M_category;
-    _M_index    = obj._M_index;
-    _M_owner    = obj._M_owner;
-
-    connections();
-
-    changed();
-
+    template_base::operator = (obj);
     return *this;
 }
 
 template_array& template_array::operator = (template_array&& obj)
 {
-    if (this == &obj) return *this;
-
-    disconnections();
-
-    _M_parser   = obj._M_parser;
-    _M_ref      = obj._M_ref;
-    _M_category = obj._M_category;
-    _M_index    = obj._M_index;
-    _M_owner    = obj._M_owner;
-
-    obj.invalidate();
-    connections();
-
-    changed();
-
+    template_base::operator = (std::move (obj));
     return *this;
 }
 
 template_array::~template_array()
 {
-    disconnections ();
-    destroyed ();
+    template_array::disconnections ();
 }
 
 template_array::const_reference template_array::operator [] (size_type idx) const
@@ -675,21 +699,6 @@ void template_array::disconnections()
         disconnect(_M_owner.array()->about_to_save, *this, &template_array::on_about_to_save);
         disconnect(_M_owner.array()->destroyed, *this, &template_array::invalidate);
     }
-}
-
-void template_array::invalidate()
-{
-    if (!_M_ref) return;
-
-    disconnections();
-
-    _M_ref      = nullptr;
-    _M_parser   = nullptr;
-    _M_category = string_type();
-    _M_index    = npos;
-    _M_owner    = template_owner();
-
-    invalidated();
 }
 
 void template_array::assign_from_parser_object()
@@ -818,18 +827,6 @@ void template_array::clear()
     cleared();
 }
 
-template_array::pointer template_array::parent_object_ref() const
-{
-    assert(_M_owner.object()->_M_ref != nullptr);
-    return _M_owner.object()->_M_ref;
-}
-
-template_array::pointer template_array::parent_array_ref() const
-{
-    assert(_M_owner.array()->_M_ref != nullptr);
-    return _M_owner.array()->_M_ref;
-}
-
 void template_array::on_parser_data_changed()
 {
     assert(_M_parser != nullptr);
@@ -881,13 +878,103 @@ void template_array::on_removed(size_type idx)
 
 // ======================================================================
 
-value_reference_base<doc_parser::string_type>::value_reference_base (template_object*   owner,
-                                                                     string_type const& key,
-                                                                     value_type  const& default_val)
-: _M_ref(),
-  _M_owner(*owner)
+value_reference_base::value_reference_base (template_object* owner)
+: _M_ref  (),
+  _M_owner(*owner),
+  _M_fn   ()
 {
-    _M_fn = func_type([def_key = key, def = default_val](self_type* ptr)
+    connections ();
+}
+
+value_reference_base::value_reference_base(template_array* owner)
+: _M_ref  (),
+  _M_owner(*owner),
+  _M_fn   ()
+{
+    connections ();
+}
+
+value_reference_base::value_reference_base (value_reference_base const& obj)
+: _M_ref(obj._M_ref),
+  _M_owner(obj._M_owner),
+  _M_fn(obj._M_fn)
+{
+    connections ();
+}
+
+value_reference_base::~value_reference_base ()
+{
+    disconnections ();
+}
+
+value_reference_base& value_reference_base::operator = (value_reference_base const& obj)
+{
+    if (this != &obj && obj._M_ref && _M_ref != obj._M_ref)
+    {
+        disconnections ();
+
+        _M_ref    = obj._M_ref  ;
+        _M_owner  = obj._M_owner;
+        _M_fn     = obj._M_fn   ;
+
+        connections ();
+        changed ();
+    }
+
+    return *this;
+}
+
+void value_reference_base::connections()
+{
+    if (_M_owner.type() == doc_parser::doc_type::object)
+    {
+        connect(_M_owner.object()->changed, *this, &base_type::assign);
+        connect(_M_owner.object()->destroyed, *this, &base_type::invalidate);
+    }
+    else if (_M_owner.type() == doc_parser::doc_type::array)
+    {
+        connect(_M_owner.array()->changed, *this, &base_type::assign);
+        connect(_M_owner.array()->destroyed, *this, &base_type::invalidate);
+    }
+}
+
+void value_reference_base::disconnections()
+{
+    if (_M_owner.type() == doc_parser::doc_type::object)
+    {
+        disconnect(_M_owner.object()->changed, *this, &base_type::assign);
+        disconnect(_M_owner.object()->destroyed, *this, &base_type::invalidate);
+    }
+    else if (_M_owner.type() == doc_parser::doc_type::array)
+    {
+        disconnect(_M_owner.array()->changed, *this, &base_type::assign);
+        disconnect(_M_owner.array()->destroyed, *this, &base_type::invalidate);
+    }
+}
+
+void value_reference_base::assign()
+{
+    if(_M_fn == nullptr) return;
+
+    _M_fn (this);
+    changed ();
+}
+
+void value_reference_base::invalidate() noexcept
+{
+    _M_ref   = nullptr;
+    _M_owner = template_owner ();
+    _M_fn    = func_type ();
+}
+
+// ======================================================================
+
+value_reference_template<doc_parser::string_type>::value_reference_template (template_object*   owner,
+                                                                             string_type const& key,
+                                                                             value_type  const& default_val)
+: base_type (owner)
+{
+    _M_fn = func_type([def_key = key, def = default_val](base_type* ptr)
     {
         if(def_key.empty()) return;
 
@@ -915,17 +1002,15 @@ value_reference_base<doc_parser::string_type>::value_reference_base (template_ob
         }
     });
 
-    _M_fn(this);
-    connections();
+    _M_fn (this);
 }
 
-value_reference_base<doc_parser::string_type>::value_reference_base (template_array* owner,
-                                                                     size_type idx,
-                                                                     value_type const& default_val)
-: _M_ref(),
-  _M_owner(*owner)
+value_reference_template<doc_parser::string_type>::value_reference_template (template_array* owner,
+                                                                             size_type idx,
+                                                                             value_type const& default_val)
+: base_type (owner)
 {
-    _M_fn = func_type([idx, def = default_val](self_type* ptr)
+    _M_fn = func_type([idx, def = default_val](base_type* ptr)
     {
         auto new_idx = idx;
 
@@ -952,53 +1037,7 @@ value_reference_base<doc_parser::string_type>::value_reference_base (template_ar
         }
     });
 
-    _M_fn(this);
-    connections();
-}
-
-void value_reference_base<doc_parser::string_type>::connections()
-{
-    if (_M_owner.type() == doc_parser::doc_type::object)
-    {
-        connect(_M_owner.object()->changed, *this, &value_reference_base::assign);
-        connect(_M_owner.object()->destroyed, *this, &value_reference_base::invalidate);
-    }
-    else if (_M_owner.type() == doc_parser::doc_type::array)
-    {
-        connect(_M_owner.array()->changed, *this, &value_reference_base::assign);
-        connect(_M_owner.array()->destroyed, *this, &value_reference_base::invalidate);
-    }
-}
-
-void value_reference_base<doc_parser::string_type>::disconnections()
-{
-    if (_M_owner.type() == doc_parser::doc_type::object)
-    {
-        disconnect(_M_owner.object()->changed, *this, &value_reference_base::assign);
-        disconnect(_M_owner.object()->destroyed, *this, &value_reference_base::invalidate);
-    }
-    else if (_M_owner.type() == doc_parser::doc_type::array)
-    {
-        disconnect(_M_owner.array()->changed, *this, &value_reference_base::assign);
-        disconnect(_M_owner.array()->destroyed, *this, &value_reference_base::invalidate);
-    }
-}
-
-void value_reference_base<doc_parser::string_type>::assign()
-{
-    if(_M_fn == nullptr) return;
-
-    _M_fn(this);
-    changed();
-}
-
-void value_reference_base<doc_parser::string_type>::invalidate()
-{
-    disconnections();
-
-    _M_ref   = nullptr;
-    _M_owner = template_owner ();
-    _M_fn    = func_type ();
+    _M_fn (this);
 }
 
 // ======================================================================

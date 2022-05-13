@@ -504,8 +504,6 @@ void xcb_window::set_fullscreen (bool bFullscreen)
 {
     x::client_msg_event_type payload { };
 
-
-
     payload.response_type  = XCB_CLIENT_MESSAGE;
     payload.type           = data ()._NET_WM_STATE;
     payload.format         = 32;

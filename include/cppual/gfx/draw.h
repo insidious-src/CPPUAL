@@ -309,13 +309,15 @@ struct draw_factory : public non_copyable_virtual
     typedef resource_interface::connection_type connection_type;
     typedef resource_interface::handle_type     handle_type    ;
 
-    virtual shared_surface create_surface (connection_type conn,
+    virtual shared_surface create_surface (connection_type native,
+                                           connection_type legacy,
                                            pixel_format format,
                                            point2u size,
                                            handle_type wnd,
                                            surface_type type = surface_type::double_buffer) = 0;
 
-    virtual shared_context create_context (connection_type conn,
+    virtual shared_context create_context (connection_type native,
+                                           connection_type legacy,
                                            pixel_format format,
                                            shared_context shared = nullptr) = 0;
 

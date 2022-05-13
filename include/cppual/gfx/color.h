@@ -57,6 +57,7 @@ enum class color_name : byte
 
 enum class color_type : byte
 {
+    none       ,
     true_type  ,
     direct     ,
     pseudo     ,

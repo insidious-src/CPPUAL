@@ -49,6 +49,16 @@ inline static map_type& map ()
     return views_map;
 }
 
+/*inline void print_map_values (resource_handle wnd)
+{
+    std::cout << "wnd value: " << wnd.get<uptr> () << std::endl;
+
+    for (auto it = internal::map ().cbegin (); it != internal::map ().cend (); ++it)
+    {
+        std::cout << "view map key: " << it->first << " value: " << it->second << std::endl;
+    }
+}*/
+
 inline shared_window create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
 {
     return pParentObj ? memory::allocate_shared<proxy_renderable, platform_wnd_interface>
@@ -83,117 +93,9 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
     {
         static bool bRegEvents = false;
 
-        if (!bRegEvents)
-        {
-            connect (event_queue::events ().mouseMove,
-                     [](event_queue::handle_type wnd, point2u pos)
-            {
-                internal::map ()[wnd]->mouse_moved_event (pos);
-            });
-
-            connect (event_queue::events ().mousePress,
-                    [](event_queue::handle_type wnd, event_type::mbutton_data data)
-            {
-                internal::map ()[wnd]->mouse_pressed_event (data);
-            });
-
-            connect (event_queue::events ().mouseRelease,
-                    [](event_queue::handle_type wnd, event_type::mbutton_data data)
-            {
-                internal::map ()[wnd]->mouse_released_event (data);
-            });
-
-            connect (event_queue::events ().keyPress,
-                    [](event_queue::handle_type wnd, event_type::key_data data)
-            {
-                internal::map ()[wnd]->key_pressed_event (data);
-            });
-
-            connect (event_queue::events ().keyRelease,
-                    [](event_queue::handle_type wnd, event_type::key_data data)
-            {
-                internal::map ()[wnd]->key_released_event (data);
-            });
-
-            connect (event_queue::events ().scroll,
-                    [](event_queue::handle_type wnd, event_type::mwheel_data data)
-            {
-                internal::map ()[wnd]->mouse_wheel_event (data);
-            });
-
-            connect (event_queue::events ().winPaint,
-                    [](event_queue::handle_type wnd, event_type::paint_data data)
-            {
-                internal::map ()[wnd]->paint (data.region);
-            });
-
-            connect (event_queue::events ().winFocus,
-                    [](event_queue::handle_type wnd, bool state)
-            {
-                internal::map ()[wnd]->focus_event (state);
-            });
-
-            connect (event_queue::events ().winSize,
-                    [](event_queue::handle_type wnd, point2u size)
-            {
-                internal::map ()[wnd]->size (size);
-            });
-
-            connect (event_queue::events ().winVisible,
-                    [](event_queue::handle_type wnd, bool state)
-            {
-                internal::map ()[wnd]->show_event (state);
-            });
-
-            connect(event_queue::events ().winStep,
-                    [](event_queue::handle_type wnd, bool state)
-            {
-                internal::map()[wnd]->enter_leave_event (state);
-            });
-
-            connect (event_queue::events ().winProperty,
-                    [](event_queue::handle_type wnd, event_type::property_data data)
-            {
-                switch (data.prop)
-                {
-                case 0:
-                    internal::map ()[wnd]->min_max_size_event (point2u ());
-                    break;
-                default:
-                    break;
-                }
-            });
-
-            connect (event_queue::events ().winHelp,
-                    [](event_queue::handle_type wnd)
-            {
-                internal::map ()[wnd]->help_event ();
-            });
-
-            connect (event_queue::events ().winMinimize,
-                    [](event_queue::handle_type wnd)
-            {
-                internal::map ()[wnd]->minimize_event ();
-            });
-
-            connect (event_queue::events ().winMaximize,
-                    [](event_queue::handle_type wnd)
-            {
-                internal::map ()[wnd]->maximize_event ();
-            });
-
-            connect (event_queue::events ().winClose,
-                    [](event_queue::handle_type wnd)
-            {
-                internal::map ()[wnd]->close_event ();
-            });
-
-            bRegEvents = true;
-        }
-
         if (!pParentObj)
         {
-            uptr key = _M_pRenderable->handle ();
+            uptr const key = _M_pRenderable->handle ();
 
             if (internal::map ().count (key) == 1) internal::map ()[key] = this;
             else if (!internal::map ().emplace (std::make_pair (key, this)).second)
@@ -207,6 +109,138 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
                                         event_type::key   |
                                         event_type::mouse |
                                         event_type::window);
+
+            if (!bRegEvents)
+            {
+                connect (event_queue::events ().mouseMove,
+                         [](event_queue::handle_type wnd, point2u pos)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->mouse_moved_event (pos);
+                });
+
+                connect (event_queue::events ().mousePress,
+                        [](event_queue::handle_type wnd, event_type::mbutton_data data)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->mouse_pressed_event (data);
+                });
+
+                connect (event_queue::events ().mouseRelease,
+                        [](event_queue::handle_type wnd, event_type::mbutton_data data)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->mouse_released_event (data);
+                });
+
+                connect (event_queue::events ().keyPress,
+                        [](event_queue::handle_type wnd, event_type::key_data data)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->key_pressed_event (data);
+                });
+
+                connect (event_queue::events ().keyRelease,
+                        [](event_queue::handle_type wnd, event_type::key_data data)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->key_released_event (data);
+                });
+
+                connect (event_queue::events ().scroll,
+                        [](event_queue::handle_type wnd, event_type::mwheel_data data)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->mouse_wheel_event (data);
+                });
+
+                connect (event_queue::events ().winPaint,
+                        [](event_queue::handle_type wnd, event_type::paint_data data)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->paint (data.region);
+                });
+
+                connect (event_queue::events ().winFocus,
+                        [](event_queue::handle_type wnd, bool state)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->focus_event (state);
+                });
+
+                connect (event_queue::events ().winSize,
+                        [](event_queue::handle_type wnd, point2u size)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->size (size);
+                });
+
+                connect (event_queue::events ().winVisible,
+                        [](event_queue::handle_type wnd, bool state)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->show_event (state);
+                });
+
+                connect(event_queue::events ().winStep,
+                        [](event_queue::handle_type wnd, bool state)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->enter_leave_event (state);
+                });
+
+                connect (event_queue::events ().winProperty,
+                        [](event_queue::handle_type wnd, event_type::property_data data)
+                {
+                    //internal::print_map_values (wnd);
+
+                    switch (data.prop)
+                    {
+                    case 0:
+                        internal::map ()[wnd]->min_max_size_event (point2u ());
+                        break;
+                    default:
+                        break;
+                    }
+                });
+
+                connect (event_queue::events ().winHelp,
+                        [](event_queue::handle_type wnd)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->help_event ();
+                });
+
+                connect (event_queue::events ().winMinimize,
+                        [](event_queue::handle_type wnd, bool is_minimized)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->minimize_event (is_minimized);
+                });
+
+                connect (event_queue::events ().winMaximize,
+                        [](event_queue::handle_type wnd, bool is_maximized)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->maximize_event (is_maximized);
+                });
+
+                connect (event_queue::events ().winFullscreen,
+                        [](event_queue::handle_type wnd, bool is_fullscreen)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->fullscreen_event (is_fullscreen);
+                });
+
+                connect (event_queue::events ().winClose,
+                        [](event_queue::handle_type wnd)
+                {
+                    //internal::print_map_values (wnd);
+                    internal::map ()[wnd]->close_event ();
+                });
+
+                bRegEvents = true;
+            }
         }
 
     }
@@ -504,17 +538,24 @@ void view::help_event()
 #   endif
 }
 
-void view::minimize_event()
+void view::minimize_event(bool is_minimized)
 {
 #   ifdef DEBUG_MODE
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << ' ' << is_minimized << std::endl;
 #   endif
 }
 
-void view::maximize_event()
+void view::maximize_event(bool is_maximized)
 {
 #   ifdef DEBUG_MODE
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << __PRETTY_FUNCTION__<< ' ' << is_maximized << std::endl;
+#   endif
+}
+
+void view::fullscreen_event(bool is_fullscreen)
+{
+#   ifdef DEBUG_MODE
+    std::cout << __PRETTY_FUNCTION__<< ' ' << is_fullscreen << std::endl;
 #   endif
 }
 
@@ -525,10 +566,10 @@ void view::close_event()
 #   endif
 }
 
-void view::show_event(bool)
+void view::show_event(bool is_shown)
 {
 #   ifdef DEBUG_MODE
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << __PRETTY_FUNCTION__<< ' ' << is_shown << std::endl;
 #   endif
 }
 
@@ -539,10 +580,10 @@ void view::paint_event(rect const&)
 #   endif
 }
 
-void view::on_enable(bool)
+void view::on_enable(bool is_enabled)
 {
 #   ifdef DEBUG_MODE
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << __PRETTY_FUNCTION__<< ' ' << is_enabled << std::endl;
 #   endif
 }
 
@@ -560,10 +601,10 @@ void view::move_event(point2i)
 #   endif
 }
 
-void view::enter_leave_event(bool)
+void view::enter_leave_event(bool is_entered)
 {
 #   ifdef DEBUG_MODE
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << __PRETTY_FUNCTION__<< ' ' << is_entered << std::endl;
 #   endif
 }
 
@@ -588,10 +629,10 @@ void view::min_max_size_event(point2u)
 #   endif
 }
 
-void view::focus_event(bool)
+void view::focus_event(bool is_focused)
 {
 #   ifdef DEBUG_MODE
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << __PRETTY_FUNCTION__<< ' ' << is_focused << std::endl;
 #   endif
 }
 
