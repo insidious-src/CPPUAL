@@ -98,9 +98,10 @@ private:
     }
 
     inline
-    void do_deallocate (void* p, size_type bytes, size_type alignment)
+    void do_deallocate (void* p, size_type /*bytes*/, size_type /*alignment*/)
     {
-        ::operator delete (p, bytes, std::align_val_t (alignment));
+        //::operator delete (p, bytes, std::align_val_t (alignment));
+        ::operator delete (p);
     }
 
     inline

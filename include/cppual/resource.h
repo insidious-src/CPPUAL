@@ -147,14 +147,6 @@ public:
     friend
     constexpr bool operator == (std::nullptr_t, resource_handle const&) noexcept;
 
-    template <typename T, typename>
-    friend
-    constexpr bool operator == (resource_handle const&, T) noexcept;
-
-    template <typename T, typename>
-    friend
-    constexpr bool operator == (T, resource_handle const&) noexcept;
-
 private:
     value_type _M_handle { };
 };
@@ -170,30 +162,6 @@ constexpr bool operator == (resource_handle const& lh, std::nullptr_t) noexcept
 constexpr bool operator == (std::nullptr_t, resource_handle const& rh) noexcept
 { return rh._M_handle == resource_handle::value_type (); }
 
-template <typename T,
-          typename =
-          typename std::enable_if<is_integer<T>::value>::type
-          >
-constexpr bool operator == (resource_handle const& lh, T rh) noexcept
-{
-    static_assert (sizeof (T) <= sizeof (resource_handle::pointer),
-                   "T is bigger than the size of a pointer!");
-
-    return lh._M_handle == static_cast<resource_handle::value_type> (rh);
-}
-
-template <typename T,
-          typename =
-          typename std::enable_if<is_integer<T>::value>::type
-          >
-constexpr bool operator == (T lh, resource_handle const& rh) noexcept
-{
-    static_assert (sizeof (T) <= sizeof (resource_handle::pointer),
-                   "T is bigger than the size of a pointer!");
-
-    return static_cast<resource_handle::value_type> (lh) == rh._M_handle;
-}
-
 constexpr bool operator != (resource_handle const& lh, resource_handle const& rh) noexcept
 { return !(lh == rh); }
 
@@ -202,20 +170,6 @@ constexpr bool operator != (resource_handle const& lh, std::nullptr_t) noexcept
 
 constexpr bool operator != (std::nullptr_t, resource_handle const& rh) noexcept
 { return !(rh == nullptr); }
-
-template <typename U,
-          typename =
-          typename std::enable_if<is_integer<U>::value>::type
-          >
-constexpr bool operator != (resource_handle const& lh, U const& rh) noexcept
-{ return !(lh == rh); }
-
-template <typename U,
-          typename =
-          typename std::enable_if<is_integer<U>::value>::type
-          >
-constexpr bool operator != (U const& lh, resource_handle const& rh) noexcept
-{ return !(lh == rh); }
 
 // =========================================================
 

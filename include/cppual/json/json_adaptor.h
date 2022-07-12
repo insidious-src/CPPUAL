@@ -588,7 +588,7 @@ public:
 
     static constexpr auto npos = static_cast<size_type> (-1);
 
-    constexpr Type type() const
+    inline Type type() const
     {
         return ref()->GetType();
     }

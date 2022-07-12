@@ -114,11 +114,12 @@ class MemoryPoolResource : public cppual::memory::memory_resource
     static const size_type SIZEOF_SHARED_DATA = RAPIDJSON_ALIGN(sizeof(SharedData));
     static const size_type SIZEOF_CHUNK_HEADER = RAPIDJSON_ALIGN(sizeof(ChunkHeader));
 
-    static inline ChunkHeader *GetChunkHead(SharedData *shared)
+    static inline ChunkHeader* GetChunkHead(SharedData* shared)
     {
-        return reinterpret_cast<ChunkHeader*>(reinterpret_cast<uint8_t*>(shared) + SIZEOF_SHARED_DATA);
+        return reinterpret_cast<ChunkHeader*>
+                (reinterpret_cast<uptr> (reinterpret_cast<uint8_t*>(shared) + SIZEOF_SHARED_DATA));
     }
-    static inline uint8_t *GetChunkBuffer(SharedData *shared)
+    static inline uint8_t* GetChunkBuffer(SharedData* shared)
     {
         return reinterpret_cast<uint8_t*>(shared->chunkHead) + SIZEOF_CHUNK_HEADER;
     }

@@ -452,7 +452,7 @@ point2u surface::size () const noexcept
 }
 
 /// TODO: finish egl resizing
-void surface::scale (point2u gSize)
+void surface::scale (point2u /*gSize*/)
 {
     if (context_interface::current ())
     {

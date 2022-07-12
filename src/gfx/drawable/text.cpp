@@ -20,7 +20,6 @@
  */
 
 #include <cppual/gfx/drawable/text.h>
-#include <cppual/gfx/gl/gldef.h>
 
 #include <iostream>
 

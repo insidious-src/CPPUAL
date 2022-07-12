@@ -194,9 +194,12 @@ target_compile_definitions(cppual-memory PRIVATE -DAPI_EXPORT)
 add_library(cppual-memory-system SHARED
     "include/cppual/memory/system.h"
     "src/memory/system.cpp"
-
     "include/cppual/system_memory"
     )
+
+#if (NOT ANDROID)
+#    target_compile_definitions(cppual-memory-system PRIVATE -DCPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY)
+#endif()
 
 # device compute, memory (Vulkan, OpenCL, Serial)
 add_library(cppual-compute SHARED
@@ -620,7 +623,7 @@ target_compile_definitions(cppual-gfx-font PRIVATE -DAPI_EXPORT)
 
 endif()
 
-if(TARGET cppual-gfx AND OPENGL_FOUND)
+if(TARGET cppual-gfx AND OPENGL_FOUND AND GLEW_FOUND)
 
 # OpenGL/ES library
 add_library(cppual-gl SHARED
@@ -778,6 +781,8 @@ endif()
 
 if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+if (TARGET cppual-gfx AND XCB_EWMH_FOUND AND XCB_ICCCM_FOUND AND X11_FOUND)
+
 # graphical user interface - platform Xorg
 add_library(cppual-ui-xorg MODULE
     "include/cppual/ui/platforms/xcb/atom.hpp"
@@ -847,6 +852,10 @@ add_library(cppual-ui-xorg MODULE
     "src/ui/platform/xorg/xcb_window.h"
     )
 
+endif()
+
+if (TARGET cppual-gfx AND WM_FOUND)
+
 # graphical user interface - platform Wayland
 add_library(cppual-ui-wayland MODULE
     "src/ui/platform/wayland/wlbackend.cpp"
@@ -857,6 +866,8 @@ add_library(cppual-ui-wayland MODULE
     "src/ui/platform/wayland/wlinput.h"
     "src/ui/platform/wayland/wlmain.cpp"
     )
+
+endif()
 
 elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
@@ -882,7 +893,7 @@ if(TARGET cppual-gfx)
         target_link_libraries(cppual-gfx-font cppual-gfx cppual-memory Freetype::Library)
     endif()
 
-    if(OPENGL_FOUND)
+    if(OPENGL_FOUND AND GLEW_FOUND)
         target_link_libraries(cppual-gl cppual-gfx cppual-memory OpenGL::Library GLEW::Library)
     endif()
 
@@ -904,8 +915,11 @@ if(TARGET cppual-gfx)
 endif()
 
 if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(cppual-ui-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
-    target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
+    if (XCB_EWMH_FOUND AND XCB_ICCCM_FOUND AND X11_FOUND)
+        target_link_libraries(cppual-ui-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
+    elseif (WM_FOUND)
+        target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
+    endif()
 elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(cppual-ui-win cppual-memory WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")

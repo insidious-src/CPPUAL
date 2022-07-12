@@ -461,41 +461,6 @@ template <typename Allocator>
 struct is_string<cstring<wchar, Allocator>> : std::true_type
 { };
 
-// ====================================================
-
-template <typename T,
-          typename Char = char,
-          typename      = typename std::enable_if<is_char<Char>::value>::type
-          >
-inline
-used_string<Char>
-to_string (T val, typename used_string<Char>::allocator_type const& a =
-                  typename used_string<Char>::allocator_type())
-{
-    typedef std::basic_string<Char, std::char_traits<Char>, memory::allocator<Char>> out_string_type;
-
-    out_string_type in_str (a);
-
-    used_ostringstream<Char> ss(in_str);
-    ss << val;
-
-    return ss.str();
-}
-
-// ====================================================
-
-template <typename Char = char,
-          typename      = typename std::enable_if<is_char<Char>::value>::type
-          >
-inline
-std::basic_string<Char, std::char_traits<Char>, std::allocator<Char>>
-to_std_string (used_string<Char> const& val)
-{
-    typedef std::basic_string<Char, std::char_traits<Char>, std::allocator<Char>> out_string_type;
-
-    return out_string_type(val.c_str(), val.size());
-}
-
 } // namespace cppual
 
 // ====================================================

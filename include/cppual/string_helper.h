@@ -26,11 +26,15 @@
 #include <cppual/decl.h>
 #include <cppual/meta.h>
 #include <cppual/string.h>
+#include <cppual/containers.h>
 
 #include <cstring>
 #include <string>
 #include <vector>
 #include <memory>
+#include <array>
+
+#include <assert.h>
 
 namespace cppual {
 
@@ -56,6 +60,33 @@ auto split_string (std::basic_string<T, std::char_traits<T>, Ator> const& str,
             static_cast<std::size_t> (std::count (str.cbegin (), str.cend (), delim));
 
     if (delim_count > 0) out.reserve (delim_count + 1);
+
+    while ((start = str.find_first_not_of (delim, end)) != string_type::npos)
+    {
+        end = str.find (delim, start);
+        out.push_back (str.substr (start, end - start));
+    }
+
+    return out;
+}
+
+// ====================================================
+
+template <typename T    = char,
+          typename Ator = memory::allocator<T>,
+          typename      = typename std::enable_if<is_char<T>::value>::type>
+auto split_string (std::basic_string<T, std::char_traits<T>, Ator> const& str,
+                   std::basic_string<T, std::char_traits<T>, Ator> const& delim)
+{
+    typedef std::basic_string<T, std::char_traits<T>, Ator> string_type;
+
+    using allocator_type = typename std::allocator_traits<Ator>::template rebind_alloc<string_type>;
+
+    std::vector<string_type, allocator_type> out (std::is_same<Ator, memory::allocator<T>>::value ?
+                                                  allocator_type (str.get_allocator ()) : allocator_type ());
+
+    std::size_t start;
+    std::size_t end = 0;
 
     while ((start = str.find_first_not_of (delim, end)) != string_type::npos)
     {
@@ -290,6 +321,76 @@ template <typename T = char, typename... Ts>
 constexpr auto make_string_list (Ts... ts) -> string_list<T, sizeof... (Ts)>
 {
     return { std::forward<Ts> (ts)... };
+}
+
+// ====================================================
+
+template <typename T,
+          typename Char = char,
+          typename Ator = memory::allocator<Char>,
+          typename      = typename std::enable_if<(is_integer<T>::value ||
+                                                   is_float<T>::value)  &&
+                                                   is_char<Char>::value>::type
+          >
+inline auto number_to_string (T val)
+{
+    typedef std::basic_string<Char, std::char_traits<Char>, Ator> string_type;
+
+    string_type str_val (sizeof (T), ' ');
+
+    unordered_map<std::size_t, cchar*> formats_map
+    {
+        std::make_pair (typeid(short).hash_code   (), "%hd"),
+        std::make_pair (typeid(int).hash_code     (), "%d"),
+        std::make_pair (typeid(long).hash_code    (), "%ld"),
+        std::make_pair (typeid(long64).hash_code  (), "%lld"),
+        std::make_pair (typeid(ushort).hash_code  (), "%hu"),
+        std::make_pair (typeid(uint).hash_code    (), "%u"),
+        std::make_pair (typeid(ulong).hash_code   (), "%lu"),
+        std::make_pair (typeid(ulong64).hash_code (), "%llu"),
+        std::make_pair (typeid(float).hash_code   (), "%f"),
+        std::make_pair (typeid(double).hash_code  (), "%lf"),
+        std::make_pair (typeid(ldouble).hash_code (), "%Lf")
+    };
+
+    std::sprintf (&str_val[0], formats_map[typeid(T).hash_code ()], val);
+
+    return str_val;
+}
+
+// ====================================================
+
+template <typename T,
+          typename Char  = char,
+          typename Alloc = memory::allocator<Char>,
+          typename       = typename std::enable_if<is_char<Char>::value &&
+                                                   is_char<typename Alloc::value_type>::value>::type
+          >
+inline
+auto to_string (T val, Alloc const& a = Alloc ())
+{
+    typedef std::basic_string<Char, std::char_traits<Char>, Alloc>        out_string_type  ;
+    typedef std::basic_ostringstream<Char, std::char_traits<Char>, Alloc> out_ostringstream;
+
+    out_string_type in_str (a);
+
+    out_ostringstream ss(in_str);
+    ss << val;
+
+    return ss.str();
+}
+
+// ====================================================
+
+template <typename Char = char,
+          typename      = typename std::enable_if<is_char<Char>::value>::type
+          >
+inline
+auto to_std_string (used_string<Char> const& val)
+{
+    typedef std::basic_string<Char, std::char_traits<Char>, std::allocator<Char>> out_string_type;
+
+    return out_string_type(val.c_str(), val.size());
 }
 
 //======================================================

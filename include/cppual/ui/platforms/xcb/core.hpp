@@ -2,6 +2,7 @@
 #define CPPUAL_CORE_HPP
 
 #include <cppual/string.h>
+#include <cppual/string_helper.h>
 
 #include <memory>
 

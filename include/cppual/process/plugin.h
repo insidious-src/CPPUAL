@@ -263,7 +263,7 @@ public:
                 return false;
         }
 
-        _M_gPluginMap.try_emplace (path, std::make_pair (std::move (loader), std::move(*plugin)));
+        _M_gPluginMap.emplace (path, std::make_pair (std::move (loader), std::move(*plugin)));
         return true;
     }
 

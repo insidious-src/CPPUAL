@@ -769,8 +769,6 @@ public:
             ui::event_queue::events ().winFocus (window (), false);
             break;
         case TSize:
-            handle_secret_xlib_event (conn->legacy<x::legacy_type> (), &get ()->generic);
-
             ui::event_queue::events ().winSize (window (),
             { get ()->size.width, get ()->size.height });
             break;
@@ -904,14 +902,13 @@ public:
             ui::event_queue::events ().winClose (window ());
             break;
         case TClientMessage:
+            if (get ()->clientMessage.data.data32[0] == data(conn).WM_DELETE_WINDOW)
             {
-                if (get ()->clientMessage.data.data32[0] == data(conn).WM_DELETE_WINDOW)
-                {
-                    ui::event_queue::events ().winClose (window ());
-                }
+                ui::event_queue::events ().winClose (window ());
             }
             break;
         case TGraphicsExposure:
+            handle_secret_xlib_event (conn->legacy<x::legacy_type> (), &get ()->generic);
             break;
         case TNoExposure:
             break;
