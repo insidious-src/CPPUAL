@@ -1373,6 +1373,22 @@ void factory::reset(size_type key)
     after_reset_doc (key);
 }
 
+bool factory::save (size_type key, string_type const& file_name)
+{
+    auto json = _M_jsonDocs.find (key);
+
+    if (json != _M_jsonDocs.end ())
+    {
+        std::ofstream file;
+
+        file.open (file_name, std::ios::out | std::ios::trunc);
+
+        return json->second.second->save (file);
+    }
+
+    return false;
+}
+
 bool factory::save (size_type key)
 {
     auto json = _M_jsonDocs.find (key);
@@ -1433,6 +1449,27 @@ factory::generic_array_ptr factory::get_array (size_type type, size_type key) co
     }
 
     return generic_array_ptr ();
+}
+
+factory::string_type factory::file_name_of_doc_no_ext (size_type key) const
+{
+    auto const end = (*this)[key].first.find_last_of ('.');
+
+    return end != string_type::npos ? (*this)[key].first.substr (0, end) : (*this)[key].first;
+}
+
+factory::string_type factory::file_name_of_doc_ext(size_type key) const
+{
+    auto const start = (*this)[key].first.find_last_of ('.');
+
+    return start != string_type::npos ? (*this)[key].first.substr (start) : string_type ();
+}
+
+bool factory::has_file_name_doc_ext (size_type key) const
+{
+    auto const end = (*this)[key].first.find_last_of ('.');
+
+    return end != string_type::npos;
 }
 
 } } // namespace Json

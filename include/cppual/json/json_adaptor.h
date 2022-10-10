@@ -2163,10 +2163,14 @@ public:
     factory() = delete;
     factory(std::initializer_list<file_tuple> json_files);
 
-    void reset();
-    void reset(size_type key);
-    bool save (size_type key);
-    void save ();
+    string_type file_name_of_doc_no_ext(size_type key) const;
+    string_type file_name_of_doc_ext(size_type key) const;
+    bool        has_file_name_doc_ext(size_type key) const;
+    void        reset();
+    void        reset(size_type key);
+    bool        save (size_type key, string_type const& file_name);
+    bool        save (size_type key);
+    void        save ();
 
     generic_object_ptr get_object(size_type type, size_type key) const;
     generic_array_ptr  get_array (size_type type, size_type key) const;

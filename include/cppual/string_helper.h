@@ -54,7 +54,7 @@ auto split_string (std::basic_string<T, std::char_traits<T>, Ator> const& str,
                                                   allocator_type (str.get_allocator ()) : allocator_type ());
 
     std::size_t start;
-    std::size_t end = 0;
+    std::size_t end = 0U;
 
     std::size_t const delim_count =
             static_cast<std::size_t> (std::count (str.cbegin (), str.cend (), delim));
@@ -86,7 +86,7 @@ auto split_string (std::basic_string<T, std::char_traits<T>, Ator> const& str,
                                                   allocator_type (str.get_allocator ()) : allocator_type ());
 
     std::size_t start;
-    std::size_t end = 0;
+    std::size_t end = 0U;
 
     while ((start = str.find_first_not_of (delim, end)) != string_type::npos)
     {
