@@ -78,13 +78,13 @@ public:
     packet& operator >> (u16string&)   noexcept;
     packet& operator >> (u32string&)   noexcept;
 
-    constexpr size_type size () const noexcept
+    inline size_type size () const noexcept
     { return _M_gData.size (); }
 
-    constexpr cvoid* data () const noexcept
+    inline cvoid* data () const noexcept
     { return !_M_gData.empty () ? &_M_gData[0] : nullptr; }
 
-    constexpr bool is_end_of_packet () const noexcept
+    inline bool is_end_of_packet () const noexcept
     { return _M_uPos >= _M_gData.size (); }
 
     constexpr operator safe_bool () const noexcept

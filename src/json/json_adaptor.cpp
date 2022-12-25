@@ -1381,7 +1381,7 @@ bool factory::save (size_type key, string_type const& file_name)
     {
         std::ofstream file;
 
-        file.open (file_name, std::ios::out | std::ios::trunc);
+        file.open (file_name.c_str (), std::ios::out | std::ios::trunc);
 
         return json->second.second->save (file);
     }
