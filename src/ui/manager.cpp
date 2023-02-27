@@ -32,8 +32,8 @@ namespace { // optimize for internal unit usage
 class initializer final
 {
 private:
-    factory::manager_type mgr    ;
-    shared_manager        factory;
+    factory::manager_type mgr          ;
+    shared_manager        local_factory;
 
     inline static cchar* platform_name () noexcept
     {
@@ -50,12 +50,12 @@ private:
 public:
     inline initializer ()
     {
-        if (mgr.load_plugin (platform_name ())) factory = mgr.plugin (platform_name ()).interface ();
+        if (mgr.load_plugin (platform_name ())) local_factory = mgr.plugin (platform_name ()).interface ();
     }
 
     inline operator shared_manager () const
     {
-        return factory;
+        return local_factory;
     }
 };
 

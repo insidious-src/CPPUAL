@@ -35,7 +35,7 @@ namespace cppual { namespace ui {
 class view
 {
 public:
-    typedef input::event                          event_type    ;
+    typedef input::sys_event                          event_type    ;
     typedef resource_handle                       window_type   ;
     typedef memory::allocator<view*>              allocator_type;
     typedef circular_queue<view*, allocator_type> container     ;

@@ -47,7 +47,7 @@ private:
     Initializer& get () noexcept;
 };
 
-inline static Initializer& get () noexcept
+inline Initializer& get () noexcept
 {
     static Initializer internal;
     return internal;

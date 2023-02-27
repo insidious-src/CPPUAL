@@ -33,7 +33,9 @@ namespace cppual { namespace json {
     \tparam Allocator type for allocating memory buffer.
     \note implements Stream concept
 */
-template <typename Allocator = memory::MemoryRememory_resource GenericMemoryBuffer {
+template <typename Allocator = MemoryPoolResource<cppual::memory::memory_resource>>
+class GenericMemoryBuffer {
+public:
     typedef char Ch; // byte
 
     GenericMemoryBuffer(Allocator* allocator = 0, size_t capacity = kDefaultCapacity) : stack_(allocator, capacity) {}

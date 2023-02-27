@@ -25,8 +25,8 @@
 
 #include <cppual/decl.h>
 
-//#include "glad.h"
-#include <GL/glew.h>
+//#include <GL/glew.h>
+#include "glad.h"
 
 namespace cppual { namespace gfx { namespace gl {
 

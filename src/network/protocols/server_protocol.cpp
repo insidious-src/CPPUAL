@@ -37,7 +37,7 @@ data_protocol::data_protocol(string_type const& firstString, string_type const& 
 
     if(type == Type::Upload)
     {
-        std::ifstream file (firstString);
+        std::ifstream file (firstString.c_str ());
         stream_type   bytes;
 
         if (file.is_open ())

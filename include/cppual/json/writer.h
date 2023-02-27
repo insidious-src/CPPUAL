@@ -89,7 +89,7 @@ enum WriteFlag {
 template<typename OutputStream,
          typename SourceEncoding = UTF8<>,
          typename TargetEncoding = UTF8<>,
-         typename StackAllocator = memory::memory_resource,
+         typename StackAllocator = MemoryPoolResource<cppual::memory::memory_resource>,
          unsigned writeFlags = kWriteDefaultFlags
          >
 class Writer

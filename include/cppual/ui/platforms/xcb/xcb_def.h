@@ -107,30 +107,38 @@ public:
 
     screen_setup () = delete;
 
-    constexpr screen_setup (display_type* conn) noexcept
+    inline
+    screen_setup (display_type* conn) noexcept
     : _M_setup (::xcb_get_setup (conn)),
       _M_count (static_cast<size_type> (::xcb_setup_roots_length (_M_setup)))
     { }
 
-    constexpr const_iterator begin () const noexcept
+    inline
+    const_iterator begin () const noexcept
     { return iterator (*_M_setup); }
 
-    constexpr const_iterator cbegin () const noexcept
+    inline
+    const_iterator cbegin () const noexcept
     { return iterator (*_M_setup); }
 
-    constexpr iterator begin () noexcept
+    inline
+    iterator begin () noexcept
     { return iterator (*_M_setup); }
 
-    constexpr const_iterator end () const noexcept
+    constexpr
+    const_iterator end () const noexcept
     { return iterator ({ nullptr, 0, static_cast<int> (_M_count) }); }
 
-    constexpr const_iterator cend () const noexcept
+    constexpr
+    const_iterator cend () const noexcept
     { return iterator ({ nullptr, 0, static_cast<int> (_M_count) }); }
 
-    constexpr iterator end () noexcept
+    constexpr
+    iterator end () noexcept
     { return iterator ({ nullptr, 0, static_cast<int> (_M_count) }); }
 
-    constexpr size_type count () const noexcept
+    constexpr
+    size_type count () const noexcept
     { return _M_count; }
 
 private:

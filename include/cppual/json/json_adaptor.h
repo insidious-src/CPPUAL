@@ -202,7 +202,7 @@ public:
     //! recreate document from file
     bool create_document(string_type const& file, doc_type type = doc_type::object);
 
-    bool save(std::ostream& stream);
+    bool save(std::ostream& stream, bool pretty = true);
 
     doc_type  type() const;
     size_type size() const;
@@ -751,7 +751,6 @@ protected:
 
     template <typename, typename, typename>
     friend class objects_array;
-
 };
 
 // ======================================================================
@@ -896,7 +895,7 @@ template <>
 class SHARED_API value_reference<u16> : public value_reference_template<u16>
 {
 public:
-    typedef value_reference_template<u16>             reference_base;
+    typedef value_reference_template<u16>         reference_base;
     typedef typename reference_base::json_type    json_type     ;
     typedef typename reference_base::string_type  string_type   ;
     typedef typename reference_base::value_type   value_type    ;
@@ -944,7 +943,7 @@ template <>
 class SHARED_API value_reference<i16> : public value_reference_template<i16>
 {
 public:
-    typedef value_reference_template<i16>             reference_base;
+    typedef value_reference_template<i16>         reference_base;
     typedef typename reference_base::json_type    json_type     ;
     typedef typename reference_base::string_type  string_type   ;
     typedef typename reference_base::value_type   value_type    ;
@@ -992,7 +991,7 @@ template <>
 class SHARED_API value_reference<u32> : public value_reference_template<u32>
 {
 public:
-    typedef value_reference_template<u32>            reference_base;
+    typedef value_reference_template<u32>        reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1039,7 +1038,7 @@ template <>
 class SHARED_API value_reference<i32> : public value_reference_template<i32>
 {
 public:
-    typedef value_reference_template<i32>            reference_base;
+    typedef value_reference_template<i32>        reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1086,7 +1085,7 @@ template <>
 class SHARED_API value_reference<u64> : public value_reference_template<u64>
 {
 public:
-    typedef value_reference_template<u64>            reference_base;
+    typedef value_reference_template<u64>        reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1133,7 +1132,7 @@ template <>
 class SHARED_API value_reference<i64> : public value_reference_template<i64>
 {
 public:
-    typedef value_reference_template<i64>            reference_base;
+    typedef value_reference_template<i64>        reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1180,7 +1179,7 @@ template <>
 class SHARED_API value_reference<float> : public value_reference_template<float>
 {
 public:
-    typedef value_reference_template<float>          reference_base;
+    typedef value_reference_template<float>      reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1227,7 +1226,7 @@ template <>
 class SHARED_API value_reference<double> : public value_reference_template<double>
 {
 public:
-    typedef value_reference_template<double>         reference_base;
+    typedef value_reference_template<double>     reference_base;
     typedef typename reference_base::json_type   json_type     ;
     typedef typename reference_base::string_type string_type   ;
     typedef typename reference_base::value_type  value_type    ;
@@ -1276,9 +1275,9 @@ class SHARED_API value_reference<doc_parser::string_type> : public
 {
 public:
     typedef value_reference_template<doc_parser::string_type> reference_base;
-    typedef typename reference_base::json_type            json_type     ;
-    typedef reference_base::string_type                   string_type   ;
-    typedef reference_base::value_type                    value_type    ;
+    typedef typename reference_base::json_type                json_type     ;
+    typedef reference_base::string_type                       string_type   ;
+    typedef reference_base::value_type                        value_type    ;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -2060,7 +2059,7 @@ private:
 class SHARED_API factory
 {
 public:
-    template<typename T>
+    template <typename T>
     using shared_ptr = std::shared_ptr<T>;
 
     typedef doc_parser::string_type                                  string_type        ;

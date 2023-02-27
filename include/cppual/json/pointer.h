@@ -75,7 +75,8 @@ enum PointerParseErrorCode {
     \note GenericPointer uses same encoding of ValueType.
     However, Allocator of GenericPointer is independent of Allocator of Value.
 */
-template <typename ValueType, typename Allocator = memory::MemoryRememory_resourceGenericPointer {
+template <typename ValueType, typename Allocator = MemoryPoolResource<memory::memory_resource>>
+class GenericPointer {
 public:
     typedef typename ValueType::EncodingType EncodingType;  //!< Encoding type from Value
     typedef typename ValueType::Ch Ch;                      //!< Character type from Value

@@ -145,12 +145,12 @@ public:
     void    scale (point2u size);
     void    flush ();
 
-    conf_reference  config     () const noexcept { return  _M_pConf;             }
-    device_backend  device     () const noexcept { return  device_backend::gl;   }
-    handle_type     handle     () const noexcept { return  _M_pHandle;           }
-    connection_type connection () const noexcept { return  _M_pConf.display ();  }
-    format_type     format     () const noexcept { return  _M_pConf.format  ();  }
-    surface_type    type       () const noexcept { return  _M_eType;             }
+    conf_reference  configuration () const noexcept { return  _M_pConf;             }
+    device_backend  device        () const noexcept { return  device_backend::gl;   }
+    handle_type     handle        () const noexcept { return  _M_pHandle;           }
+    connection_type connection    () const noexcept { return  _M_pConf.display ();  }
+    format_type     format        () const noexcept { return  _M_pConf.format  ();  }
+    surface_type    type          () const noexcept { return  _M_eType;             }
 
 private:
     conf_value   _M_pConf  ;
@@ -186,14 +186,14 @@ public:
     void finish  () noexcept;
     void release () noexcept;
 
-    conf_reference  config     () const noexcept { return  _M_pConf;             }
-    const_pointer   readable   () const noexcept { return  _M_pReadTarget;       }
-    pointer         drawable   () const noexcept { return  _M_pDrawTarget;       }
-    version_type    version    () const noexcept { return  _M_nVersion;          }
-    device_backend  device     () const noexcept { return  device_backend::gl;   }
-    handle_type     handle     () const noexcept { return  _M_pGC;               }
-    connection_type connection () const noexcept { return  _M_pConf.display ();  }
-    format_type     format     () const noexcept { return  _M_pConf.format  ();  }
+    conf_reference  configuration () const noexcept { return  _M_pConf;             }
+    const_pointer   readable      () const noexcept { return  _M_pReadTarget;       }
+    pointer         drawable      () const noexcept { return  _M_pDrawTarget;       }
+    version_type    version       () const noexcept { return  _M_nVersion;          }
+    device_backend  device        () const noexcept { return  device_backend::gl;   }
+    handle_type     handle        () const noexcept { return  _M_pGC;               }
+    connection_type connection    () const noexcept { return  _M_pConf.display ();  }
+    format_type     format        () const noexcept { return  _M_pConf.format  ();  }
 
     static constexpr version_type default_version () noexcept
     { return version_type { 3, 0 }; }

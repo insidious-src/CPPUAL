@@ -383,7 +383,7 @@ select_input_unchecked(Connection && c, Parameter && ... parameter)
 
 
 template<typename Derived, typename Connection>
-class event
+class xevent
 {
 protected:
     Connection
@@ -399,7 +399,7 @@ protected:
     }
 
 public:
-    virtual ~event(void) {}
+    virtual ~xevent(void) {}
 
     template<typename ... Parameter>
     auto

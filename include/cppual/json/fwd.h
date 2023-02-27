@@ -75,7 +75,7 @@ class FileWriteStream;
 template <typename Allocator>
 struct GenericMemoryBuffer;
 
-typedef GenericMemoryBuffer<memory::memory_resource> MemoryBuffer;
+typedef GenericMemoryBuffer<MemoryPoolResource<cppual::memory::memory_resource>> MemoryBuffer;
 
 // memorystream.h
 
@@ -122,7 +122,7 @@ class GenericDocument;
 
 typedef
 GenericDocument
-<UTF8<char>, MemoryPoolResource<memory::memory_resource>, memory::memory_resource>
+<UTF8<char>, MemoryPoolResource<memory::memory_resource>, MemoryPoolResource<memory::memory_resource>>
 Document;
 
 // pointer.h
@@ -130,7 +130,7 @@ Document;
 template <typename ValueType, typename Allocator>
 class GenericPointer;
 
-typedef GenericPointer<Value, memory::memory_resource> Pointer;
+typedef GenericPointer<Value, MemoryPoolResource<memory::memory_resource>> Pointer;
 
 // schema.h
 
@@ -140,7 +140,7 @@ class IGenericRemoteSchemaDocumentProvider;
 template <typename ValueT, typename Allocator>
 class GenericSchemaDocument;
 
-typedef GenericSchemaDocument<Value, memory::memory_resource> SchemaDocument;
+typedef GenericSchemaDocument<Value, MemoryPoolResource<memory::memory_resource>> SchemaDocument;
 typedef IGenericRemoteSchemaDocumentProvider<SchemaDocument> IRemoteSchemaDocumentProvider;
 
 template <
@@ -152,7 +152,7 @@ class GenericSchemaValidator;
 
 typedef
 GenericSchemaValidator
-<SchemaDocument, BaseReaderHandler<UTF8<char>, void>, memory::memory_resource>
+<SchemaDocument, BaseReaderHandler<UTF8<char>, void>, MemoryPoolResource<memory::memory_resource>>
 SchemaValidator;
 
 } } // namespace Json

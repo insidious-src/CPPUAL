@@ -1478,7 +1478,7 @@ public:
 
     template<typename ... Parameter>
     void
-    union(Parameter && ... parameter) const
+    union_unchecked(Parameter && ... parameter) const
     {
         cppual::xfixes::union_region(connection(),
                                   resource(),

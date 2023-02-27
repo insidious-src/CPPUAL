@@ -106,7 +106,8 @@ class GenericRegexSearch;
         Cox, Russ. "Regular Expression Matching Can Be Simple And Fast (but is slow in Java, Perl, PHP, Python, Ruby,...).",
         https://swtch.com/~rsc/regexp/regexp1.html
 */
-template <typename Encoding, typename Allocator = memory::MemoryRememory_resourceGenericRegex {
+template <typename Encoding, typename Allocator = MemoryPoolResource<memory::memory_resource>>
+class GenericRegex {
 public:
     typedef Encoding EncodingType;
     typedef typename Encoding::Ch Ch;
@@ -601,7 +602,8 @@ private:
     bool anchorEnd_;
 };
 
-template <typename RegexType, typename Allocator = memory::MemoryRememory_resourceGenericRegexSearch {
+template <typename RegexType, typename Allocator = MemoryPoolResource<memory::memory_resource>>
+class GenericRegexSearch {
 public:
     typedef typename RegexType::EncodingType Encoding;
     typedef typename Encoding::Ch Ch;

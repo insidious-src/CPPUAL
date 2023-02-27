@@ -45,7 +45,7 @@ struct system_message final
 
 // =========================================================
 
-class event
+class sys_event
 {
 public:
     typedef std::size_t size_type;
@@ -121,29 +121,29 @@ public:
 
     struct joy_button_data
     {
-        size_type id;
+        size_type id    ;
         i32       button;
     };
 
     struct joy_axis_data
     {
-        size_type id;
+        size_type id   ;
         i16       value;
-        u8        axis;
+        u8        axis ;
     };
 
     struct joy_trigger_data
     {
-        size_type id;
+        size_type id       ;
         i16       threshold;
-        u8        trigger;
+        u8        trigger  ;
 
     };
 
     struct joy_track_data
     {
-        size_type id;
-        point2i   pos;
+        size_type id   ;
+        point2i   pos  ;
         u8        track;
     };
 
@@ -159,28 +159,28 @@ public:
 
     struct property_data
     {
-        u32 prop;
+        u32 prop ;
         i32 value;
     };
 
     union data_value
     {
-        base_data        base;
-        key_data         key_code;
+        base_data        base        ;
+        key_data         key_code    ;
         mbutton_data     mouse_button;
-        point2u          position;
-        mwheel_data      wheel;
-        touch_data       touch;
-        joy_button_data  joy_button;
-        joy_axis_data    joy_axis;
-        joy_plug_data    joy_plug;
-        joy_trigger_data joy_trigger;
-        joy_track_data   joy_track;
-        i32              message;
-        paint_data       paint;
-        point2u          size;
-        bool             state;
-        property_data    property;
+        point2u          position    ;
+        mwheel_data      wheel       ;
+        touch_data       touch       ;
+        joy_button_data  joy_button  ;
+        joy_axis_data    joy_axis    ;
+        joy_plug_data    joy_plug    ;
+        joy_trigger_data joy_trigger ;
+        joy_track_data   joy_track   ;
+        i32              message     ;
+        paint_data       paint       ;
+        point2u          size        ;
+        bool             state       ;
+        property_data    property    ;
 
         constexpr data_value () noexcept : base { } { }
 
@@ -193,26 +193,32 @@ public:
         { }
     };
 
-    event () noexcept = default;
-    constexpr data_value const& data () const noexcept { return _M_data; }
-    constexpr bits              type () const noexcept { return _M_type; }
+    typedef data_value        value_type     ;
+    typedef data_value const  const_value    ;
+    typedef data_value&       reference      ;
+    typedef data_value const& const_reference;
 
-    constexpr event (bits type, data_value const& data = data_value()) noexcept
+    constexpr sys_event () noexcept : _M_data (), _M_type { } { }
+    constexpr const_reference data () const noexcept { return _M_data; }
+    constexpr bits            type () const noexcept { return _M_type; }
+
+    constexpr sys_event (bits type, const_reference data = value_type()) noexcept
     : _M_data (data),
       _M_type (type)
     { }
 
 protected:
-    data_value _M_data;
+    value_type _M_data;
     bits       _M_type;
 };
 
 // =========================================================
 
-struct message_event : public event
+struct message_event : public sys_event
 {
+    inline
     message_event (int nMsg) noexcept
-    : event       (event::sys_message)
+    : sys_event   (sys_event::sys_message)
     {
         _M_data.message = nMsg;
     }
@@ -220,10 +226,11 @@ struct message_event : public event
 
 // =========================================================
 
-struct visibility_event : public event
+struct visibility_event : public sys_event
 {
+    inline
     visibility_event (bool bVis) noexcept
-    : event          (event::visibility)
+    : sys_event      (sys_event::visibility)
     {
         _M_data.state = bVis;
     }
@@ -231,10 +238,11 @@ struct visibility_event : public event
 
 // =========================================================
 
-struct paint_event : public event
+struct paint_event : public sys_event
 {
+    inline
     paint_event (rect gRect) noexcept
-    : event     (event::paint)
+    : sys_event (sys_event::paint)
     {
         _M_data.paint.region = gRect;
     }
@@ -242,10 +250,11 @@ struct paint_event : public event
 
 // =========================================================
 
-struct size_event : public event
+struct size_event : public sys_event
 {
+    inline
     size_event (point2u size) noexcept
-    : event    (event::size)
+    : sys_event(sys_event::size)
     {
         _M_data.size = size;
     }
@@ -253,10 +262,11 @@ struct size_event : public event
 
 // =========================================================
 
-struct focus_event : public event
+struct focus_event : public sys_event
 {
+    inline
     focus_event (bool in) noexcept
-    : event     (event::focus)
+    : sys_event (sys_event::focus)
     {
         _M_data.state = in;
     }
@@ -264,10 +274,11 @@ struct focus_event : public event
 
 // =========================================================
 
-struct step_event : public event
+struct step_event : public sys_event
 {
+    inline
     step_event (bool in) noexcept
-    : event    (event::step)
+    : sys_event(sys_event::step)
     {
         _M_data.state = in;
     }
@@ -275,10 +286,11 @@ struct step_event : public event
 
 // =========================================================
 
-struct property_event : public event
+struct property_event : public sys_event
 {
+    inline
     property_event (u32 prop, i32 value) noexcept
-    : event        (event::property)
+    : sys_event    (sys_event::property)
     {
         _M_data.property.prop  = prop ;
         _M_data.property.value = value;
@@ -287,12 +299,12 @@ struct property_event : public event
 
 // =========================================================
 
-struct key_event : public event
+struct key_event : public sys_event
 {
     constexpr key_event (keyboard::key nKey,
                          keyboard::modifier uMask = keyboard::modifier::none,
                          bool is_pressed = true) noexcept
-    : event (is_pressed ? event::key_pressed : event::key_released, { key_data { nKey, uMask } })
+    : sys_event (is_pressed ? sys_event::key_pressed : sys_event::key_released, { key_data { nKey, uMask } })
     { }
 };
 
@@ -318,20 +330,20 @@ struct key_release_event : public key_event
 
 // =========================================================
 
-struct mouse_event : public event
+struct mouse_event : public sys_event
 {
     constexpr mouse_event (u8 nBtn, point2u gPos, bool is_down) noexcept
-    : event (is_down ? event::mbutton_down : event::mbutton_up, { mbutton_data { gPos, nBtn } })
+    : sys_event (is_down ? sys_event::mbutton_down : sys_event::mbutton_up, { mbutton_data { gPos, nBtn } })
     { }
 
     inline mouse_event (point2u gPos) noexcept
-    : event (event::mouse_move)
+    : sys_event (sys_event::mouse_move)
     {
         _M_data.position = gPos;
     }
 
     inline mouse_event (i32 nDelta, point2u gPos) noexcept
-    : event (event::mwheel_step)
+    : sys_event (sys_event::mwheel_step)
     {
         _M_data.wheel.delta = nDelta;
         _M_data.wheel.pos   = gPos;
@@ -360,6 +372,7 @@ struct mouse_release_event : public mouse_event
 
 struct mouse_move_event : public mouse_event
 {
+    inline
     mouse_move_event (point2u gPos) noexcept
     : mouse_event (gPos)
     { }
@@ -369,6 +382,7 @@ struct mouse_move_event : public mouse_event
 
 struct wheel_event : public mouse_event
 {
+    inline
     wheel_event (i32 nDelta, point2u gPos) noexcept
     : mouse_event (nDelta, gPos)
     { }
@@ -376,10 +390,11 @@ struct wheel_event : public mouse_event
 
 // =========================================================
 
-struct touch_event : public event
+struct touch_event : public sys_event
 {
+    inline
     touch_event (i32 pid, point2u gPos, bits action) noexcept
-    : event     (action)
+    : sys_event (action)
     {
         _M_data.touch.pid = pid;
         _M_data.touch.pos = gPos;
@@ -390,8 +405,9 @@ struct touch_event : public event
 
 struct touch_press_event : public touch_event
 {
+    inline
     touch_press_event (i32 pid, point2u gPos) noexcept
-    : touch_event     (pid, gPos, event::touch_press)
+    : touch_event     (pid, gPos, sys_event::touch_press)
     { }
 };
 
@@ -399,8 +415,9 @@ struct touch_press_event : public touch_event
 
 struct touch_release_event : public touch_event
 {
+    inline
     touch_release_event (i32 pid, point2u gPos) noexcept
-    : touch_event       (pid, gPos, event::touch_release)
+    : touch_event       (pid, gPos, sys_event::touch_release)
     { }
 };
 
@@ -408,8 +425,9 @@ struct touch_release_event : public touch_event
 
 struct touch_moved_event : public touch_event
 {
+    inline
     touch_moved_event (i32 pid, point2u gPos) noexcept
-    : touch_event   (pid, gPos, event::touch_move)
+    : touch_event     (pid, gPos, sys_event::touch_move)
     { }
 };
 

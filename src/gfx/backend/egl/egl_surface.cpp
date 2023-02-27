@@ -656,7 +656,7 @@ context& context::operator = (context const& obj)
         ::eglDestroyContext (config ().display (), _M_pGC);
     }
 
-    _M_pGC = obj._M_pGC ? egl::create_gc (obj.config (),
+    _M_pGC = obj._M_pGC ? egl::create_gc (obj.configuration (),
                                           obj._M_nVersion,
                                           obj._M_pShared ? obj._M_pShared->handle () : nullptr) :
                           nullptr;
@@ -675,7 +675,7 @@ context::~context () noexcept
 
     if (active ()) acquire (nullptr);
 
-    ::eglDestroyContext (config ().display (), _M_pGC);
+    ::eglDestroyContext (configuration ().display (), _M_pGC);
 }
 
 resource_version context::platform_version () noexcept
@@ -698,7 +698,7 @@ bool context::use (pointer pDraw, const_pointer pRead) noexcept
 
 bool context::assign () noexcept
 {
-    if (!::eglMakeCurrent (config ().display (),
+    if (!::eglMakeCurrent (configuration ().display (),
                            _M_pDrawTarget != nullptr ?
                            _M_pDrawTarget->handle ().get<egl::surface_pointer> () : nullptr,
                            _M_pReadTarget != nullptr ?
@@ -712,7 +712,7 @@ bool context::assign () noexcept
 
 void context::release () noexcept
 {
-    if (!::eglMakeCurrent (config ().display (), nullptr, nullptr, nullptr))
+    if (!::eglMakeCurrent (configuration ().display (), nullptr, nullptr, nullptr))
         egl::error<egl::error_type::make_current> ();
 }
 

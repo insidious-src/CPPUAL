@@ -48,15 +48,18 @@ public:
     constexpr reference operator *  () noexcept { return  _M_gPos; }
     constexpr pointer   operator -> () noexcept { return &_M_gPos; }
 
-    constexpr screen_iterator () noexcept
+    constexpr
+    screen_iterator () noexcept
     : _M_gPos { }
     { }
 
-    constexpr screen_iterator (const_handle& setup) noexcept
+    inline
+    screen_iterator (const_handle& setup) noexcept
     : _M_gPos (::xcb_setup_roots_iterator (&setup))
     { }
 
-    constexpr screen_iterator (const_reference ref) noexcept
+    constexpr
+    screen_iterator (const_reference ref) noexcept
     : _M_gPos (ref)
     { }
 

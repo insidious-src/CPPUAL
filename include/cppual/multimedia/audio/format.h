@@ -101,9 +101,9 @@ struct data_chunk
 
 struct format_header
 {
-    descriptor    descriptor;
-    fmt_sub_chunk fmt       ;
-    data_chunk    data      ;
+    descriptor    local_descriptor;
+    fmt_sub_chunk fmt             ;
+    data_chunk    data            ;
 };
 
 } } // namespace Audio

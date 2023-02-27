@@ -65,7 +65,7 @@ public:
 
     menu_item_type item_type (int pos);
     popup_menu*    sub_menu (int menu_pos);
-    command_type*  command (int action_pos);
+    command_type*  get_command (int action_pos);
     size_type      delay ();
     bool           create (point2i);
     bool           add_command (command_type*, int pos = -1);

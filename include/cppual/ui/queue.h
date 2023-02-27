@@ -46,7 +46,7 @@ typedef std::shared_ptr<display_queue_interface> shared_queue;
 class display_queue_interface : public non_copyable_virtual
 {
 public:
-    typedef input::event             event_type     ;
+    typedef input::sys_event             event_type     ;
     typedef shared_display           connection_type;
     typedef platform_wnd_interface   window_type    ;
     typedef std::atomic_bool         bool_type      ;

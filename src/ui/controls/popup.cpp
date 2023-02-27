@@ -63,7 +63,7 @@ popup_menu* popup_menu::sub_menu (int)
     return nullptr;
 }
 
-popup_menu::command_type* popup_menu::command (int)
+popup_menu::command_type* popup_menu::get_command (int)
 {
     return nullptr;
 }

@@ -203,7 +203,7 @@ constexpr u8 button (button_type uId) noexcept
     }
 }
 
-input::keyboard::key get_key (keycode_type keycode) noexcept
+constexpr input::keyboard::key get_key (keycode_type keycode) noexcept
 {
     switch (keycode)
     {
@@ -387,7 +387,7 @@ class event_handle final
 {
 public:
     typedef base_event_type        base_type              ;
-    typedef input::event           event_type             ;
+    typedef input::sys_event       event_type             ;
     typedef event_handle           self_type              ;
     typedef event_handle*          pointer                ;
     typedef ui::shared_display     display_pointer        ;
@@ -504,14 +504,14 @@ public:
         return base_type ();
     }
 
-    constexpr
+    inline
     static
     ui::xcb_display::data_const_reference data (display_const_reference conn) noexcept
     {
         return static_cast<ui::xcb_display&> (*conn).data ();
     }
 
-    constexpr
+    inline
     static
     ui::xcb_display::atoms_refrence prev_atoms (display_const_reference conn) noexcept
     {
@@ -643,9 +643,9 @@ public:
             return input::mouse_move_event ({ get ()->mouseMove.event_x,
               get ()->mouseMove.event_y });
         case TKeyPress:
-            return input::key_press_event ({ get_key (get ()->key.detail), get_modifier (get ()->key.state) });
+            return input::key_press_event  ({ get_key(get ()->key.detail), get_modifier (get ()->key.state) });
         case TKeyRelease:
-            return input::key_release_event ({ get_key(get ()->key.detail), get_modifier (get ()->key.state) });
+            return input::key_release_event({ get_key(get ()->key.detail), get_modifier (get ()->key.state) });
         case TExpose:
             return input::paint_event (rect (static_cast<i16> (get ()->paint.x),
                                              static_cast<i16> (get ()->paint.y),

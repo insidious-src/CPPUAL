@@ -496,7 +496,7 @@ context& context::operator = (context&& obj) noexcept
     {
         if (active ()) release ();
 
-        ::glXDestroyContext (config ().legacy ().get<internal::display_pointer> (),
+        ::glXDestroyContext (configuration ().legacy ().get<internal::display_pointer> (),
                              _M_pGC.get<internal::context_pointer> ());
     }
 
@@ -523,11 +523,11 @@ context& context::operator = (context const& obj)
     {
         if (active ()) release ();
 
-        ::glXDestroyContext (config ().legacy ().get<internal::display_pointer> (),
+        ::glXDestroyContext (configuration ().legacy ().get<internal::display_pointer> (),
                              _M_pGC.get<internal::context_pointer> ());
     }
 
-    _M_pGC = obj._M_pGC ? internal::create_gc (obj.config (), obj._M_nVersion) :
+    _M_pGC = obj._M_pGC ? internal::create_gc (obj.configuration (), obj._M_nVersion) :
                           internal::context_pointer ();
 
     _M_pReadTarget = _M_pDrawTarget = nullptr;
@@ -543,7 +543,7 @@ context::~context () noexcept
 
     if (active ()) acquire (nullptr);
 
-    ::glXDestroyContext (config ().legacy ().get<internal::display_pointer> (),
+    ::glXDestroyContext (configuration ().legacy ().get<internal::display_pointer> (),
                          _M_pGC.get<internal::context_pointer> ());
 }
 
@@ -567,7 +567,7 @@ bool context::use (pointer pDraw, const_pointer pRead) noexcept
 
 bool context::assign () noexcept
 {
-    if (::glXMakeContextCurrent (config ().legacy ().get<internal::display_pointer> (),
+    if (::glXMakeContextCurrent (configuration ().legacy ().get<internal::display_pointer> (),
                                  _M_pDrawTarget != nullptr ?
                                  _M_pDrawTarget->handle ().get<internal::surface_id> () : internal::surface_id (),
                                  _M_pReadTarget != nullptr ?
@@ -585,7 +585,7 @@ void context::release () noexcept
 {
     if (active ())
     {
-        ::glXMakeContextCurrent (config ().legacy ().get<internal::display_pointer> (),
+        ::glXMakeContextCurrent (configuration ().legacy ().get<internal::display_pointer> (),
                                  internal::surface_id (),
                                  internal::surface_id (),
                                  internal::context_pointer ());

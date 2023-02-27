@@ -33,7 +33,7 @@ namespace cppual { namespace ui {
 class hotkey
 {
 public:
-    typedef input::event::key_data value_type;
+    typedef input::sys_event::key_data value_type;
     typedef std::atomic_bool       bool_type ;
 
     hotkey () noexcept;

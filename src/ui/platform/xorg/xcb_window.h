@@ -29,7 +29,7 @@
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-#include "xcb_def.h"
+#include <cppual/ui/platforms/xcb/xcb_def.h>
 
 namespace cppual { namespace x {
 

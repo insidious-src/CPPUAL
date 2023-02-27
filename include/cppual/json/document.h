@@ -76,7 +76,7 @@ class GenericDocument;
     User can define this to use cppual::memory::memory_resource or MemoryPoolResource.
 */
 #ifndef RAPIDJSON_DEFAULT_STACK_ALLOCATOR
-#define RAPIDJSON_DEFAULT_STACK_ALLOCATOR cppual::memory::memory_resource
+#define RAPIDJSON_DEFAULT_STACK_ALLOCATOR MemoryPoolResource<cppual::memory::memory_resource>
 #endif
 
 /*! \def RAPIDJSON_VALUE_DEFAULT_OBJECT_CAPACITY
@@ -2505,7 +2505,7 @@ public:
     */
     GenericDocument(Allocator* allocator = static_cast<Allocator*>(memory_pool_resource()),
                     size_t stackCapacity = kDefaultStackCapacity,
-                    StackAllocator* stackAllocator = cppual::memory::get_default_resource()) :
+                    StackAllocator* stackAllocator = memory_pool_resource()) :
         allocator_(allocator), ownAllocator_(0), stack_(stackAllocator, stackCapacity), parseResult_()
     {
         if (!allocator_)

@@ -19,9 +19,9 @@ doc_parser::doc_parser(string_type const& file_path, doc_type type)
 {
     std::ifstream file(file_path.c_str());
 
-    std::cout << "Json File " << file_path << std::endl;
-
     if (!file.is_open()) return;
+
+    std::cout << "Json File " << file_path << std::endl;
 
     file.seekg(std::ios::beg, std::ios::end);
 
@@ -132,12 +132,20 @@ bool doc_parser::create_document(string_type const& file_path, doc_type type)
     return true;
 }
 
-bool doc_parser::save(std::ostream& stream)
+bool doc_parser::save(std::ostream& stream, bool pretty)
 {
     about_to_save();
 
     OStreamWrapper wrapper(stream);
-    PrettyWriter<OStreamWrapper> writer(wrapper);
+
+    if (pretty)
+    {
+        PrettyWriter<OStreamWrapper> writer(wrapper);
+
+        return base_type::Accept(writer);
+    }
+
+    Writer<OStreamWrapper> writer(wrapper);
 
     return base_type::Accept(writer);
 }
@@ -151,7 +159,7 @@ doc_parser::size_type doc_parser::size() const
 {
     return type() == doc_type::array ? Size() :
                                        type() == doc_type::object ? MemberCount() :
-                                                                    doc_parser::size_type();
+                                                                    size_type();
 }
 
 doc_parser::const_reference doc_parser::operator [] (string_type const& key) const
@@ -241,11 +249,11 @@ template_base& template_base::operator = (template_base const& obj)
 
     disconnections();
 
-    _M_parser   = obj._M_parser;
-    _M_ref      = obj._M_ref;
+    _M_parser   = obj._M_parser  ;
+    _M_ref      = obj._M_ref     ;
     _M_category = obj._M_category;
-    _M_index    = obj._M_index;
-    _M_owner    = obj._M_owner;
+    _M_index    = obj._M_index   ;
+    _M_owner    = obj._M_owner   ;
 
     connections();
 
@@ -260,11 +268,11 @@ template_base& template_base::operator = (template_base&& obj)
 
     disconnections();
 
-    _M_parser   = obj._M_parser;
-    _M_ref      = obj._M_ref;
+    _M_parser   = obj._M_parser  ;
+    _M_ref      = obj._M_ref     ;
     _M_category = obj._M_category;
-    _M_index    = obj._M_index;
-    _M_owner    = obj._M_owner;
+    _M_index    = obj._M_index   ;
+    _M_owner    = obj._M_owner   ;
 
     obj.invalidate();
     connections();
@@ -304,10 +312,10 @@ void template_base::invalidate()
     if (_M_ref == nullptr) return;
 
     _M_owner    = template_owner ();
-    _M_parser   = nullptr;
-    _M_ref      = nullptr;
-    _M_category = string_type ();
-    _M_index    = size_type ();
+    _M_parser   = nullptr          ;
+    _M_ref      = nullptr          ;
+    _M_category = string_type ()   ;
+    _M_index    = size_type ()     ;
 
     invalidated ();
 }
@@ -962,9 +970,9 @@ void value_reference_base::assign()
 
 void value_reference_base::invalidate() noexcept
 {
-    _M_ref   = nullptr;
+    _M_ref   = nullptr          ;
     _M_owner = template_owner ();
-    _M_fn    = func_type ();
+    _M_fn    = func_type ()     ;
 }
 
 // ======================================================================
