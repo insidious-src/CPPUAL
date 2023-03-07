@@ -60,6 +60,10 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(CompilerConfig REQUIRED)
 include(CTest)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll" ".DLL" ".a")
+endif()
+
 find_package(RT            REQUIRED) ## run-time library
 find_package(DL            REQUIRED) ## dynamic loading of libraries
 find_package(WM            REQUIRED) ## platform window manager
@@ -1055,7 +1059,7 @@ if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
     endif()
 elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(cppual-ui-win cppual-memory WM::Library)
+    target_link_libraries(cppual-ui-win cppual-memory cppual-ui WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 #    target_link_libraries(cppual-ui-android cppual-memory WM::Library)
 endif()

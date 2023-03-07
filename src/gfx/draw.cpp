@@ -52,7 +52,7 @@ private:
 public:
     inline initializer ()
     {
-        if (mgr.load_plugin (plugin_name ())) factory = mgr.plugin (plugin_name ()).interface ();
+        if (mgr.load_plugin (plugin_name ())) factory = mgr.plugin (plugin_name ()).iface ();
     }
 
     inline operator shared_factory () const

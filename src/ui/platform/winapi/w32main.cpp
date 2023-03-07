@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/decl.h>
+#include <cppual/memory/stacked.h>
 
 #ifdef OS_WINDOWS
 
@@ -29,13 +29,13 @@
 #include "w32window.h"
 #include "w32backend.h"
 
-namespace cppual { namespace Ui { namespace Platform {
+namespace cppual { namespace ui { namespace platform {
 
-struct Win32Factory final : Factory
+struct Win32Factory final : factory
 {
     shared_queue   createQueueInstance ();
     shared_display connectDisplay      (string_type const&);
-    shared_window  createWindow        (Rect const&, u32, IDisplay*);
+    shared_window  createWindow        (rect const&, u32, shared_display);
 };
 
 shared_display Win32Factory::connectDisplay (string_type const&)
@@ -48,7 +48,7 @@ shared_queue Win32Factory::createQueueInstance ()
     return shared_queue (new win32_queue);
 }
 
-shared_window Win32Factory::createWindow (Rect const& gRect, u32 nScreen, IDisplay* pDisplay)
+shared_window Win32Factory::createWindow (rect const& gRect, u32 nScreen, shared_display pDisplay)
 {
     return shared_window (new win32_window (gRect, nScreen, pDisplay));
 }
@@ -57,13 +57,16 @@ shared_window Win32Factory::createWindow (Rect const& gRect, u32 nScreen, IDispl
 
 // =========================================================
 
-using cppual::Ui::Platform::Win32Factory;
+using cppual::ui::platform::Win32Factory;
 using cppual::process::Plugin           ;
-using cppual::memory::memory_resource    ;
-using cppual::memory::allocator         ;
+using cppual::memory::memory_resource   ;
+using cppual::memory::stacked_resource  ;
+using cppual::memory::allocate_shared   ;
 
-extern "C" Plugin* plugin_main (memory_resource* rc)
+extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
 {
+    static char buffer[sizeof (Win32Factory) + memory_resource::max_adjust];
+    static stacked_resource static_resource (buffer, sizeof (buffer));
     static Plugin plugin;
 
     plugin.name     = "Win32Factory"    ;
@@ -72,8 +75,7 @@ extern "C" Plugin* plugin_main (memory_resource* rc)
     plugin.verMajor = 1                 ;
     plugin.verMinor = 0                 ;
 
-    plugin.iface    = std::static_pointer_cast<void>
-            (std::allocate_shared<Win32Factory>(Allocator<Win32Factory>(*rc)));
+    plugin.iface    = allocate_shared<Win32Factory, void> (&static_resource);
 
     return &plugin;
 }

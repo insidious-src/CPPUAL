@@ -26,16 +26,16 @@
 #include <cppual/ui/queue.h>
 #ifdef   OS_WINDOWS
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
 struct DECL_EXPORT win32_queue final : public display_queue_interface
 {
     win32_queue () noexcept;
-    bool set_window_events (platform_wnd_interface const&, mask_type);
-    bool pop_front         (event_type&, bool);
-    int  poll              (platform_wnd_interface const&, atomic_bool&);
-    void send              (event_type const&);
-    void post              (event_type const&);
+    bool set_window_events (window_type const&, mask_type);
+    bool pop_front         (bool wait);
+    int  poll              (bool_type& poll);
+    void send              (window_type const&, event_type const&);
+    void post              (window_type const&, event_type const&);
 };
 
 } } // namespace Input

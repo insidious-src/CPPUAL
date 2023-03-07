@@ -57,7 +57,8 @@ bool tcp_listener::accept (tcp_stream&) noexcept
 {
     if (!valid () or _M_bIsListening) return false;
 
-    ::sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
+    //::sockaddr_in gAddr = { 0, 0, { 0 }, { 0 } };
+    ::sockaddr_in gAddr = ::sockaddr_in { };
     ::socklen_t   uLen  = sizeof (::sockaddr_in);
 
     replace_from_id (::accept (id (),

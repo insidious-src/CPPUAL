@@ -50,7 +50,7 @@ private:
 public:
     inline initializer ()
     {
-        if (mgr.load_plugin (platform_name ())) local_factory = mgr.plugin (platform_name ()).interface ();
+        if (mgr.load_plugin (platform_name ())) local_factory = mgr.plugin (platform_name ()).iface ();
     }
 
     inline operator shared_manager () const

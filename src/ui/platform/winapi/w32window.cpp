@@ -24,13 +24,13 @@
 #define  WIN32_MEAN_AND_LEAN 1
 #include <windows.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
 namespace {
 
 typedef ::WNDCLASSEXA window_class_type;
 typedef ::HINSTANCE   instance_type;
-typedef ::HWND        handle_type;
+typedef ::HWND        id_type;
 typedef ::HBRUSH      brush_type;
 typedef ::RECT        rect_type;
 
@@ -89,11 +89,11 @@ struct Win32Rect final : public rect_type
     constexpr uint width () const noexcept
     { return right - left; }
 
-    constexpr int16 left_unsafe () const noexcept
-    { return static_cast<int16> (left); }
+    constexpr i16 left_unsafe () const noexcept
+    { return static_cast<i16> (left); }
 
-    constexpr int16 top_unsafe () const noexcept
-    { return static_cast<int16> (top); }
+    constexpr i16 top_unsafe () const noexcept
+    { return static_cast<i16> (top); }
 
     constexpr u16 width_unsafe () const noexcept
     { return static_cast<u16> (right - left); }
@@ -105,14 +105,14 @@ struct Win32Rect final : public rect_type
     { return static_cast<u16> (bottom - top); }
 };
 
-inline long_t toWindowStyles (WindowFlags flags) noexcept
+inline long_t toWindowStyles (window_flags /*flags*/) noexcept
 {
     long_t styles;
 
     return styles;
 }
 
-inline long_t toExStyles (WindowFlags flags) noexcept
+inline long_t toExStyles (window_flags /*flags*/) noexcept
 {
     long_t styles;
 
@@ -123,32 +123,31 @@ inline long_t toExStyles (WindowFlags flags) noexcept
 
 // ====================================================
 
-win32_window::win32_window (Rect const& gRect, u32, IDisplay* pDisplay)
+win32_window::win32_window (rect const& gRect, u32, shared_display pDisplay)
 : platform_wnd_interface (pDisplay,
            ::CreateWindowExA (0, WindowClass::registered ().name (), nullptr, WS_OVERLAPPEDWINDOW,
                               gRect.left, gRect.top, gRect.width (), gRect.height (),
-                              0, 0, WindowClass::registered ().instance (), 0),
-           ResourceType::Window)
+                              0, 0, WindowClass::registered ().instance (), 0))
 {
 }
 
 win32_window::~win32_window ()
 {
-    if (id ()) ::DestroyWindow (id ().get<handle_type> ());
+    if (handle ()) ::DestroyWindow (handle<id_type> ());
 }
 
 string win32_window::title () const
 {
-    string gTitle (::GetWindowTextLengthA (id ().get<handle_type> ()),
+    string gTitle (::GetWindowTextLengthA (handle<id_type> ()),
                    string::value_type ());
 
-    ::GetWindowTextA (id ().get<handle_type> (), &gTitle[0], static_cast<int> (gTitle.length ()));
-    return std::move (gTitle);
+    ::GetWindowTextA (handle<id_type> (), &gTitle[0], static_cast<int> (gTitle.length ()));
+    return gTitle;
 }
 
 void win32_window::set_title (string const& gText) noexcept
 {
-    ::SetWindowTextA (id ().get<handle_type> (), &gText[0]);
+    ::SetWindowTextA (handle<id_type> (), &gText[0]);
 }
 
 void win32_window::set_shaded (bool) noexcept
@@ -156,7 +155,7 @@ void win32_window::set_shaded (bool) noexcept
 
 }
 
-bool win32_window::is_shaded () noexcept
+bool win32_window::is_shaded () const noexcept
 {
     return false;
 }
@@ -164,12 +163,12 @@ bool win32_window::is_shaded () noexcept
 void win32_window::set_modal (bool bModal) noexcept
 {
     if (!owner ().expired ())
-        ::EnableWindow (owner ().lock ()->id().get<handle_type> (), bModal ? false : true);
+        ::EnableWindow (owner ().lock ()->handle<id_type> (), bModal ? false : true);
 }
 
-bool win32_window::is_modal () noexcept
+bool win32_window::is_modal () const noexcept
 {
-    return !owner ().expired () and !::IsWindowEnabled (owner ().lock ()->id().get<handle_type> ());
+    return !owner ().expired () and !::IsWindowEnabled (owner ().lock ()->handle<id_type> ());
 }
 
 void win32_window::set_fullscreen (bool) noexcept
@@ -177,72 +176,72 @@ void win32_window::set_fullscreen (bool) noexcept
 
 }
 
-bool win32_window::is_fullscreen () noexcept
+bool win32_window::is_fullscreen () const noexcept
 {
     return false;
 }
 
 void win32_window::set_maximized (bool bMaximized) noexcept
 {
-    ::ShowWindowAsync (id ().get<handle_type> (), bMaximized ? SW_MAXIMIZE : SW_SHOWNORMAL);
+    ::ShowWindowAsync (handle<id_type> (), bMaximized ? SW_MAXIMIZE : SW_SHOWNORMAL);
 }
 
-bool win32_window::is_maximized () noexcept
+bool win32_window::is_maximized () const noexcept
 {
-    return ::IsZoomed (id ().get<handle_type> ());
+    return ::IsZoomed (handle<id_type> ());
 }
 
 void win32_window::set_minimized (bool bMinimized) noexcept
 {
-    if (bMinimized) ::CloseWindow (id ().get<handle_type> ());
-    else ::OpenIcon (id ().get<handle_type> ());
+    if (bMinimized) ::CloseWindow (handle<id_type> ());
+    else ::OpenIcon (handle<id_type> ());
 }
 
-bool win32_window::is_minimized () noexcept
+bool win32_window::is_minimized () const noexcept
 {
-    return ::IsIconic (id ().get<handle_type> ());
+    return ::IsIconic (handle<id_type> ());
 }
 
-void win32_window::set_flags (WindowFlags flags) noexcept
+void win32_window::set_flags (window_flags flags) noexcept
 {
-    ::SetWindowLongA (id ().get<handle_type> (),
+    ::SetWindowLongA (handle<id_type> (),
                       GWL_EXSTYLE,
                       toExStyles (flags));
 }
 
 void win32_window::set_visible_in_taskbar (bool bVis) noexcept
 {
-    long_t uStyles = ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE);
+    long_t uStyles = ::GetWindowLong (handle<id_type> (), GWL_EXSTYLE);
 
-    ::SetWindowLongA (id ().get<handle_type> (),
+    ::SetWindowLongA (handle<id_type> (),
                       GWL_EXSTYLE,
                       bVis ? uStyles | WS_EX_APPWINDOW : uStyles | ~WS_EX_APPWINDOW);
 }
 
-bool win32_window::is_visible_in_taskbar () noexcept
+bool win32_window::is_visible_in_taskbar () const noexcept
 {
-    return ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE) & WS_EX_APPWINDOW;
+    return ::GetWindowLong (handle<id_type> (), GWL_EXSTYLE) & WS_EX_APPWINDOW;
 }
 
 void win32_window::set_visible_in_pager (bool bVis) noexcept
 {
-    long_t uStyles = ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE);
+    long_t uStyles = ::GetWindowLong (handle<id_type> (), GWL_EXSTYLE);
 
-    ::SetWindowLongA (id ().get<handle_type> (),
+    ::SetWindowLongA (handle<id_type> (),
                       GWL_EXSTYLE,
                       bVis ? uStyles | WS_EX_TOOLWINDOW : uStyles | ~WS_EX_TOOLWINDOW);
 }
 
-bool win32_window::is_visible_in_pager () noexcept
+bool win32_window::is_visible_in_pager () const noexcept
 {
-    return ::GetWindowLong (id ().get<handle_type> (), GWL_EXSTYLE) & WS_EX_TOOLWINDOW;
+    return ::GetWindowLong (handle<id_type> (), GWL_EXSTYLE) & WS_EX_TOOLWINDOW;
 }
 
 void win32_window::flash (uint count) noexcept
 {
     FLASHWINFO info;
 
-    info.hwnd      = id ().get<handle_type> ();
+    info.hwnd      = handle<id_type> ();
     info.cbSize    = sizeof (FLASHWINFO);
     info.uCount    = count;
     info.dwFlags   = count ? FLASHW_ALL : FLASHW_ALL | FLASHW_TIMERNOFG;
@@ -251,56 +250,86 @@ void win32_window::flash (uint count) noexcept
     ::FlashWindowEx (&info);
 }
 
-Rect win32_window::geometry () const
+rect win32_window::geometry () const
 {
-    Win32Rect rect;
+    Win32Rect rct;
 
-    ::GetClientRect (id ().get<handle_type> (), &rect);
-    return Rect (rect.left_unsafe  (), rect.top_unsafe    (),
-                 rect.width_unsafe (), rect.height_unsafe ());
+    ::GetClientRect (handle<id_type> (), &rct);
+    return rect (rct.left_unsafe  (), rct.top_unsafe    (),
+                 rct.width_unsafe (), rct.height_unsafe ());
 }
 
 bool win32_window::is_mapped () const
 {
-    return ::IsWindowVisible (id ().get<handle_type> ());
+    return ::IsWindowVisible (handle<id_type> ());
 }
 
 void win32_window::set_owner (const_pointer pWnd)
 {
-    ::SetParent (id ().get<handle_type> (), pWnd == nullptr ? handle_type () : pWnd->id ().get<handle_type> ());
+    ::SetParent (handle<id_type> (), pWnd == nullptr ? ::HWND () : pWnd->handle<id_type> ());
 }
 
-void win32_window::set_geometry (Rect const& rect)
+void win32_window::set_geometry (rect const& rect)
 {
-    ::SetWindowPos (id ().get<handle_type> (), handle_type (), rect.left, rect.top, rect.right, rect.bottom, 0);
+    ::SetWindowPos (handle<id_type> (), ::HWND (), rect.left, rect.top, rect.right, rect.bottom, 0);
 }
 
 void win32_window::raise ()
 {
-    ::BringWindowToTop (id ().get<handle_type> ());
+    ::BringWindowToTop (handle<id_type> ());
 }
 
 void win32_window::lower ()
 {
-    ::SetForegroundWindow (::GetWindow (id ().get<handle_type> (), GW_HWNDPREV));
+    ::SetForegroundWindow (::GetWindow (handle<id_type> (), GW_HWNDPREV));
 }
 
 void win32_window::move (point2i gPos)
 {
     Win32Rect rect;
 
-    ::GetClientRect (id ().get<handle_type> (), &rect);
-    ::MoveWindow    (id ().get<handle_type> (), gPos.x, gPos.y, rect.width (), rect.height (), false);
+    ::GetClientRect (handle<id_type> (), &rect);
+    ::MoveWindow    (handle<id_type> (), gPos.x, gPos.y, rect.width (), rect.height (), false);
 }
 
 void win32_window::map ()
 {
-    ::ShowWindowAsync (id ().get<handle_type> (), SW_SHOW);
+    ::ShowWindowAsync (handle<id_type> (), SW_SHOW);
 }
 
 void win32_window::unmap ()
 {
-    ::ShowWindowAsync (id ().get<handle_type> (), SW_HIDE);
+    ::ShowWindowAsync (handle<id_type> (), SW_HIDE);
+}
+
+void win32_window::map_minimized()
+{
+
+}
+
+void win32_window::map_maximized()
+{
+
+}
+
+void win32_window::keep_above(bool)
+{
+
+}
+
+bool win32_window::is_above() const
+{
+    return false;
+}
+
+void win32_window::keep_below(bool)
+{
+
+}
+
+bool win32_window::is_below() const
+{
+    return false;
 }
 
 } } // Ui

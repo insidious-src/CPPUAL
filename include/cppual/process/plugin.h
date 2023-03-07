@@ -202,7 +202,7 @@ public:
         constexpr const_plugin_pointer operator -> () const noexcept
         { return &_M_ref->second; }
 
-        constexpr shared_iface interface () const
+        constexpr shared_iface iface () const
         { return std::static_pointer_cast<iface_type>(_M_ref->second.iface); }
 
     private:

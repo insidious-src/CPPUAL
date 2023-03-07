@@ -25,7 +25,7 @@
 #include <windows.h>
 #include <iostream>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
 namespace {
 
@@ -47,7 +47,7 @@ inline handle_type desktop_window () noexcept
 } // anonymous namespace
 
 win32_display::win32_display () noexcept
-: IDisplay (get_display (), get_display ())
+: display_interface (get_display (), get_display ())
 {
 }
 

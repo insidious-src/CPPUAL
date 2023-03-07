@@ -26,7 +26,7 @@
 #include <cppual/ui/display.h>
 #ifdef   OS_WINDOWS
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
 struct DECL_EXPORT win32_display final : public display_interface
 {
@@ -37,7 +37,7 @@ struct DECL_EXPORT win32_display final : public display_interface
     void   flush        () noexcept;
 };
 
-} } // namespace Input
+} } // namespace Ui
 
 #endif // OS_WINDOWS
 #endif // __cplusplus

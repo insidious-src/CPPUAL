@@ -26,7 +26,11 @@
 #include <cppual/decl.h>
 
 #if defined (OS_WINDOWS)
-#    include <windows.h>
+
+#include <windows.h>
+
+typedef int socklen_t;
+
 #endif
 
 #endif // __cplusplus

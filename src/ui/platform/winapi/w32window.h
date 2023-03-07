@@ -26,49 +26,55 @@
 #include <cppual/ui/wm.h>
 #ifdef   OS_WINDOWS
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
 class DECL_EXPORT win32_window final : public platform_wnd_interface
 {
 public:
-    win32_window  (Rect const& rect, u32 screen, IDisplay* display);
+    win32_window  (rect const& rect, u32 screen, shared_display display);
     ~win32_window ();
 
-    string title () const;
-    void   set_title (string const&) noexcept;
+    string_type title () const;
+    void   set_title (string_type const&) noexcept;
     void   set_shaded (bool) noexcept;
-    bool   is_shaded () noexcept;
+    bool   is_shaded () const noexcept;
     void   set_modal (bool) noexcept;
-    bool   is_modal () noexcept;
+    bool   is_modal () const noexcept;
     void   set_fullscreen (bool) noexcept;
-    bool   is_fullscreen () noexcept;
+    bool   is_fullscreen () const noexcept;
     void   set_maximized (bool) noexcept;
-    bool   is_maximized () noexcept;
+    bool   is_maximized () const noexcept;
     void   set_minimized (bool) noexcept;
-    bool   is_minimized () noexcept;
+    bool   is_minimized () const noexcept;
     void   set_visible_in_taskbar (bool) noexcept;
-    bool   is_visible_in_taskbar () noexcept;
+    bool   is_visible_in_taskbar () const noexcept;
     void   set_visible_in_pager (bool) noexcept;
-    bool   is_visible_in_pager () noexcept;
+    bool   is_visible_in_pager () const noexcept;
     void   flash (uint) noexcept;
-    Rect   geometry () const;
+    rect   geometry () const;
     bool   is_mapped () const;
     void   set_owner (const_pointer);
-    void   set_geometry (Rect const&);
+    void   set_geometry (rect const&);
     void   raise ();
     void   lower ();
     void   move (point2i);
     void   map ();
     void   unmap ();
+    void   map_minimized();
+    void   map_maximized();
+    void   keep_above(bool);
+    bool   is_above() const;
+    void   keep_below(bool);
+    bool   is_below() const;
 
-    WindowFlags flags () const noexcept { return _M_eFlags; }
-    void        set_flags (WindowFlags) noexcept;
+    window_flags flags () const noexcept { return _M_eFlags; }
+    void         set_flags (window_flags) noexcept;
 
-    weak_window owner  () const noexcept { return shared_window (); }
-    u32         screen () const noexcept { return 0; }
+    weak_window  owner  () const noexcept { return shared_window (); }
+    u32          screen () const noexcept { return 0; }
 
 private:
-    WindowFlags _M_eFlags;
+    window_flags _M_eFlags;
 };
 
 } } // namespace Ui

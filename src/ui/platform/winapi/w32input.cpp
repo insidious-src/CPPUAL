@@ -24,7 +24,7 @@
 #define  WIN32_MEAN_AND_LEAN 1
 #include <windows.h>
 
-namespace cppual { namespace Ui {
+namespace cppual { namespace ui {
 
 namespace {
 
@@ -34,8 +34,8 @@ typedef ::UINT message_value;
 
 struct Win32Event final : public message_type
 {
-    typedef display_queue_interface::event_type::window_type window_type;
-    typedef display_queue_interface::event_type              event_type ;
+    typedef display_queue_interface::window_type window_type;
+    typedef display_queue_interface::event_type  event_type ;
 
     enum
     {
@@ -85,25 +85,27 @@ struct Win32Event final : public message_type
         switch (type ())
         {
         case Win32Event::KeyPress:
-            EventQueue::emit ().keyPress (window (), { primary<u8> () });
+            event_queue::events ().keyPress (window (), { primary<input::keyboard::key> (),
+                                                          primary<input::keyboard::modifier> () });
             break;
         case Win32Event::KeyRelease:
-            EventQueue::emit ().keyRelease (window (), { primary<u8> () });
+            event_queue::events ().keyRelease (window (), { primary<input::keyboard::key> (),
+                                                            primary<input::keyboard::modifier> () });
             break;
         case Win32Event::ButtonPress:
-            EventQueue::emit ().mousePress (window (), { position (), primary<u8> () });
+            event_queue::events ().mousePress (window (), { position (), primary<u8> () });
             break;
         case Win32Event::ButtonRelease:
-            EventQueue::emit ().mouseRelease (window (), { position (), primary<u8> () });
+            event_queue::events ().mouseRelease (window (), { position (), primary<u8> () });
             break;
         case Win32Event::Scroll:
-            EventQueue::emit ().scroll (window (), { position (), primary<int32> () });
+            event_queue::events ().scroll (window (), { position (), primary<i32> () });
             break;
         case Win32Event::PointerMove:
-            EventQueue::emit ().mouseMove (window (), position ());
+            event_queue::events ().mouseMove (window (), position ());
             break;
         case Win32Event::Show:
-            EventQueue::emit ().winVisible (window (), primary<bool> ());
+            event_queue::events ().winVisible (window (), primary<bool> ());
             break;
         case Win32Event::Destroy:
             break;
@@ -125,21 +127,21 @@ struct Win32Event final : public message_type
         switch (type ())
         {
         case Win32Event::KeyPress:
-            return KeyPressEvent (window (), primary<u8> ());
+            return input::key_press_event (primary<input::keyboard::key> ());
         case Win32Event::KeyRelease:
-            return KeyReleaseEvent (window (), primary<u8> ());
+            return input::key_release_event (primary<input::keyboard::key> ());
         case Win32Event::ButtonPress:
-            return MousePressEvent (window (), primary<u8> (), position ());
+            return input::mouse_press_event (primary<u8> (), position ());
         case Win32Event::ButtonRelease:
-            return MouseReleaseEvent (window (), primary<u8> (), position ());
+            return input::mouse_release_event (primary<u8> (), position ());
         case Win32Event::Scroll:
-            return ScrollEvent (window (), primary<int32> (), position ());
+            return input::wheel_event (primary<i32> (), position ());
         case Win32Event::PointerMove:
-            return PointerMoveEvent (window (), position ());
+            return input::mouse_move_event (position ());
         case Win32Event::Show:
-            return VisibilityEvent (window (), true);
+            return input::visibility_event (true);
         case Win32Event::Destroy:
-            return VisibilityEvent (window (), false);
+            return input::visibility_event (false);
         case Win32Event::Paint:
             return event_type ();
         case Win32Event::Size:
@@ -159,7 +161,7 @@ struct Win32Event final : public message_type
 // ====================================================
 
 win32_queue::win32_queue () noexcept
-: display_queue_interface (::GetDC (handle_type ()))
+: display_queue_interface (display_interface::primary ())
 {
 }
 
@@ -168,17 +170,17 @@ bool win32_queue::set_window_events (platform_wnd_interface const&, mask_type)
     return false;
 }
 
-void win32_queue::send (event_type const& event)
+void win32_queue::send (window_type const& wnd, event_type const& event)
 {
-    ::SendMessageA (event.window ().get<handle_type> (), event.type (), 0, 0);
+    ::SendMessageA (wnd.handle<handle_type> (), event.type (), 0, 0);
 }
 
-void win32_queue::post (event_type const& event)
+void win32_queue::post (window_type const& wnd, event_type const& event)
 {
-    ::PostMessageA (event.window ().get<handle_type> (), event.type (), 0, 0);
+    ::PostMessageA (wnd.handle<handle_type> (), event.type (), 0, 0);
 }
 
-bool win32_queue::pop_front (event_type& event, bool wait)
+bool win32_queue::pop_front (bool wait)
 {
     static Win32Event internal_event;
 
@@ -187,17 +189,17 @@ bool win32_queue::pop_front (event_type& event, bool wait)
         return false;
 
     ::TranslateMessage (&internal_event);
-    event = internal_event.toEvent ();
+    //event = internal_event.toEvent ();
     return true;
 }
 
-int win32_queue::poll (platform_wnd_interface const& window, atomic_bool& polling)
+int win32_queue::poll (bool_type& polling)
 {
     Win32Event event;
 
     while (polling.load (std::memory_order_relaxed))
     {
-        switch (::GetMessageA  (&event, window.id ().get<handle_type> (), 0, 0))
+        switch (::GetMessageA  (&event, nullptr, 0, 0))
         {
         case  0:
             polling = false;
