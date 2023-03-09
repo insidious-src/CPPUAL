@@ -515,14 +515,14 @@ std::enable_if<is_allocator<T>::value, T>::type;
 // =========================================================
 
 template <typename T, typename... Args>
-inline std::shared_ptr<T> allocate_shared (memory_resource* rc, Args&&... args)
+inline std::shared_ptr<T> allocate_shared (memory_resource* rc = nullptr, Args&&... args)
 {
     return std::allocate_shared<T> (rc == nullptr ? allocator<T>() : allocator<T>(*rc),
                                     std::forward<Args> (args)...);
 }
 
 template <typename T, typename U, typename... Args>
-inline std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
+inline std::shared_ptr<U> allocate_shared (memory_resource* rc = nullptr, Args&&... args)
 {
     return std::static_pointer_cast<U>
             (std::allocate_shared<T> (rc == nullptr ? allocator<T>() : allocator<T>(*rc),
