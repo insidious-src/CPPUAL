@@ -1,3 +1,3 @@
 [submodule "cmake"]
 	path = cmake
-	url = https://github.com/insidious-src/cmake-cppual.git
+	url = git@github.com:insidious-src/cmake-cppual.git
