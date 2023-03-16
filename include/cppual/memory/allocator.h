@@ -35,7 +35,7 @@ namespace cppual { namespace memory {
 // =========================================================
 
 /// std::pmr::memory_resource replacement for compute usage
-class memory_resource
+class SHARED_API memory_resource
 {
 public:
     typedef memory_resource  base_type             ;
@@ -137,29 +137,29 @@ operator != (memory_resource const& a, memory_resource const& b) noexcept
 // =========================================================
 
 /// statically constructed memory_resource using new & delete operators
-memory_resource* new_delete_resource () noexcept;
+memory_resource* SHARED_API new_delete_resource () noexcept;
 
 /// statically constructed memory_resource for testing purposes.
 /// on allocation throws std::bad_alloc on deallocation does nothing
-memory_resource* null_resource () noexcept;
+memory_resource* SHARED_API null_resource () noexcept;
 
 /// statically constructed memory_resource using malloc & free functions
-memory_resource* malloc_resource () noexcept;
+memory_resource* SHARED_API malloc_resource () noexcept;
 
 /// get the default memory_resource
-memory_resource* get_default_resource () noexcept;
+memory_resource* SHARED_API get_default_resource () noexcept;
 
 /// get the default memory_resource for the current thread
-memory_resource* get_default_thread_resource () noexcept;
+memory_resource* SHARED_API get_default_thread_resource () noexcept;
 
 /// set the default memory_resource
-void set_default_resource (memory_resource& resource) noexcept;
+void SHARED_API set_default_resource (memory_resource& resource) noexcept;
 
 /// set the default memory_resource for the current thread
-void set_default_thread_resource (memory_resource& resource) noexcept;
+void SHARED_API set_default_thread_resource (memory_resource& resource) noexcept;
 
 /// get main thread id
-std::thread::id main_thread_id () noexcept;
+std::thread::id SHARED_API main_thread_id () noexcept;
 
 // =========================================================
 // memory_resource Concept
@@ -186,7 +186,7 @@ std::enable_if<is_memory_resource<T>::value, T>::type;
 
 /// redefined polymorphic memory allocator
 template <typename T, typename R = memory_resource>
-class allocator
+class SHARED_API allocator
 {
 public:
     typedef T               value_type                            ;
@@ -515,14 +515,14 @@ std::enable_if<is_allocator<T>::value, T>::type;
 // =========================================================
 
 template <typename T, typename... Args>
-inline std::shared_ptr<T> allocate_shared (memory_resource* rc = nullptr, Args&&... args)
+inline std::shared_ptr<T> allocate_shared (memory_resource* rc, Args&&... args)
 {
     return std::allocate_shared<T> (rc == nullptr ? allocator<T>() : allocator<T>(*rc),
                                     std::forward<Args> (args)...);
 }
 
 template <typename T, typename U, typename... Args>
-inline std::shared_ptr<U> allocate_shared (memory_resource* rc = nullptr, Args&&... args)
+inline std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
 {
     return std::static_pointer_cast<U>
             (std::allocate_shared<T> (rc == nullptr ? allocator<T>() : allocator<T>(*rc),

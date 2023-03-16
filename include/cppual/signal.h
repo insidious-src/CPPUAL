@@ -57,7 +57,7 @@ class scoped_connection;
 // =========================================================
 
 template <typename T, typename... Args, typename Allocator>
-class signal <T(Args...), Allocator>
+class SHARED_API signal <T(Args...), Allocator>
 {
 public:
     typedef Allocator                                    allocator_type        ;
@@ -226,7 +226,7 @@ private:
 // =========================================================
 
 template <typename... Args, typename Allocator>
-class signal <void(Args...), Allocator>
+class SHARED_API signal <void(Args...), Allocator>
 {
 public:
     typedef Allocator                                    allocator_type        ;
@@ -379,6 +379,7 @@ template <typename TRetType,
           typename... TArgs,
           typename Allocator
           >
+inline
 typename signal<TRetType(TArgs...), Allocator>::slot_type
 connect (signal<TRetType(TArgs...), Allocator>& gSignal,
          typename signal<TRetType(TArgs...), Allocator>::const_reference val,
@@ -577,7 +578,7 @@ disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
 // =========================================================
 
 template <typename T, typename... TArgs, typename Allocator>
-class scoped_connection <T(TArgs...), Allocator> : public non_copyable
+class SHARED_API scoped_connection <T(TArgs...), Allocator> : public non_copyable
 {
 public:
     typedef signal<T(TArgs...), Allocator>   signal_type;
@@ -667,6 +668,7 @@ template <typename T,
           typename... TArgs,
           typename Allocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                typename signal<T(TArgs...), Allocator>::value_type&& fn,
@@ -681,6 +683,7 @@ template <typename Call,
           typename... TArgs,
           typename Allocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                Call&& fn,
@@ -697,6 +700,7 @@ template <typename Call,
           typename Allocator,
           typename CallableAllocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                Call&& fn,
@@ -711,6 +715,7 @@ template <typename T,
           typename... TArgs,
           typename Allocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                typename signal<T(TArgs...), Allocator>::const_reference fn,
@@ -725,6 +730,7 @@ template <typename TClass,
           typename... TArgs,
           typename Allocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                ClassType<TClass>& pObj,
@@ -739,6 +745,7 @@ template <typename T,
           typename... TArgs,
           typename Allocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 make_shared_scoped_connection (signal<T(TArgs...), Allocator>& _signal,
                                T (* fn)(TArgs...),
@@ -755,6 +762,7 @@ template <typename T,
           typename Allocator,
           typename SharedAllocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 allocate_shared_scoped_connection (SharedAllocator alloc,
                                    signal<T(TArgs...), Allocator>& _signal,
@@ -771,6 +779,7 @@ template <typename Call,
           typename Allocator,
           typename SharedAllocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 allocate_shared_scoped_connection (SharedAllocator alloc,
                                    signal<T(TArgs...), Allocator>& _signal,
@@ -790,6 +799,7 @@ template <typename Call,
           typename SharedAllocator,
           typename CallableAllocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 allocate_shared_scoped_connection (SharedAllocator alloc,
                                    signal<T(TArgs...), Allocator>& _signal,
@@ -808,6 +818,7 @@ template <typename T,
           typename Allocator,
           typename SharedAllocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 allocate_shared_scoped_connection (SharedAllocator alloc,
                                    signal<T(TArgs...), Allocator>& _signal,
@@ -824,6 +835,7 @@ template <typename TClass,
           typename Allocator,
           typename SharedAllocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 allocate_shared_scoped_connection (SharedAllocator alloc,
                                    signal<T(TArgs...), Allocator>& _signal,
@@ -841,6 +853,7 @@ template <typename T,
           typename Allocator,
           typename SharedAllocator
           >
+inline
 std::shared_ptr<scoped_connection<T(TArgs...), Allocator> >
 allocate_shared_scoped_connection (SharedAllocator alloc,
                                    signal<T(TArgs...), Allocator>& _signal,

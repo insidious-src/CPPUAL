@@ -43,7 +43,7 @@ template <typename T,
           typename Allocator = memory::allocator<T>,
           bool     Atomic    = false
           >
-class circular_queue : private Allocator
+class SHARED_API circular_queue : private Allocator
 {
 public:
     static_assert (!std::is_void<T>::value              , "T is void");
@@ -522,7 +522,7 @@ void circular_queue<T, Allocator, Atomic>::dispose ()
 // lock-free circular queue (1 producer / 1 consumer)
 // ex. sufficient for event handling
 template <typename T, std::size_t N>
-class uniform_queue : non_copyable
+class SHARED_API uniform_queue : non_copyable
 {
 public:
     static_assert (!std::is_void<T>::value              , "T is void");
@@ -647,7 +647,7 @@ private:
 // feature complete lock-free multi-producer/multi-consumer bidirectional queue
 // ex. game messaging queue
 template <typename T, class Allocator>
-class circular_queue <T, Allocator, true> : Allocator, non_copyable
+class SHARED_API circular_queue <T, Allocator, true> : Allocator, non_copyable
 {
 public:
     static_assert (!std::is_void<T>::value              , "T is void");

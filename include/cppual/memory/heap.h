@@ -29,7 +29,7 @@
 
 namespace cppual { namespace memory {
 
-class heap_resource final : public memory_resource
+class SHARED_API heap_resource final : public memory_resource
 {
 public:
     heap_resource   (size_type size);
@@ -73,7 +73,7 @@ private:
 
 // =========================================================
 
-class list_resource final : public memory_resource
+class SHARED_API list_resource final : public memory_resource
 {
 public:
     struct header { size_type size; header* next; };

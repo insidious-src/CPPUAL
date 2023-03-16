@@ -29,7 +29,7 @@
 
 namespace cppual { namespace memory {
 
-class stacked_resource final : public memory_resource
+class SHARED_API stacked_resource final : public memory_resource
 {
 public:
     stacked_resource  (size_type capacity);
@@ -77,7 +77,7 @@ private:
 
 // =========================================================
 
-class dstacked_resource final : public memory_resource
+class SHARED_API dstacked_resource final : public memory_resource
 {
 public:
     dstacked_resource  (size_type capacity, size_type hint);

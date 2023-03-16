@@ -28,7 +28,7 @@
 
 namespace cppual { namespace audio { namespace al {
 
-class sound_emitter : public sound_source
+class SHARED_API sound_emitter : public sound_source
 {
 public:
     using sound_source::sound_source;

@@ -29,6 +29,7 @@
 #include <cppual/concepts.h>
 #include <cppual/string.h>
 #include <cppual/meta.h>
+#include <cppual/containers.h>
 
 #include <memory>
 #include <cstring>
@@ -39,7 +40,7 @@ namespace cppual { namespace process {
 
 // =========================================================
 
-class dyn_loader : public non_copyable
+class SHARED_API dyn_loader : public non_copyable
 {
 public:
     typedef call_ret_t (DLCALL * function_type)();
@@ -111,12 +112,12 @@ private:
 private:
     handle_type    _M_pHandle ;
     string_type    _M_gLibPath;
-    resolve_policy _M_eResolve;
+    resolve_policy _M_eResolve { resolve_policy::lazy };
 };
 
 // =========================================================
 
-struct Plugin
+struct SHARED_API Plugin
 {
     cchar*                name     { };
     cchar*                provides { };
@@ -125,6 +126,7 @@ struct Plugin
     uint                  verMinor { };
     u64                   priority { };
     std::shared_ptr<void> iface    { };
+    vector<string>        required { };
 
     inline Plugin () noexcept = default;
     inline Plugin (Plugin const&) = default;
@@ -136,7 +138,8 @@ struct Plugin
       desc(obj.desc),
       verMajor(obj.verMajor),
       verMinor(obj.verMinor),
-      iface(std::move(obj.iface))
+      iface(std::move(obj.iface)),
+      required(std::move(obj.required))
     { }
 
     inline Plugin& operator = (Plugin&& obj)
@@ -149,6 +152,7 @@ struct Plugin
         verMajor = obj.verMajor;
         verMinor = obj.verMinor;
         iface    = std::move(obj.iface);
+        required = std::move(obj.required);
 
         return *this;
     }
@@ -165,7 +169,7 @@ template <typename Interface,
                            std::pair<string const, plugin_pair>
                            >{}>::type
           >
-class plugin_manager : public non_copyable
+class SHARED_API plugin_manager : public non_copyable
 {
 public:
     static_assert (memory::is_allocator<Allocator>::value, "invalid allocator object type!");

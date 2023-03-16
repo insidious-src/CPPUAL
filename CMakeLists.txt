@@ -212,6 +212,7 @@ add_library(cppual-memory-system SHARED
 
     "include/cppual/system_memory"
     )
+target_compile_definitions(cppual-memory-system PRIVATE -DAPI_EXPORT)
 target_precompile_headers(cppual-memory-system PRIVATE ${CPPUAL_MEMORY_SYSTEM_HEADERS})
 
 #if (NOT ANDROID)
@@ -582,6 +583,7 @@ add_library(cppual-audio-openal MODULE
 
     "include/cppual/openal"
     )
+target_compile_definitions(cppual-audio-openal PRIVATE -DAPI_EXPORT)
 target_precompile_headers(cppual-audio-openal PRIVATE ${CPPUAL_AUDIO_AL_HEADERS})
 
 endif()

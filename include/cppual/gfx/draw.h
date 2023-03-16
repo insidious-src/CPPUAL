@@ -220,7 +220,7 @@ class transform3d
 
 // =========================================================
 
-struct resource_interface
+struct SHARED_API resource_interface
 {
     typedef resource_connection connection_type;
     typedef resource_handle     handle_type    ;
@@ -237,7 +237,7 @@ struct resource_interface
 
 // =========================================================
 
-struct surface_interface : public resource_interface
+struct SHARED_API surface_interface : public resource_interface
 {
     virtual point2u      size  () const = 0;
     virtual surface_type type  () const = 0;
@@ -246,7 +246,7 @@ struct surface_interface : public resource_interface
 
 // =========================================================
 
-struct context_interface : public resource_interface
+struct SHARED_API context_interface : public resource_interface
 {
     typedef surface_interface*       pointer      ;
     typedef surface_interface const* const_pointer;
@@ -269,7 +269,7 @@ struct context_interface : public resource_interface
 
 // =========================================================
 
-struct drawable2d_interface
+struct SHARED_API drawable2d_interface
 {
     virtual device_backend type () const noexcept    = 0;
     virtual void           draw (transform2d const&) = 0;
@@ -279,7 +279,7 @@ struct drawable2d_interface
 
 // =========================================================
 
-struct drawable3d_interface
+struct SHARED_API drawable3d_interface
 {
     virtual device_backend type () const noexcept    = 0;
     virtual void           draw (transform3d const&) = 0;
@@ -289,21 +289,21 @@ struct drawable3d_interface
 
 // =========================================================
 
-struct transformable2d_interface
+struct SHARED_API transformable2d_interface
 {
     virtual ~transformable2d_interface () { }
 };
 
 // =========================================================
 
-struct transformable3d_interface
+struct SHARED_API transformable3d_interface
 {
     virtual ~transformable3d_interface () { }
 };
 
 // ====================================================
 
-struct draw_factory : public non_copyable_virtual
+struct SHARED_API draw_factory : public non_copyable_virtual
 {
     typedef string                              string_type    ;
     typedef resource_interface::connection_type connection_type;

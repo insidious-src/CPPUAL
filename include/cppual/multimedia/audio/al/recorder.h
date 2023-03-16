@@ -28,7 +28,7 @@
 
 namespace cppual { namespace audio { namespace al {
 
-class sound_stream_recorder : public non_copyable
+class SHARED_API sound_stream_recorder : public non_copyable
 {
 public:
     sound_stream_recorder () = delete;

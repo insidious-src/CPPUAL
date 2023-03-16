@@ -29,7 +29,7 @@
 
 namespace cppual { namespace ui {
 
-class animation_interface : public non_copy_assignable
+class SHARED_API animation_interface : public non_copy_assignable
 {
 public:
     virtual float speed     () const = 0;
@@ -60,7 +60,7 @@ protected:
     bool_type               _M_bIsPlaying;
 };
 
-class motion final : public animation_base
+class SHARED_API motion final : public animation_base
 {
 public:
     void play   (int);
@@ -68,7 +68,7 @@ public:
     void resume ();
 };
 
-class fade final : public animation_base
+class SHARED_API fade final : public animation_base
 {
 public:
     void play   (int);
@@ -76,7 +76,7 @@ public:
     void resume ();
 };
 
-class rotation final : public animation_base
+class SHARED_API rotation final : public animation_base
 {
 public:
     void play   (int);
@@ -84,7 +84,7 @@ public:
     void resume ();
 };
 
-class pulse final : public animation_base
+class SHARED_API pulse final : public animation_base
 {
 public:
     void play   (int);

@@ -242,7 +242,7 @@ private:
 
 //! reimplementation of impossibly fast delegates
 template <typename T, typename... Args>
-class function <T(Args...)> final
+class SHARED_API function <T(Args...)> final
 {
 public:
     typedef member_fn<T, Args...>                    any_mem_fn_type;

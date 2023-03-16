@@ -27,7 +27,7 @@
 
 namespace cppual { namespace audio { namespace al {
 
-struct sound_player final : public sound_source
+struct SHARED_API sound_player final : public sound_source
 {
 public:
     using sound_source::sound_source;

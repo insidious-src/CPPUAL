@@ -26,7 +26,7 @@
 
 namespace cppual { namespace ui {
 
-class dialog : public window
+class SHARED_API dialog : public window
 {
 public:
     dialog () noexcept;

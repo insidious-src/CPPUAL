@@ -32,7 +32,7 @@
 
 namespace cppual { namespace ui {
 
-class view
+class SHARED_API view
 {
 public:
     typedef input::sys_event                          event_type    ;

@@ -37,7 +37,7 @@ typedef std::weak_ptr  <display_interface> weak_display  ;
 
 // ====================================================
 
-class display_interface : public non_copyable_virtual
+class SHARED_API display_interface : public non_copyable_virtual
 {
 public:
     typedef resource_connection handle_type;

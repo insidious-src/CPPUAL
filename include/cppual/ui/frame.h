@@ -37,7 +37,7 @@ enum class vis_type : byte
     maximized
 };
 
-class frame_view : public skinnable_view
+class SHARED_API frame_view : public skinnable_view
 {
 public:
     typedef gfx::image_interface image_type;
@@ -129,7 +129,7 @@ private:
 
 // control window frame eighter using internal compositor
 // or the window manager
-class Frame
+class SHARED_API Frame
 {
 public:
     typedef frame_view::image_type image_type;

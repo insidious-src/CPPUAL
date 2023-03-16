@@ -30,7 +30,7 @@
 
 namespace cppual { namespace ui {
 
-class window : public view
+class SHARED_API window : public view
 {
 public:
     typedef gfx::image_interface image_type;

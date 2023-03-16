@@ -29,7 +29,7 @@
 
 namespace cppual { namespace audio { namespace al {
 
-class sound_source : public object
+class SHARED_API sound_source : public object
 {
 public:
     typedef deque<sound_buffer*> queue_type;

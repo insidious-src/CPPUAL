@@ -35,7 +35,7 @@ class sound_source;
 
 // ====================================================
 
-class sound_buffer : public object, public sound
+class SHARED_API sound_buffer : public object, public sound
 {
 public:
     typedef vector<sound_source*>        vector_type   ;

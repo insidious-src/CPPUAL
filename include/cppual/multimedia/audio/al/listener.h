@@ -27,19 +27,19 @@
 
 namespace cppual { namespace audio { namespace al { namespace listener {
 
-void    reset () noexcept;
-void    set_position (point3f const& position) noexcept;
-point3f position () noexcept;
-void    set_velocity (point3f const& velocity) noexcept;
-point3f velocity () noexcept;
-void    set_orientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) noexcept;
-point3f orientation_at () noexcept;
-point3f orientation_up () noexcept;
-void    set_volume (float value) noexcept;
-float   volume () noexcept;
-bool    is_mute () noexcept;
-void    mute () noexcept;
-void    unmute () noexcept;
+void    SHARED_API reset () noexcept;
+void    SHARED_API SHARED_API set_position (point3f const& position) noexcept;
+point3f SHARED_API position () noexcept;
+void    SHARED_API set_velocity (point3f const& velocity) noexcept;
+point3f SHARED_API velocity () noexcept;
+void    SHARED_API set_orientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) noexcept;
+point3f SHARED_API orientation_at () noexcept;
+point3f SHARED_API orientation_up () noexcept;
+void    SHARED_API set_volume (float value) noexcept;
+float   SHARED_API volume () noexcept;
+bool    SHARED_API is_mute () noexcept;
+void    SHARED_API mute () noexcept;
+void    SHARED_API unmute () noexcept;
 
 } } } } // namespace Listener
 

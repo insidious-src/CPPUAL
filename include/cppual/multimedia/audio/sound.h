@@ -69,7 +69,7 @@ enum class sound_quality : byte
 
 // ====================================================
 
-class sound
+class SHARED_API sound
 {
 public:
     typedef std::array<double, buffer_length> buffer_type  ;

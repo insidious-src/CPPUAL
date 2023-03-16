@@ -35,7 +35,7 @@ class data_group
 
 // =========================================================
 
-class view_group
+class SHARED_API view_group
 {
 public:
     typedef string  string_type ;

@@ -43,7 +43,7 @@ struct align
 
 // =========================================================
 
-class layout
+class SHARED_API layout
 {
 public:
     typedef vector<view*> vector_type;

@@ -47,7 +47,7 @@ enum class State : byte
     Invalid
 };
 
-class shared_object final : public non_copyable
+class SHARED_API shared_object final : public non_copyable
 {
 public:
     typedef std::size_t size_type;
@@ -77,7 +77,7 @@ private:
     int    _M_nId   ;
 };
 
-class shared_memory final : public non_copyable
+class SHARED_API shared_memory final : public non_copyable
 {
 public:
     typedef std::size_t size_type;

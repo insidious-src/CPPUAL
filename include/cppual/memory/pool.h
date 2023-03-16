@@ -31,7 +31,7 @@ namespace cppual { namespace memory {
 
 // =========================================================
 
-class uniform_pool_resource final : public memory_resource
+class SHARED_API uniform_pool_resource final : public memory_resource
 {
 public:
     /// local memory

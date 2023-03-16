@@ -36,7 +36,7 @@ typedef std::shared_ptr<factory> shared_manager;
 
 // =========================================================
 
-struct factory : public non_copyable_virtual
+struct SHARED_API factory : public non_copyable_virtual
 {
     typedef process::plugin_manager<factory> manager_type;
     typedef string                           string_type ;

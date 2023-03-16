@@ -58,7 +58,7 @@ typedef bitset         <window_flag           > window_flags ;
 
 // ====================================================
 
-class platform_wnd_interface : public resource <shared_display, resource_handle>
+class SHARED_API platform_wnd_interface : public resource <shared_display, resource_handle>
 {
 public:
     using resource<shared_display, resource_handle>::resource;

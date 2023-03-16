@@ -39,7 +39,7 @@ enum class string_query : byte
 
 // ====================================================
 
-class device : public non_copyable
+class SHARED_API device : public non_copyable
 {
 public:
     typedef std::size_t size_type  ;
@@ -68,7 +68,7 @@ protected:
 
 };
 
-class playback_device : public virtual device
+class SHARED_API playback_device : public virtual device
 {
 public:
     playback_device  () noexcept;
@@ -98,7 +98,7 @@ private:
 
 // ====================================================
 
-class context
+class SHARED_API context
 {
 public:
     typedef string string_type;

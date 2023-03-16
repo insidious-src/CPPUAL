@@ -93,7 +93,7 @@ enum class skin_loading : byte { statically, dynamically };
 
 // =========================================================
 
-class skin_interface : public non_copyable_virtual
+class SHARED_API skin_interface : public non_copyable_virtual
 {
 public:
     typedef gfx::font::format_type font_format;
@@ -119,7 +119,7 @@ public:
 
 // =========================================================
 
-class skinnable_view : public view
+class SHARED_API skinnable_view : public view
 {
 public:
     typedef view::event_type event_type;

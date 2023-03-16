@@ -35,7 +35,7 @@ class popup_menu;
 
 // ====================================================
 
-class command
+class SHARED_API command
 {
 public:
     typedef gfx::icon icon_type;

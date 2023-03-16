@@ -39,17 +39,17 @@ static_assert (alignof (std::size_t) == alignof (byte*), "alignment is wrong!");
 // =========================================================
 
 /// Get size of the total physical memory installed
-std::size_t capacity ();
+std::size_t SHARED_API capacity ();
 
 /// Largest available system memory block
-std::size_t max_size ();
+std::size_t SHARED_API max_size ();
 
 /// Get size the current process allocated memory
-std::size_t working_size ();
+std::size_t SHARED_API working_size ();
 
 // =========================================================
 
-memory_resource* system_resource ();
+memory_resource* SHARED_API system_resource ();
 
 // =========================================================
 

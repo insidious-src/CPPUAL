@@ -52,7 +52,7 @@ enum class string_query : byte
 
 // ====================================================
 
-class audio_device : public non_copyable
+class SHARED_API audio_device : public non_copyable
 {
 public:
     typedef string string_type;
@@ -79,7 +79,7 @@ protected:
     { }
 };
 
-class playback_device : public audio_device
+class SHARED_API playback_device : public audio_device
 {
 public:
     playback_device  () noexcept;
@@ -87,7 +87,7 @@ public:
     ~playback_device () noexcept;
 };
 
-class capture_device : public audio_device
+class SHARED_API capture_device : public audio_device
 {
 public:
     typedef string string_type;
@@ -110,7 +110,7 @@ private:
 
 // ====================================================
 
-class instance final : public non_copyable
+class SHARED_API instance final : public non_copyable
 {
 public:
     typedef string              string_type;

@@ -29,7 +29,7 @@
 
 namespace cppual { namespace ui {
 
-class proxy_renderable final : public platform_wnd_interface
+class SHARED_API proxy_renderable final : public platform_wnd_interface
 {
 public:
     proxy_renderable () = delete;

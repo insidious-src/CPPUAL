@@ -43,7 +43,7 @@ typedef std::shared_ptr<display_queue_interface> shared_queue;
 
 // =========================================================
 
-class display_queue_interface : public non_copyable_virtual
+class SHARED_API display_queue_interface : public non_copyable_virtual
 {
 public:
     typedef input::sys_event         event_type     ;

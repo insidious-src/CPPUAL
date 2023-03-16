@@ -29,7 +29,7 @@
 
 namespace cppual { namespace audio { namespace al {
 
-class object
+class SHARED_API object
 {
 public:
     object (object_type type) noexcept;

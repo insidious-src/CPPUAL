@@ -660,7 +660,7 @@ private:
 // ======================================================================
 
 template <typename T>
-class SHARED_API value_reference_template : public value_reference_base
+class value_reference_template : public value_reference_base
 {
 public:
     static_assert (is_json_value<T>::value, "invalid type!");
@@ -784,7 +784,7 @@ private:
 //======================================================
 
 template <typename T>
-class SHARED_API value_reference<T> : public value_reference_template<T>
+class value_reference<T> : public value_reference_template<T>
 {
 public:
     static_assert (std::is_enum_v<T>, "T is NOT an enum!");
@@ -1628,7 +1628,7 @@ inline bool operator != (std::nullptr_t, value_reference<T> const& rh)
 // ======================================================================
 
 template <typename T, typename Allocator>
-class SHARED_API objects_array<T, Allocator> : public template_array, public Allocator
+class objects_array<T, Allocator> : public template_array, public Allocator
 {
 public:
     typedef T                                           value_type            ;
@@ -1848,7 +1848,7 @@ private:
 // ======================================================================
 
 template <typename T, typename Allocator>
-class SHARED_API values_array<T, Allocator> : public template_array, public Allocator
+class values_array<T, Allocator> : public template_array, public Allocator
 {
 public:
     typedef value_reference<T>                          value_type            ;

@@ -29,8 +29,8 @@ namespace cppual { namespace ui {
 
 // ====================================================
 
-void use_internal_compositor  (bool) noexcept;
-bool is_using_internal_compositor () noexcept;
+void SHARED_API use_internal_compositor  (bool) noexcept;
+bool SHARED_API is_using_internal_compositor () noexcept;
 
 // ====================================================
 

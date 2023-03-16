@@ -80,7 +80,8 @@ dyn_loader::string_type dyn_loader::extension () noexcept
 
 dyn_loader::dyn_loader (dyn_loader&& obj) noexcept
 : _M_pHandle  (obj._M_pHandle),
-  _M_gLibPath (std::move (obj._M_gLibPath))
+  _M_gLibPath (std::move (obj._M_gLibPath)),
+  _M_eResolve (obj._M_eResolve)
 {
     obj._M_pHandle = nullptr;
 }
@@ -91,6 +92,7 @@ dyn_loader& dyn_loader::operator = (dyn_loader&& obj) noexcept
     {
         _M_pHandle  = obj._M_pHandle;
         _M_gLibPath = std::move (obj._M_gLibPath);
+        _M_eResolve = obj._M_eResolve;
 
         obj._M_pHandle = nullptr;
     }

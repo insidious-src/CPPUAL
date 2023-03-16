@@ -30,7 +30,7 @@
 
 namespace cppual { namespace ui {
 
-class hotkey
+class SHARED_API hotkey
 {
 public:
     typedef input::sys_event::key_data value_type;

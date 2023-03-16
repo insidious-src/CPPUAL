@@ -31,12 +31,37 @@ layout::layout   ()
 {
 }
 
+layout::layout(layout&&)
+{
+
+}
+
+layout::layout(layout const&)
+{
+
+}
+
+layout& layout::operator = (layout&&)
+{
+    return *this;
+}
+
+layout& layout::operator = (layout const&)
+{
+    return *this;
+}
+
 void layout::on_size (rect const&)
 {
 }
 
 void layout::set_view_metrics (view*, layout_metrics const&)
 {
+}
+
+void layout::set_padding(const rect&)
+{
+
 }
 
 bool layout::add_view (view*, layout_metrics const&)
