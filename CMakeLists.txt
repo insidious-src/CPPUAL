@@ -66,7 +66,7 @@ endif()
 
 find_package(RT            REQUIRED) ## run-time library
 find_package(DL            REQUIRED) ## dynamic loading of libraries
-find_package(WM            REQUIRED) ## platform window manager
+find_package(WM                    ) ## platform window manager
 find_package(XCB COMPONENTS XCB ICCCM EWMH GLX) ## platform window manager (Xcb)
 find_package(X11                   ) ## platform window manager (X11-xcb)
 find_package(Sockets       REQUIRED) ## network interface & interprocess
