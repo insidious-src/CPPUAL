@@ -365,6 +365,8 @@ std::size_t working_size ()
 #define GET_THREAD_LOCAL(TYPE, NAME) ((TYPE)pthread_getspecific(NAME))
 #define GET_THREAD_LOCAL_LITERAL_VALUE(TYPE, NAME) ((TYPE)((size_t)pthread_getspecific(NAME)))
 #define SET_THREAD_LOCAL(NAME, VALUE) pthread_setspecific(NAME, (void*)VALUE);
+#define CAST_THREAD_LOCAL(NAME, VALUE) reinterpret_cast<void*> \
+    (static_cast<uptr>(static_cast<decltype(NAME)>(VALUE)))
 #else
 #define DEFINE_THREAD_LOCAL(TYPE, NAME) THREAD_LOCAL TYPE NAME
 #define INITIALIZE_THREAD_LOCAL(NAME)
@@ -372,6 +374,7 @@ std::size_t working_size ()
 #define GET_THREAD_LOCAL(TYPE, NAME) NAME
 #define GET_THREAD_LOCAL_LITERAL_VALUE(TYPE, NAME) NAME
 #define SET_THREAD_LOCAL(NAME, VALUE) NAME = VALUE
+#define CAST_THREAD_LOCAL(NAME, VALUE) static_cast<decltype(NAME)>(VALUE)
 #endif
 
 // Build time configurable limits
@@ -1678,9 +1681,9 @@ thread_initialize(void) {
     {
         _acquire_heaps_lock();
 
-        void* heap_ptr = _memory_heaps[GET_THREAD_LOCAL_LITERAL_VALUE(u32, _memory_preferred_heap)].load();
+        void* heap_ptr = _memory_heaps[GET_THREAD_LOCAL_LITERAL_VALUE(uptr, _memory_preferred_heap)].load();
 
-        for (u32 id = GET_THREAD_LOCAL_LITERAL_VALUE(u32, _memory_preferred_heap);
+        for (u32 id = GET_THREAD_LOCAL_LITERAL_VALUE(uptr, _memory_preferred_heap);
             id < HEAP_ARRAY_SIZE + GET_THREAD_LOCAL_LITERAL_VALUE(u32, _memory_preferred_heap);
             ++id)
         {
@@ -1699,10 +1702,11 @@ thread_initialize(void) {
             // We have to allocate a new heap
             Heap* heap = _memory_allocate_heap();
 
-            i32 id = heap->id;
+            auto id = heap->id;
             SET_THREAD_LOCAL(_memory_thread_heap, heap);
             _memory_heaps[id] = _mark_heap_in_use(heap);
-            SET_THREAD_LOCAL(_memory_preferred_heap, u32(id));
+            SET_THREAD_LOCAL(_memory_preferred_heap,
+                             CAST_THREAD_LOCAL(_memory_preferred_heap, id));
         }
 
         _release_heaps_lock();

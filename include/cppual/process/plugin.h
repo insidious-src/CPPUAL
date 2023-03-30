@@ -126,11 +126,21 @@ struct SHARED_API Plugin
     uint                  verMinor { };
     u64                   priority { };
     std::shared_ptr<void> iface    { };
-    vector<string>        required { };
+    vector<cchar*>        required { };
 
-    inline Plugin () noexcept = default;
     inline Plugin (Plugin const&) = default;
     inline Plugin& operator = (Plugin const&) = default;
+
+    inline Plugin (memory::memory_resource* res = nullptr)
+    : name(),
+      provides(),
+      desc(),
+      verMajor(),
+      verMinor(),
+      iface(),
+      required(res == nullptr ? vector<cchar*>::allocator_type() :
+                                vector<cchar*>::allocator_type(*res))
+    { }
 
     inline Plugin (Plugin&& obj)
     : name(obj.name),
