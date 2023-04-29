@@ -60,16 +60,16 @@ shared_window xcb_factory::createWindow (rect const& gRect, u32 nScreen, shared_
 using cppual::process::plugin_manager  ;
 using cppual::ui::platform::factory    ;
 using cppual::ui::platform::xcb_factory;
-using cppual::process::Plugin          ;
+using cppual::process::plugin_vars     ;
 using cppual::memory::memory_resource  ;
 using cppual::memory::stacked_resource ;
 using cppual::memory::allocate_shared  ;
 
-extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
+extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {
     static char buffer[sizeof (xcb_factory) + memory_resource::max_adjust];
     static stacked_resource static_resource (buffer, sizeof (buffer));
-    static Plugin plugin;
+    static plugin_vars plugin;
 
     plugin.name     = "XFactory"       ;
     plugin.desc     = "Xorg UI Factory";

@@ -79,12 +79,13 @@ enum class polygon_face : byte
 
 // =========================================================
 
-struct  context_interface;
-struct  surface_interface;
+struct  context_interface   ;
+struct  surface_interface   ;
 struct  drawable2d_interface;
 struct  drawable3d_interface;
-struct  painter_interface;
-struct  draw_factory;
+struct  painter_interface   ;
+struct  draw_factory        ;
+
 typedef bitset<pixel_flag::type>              pixel_flags      ;
 typedef std::shared_ptr<painter_interface>    shared_painter   ;
 typedef std::shared_ptr<draw_factory>         shared_factory   ;
@@ -226,7 +227,7 @@ struct SHARED_API resource_interface
     typedef resource_handle     handle_type    ;
     typedef pixel_format        format_type    ;
 
-    virtual ~resource_interface () { }
+    virtual ~resource_interface ();
 
     virtual connection_type     connection () const = 0;
     virtual format_type         format     () const = 0;
@@ -239,6 +240,8 @@ struct SHARED_API resource_interface
 
 struct SHARED_API surface_interface : public resource_interface
 {
+    virtual ~surface_interface ();
+
     virtual point2u      size  () const = 0;
     virtual surface_type type  () const = 0;
     virtual void         scale (point2u size) = 0;
@@ -251,6 +254,8 @@ struct SHARED_API context_interface : public resource_interface
     typedef surface_interface*       pointer      ;
     typedef surface_interface const* const_pointer;
     typedef resource_version         version_type ;
+
+    virtual ~context_interface ();
 
     virtual pointer       drawable () const = 0;
     virtual const_pointer readable () const = 0;
@@ -303,11 +308,57 @@ struct SHARED_API transformable3d_interface
 
 // ====================================================
 
+class context_mutex
+{
+public:
+    context_mutex (context_interface& context) noexcept
+    : _M_context  (&context)
+    { }
+
+    void lock ()
+    {
+        _M_mutex.lock ();
+        _M_context->assign ();
+    }
+
+    bool try_lock ()
+    {
+        if (!_M_mutex.try_lock ()) return false;
+
+        _M_context->assign ();
+        return true;
+    }
+
+    void unlock ()
+    {
+        _M_context->release ();
+        _M_mutex.unlock ();
+    }
+
+private:
+    std::recursive_mutex _M_mutex  ;
+    context_interface*   _M_context;
+};
+
+// ====================================================
+
 struct SHARED_API draw_factory : public non_copyable_virtual
 {
     typedef string                              string_type    ;
     typedef resource_interface::connection_type connection_type;
     typedef resource_interface::handle_type     handle_type    ;
+
+    enum shape
+    {
+        image    ,
+        line     ,
+        elipse   ,
+        polygon  ,
+        rectangle,
+        text
+    };
+
+    virtual ~draw_factory ();
 
     virtual shared_surface create_surface (connection_type native,
                                            connection_type legacy,
@@ -321,15 +372,9 @@ struct SHARED_API draw_factory : public non_copyable_virtual
                                            pixel_format format,
                                            shared_context shared = nullptr) = 0;
 
-    virtual device_backend backend () = 0;
-    virtual shared_painter create_painter () = 0;
-
-    //virtual shared_drawable2d create_image () = 0;
-    //virtual shared_drawable2d create_line () = 0;
-    //virtual shared_drawable2d create_elipse () = 0;
-    //virtual shared_drawable2d create_polygon () = 0;
-    //virtual shared_drawable2d create_rectangle () = 0;
-    //virtual shared_drawable2d create_text () = 0;
+    virtual device_backend    backend () = 0;
+    virtual shared_painter    create_painter () = 0;
+    virtual shared_drawable2d create_shape (byte shape_type) = 0;
 
     static shared_factory instance ();
     static bool           has_valid_instance () noexcept;

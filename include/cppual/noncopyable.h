@@ -68,6 +68,29 @@ struct non_copyable_virtual
 
 // ====================================================
 
+struct non_copyable_movable
+{
+    constexpr non_copyable_movable () = default;
+    non_copyable_movable (non_copyable&&) = delete;
+    non_copyable_movable (non_copyable const&) = delete;
+    non_copyable_movable& operator = (non_copyable&&) = delete;
+    non_copyable_movable& operator = (non_copyable_movable const&) = delete;
+};
+
+// ====================================================
+
+struct non_copyable_movable_virtual
+{
+    constexpr non_copyable_movable_virtual () = default;
+    non_copyable_movable_virtual (non_copyable_movable_virtual&&) = delete;
+    non_copyable_movable_virtual (non_copyable_movable_virtual const&) = delete;
+    non_copyable_movable_virtual& operator = (non_copyable_movable_virtual&&) = delete;
+    non_copyable_movable_virtual& operator = (non_copyable_movable_virtual const&) = delete;
+    virtual ~non_copyable_movable_virtual () { }
+};
+
+// ====================================================
+
 struct non_copy_constructible
 {
     constexpr non_copy_constructible () = default;

@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
+#include <cppual/noncopyable.h>
 
 #include <thread>
 #include <memory>
@@ -35,7 +36,7 @@ namespace cppual { namespace memory {
 // =========================================================
 
 /// std::pmr::memory_resource replacement for compute usage
-class SHARED_API memory_resource
+class SHARED_API memory_resource : public non_copyable_movable_virtual
 {
 public:
     typedef memory_resource  base_type             ;
@@ -58,14 +59,8 @@ public:
     /// using smart pointers (ex. std::shared_ptr & std::unique_ptr)
     static constexpr const align_type max_adjust = alignof (std::max_align_t) * 2;
 
-    virtual ~memory_resource() { }
-
     constexpr memory_resource () = default;
-
-    memory_resource (memory_resource&&) = delete;
-    memory_resource& operator = (memory_resource&&) = delete;
-    memory_resource (memory_resource const&) = delete;
-    memory_resource& operator = (memory_resource const&) = delete;
+    virtual  ~memory_resource ();
 
     /// is thread safe (ex. using mutex)
     inline virtual bool is_thread_safe () const noexcept { return false; }
@@ -110,8 +105,8 @@ protected:
     {
         if (p && old_size && old_size == new_size) return p;
 
-        auto old_p = static_cast<math_pointer> (p);
-        auto new_p = static_cast<math_pointer>
+        auto const old_p = static_cast<math_pointer> (p);
+        auto const new_p = static_cast<math_pointer>
                 (allocate (new_size > old_size ? new_size : old_size, alignment));
 
         if (p)
@@ -126,8 +121,7 @@ protected:
 
 // =========================================================
 
-inline bool
-operator == (memory_resource const& a, memory_resource const& b) noexcept
+inline bool operator == (memory_resource const& a, memory_resource const& b) noexcept
 { return a.is_equal(b); }
 
 inline bool
@@ -175,7 +169,7 @@ struct is_memory_resource_helper <memory_resource> : public std::true_type
 
 template <class T>
 struct is_memory_resource : public is_memory_resource_helper<T>
-{ static_assert (is_memory_resource<T>::value, "invalid memory_resource object type!"); };
+{ static_assert (is_memory_resource<T>::value, "T is not derived from memory_resource!"); };
 
 /// memory_resource concept type
 template <class T>
@@ -194,16 +188,14 @@ public:
     typedef T const*        const_pointer                         ;
     typedef T &             reference                             ;
     typedef T const&        const_reference                       ;
-    typedef R               resource_type                         ;
-    typedef R*              resource_pointer                      ;
-    typedef R&              resource_reference                    ;
+    typedef ResourceType<R> resource_type                         ;
+    typedef resource_type*  resource_pointer                      ;
+    typedef resource_type&  resource_reference                    ;
     typedef std::size_t     size_type                             ;
     typedef std::ptrdiff_t  difference_type                       ;
     typedef std::true_type  propagate_on_container_copy_assignment;
     typedef std::true_type  propagate_on_container_move_assignment;
     typedef std::true_type  propagate_on_container_swap           ;
-
-    static_assert (is_memory_resource<resource_type>::value, "R is not derived from memory_resource!");
 
     template <class U>
     struct rebind { typedef allocator<U, resource_type> other; };
@@ -255,8 +247,7 @@ public:
     : _M_pRc  (&rc)
     { }
 
-    template <typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type>
-    constexpr
+    inline
     allocator () noexcept
     : _M_pRc  (std::this_thread::get_id () == main_thread_id () ?
                    get_default_resource ()  : get_default_thread_resource ())
@@ -269,7 +260,7 @@ public:
         ator._M_pRc = nullptr;
     }
 
-    inline
+    constexpr
     allocator (allocator const& ator) noexcept
     : _M_pRc  (ator._M_pRc)
     { }
@@ -293,8 +284,7 @@ public:
     }
 
     template <typename U,
-              typename M,
-              typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type
+              typename M
               >
     constexpr
     explicit
@@ -303,8 +293,7 @@ public:
     { }
 
     template <typename U,
-              typename M,
-              typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type
+              typename M
               >
     inline
     explicit
@@ -315,8 +304,7 @@ public:
     }
 
     template <typename U,
-              typename M,
-              typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type
+              typename M
               >
     inline
     allocator& operator = (allocator<U, M> const& ator) noexcept
@@ -326,8 +314,7 @@ public:
     }
 
     template <typename U,
-              typename M,
-              typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type
+              typename M
               >
     inline
     allocator& operator = (allocator<U, M>&& ator) noexcept
@@ -338,27 +325,21 @@ public:
         return *this;
     }
 
-    template <typename U,
-              typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type
-              >
-    constexpr
+    template <typename U>
+    inline
     explicit
     allocator (std::allocator<U> const&) noexcept
     : _M_pRc  (new_delete_resource ())
     { }
 
-    template <typename U,
-              typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type
-              >
-    constexpr
+    template <typename U>
+    inline
     explicit
     allocator (std::allocator<U>&&) noexcept
     : _M_pRc  (new_delete_resource ())
     { }
 
-    template <typename U,
-              typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type
-              >
+    template <typename U>
     inline
     allocator& operator = (std::allocator<U> const&) noexcept
     {
@@ -366,9 +347,7 @@ public:
         return *this;
     }
 
-    template <typename U,
-              typename = typename std::enable_if<std::is_same<memory_resource, R>::value>::type
-              >
+    template <typename U>
     inline
     allocator& operator = (std::allocator<U>&&) noexcept
     {

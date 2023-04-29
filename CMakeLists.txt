@@ -735,8 +735,8 @@ if(TARGET cppual-gfx AND OPENGL_FOUND AND GLEW_FOUND)
 
 # OpenGL/ES library
 set(CPPUAL_GL_HEADERS
-    "include/cppual/gfx/gl/glad.h"
-    "include/cppual/gfx/gl/khrplatform.h"
+    #"include/cppual/gfx/gl/glad.h"
+    #"include/cppual/gfx/gl/khrplatform.h"
     "include/cppual/gfx/gl/gldef.h"
     "include/cppual/gfx/gl/glbase.h"
     "include/cppual/gfx/gl/runtime.h"

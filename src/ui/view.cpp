@@ -538,21 +538,33 @@ void view::help_event()
 #   endif
 }
 
+#ifdef DEBUG_MODE
 void view::minimize_event(bool is_minimized)
+#else
+void view::minimize_event(bool /*is_minimized*/)
+#endif
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << ' ' << is_minimized << std::endl;
 #   endif
 }
 
+#ifdef DEBUG_MODE
 void view::maximize_event(bool is_maximized)
+#else
+void view::maximize_event(bool /*is_maximized*/)
+#endif
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__<< ' ' << is_maximized << std::endl;
 #   endif
 }
 
+#ifdef DEBUG_MODE
 void view::fullscreen_event(bool is_fullscreen)
+#else
+void view::fullscreen_event(bool /*is_fullscreen*/)
+#endif
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__<< ' ' << is_fullscreen << std::endl;
@@ -566,7 +578,11 @@ void view::close_event()
 #   endif
 }
 
+#ifdef DEBUG_MODE
 void view::show_event(bool is_shown)
+#else
+void view::show_event(bool /*is_shown*/)
+#endif
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__<< ' ' << is_shown << std::endl;
@@ -580,7 +596,11 @@ void view::paint_event(rect const&)
 #   endif
 }
 
+#ifdef DEBUG_MODE
 void view::on_enable(bool is_enabled)
+#else
+void view::on_enable(bool /*is_enabled*/)
+#endif
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__<< ' ' << is_enabled << std::endl;
@@ -601,7 +621,11 @@ void view::move_event(point2i)
 #   endif
 }
 
+#ifdef DEBUG_MODE
 void view::enter_leave_event(bool is_entered)
+#else
+void view::enter_leave_event(bool /*is_entered*/)
+#endif
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__<< ' ' << is_entered << std::endl;
@@ -629,7 +653,11 @@ void view::min_max_size_event(point2u)
 #   endif
 }
 
+#ifdef DEBUG_MODE
 void view::focus_event(bool is_focused)
+#else
+void view::focus_event(bool /*is_focused*/)
+#endif
 {
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__<< ' ' << is_focused << std::endl;

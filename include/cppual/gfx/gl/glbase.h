@@ -63,7 +63,7 @@ public:
     { return _M_eResType; }
 
 private:
-    resource_type _M_eResType;
+    resource_type _M_eResType { };
 };
 
 // ====================================================

@@ -58,17 +58,17 @@ shared_window WlFactory::createWindow (rect const& gRect, u32 nScreen, shared_di
 // =========================================================
 
 using cppual::ui::platform::WlFactory ;
-using cppual::process::Plugin         ;
+using cppual::process::plugin_vars    ;
 using cppual::memory::memory_resource ;
 using cppual::memory::stacked_resource;
 using cppual::memory::allocator       ;
 using cppual::memory::allocate_shared ;
 
-extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
+extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {
     static char buffer[sizeof (WlFactory) + memory_resource::max_align * 2];
     static stacked_resource static_resource (buffer, sizeof (buffer));
-    static Plugin plugin;
+    static plugin_vars plugin;
 
     plugin.name     = "WlFactory"         ;
     plugin.desc     = "Wayland UI Factory";

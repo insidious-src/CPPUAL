@@ -31,10 +31,9 @@ namespace cppual { namespace gfx { namespace gl {
 
 // ====================================================
 
-class config       ;
-class surface      ;
-class context      ;
-class context_mutex;
+class config ;
+class surface;
+class context;
 
 // ====================================================
 
@@ -139,7 +138,7 @@ public:
     surface (surface&&) noexcept = default;
     surface (conf_reference cfg, point2u size, handle_type wnd, surface_type type = surface_type::double_buffer);
     surface& operator = (surface&&) noexcept;
-    ~surface ();
+    virtual ~surface ();
 
     point2u size  () const noexcept;
     void    scale (point2u size);
@@ -186,7 +185,10 @@ public:
     void finish  () noexcept;
     void release () noexcept;
 
-    conf_reference  configuration () const noexcept { return  _M_pConf;             }
+    constexpr
+    conf_reference configuration () const noexcept
+    { return _M_pConf; }
+
     const_pointer   readable      () const noexcept { return  _M_pReadTarget;       }
     pointer         drawable      () const noexcept { return  _M_pDrawTarget;       }
     version_type    version       () const noexcept { return  _M_nVersion;          }
@@ -205,40 +207,6 @@ private:
     const_pointer  _M_pReadTarget;
     shared_context _M_pShared    ;
     version_type   _M_nVersion   ;
-};
-
-// ====================================================
-
-class context_mutex
-{
-public:
-    context_mutex (context& context) noexcept
-    : _M_context  (&context)
-    { }
-
-    void lock ()
-    {
-        _M_mutex.lock ();
-        _M_context->assign ();
-    }
-
-    bool try_lock ()
-    {
-        if (!_M_mutex.try_lock ()) return false;
-
-        _M_context->assign ();
-        return true;
-    }
-
-    void unlock ()
-    {
-        _M_context->release ();
-        _M_mutex.unlock ();
-    }
-
-private:
-    std::recursive_mutex _M_mutex  ;
-    context*             _M_context;
 };
 
 // ====================================================

@@ -58,16 +58,16 @@ shared_window Win32Factory::createWindow (rect const& gRect, u32 nScreen, shared
 // =========================================================
 
 using cppual::ui::platform::Win32Factory;
-using cppual::process::Plugin           ;
+using cppual::process::plugin_vars      ;
 using cppual::memory::memory_resource   ;
 using cppual::memory::stacked_resource  ;
 using cppual::memory::allocate_shared   ;
 
-extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
+extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {
     static char buffer[sizeof (Win32Factory) + memory_resource::max_adjust];
     static stacked_resource static_resource (buffer, sizeof (buffer));
-    static Plugin plugin;
+    static plugin_vars plugin;
 
     plugin.name     = "Win32Factory"    ;
     plugin.desc     = "Win32 UI Factory";

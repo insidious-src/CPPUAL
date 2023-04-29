@@ -2164,9 +2164,9 @@ thread_collect(void)
 }
 
 void
-thread_statistics(ThreadStatistics* stats)
+get_thread_statistics(thread_statistics* stats)
 {
-    new (stats) ThreadStatistics ();
+    new (stats) thread_statistics ();
     Heap* heap = GET_THREAD_LOCAL(Heap*, _memory_thread_heap);
 #if ENABLE_STATISTICS
     stats->allocated = heap->allocated;
@@ -2202,9 +2202,9 @@ thread_statistics(ThreadStatistics* stats)
 }
 
 void
-global_statistics(GlobalStatistics* stats)
+get_global_statistics(global_statistics* stats)
 {
-    new (stats) GlobalStatistics ();
+    new (stats) global_statistics ();
 #if ENABLE_STATISTICS
     stats->mapped = _mapped_pages * MALLOC_PAGE_SIZE;
     stats->mapped_total = _mapped_total * MALLOC_PAGE_SIZE;

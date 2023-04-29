@@ -98,10 +98,10 @@ private:
     }
 
     inline
-    void do_deallocate (void* p, size_type /*bytes*/, size_type /*alignment*/)
+    void do_deallocate (void* p, size_type bytes, size_type alignment)
     {
-        //::operator delete (p, bytes, std::align_val_t (alignment));
-        ::operator delete (p);
+        ::operator delete (p, bytes, std::align_val_t (alignment));
+        //::operator delete (p);
     }
 
     inline
@@ -148,6 +148,12 @@ private:
 };
 
 } // anonymous namespace
+
+// =========================================================
+
+memory_resource::~memory_resource ()
+{
+}
 
 // =========================================================
 

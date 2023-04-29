@@ -66,10 +66,11 @@ namespace model {
 # define MALLOC_CALL
 #endif
 
-//! Flag to rpaligned_realloc to not preserve content in reallocation
+//! Flag to aligned_realloc to not preserve content in reallocation
 #define NO_PRESERVE 1
 
-typedef struct GlobalStatistics {
+struct global_statistics
+{
     //! Current amount of virtual memory mapped (only if ENABLE_STATISTICS=1)
     std::size_t mapped;
     //! Current amount of memory in global caches for small and medium sizes (<64KiB)
@@ -80,9 +81,10 @@ typedef struct GlobalStatistics {
     std::size_t mapped_total;
     //! Total amount of memory unmapped (only if ENABLE_STATISTICS=1)
     std::size_t unmapped_total;
-} GlobalStatistics;
+};
 
-typedef struct ThreadStatistics {
+struct thread_statistics
+{
     //! Amount of memory currently requested in allocations (only if ENABLE_STATISTICS=1)
     std::size_t requested;
     //! Amount of memory actually allocated in memory blocks (only if ENABLE_STATISTICS=1)
@@ -99,7 +101,7 @@ typedef struct ThreadStatistics {
     std::size_t thread_to_global;
     //! Total number of bytes transitioned from global cache to thread cache
     std::size_t global_to_thread;
-} ThreadStatistics;
+};
 
 extern int
 initialize(void);
@@ -120,10 +122,10 @@ extern int
 is_thread_initialized(void);
 
 extern void
-thread_statistics(ThreadStatistics* stats);
+get_thread_statistics(thread_statistics* stats);
 
 extern void
-global_statistics(GlobalStatistics* stats);
+get_global_statistics(global_statistics* stats);
 
 void*
 allocate(std::size_t bytes);

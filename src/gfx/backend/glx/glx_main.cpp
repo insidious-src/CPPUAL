@@ -45,8 +45,9 @@ struct glx_factory final : public draw_factory
                                    pixel_format format,
                                    shared_context shared);
 
-    device_backend backend ();
-    shared_painter create_painter ();
+    device_backend    backend ();
+    shared_painter    create_painter ();
+    shared_drawable2d create_shape (byte shape_type);
 };
 
 shared_surface glx_factory::create_surface (connection_type native,
@@ -82,21 +83,26 @@ shared_painter glx_factory::create_painter ()
     return shared_painter ();
 }
 
+shared_drawable2d glx_factory::create_shape (byte /*shape_type*/)
+{
+    return shared_drawable2d ();
+}
+
 } } // namespace gfx
 
 // =========================================================
 
 using cppual::gfx::glx_factory        ;
-using cppual::process::Plugin         ;
+using cppual::process::plugin_vars    ;
 using cppual::memory::memory_resource ;
 using cppual::memory::stacked_resource;
 using cppual::memory::allocate_shared ;
 
-extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
+extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {
     static char buffer[sizeof (glx_factory) + memory_resource::max_adjust];
     static stacked_resource static_resource (buffer, sizeof (buffer));
-    static Plugin plugin;
+    static plugin_vars plugin;
 
     plugin.name     = "glx_factory"        ;
     plugin.desc     = "XCB_GLX GFX Factory";

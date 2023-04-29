@@ -43,7 +43,7 @@ private:
     inline static cchar* plugin_name () noexcept
     {
     #   if defined OS_GNU_LINUX || defined OS_BSD || defined OS_ANDROID
-            return "libcppual-gfx-egl";
+            return "libcppual-gfx-glx";
     #   elif defined OS_WINDOWS
             return "libcppual-gfx-wgl";
     #   endif
@@ -80,6 +80,22 @@ inline context_pointer& current () noexcept
 
 // ====================================================
 
+resource_interface::~resource_interface ()
+{
+}
+
+// ====================================================
+
+surface_interface::~surface_interface ()
+{
+}
+
+// ====================================================
+
+draw_factory::~draw_factory ()
+{
+}
+
 shared_factory draw_factory::instance ()
 {
     return internal::plugin_instance ();
@@ -91,6 +107,10 @@ bool draw_factory::has_valid_instance () noexcept
 }
 
 // ====================================================
+
+context_interface::~context_interface ()
+{
+}
 
 context_interface* context_interface::current () noexcept
 {

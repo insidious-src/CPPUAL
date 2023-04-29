@@ -30,9 +30,7 @@
 #include <algorithm>
 
 #include <X11/Xlib.h>
-
 #include <xcb/xcb.h>
-
 #include <GL/glx.h>
 
 namespace cppual { namespace gfx { namespace gl {
@@ -58,18 +56,12 @@ enum
     ContextVersion      = GLX_VERSION,
     ContextProfile      = 0,
     RgbaType            = GLX_RGBA_TYPE,
-    //BadDisplay          = GLX_BAD_DISPLAY,
     BadContext          = GLX_BAD_CONTEXT,
-    //BadSurface          = EGL_BAD_SURFACE,
-    //BadCurrentSurface   = EGL_BAD_CURRENT_SURFACE,
-    //BadNativeWindow     = EGL_BAD_NATIVE_WINDOW,
-    //BadConfig           = EGL_BAD_CONFIG,
-    //BadAttribute        = EGL_BAD_ATTRIBUTE,
-    //NoMatch             = EGL_BAD_MATCH,
-    //NoAccess            = EGL_BAD_ACCESS,
-    //NoAlloc             = EGL_BAD_ALLOC,
-    //NotInitialized      = EGL_NOT_INITIALIZED,
-    //ContextLost         = EGL_CONTEXT_LOST,
+    BadVALUE            = GLX_BAD_VALUE,
+    BadEnum             = GLX_BAD_ENUM,
+    BadScreen           = GLX_BAD_SCREEN,
+    BadVisual           = GLX_BAD_VISUAL,
+    BadAttribute        = GLX_BAD_ATTRIBUTE,
     none                = GLX_NONE,
     TRUE                = 1,
     FALSE               = 0
@@ -86,8 +78,15 @@ enum class error_type : byte
 
 inline version_type& version () noexcept
 {
-    static version_type glVersion { 3, 0 };
-    return glVersion;
+    static version_type ver { 0, 0 };
+    return ver;
+}
+
+// ====================================================
+
+inline void initialize (display_pointer dsp)
+{
+    ::glXQueryVersion (dsp, &internal::version ().major, &internal::version ().minor);
 }
 
 // ====================================================
@@ -97,6 +96,12 @@ inline surface_id create_drawable (config const&                   gConf,
                                    resource_interface::handle_type uWndHandle,
                                    bool                            /*bDouble*/)
 {
+    //value_type nSurfaceAttribs[9];
+
+    //nSurfaceAttribs[0] = GLX_X_RENDERABLE;
+    //nSurfaceAttribs[1] = bDouble ? GLX_BACK_BUFFER : GLX_SINGLE_BUFFER;
+    //nSurfaceAttribs[2] = internal::none;
+
     auto const id = ::glXCreateWindow (gConf.legacy ().get<internal::display_pointer> (),
                                        gConf.handle ().get<internal::fbconfig_pointer> (),
                                        uWndHandle,
@@ -149,6 +154,16 @@ inline context_pointer create_gc (config const& gConf, version_type const& /*ver
                                   TRUE);
 }
 
+inline point2u get_size (config const& config, surface::handle_type surface) noexcept
+{
+    value_type size[2];
+
+    ::glXQueryDrawable (config.legacy ().get<display_pointer> (), surface, Width, &size[0]);
+    ::glXQueryDrawable (config.legacy ().get<display_pointer> (), surface, Height, &size[1]);
+
+    return { static_cast<u16> (size[0]), static_cast<u16> (size[1]) };
+}
+
 } } // anonymous namespace internal
 
 // ====================================================
@@ -161,6 +176,8 @@ config::config (connection_type native, connection_type legacy, format_type gFor
   _M_eFeatures ()
 {
     if (!_M_pLegacy) throw std::logic_error ("invalid display");
+
+    internal::initialize (_M_pLegacy.get<internal::display_pointer> ());
 
     auto const screens = x::screen_setup (native.get<internal::conn_pointer> ());
 
@@ -177,7 +194,7 @@ config::config (connection_type native, connection_type legacy, format_type gFor
     }
 
     internal::fbconfig_pointer fb_config;
-    value_type prevVisualID = 0U, visualID = prevVisualID;
+    auto prevVisualID = value_type (), visualID = prevVisualID;
 
     for (int i = 0; !visualID && i < num_fb_configs; ++i)
     {
@@ -192,16 +209,6 @@ config::config (connection_type native, connection_type legacy, format_type gFor
         if (visual->visualid)
         {
             auto const val_format = to_format (fb_config);
-
-            /*std::cout << "\n\nvisual id: " << visual->visualid << '\n'
-                      << "pixel_flags: " << static_cast<u16> (val_format.flags) << '\n'
-                      << "red: " << static_cast<u16> (val_format.red) << '\n'
-                      << "green: " << static_cast<u16> (val_format.green) << '\n'
-                      << "blue: " << static_cast<u16> (val_format.blue) << '\n'
-                      << "alpha: " << static_cast<u16> (val_format.alpha) << '\n'
-                      << "depth: " << static_cast<u16> (val_format.depth) << '\n'
-                      << "stencil: " << static_cast<u16> (val_format.stencil) << '\n'
-                      << "type: " << static_cast<u16> (val_format.type) << std::endl;*/
 
             if (_M_gFormat == val_format)
             {
@@ -316,14 +323,12 @@ void config::print () const
 {
     //static int value;
 
-    std::cout << "Buffer Size: " << static_cast<u16> (_M_gFormat.depth + _M_gFormat.alpha)
-              << std::endl;
-
-    std::cout << "Red Size: "   << static_cast<u16> (_M_gFormat.red)   << std::endl;
-    std::cout << "Green Size: " << static_cast<u16> (_M_gFormat.green) << std::endl;
-    std::cout << "Blue Size: "  << static_cast<u16> (_M_gFormat.blue)  << std::endl;
-    std::cout << "Alpha Size: " << static_cast<u16> (_M_gFormat.alpha) << std::endl;
-    std::cout << "Depth size: " << static_cast<u16> (_M_gFormat.depth) << std::endl;
+    std::cout << "Buffer Size: "  << static_cast<u16> (_M_gFormat.depth + _M_gFormat.alpha)
+              << "\nRed Size: "   << static_cast<u16> (_M_gFormat.red)
+              << "\nGreen Size: " << static_cast<u16> (_M_gFormat.green)
+              << "\nBlue Size: "  << static_cast<u16> (_M_gFormat.blue)
+              << "\nAlpha Size: " << static_cast<u16> (_M_gFormat.alpha)
+              << "\nDepth size: " << static_cast<u16> (_M_gFormat.depth) << std::endl;
 
     /*::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_CONFIG_CAVEAT, &value);
 
@@ -448,11 +453,11 @@ void surface::flush ()
 
 point2u surface::size () const noexcept
 {
-    return point2u ();
+    return internal::get_size (config (), _M_pHandle);
 }
 
-/// TODO: finish egl resizing
-void surface::scale (point2u /*gSize*/)
+/// TODO: finish glx resizing
+void surface::scale (point2u gSize)
 {
     if (context_interface::current ())
     {
@@ -461,6 +466,16 @@ void surface::scale (point2u /*gSize*/)
 
         if (drawable == this && readable == this)
         {
+            ::glMatrixMode (GL_PROJECTION);
+            ::glPushMatrix ();
+            ::glLoadIdentity ();
+
+            ::glViewport (0, 0, gSize.x, gSize.y);
+
+            ::glMatrixMode (GL_MODELVIEW);
+            ::glPushMatrix ();
+            ::glLoadIdentity ();
+
             if (_M_eType == surface_type::double_buffer)
                 ::glXSwapBuffers (_M_pConf.legacy ().get<internal::display_pointer> (),
                                   _M_pHandle.get<internal::surface_id> ());

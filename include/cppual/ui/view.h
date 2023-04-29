@@ -35,13 +35,14 @@ namespace cppual { namespace ui {
 class SHARED_API view
 {
 public:
-    typedef input::sys_event                          event_type    ;
+    typedef input::sys_event                      event_type    ;
     typedef resource_handle                       window_type   ;
     typedef memory::allocator<view*>              allocator_type;
     typedef circular_queue<view*, allocator_type> container     ;
     typedef std::size_t                           size_type     ;
     typedef typename container::iterator          iterator      ;
     typedef string                                string_type   ;
+    typedef platform_wnd_interface                platform_wnd  ;
 
     enum
     {
@@ -74,10 +75,12 @@ public:
     void set_focus ();
     void kill_focus ();
 
-    inline weak_window             renderable () const noexcept { return _M_pRenderable; }
-    inline platform_wnd_interface* renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
-    inline point2u                 minimum_size () const noexcept { return _M_gMinSize; }
-    inline point2u                 maximum_size () const noexcept { return _M_gMaxSize; }
+    inline weak_window     renderable () const noexcept { return _M_pRenderable; }
+    inline platform_wnd*   renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
+    inline resource_handle platform_handle () const { return renderable ().lock ()->handle (); }
+    inline shared_display  platform_display () const { return renderable ().lock ()->connection (); }
+    inline point2u         minimum_size () const noexcept { return _M_gMinSize; }
+    inline point2u         maximum_size () const noexcept { return _M_gMaxSize; }
 
     inline bool valid () const noexcept
     { return _M_gStateFlags.test (view::is_valid); }

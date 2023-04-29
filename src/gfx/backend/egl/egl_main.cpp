@@ -35,18 +35,19 @@ struct egl_factory final : public draw_factory
 {
     shared_surface create_surface (connection_type native,
                                    connection_type legacy,
-                                   pixel_format format,
-                                   point2u size,
-                                   handle_type wnd,
-                                   surface_type type);
+                                   pixel_format    format,
+                                   point2u         size,
+                                   handle_type     wnd,
+                                   surface_type    type);
 
     shared_context create_context (connection_type native,
                                    connection_type legacy,
-                                   pixel_format format,
-                                   shared_context shared);
+                                   pixel_format    format,
+                                   shared_context  shared);
 
-    device_backend backend ();
-    shared_painter create_painter ();
+    device_backend    backend ();
+    shared_painter    create_painter ();
+    shared_drawable2d create_shape (byte shape_type);
 };
 
 shared_surface egl_factory::create_surface (connection_type /*native*/,
@@ -56,10 +57,11 @@ shared_surface egl_factory::create_surface (connection_type /*native*/,
                                             handle_type     wnd,
                                             surface_type    type)
 {
-    return shared_surface (new gl::surface (gl::config (legacy, format),
-                                            size,
-                                            wnd,
-                                            type));
+    return memory::allocate_shared<gl::surface, surface_interface> (nullptr,
+                                                                    gl::config (legacy, format),
+                                                                    size,
+                                                                    wnd,
+                                                                    type);
 }
 
 shared_context egl_factory::create_context (connection_type /*native*/,
@@ -67,9 +69,10 @@ shared_context egl_factory::create_context (connection_type /*native*/,
                                             pixel_format    format,
                                             shared_context  shared)
 {
-    return shared_context (new gl::context (gl::config(legacy, format),
-                                            gl::context::default_version (),
-                                            shared));
+    return memory::allocate_shared<gl::context, context_interface> (nullptr,
+                                                                    gl::config(legacy, format),
+                                                                    gl::context::default_version (),
+                                                                    shared);
 }
 
 device_backend egl_factory::backend ()
@@ -82,28 +85,32 @@ shared_painter egl_factory::create_painter ()
     return shared_painter ();
 }
 
+shared_drawable2d egl_factory::create_shape (byte /*shape_type*/)
+{
+    return shared_drawable2d ();
+}
+
 } } // namespace gfx
 
 // =========================================================
 
 using cppual::gfx::egl_factory        ;
-using cppual::process::Plugin         ;
+using cppual::process::plugin_vars    ;
 using cppual::memory::memory_resource ;
 using cppual::memory::stacked_resource;
 using cppual::memory::allocate_shared ;
 
-extern "C" Plugin* plugin_main (memory_resource* /*rc*/)
+extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {
     static char buffer[sizeof (egl_factory) + memory_resource::max_adjust];
     static stacked_resource static_resource (buffer, sizeof (buffer));
-    static Plugin plugin;
+    static plugin_vars plugin;
 
     plugin.name     = "egl_factory"      ;
     plugin.desc     = "EGL GFX Factory"  ;
     plugin.provides = "gfx::draw_factory";
     plugin.verMajor = 1                  ;
     plugin.verMinor = 0                  ;
-
     plugin.iface    = allocate_shared<egl_factory, void> (&static_resource);
 
     return &plugin;

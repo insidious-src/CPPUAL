@@ -121,7 +121,7 @@ factory::size_type cl_factory::device_count(device_categories types)
 // =========================================================
 
 using cppual::compute::cl::cl_factory ;
-using cppual::process::Plugin         ;
+using cppual::process::plugin_vars    ;
 using cppual::memory::memory_resource ;
 using cppual::memory::allocator       ;
 using cppual::memory::stacked_resource;
@@ -129,11 +129,11 @@ using cppual::memory::allocate_shared ;
 
 // =========================================================
 
-extern "C" Plugin* plugin_main (memory_resource* rc)
+extern "C" plugin_vars* plugin_main (memory_resource* rc)
 {
     static char buffer[sizeof (cl_factory) + memory_resource::max_align * 2];
     static stacked_resource static_resource (buffer, sizeof (buffer));
-    static Plugin plugin;
+    static plugin_vars plugin;
 
     plugin.name     = "cl_factory"      ;
     plugin.desc     = "OpenCL Factory"  ;

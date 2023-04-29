@@ -43,28 +43,28 @@ public:
     typedef float                                            ratio_type  ;
     typedef u8                                               state_type  ;
 
-    constexpr static cfloat Instant       = 10.0f;
-    constexpr static cfloat VeryFast      =  5.0f;
-    constexpr static cfloat Fast          =  2.0f;
-    constexpr static cfloat Normal        =  1.0f;
-    constexpr static cfloat Slow          =  0.8f;
-    constexpr static cfloat VerySlow      =  0.5f;
-    constexpr static cfloat ExtremelySlow =  0.3f;
-    constexpr static cfloat Slowest       =  0.1f;
+    constexpr static cfloat instant        = 10.0f;
+    constexpr static cfloat very_fast      =  5.0f;
+    constexpr static cfloat fast           =  2.0f;
+    constexpr static cfloat normal         =  1.0f;
+    constexpr static cfloat slow           =  0.8f;
+    constexpr static cfloat very_slow      =  0.5f;
+    constexpr static cfloat extremely_slow =  0.3f;
+    constexpr static cfloat slowest        =  0.1f;
 
     enum
     {
-        Infinite = 0,
+        infinite = 0,
     };
 
     enum
     {
-        Inactive,
-        Active,
-        Paused
+        inactive,
+        active,
+        paused
     };
 
-    pasive_timeline (duration length, ratio_type speed = Normal) noexcept
+    pasive_timeline (duration length, ratio_type speed = normal) noexcept
     : _M_timer      (),
       _M_length     (length),
       _M_state      (),
@@ -76,13 +76,13 @@ public:
     { return _M_length; }
 
     void length (duration len) noexcept
-    { if (!active ()) _M_length = len; }
+    { if (!is_active ()) _M_length = len; }
 
     rep frame () const noexcept
     { return time ().count () + (length ().count () / 60); }
 
-    bool active () const noexcept
-    { return state () == pasive_timeline::Active; }
+    bool is_active () const noexcept
+    { return state () == pasive_timeline::active; }
 
     void reverse () noexcept
     { _M_speed = -(_M_speed.load (std::memory_order_relaxed)); }
@@ -94,7 +94,7 @@ public:
     { if (_M_speed > ratio_type()) _M_speed = -(_M_speed.load (std::memory_order_relaxed)); }
 
     void stop () noexcept
-    { _M_state = pasive_timeline::Inactive; }
+    { _M_state = pasive_timeline::inactive; }
 
     ratio_type speed () const noexcept
     {
@@ -112,7 +112,7 @@ public:
         stop ();
         _M_count = loop_count;
         _M_timer.reset ();
-        _M_state = pasive_timeline::Active;
+        _M_state = pasive_timeline::active;
     }
 
     state_type state () const noexcept
@@ -121,12 +121,12 @@ public:
 
         switch (curstate)
         {
-        case pasive_timeline::Active:
+        case pasive_timeline::active:
             if (!_M_count or (normalize_elapsed () / _M_length.count ()) < _M_count)
-                return pasive_timeline::Active;
+                return pasive_timeline::active;
 
-            _M_state = pasive_timeline::Inactive;
-            return pasive_timeline::Inactive;
+            _M_state = pasive_timeline::inactive;
+            return pasive_timeline::inactive;
         default:
             return curstate;
         }
@@ -134,14 +134,14 @@ public:
 
     void resume () noexcept
     {
-        if (_M_state.load (std::memory_order_relaxed) != pasive_timeline::Paused) return;
+        if (_M_state.load (std::memory_order_relaxed) != pasive_timeline::paused) return;
         _M_timer.resume ();
-        _M_state = pasive_timeline::Active;
+        _M_state = pasive_timeline::active;
     }
 
     void pause () noexcept
     {
-        if (_M_state.load (std::memory_order_relaxed) != pasive_timeline::Active) return;
+        if (_M_state.load (std::memory_order_relaxed) != pasive_timeline::active) return;
         _M_timer.pause ();
 
         rep elapsed = normalize_elapsed ();
@@ -151,7 +151,7 @@ public:
         else
         {
             _M_saved = duration (elapsed);
-            _M_state = pasive_timeline::Paused;
+            _M_state = pasive_timeline::paused;
         }
     }
 
@@ -159,9 +159,9 @@ public:
     {
         switch (_M_state.load (std::memory_order_relaxed))
         {
-        case pasive_timeline::Inactive:
+        case pasive_timeline::inactive:
             return duration ();
-        case pasive_timeline::Paused:
+        case pasive_timeline::paused:
             return _M_saved;
         default:
             rep elapsed    = normalize_elapsed ();
@@ -180,8 +180,8 @@ private:
         auto       current_speed = _M_prev_speed.load (std::memory_order_relaxed);
         auto const max_speed     = _M_speed.load (std::memory_order_relaxed);
 
-        if      (current_speed < max_speed) current_speed += Slowest;
-        else if (current_speed > max_speed) current_speed -= Slowest;
+        if      (current_speed < max_speed) current_speed += slowest;
+        else if (current_speed > max_speed) current_speed -= slowest;
         else     current_speed = max_speed;
 
         return rep(ratio_type (_M_timer.elapsed<duration> ().count ()) * current_speed);

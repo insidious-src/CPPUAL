@@ -117,7 +117,7 @@ private:
 
 // =========================================================
 
-struct SHARED_API Plugin
+struct SHARED_API plugin_vars
 {
     cchar*                name     { };
     cchar*                provides { };
@@ -128,10 +128,10 @@ struct SHARED_API Plugin
     std::shared_ptr<void> iface    { };
     vector<cchar*>        required { };
 
-    inline Plugin (Plugin const&) = default;
-    inline Plugin& operator = (Plugin const&) = default;
+    inline plugin_vars (plugin_vars const&) = default;
+    inline plugin_vars& operator = (plugin_vars const&) = default;
 
-    inline Plugin (memory::memory_resource* res = nullptr)
+    inline plugin_vars (memory::memory_resource* res = nullptr)
     : name(),
       provides(),
       desc(),
@@ -142,7 +142,7 @@ struct SHARED_API Plugin
                                 vector<cchar*>::allocator_type(*res))
     { }
 
-    inline Plugin (Plugin&& obj)
+    inline plugin_vars (plugin_vars&& obj)
     : name(obj.name),
       provides(obj.provides),
       desc(obj.desc),
@@ -152,7 +152,7 @@ struct SHARED_API Plugin
       required(std::move(obj.required))
     { }
 
-    inline Plugin& operator = (Plugin&& obj)
+    inline plugin_vars& operator = (plugin_vars&& obj)
     {
         if (this == &obj) return *this;
 
@@ -168,7 +168,7 @@ struct SHARED_API Plugin
     }
 };
 
-typedef std::pair<dyn_loader const, Plugin> plugin_pair;
+typedef std::pair<dyn_loader const, plugin_vars> plugin_pair;
 
 // =========================================================
 
@@ -209,7 +209,7 @@ public:
     class plugin_pointer
     {
     public:
-        typedef Plugin const* const_plugin_pointer;
+        typedef plugin_vars const* const_plugin_pointer;
 
         plugin_pointer() = delete;
 
@@ -267,7 +267,7 @@ public:
 
         if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
 
-        Plugin* plugin = loader.call<Plugin*> (plugin_main,
+        plugin_vars* plugin = loader.call<plugin_vars*> (plugin_main,
                                                rc == nullptr ? get_allocator().resource() : rc,
                                                std::forward<Args> (args)...);
 

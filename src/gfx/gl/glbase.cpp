@@ -29,14 +29,14 @@ namespace cppual { namespace gfx { namespace gl {
 
 namespace { // optimize for internal unit usage
 
-inline uint generate_object (resource_type eType)
+inline ::GLuint generate_object (resource_type eType)
 {
     context_interface* pContext = context_interface::current ();
 
     if (!pContext or pContext->device () != device_backend::gl)
         throw bad_context ("NO GL context bound to thread");
 
-    uint uId;
+    ::GLuint uId;
 
     switch (eType)
     {
@@ -67,7 +67,7 @@ inline uint generate_object (resource_type eType)
     return uId;
 }
 
-inline uint generate_shader (uint uType)
+inline ::GLuint generate_shader (::GLenum uType)
 {
     context_interface* pContext = context_interface::current ();
 
@@ -94,7 +94,7 @@ object::object (uint uShaderType)
 
 object::~object () noexcept
 {
-    uint uId = handle ();
+    auto const uId = handle ();
 
     if (uId)
     {
