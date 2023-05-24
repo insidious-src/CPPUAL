@@ -30,10 +30,6 @@
 
 namespace cppual {
 
-// 1 byte size typedefs
-typedef std::uint8_t byte;
-typedef std::uint8_t const cbyte;
-
 // int typedefs
 typedef std::int8_t i8;
 typedef std::int_fast8_t fi8;

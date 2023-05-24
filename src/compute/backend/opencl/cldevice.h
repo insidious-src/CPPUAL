@@ -29,7 +29,7 @@ namespace cppual { namespace compute { namespace cl {
 
 // =========================================================
 
-class device final : public interface<resource_type::device>
+class device final : public device_object
 {
 public:
     typedef vector<pointer>        device_ids_vector;
@@ -57,16 +57,18 @@ private:
     bool supports_extension(string_type const& name) const;
 
     static device_ids_vector get_device_ids();
+    static device_ids_vector get_device_ids(device_vector const& devs);
     static device_vector     get_devices(memory::memory_resource& rc);
     static size_type         count();
 
-    template<typename T>
+    template <typename T>
     T get_info (device_info_type info) const
     {
         return get_object_info<T> (::clGetDeviceInfo, handle(), info);
     }
 
     friend class platform  ;
+    friend class context   ;
     friend class cl_factory;
 };
 

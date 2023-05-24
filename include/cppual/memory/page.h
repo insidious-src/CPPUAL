@@ -55,7 +55,7 @@ private:
 // =========================================================
 
 template <typename T>
-using page_allocator = allocator<T, page_resource>;
+using page_allocator = allocator<T>;
 
 } } // Memory
 

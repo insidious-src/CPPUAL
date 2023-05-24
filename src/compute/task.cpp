@@ -20,8 +20,9 @@
  */
 
 #include <cppual/compute/task.h>
+#include <cppual/circular_queue.h>
+
 #include <thread>
-#include <deque>
 
 namespace cppual { namespace compute {
 
@@ -33,27 +34,28 @@ struct thread_pool_initializer final
     typedef host_queue::write_lock write_lock;
     typedef host_queue::read_lock  read_lock ;
 
-    thread_pool_initializer  () noexcept = default;
-    ~thread_pool_initializer ();
+    inline thread_pool_initializer ()
+    : threadMutex ( ),
+      threads     (5)
+    { }
 
-    mutex_type              threadMutex;
-    std::deque<std::thread> threads    ;
+    inline ~thread_pool_initializer ()
+    {
+        /// block thread reservation until all threads exit
+        /// and clear the container
+        read_lock gLock (threadMutex);
 
+        if (!threads.empty ())
+        {
+            for (auto& gThread : threads) if (gThread.joinable ()) gThread.join ();
+        }
+    }
+
+    mutex_type                  threadMutex;
+    circular_queue<std::thread> threads    ;
 };
 
 // =========================================================
-
-inline thread_pool_initializer::~thread_pool_initializer ()
-{
-    // block thread reservation until all threads exit
-    // and clear the container
-    read_lock gLock (threadMutex);
-
-    if (!threads.empty ())
-    {
-        for (auto& gThread : threads) if (gThread.joinable ()) gThread.join ();
-    }
-}
 
 inline static thread_pool_initializer& pool () noexcept
 {
@@ -79,7 +81,7 @@ public:
 
     ~assign_queue ()
     {
-        // isolation brackets
+        /// isolation brackets
         {
             write_lock lock (_M_queue._M_gQueueMutex);
 
@@ -98,11 +100,11 @@ private:
 void host_queue::operator ()()
 {
     assign_queue assign (*this);
-    call_type run;
+    call_type    run;
 
     while (true)
     {
-        // RAII lock
+        /// RAII lock
         {
             read_lock gReadLock (_M_gQueueMutex);
 
@@ -111,9 +113,9 @@ void host_queue::operator ()()
                 return running > _M_eState or !_M_gTaskQueue.empty ();
             });
 
-            // process a task if there is one scheduled,
-            // otherwise return if the execution state
-            // requires it
+            /// process a task if there is one scheduled,
+            /// otherwise return if the execution state
+            /// requires it
             if (interrupted == _M_eState or
                 (_M_gTaskQueue.empty () and inactive == _M_eState))
                 break;
@@ -121,15 +123,16 @@ void host_queue::operator ()()
             run = std::move (_M_gTaskQueue.front ());
         }
 
-        // RAII lock
+        /// RAII lock
         {
             write_lock gWriteLock (_M_gQueueMutex);
             _M_gTaskQueue.pop_front ();
         }
 
-        run (); // run the aquired task if valid
+        /// run the aquired task if valid
+        run ();
 
-        // RAII lock
+        /// RAII lock
         {
             write_lock gWriteLock (_M_gQueueMutex);
             ++_M_uNumCompleted;
@@ -148,10 +151,10 @@ bool thread_pool::reserve (host_queue& gTaskQueue, size_type uAddThreads, bool b
 
     write_lock gLock (pool ().threadMutex);
 
-    // add threads to the container and initialize them
+    /// add threads to the container and initialize them
     while (uAddThreads--)
     {
-        // add and initialize a thread with HostQueue::operator ()
+        /// add and initialize a thread with HostQueue::operator ()
         pool ().threads.emplace_back (std::thread (gTaskQueue));
         if (bDetached) pool ().threads.back ().detach ();
     }
@@ -182,24 +185,24 @@ host_queue& host_queue::operator = (host_queue const&)
 
 bool host_queue::schedule (call_type const& callable)
 {
-    // RAII lock
+    /// RAII lock
     {
         write_lock gLock (_M_gQueueMutex);
         if (_M_uNumAssigned == 0) return false;
 
-        // schedule task
+        /// schedule task
         _M_gTaskQueue.push_back (callable);
         _M_eState = host_queue::running;
     }
 
-    // wake a thread to receive the task
+    /// wake a thread to receive the task
     _M_gTaskCond.notify_one ();
     return true;
 }
 
 void host_queue::quit (bool bInterrupt) noexcept
 {
-    // RAII lock
+    /// RAII lock
     {
         read_lock gLock (_M_gQueueMutex);
 
@@ -207,7 +210,7 @@ void host_queue::quit (bool bInterrupt) noexcept
         _M_eState = bInterrupt ? interrupted : inactive;
     }
 
-    // wake all threads to check the execution state
+    /// wake all threads to check the execution state
     _M_gTaskCond.notify_all ();
 }
 

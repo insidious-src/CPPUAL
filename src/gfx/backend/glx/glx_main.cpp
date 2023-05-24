@@ -57,7 +57,11 @@ shared_surface glx_factory::create_surface (connection_type native,
                                             handle_type     wnd,
                                             surface_type    type)
 {
-    return shared_surface (new gl::surface (gl::config (native, legacy, format),
+    auto const config = gl::config (native, legacy, format);
+
+    config.print ();
+
+    return shared_surface (new gl::surface (config,
                                             size,
                                             wnd,
                                             type));

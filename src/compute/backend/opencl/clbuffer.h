@@ -29,13 +29,17 @@ namespace cppual { namespace compute { namespace cl {
 
 // =========================================================
 
-class buffer final : public interface<resource_type::buffer>
+class memory_chunk final : public buffer_object
 {
 public:
-    typedef std::vector<buffer::pointer> device_ids_vector;
-    typedef factory::device_vector       device_vector    ;
+    typedef buffer_object base_type;
 
-    buffer (pointer handle) noexcept : interface (handle) { }
+    memory_chunk (pointer handle) noexcept : base_type (handle) { }
+
+    memory_chunk (shared_context const& cntxt,
+                  size_type             size,
+                  memory_access = memory_access::read_write,
+                  memory_cat    = memory_cat::global);
 
 private:
     template<typename T>
@@ -43,6 +47,9 @@ private:
     {
         return get_object_info<T> (::clGetMemObjectInfo, handle(), info);
     }
+
+private:
+    ::cl_int _M_error;
 };
 
 // =========================================================

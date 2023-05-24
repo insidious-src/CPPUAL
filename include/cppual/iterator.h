@@ -159,6 +159,12 @@ public:
     : _M_pBuf (other._M_pBuf), _M_uPos (other._M_uPos)
     { }
 
+    /// Converting a const iterator iterator to a non-const
+    constexpr
+    bidirectional_iterator (bidirectional_iterator<buf_type const> const& other) noexcept
+    : _M_pBuf (const_cast<buf_type*>(other._M_pBuf)), _M_uPos (other._M_uPos)
+    { }
+
     /// Converting a non-const iterator to a const iterator
     inline
     bidirectional_iterator& operator = (bidirectional_iterator<typename std::remove_const<buf_type>::type>

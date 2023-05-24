@@ -42,22 +42,22 @@ inline ::GLuint generate_object (resource_type eType)
     {
     case resource_type::buffer:
         pContext->version () < 3 ?
-                    glGenBuffers (1, &uId) : glGenBuffersARB (1, &uId);
+                    ::glGenBuffers (1, &uId) : ::glGenBuffersARB (1, &uId);
         break;
     case resource_type::macro:
         glGenVertexArrays (1, &uId);
         break;
     case resource_type::program:
         uId = pContext->version () < 3 ?
-                  glCreateProgram () : glCreateProgramObjectARB ();
+                  ::glCreateProgram () : ::glCreateProgramObjectARB ();
         break;
     case resource_type::query:
         pContext->version () < 3 ?
-                    glGenQueries (1, &uId) : glGenQueriesARB (1, &uId);
+                    ::glGenQueries (1, &uId) : ::glGenQueriesARB (1, &uId);
         break;
     case resource_type::texture:
-        glGenTextures (1, &uId);
-        if (uId) glBindTexture (gl::Texture2D, uId);
+        ::glGenTextures (1, &uId);
+        if (uId) ::glBindTexture (gl::Texture2D, uId);
         break;
     default:
         uId = 0;
@@ -75,7 +75,28 @@ inline ::GLuint generate_shader (::GLenum uType)
         throw bad_context ("NO GL context bound to thread");
 
     return pContext->version () < 3 ?
-                glCreateShader (uType) : glCreateShaderObjectARB (uType);
+               ::glCreateShader (uType) : ::glCreateShaderObjectARB (uType);
+}
+
+constexpr static uint convert_shader_type (shader_type eType) noexcept
+{
+    switch (eType)
+    {
+    case shader_type::vertex:
+        return gl::VertexShaderARB;
+    case shader_type::geometry:
+        return gl::GeometryShaderARB;
+    case shader_type::tess_control:
+        return gl::TessControlShaderARB;
+    case shader_type::tess_evaluation:
+        return gl::TessEvaluationShaderARB;
+#   ifndef OS_ANDROID
+    case shader_type::compute:
+        return gl::ComputeShaderARB;
+#   endif
+    default:
+        return gl::FragmentShaderARB;
+    }
 }
 
 } // anonymous
@@ -87,8 +108,8 @@ object::object (resource_type eType)
   _M_eResType  (eType)
 { }
 
-object::object (uint uShaderType)
-: resource     (generate_shader (uShaderType)),
+object::object (shader_type eShaderType)
+: resource     (generate_shader (convert_shader_type (eShaderType))),
   _M_eResType  (resource_type::shader)
 { }
 
@@ -103,22 +124,22 @@ object::~object () noexcept
             switch (type ())
             {
             case resource_type::buffer:
-                glDeleteBuffers (1, &uId);
+                ::glDeleteBuffers (1, &uId);
                 break;
             case resource_type::macro:
-                glDeleteVertexArrays (1, &uId);
+                ::glDeleteVertexArrays (1, &uId);
                 break;
             case resource_type::program:
-                glDeleteProgram (uId);
+                ::glDeleteProgram (uId);
                 break;
             case resource_type::query:
-                glDeleteQueries (1, &uId);
+                ::glDeleteQueries (1, &uId);
                 break;
             case resource_type::shader:
-                glDeleteShader (uId);
+                ::glDeleteShader (uId);
                 break;
             case resource_type::texture:
-                glDeleteTextures (1, &uId);
+                ::glDeleteTextures (1, &uId);
                 break;
             default:
                 break;
@@ -129,16 +150,16 @@ object::~object () noexcept
             switch (type ())
             {
             case resource_type::buffer:
-                glDeleteBuffersARB (1, &uId);
+                ::glDeleteBuffersARB (1, &uId);
                 break;
             case resource_type::program:
-                glDeleteProgramsARB (1, &uId);
+                ::glDeleteProgramsARB (1, &uId);
                 break;
             case resource_type::query:
-                glDeleteQueriesARB (1, &uId);
+                ::glDeleteQueriesARB (1, &uId);
                 break;
             default:
-                glDeleteObjectARB (uId);
+                ::glDeleteObjectARB (uId);
                 break;
             }
         }

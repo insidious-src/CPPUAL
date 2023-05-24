@@ -40,7 +40,7 @@ string_type opencl_error::to_string(i32 error)
 {
     switch(error)
     {
-    case Success: return "Success";
+    case success: return "Success";
     case CL_DEVICE_NOT_FOUND: return "Device Not Found";
     case CL_DEVICE_NOT_AVAILABLE: return "Device Not Available";
     case CL_COMPILER_NOT_AVAILABLE: return "Compiler Not Available";

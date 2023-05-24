@@ -45,13 +45,6 @@ public:
     typedef device const* device_const_pointer  ;
     typedef device const& device_const_reference;
 
-    enum class Type : unsigned char
-    {
-        Restricted,
-        Specialized,
-        Global
-    };
-
     memory_chunk (device_const_reference, size_type size);
 
     device_const_reference get_device () const noexcept

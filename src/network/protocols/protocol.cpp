@@ -24,11 +24,54 @@
 
 namespace cppual { namespace network {
 
+void protocol::add_upper_layer (protocol* layer)
+{
+    if (_M_pUpperProt != nullptr)
+    {
+        auto const lower_layer = _M_pUpperProt;
+
+        _M_pUpperProt = layer;
+        _M_pUpperProt->lowest_layer ()->add_lower_layer (lower_layer);
+    }
+    else
+    {
+        _M_pUpperProt = layer;
+    }
+}
+
+void protocol::add_lower_layer (protocol* layer)
+{
+    if (_M_pLowerProt != nullptr)
+    {
+        auto const lower_layer = _M_pLowerProt;
+
+        _M_pLowerProt = layer;
+        _M_pLowerProt->add_upper_layer (lower_layer);
+    }
+    else
+    {
+        _M_pLowerProt = layer;
+    }
+}
+
+protocol* protocol::uppest_layer () const
+{
+    if (_M_pUpperProt != nullptr)
+    {
+        auto pUppestProt = _M_pUpperProt;
+
+        while (pUppestProt != nullptr) pUppestProt = pUppestProt->upper_layer ();
+        return pUppestProt;
+    }
+
+    return nullptr;
+}
+
 protocol* protocol::lowest_layer () const
 {
     if (_M_pLowerProt != nullptr)
     {
-        protocol* pLowestProt = _M_pLowerProt->lower_layer ();
+        auto pLowestProt = _M_pLowerProt;
 
         while (pLowestProt != nullptr) pLowestProt = pLowestProt->lower_layer ();
         return pLowestProt;

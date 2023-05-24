@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/ui/manager.h>
+#include <cppual/compute/backend_iface.h>
 #include <cppual/memory/stacked.h>
 
 #include "cldevice.h"
@@ -30,7 +30,6 @@
 #include "climage.h"
 #include "clevent.h"
 #include "clcmdqueue.h"
-#include "clqueue.h"
 #include "clsampler.h"
 
 namespace cppual { namespace compute { namespace cl {
@@ -45,7 +44,8 @@ public:
     { }
 
     device_vector          get_devices(device_categories = device_category::any);
-    shared_buffer          create_buffer();
+    shared_context         create_context (device_vector const&);
+    shared_buffer          create_buffer(shared_context const&, size_type, memory_access, memory_cat);
     shared_cmd_sequence    create_cmd_sequence();
     shared_image           create_image();
     shared_pipeline        create_pipeline();
@@ -56,7 +56,7 @@ public:
     shared_state           create_state();
     shared_queue           create_queue();
     shared_sampler         create_sampler();
-    size_type              device_count(device_categories = device_category::any);
+    size_type              device_count(device_categories);
 
 private:
     device_const_reference all_devices() const;
@@ -116,6 +116,70 @@ factory::size_type cl_factory::device_count(device_categories types)
     return devs.size();
 }
 
+shared_context cl_factory::create_context (device_vector const& devs)
+{
+    return shared_context (new context (devs, nullptr));
+}
+
+shared_buffer cl_factory::create_buffer (shared_context const& cntxt,
+                                         size_type size,
+                                         memory_access access,
+                                         memory_cat cat)
+{
+    return shared_buffer (new memory_chunk (cntxt, size, access, cat));
+}
+
+shared_cmd_sequence cl_factory::create_cmd_sequence ()
+{
+    return shared_cmd_sequence (new program (nullptr));
+}
+
+shared_image cl_factory::create_image ()
+{
+    return shared_image (new cl::image (nullptr));
+}
+
+shared_pipeline cl_factory::create_pipeline ()
+{
+    return shared_pipeline ();
+}
+
+shared_render_pass cl_factory::create_render_pass ()
+{
+    return shared_render_pass ();
+}
+
+shared_shader cl_factory::create_shader ()
+{
+    return shared_shader (new cl::kernel (nullptr));
+}
+
+shared_descriptor_pool cl_factory::create_descriptor_pool ()
+{
+    return shared_descriptor_pool ();
+}
+
+shared_event cl_factory::create_event ()
+{
+    return shared_event (new cl::event (nullptr));
+}
+
+shared_state cl_factory::create_state ()
+{
+    return shared_state ();
+}
+
+shared_queue cl_factory::create_queue ()
+{
+    return shared_queue (new cl::command_queue (nullptr));
+}
+
+shared_sampler cl_factory::create_sampler ()
+{
+    return shared_sampler (new cl::sampler (nullptr));
+}
+
+
 } } } // namespace CL
 
 // =========================================================
@@ -131,7 +195,7 @@ using cppual::memory::allocate_shared ;
 
 extern "C" plugin_vars* plugin_main (memory_resource* rc)
 {
-    static char buffer[sizeof (cl_factory) + memory_resource::max_align * 2];
+    static char buffer[sizeof (cl_factory) + memory_resource::max_adjust];
     static stacked_resource static_resource (buffer, sizeof (buffer));
     static plugin_vars plugin;
 

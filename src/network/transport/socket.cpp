@@ -64,47 +64,59 @@ typedef bitset<socket_flag> socket_flags;
 // ====================================================
 
 transport_socket::transport_socket (socket_type eProt) noexcept
-: _M_nId (create (eProt)),
-  _M_eProtocol   (eProt),
-  _M_bIsBlocking (true)
+: resource (create_socket (eProt)),
+  _M_eProtocol   (eProt)
 {
     init_socket ();
 }
 
 transport_socket::transport_socket (transport_socket&& gObj) noexcept
-: _M_nId         (gObj._M_nId),
-  _M_eProtocol   (gObj._M_eProtocol),
-  _M_bIsBlocking (gObj._M_bIsBlocking)
+: resource       (std::move (gObj)),
+  _M_eProtocol   (gObj._M_eProtocol)
 {
-    gObj._M_nId = null_socket;
 }
 
 transport_socket& transport_socket::operator = (transport_socket&& gObj) noexcept
 {
-    _M_nId         = gObj._M_nId;
-    _M_eProtocol   = gObj._M_eProtocol;
-    _M_bIsBlocking = gObj._M_bIsBlocking;
-    gObj._M_nId    = null_socket;
+    if (this == gObj) return *this;
+
+    resource::operator = (std::move (gObj));
+
+    _M_eProtocol = gObj._M_eProtocol;
+
     return *this;
 }
 
 void transport_socket::set_blocking (bool bBlock) noexcept
 {
-    if (_M_nId != null_socket)
+    if (valid ())
     {
 #       ifdef OS_STD_UNIX
-        socket_flags status_flags = ::fcntl (id (), F_GETFL);
+        socket_flags status_flags = ::fcntl (handle (), F_GETFL);
 
         if (bBlock) status_flags -= socket_flag::non_blocking;
-        else status_flags += socket_flag::non_blocking;
+        else        status_flags += socket_flag::non_blocking;
 
-        ::fcntl (id (), F_SETFL, status_flags);
-        _M_bIsBlocking = bBlock;
+        ::fcntl (handle (), F_SETFL, status_flags);
 #       endif
     }
 }
 
-transport_socket::socket_id transport_socket::create (socket_type eProt) noexcept
+bool transport_socket::is_blocking () const noexcept
+{
+    if (valid ())
+    {
+#       ifdef OS_STD_UNIX
+        socket_flags status_flags = ::fcntl (handle (), F_GETFL);
+
+        return !status_flags.test (socket_flag::non_blocking);
+#       endif
+    }
+
+    return true;
+}
+
+transport_socket::socket_id transport_socket::create_socket (socket_type eProt) noexcept
 {
     return ::socket (PF_INET,
                      eProt == socket_type::tcp ? SOCK_STREAM : SOCK_DGRAM,
@@ -114,21 +126,23 @@ transport_socket::socket_id transport_socket::create (socket_type eProt) noexcep
 void transport_socket::replace_from_id (socket_id nId) noexcept
 {
     close ();
-    _M_nId = nId;
+    set_handle (nId);
 }
 
 void transport_socket::close () noexcept
 {
 #   ifdef OS_STD_UNIX
-    if (id () != null_socket) ::close (id ());
+    if (valid ()) ::close (handle ());
 #   elif defined OS_WINDOWS
-    if (id () != null_socket) ::closesocket (id ());
+    if (valid ()) ::closesocket (handle ());
 #   endif
+
+    set_handle (null_value);
 }
 
 void transport_socket::init_socket () noexcept
 {
-    if (id () != null_socket)
+    if (valid ())
     {
         if (_M_eProtocol == socket_type::tcp)
         {
@@ -136,7 +150,7 @@ void transport_socket::init_socket () noexcept
             // Disable the Nagle algorithm (ie. removes buffering of TCP packets)
             int yes = 1;
 
-            if (::setsockopt (id (),
+            if (::setsockopt (handle (),
                               IPPROTO_TCP,
                               int(socket_flag::no_delay),
                               reinterpret_cast<char*> (&yes),
@@ -147,7 +161,7 @@ void transport_socket::init_socket () noexcept
             }
 #           elif defined OS_MACX
             // On Mac OS X, disable the SIGPIPE signal on disconnection
-            if (::setsockopt (id (),
+            if (::setsockopt (handle (),
                               SOL_SOCKET,
                               int(socket_flag::no_sig_pipe),
                               reinterpret_cast<char*>(&yes),
@@ -160,7 +174,7 @@ void transport_socket::init_socket () noexcept
             // Enable broadcast by default for UDP sockets
             int yes = 1;
 
-            if (::setsockopt (id (),
+            if (::setsockopt (handle (),
                               SOL_SOCKET,
                               int(socket_flag::broadcast),
                               reinterpret_cast<char*> (&yes),

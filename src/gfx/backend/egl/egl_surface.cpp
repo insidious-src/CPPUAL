@@ -33,11 +33,12 @@ namespace cppual { namespace gfx { namespace gl {
 
 namespace { namespace internal { // optimize for internal unit usage
 
-typedef EGLint                          value_type     ;
-typedef EGLDisplay                      display_pointer;
-typedef EGLSurface                      surface_pointer;
-typedef EGLContext                      context_pointer;
-typedef EGLNativeDisplayType            native_display ;
+typedef ::EGLint                        value_type     ;
+typedef ::EGLBoolean                    bool_type      ;
+typedef ::EGLDisplay                    display_pointer;
+typedef ::EGLSurface                    surface_pointer;
+typedef ::EGLContext                    context_pointer;
+typedef ::EGLNativeDisplayType          native_display ;
 typedef context_interface::version_type version_type   ;
 
 enum class API
@@ -182,9 +183,11 @@ inline void error <error_type::destroy> ()
 
 // ====================================================
 
-inline void initialize (display_pointer dsp)
+inline bool_type initialize (display_pointer dsp)
 {
-    if (!::eglInitialize (dsp, &internal::version ().major, &internal::version ().minor))
+    bool_type ret;
+
+    if (!(ret = ::eglInitialize (dsp, &internal::version ().major, &internal::version ().minor)))
         error<error_type::initialize> ();
 
     if (internal::version ().minor < 4)
@@ -192,6 +195,8 @@ inline void initialize (display_pointer dsp)
         ::eglTerminate (dsp);
         throw std::logic_error ("the EGL implementation must be atleast 1.4 version");
     }
+
+    return ret;
 }
 
 // ====================================================
@@ -402,7 +407,9 @@ config::config (connection_type legacy, format_type gFormat)
         internal::none
     };
 
-    internal::initialize (_M_pDisplay);
+    static auto init = internal::initialize (_M_pDisplay);
+
+    UNUSED (init);
 
     ::eglGetConfigs   (_M_pDisplay, &ptr, 1, &nNumConfigs);
     ::eglChooseConfig (_M_pDisplay, nConfigAttribs, &ptr, 1, &nNumConfigs);
@@ -460,49 +467,49 @@ void config::print ()
 {
     static int value;
 
-    std::cout << "Buffer Size: " << static_cast<u16> (_M_gFormat.depth + _M_gFormat.alpha)
-              << std::endl;
+    std::cout << "Buffer Size: " << static_cast<u16> (_M_gFormat.depth + _M_gFormat.alpha);
 
-    std::cout << "Red Size: "   << static_cast<u16> (_M_gFormat.red)   << std::endl;
-    std::cout << "Green Size: " << static_cast<u16> (_M_gFormat.green) << std::endl;
-    std::cout << "Blue Size: "  << static_cast<u16> (_M_gFormat.blue)  << std::endl;
-    std::cout << "Alpha Size: " << static_cast<u16> (_M_gFormat.alpha) << std::endl;
-    std::cout << "Depth size: " << static_cast<u16> (_M_gFormat.depth) << std::endl;
+    std::cout << "\nRed Size: "   << static_cast<u16> (_M_gFormat.red);
+    std::cout << "\nGreen Size: " << static_cast<u16> (_M_gFormat.green);
+    std::cout << "\nBlue Size: "  << static_cast<u16> (_M_gFormat.blue);
+    std::cout << "\nAlpha Size: " << static_cast<u16> (_M_gFormat.alpha);
+    std::cout << "\nDepth size: " << static_cast<u16> (_M_gFormat.depth);
 
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_CONFIG_CAVEAT, &value);
 
     switch (value)
     {
     case internal::none:
-        std::cout << "EGL_CONFIG_CAVEAT: EGL_NONE" << std::endl;
+        std::cout << "\nEGL_CONFIG_CAVEAT: EGL_NONE";
         break;
     case EGL_SLOW_CONFIG:
-        std::cout << "EGL_CONFIG_CAVEAT: EGL_SLOW_CONFIG" << std::endl;
+        std::cout << "\nEGL_CONFIG_CAVEAT: EGL_SLOW_CONFIG";
         break;
     }
 
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_CONFIG_ID, &value);
-    std::cout << "Config ID: " << value << std::endl;
+    std::cout << "\nConfig ID: " << value;
 
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_MAX_PBUFFER_WIDTH, &value);
-    std::cout << "Max pbuffer width: " << value << std::endl;
+    std::cout << "\nMax pbuffer width: " << value;
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_MAX_PBUFFER_HEIGHT, &value);
-    std::cout << "Max pbuffer height: " << value << std::endl;
+    std::cout << "\nMax pbuffer height: " << value;
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_MAX_PBUFFER_PIXELS, &value);
-    std::cout << "Max pbuffer pixels: " << value << std::endl;
+    std::cout << "\nMax pbuffer pixels: " << value;
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_NATIVE_RENDERABLE, &value);
-    std::cout << "Native renderable: " << (value ? "true" : "false") << std::endl;
+    std::cout << "\nNative renderable: " << (value ? "true" : "false");
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_NATIVE_VISUAL_ID, &value);
-    std::cout << "Native visual ID: " << value << std::endl;
+    std::cout << "\nNative visual ID: " << value;
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_NATIVE_VISUAL_TYPE, &value);
-    std::cout << "Native visual type: " << value << std::endl;
+    std::cout << "\nNative visual type: " << value;
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_SAMPLE_BUFFERS, &value);
-    std::cout << "Sample Buffers: " << value << std::endl;
+    std::cout << "\nSample Buffers: " << value;
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_SAMPLES, &value);
-    std::cout << "Samples: " << value << std::endl;
+    std::cout << "\nSamples: " << value;
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_SURFACE_TYPE, &value);
-    std::cout << "Surface type: " << value << std::endl;
+    std::cout << "\nSurface type: " << value;
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_TRANSPARENT_TYPE, &value);
+    std::cout << "\nTransparent type: " << value << std::endl;
 }
 
 config::~config ()
@@ -581,10 +588,8 @@ void surface::scale (point2u gSize)
 {
     if (context_interface::current ())
     {
-        auto drawable = context_interface::current ()->drawable ();
-        auto readable = context_interface::current ()->readable ();
-
-        if (drawable == this && readable == this)
+        if (context_interface::current ()->drawable () == this &&
+            context_interface::current ()->readable () == this)
         {
             ::glMatrixMode (GL_PROJECTION);
             ::glPushMatrix ();
@@ -711,9 +716,11 @@ bool context::assign () noexcept
 {
     if (!::eglMakeCurrent (configuration ().display (),
                            _M_pDrawTarget != nullptr ?
-                           _M_pDrawTarget->handle ().get<internal::surface_pointer> () : nullptr,
+                              _M_pDrawTarget->handle ().get<internal::surface_pointer> () :
+                              internal::surface_pointer (),
                            _M_pReadTarget != nullptr ?
-                           _M_pReadTarget->handle ().get<internal::surface_pointer> () : nullptr,
+                              _M_pReadTarget->handle ().get<internal::surface_pointer> () :
+                              internal::surface_pointer (),
                            _M_pGC))
         internal::error<internal::error_type::make_current> ();
 

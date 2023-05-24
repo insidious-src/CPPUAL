@@ -67,20 +67,8 @@ class shader : public object, public binary
 public:
     typedef string string_type;
 
-    enum Type
-    {
-        Vertex         = 1 << 0,
-        Fragment       = 1 << 1,
-        Geometry       = 1 << 2,
-        TessControl    = 1 << 3,
-        TessEvaluation = 1 << 4,
-        Compute        = 1 << 5
-    };
-
-    typedef bitset<shader::Type> types;
-
     shader () = default;
-    shader (shader::Type type) noexcept;
+    shader (shader_type type) noexcept;
     shader (shader&&) noexcept;
     shader& operator = (shader&&) noexcept;
 
@@ -91,7 +79,7 @@ public:
     bool        load_from_memory (string_type const& source);
 
     string_type const& source () const noexcept { return _M_gSource; }
-    shader::Type       type   () const noexcept { return _M_eType  ; }
+    shader_type        type   () const noexcept { return _M_eType  ; }
 
     bool is_loaded () const noexcept
     { return _M_gStates.test (shader::IsLoaded); }
@@ -122,9 +110,9 @@ private:
     typedef bitset<shader::State> states;
 
 private:
-    string_type  _M_gSource;
-    states       _M_gStates;
-    shader::Type _M_eType  ;
+    string_type _M_gSource;
+    states      _M_gStates;
+    shader_type _M_eType  ;
 };
 
 // ====================================================
@@ -135,11 +123,11 @@ public:
     typedef string string_type;
 
     fragment_shader () noexcept
-    : shader (shader::Fragment)
+    : shader (shader_type::fragment)
     { }
 
     fragment_shader (string_type const& gString, load_from eMode = load_from::file)
-    : shader (shader::Fragment)
+    : shader (shader_type::fragment)
     { load (gString, eMode); }
 };
 
@@ -151,11 +139,11 @@ public:
     typedef string string_type;
 
     vertex_shader () noexcept
-    : shader (shader::Vertex)
+    : shader (shader_type::vertex)
     { }
 
     vertex_shader (string_type const& gString, load_from eMode = load_from::file)
-    : shader (shader::Vertex)
+    : shader (shader_type::vertex)
     { load (gString, eMode); }
 };
 
@@ -167,11 +155,11 @@ public:
     typedef string string_type;
 
     geometry_shader () noexcept
-    : shader (shader::Geometry)
+    : shader (shader_type::geometry)
     { }
 
     geometry_shader (string_type const& gString, load_from eMode = load_from::file)
-    : shader (shader::Geometry)
+    : shader (shader_type::geometry)
     { load (gString, eMode); }
 };
 
@@ -183,11 +171,11 @@ public:
     typedef string string_type;
 
     compute_shader () noexcept
-    : shader (shader::Compute)
+    : shader (shader_type::compute)
     { }
 
     compute_shader (string_type const& gString, load_from eMode = load_from::file)
-    : shader (shader::Compute)
+    : shader (shader_type::compute)
     { load (gString, eMode); }
 };
 
@@ -199,11 +187,11 @@ public:
     typedef string string_type;
 
     tess_control_shader () noexcept
-    : shader (shader::TessControl)
+    : shader (shader_type::tess_control)
     { }
 
     tess_control_shader (string_type const& gString, load_from eMode = load_from::file)
-    : shader (shader::TessControl)
+    : shader (shader_type::tess_control)
     { load (gString, eMode); }
 };
 
@@ -215,11 +203,11 @@ public:
     typedef string string_type;
 
     tess_evaluation_shader () noexcept
-    : shader (shader::TessEvaluation)
+    : shader (shader_type::tess_evaluation)
     { }
 
     tess_evaluation_shader (string_type const& gString, load_from eMode = load_from::file)
-    : shader (shader::TessEvaluation)
+    : shader (shader_type::tess_evaluation)
     { load (gString, eMode); }
 };
 
@@ -272,25 +260,25 @@ public:
     { return _M_gUniformLocList[gName]; }
 
     bool has_fragment_shader () const noexcept
-    { return _M_gShaderTypes.test (shader::Fragment); }
+    { return _M_gShaderTypes.test (shader_type::fragment); }
 
     bool has_vertex_shader () const noexcept
-    { return _M_gShaderTypes.test (shader::Vertex); }
+    { return _M_gShaderTypes.test (shader_type::vertex); }
 
     bool has_compute_shader () const noexcept
-    { return _M_gShaderTypes.test (shader::Compute); }
+    { return _M_gShaderTypes.test (shader_type::compute); }
 
     bool has_tess_control_shader () const noexcept
-    { return _M_gShaderTypes.test (shader::TessControl); }
+    { return _M_gShaderTypes.test (shader_type::tess_control); }
 
     bool has_tess_evaluation_shader () const noexcept
-    { return _M_gShaderTypes.test (shader::TessEvaluation); }
+    { return _M_gShaderTypes.test (shader_type::tess_evaluation); }
 
 private:
-    map_type      _M_gAttribLocList, _M_gUniformLocList;
-    uint          _M_uShaderCount;
-    shader::types _M_gShaderTypes;
-    States        _M_gStates;
+    map_type     _M_gAttribLocList, _M_gUniformLocList;
+    uint         _M_uShaderCount;
+    shader_types _M_gShaderTypes;
+    States       _M_gStates;
 };
 
 } } } // namespace GL

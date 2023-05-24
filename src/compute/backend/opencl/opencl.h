@@ -35,6 +35,7 @@
 
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
+#include <CL/sycl.hpp>
 
 #include <type_traits>
 #include <exception>
@@ -44,7 +45,6 @@
  *
  * API calls should always start with root namespace "::";
  * define all API typedefs in a consistent non-conflicting way;
- * completely cross-platform implementation using the ISO C++17 standard;
  * for integer bit fields use enums;
  * for object encapsulation use template specialization,
  * inline & constexpr functions as much as possible;
@@ -59,7 +59,10 @@ namespace cppual { namespace compute { namespace cl {
 
 // =========================================================
 
+using namespace ::cl;
+
 typedef string                  string_type         ;
+typedef ::cl_platform_info      platform_info_type  ;
 typedef ::cl_device_info        device_info_type    ;
 typedef ::cl_device_type        device_category_type;
 typedef ::cl_mem_info           memory_info_type    ;
@@ -73,59 +76,76 @@ typedef ::cl_image_info         image_info_type     ;
 
 // =========================================================
 
-typedef std::remove_pointer<cl_platform_id  >::type platform_type;
-typedef std::remove_pointer<cl_device_id    >::type device_type  ;
-typedef std::remove_pointer<cl_event        >::type event_type   ;
-typedef std::remove_pointer<cl_kernel       >::type kernel_type  ;
-typedef std::remove_pointer<cl_program      >::type program_type ;
-typedef std::remove_pointer<cl_context      >::type context_type ;
-typedef std::remove_pointer<cl_mem          >::type memory_type  ;
-typedef std::remove_pointer<cl_command_queue>::type queue_type   ;
-typedef std::remove_pointer<cl_sampler      >::type sampler_type ;
+typedef std::remove_pointer<::cl_platform_id  >::type platform_type;
+typedef std::remove_pointer<::cl_device_id    >::type device_type  ;
+typedef std::remove_pointer<::cl_event        >::type event_type   ;
+typedef std::remove_pointer<::cl_kernel       >::type kernel_type  ;
+typedef std::remove_pointer<::cl_program      >::type program_type ;
+typedef std::remove_pointer<::cl_context      >::type context_type ;
+typedef std::remove_pointer<::cl_mem          >::type memory_type  ;
+typedef std::remove_pointer<::cl_command_queue>::type queue_type   ;
+typedef std::remove_pointer<::cl_sampler      >::type sampler_type ;
+
+// =========================================================
+
+template <resource_type T> class interface;
+
+typedef interface<resource_type::instance> platform_object;
+typedef interface<resource_type::device  > device_object  ;
+typedef interface<resource_type::buffer  > buffer_object  ;
+typedef interface<resource_type::image   > image_object   ;
+typedef interface<resource_type::context > context_object ;
+typedef interface<resource_type::shader  > cmd_object     ;
+typedef interface<resource_type::program > cmd_seq_object ;
+typedef interface<resource_type::queue   > queue_object   ;
+typedef interface<resource_type::event   > event_object   ;
+typedef interface<resource_type::sampler > sampler_object ;
 
 // =========================================================
 
 enum
 {
-    Success            = CL_SUCCESS                         ,
-    True               = CL_TRUE                            ,
-    False              = CL_FALSE                           ,
+    success             = CL_SUCCESS                         ,
+    true_value          = CL_TRUE                            ,
+    false_value         = CL_FALSE                           ,
 
-    MaxUnits           = CL_DEVICE_MAX_COMPUTE_UNITS        ,
-    MaxDimensions      = CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS ,
-    MaxGroupSize       = CL_DEVICE_MAX_WORK_GROUP_SIZE      ,
-    MaxItemCount       = CL_DEVICE_MAX_WORK_ITEM_SIZES      ,
-    GlobalMemSize      = CL_DEVICE_GLOBAL_MEM_SIZE          ,
-    CacheSize          = CL_DEVICE_GLOBAL_MEM_CACHE_SIZE    ,
-    CacheLineSize      = CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
-    ConstMemSize       = CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE ,
-    LocalMemSize       = CL_DEVICE_LOCAL_MEM_SIZE           ,
+    max_units           = CL_DEVICE_MAX_COMPUTE_UNITS        ,
+    max_dimensions      = CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS ,
+    max_group_size      = CL_DEVICE_MAX_WORK_GROUP_SIZE      ,
+    max_item_count      = CL_DEVICE_MAX_WORK_ITEM_SIZES      ,
+    global_mem_size     = CL_DEVICE_GLOBAL_MEM_SIZE          ,
+    cache_size          = CL_DEVICE_GLOBAL_MEM_CACHE_SIZE    ,
+    cache_line_size     = CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
+    const_mem_size      = CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE ,
+    local_mem_size      = CL_DEVICE_LOCAL_MEM_SIZE           ,
 
-    PlatformExtensions = CL_PLATFORM_EXTENSIONS             ,
-    DeviceExtensions   = CL_DEVICE_EXTENSIONS
+    platform_extensions = CL_PLATFORM_EXTENSIONS             ,
+    device_extensions   = CL_DEVICE_EXTENSIONS
 };
 
-enum class SupportedILs : ::cl_device_exec_capabilities
+enum class supported_ils : ::cl_device_exec_capabilities
 {
-    OpenCL = CL_EXEC_KERNEL,
-    Native = CL_EXEC_NATIVE_KERNEL
+    opencl = CL_EXEC_KERNEL,
+    native = CL_EXEC_NATIVE_KERNEL
 };
 
-typedef bitset<SupportedILs> supported_ils_type;
+typedef bitset<supported_ils> supported_ils_type;
 
 // =========================================================
 
-class platform    ;
-class device      ;
-class Program     ;
-class Kernel      ;
-class Event       ;
-class Context     ;
-class MemoryChunk ;
-class CommandQueue;
+class platform     ;
+class device       ;
+class program      ;
+class kernel       ;
+class event        ;
+class context      ;
+class image        ;
+class memory_chunk ;
+class command_queue;
+class sampler      ;
 
 // =========================================================
-// OpenCL Object Concept
+// opencl Object Concept
 // =========================================================
 
 template <typename> struct is_cl_object_helper        : public std::false_type { };
@@ -142,7 +162,7 @@ template <> struct is_cl_object_helper<sampler_type > : public std::true_type  {
 template <typename T>
 struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<typename
                                                     std::remove_cv<T>::type>::value)>
-{ static_assert (is_cl_object<T>::value, "invalid OpenCL object type!"); };
+{ static_assert (is_cl_object<T>::value, "T is NOT a opencl object type!"); };
 
 template <typename T>
 using CLObject = typename std::enable_if<is_cl_object<T>::value, T>::type;
@@ -166,7 +186,7 @@ class opencl_error : public std::exception
 public:
     /// Creates a new opencl_error exception object for \p error.
     explicit opencl_error (i32 error) noexcept
-    : _M_error(error),
+    : _M_error       (error),
       _M_error_string(to_string(error))
     {
     }
@@ -194,7 +214,7 @@ public:
         return _M_error_string.c_str();
     }
 
-    /// Static function which converts the numeric OpenCL error code \p error
+    /// Static function which converts the numeric opencl error code \p error
     /// to a human-readable string.
     ///
     /// For example:
@@ -204,13 +224,13 @@ public:
     ///
     /// Will print "Invalid Kernel Arguments".
     ///
-    /// If the error code is unknown (e.g. not a valid OpenCL error), a string
-    /// containing "Unknown OpenCL Error" along with the error number will be
+    /// If the error code is unknown (e.g. not a valid opencl error), a string
+    /// containing "Unknown opencl Error" along with the error number will be
     /// returned.
     static string_type to_string(i32 error);
 
 private:
-    i32       _M_error;
+    i32         _M_error       ;
     string_type _M_error_string;
 };
 
@@ -221,7 +241,7 @@ struct no_platform_found : public std::exception
     /// Returns a string containing a human-readable error message.
     cchar* what() const noexcept
     {
-        return "No OpenCL platform found";
+        return "NO opencl platforms found!";
     }
 };
 
@@ -230,7 +250,7 @@ struct no_device_found : public std::exception
     /// Returns a string containing a human-readable error message.
     cchar* what() const noexcept
     {
-        return "No OpenCL device found";
+        return "NO opencl devices found!";
     }
 };
 
@@ -241,7 +261,7 @@ struct bound_info_function
 {
     bound_info_function(Function function, Object object, AuxInfo aux_info)
     : _M_function(function),
-      _M_object(object),
+      _M_object  (object  ),
       _M_aux_info(aux_info)
     {
     }
@@ -263,7 +283,7 @@ struct bound_info_function
     }
 
     Function _M_function;
-    Object   _M_object;
+    Object   _M_object  ;
     AuxInfo  _M_aux_info;
 };
 
@@ -272,7 +292,7 @@ struct bound_info_function<Function, Object, void>
 {
     bound_info_function(Function function, Object object)
     : _M_function(function),
-      _M_object(object)
+      _M_object  (object  )
     {
     }
 
@@ -283,7 +303,7 @@ struct bound_info_function<Function, Object, void>
     }
 
     Function _M_function;
-    Object   _M_object;
+    Object   _M_object  ;
 };
 
 template <class Function>
@@ -291,7 +311,7 @@ struct bound_info_function<Function, platform_type*, void>
 {
     bound_info_function(Function function, platform_type* object)
     : _M_function(function),
-      _M_object(object)
+      _M_object  (object  )
     {
     }
 
@@ -301,8 +321,14 @@ struct bound_info_function<Function, platform_type*, void>
         return _M_function(_M_object, info, size, value, size_ret);
     }
 
+    template<class Info>
+    i32 operator()(Info info, std::size_t size, void* value, std::size_t* size_ret) const
+    {
+        return _M_function(_M_object, info, size, value, size_ret);
+    }
+
     Function       _M_function;
-    platform_type* _M_object;
+    platform_type* _M_object  ;
 };
 
 template <class Function>
@@ -357,7 +383,7 @@ struct get_object_info_impl
         T value;
 
         i32 ret = function(info, sizeof(T), &value, 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return value;
     }
@@ -369,7 +395,7 @@ struct get_object_info_impl
         T value;
 
         i32 ret = function(info, input_size, input, sizeof(T), &value, 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return value;
     }
@@ -385,7 +411,7 @@ struct get_object_info_impl<bool>
         cl_bool value;
 
         i32 ret = function(info, sizeof(cl_bool), &value, 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return value == CL_TRUE;
     }
@@ -401,14 +427,14 @@ struct get_object_info_impl<string_type>
         size_t size = 0;
 
         i32 ret = function(info, 0, 0, &size);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         if(size == 0) return string_type();
 
         string_type value(size - 1, 0);
 
         ret = function(info, size, &value[0], 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return value;
     }
@@ -424,14 +450,14 @@ struct get_object_info_impl< vector<T> >
         size_t size = 0;
 
         i32 ret = function(0, 0, &size);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         if(size == 0) return vector<T>();
 
         vector<T> vector(size / sizeof(T));
 
         ret = function(size, &vector[0], 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return vector;
     }
@@ -442,14 +468,14 @@ struct get_object_info_impl< vector<T> >
         size_t size = 0;
 
         i32 ret = function(info, 0, 0, &size);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         if(size == 0) return vector<T>();
 
         vector<T> vector(size / sizeof(T));
 
         ret = function(info, size, &vector[0], 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return vector;
     }
@@ -461,12 +487,12 @@ struct get_object_info_impl< vector<T> >
         size_t size = 0;
 
         i32 ret = function(info, input_size, input, 0, 0, &size);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         vector<T> vector(size / sizeof(T));
 
         ret = function(info, input_size, input, size, &vector[0], 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return vector;
     }
@@ -481,14 +507,14 @@ struct get_object_info_impl< vector<platform_type*> >
         u32 size = 0;
 
         i32 ret = function(0, 0, &size);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         if(size == 0) return vector<platform_type*>();
 
         vector<platform_type*> vector(size / sizeof(platform_type*));
 
         ret = function(size, &vector[0], 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return vector;
     }
@@ -503,14 +529,14 @@ struct get_object_info_impl< vector<device_type*> >
         u32 size = 0;
 
         i32 ret = function(info, 0, 0, &size);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         if(size == 0) return vector<device_type*>();
 
         vector<device_type*> vector(size / sizeof(device_type*));
 
         ret = function(info, size, &vector[0], 0);
-        if(ret != Success) throw (opencl_error(ret));
+        if(ret != success) throw (opencl_error(ret));
 
         return vector;
     }
@@ -537,13 +563,13 @@ inline T get_object_info(Function f, Object o, Info i, AuxInfo j)
 }
 
 template <class T, class Function, class Object, class Info, class AuxInfo>
-inline T get_object_info(Function f, Object o, Info i, AuxInfo j, const size_t k, const void * l)
+inline T get_object_info(Function f, Object o, Info i, AuxInfo j, const size_t k, cvoid* l)
 {
     return get_object_info_impl<T>()(bind_info_function(f, o, j), i, k, l);
 }
 
 // =========================================================
-// simplified implementation for managing OpenCL handles
+// simplified implementation for managing opencl handles
 // =========================================================
 
 //! Handle Class
@@ -561,11 +587,6 @@ public:
 
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
-
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
 
     constexpr pointer handle () const noexcept
     {
@@ -592,11 +613,6 @@ public:
     interface (interface&&) = default;
     interface& operator = (interface &&) = default;
 
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
-
     constexpr pointer handle () const noexcept
     {
         return base_type::template handle<pointer>();
@@ -621,11 +637,6 @@ public:
 
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
-
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
 
     constexpr pointer handle () const noexcept
     {
@@ -652,11 +663,6 @@ public:
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
 
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
-
     constexpr pointer handle () const noexcept
     {
         return base_type::template handle<pointer>();
@@ -669,10 +675,10 @@ protected:
 // =========================================================
 
 template <>
-class interface<resource_type::context> : public pipeline_interface
+class interface<resource_type::context> : public context_interface
 {
 public:
-    typedef pipeline_interface      base_type  ;
+    typedef context_interface       base_type  ;
     typedef CLObject<context_type>* pointer    ;
     typedef std::size_t             size_type  ;
     typedef resource_handle         handle_type;
@@ -681,11 +687,6 @@ public:
 
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
-
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
 
     constexpr pointer handle () const noexcept
     {
@@ -712,11 +713,6 @@ public:
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
 
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
-
     constexpr pointer handle () const noexcept
     {
         return base_type::template handle<pointer>();
@@ -729,10 +725,10 @@ protected:
 // =========================================================
 
 template <>
-class interface<resource_type::program> : public cmd_sequence_interface
+class interface<resource_type::program> : public cmd_seq_interface
 {
 public:
-    typedef cmd_sequence_interface  base_type  ;
+    typedef cmd_seq_interface       base_type  ;
     typedef CLObject<program_type>* pointer    ;
     typedef std::size_t             size_type  ;
     typedef resource_handle         handle_type;
@@ -741,11 +737,6 @@ public:
 
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
-
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
 
     constexpr pointer handle () const noexcept
     {
@@ -772,11 +763,6 @@ public:
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
 
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
-
     constexpr pointer handle () const noexcept
     {
         return base_type::template handle<pointer>();
@@ -802,11 +788,6 @@ public:
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
 
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
-
     constexpr pointer handle () const noexcept
     {
         return base_type::template handle<pointer>();
@@ -830,11 +811,6 @@ public:
 
     interface (interface&&) = default;
     interface& operator = (interface&&) = default;
-
-    constexpr operator pointer () const noexcept
-    {
-        return handle ();
-    }
 
     constexpr pointer handle () const noexcept
     {

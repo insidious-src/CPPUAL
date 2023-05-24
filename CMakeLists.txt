@@ -350,7 +350,7 @@ set(CPPUAL_COMPUTE_CL_HEADERS
     "src/compute/backend/opencl/cldevice.h"
     "src/compute/backend/opencl/clprogram.h"
     "src/compute/backend/opencl/clkernel.h"
-    "src/compute/backend/opencl/clqueue.h"
+    "src/compute/backend/opencl/clsampler.h"
     "src/compute/backend/opencl/clcontext.h"
     "src/compute/backend/opencl/clevent.h"
     "src/compute/backend/opencl/clcmdqueue.h"
@@ -363,7 +363,7 @@ add_library(cppual-compute-opencl MODULE
     "src/compute/backend/opencl/cldevice.cpp"
     "src/compute/backend/opencl/clprogram.cpp"
     "src/compute/backend/opencl/clkernel.cpp"
-    "src/compute/backend/opencl/clqueue.cpp"
+    "src/compute/backend/opencl/clsampler.cpp"
     "src/compute/backend/opencl/clcontext.cpp"
     "src/compute/backend/opencl/clevent.cpp"
     "src/compute/backend/opencl/clcmdqueue.cpp"
@@ -778,11 +778,11 @@ if(TARGET cppual-gfx)
                 "src/gfx/backend/egl/egl_surface.h"
                 )
 
-            add_library(cppual-gfx-egl MODULE
+            add_library(cppual-gfx-module-egl MODULE
                 "src/gfx/backend/egl/egl_surface.cpp"
                 "src/gfx/backend/egl/egl_main.cpp"
                 )
-            target_precompile_headers(cppual-gfx-egl PRIVATE ${CPPUAL_GFX_EGL_HEADERS})
+            target_precompile_headers(cppual-gfx-module-egl PRIVATE ${CPPUAL_GFX_EGL_HEADERS})
         endif()
 
         if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND XCB_GLX_FOUND)
@@ -790,11 +790,11 @@ if(TARGET cppual-gfx)
                 "src/gfx/backend/glx/glx_surface.h"
                 )
 
-            add_library(cppual-gfx-glx MODULE
+            add_library(cppual-gfx-module-glx MODULE
                 "src/gfx/backend/glx/glx_main.cpp"
                 "src/gfx/backend/glx/glx_surface.cpp"
                 )
-            target_precompile_headers(cppual-gfx-glx PRIVATE ${CPPUAL_GFX_GLX_HEADERS})
+            target_precompile_headers(cppual-gfx-module-glx PRIVATE ${CPPUAL_GFX_GLX_HEADERS})
         endif()
     endif()
 
@@ -802,10 +802,10 @@ if(TARGET cppual-gfx)
         set(CPPUAL_GFX_VK_HEADERS
             )
 
-        add_library(cppual-gfx-vulkan MODULE
+        add_library(cppual-gfx-module-vulkan MODULE
             "src/gfx/backend/vulkan/vk_main.cpp"
             )
-        target_precompile_headers(cppual-gfx-vulkan PRIVATE ${CPPUAL_GFX_VK_HEADERS})
+        target_precompile_headers(cppual-gfx-module-vulkan PRIVATE ${CPPUAL_GFX_VK_HEADERS})
     endif()
 
 
@@ -1046,15 +1046,15 @@ if(TARGET cppual-gfx)
     endif()
 
     if(TARGET cppual-gl AND EGL_FOUND)
-        target_link_libraries(cppual-gfx-egl cppual-gfx cppual-gl OpenGL::Library EGL::Library GLEW::Library)
+        target_link_libraries(cppual-gfx-module-egl cppual-gfx cppual-gl OpenGL::Library EGL::Library GLEW::Library)
     endif()
 
     if(TARGET cppual-gl AND XCB_GLX_FOUND)
-        target_link_libraries(cppual-gfx-glx cppual-gfx cppual-gl OpenGL::Library X11::Library GLEW::Library)
+        target_link_libraries(cppual-gfx-module-glx cppual-gfx cppual-gl OpenGL::Library X11::Library GLEW::Library)
     endif()
 
     if(VULKAN_FOUND)
-        target_link_libraries(cppual-gfx-vulkan cppual-gfx Vulkan::Library)
+        target_link_libraries(cppual-gfx-module-vulkan cppual-gfx Vulkan::Library)
     endif()
 
     target_link_libraries(cppual-ui cppual-host cppual-gfx cppual-memory)

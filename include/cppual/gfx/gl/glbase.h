@@ -48,6 +48,20 @@ class vertex_array          ;
 
 // ====================================================
 
+enum class shader_type : byte
+{
+    compute         = 1 << 0,
+    vertex          = 1 << 1,
+    tess_control    = 1 << 2,
+    tess_evaluation = 1 << 3,
+    geometry        = 1 << 4,
+    fragment        = 1 << 5
+};
+
+typedef bitset<shader_type> shader_types;
+
+// ====================================================
+
 class object : public resource<void, uint>
 {
 public:
@@ -56,7 +70,7 @@ public:
 
     object  () noexcept = default;
     object  (resource_type type);
-    object  (uint  shader_type);
+    object  (shader_type   shader_type);
     ~object () noexcept;
 
     resource_type type () const noexcept

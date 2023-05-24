@@ -22,7 +22,6 @@
 #include <cppual/memory/allocator.h>
 
 #include <new>
-
 #include <cstdlib>
 
 namespace cppual { namespace memory {

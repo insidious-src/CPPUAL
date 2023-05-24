@@ -69,7 +69,7 @@ public:
     size_type globalMemory () const;
 
     device_category type     () const noexcept;
-    bool       valid    () const noexcept;
+    bool            valid    () const noexcept;
     backend_type    backend  () const noexcept;
 
 private:

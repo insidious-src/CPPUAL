@@ -67,9 +67,8 @@ public:
     pasive_timeline (duration length, ratio_type speed = normal) noexcept
     : _M_timer      (),
       _M_length     (length),
-      _M_state      (),
       _M_speed      (speed),
-      _M_prev_speed (speed)
+      _M_state      ()
     { }
 
     duration length () const noexcept
@@ -103,7 +102,6 @@ public:
 
     void scale (ratio_type speed) noexcept
     {
-        _M_prev_speed.store(_M_speed.load(std::memory_order_relaxed));
         _M_speed = speed;
     }
 
@@ -177,12 +175,7 @@ public:
 private:
     rep normalize_elapsed () const noexcept
     {
-        auto       current_speed = _M_prev_speed.load (std::memory_order_relaxed);
-        auto const max_speed     = _M_speed.load (std::memory_order_relaxed);
-
-        if      (current_speed < max_speed) current_speed += slowest;
-        else if (current_speed > max_speed) current_speed -= slowest;
-        else     current_speed = max_speed;
+        auto const current_speed = _M_speed.load (std::memory_order_relaxed);
 
         return rep(ratio_type (_M_timer.elapsed<duration> ().count ()) * current_speed);
     }
@@ -190,10 +183,9 @@ private:
 private:
     timer_type           _M_timer;
     duration             _M_length, _M_saved;
-    mutable atomic_state _M_state;
-    count_type           _M_count;
     atomic_ratio         _M_speed;
-    atomic_ratio         _M_prev_speed;
+    count_type           _M_count;
+    mutable atomic_state _M_state;
 };
 
 } // namespace cppual

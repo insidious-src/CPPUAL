@@ -56,12 +56,14 @@ enum class resource_type : u32
     cursor          = 1 << 14,
     glyph_cursor    = 1 << 15,
     context         = 1 << 16,
-    queue           = 1 << 17,
-    event           = 1 << 18,
-    state           = 1 << 19,
-    sampler         = 1 << 20,
-    render_pass     = 1 << 21,
-    descriptor_pool = 1 << 22,
+    pipeline        = 1 << 17,
+    queue           = 1 << 18,
+    event           = 1 << 19,
+    state           = 1 << 20,
+    sampler         = 1 << 21,
+    render_pass     = 1 << 22,
+    descriptor_pool = 1 << 23,
+    socket          = 1 << 24,
     custom          = 1 << 30
 };
 
@@ -138,6 +140,18 @@ public:
         return _M_handle;
     }
 
+    inline resource_handle& operator = (value_type val) noexcept
+    {
+        _M_handle = val;
+        return *this;
+    }
+
+    inline resource_handle& operator = (pointer ptr) noexcept
+    {
+        _M_handle = direct_cast<value_type> (ptr);
+        return *this;
+    }
+
     friend
     constexpr bool operator == (resource_handle const&, resource_handle const&) noexcept;
 
@@ -146,6 +160,12 @@ public:
 
     friend
     constexpr bool operator == (std::nullptr_t, resource_handle const&) noexcept;
+
+    friend
+    constexpr bool operator == (resource_handle const&, resource_handle::value_type) noexcept;
+
+    friend
+    constexpr bool operator == (resource_handle::value_type, resource_handle const&) noexcept;
 
 private:
     value_type _M_handle { };
@@ -162,6 +182,12 @@ constexpr bool operator == (resource_handle const& lh, std::nullptr_t) noexcept
 constexpr bool operator == (std::nullptr_t, resource_handle const& rh) noexcept
 { return rh._M_handle == resource_handle::value_type (); }
 
+constexpr bool operator == (resource_handle const& lh, resource_handle::value_type val) noexcept
+{ return lh._M_handle == val; }
+
+constexpr bool operator == (resource_handle::value_type val, resource_handle const& rh) noexcept
+{ return rh._M_handle == val; }
+
 constexpr bool operator != (resource_handle const& lh, resource_handle const& rh) noexcept
 { return !(lh == rh); }
 
@@ -170,6 +196,12 @@ constexpr bool operator != (resource_handle const& lh, std::nullptr_t) noexcept
 
 constexpr bool operator != (std::nullptr_t, resource_handle const& rh) noexcept
 { return !(rh == nullptr); }
+
+constexpr bool operator != (resource_handle const& lh, resource_handle::value_type val) noexcept
+{ return !(lh == val); }
+
+constexpr bool operator != (resource_handle::value_type val, resource_handle const& rh) noexcept
+{ return !(rh == val); }
 
 // =========================================================
 
@@ -223,14 +255,16 @@ constexpr bool operator  != (resource_version const& gObj1, resource_version con
 
 // =========================================================
 
-template <class C, class ID>
+template <class C, class H, resource_handle::value_type NULL_VALUE = resource_handle::value_type ()>
 class resource
 {
 public:
-    typedef ID                    value_type     ;
+    typedef H                     value_type     ;
     typedef C                     connection_type;
     typedef resource_handle       handle_type    ;
     typedef resource* resource::* safe_bool      ;
+
+    constexpr static auto null_value = NULL_VALUE;
 
     constexpr resource () noexcept = default;
     resource (resource&&) = default;
@@ -244,11 +278,23 @@ public:
     { return _M_connection; }
 
     constexpr bool valid () const noexcept
-    { return _M_connection && _M_handle; }
+    { return _M_connection && _M_handle != null_value; }
 
     template <typename T = value_type>
     constexpr T handle () const noexcept
     { return _M_handle.get<T> (); }
+
+    void set_connection (handle_type::value_type conn) noexcept
+    { _M_connection = conn; }
+
+    void set_connection (connection_type conn) noexcept
+    { _M_connection = conn; }
+
+    void set_handle (handle_type::value_type handle) noexcept
+    { _M_handle = handle; }
+
+    void set_handle (value_type handle) noexcept
+    { _M_handle = handle; }
 
     constexpr resource (connection_type conn, value_type id) noexcept
     : _M_connection (conn),
@@ -257,7 +303,7 @@ public:
 
     constexpr explicit operator safe_bool () const noexcept
     {
-        return _M_connection && _M_handle ? this : nullptr;
+        return valid () ? this : nullptr;
     }
 
     template <class C_, class ID_>
@@ -270,13 +316,15 @@ private:
 
 // =========================================================
 
-template <class ID>
-class resource <void, ID>
+template <class H, resource_handle::value_type NULL_VALUE>
+class resource <void, H, NULL_VALUE>
 {
 public:
-    typedef ID                    value_type ;
+    typedef H                     value_type ;
     typedef resource_handle       handle_type;
     typedef resource* resource::* safe_bool  ;
+
+    constexpr static auto null_value = NULL_VALUE;
 
     constexpr resource () noexcept = default;
     resource (resource&&) = default;
@@ -287,11 +335,17 @@ public:
     virtual ~resource () { }
 
     constexpr bool valid () const noexcept
-    { return _M_handle; }
+    { return _M_handle != null_value; }
 
     template <typename T = value_type>
     constexpr T handle () const noexcept
     { return _M_handle.get<T> (); }
+
+    void set_handle (handle_type::value_type handle) noexcept
+    { _M_handle = handle; }
+
+    void set_handle (value_type handle) noexcept
+    { _M_handle = handle; }
 
     constexpr resource (value_type id) noexcept
     : _M_handle (id)
@@ -299,7 +353,7 @@ public:
 
     constexpr explicit operator safe_bool () const noexcept
     {
-        return _M_handle ? this : nullptr;
+        return valid () ? this : nullptr;
     }
 
     template <class ID_>

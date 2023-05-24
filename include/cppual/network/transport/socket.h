@@ -25,6 +25,7 @@
 
 #include <cppual/types.h>
 #include <cppual/string.h>
+#include <cppual/resource.h>
 #include <cppual/noncopyable.h>
 #include <cppual/network/protocols/protocol.h>
 
@@ -40,39 +41,35 @@ enum class socket_type : byte
 
 // ====================================================
 
-class transport_socket : public protocol
+class transport_socket
+    : public protocol,
+      public resource<void, int, static_cast<resource_handle::value_type> (-1)>
 {
 public:
-    typedef int            socket_id;
-    typedef socket_id const const_id;
-
-    constexpr static socket_id null_socket = -1;
+    typedef value_type       socket_id;
+    typedef value_type const const_id ;
 
     transport_socket () = delete;
     transport_socket (socket_type) noexcept;
     transport_socket (transport_socket&&) noexcept;
     transport_socket& operator = (transport_socket&&) noexcept;
 
-    void set_blocking (bool) noexcept;
+    void set_blocking (bool)   noexcept;
+    bool is_blocking  () const noexcept;
 
-    inline ~transport_socket       ()       noexcept { close ();                     }
-    inline socket_id   id          () const noexcept { return _M_nId;                }
-    inline socket_type type        () const noexcept { return _M_eProtocol;          }
-    inline bool        valid       () const noexcept { return _M_nId != null_socket; }
-    inline bool        is_blocking () const noexcept { return _M_bIsBlocking;        }
+    inline ~transport_socket ()       noexcept { close ();            }
+    inline socket_type type  () const noexcept { return _M_eProtocol; }
 
 protected:
-    static socket_id create (socket_type) noexcept;
-    void   replace_from_id (socket_id) noexcept;
-    void   close () noexcept;
+    static socket_id create_socket (socket_type) noexcept;
+    void   replace_from_id         (socket_id  ) noexcept;
+    void   close                   ()            noexcept;
 
 private:
     void init_socket () noexcept;
 
 private:
-    socket_id   _M_nId        ;
-    socket_type _M_eProtocol  ;
-    bool        _M_bIsBlocking;
+    socket_type _M_eProtocol;
 };
 
 } } // namespace Network

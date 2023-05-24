@@ -51,7 +51,7 @@ public:
  * @brief Raster image parser for jpg, png, bmp, tga, gif
  */
 
-class raster_image final : public image_interface, private memory::allocator<raster_image, memory_resource>
+class raster_image final : public image_interface, private memory::allocator<raster_image>
 {
 public:
     raster_image  () = delete;
@@ -96,7 +96,7 @@ private:
  * @brief Vector image parser for svg
  */
 
-class vector_image final : public image_interface, private memory::allocator<vector_image, memory_resource>
+class vector_image final : public image_interface, private memory::allocator<vector_image>
 {
 public:
     vector_image  () = delete;

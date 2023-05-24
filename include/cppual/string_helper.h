@@ -268,6 +268,7 @@ public:
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     static_assert (N > 0, "string_list empty!");
+    static_assert (is_char_v<T>, "T is not a character type!");
 
     static constexpr const size_type npos = static_cast<size_type> (-1);
 

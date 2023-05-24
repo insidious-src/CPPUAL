@@ -34,7 +34,9 @@ class protocol : public non_copyable_virtual
 {
 public:
     protocol_context* create_context  ();
-    bool              add_lower_layer (protocol*);
+    void              add_upper_layer (protocol*);
+    void              add_lower_layer (protocol*);
+    protocol*         uppest_layer    () const;
     protocol*         lowest_layer    () const;
 
     virtual uint required_output_size        (uint max_input);

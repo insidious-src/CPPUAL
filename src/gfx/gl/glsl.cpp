@@ -62,45 +62,26 @@ string_type sync_read_file (string_type const& gFilePath, std::ios_base::openmod
     return gContent;
 }
 
-constexpr static uint convert_shader_type (shader::Type eType) noexcept
-{
-    switch (eType)
-    {
-    case shader::Vertex:
-        return gl::VertexShaderARB;
-    case shader::Geometry:
-        return gl::GeometryShaderARB;
-    case shader::TessControl:
-        return gl::TessControlShaderARB;
-    case shader::TessEvaluation:
-        return gl::TessEvaluationShaderARB;
-    case shader::Compute:
-        return gl::ComputeShaderARB;
-    default:
-        return gl::FragmentShaderARB;
-    }
-}
-
-constexpr static shader::Type convert_shader_type (int nType) noexcept
+constexpr static shader_type convert_shader_type (int nType) noexcept
 {
     switch (nType)
     {
     case gl::FragmentShaderARB:
-        return shader::Fragment;
+        return shader_type::fragment;
     case gl::VertexShaderARB:
-        return shader::Vertex;
+        return shader_type::vertex;
     case gl::GeometryShaderARB:
-        return shader::Geometry;
+        return shader_type::geometry;
     case gl::TessControlShaderARB:
-        return shader::TessControl;
+        return shader_type::tess_control;
     case gl::TessEvaluationShaderARB:
-        return shader::TessEvaluation;
+        return shader_type::tess_evaluation;
 #ifndef OS_ANDROID
     case gl::ComputeShaderARB:
-        return shader::Compute;
+        return shader_type::compute;
 #endif
     default:
-        return shader::Fragment;
+        return shader_type::fragment;
     }
 }
 
@@ -123,8 +104,8 @@ uint binary::binary_formats () noexcept
 
 // ====================================================
 
-shader::shader (shader::Type eType) noexcept
-: object     (convert_shader_type (eType)),
+shader::shader (shader_type eType) noexcept
+: object     (eType),
   _M_gSource (),
   _M_gStates (),
   _M_eType   (eType)

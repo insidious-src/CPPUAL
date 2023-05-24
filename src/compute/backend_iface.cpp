@@ -21,6 +21,7 @@
 
 #include <cppual/compute/backend_iface.h>
 #include <cppual/process/plugin.h>
+#include <cppual/memory/stacked.h>
 
 namespace cppual { namespace compute {
 
@@ -29,15 +30,29 @@ namespace { // optimize for internal unit usage
 class initializer final
 {
 private:
-    factory::manager_type mgr          ;
-    shared_factory        local_factory;
+    typedef factories::libraries_vector libraries_vector          ;
+    typedef libraries_vector&           libraries_vector_reference;
+    typedef vector<shared_factory>&     factory_vector_reference  ;
 
-    constexpr cchar* platform_name () noexcept
+    factory::manager_type  mgr            ;
+    vector<shared_factory> local_factories;
+
+    static libraries_vector_reference platform_names () noexcept
     {
-        return "libcppual-compute-opencl";
+        static char buffer[sizeof (cchar*) * 3];
+        static memory::stacked_resource static_resource (buffer, sizeof (buffer));
+
+        static libraries_vector ret_vec
+        {
+            "libcppual-compute-opencl",
+            "libcppual-compute-vulkan",
+            "libcppual-compute-cuda"
+        };
+
+        return ret_vec;
     }
 
-    inline static initializer& platform () noexcept
+    inline static initializer& platforms () noexcept
     {
         static initializer init;
         return init;
@@ -45,26 +60,34 @@ private:
 
     inline initializer ()
     {
-        if (mgr.load_plugin(platform_name())) local_factory = mgr.plugin(platform_name()).iface();
+        static libraries_vector_reference vec = platform_names ();
+
+        for (auto i = 0U; i < vec.size (); ++i)
+        {
+            if (mgr.load_plugin (vec[i]))
+            {
+                local_factories.push_back (mgr.plugin (vec[i]).iface ());
+            }
+        }
     }
 
 public:
-    inline static shared_factory instance () noexcept
+    inline static factory_vector_reference instances () noexcept
     {
-        return platform ().local_factory;
+        return platforms ().local_factories;
     }
 };
 
 } // anonymous namespace
 
-shared_factory factory::instance ()
+factories::factory_vector_reference factories::instances ()
 {
-    return initializer::instance ();
+    return initializer::instances ();
 }
 
-bool factory::has_valid_instance () noexcept
+bool factories::has_valid_instance () noexcept
 {
-    return initializer::instance () != nullptr;
+    return !initializer::instances ().empty ();
 }
 
 } } // namespace Compute

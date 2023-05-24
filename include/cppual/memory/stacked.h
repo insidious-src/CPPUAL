@@ -133,10 +133,10 @@ private:
 // =========================================================
 
 template <class T>
-using stacked_allocator = allocator <T, stacked_resource>;
+using stacked_allocator = allocator <T>;
 
 template <class T>
-using dstacked_allocator = allocator <T, dstacked_resource>;
+using dstacked_allocator = allocator <T>;
 
 // =========================================================
 

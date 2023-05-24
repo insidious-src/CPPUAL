@@ -38,6 +38,7 @@ namespace cppual { namespace gfx { namespace gl {
 namespace { namespace internal { // optimize for internal unit usage
 
 typedef u32                             value_type      ;
+typedef Bool                            bool_type       ;
 typedef ::xcb_connection_t*             conn_pointer    ;
 typedef ::Display*                      display_pointer ;
 typedef ::GLXFBConfig                   fbconfig_pointer;
@@ -84,9 +85,9 @@ inline version_type& version () noexcept
 
 // ====================================================
 
-inline void initialize (display_pointer dsp)
+inline bool_type initialize (display_pointer dsp)
 {
-    ::glXQueryVersion (dsp, &internal::version ().major, &internal::version ().minor);
+    return ::glXQueryVersion (dsp, &internal::version ().major, &internal::version ().minor);
 }
 
 // ====================================================
@@ -177,9 +178,11 @@ config::config (connection_type native, connection_type legacy, format_type gFor
 {
     if (!_M_pLegacy) throw std::logic_error ("invalid display");
 
-    internal::initialize (_M_pLegacy.get<internal::display_pointer> ());
+    static auto init = internal::initialize (_M_pLegacy.get<internal::display_pointer> ());
 
     auto const screens = x::screen_setup (native.get<internal::conn_pointer> ());
+
+    UNUSED (init);
 
     if (!screens.count ()) throw std::logic_error ("NO screens available!");
 
@@ -220,19 +223,13 @@ config::config (connection_type native, connection_type legacy, format_type gFor
         }
     }
 
-    if (!visualID)
+    if (!visualID && !prevVisualID)
     {
-        if (!prevVisualID)
-        {
-            throw std::logic_error ("NO visualid available!");
-        }
-        else
-        {
-            _M_gFormat = to_format (fb_config);
-        }
+        throw std::logic_error ("NO visualid available!");
     }
 
-    _M_pCfg = fb_config;
+    _M_gFormat = to_format (fb_config);
+    _M_pCfg    = fb_config;
 }
 
 config::value_type config::id () const
@@ -321,49 +318,75 @@ pixel_format config::to_format (handle_type fb_cfg) const
 
 void config::print () const
 {
-    //static int value;
+    static int value;
 
     std::cout << "Buffer Size: "  << static_cast<u16> (_M_gFormat.depth + _M_gFormat.alpha)
               << "\nRed Size: "   << static_cast<u16> (_M_gFormat.red)
               << "\nGreen Size: " << static_cast<u16> (_M_gFormat.green)
               << "\nBlue Size: "  << static_cast<u16> (_M_gFormat.blue)
               << "\nAlpha Size: " << static_cast<u16> (_M_gFormat.alpha)
-              << "\nDepth size: " << static_cast<u16> (_M_gFormat.depth) << std::endl;
+              << "\nDepth size: " << static_cast<u16> (_M_gFormat.depth);
 
-    /*::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_CONFIG_CAVEAT, &value);
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                           _M_pCfg.get<internal::fbconfig_pointer> (), GLX_CONFIG_CAVEAT, &value);
 
     switch (value)
     {
     case internal::none:
-        std::cout << "EGL_CONFIG_CAVEAT: EGL_NONE" << std::endl;
+        std::cout << "\nGLX_CONFIG_CAVEAT: GLX_NONE";
         break;
-    case EGL_SLOW_CONFIG:
-        std::cout << "EGL_CONFIG_CAVEAT: EGL_SLOW_CONFIG" << std::endl;
+    case GLX_SLOW_CONFIG:
+        std::cout << "\nGLX_CONFIG_CAVEAT: GLX_SLOW_CONFIG";
         break;
     }
 
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_CONFIG_ID, &value);
-    std::cout << "Config ID: " << value << std::endl;
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                            _M_pCfg.get<internal::fbconfig_pointer> (), GLX_FBCONFIG_ID, &value);
+    std::cout << "\nConfig ID: " << value;
 
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_MAX_PBUFFER_WIDTH, &value);
-    std::cout << "Max pbuffer width: " << value << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_MAX_PBUFFER_HEIGHT, &value);
-    std::cout << "Max pbuffer height: " << value << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_MAX_PBUFFER_PIXELS, &value);
-    std::cout << "Max pbuffer pixels: " << value << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_NATIVE_RENDERABLE, &value);
-    std::cout << "Native renderable: " << (value ? "true" : "false") << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_NATIVE_VISUAL_ID, &value);
-    std::cout << "Native visual ID: " << value << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_NATIVE_VISUAL_TYPE, &value);
-    std::cout << "Native visual type: " << value << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_SAMPLE_BUFFERS, &value);
-    std::cout << "Sample Buffers: " << value << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_SAMPLES, &value);
-    std::cout << "Samples: " << value << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_SURFACE_TYPE, &value);
-    std::cout << "Surface type: " << value << std::endl;
-    ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_TRANSPARENT_TYPE, &value);*/
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                            _M_pCfg.get<internal::fbconfig_pointer> (),
+                            GLX_MAX_PBUFFER_WIDTH, &value);
+    std::cout << "\nMax pbuffer width: " << value;
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                            _M_pCfg.get<internal::fbconfig_pointer> (),
+                            GLX_MAX_PBUFFER_HEIGHT, &value);
+    std::cout << "\nMax pbuffer height: " << value;
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                            _M_pCfg.get<internal::fbconfig_pointer> (),
+                            GLX_MAX_PBUFFER_PIXELS, &value);
+    std::cout << "\nMax pbuffer pixels: " << value;
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                            _M_pCfg.get<internal::fbconfig_pointer> (),
+                            GLX_VISUAL_ID, &value);
+    std::cout << "\nNative visual ID: " << value;
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                            _M_pCfg.get<internal::fbconfig_pointer> (),
+                            GLX_SAMPLE_BUFFERS, &value);
+    std::cout << "\nSample Buffers: " << value;
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                            _M_pCfg.get<internal::fbconfig_pointer> (),
+                            GLX_SAMPLES, &value);
+    std::cout << "\nSamples: " << value;
+    ::glXGetFBConfigAttrib (_M_pLegacy.get<internal::display_pointer> (),
+                            _M_pCfg.get<internal::fbconfig_pointer> (),
+                            GLX_TRANSPARENT_TYPE, &value);
+
+    switch (value)
+    {
+    case GLX_NONE:
+        std::cout << "\nTransparent type: GLX_NONE" << std::endl;
+        break;
+    case  GLX_TRANSPARENT_RGB:
+        std::cout << "\nTransparent type:  GLX_TRANSPARENT_RGB" << std::endl;
+        break;
+    case  GLX_TRANSPARENT_INDEX:
+        std::cout << "\nTransparent type:  GLX_TRANSPARENT_INDEX" << std::endl;
+        break;
+    default:
+        std::cout << "\nTransparent type: " << value << std::endl;
+        break;
+    }
 }
 
 // ====================================================
@@ -461,10 +484,8 @@ void surface::scale (point2u gSize)
 {
     if (context_interface::current ())
     {
-        auto drawable = context_interface::current ()->drawable ();
-        auto readable = context_interface::current ()->readable ();
-
-        if (drawable == this && readable == this)
+        if (context_interface::current ()->drawable () == this &&
+            context_interface::current ()->readable () == this)
         {
             ::glMatrixMode (GL_PROJECTION);
             ::glPushMatrix ();
@@ -584,9 +605,11 @@ bool context::assign () noexcept
 {
     if (::glXMakeContextCurrent (configuration ().legacy ().get<internal::display_pointer> (),
                                  _M_pDrawTarget != nullptr ?
-                                 _M_pDrawTarget->handle ().get<internal::surface_id> () : internal::surface_id (),
+                                    _M_pDrawTarget->handle ().get<internal::surface_id> () :
+                                    internal::surface_id (),
                                  _M_pReadTarget != nullptr ?
-                                 _M_pReadTarget->handle ().get<internal::surface_id> () : internal::surface_id (),
+                                    _M_pReadTarget->handle ().get<internal::surface_id> () :
+                                    internal::surface_id (),
                                  _M_pGC.get<internal::context_pointer> ()))
     {
         acquire (this);

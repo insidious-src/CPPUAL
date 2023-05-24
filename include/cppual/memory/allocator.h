@@ -179,7 +179,7 @@ std::enable_if<is_memory_resource<T>::value, T>::type;
 // =========================================================
 
 /// redefined polymorphic memory allocator
-template <typename T, typename R = memory_resource>
+template <typename T>
 class SHARED_API allocator
 {
 public:
@@ -188,7 +188,7 @@ public:
     typedef T const*        const_pointer                         ;
     typedef T &             reference                             ;
     typedef T const&        const_reference                       ;
-    typedef ResourceType<R> resource_type                         ;
+    typedef memory_resource resource_type                         ;
     typedef resource_type*  resource_pointer                      ;
     typedef resource_type&  resource_reference                    ;
     typedef std::size_t     size_type                             ;
@@ -198,7 +198,7 @@ public:
     typedef std::true_type  propagate_on_container_swap           ;
 
     template <class U>
-    struct rebind { typedef allocator<U, resource_type> other; };
+    struct rebind { typedef allocator<U> other; };
 
     inline void deallocate (pointer p, size_type n)
     { resource ()->deallocate (p, n * sizeof (value_type), alignof (value_type)); }
@@ -253,71 +253,33 @@ public:
                    get_default_resource ()  : get_default_thread_resource ())
     { }
 
+    template <typename U>
+    constexpr
+    explicit
+    allocator (allocator<U> const& ator) noexcept
+    : _M_pRc  (ator._M_pRc)
+    { }
+
+    template <typename U>
     inline
-    allocator (allocator&& ator) noexcept
+    explicit
+    allocator (allocator<U>&& ator) noexcept
     : _M_pRc  (ator._M_pRc)
     {
         ator._M_pRc = nullptr;
     }
 
-    constexpr
-    allocator (allocator const& ator) noexcept
-    : _M_pRc  (ator._M_pRc)
-    { }
-
+    template <typename U>
     inline
-    allocator& operator = (allocator&& ator) noexcept
-    {
-        if (this == &ator) return *this;
-
-        _M_pRc      = ator._M_pRc;
-        ator._M_pRc = nullptr    ;
-
-        return *this;
-    }
-
-    inline
-    allocator& operator = (allocator const& ator) noexcept
-    {
-        if (this != &ator) _M_pRc = ator._M_pRc;
-        return *this;
-    }
-
-    template <typename U,
-              typename M
-              >
-    constexpr
-    explicit
-    allocator (allocator<U, M> const& ator) noexcept
-    : _M_pRc  (ator._M_pRc)
-    { }
-
-    template <typename U,
-              typename M
-              >
-    inline
-    explicit
-    allocator (allocator<U, M>&& ator) noexcept
-    : _M_pRc  (ator._M_pRc)
-    {
-        ator._M_pRc = nullptr;
-    }
-
-    template <typename U,
-              typename M
-              >
-    inline
-    allocator& operator = (allocator<U, M> const& ator) noexcept
+    allocator& operator = (allocator<U> const& ator) noexcept
     {
         _M_pRc = ator._M_pRc;
         return *this;
     }
 
-    template <typename U,
-              typename M
-              >
+    template <typename U>
     inline
-    allocator& operator = (allocator<U, M>&& ator) noexcept
+    allocator& operator = (allocator<U>&& ator) noexcept
     {
         _M_pRc      = ator._M_pRc;
         ator._M_pRc = nullptr    ;
@@ -355,7 +317,7 @@ public:
         return *this;
     }
 
-    template <typename, typename>
+    template <typename>
     friend class allocator;
 
 private:
@@ -386,39 +348,6 @@ inline bool operator == (allocator<T1> const& lhs, allocator<T2> const& rhs) noe
 
 template <typename T1, typename T2>
 inline bool operator != (allocator<T1> const& lhs, allocator<T2> const& rhs) noexcept
-{ return !(lhs == rhs); }
-
-template <typename T, typename R>
-inline bool operator == (allocator<T, R> const& lhs, allocator<T, R> const& rhs) noexcept
-{
-    return lhs.resource () == rhs.resource () ||
-          (lhs.resource () && rhs.resource () && *lhs.resource () == *rhs.resource ());
-}
-
-template <typename T, typename R>
-inline bool operator != (allocator<T, R> const& lhs, allocator<T, R> const& rhs) noexcept
-{ return !(lhs == rhs); }
-
-template <typename T1, typename T2, typename R2>
-inline bool operator == (allocator<T1> const& lhs, allocator<T2, R2> const& rhs) noexcept
-{
-    return lhs.resource () == rhs.resource () ||
-          (lhs.resource () && rhs.resource () && *lhs.resource () == *rhs.resource ());
-}
-
-template <typename T1, typename T2, typename R2>
-inline bool operator != (allocator<T1> const& lhs, allocator<T2, R2> const& rhs) noexcept
-{ return !(lhs == rhs); }
-
-template <typename T1, typename R1, typename T2>
-inline bool operator == (allocator<T1, R1> const& lhs, allocator<T2> const& rhs) noexcept
-{
-    return lhs.resource () == rhs.resource () ||
-          (lhs.resource () && rhs.resource () && *lhs.resource () == *rhs.resource ());
-}
-
-template <typename T1, typename R1, typename T2>
-inline bool operator != (allocator<T1, R1> const& lhs, allocator<T2> const& rhs) noexcept
 { return !(lhs == rhs); }
 
 template <typename T>
@@ -470,11 +399,7 @@ struct is_allocator_helper : public std::false_type
 { };
 
 template <typename T>
-struct is_allocator_helper < allocator<T, memory_resource> > : public std::true_type
-{ };
-
-template <typename T, typename U>
-struct is_allocator_helper < allocator<T, U> > : public std::is_base_of<memory_resource, U>
+struct is_allocator_helper < allocator<T> > : public std::true_type
 { };
 
 /// is allocator helper

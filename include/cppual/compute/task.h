@@ -44,9 +44,9 @@ public:
     typedef function<void()>             call_type ;
     typedef fu16                         size_type ;
     typedef std::shared_timed_mutex      mutex_type;
-    typedef std::lock_guard<mutex_type>  write_lock;
+    typedef std::lock_guard <mutex_type> write_lock;
     typedef std::shared_lock<mutex_type> read_lock ;
-    typedef circular_queue<call_type>     queue_type;
+    typedef circular_queue  <call_type > queue_type;
 
     enum state_type
     {
@@ -145,11 +145,13 @@ public:
 
     void when_any () { when_any_finish (); }
     void when_all () { when_all_finish (); }
-    void finish   () { quit (false);     }
-    bool valid    () const noexcept { return !assigned (); }
+    void finish   () { quit       (false); }
 
     host_task () : _M_value ()
     { thread_pool::reserve (*this); }
+
+    bool valid () const noexcept
+    { return !assigned (); }
 
     bool ready () const
     { return state () == host_queue::running and empty (); }
@@ -222,14 +224,18 @@ private:
 
 // =========================================================
 
+//! host concurrent continuation task
+//!
+//! Use a matrix to calculate several results into one
+//! with only a single thread.
 template <typename T>
-class unbound_task : private host_queue
+class concurrent_task : private host_queue
 {
 public:
     static_assert (!std::is_void<T>::value, "T = void ... use std::async instead");
 
     typedef T                 value_type ;
-    typedef vector<T>        vector_type;
+    typedef vector<T>         vector_type;
     typedef unbound_matrix<T> matrix_type;
 
     template <typename F>
@@ -237,11 +243,13 @@ public:
 
     void when_any () { when_any_finish (); }
     void when_all () { when_all_finish (); }
-    void finish   () { quit (false);     }
-    bool valid    () const noexcept { return !assigned (); }
+    void finish   () { quit       (false); }
 
-    unbound_task ()
+    concurrent_task ()
     { thread_pool::reserve (*this); }
+
+    bool valid () const noexcept
+    { return !assigned (); }
 
     bool ready () const
     { return state () == host_queue::running and empty (); }
@@ -263,18 +271,18 @@ public:
     }
 
     template <class X>
-    unbound_task (fn_vector_type<value_type (X::*)()> const& functions) : unbound_task ()
+    concurrent_task (fn_vector_type<void (X::*)(value_type&)> const& functions) : concurrent_task ()
     { then (functions); }
 
-    unbound_task (fn_vector_type<value_type (*)()> const& functions) : unbound_task ()
+    concurrent_task (fn_vector_type<void (*)(value_type&)> const& functions) : concurrent_task ()
     { then (functions); }
 
     template <typename Callable>
-    unbound_task (fn_vector_type<Callable&&> const& functions) : unbound_task ()
+    concurrent_task (fn_vector_type<Callable&&> const& functions) : concurrent_task ()
     { then (functions); }
 
     template <class X>
-    unbound_task& then (fn_vector_type<value_type (X::*)()> const& functions)
+    concurrent_task& then (fn_vector_type<void (X::*)(value_type&)> const& functions)
     {
         schedule (call_type ([&]
         {
@@ -286,7 +294,7 @@ public:
         return *this;
     }
 
-    unbound_task& then (fn_vector_type<value_type (*)()> const& functions)
+    concurrent_task& then (fn_vector_type<void (*)(value_type&)> const& functions)
     {
         schedule (call_type ([&]
         {
@@ -299,7 +307,7 @@ public:
     }
 
     template <typename U>
-    unbound_task& then (fn_vector_type<CallableType<U>&&> const& functions)
+    concurrent_task& then (fn_vector_type<CallableType<U>&&> const& functions)
     {
         schedule (call_type ([&]
         {

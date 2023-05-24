@@ -105,7 +105,7 @@ private:
 // =========================================================
 
 template <typename T>
-using uniform_pool_allocator = allocator <T, uniform_pool_resource>;
+using uniform_pool_allocator = allocator <T>;
 
 // =========================================================
 

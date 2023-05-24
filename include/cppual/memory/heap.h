@@ -119,10 +119,10 @@ private:
 // =========================================================
 
 template <class T>
-using heap_allocator = allocator <T, heap_resource>;
+using heap_allocator = allocator <T>;
 
 template <class T>
-using list_allocator = allocator <T, list_resource>;
+using list_allocator = allocator <T>;
 
 // =========================================================
 

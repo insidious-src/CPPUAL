@@ -32,8 +32,8 @@
 #include <memory>
 #include <limits>
 #include <cstring>
-#include <type_traits>
 #include <algorithm>
+#include <type_traits>
 
 namespace cppual {
 
@@ -484,7 +484,7 @@ void circular_queue<T, Allocator, Atomic>::erase (const_iterator gIt)
     else if (&(*gIt) == _M_endPos) _pop_back ();
     else
     {
-        iterator it (const_cast<self_type&> (gIt.get ()), gIt.pos ());
+        iterator it (gIt);
 
         if (end () - it <= it - begin ())
         {
@@ -522,7 +522,7 @@ void circular_queue<T, Allocator, Atomic>::dispose ()
 // lock-free circular queue (1 producer / 1 consumer)
 // ex. sufficient for event handling
 template <typename T, std::size_t N>
-class SHARED_API uniform_queue : non_copyable
+class SHARED_API uniform_queue : public non_copyable
 {
 public:
     static_assert (!std::is_void<T>::value              , "T is void");

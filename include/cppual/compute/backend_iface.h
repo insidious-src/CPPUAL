@@ -67,6 +67,20 @@ enum class il_type : u16
     hlil   = 1 << 5
 };
 
+enum class memory_cat : byte
+{
+    restricted,
+    specialized,
+    global
+};
+
+enum class memory_access : byte
+{
+    read_only ,
+    write_only,
+    read_write
+};
+
 typedef bitset<device_category> device_categories;
 typedef bitset<il_type>         device_ils       ;
 
@@ -74,8 +88,9 @@ typedef bitset<il_type>         device_ils       ;
 
 class factory;
 class device_interface;
+class context_interface;
 class buffer_interface;
-class cmd_sequence_interface;
+class cmd_seq_interface;
 class image_interface;
 class pipeline_interface;
 class render_pass_interface;
@@ -88,31 +103,38 @@ class sampler_interface;
 
 // =========================================================
 
-typedef std::shared_ptr<factory>                   shared_factory;
-typedef std::shared_ptr<device_interface>          shared_device;
-typedef std::shared_ptr<buffer_interface>          shared_buffer;
-typedef std::shared_ptr<cmd_sequence_interface>    shared_cmd_sequence;
-typedef std::shared_ptr<image_interface>           shared_image;
-typedef std::shared_ptr<pipeline_interface>        shared_pipeline;
-typedef std::shared_ptr<render_pass_interface>     shared_render_pass;
-typedef std::shared_ptr<shader_interface>          shared_shader;
+typedef std::shared_ptr<factory>                   shared_factory        ;
+typedef std::shared_ptr<device_interface>          shared_device         ;
+typedef std::shared_ptr<context_interface>         shared_context        ;
+typedef std::shared_ptr<buffer_interface>          shared_buffer         ;
+typedef std::shared_ptr<cmd_seq_interface>         shared_cmd_sequence   ;
+typedef std::shared_ptr<image_interface>           shared_image          ;
+typedef std::shared_ptr<pipeline_interface>        shared_pipeline       ;
+typedef std::shared_ptr<render_pass_interface>     shared_render_pass    ;
+typedef std::shared_ptr<shader_interface>          shared_shader         ;
 typedef std::shared_ptr<descriptor_pool_interface> shared_descriptor_pool;
-typedef std::shared_ptr<event_interface>           shared_event;
-typedef std::shared_ptr<state_interface>           shared_state;
-typedef std::shared_ptr<queue_interface>           shared_queue;
-typedef std::shared_ptr<sampler_interface>         shared_sampler;
+typedef std::shared_ptr<event_interface>           shared_event          ;
+typedef std::shared_ptr<state_interface>           shared_state          ;
+typedef std::shared_ptr<queue_interface>           shared_queue          ;
+typedef std::shared_ptr<sampler_interface>         shared_sampler        ;
 
 // =========================================================
 
 class SHARED_API factory : public non_copyable_virtual
 {
 public:
-    typedef std::size_t                     size_type    ;
-    typedef vector<shared_device>           device_vector;
+    typedef std::size_t                      size_type    ;
+    typedef vector<shared_device>            device_vector;
     typedef process::plugin_manager<factory> manager_type ;
 
     virtual device_vector          get_devices (device_categories type = device_category::any) = 0;
-    virtual shared_buffer          create_buffer () = 0;
+    virtual shared_context         create_context (device_vector const& devs) = 0;
+
+    virtual shared_buffer          create_buffer (shared_context const& context,
+                                        size_type size,
+                                        memory_access = memory_access::read_write,
+                                        memory_cat    = memory_cat::global) = 0;
+    \
     virtual shared_cmd_sequence    create_cmd_sequence () = 0;
     virtual shared_image           create_image () = 0;
     virtual shared_pipeline        create_pipeline () = 0;
@@ -124,10 +146,36 @@ public:
     virtual shared_queue           create_queue () = 0;
     virtual shared_sampler         create_sampler () = 0;
     virtual size_type              device_count (device_categories type = device_category::any) = 0;
+};
+
+// =========================================================
+
+class SHARED_API factories : public non_copyable_virtual
+{
+public:
+    typedef vector<shared_factory> factory_vector          ;
+    typedef factory_vector&        factory_vector_reference;
+    typedef vector<cchar*>         libraries_vector        ;
+    typedef std::size_t            size_type               ;
+
+    factories (libraries_vector const&);
+
+    inline size_type size () const noexcept
+    {
+        return _M_factory_vec.size ();
+    }
+
+    constexpr factory_vector_reference get_factories () noexcept
+    {
+        return _M_factory_vec;
+    }
 
 public:
-    static shared_factory instance();
-    static bool           has_valid_instance() noexcept;
+    static factory_vector_reference instances();
+    static bool                     has_valid_instance() noexcept;
+
+private:
+    factory_vector _M_factory_vec;
 };
 
 // =========================================================
@@ -164,6 +212,14 @@ protected:
 
 // =========================================================
 
+class SHARED_API context_interface : public object<resource_type::context>
+{
+protected:
+    using object<resource_type::context>::object;
+};
+
+// =========================================================
+
 class SHARED_API buffer_interface : public object<resource_type::buffer>
 {
 public:
@@ -196,7 +252,7 @@ protected:
 
 // =========================================================
 
-class SHARED_API cmd_sequence_interface : public object<resource_type::program>
+class SHARED_API cmd_seq_interface : public object<resource_type::program>
 {
 protected:
     using object<resource_type::program>::object;
@@ -212,10 +268,10 @@ protected:
 
 // =========================================================
 
-class SHARED_API pipeline_interface : public object<resource_type::context>
+class SHARED_API pipeline_interface : public object<resource_type::pipeline>
 {
 protected:
-    using object<resource_type::context>::object;
+    using object<resource_type::pipeline>::object;
 };
 
 // =========================================================

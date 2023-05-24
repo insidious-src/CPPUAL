@@ -45,15 +45,17 @@ template <typename T, typename Allocator = memory::allocator<T> >
 class unbound_matrix
 {
 public:
-    typedef T                                 value_type    ;
-    typedef Allocator                         allocator_type;
-    typedef T*                                pointer       ;
-    typedef T const*                          const_pointer ;
-    typedef std::vector  <T, allocator_type>  vector_type   ;
-    typedef std::deque   <T, allocator_type>  array_type    ;
-    typedef signal    <void, allocator_type>  signal_type   ;
-    typedef circular_queue<T, allocator_type> queue_type    ;
-    typedef typename Allocator::size_type     size_type     ;
+    typedef T                                    value_type    ;
+    typedef Allocator                            allocator_type;
+    typedef T*                                   pointer       ;
+    typedef T const*                             const_pointer ;
+    typedef std::vector      <T, allocator_type> vector_type   ;
+    typedef std::deque       <T, allocator_type> array_type    ;
+    typedef signal        <void, allocator_type> signal_type   ;
+    typedef function         <void(value_type&)> fn_type       ;
+    typedef std::vector<fn_type, allocator_type> fn_vector_type;
+    typedef circular_queue   <T, allocator_type> queue_type    ;
+    typedef typename Allocator::size_type        size_type     ;
 
     enum class Instructions
     {
@@ -67,7 +69,10 @@ public:
         Root
     };
 
-    void process ();
+    /// Process sequentially each function using matrix'
+    /// queue operation functions and calculate each result
+    /// in parallel. Return all results.
+    vector_type process (fn_vector_type);
 
     constexpr size_type    size      () const noexcept { return rows () * cols (); }
     constexpr size_type    cols      () const noexcept { return _M_uCols;          }

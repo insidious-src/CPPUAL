@@ -21,7 +21,6 @@
 
 #include <cppual/gfx/gl/glbase.h>
 #include <cppual/gfx/gl/runtime.h>
-#include <cppual/gfx/gl/surface.h>
 #include <cppual/gfx/gl/buffer.h>
 #include <cppual/gfx/gl/framebuf.h>
 #include <cppual/gfx/gl/query.h>
@@ -29,4 +28,3 @@
 #include <cppual/gfx/gl/texture.h>
 #include <cppual/gfx/gl/vbo.h>
 #include <cppual/gfx/gl/glsl.h>
-#include <cppual/gfx/gl/instance.h>

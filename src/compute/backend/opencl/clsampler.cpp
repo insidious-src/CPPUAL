@@ -1,1 +1,1 @@
- 
+#include "clsampler.h"

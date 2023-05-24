@@ -26,6 +26,10 @@
 #include <cppual/network/uri_parts.h>
 #include <cppual/string.h>
 
+#define _LIBCPP_DISABLE_DEPRECATION_WARNINGS
+#include <locale>
+#include <codecvt>
+
 namespace cppual { namespace network {
 
 class uri
@@ -84,16 +88,39 @@ public:
     { return _M_gUri; }
 
     inline string_type to_string () const
-    { return string_type (); }
+    {
+        return _M_gUri;
+    }
 
     inline wstring to_wstring () const
-    { return wstring (); }
+    {
+        return std::wstring_convert<
+                   std::codecvt_utf8<wchar_t>,
+                   wchar_t,
+                   memory::allocator<wchar_t>,
+                   memory::allocator<char>
+                   >().from_bytes(_M_gUri);
+    }
 
     inline u16string to_u16string () const
-    { return u16string (); }
+    {
+        return std::wstring_convert<
+                   std::codecvt_utf8<char16_t>,
+                   char16_t,
+                   memory::allocator<char16_t>,
+                   memory::allocator<char>
+                   >().from_bytes(_M_gUri);
+    }
 
     inline u32string to_u32string () const
-    { return u32string (); }
+    {
+        return std::wstring_convert<
+                   std::codecvt_utf8<char32_t>,
+                   char32_t,
+                   memory::allocator<char32_t>,
+                   memory::allocator<char>
+                   >().from_bytes(_M_gUri);
+    }
 
     void swap (uri& gObj) noexcept
     {

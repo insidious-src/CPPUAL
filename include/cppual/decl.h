@@ -46,7 +46,7 @@
 #undef OS_PS3       // undefined
 #undef OS_PS4
 #undef OS_XBOX360   // undefined
-#undef OS_XBONE     // undefined
+#undef OS_XBOXONE   // undefined
 #undef OS_WII_U     // undefined
 #undef OS_FREERT    // undefined
 #undef ARCH_64BITS
@@ -74,7 +74,7 @@
 #   define OS_STD_CYGWIN
 #endif // CYGWIN
 
-// operating system support verification & definitions
+/// operating system support verification & definitions
 #if defined (__WINDOWS__) or defined (__TOS_WIN__) or defined (__WIN32__) or defined (__WIN64__)
 #
 #   ifdef WINAPI_FAMILY
@@ -93,14 +93,14 @@
 
 #   if defined (_WIN64) or defined (__WIN64) or defined (__WIN64__)
 #
-#       define OS_WIN64
+#       define OS_WIN64 1
 #       define OS_STD_WINNT
 #       define OS_WINDOWS OS_WIN64
 #       define OS_CURRENT OS_WINDOWS
 #
 #   elif defined (_WIN32) or defined (__WIN32) or defined (__WIN32__)
 #
-#       define OS_WIN32
+#       define OS_WIN32 2
 #       define OS_STD_WINNT
 #       define OS_WINDOWS OS_WIN32
 #       define OS_CURRENT OS_WINDOWS
@@ -112,12 +112,12 @@
 #   define OS_STD_UNIX
 #
 #   if (defined (__linux__) or defined (__gnu_linux__)) && !defined (__ANDROID__)
-#       define OS_GNU_LINUX
+#       define OS_GNU_LINUX 3
 #       define OS_CURRENT OS_GNU_LINUX
 #       define OS_STD_POSIX
 #   elif defined (BSD) or defined (__FreeBSD__) or defined (__NetBSD__) or defined (__OpenBSD__) or \
     defined (__bsdi__) or defined (__DragonFly__)
-#       define OS_BSD
+#       define OS_BSD 4
 #       define OS_CURRENT OS_BSD
 #       define OS_STD_POSIX
 #   elif defined (__ANDROID__)
@@ -125,13 +125,13 @@
 #       define OS_CURRENT OS_ANDROID
 #       define OS_STD_POSIX
 #   elif defined (_AIX)
-#       define OS_AIX
+#       define OS_AIX 5
 #       define OS_CURRENT OS_AIX
 #   elif (defined (__sun) or defined (__sun__)) and (defined (__SVR4) or defined (__SVR4__))
-#       define OS_SOLARIS
+#       define OS_SOLARIS 6
 #       define OS_CURRENT OS_SOLARIS
 #   elif defined(__ORBIS__)
-#       define OS_PS4
+#       define OS_PS4 7
 #       define OS_CURRENT OS_PS4
 #       define OS_STD_POSIX
 #   endif
@@ -142,10 +142,10 @@
 #   define OS_STD_POSIX
 #   include "TargetConditionals.h"
 #   if defined (TARGET_OS_IPHONE) or defined (TARGET_IPHONE_SIMULATOR)
-#       define OS_IOS
+#       define OS_IOS 8
 #       define OS_CURRENT OS_IOS
 #   elif defined(TARGET_OS_MAC)
-#       define OS_MACX
+#       define OS_MACX 9
 #       define OS_CURRENT OS_MACX
 #   else
 #       error unknown apple operating system!
@@ -293,7 +293,7 @@
 
 #define UNUSED(x) (void)x
 
-// character storage literals
+/// character storage literals
 #ifdef __STD_UTF_8__
 #   define TXT_STD_UTF8
 #   define TXT(quote) u8 ## quote
@@ -321,16 +321,19 @@ inline T pointer_cast (U value)
 #   endif
 }
 
-
 namespace cppual {
 
-// void typedefs
+/// void typedefs
 typedef const void cvoid;
 
-// bool typedefs
+/// bool typedefs
 typedef const bool cbool;
 
-// ASCII & UTF-8 sized typedefs
+/// 1 byte size typedefs
+typedef unsigned char byte;
+typedef unsigned char const cbyte;
+
+/// ASCII & UTF-8 sized typedefs
 typedef const char cchar;
 typedef unsigned char uchar;
 typedef const unsigned cuchar;
@@ -340,15 +343,15 @@ typedef cchar cchar8;
 typedef uchar uchar8;
 typedef cuchar cuchar8;
 
-// UTF-16 sized typedefs
+/// UTF-16 sized typedefs
 typedef char16_t char16;
 typedef const char16_t cchar16;
 
-// UTF-32 sized typedefs
+/// UTF-32 sized typedefs
 typedef char32_t char32;
 typedef const char32_t cchar32;
 
-// old UNICODE typedefs
+/// old UNICODE typedefs
 typedef wchar_t wchar;
 typedef const wchar_t cwchar;
 
@@ -374,12 +377,12 @@ typedef uchar8 utchar;
 typedef cuchar8 cutchar;
 #endif
 
-// short int typedefs
+/// short int typedefs
 typedef const short cshort;
 typedef unsigned short ushort;
 typedef const unsigned short cushort;
 
-// int typedefs
+/// int typedefs
 typedef const int cint;
 typedef unsigned uint;
 typedef const unsigned cuint;
@@ -387,13 +390,13 @@ typedef const long clong;
 typedef unsigned long ulong;
 typedef const unsigned long culong;
 
-// 64-bit long int typedefs
+/// 64-bit long int typedefs
 typedef long long long64;
 typedef const long long clong64;
 typedef unsigned long long ulong64;
 typedef const unsigned long long culong64;
 
-// long_t typedefs
+/// long_t typedefs
 #ifdef OS_WIN64
 typedef long long long_t;
 typedef const long long clong_t;
@@ -408,7 +411,7 @@ typedef const unsigned long culong_t;
 typedef int call_ret_t;
 #endif
 
-// floating point typedefs
+/// floating point typedefs
 typedef const float cfloat;
 typedef const double cdouble;
 typedef long double ldouble;

@@ -72,8 +72,8 @@ public:
     inline reactive (reactive const&) = default;
     inline reactive& operator = (reactive&&) = default;
 
-    inline reactive (value_type&&    value) : _M_value (std::forward<T> (value)) { }
-    inline reactive (const_reference value) : _M_value (value)                   { }
+    inline reactive (value_type&&    value) : _M_value (std::move (value)) { }
+    inline reactive (const_reference value) : _M_value (value)             { }
 
     inline reactive& operator = (reactive const& gObj)
     {
@@ -89,7 +89,7 @@ public:
 
     inline reactive& operator = (value_type&& value)
     {
-        _M_value = std::forward<T> (value);
+        _M_value = std::move (value);
         (*this)(_M_value);
         return *this;
     }

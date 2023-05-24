@@ -43,9 +43,9 @@ private:
     inline static cchar* plugin_name () noexcept
     {
     #   if defined OS_GNU_LINUX || defined OS_BSD || defined OS_ANDROID
-            return "libcppual-gfx-glx";
+            return "libcppual-gfx-module-glx";
     #   elif defined OS_WINDOWS
-            return "libcppual-gfx-wgl";
+            return "libcppual-gfx-module-wgl";
     #   endif
     }
 
