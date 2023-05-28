@@ -405,7 +405,7 @@ struct is_allocator_helper < allocator<T> > : public std::true_type
 /// is allocator helper
 template <typename T>
 struct is_allocator : public is_allocator_helper<T>
-{ static_assert (is_allocator<T>::value, "invalid allocator object type!"); };
+{ static_assert (is_allocator<T>::value, "T is NOT a polymorphic allocator type!"); };
 
 /// is allocator helper -> value
 template <typename T>
@@ -421,7 +421,7 @@ std::enable_if<is_allocator<T>::value, T>::type;
 template <typename T, typename... Args>
 inline std::shared_ptr<T> allocate_shared (memory_resource* rc, Args&&... args)
 {
-    return std::allocate_shared<T> (rc == nullptr ? allocator<T>() : allocator<T>(*rc),
+    return std::allocate_shared<T> (rc == nullptr ? allocator<T> () : allocator<T> (*rc),
                                     std::forward<Args> (args)...);
 }
 
@@ -429,7 +429,7 @@ template <typename T, typename U, typename... Args>
 inline std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
 {
     return std::static_pointer_cast<U>
-            (std::allocate_shared<T> (rc == nullptr ? allocator<T>() : allocator<T>(*rc),
+            (std::allocate_shared<T> (rc == nullptr ? allocator<T> () : allocator<T> (*rc),
                                       std::forward<Args> (args)...));
 }
 

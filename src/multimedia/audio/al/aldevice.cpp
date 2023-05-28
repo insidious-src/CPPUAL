@@ -185,41 +185,40 @@ bool audio_device::is_extension_supported (string_type const& gExt) noexcept
 
 bool audio_device::is_extension_present (string_type const& gExt) noexcept
 {
-    if (_M_pDevObj)
-        return ::alcIsExtensionPresent
-                (static_cast<ALCdevice*> (_M_pDevObj), gExt.c_str ());
+    if (valid ())
+        return ::alcIsExtensionPresent (handle<ALCdevice*> (), gExt.c_str ());
     return false;
 }
 
 // ====================================================
 
 playback_device::playback_device () noexcept
-: audio_device ("Default",
-               ::alcOpenDevice (nullptr),
-               device_type::playback)
+: audio_device (::alcGetString (nullptr, ALC_DEFAULT_DEVICE_SPECIFIER),
+                ::alcOpenDevice (name ().c_str ()),
+                device_type::playback)
 { }
 
 playback_device::playback_device (string_type const& gName) noexcept
 : audio_device (std::move (gName),
-               ::alcOpenDevice (gName.c_str ()),
-               device_type::playback)
+                ::alcOpenDevice (gName.c_str ()),
+                device_type::playback)
 { }
 
 playback_device::~playback_device () noexcept
 {
-    if (_M_pDevObj) ::alcCloseDevice (static_cast<ALCdevice*> (_M_pDevObj));
+    if (valid ()) ::alcCloseDevice (handle<ALCdevice*> ());
 }
 
 // ====================================================
 
 capture_device::capture_device () noexcept
-: audio_device ("Default",
-               ::alcCaptureOpenDevice (nullptr,
-                                       22050,
-                                       convert_quality (output_format::stereo,
-                                                       sound_quality::low),
-                                       0),
-               device_type::capture),
+: audio_device (::alcGetString (nullptr, ALC_DEFAULT_DEVICE_SPECIFIER),
+                ::alcCaptureOpenDevice (name ().c_str (),
+                                        22050,
+                                        convert_quality (output_format::stereo,
+                                                         sound_quality::low),
+                                        0),
+                device_type::capture),
   _M_eQuality (sound_quality::low),
   _M_eFormat (output_format::stereo)
 {
@@ -227,8 +226,8 @@ capture_device::capture_device () noexcept
 
 capture_device::capture_device (string_type const& gName,
                                 uint               uFreq,
-                                output_format       eFormat,
-                                sound_quality       eQuality) noexcept
+                                output_format      eFormat,
+                                sound_quality      eQuality) noexcept
 : audio_device (gName,
                 ::alcCaptureOpenDevice (gName.c_str (),
                                         uFreq,
@@ -241,7 +240,7 @@ capture_device::capture_device (string_type const& gName,
 
 capture_device::~capture_device () noexcept
 {
-    if (_M_pDevObj) ::alcCaptureCloseDevice (static_cast<ALCdevice*> (_M_pDevObj));
+    if (valid ()) ::alcCaptureCloseDevice (handle<ALCdevice*> ());
 }
 
 // ====================================================
@@ -380,4 +379,4 @@ float instance::speed_of_sound () noexcept
     return .0f;
 }
 
-} } } // namespace Audio
+} } } // namespace al

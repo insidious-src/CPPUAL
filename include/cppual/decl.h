@@ -336,7 +336,7 @@ typedef unsigned char const cbyte;
 /// ASCII & UTF-8 sized typedefs
 typedef const char cchar;
 typedef unsigned char uchar;
-typedef const unsigned cuchar;
+typedef const unsigned char cuchar;
 
 typedef char char8;
 typedef cchar cchar8;

@@ -33,9 +33,7 @@ class SHARED_API sound_emitter : public sound_source
 public:
     using sound_source::sound_source;
 
-    explicit sound_emitter (sound_emitter const&) noexcept;
     sound_emitter& operator = (sound_emitter&&) noexcept = default;
-    sound_emitter& operator = (sound_emitter const&) noexcept;
 
     emit_type type () const noexcept;
     void      set_type (audio::emit_type type) noexcept;

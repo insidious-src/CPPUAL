@@ -10,7 +10,6 @@
 #include <cppual/meta.h>
 #include <cppual/string.h>
 #include <cppual/containers.h>
-
 #include <cppual/json/document.h>
 
 #include <iostream>
@@ -18,8 +17,6 @@
 #include <utility>
 #include <cassert>
 #include <tuple>
-
-class QString;
 
 namespace cppual { namespace json {
 
@@ -127,16 +124,6 @@ struct is_json_string<string> : std::true_type
 
 template <>
 struct is_json_string<std::string> : std::true_type
-{ };
-
-//======================================================
-
-template <typename>
-struct is_json_qstring : std::false_type
-{ };
-
-template <>
-struct is_json_qstring<QString> : std::true_type
 { };
 
 //======================================================

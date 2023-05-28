@@ -26,6 +26,7 @@
 
 #include <cppual/noncopyable.h>
 #include <cppual/containers.h>
+#include <cppual/resource.h>
 #include <cppual/string.h>
 
 #include <cppual/multimedia/audio/sound.h>
@@ -52,7 +53,7 @@ enum class string_query : byte
 
 // ====================================================
 
-class SHARED_API audio_device : public non_copyable
+class SHARED_API audio_device : public resource<void, void*>
 {
 public:
     typedef string string_type;
@@ -61,20 +62,17 @@ public:
     static bool is_extension_supported (string const& name) noexcept;
     bool        is_extension_present   (string const& name) noexcept;
 
-    constexpr device_type type   () const noexcept { return _M_eType      ; }
-    inline    string_type name   () const noexcept { return _M_gDeviceName; }
-    constexpr void*       handle ()       noexcept { return _M_pDevObj    ; }
-    constexpr bool        valid  () const noexcept { return _M_pDevObj    ; }
+    constexpr device_type type () const noexcept { return _M_eType      ; }
+    inline    string_type name () const noexcept { return _M_gDeviceName; }
 
 protected:
     string_type _M_gDeviceName;
-    void*       _M_pDevObj    ;
     device_type _M_eType      ;
 
     inline
     audio_device (string_type const& gName, void* pObj, device_type eType) noexcept
-    : _M_gDeviceName (std::move (gName)),
-      _M_pDevObj     (pObj),
+    : resource       (pObj),
+      _M_gDeviceName (std::move (gName)),
       _M_eType       (eType)
     { }
 };

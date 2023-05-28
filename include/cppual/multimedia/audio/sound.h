@@ -25,6 +25,7 @@
 
 
 #include <cppual/flags.h>
+#include <cppual/containers.h>
 #include <cppual/multimedia/audio/format.h>
 #include <cppual/string.h>
 
@@ -72,12 +73,12 @@ enum class sound_quality : byte
 class SHARED_API sound
 {
 public:
-    typedef std::array<double, buffer_length> buffer_type  ;
-    typedef double                            value_type   ;
-    typedef double*                           pointer      ;
-    typedef double const*                     const_pointer;
-    typedef i64                               size_type    ;
-    typedef string                            string_type  ;
+    typedef vector<uchar> buffer_type  ;
+    typedef uchar         value_type   ;
+    typedef uchar*        pointer      ;
+    typedef cuchar*       const_pointer;
+    typedef i64           size_type    ;
+    typedef string        string_type  ;
 
     enum attribute_type
     {

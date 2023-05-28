@@ -31,7 +31,7 @@ bool sound_stream_recorder::record () noexcept
 {
     if (_M_gDevice->valid () and !_M_bIsRecording)
     {
-        ::alcCaptureStart (static_cast<ALCdevice*> (_M_gDevice->handle ()));
+        ::alcCaptureStart (_M_gDevice->handle<ALCdevice*> ());
         return _M_bIsRecording = true;
     }
 
@@ -42,7 +42,7 @@ void sound_stream_recorder::stop () noexcept
 {
     if (_M_bIsRecording)
     {
-        ::alcCaptureStop (static_cast<ALCdevice*> (_M_gDevice->handle ()));
+        ::alcCaptureStop (_M_gDevice->handle<ALCdevice*> ());
         _M_bIsRecording = false;
     }
 }
@@ -51,7 +51,7 @@ void sound_stream_recorder::set_samples (int nSamples) noexcept
 {
     if (_M_gDevice->valid ())
     {
-        ::alcCaptureSamples (static_cast<ALCdevice*> (_M_gDevice->handle ()),
+        ::alcCaptureSamples (_M_gDevice->handle<ALCdevice*> (),
                              nullptr,
                              nSamples);
         _M_nSamples = nSamples;

@@ -38,16 +38,14 @@ class sound_source;
 class SHARED_API sound_buffer : public object, public sound
 {
 public:
-    typedef vector<sound_source*>        vector_type   ;
+    typedef vector<sound_source*>       vector_type   ;
     typedef vector_type::const_iterator const_iterator;
     typedef std::size_t                 size_type     ;
-    friend  class                       sound_source   ;
+    friend  class                       sound_source  ;
 
     sound_buffer () noexcept;
     sound_buffer (sound_buffer&&) noexcept;
-    sound_buffer (sound_buffer const&) noexcept;
     sound_buffer& operator = (sound_buffer&&) noexcept;
-    sound_buffer& operator = (sound_buffer const&) noexcept;
     ~sound_buffer () noexcept;
 
     int frequency () const noexcept;

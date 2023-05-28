@@ -28,12 +28,12 @@
 
 namespace cppual { namespace ui {
 
-class SHARED_API WlDisplay final : public display_interface
+class SHARED_API wl_display final : public display_interface
 {
 public:
-    WlDisplay () = delete;
+    wl_display () = delete;
 
-    ~WlDisplay () noexcept
+    ~wl_display () noexcept
     { if (native ()) ::wl_display_disconnect (native<::wl_display> ()); }
 
 
@@ -43,7 +43,7 @@ public:
     void flush () noexcept
     { ::wl_display_flush (native<::wl_display> ()); }
 
-    WlDisplay (string_type const& strName) noexcept
+    wl_display (string_type const& strName) noexcept
     : display_interface       (::wl_display_connect (strName.c_str()), nullptr),
       _M_nScreenCount (),
       _M_gName        (strName)

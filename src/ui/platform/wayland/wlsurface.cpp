@@ -28,13 +28,13 @@
 
 namespace cppual { namespace ui {
 
-class WlSurface final : public platform_wnd_interface
+class wl_surface final : public platform_wnd_interface
 {
 public:
-    WlSurface  () = delete;
-    ~WlSurface () noexcept { }
+    wl_surface  () = delete;
+    ~wl_surface () noexcept { }
 
-    WlSurface (rect const& gRect, u32 nScreen, shared_display pDisplay) noexcept
+    wl_surface (rect const& gRect, u32 nScreen, shared_display pDisplay) noexcept
     : platform_wnd_interface(pDisplay, nullptr),
       _M_gRect        (gRect),
       _M_uScreen      (nScreen)

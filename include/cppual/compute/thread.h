@@ -23,6 +23,7 @@
 #define CPPUAL_PROCESS_THREAD
 #ifdef __cplusplus
 
+#include <cppual/resource.h>
 #include <cppual/functional.h>
 #include <cppual/noncopyable.h>
 #include <cppual/process/details.h>
@@ -52,7 +53,7 @@ enum class thread_priority : byte
 
 namespace main_thread {
 
-thread_handle   handle () noexcept;
+resource_handle handle () noexcept;
 thread_priority priority ();
 int			    set_priority (thread_priority priority);
 
@@ -62,9 +63,9 @@ int			    set_priority (thread_priority priority);
 
 namespace this_thread {
 
-thread_handle handle () noexcept;
-void		  exit ();
-int			  sleep_for (uint millisec);
+resource_handle handle () noexcept;
+void		    exit ();
+int			    sleep_for (uint millisec);
 
 } // namespace this_thread
 
@@ -88,7 +89,7 @@ public:
         friend class  thread  ;
         thread_handle _M_handle;
 
-        static bool thread_handles_equal (thread_handle h1, thread_handle h2);
+        static bool thread_handles_equal (resource_handle h1, resource_handle h2);
 
         friend bool
         operator == (thread::id, thread::id) noexcept;

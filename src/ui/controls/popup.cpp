@@ -23,7 +23,7 @@
 
 namespace cppual { namespace ui {
 
-class PopupGroup final
+class popup_group final
 {
 };
 

@@ -39,9 +39,7 @@ public:
     sound_source (sound_buffer&) noexcept;
 
     explicit sound_source (sound_source&&) noexcept;
-    explicit sound_source (sound_source const&) noexcept;
     sound_source& operator = (sound_source&&) noexcept;
-    sound_source& operator = (sound_source const&) noexcept;
     ~sound_source () noexcept;
 
     sound_state state () const noexcept;

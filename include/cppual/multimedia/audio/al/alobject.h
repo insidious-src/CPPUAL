@@ -24,33 +24,30 @@
 #ifdef __cplusplus
 
 #include <cppual/multimedia/audio/spatial.h>
+#include <cppual/resource.h>
 
 #include <atomic>
 
 namespace cppual { namespace audio { namespace al {
 
-class SHARED_API object
+class SHARED_API object : public resource<void, uint>
 {
 public:
     object (object_type type) noexcept;
     object (object&&) noexcept;
-    object (object const&) noexcept;
     object& operator = (object&&) noexcept;
-    object& operator = (object const&) noexcept;
 
-    constexpr object () noexcept : _M_uObjId (), _M_eObjType () { }
+    constexpr object () noexcept : _M_eObjType () { }
     virtual  ~object () noexcept { reset (); }
 
-    inline object_type type  () const noexcept { return _M_eObjType; }
-    inline uint        id    () const noexcept { return _M_uObjId;   }
-    inline bool        valid () const noexcept { return _M_uObjId;   }
+    inline object_type type () const noexcept
+    { return _M_eObjType; }
 
     inline static uint count () noexcept
     { return sm_uALObjCount.load (std::memory_order_consume); }
 
 private:
     static std::atomic_uint sm_uALObjCount;
-    uint                     _M_uObjId    ;
     object_type              _M_eObjType  ;
 
     void reset () noexcept;

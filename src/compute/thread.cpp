@@ -49,9 +49,9 @@ enum result
 
 namespace main_thread {
 
-const thread_handle main_thread_handle = this_thread::handle ();
+static const thread_handle main_thread_handle = this_thread::handle ();
 
-thread_handle handle () noexcept
+resource_handle handle () noexcept
 {
     return main_thread::main_thread_handle;
 }
@@ -98,13 +98,13 @@ int set_priority (thread_priority ePrio)
     case thread_priority::inherit:
     {
         sched_param gParam;
-        pthread_getschedparam (main_thread::main_thread_handle, &nPrio, &gParam);
+        ::pthread_getschedparam (main_thread::main_thread_handle, &nPrio, &gParam);
         nPrio = gParam.sched_priority;
     }
         break;
     }
 
-    switch (pthread_setschedprio (main_thread::main_thread_handle, nPrio))
+    switch (::pthread_setschedprio (main_thread::main_thread_handle, nPrio))
     {
     case ENOTSUP: case EINVAL:
         return error_invalid;
@@ -128,37 +128,37 @@ void this_thread::exit ()
 {
 #ifdef OS_WINDOWS
 #elif defined (OS_STD_POSIX)
-    pthread_exit (nullptr);
+    ::pthread_exit (nullptr);
 #endif
 }
 
 int this_thread::sleep_for (uint uMillisec)
 {
 #ifdef OS_WINDOWS
-    Sleep (uMillisec);
+    ::Sleep (uMillisec);
     return static_cast<int>(uMillisec);
 #elif defined (OS_STD_POSIX)
-    return usleep (uMillisec * 1000);
+    return ::usleep (uMillisec * 1000);
 #endif
 }
 
-thread_handle this_thread::handle () noexcept
+resource_handle this_thread::handle () noexcept
 {
 #ifdef OS_WINDOWS
-    return GetCurrentThreadId ();
+    return ::GetCurrentThreadId ();
 #elif defined (OS_STD_POSIX)
-    return pthread_self ();
+    return ::pthread_self ();
 #endif
 }
 
 // =========================================================
 
-bool thread::id::thread_handles_equal (thread_handle pth1, thread_handle pth2)
+bool thread::id::thread_handles_equal (resource_handle pth1, resource_handle pth2)
 {
 #ifdef OS_WINDOWS
     return (pth1 == pth2);
 #elif defined (OS_STD_POSIX)
-    return pthread_equal (pth1, pth2);
+    return ::pthread_equal (pth1.get<thread_handle> (), pth2.get<thread_handle> ());
 #endif
 }
 
@@ -191,31 +191,33 @@ thread::~thread ()
 
 bool thread::start (callable&       gFunc,
                     bool            bJoinable,
-                    thread_priority /*ePrio*/,
+                    thread_priority ePrio,
                     size_type       uStackSize)
 {
-#    ifdef OS_STD_POSIX
+    UNUSED(ePrio);
 
-    pthread_attr_t attr { };
-    //const sched_param gParam { 49 };
-    if (pthread_attr_init (&attr) != 0) return false;
+#   ifdef OS_STD_POSIX
 
-    if (pthread_attr_setstacksize (&attr, uStackSize) != 0 ||
+    ::pthread_attr_t attr { };
+    //const ::sched_param gParam { 49 };
+    if (::pthread_attr_init (&attr) != 0) return false;
+
+    if (::pthread_attr_setstacksize (&attr, uStackSize) != 0 ||
             //ThreadPriority::Inherit == ePrio ? 0 :
-            //pthread_attr_setschedparam (&attr, &gParam) != 0 ||
-            pthread_attr_setdetachstate (&attr, !bJoinable ?
-                                         PTHREAD_CREATE_JOINABLE :
-                                         PTHREAD_CREATE_DETACHED) != 0 ||
-            pthread_create (&_M_gId._M_handle, &attr, &bind, &gFunc) != 0)
+            //::pthread_attr_setschedparam (&attr, &gParam) != 0 ||
+            ::pthread_attr_setdetachstate (&attr, !bJoinable ?
+                                           PTHREAD_CREATE_JOINABLE :
+                                           PTHREAD_CREATE_DETACHED) != 0 ||
+            ::pthread_create (&_M_gId._M_handle, &attr, &bind, &gFunc) != 0)
     {
-        pthread_attr_destroy (&attr);
+        ::pthread_attr_destroy (&attr);
         return false;
     }
 
-    pthread_attr_destroy (&attr);
+    ::pthread_attr_destroy (&attr);
 
-#    elif defined (OS_WINDOWS)
-#    endif
+#   elif defined (OS_WINDOWS)
+#   endif
 
     _M_bIsJoinable.store (bJoinable);
     _M_uStackSize = uStackSize;
@@ -225,32 +227,30 @@ bool thread::start (callable&       gFunc,
 
 void thread::cancel ()
 {
-#ifdef OS_WINDOWS
-#elif defined (OS_STD_POSIX) && !defined (OS_ANDROID)
-    pthread_cancel (_M_gId._M_handle);
-#endif
+#   ifdef OS_WINDOWS
+#   elif defined (OS_STD_POSIX) && !defined (OS_ANDROID)
+    ::pthread_cancel (_M_gId._M_handle);
+#   endif
 }
 
 void thread::join ()
 {
-#ifdef OS_WINDOWS
-#elif defined (OS_STD_POSIX)
-    pthread_join (_M_gId._M_handle, nullptr);
-#endif
+#   ifdef OS_WINDOWS
+#   elif defined (OS_STD_POSIX)
+    ::pthread_join (_M_gId._M_handle, nullptr);
+#   endif
 }
 
 void thread::detach ()
 {
     if (_M_gId._M_handle and _M_bIsJoinable.load ())
     {
+#       ifdef OS_WINDOWS
+#       elif defined (OS_STD_POSIX)
+        ::pthread_detach (_M_gId._M_handle);
+#       endif
 
-#ifdef OS_WINDOWS
-#elif defined (OS_STD_POSIX)
-    pthread_detach (_M_gId._M_handle);
-#endif
-
-    _M_bIsJoinable.store (false);
-
+        _M_bIsJoinable.store (false);
     }
 }
 
@@ -258,7 +258,7 @@ int thread::set_priority (thread_priority ePrio)
 {
     UNUSED(ePrio);
 
-#    if defined (OS_STD_POSIX) && !defined (OS_ANDROID)
+#   if defined (OS_STD_POSIX) && !defined (OS_ANDROID)
 
     int nPrio = 0;
 
@@ -290,14 +290,14 @@ int thread::set_priority (thread_priority ePrio)
         break;
     case thread_priority::inherit:
     {
-        sched_param gParam;
-        pthread_getschedparam (_M_gId._M_handle, &nPrio, &gParam);
+        ::sched_param gParam;
+        ::pthread_getschedparam (_M_gId._M_handle, &nPrio, &gParam);
         nPrio = gParam.sched_priority;
     }
         break;
     }
 
-    switch (pthread_setschedprio (_M_gId._M_handle, nPrio))
+    switch (::pthread_setschedprio (_M_gId._M_handle, nPrio))
     {
     case ENOTSUP: case EINVAL:
         return error_invalid;
@@ -307,8 +307,8 @@ int thread::set_priority (thread_priority ePrio)
         return result_success;
     }
 
-#    elif defined (OS_WINDOWS)
-#    endif
+#   elif defined (OS_WINDOWS)
+#   endif
 
     return error_unknown;
 }

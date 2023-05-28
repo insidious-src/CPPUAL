@@ -72,10 +72,9 @@ int sound::open_read_only (string const& gFile) noexcept
         _M_nSampleRate   = gInfo.samplerate;
 
         if (gInfo.seekable) _M_gFlags += flag::seekable;
-
         _M_gFlags += flag::read;
 
-        // using format to save an int copy
+        /// using format to save an int copy
         if (!(gInfo.format = on_open ()))
         {
             close ();

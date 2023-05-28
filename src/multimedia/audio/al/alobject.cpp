@@ -53,22 +53,15 @@ inline uint generate_object (object_type eType) noexcept
 // =========================================================
 
 object::object (object_type eType) noexcept
-: _M_uObjId (generate_object (eType)), _M_eObjType (eType)
+: resource (generate_object (eType)), _M_eObjType (eType)
 {
-    if (_M_uObjId) ++sm_uALObjCount;
-}
-
-object::object (object const& gObj) noexcept
-: _M_uObjId (generate_object (gObj._M_eObjType)), _M_eObjType (gObj._M_eObjType)
-{
-    if (_M_uObjId) ++sm_uALObjCount;
+    if (valid ()) ++sm_uALObjCount;
 }
 
 object::object (object&& gObj) noexcept
-: _M_uObjId   (gObj._M_uObjId),
-  _M_eObjType (gObj._M_eObjType)
+: resource     (std::move (gObj)),
+  _M_eObjType  (gObj._M_eObjType)
 {
-    gObj._M_uObjId = 0;
 }
 
 object& object::operator = (object&& gObj) noexcept
@@ -77,22 +70,8 @@ object& object::operator = (object&& gObj) noexcept
     {
         reset ();
 
-        _M_uObjId   = gObj._M_uObjId;
-        _M_eObjType = gObj._M_eObjType;
+        resource::operator = (std::move (gObj));
 
-        gObj._M_uObjId = 0;
-    }
-
-    return *this;
-}
-
-object& object::operator = (object const& gObj) noexcept
-{
-    if (this != &gObj and _M_eObjType != gObj._M_eObjType)
-    {
-        reset ();
-
-        _M_uObjId   = generate_object (gObj._M_eObjType);
         _M_eObjType = gObj._M_eObjType;
     }
 
@@ -101,15 +80,17 @@ object& object::operator = (object const& gObj) noexcept
 
 void object::reset () noexcept
 {
-    if (!_M_uObjId) return;
+    if (!valid ()) return;
+
+    auto const id = handle ();
 
     switch (_M_eObjType)
     {
     case object_type::buffer:
-        ::alDeleteBuffers (1, &_M_uObjId);
+        ::alDeleteBuffers (1, &id);
         break;
     case object_type::source:
-        ::alDeleteSources (1, &_M_uObjId);
+        ::alDeleteSources (1, &id);
         break;
     }
 

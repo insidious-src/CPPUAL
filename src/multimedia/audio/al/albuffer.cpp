@@ -123,20 +123,13 @@ sound_buffer::sound_buffer () noexcept
 { }
 
 sound_buffer::sound_buffer (sound_buffer&& gObj) noexcept
-: object (gObj),
+: object (std::move (gObj)),
   _M_gSources (std::move (gObj._M_gSources)),
   _M_pContext (instance::current ())
 {
     for (size_type i = 0; i < _M_gSources.size (); ++i)
         if (_M_gSources[i]) _M_gSources[i]->_M_pBuffer = this;
 }
-
-sound_buffer::sound_buffer (sound_buffer const& gObj) noexcept
-: object (gObj),
-  sound (),
-  _M_gSources (),
-  _M_pContext (instance::current ())
-{ }
 
 sound_buffer& sound_buffer::operator = (sound_buffer&& gObj) noexcept
 {
@@ -147,22 +140,9 @@ sound_buffer& sound_buffer::operator = (sound_buffer&& gObj) noexcept
     return *this;
 }
 
-sound_buffer& sound_buffer::operator = (sound_buffer const& gObj) noexcept
-{
-    if (id () and gObj.id ())
-    {
-        for (size_type i = 0; i < _M_gSources.size (); ++i)
-            if (_M_gSources[i]) _M_gSources[i]->on_detach ();
-
-        _M_gSources.clear ();
-    }
-
-    return *this;
-}
-
 sound_buffer::~sound_buffer () noexcept
 {
-    if (id ())
+    if (valid ())
     {
         for (size_type i = 0; i < _M_gSources.size (); ++i)
             if (_M_gSources[i]) _M_gSources[i]->on_detach ();
@@ -172,21 +152,21 @@ sound_buffer::~sound_buffer () noexcept
 int sound_buffer::frequency () const noexcept
 {
     int nFreq = 0;
-    if (id ()) ::alGetBufferi (id (), al::frequency, &nFreq);
+    if (valid ()) ::alGetBufferi (handle (), al::frequency, &nFreq);
     return nFreq;
 }
 
 int sound_buffer::size () const noexcept
 {
     int nSize = 0;
-    if (id ()) ::alGetBufferi (id (), al::size, &nSize);
+    if (valid ()) ::alGetBufferi (handle (), al::size, &nSize);
     return nSize;
 }
 
 int sound_buffer::bits () const noexcept
 {
     int nBits = 0;
-    if (id ()) ::alGetBufferi (id (), al::bits, &nBits);
+    if (valid ()) ::alGetBufferi (handle (), al::bits, &nBits);
     return nBits;
 }
 
