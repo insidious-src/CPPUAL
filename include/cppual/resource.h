@@ -284,14 +284,8 @@ public:
     constexpr T handle () const noexcept
     { return _M_handle.get<T> (); }
 
-    void set_connection (handle_type::value_type conn) noexcept
-    { _M_connection = conn; }
-
     void set_connection (connection_type conn) noexcept
     { _M_connection = conn; }
-
-    void set_handle (handle_type::value_type handle) noexcept
-    { _M_handle = handle; }
 
     void set_handle (value_type handle) noexcept
     { _M_handle = handle; }
@@ -340,9 +334,6 @@ public:
     template <typename T = value_type>
     constexpr T handle () const noexcept
     { return _M_handle.get<T> (); }
-
-    void set_handle (handle_type::value_type handle) noexcept
-    { _M_handle = handle; }
 
     void set_handle (value_type handle) noexcept
     { _M_handle = handle; }
