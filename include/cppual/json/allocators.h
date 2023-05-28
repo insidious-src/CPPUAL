@@ -405,7 +405,7 @@ private:
 
 inline MemoryPoolResource<cppual::memory::memory_resource>* memory_pool_resource()
 {
-    static auto rc = MemoryPoolResource();
+    static auto rc = MemoryPoolResource<cppual::memory::memory_resource> ();
     return &rc;
 }
 
