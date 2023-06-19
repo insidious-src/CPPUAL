@@ -31,7 +31,7 @@ namespace cppual { namespace gfx { namespace gl {
 class query : public object
 {
 public:
-    enum class Type : byte
+    enum class Type : u8
     {
         Undefined = 0,
         SamplesPassed,

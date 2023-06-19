@@ -35,7 +35,7 @@ class skinnable_view;
 
 // =========================================================
 
-enum class skin_element : byte
+enum class skin_element : u8
 {
     toolbar,
     menu,
@@ -59,7 +59,7 @@ enum class skin_element : byte
 
 // =========================================================
 
-enum class icon_group : byte
+enum class icon_group : u8
 {
     action,
     alert,
@@ -89,7 +89,7 @@ enum class icon_group : byte
 // =========================================================
 
 /// statically - always stays the same; dynamically - changes its properties on specific events
-enum class skin_loading : byte { statically, dynamically };
+enum class skin_loading : u8 { statically, dynamically };
 
 // =========================================================
 

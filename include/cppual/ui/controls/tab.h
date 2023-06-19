@@ -40,7 +40,7 @@ public:
     tab_bar& operator = (tab_bar&&);
     tab_bar& operator = (tab_bar const&);
 
-    enum class tab_flag : byte
+    enum class tab_flag : u8
     {
         movable      = 1 << 0,
         draggable    = 1 << 1,

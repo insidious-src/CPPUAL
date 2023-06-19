@@ -116,6 +116,9 @@ private:
     size_type          _M_uNumAssigned { };
     size_type          _M_uNumCompleted { };
     cv_type            _M_gTaskCond;
+
+    template <typename>
+    friend class host_task;
 };
 
 // =========================================================

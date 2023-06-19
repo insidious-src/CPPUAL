@@ -49,7 +49,7 @@ public:
     typedef string                   string_type  ;
     typedef std::size_t              size_type    ;
 
-    enum class info_type : byte
+    enum class info_type : u8
     {
         name,
         board,

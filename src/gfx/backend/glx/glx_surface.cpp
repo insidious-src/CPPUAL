@@ -68,7 +68,7 @@ enum
     FALSE               = 0
 };
 
-enum class error_type : byte
+enum class error_type : u8
 {
     initialize,
     terminate,
@@ -163,6 +163,31 @@ inline point2u get_size (config const& config, surface::handle_type surface) noe
     ::glXQueryDrawable (config.legacy ().get<display_pointer> (), surface, Height, &size[1]);
 
     return { static_cast<u16> (size[0]), static_cast<u16> (size[1]) };
+}
+
+// ====================================================
+
+inline config::feature_types convert_extensions (display_pointer dsp)
+{
+    config::feature_types eFeatures (nullptr);
+
+    auto extensions = ::glXQueryExtensionsString (dsp, 0);
+
+    std::cout << extensions << std::endl;
+
+    for (auto extension = extensions; extension++; extension = std::strchr (extension , ' '))
+    {
+        switch (const_hash (extension))
+        {
+        case const_hash ("GLX_EXT_swap_control"):
+            eFeatures += config::feature::sync_control;
+        case const_hash ("GLX_MESA_swap_control"):
+            eFeatures += config::feature::mesa_sync_control;
+            break;
+        }
+    }
+
+    return eFeatures;
 }
 
 } } // anonymous namespace internal
@@ -399,7 +424,31 @@ surface::surface (conf_reference gConf,
   _M_pHandle (internal::create_surface (gConf, size, type, wnd)),
   _M_pWnd    (_M_pHandle ? wnd : handle_type ()),
   _M_eType   (type)
-{ }
+{
+    if (type == surface_type::double_buffer)
+    {
+        auto eFeatures = internal::convert_extensions (_M_pConf.legacy ().get<internal::display_pointer> ());
+
+        if (eFeatures.test (config::feature::sync_control))
+        {
+            auto glXSwapIntervalEXT =
+                reinterpret_cast<PFNGLXSWAPINTERVALEXTPROC>
+                (glXGetProcAddress((GLubyte*)"glXSwapIntervalEXT"));
+
+            glXSwapIntervalEXT (_M_pConf.legacy ().get<internal::display_pointer> (),
+                                _M_pHandle.get<internal::surface_id> (),
+                                1);
+        }
+        else if (eFeatures.test (config::feature::mesa_sync_control))
+        {
+            auto glXSwapIntervalMESA =
+                reinterpret_cast<PFNGLXSWAPINTERVALMESAPROC>
+                (glXGetProcAddress((GLubyte*)"glXSwapIntervalMESA"));
+
+            glXSwapIntervalMESA (1);
+        }
+    }
+}
 
 surface::surface (surface const& obj)
 : _M_pConf   (obj._M_pConf),

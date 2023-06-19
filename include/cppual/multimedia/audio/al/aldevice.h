@@ -37,14 +37,14 @@ namespace cppual { namespace audio { namespace al {
 
 // ====================================================
 
-enum class device_type : byte
+enum class device_type : u8
 {
     null,
     playback,
     capture
 };
 
-enum class string_query : byte
+enum class string_query : u8
 {
     version,
     renderer,

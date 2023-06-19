@@ -32,7 +32,7 @@ namespace cppual { namespace gfx { namespace gl {
 class texture : public object, transformable2d_interface
 {
 public:
-    enum class MinFilter : byte
+    enum class MinFilter : u8
     {
         Nearest,
         Bilinear,
@@ -41,13 +41,13 @@ public:
         TrilinearMipMap
     };
 
-    enum class MagFilter : byte
+    enum class MagFilter : u8
     {
         Nearest,
         Bilinear
     };
 
-    enum class State : byte
+    enum class State : u8
     {
         DirectAccess
     };

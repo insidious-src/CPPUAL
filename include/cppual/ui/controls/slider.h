@@ -26,7 +26,7 @@
 
 namespace cppual { namespace ui {
 
-enum class slider_style : byte { normal, increment };
+enum class slider_style : u8 { normal, increment };
 
 class slider : public abstract_slider
 {

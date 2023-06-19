@@ -27,20 +27,20 @@
 
 namespace cppual { namespace audio {
 
-enum class object_type : byte
+enum class object_type : u8
 {
     buffer,
     source
 };
 
-enum class emit_type : byte
+enum class emit_type : u8
 {
     undetermined,
     statically,
     streaming
 };
 
-enum class distance_type : byte
+enum class distance_type : u8
 {
     plain,
     inverse_distance,

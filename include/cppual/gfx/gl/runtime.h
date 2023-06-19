@@ -30,7 +30,7 @@ namespace cppual { namespace gfx { namespace gl {
 
 // ====================================================
 
-enum class StringQuery : byte
+enum class StringQuery : u8
 {
     Renderer,
     Vendor  ,

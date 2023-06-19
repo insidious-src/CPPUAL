@@ -58,7 +58,7 @@ public:
         attrib_count
     };
 
-    enum class feature : byte
+    enum class feature : u8
     {
         sync_control           = 1 << 0,
         context_attributes_ext = 1 << 1,

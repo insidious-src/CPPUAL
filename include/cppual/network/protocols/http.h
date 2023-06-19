@@ -38,7 +38,7 @@ class Response final
 
 class Client : public protocol
 {
-    enum class ConnectionType : byte
+    enum class ConnectionType : u8
     {
         Plain,
         SSL,

@@ -255,7 +255,9 @@ constexpr bool operator  != (resource_version const& gObj1, resource_version con
 
 // =========================================================
 
-template <class C, class H, resource_handle::value_type NULL_VALUE = resource_handle::value_type ()>
+template <class C,
+          class H,
+          resource_handle::value_type NULL_VALUE = resource_handle::value_type ()>
 class resource
 {
 public:
@@ -264,11 +266,30 @@ public:
     typedef resource_handle       handle_type    ;
     typedef resource* resource::* safe_bool      ;
 
-    constexpr static auto null_value = NULL_VALUE;
+    constexpr static handle_type null_value = NULL_VALUE;
 
     constexpr resource () noexcept = default;
-    resource (resource&&) = default;
-    resource& operator = (resource&&) = default;
+
+
+    inline resource (resource&& rc) noexcept
+    : _M_connection (rc._M_connection),
+      _M_handle     (rc._M_handle    )
+    {
+        rc._M_handle = null_value;
+    }
+
+    inline resource& operator = (resource&& rc) noexcept
+    {
+        if (this != &rc)
+        {
+            _M_connection = rc._M_connection;
+            _M_handle     = rc._M_handle    ;
+            rc._M_handle  = null_value      ;
+        }
+
+        return *this;
+    }
+
     resource (resource const&) = delete;
     resource& operator = (resource const&) = delete;
 
@@ -287,7 +308,7 @@ public:
     void set_connection (connection_type conn) noexcept
     { _M_connection = conn; }
 
-    void set_handle (value_type handle) noexcept
+    void set_handle (handle_type handle) noexcept
     { _M_handle = handle; }
 
     constexpr resource (connection_type conn, value_type id) noexcept
@@ -318,11 +339,26 @@ public:
     typedef resource_handle       handle_type;
     typedef resource* resource::* safe_bool  ;
 
-    constexpr static auto null_value = NULL_VALUE;
+    constexpr static handle_type null_value = NULL_VALUE;
 
     constexpr resource () noexcept = default;
-    resource (resource&&) = default;
-    resource& operator = (resource&&) = default;
+
+    inline resource (resource&& rc) noexcept
+    : _M_handle     (rc._M_handle )
+    {
+        rc._M_handle = null_value;
+    }
+
+    inline resource& operator = (resource&& rc) noexcept
+    {
+        if (this != &rc)
+        {
+            _M_handle    = rc._M_handle;
+            rc._M_handle = null_value  ;
+        }
+
+        return *this;
+    }
     resource (resource const&) = delete;
     resource& operator = (resource const&) = delete;
 
@@ -335,7 +371,7 @@ public:
     constexpr T handle () const noexcept
     { return _M_handle.get<T> (); }
 
-    void set_handle (value_type handle) noexcept
+    void set_handle (handle_type handle) noexcept
     { _M_handle = handle; }
 
     constexpr resource (value_type id) noexcept
@@ -392,7 +428,7 @@ namespace std {
 template <typename CharT, typename Traits>
 basic_ostream<CharT, Traits>&
 operator << (std::basic_ostream<CharT, Traits>& stream, cppual::resource_version const& u)
-{ return stream << u.major << "." << u.minor; }
+{ return stream << u.major << '.' << u.minor; }
 
 template <>
 struct hash<cppual::resource_version>

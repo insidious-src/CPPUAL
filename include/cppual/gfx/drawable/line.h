@@ -36,7 +36,7 @@ namespace cppual { namespace gfx {
 class line : public drawable2d_interface
 {
 public:
-    enum class style_type : byte
+    enum class style_type : u8
     {
         solid,
         dash,

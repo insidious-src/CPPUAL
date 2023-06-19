@@ -47,7 +47,7 @@ enum device_category
     any         = cpu | gpu | gpgpu | specialized
 };
 
-enum class backend_type : byte
+enum class backend_type : u8
 {
     native,
     opencl,
@@ -67,14 +67,14 @@ enum class il_type : u16
     hlil   = 1 << 5
 };
 
-enum class memory_cat : byte
+enum class memory_cat : u8
 {
     restricted,
     specialized,
     global
 };
 
-enum class memory_access : byte
+enum class memory_access : u8
 {
     read_only ,
     write_only,
@@ -185,7 +185,7 @@ class SHARED_API device_interface : public object<resource_type::device>
 public:
     typedef resource_version version_type;
 
-    enum class profile_type : byte
+    enum class profile_type : u8
     {
         full,
         embedded
@@ -223,7 +223,7 @@ protected:
 class SHARED_API buffer_interface : public object<resource_type::buffer>
 {
 public:
-    enum class address_space : byte
+    enum class address_space : u8
     {
         global_memory ,
         local_memory  ,

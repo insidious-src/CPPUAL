@@ -50,7 +50,7 @@ struct pixel_flag final
     };
 };
 
-enum class surface_type : byte
+enum class surface_type : u8
 {
     drawable     ,
     double_buffer,
@@ -58,7 +58,7 @@ enum class surface_type : byte
     pixmap
 };
 
-enum class device_backend : byte
+enum class device_backend : u8
 {
     native,
     gl,
@@ -70,7 +70,7 @@ enum class device_backend : byte
     custom,
 };
 
-enum class polygon_face : byte
+enum class polygon_face : u8
 {
     front,
     back ,
@@ -118,12 +118,12 @@ class pixel_format final
 {
 public:
     pixel_flags flags;
-    byte        red, green, blue, alpha;
-    byte        depth, stencil;
+    u8          red, green, blue, alpha;
+    u8          depth, stencil;
     color_type  type;
 
-    constexpr byte bits () const noexcept
-    { return byte (red + green + blue + alpha); }
+    constexpr u8 bits () const noexcept
+    { return u8 (red + green + blue + alpha); }
 
     constexpr static pixel_format default2d () noexcept
     {

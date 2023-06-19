@@ -36,7 +36,7 @@ using std::atomic_bool;
 
 namespace cppual { namespace compute {
 
-enum class thread_priority : byte
+enum class thread_priority : u8
 {
     inherit = 0,
     idle,

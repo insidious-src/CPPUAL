@@ -29,7 +29,7 @@ namespace cppual { namespace ui {
 
 // =========================================================
 
-enum class text_format : byte
+enum class text_format : u8
 {
     plain,
     word_wrap,

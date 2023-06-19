@@ -29,21 +29,21 @@ namespace cppual {
 
 // ====================================================
 
-enum class access_mode : byte
+enum class access_mode : u8
 {
     read,
     write,
     read_write
 };
 
-enum class load_from : byte
+enum class load_from : u8
 {
     file,
     memory,
     binary
 };
 
-enum class orientation : byte
+enum class orientation : u8
 {
     horizontal,
     vertical

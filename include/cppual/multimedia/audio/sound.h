@@ -40,7 +40,7 @@ enum
     buffer_length = 1024
 };
 
-enum class output_format : byte
+enum class output_format : u8
 {
     mono,
     stereo,
@@ -52,7 +52,7 @@ enum class output_format : byte
     ch71
 };
 
-enum class sound_state : byte
+enum class sound_state : u8
 {
     unavailable,
     initial,
@@ -61,7 +61,7 @@ enum class sound_state : byte
     stopped
 };
 
-enum class sound_quality : byte
+enum class sound_quality : u8
 {
     low    =  8,
     medium = 16,
@@ -136,7 +136,7 @@ protected:
     virtual void on_close () { }
 
 private:
-    enum class flag : byte
+    enum class flag : u8
     {
         read     = 1 << 0,
         write    = 1 << 1,

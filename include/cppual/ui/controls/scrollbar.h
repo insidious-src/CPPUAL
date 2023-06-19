@@ -33,7 +33,7 @@ class scrollbar : public abstract_slider
 public:
     typedef orientation orientation_type;
 
-    enum class arrows : byte
+    enum class arrows : u8
     {
         none,
         double_sided,

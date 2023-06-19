@@ -22,6 +22,8 @@
 #ifndef CPPUAL_DECL_H_
 #define CPPUAL_DECL_H_
 
+#include <cstddef>
+
 #undef OS_CURRENT
 #undef OS_STD_UNIX
 #undef OS_STD_POSIX
@@ -330,8 +332,8 @@ typedef const void cvoid;
 typedef const bool cbool;
 
 /// 1 byte size typedefs
-typedef unsigned char byte;
-typedef unsigned char const cbyte;
+using  byte = std::byte;
+using cbyte = std::byte const;
 
 /// ASCII & UTF-8 sized typedefs
 typedef const char cchar;

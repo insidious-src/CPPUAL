@@ -48,7 +48,7 @@ class vertex_array          ;
 
 // ====================================================
 
-enum class shader_type : byte
+enum class shader_type : u8
 {
     compute         = 1 << 0,
     vertex          = 1 << 1,

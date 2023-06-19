@@ -33,7 +33,7 @@ namespace cppual { namespace network {
 
 // ====================================================
 
-enum class socket_type : byte
+enum class socket_type : u8
 {
     tcp,
     udp

@@ -23,6 +23,7 @@
 #include <cppual/circular_queue.h>
 
 #include <thread>
+#include <iostream>
 
 namespace cppual { namespace compute {
 
@@ -74,9 +75,15 @@ public:
 
     assign_queue (host_queue& gTasks) : _M_queue (gTasks)
     {
-        write_lock lock (_M_queue._M_gQueueMutex);
+        /// isolation brackets
+        {
+            write_lock lock (_M_queue._M_gQueueMutex);
 
-        ++_M_queue._M_uNumAssigned;
+            _M_queue._M_eState = host_queue::running;
+            ++_M_queue._M_uNumAssigned;
+        }
+
+        _M_queue._M_gTaskCond.notify_all ();
     }
 
     ~assign_queue ()
@@ -108,17 +115,28 @@ void host_queue::operator ()()
         {
             read_lock gReadLock (_M_gQueueMutex);
 
-            _M_gTaskCond.wait (gReadLock, [this]
+            std::cout << "waiting for a task..." << std::endl;
+
+            if (running == _M_eState and _M_gTaskQueue.empty ())
             {
-                return running > _M_eState or !_M_gTaskQueue.empty ();
-            });
+                _M_gTaskCond.wait (gReadLock, [this]
+                {
+                    return running > _M_eState or !_M_gTaskQueue.empty ();
+                });
+            }
+
+            std::cout << "check for queue state..." << std::endl;
 
             /// process a task if there is one scheduled,
             /// otherwise return if the execution state
             /// requires it
-            if (interrupted == _M_eState or
-                (_M_gTaskQueue.empty () and inactive == _M_eState))
+            if (running > _M_eState)
+            {
+                std::cout << "exit thread..." << std::endl;
                 break;
+            }
+
+            std::cout << "task scheduled..." << std::endl;
 
             run = std::move (_M_gTaskQueue.front ());
         }
@@ -147,7 +165,6 @@ void host_queue::operator ()()
 bool thread_pool::reserve (host_queue& gTaskQueue, size_type uAddThreads, bool bDetached)
 {
     if (uAddThreads == 0) return false;
-
 
     write_lock gLock (pool ().threadMutex);
 
@@ -187,12 +204,20 @@ bool host_queue::schedule (call_type const& callable)
 {
     /// RAII lock
     {
+        /// isolation brackets
+        {
+            read_lock gLock (_M_gQueueMutex);
+
+            _M_gTaskCond.wait (gLock, [this]
+            {
+                return _M_eState == running;
+            });
+        }
+
         write_lock gLock (_M_gQueueMutex);
-        if (_M_uNumAssigned == 0) return false;
 
         /// schedule task
         _M_gTaskQueue.push_back (callable);
-        _M_eState = host_queue::running;
     }
 
     /// wake a thread to receive the task
@@ -204,7 +229,7 @@ void host_queue::quit (bool bInterrupt) noexcept
 {
     /// RAII lock
     {
-        read_lock gLock (_M_gQueueMutex);
+        write_lock gLock (_M_gQueueMutex);
 
         if (_M_eState != running) return;
         _M_eState = bInterrupt ? interrupted : inactive;

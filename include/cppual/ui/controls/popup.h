@@ -30,7 +30,7 @@ namespace cppual { namespace ui {
 
 // =========================================================
 
-enum class menu_item_type : byte
+enum class menu_item_type : u8
 {
     invalid,
     command,

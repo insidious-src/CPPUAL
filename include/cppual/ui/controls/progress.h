@@ -32,7 +32,7 @@ namespace cppual { namespace ui {
 class progress : public skinnable_view
 {
 public:
-    enum class progress_flag : byte
+    enum class progress_flag : u8
     {
         marquee    = 1 << 0,
         show_value = 1 << 1

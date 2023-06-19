@@ -79,7 +79,7 @@ enum
     IntFalse            = EGL_FALSE
 };
 
-enum class error_type : byte
+enum class error_type : u8
 {
     initialize,
     terminate,
@@ -226,8 +226,12 @@ inline config::feature_types convert_extensions (display_pointer dsp)
 {
     config::feature_types eFeatures (nullptr);
 
+    auto const extensions = ::eglQueryString (dsp, internal::Extensions);
+
+    std::cout << extensions << std::endl;
+
     for (auto
-         extension = ::eglQueryString (dsp, internal::Extensions) - 1; extension++;
+         extension = extensions; extension++;
          extension = std::strchr (extension , ' '))
     {
         switch (const_hash (extension))

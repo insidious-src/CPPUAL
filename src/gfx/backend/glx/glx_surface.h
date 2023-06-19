@@ -59,14 +59,15 @@ public:
         attrib_count
     };
 
-    enum class feature : byte
+    enum class feature : u8
     {
         sync_control           = 1 << 0,
-        context_attributes_ext = 1 << 1,
-        configless_context     = 1 << 2,
-        surfaceless_context    = 1 << 3,
-        create_robust_context  = 1 << 4,
-        scalable_surface       = 1 << 5
+        mesa_sync_control      = 1 << 1,
+        context_attributes_ext = 1 << 2,
+        configless_context     = 1 << 3,
+        surfaceless_context    = 1 << 4,
+        create_robust_context  = 1 << 5,
+        scalable_surface       = 1 << 6
     };
 
     typedef bitset<feature> feature_types;

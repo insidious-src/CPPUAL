@@ -31,14 +31,14 @@
 
 namespace cppual { namespace memory {
 
-enum class Mode : byte
+enum class Mode : u8
 {
     Create,
     CreateOrOpen,
     Open
 };
 
-enum class State : byte
+enum class State : u8
 {
     ReadOnly,
     ReadWrite,

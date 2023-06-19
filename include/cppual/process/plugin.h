@@ -48,7 +48,7 @@ public:
     typedef string          string_type;
     typedef resource_handle handle_type;
 
-    enum class resolve_policy : byte
+    enum class resolve_policy : u8
     {
         /// use as data file or load as static library
         statically,

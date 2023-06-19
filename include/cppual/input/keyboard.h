@@ -53,7 +53,7 @@ struct keyboard
         max_keys_at_once = 3
     };
 
-    enum class lock : byte
+    enum class lock : u8
     {
         caps,
         num,

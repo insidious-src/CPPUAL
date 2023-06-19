@@ -28,7 +28,7 @@
 
 namespace cppual { namespace system {
 
-enum class QueryCategory : byte
+enum class QueryCategory : u8
 {
     Motherboard,
     CPU,

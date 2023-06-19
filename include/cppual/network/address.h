@@ -82,7 +82,7 @@ public:
     friend bool operator >= (address const&, address const&) noexcept;
 
 private:
-    byte _M_uBytes[16] { };
+    u8 _M_uBytes[16] { };
 };
 
 std::istream& operator >> (std::istream& stream, address& address);

@@ -45,7 +45,7 @@ public:
         erased      = 1 << 4
     };
 
-    enum class sub_pixel : byte
+    enum class sub_pixel : u8
     {
         none        ,
         rgb         ,

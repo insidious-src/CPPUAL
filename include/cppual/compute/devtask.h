@@ -31,7 +31,7 @@ namespace cppual { namespace compute {
 class device_queue : public object<resource_type::queue>
 {
 public:
-    enum class engine_type : byte
+    enum class engine_type : u8
     {
         none      =      0,
         compute   = 1 << 0,

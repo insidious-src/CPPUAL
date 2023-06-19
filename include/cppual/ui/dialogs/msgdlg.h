@@ -26,7 +26,7 @@
 
 namespace cppual { namespace ui {
 
-enum class message_type : byte { plain, information, warning, error };
+enum class message_type : u8 { plain, information, warning, error };
 typedef    bitset<dialog::result> results;
 
 dialog::result show_question (string&& title,

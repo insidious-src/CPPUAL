@@ -42,7 +42,7 @@ typedef rgb_color color;
 
 // =========================================================
 
-enum class color_name : byte
+enum class color_name : u8
 {
     white ,
     black ,
@@ -55,7 +55,7 @@ enum class color_name : byte
     orange
 };
 
-enum class color_type : byte
+enum class color_type : u8
 {
     none       ,
     true_type  ,
@@ -79,8 +79,8 @@ union rgb_color
         blue_idx
     };
 
-    byte idx[3];
-    byte red, green, blue;
+    u8 idx[3];
+    u8 red, green, blue;
 
     rgb_color () noexcept = default;
 
@@ -88,11 +88,11 @@ union rgb_color
     constexpr rgb_color binary () const noexcept
     { return { idx[blue_idx], idx[green_idx], idx[red_idx] }; }
 
-    constexpr byte operator [] (size_type i) const noexcept
+    constexpr u8 operator [] (size_type i) const noexcept
     { return idx[i]; }
 
-    constexpr rgb_color (byte r, byte g, byte b) noexcept : idx { r, g, b } { }
-    byte& operator [] (size_type i) noexcept { return idx[i]; }
+    constexpr rgb_color (u8 r, u8 g, u8 b) noexcept : idx { r, g, b } { }
+    u8& operator [] (size_type i) noexcept { return idx[i]; }
 };
 
 constexpr bool operator == (rgb_color const& gObj1, rgb_color const& gObj2) noexcept
@@ -115,12 +115,12 @@ static_assert (std::is_pod<rgb_color>::value, "RGBColor is not POD!");
 // =========================================================
 
 struct cmyk_color
-{ byte cyan, magenta, yellow, black; };
+{ u8 cyan, magenta, yellow, black; };
 
 // =========================================================
 
 struct hsl_color
-{ byte hue, saturation, luminance; };
+{ u8 hue, saturation, luminance; };
 
 // =========================================================
 
@@ -130,12 +130,12 @@ struct yuv_color
 // =========================================================
 
 struct ycb_cr_color
-{ byte luminance, Cb, Cr; };
+{ u8 luminance, Cb, Cr; };
 
 // =========================================================
 
 struct ypb_pr_color
-{ byte luminance, Pb, Pr; };
+{ u8 luminance, Pb, Pr; };
 
 // =========================================================
 
@@ -151,7 +151,7 @@ inline bool operator != (Gradient const& gObj1, Gradient const& gObj2) noexcept
 // =========================================================
 
 rgb_color    color_from_name          (color_name)          noexcept;
-rgb_color    color_from_hex_value     (byte value)          noexcept; // ex. 0xff0000
+rgb_color    color_from_hex_value     (u8   value)          noexcept; // ex. 0xff0000
 rgb_color    cmyk_to_rgb_color        (cmyk_color   const&) noexcept;
 rgb_color    hsl_to_rgb_color         (hsl_color    const&) noexcept;
 rgb_color    yuv_to_rgb_color         (yuv_color    const&) noexcept;

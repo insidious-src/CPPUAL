@@ -33,7 +33,7 @@
 
 namespace cppual { namespace gfx {
 
-enum class MatrixType : byte
+enum class MatrixType : u8
 {
     Projection,
     ModelTransform,
@@ -314,7 +314,7 @@ private:
 class view_matrix : public dynamic_matrix<rgb_color, memory::allocator<rgb_color>>
 {
 public:
-    enum class Type : byte
+    enum class Type : u8
     {
         Perspective,
         Orthographic

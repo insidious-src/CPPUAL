@@ -34,9 +34,9 @@ inline uint getArrayLen (Type type) noexcept
     return (sizeof (type) / sizeof (Type));
 }
 
-inline byte getNumDigits (int nNum) noexcept
+inline u8 getNumDigits (int nNum) noexcept
 {
-    byte nDigitCount = 0;
+    u8 nDigitCount = 0;
 
     for (int n = (nNum < 0 ? -nNum : nNum); n > 0; n /= 10) ++nDigitCount;
     return nDigitCount;

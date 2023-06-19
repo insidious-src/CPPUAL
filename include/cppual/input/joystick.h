@@ -58,7 +58,7 @@ struct joystick : non_copyable_virtual
         axis_count   =  8
     };
 
-    enum class axis : byte
+    enum class axis : u8
     {
         x,
         y,
@@ -70,7 +70,7 @@ struct joystick : non_copyable_virtual
         pov_y
     };
 
-    enum class surface : byte
+    enum class surface : u8
     {
         track_pad,
         track_ball,

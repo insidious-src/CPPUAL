@@ -87,7 +87,7 @@ private:
 
 // =========================================================
 
-enum class check_state : byte
+enum class check_state : u8
 {
     unchecked,
     checked,

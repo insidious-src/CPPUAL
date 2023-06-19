@@ -31,14 +31,14 @@ namespace cppual { namespace memory {
 
 namespace {
 
-constexpr memory_resource::difference_type to_diff (byte val) noexcept
+constexpr memory_resource::difference_type to_diff (u8 val) noexcept
 {
     return static_cast<memory_resource::difference_type> (val);
 }
 
-constexpr byte to_byte (memory_resource::difference_type val) noexcept
+constexpr u8 to_byte (memory_resource::difference_type val) noexcept
 {
-    return static_cast<byte> (val);
+    return static_cast<u8> (val);
 }
 
 constexpr memory_resource::math_pointer to_math_ptr (memory_resource::pointer p) noexcept
@@ -310,7 +310,7 @@ void* dstacked_resource::do_reallocate(void* p, size_type old_size, size_type si
     {
         auto max = max_size () + old_size;
 
-        byte align_shift = 0;
+        u8 align_shift = 0;
 
         if (old_size < _M_uHint && size >= _M_uHint)
         {

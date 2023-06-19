@@ -45,7 +45,7 @@ data_protocol::data_protocol(string_type const& firstString, string_type const& 
             file.seekg(0, std::ios::end);
 
             bytes.reserve (static_cast<stream_type::size_type>(file.tellg ()));
-            bytes.insert (bytes.begin (), bytes.capacity (), byte());
+            bytes.insert (bytes.begin (), bytes.capacity (), u8());
 
             file.seekg (0);
             file >> &bytes[0];

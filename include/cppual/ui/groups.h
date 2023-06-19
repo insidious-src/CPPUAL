@@ -41,7 +41,7 @@ public:
     typedef string  string_type ;
     typedef command command_type;
 
-    enum class type : byte
+    enum class type : u8
     {
         action,
         separator,

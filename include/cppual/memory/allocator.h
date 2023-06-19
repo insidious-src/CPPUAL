@@ -47,7 +47,7 @@ public:
     typedef base_type**      base_double_pointer   ;
     typedef std::size_t      align_type            ;
     typedef std::size_t      size_type             ;
-    typedef byte*            math_pointer          ;
+    typedef u8*              math_pointer          ;
     typedef void*            pointer               ;
     typedef cvoid*           const_pointer         ;
     typedef std::ptrdiff_t   difference_type       ;

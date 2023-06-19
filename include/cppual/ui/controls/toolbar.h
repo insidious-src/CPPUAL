@@ -30,7 +30,7 @@ namespace cppual { namespace ui {
 
 // =========================================================
 
-enum class tool_style : byte
+enum class tool_style : u8
 {
     flat,
     modern
@@ -38,7 +38,7 @@ enum class tool_style : byte
 
 // =========================================================
 
-enum class tool_button : byte
+enum class tool_button : u8
 {
     text_beside_icon,
     icon_above_text,

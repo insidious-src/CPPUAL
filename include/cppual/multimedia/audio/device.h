@@ -30,7 +30,7 @@
 
 namespace cppual { namespace audio {
 
-enum class string_query : byte
+enum class string_query : u8
 {
     version,
     renderer,

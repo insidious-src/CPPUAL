@@ -29,7 +29,7 @@
 
 namespace cppual { namespace ui {
 
-enum class vis_type : byte
+enum class vis_type : u8
 {
     hidden,
     normal,

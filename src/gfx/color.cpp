@@ -48,7 +48,7 @@ color color_from_name (color_name eName) noexcept
     }
 }
 
-color color_from_hex_value (byte) noexcept
+color color_from_hex_value (u8) noexcept
 {
     return color ();
 }

@@ -50,7 +50,7 @@ elseif(WIN64)
     set(CMAKE_TOOLCHAIN_FILE "/usr/share/mingw/toolchain-${TOOLCHAIN_PREFIX}.cmake")
 endif()
 
-project("C++ UAL" VERSION 1.0.5)
+project("C++ Unified Abstraction Library" VERSION 1.0.5)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
