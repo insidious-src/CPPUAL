@@ -38,8 +38,9 @@ private:
     inline static cchar* platform_name () noexcept
     {
     #   if defined OS_GNU_LINUX or defined OS_BSD
-            return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" :
-                                                     "libcppual-ui-xorg"    ;
+            //return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-wayland" :
+            //                                         "libcppual-ui-xorg"    ;
+        return "libcppual-ui-xorg";
     #   elif defined OS_WINDOWS
             return "libcppual-ui-win";
     #   elif defined OS_ANDROID

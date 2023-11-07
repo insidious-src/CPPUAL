@@ -64,16 +64,21 @@ typedef bitset<socket_flag> socket_flags;
 // ====================================================
 
 transport_socket::transport_socket (socket_type eProt) noexcept
-: resource (create_socket (eProt)),
-  _M_eProtocol   (eProt)
+: resource     (create_socket (eProt)),
+  _M_eProtocol (eProt)
 {
     init_socket ();
 }
 
 transport_socket::transport_socket (transport_socket&& gObj) noexcept
-: resource       (std::move (gObj)),
-  _M_eProtocol   (gObj._M_eProtocol)
+: resource     (std::move (gObj)),
+  _M_eProtocol (gObj._M_eProtocol)
 {
+}
+
+transport_socket::~transport_socket () noexcept
+{
+    close ();
 }
 
 transport_socket& transport_socket::operator = (transport_socket&& gObj) noexcept
@@ -144,41 +149,39 @@ void transport_socket::init_socket () noexcept
 {
     if (valid ())
     {
+        int yes = 1;
+
         if (_M_eProtocol == socket_type::tcp)
         {
 #           ifdef OS_STD_UNIX
-            // Disable the Nagle algorithm (ie. removes buffering of TCP packets)
-            int yes = 1;
-
+            /// Disable the Nagle algorithm (ie. removes buffering of TCP packets)
             if (::setsockopt (handle (),
                               IPPROTO_TCP,
                               int(socket_flag::no_delay),
                               reinterpret_cast<char*> (&yes),
-                              sizeof (int)) == -1)
+                              static_cast<::socklen_t> (sizeof (int))) == -1)
             {
                 std::cerr << "Failed to set socket option 'TCP_NODELAY'. "
                              "All your TCP packets will be buffered!" << std::endl;
             }
 #           elif defined OS_MACX
-            // On Mac OS X, disable the SIGPIPE signal on disconnection
+            /// On Mac OS X, disable the SIGPIPE signal on disconnection
             if (::setsockopt (handle (),
                               SOL_SOCKET,
                               int(socket_flag::no_sig_pipe),
                               reinterpret_cast<char*>(&yes),
-                              sizeof (int)) == -1)
+                              static_cast<::socklen_t> (sizeof (int))) == -1)
                 std::cerr << "Failed to set socket option 'SO_NOSIGPIPE'" << std::endl;
 #           endif
         }
         else
         {
-            // Enable broadcast by default for UDP sockets
-            int yes = 1;
-
+            /// Enable broadcast by default for UDP sockets
             if (::setsockopt (handle (),
                               SOL_SOCKET,
                               int(socket_flag::broadcast),
                               reinterpret_cast<char*> (&yes),
-                              sizeof (int)) == -1)
+                              static_cast<::socklen_t> (sizeof (int))) == -1)
                 std::cerr << "Failed to enable broadcast on UDP socket" << std::endl;
         }
     }

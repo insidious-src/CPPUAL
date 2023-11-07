@@ -28,43 +28,44 @@
 namespace cppual { namespace gfx {
 
 /**
- * @class line
- * @brief A drawable that creates non-transformable line using
+ * @class gl_line
+ * @brief A drawable that creates a line using
  * rect coordinates
  */
 
-class line : public drawable2d_interface
+class gl_line : public drawable2d_interface
 {
 public:
-    enum class style_type : u8
-    {
-        solid,
-        dash,
-        dot,
-        dash_dot_dot
-    };
-
     void draw (transform2d const& transform_info);
 
-    color      getColor ()               const noexcept { return _M_gColor;   }
-    uint       size  ()                  const noexcept { return _M_uSize;    }
-    style_type style ()                  const noexcept { return _M_eStyle;   }
+    color      get_color ()              const noexcept { return _M_gColor;   }
+    uint       size      ()              const noexcept { return _M_uSize;    }
+    line_style style     ()              const noexcept { return _M_eStyle;   }
     void       set_color (color const& gColor) noexcept { _M_gColor = gColor; }
     void       set_size  (uint uSize)          noexcept { _M_uSize = uSize;   }
-    void       set_style (style_type eStyle)   noexcept { _M_eStyle = eStyle; }
+    void       set_style (line_style eStyle)   noexcept { _M_eStyle = eStyle; }
 
-    line (color const& gFillColor,
-          uint         uLineSize = 1U,
-          style_type   eStyle    = style_type::solid) noexcept
+    constexpr gl_line () noexcept = default;
+
+    gl_line (color const& gFillColor,
+             uint         uLineSize = 1U,
+             line_style   eStyle    = line_style::solid) noexcept
     : _M_gColor (gFillColor), _M_uSize (uLineSize), _M_eStyle (eStyle)
     { }
 
-    line (line const& gObj) noexcept
+    gl_line (gl_line const& gObj) noexcept
     : _M_gColor (gObj._M_gColor), _M_uSize (gObj._M_uSize), _M_eStyle (gObj._M_eStyle)
     { }
 
-    line& operator = (line const& gObj) noexcept
+    device_backend type () const noexcept
     {
+        return device_backend::gl;
+    }
+
+    gl_line& operator = (gl_line const& gObj) noexcept
+    {
+        if (this == &gObj) return *this;
+
         _M_gColor = gObj._M_gColor;
         _M_uSize  = gObj._M_uSize ;
         _M_eStyle = gObj._M_eStyle;
@@ -72,9 +73,66 @@ public:
     }
 
 private:
-    color      _M_gColor;
-    uint       _M_uSize ;
-    style_type _M_eStyle;
+    color      _M_gColor { };
+    uint       _M_uSize  { };
+    line_style _M_eStyle { };
+};
+
+/**
+ * @class gl_path
+ * @brief A drawable that creates a line path using
+ * rect coordinates
+ */
+
+class gl_path : public drawable2d_interface
+{
+public:
+    void draw (transform2d const& transform_info);
+
+    color      get_color ()              const noexcept { return _M_gColor;   }
+    uint       size      ()              const noexcept { return _M_uSize;    }
+    line_style style     ()              const noexcept { return _M_eStyle;   }
+    void       set_color (color const& gColor) noexcept { _M_gColor = gColor; }
+    void       set_size  (uint uSize)          noexcept { _M_uSize  = uSize ; }
+    void       set_style (line_style eStyle)   noexcept { _M_eStyle = eStyle; }
+
+    inline gl_path () noexcept = default;
+
+    gl_path (vector<point2i> const& coord,
+             color           const& gFillColor,
+             uint                   uLineSize = 1U,
+             line_style             eStyle    = line_style::solid) noexcept
+    : _M_coord (coord),
+      _M_gColor(gFillColor),
+      _M_uSize (uLineSize),
+      _M_eStyle(eStyle)
+    { }
+
+    gl_path (gl_path const& gObj) noexcept
+    : _M_gColor (gObj._M_gColor), _M_uSize (gObj._M_uSize), _M_eStyle (gObj._M_eStyle)
+    { }
+
+    device_backend type () const noexcept
+    {
+        return device_backend::gl;
+    }
+
+    gl_path& operator = (gl_path const& gObj) noexcept
+    {
+        if (this == &gObj) return *this;
+
+        _M_gColor = gObj._M_gColor;
+        _M_uSize  = gObj._M_uSize ;
+        _M_eStyle = gObj._M_eStyle;
+
+        return *this;
+    }
+
+private:
+    vector<point2i> _M_coord     ;
+    color           _M_gColor { };
+    uint            _M_uSize  { };
+    line_style      _M_eStyle { };
 };
 
 } } // Graphics

@@ -104,9 +104,9 @@ cmyk_color rgb_to_cmyk_color (color const& gRgb) noexcept
 {
     return
     {
-        u8 (gRgb.blue + gRgb.green),
-        u8 (gRgb.red  + gRgb.blue ),
-        u8 (gRgb.red  + gRgb.green),
+        u8 (gRgb.blue () + gRgb.green ()),
+        u8 (gRgb.red ()  + gRgb.blue () ),
+        u8 (gRgb.red ()  + gRgb.green ()),
         0
     };
 }
@@ -120,9 +120,9 @@ yuv_color rgb_to_yuv_color (color const& gRgb) noexcept
 {
     return
     {
-        double ( 0.299  * gRgb.red + 0.587  * gRgb.green + 0.114 * gRgb.blue      ),
-        double (-0.1687 * gRgb.red - 0.3313 * gRgb.green + 0.5   * gRgb.blue + 128),
-        double ( 0.5    * gRgb.red - 0.4187 * gRgb.green - 0.813 * gRgb.blue + 128)
+        double ( 0.299  * gRgb.red () + 0.587  * gRgb.green () + 0.114 * gRgb.blue ()      ),
+        double (-0.1687 * gRgb.red () - 0.3313 * gRgb.green () + 0.5   * gRgb.blue () + 128),
+        double ( 0.5    * gRgb.red () - 0.4187 * gRgb.green () - 0.813 * gRgb.blue () + 128)
     };
 }
 

@@ -41,7 +41,7 @@ public:
     typedef string string_type;
 
     virtual virtual_buffer* map () noexcept = 0;
-    virtual bool           is_loaded () const noexcept = 0;
+    virtual bool            is_loaded () const noexcept = 0;
 };
 
 // =========================================================
@@ -54,15 +54,14 @@ public:
 class raster_image final : public image_interface, private memory::allocator<raster_image>
 {
 public:
-    raster_image  () = delete;
-    ~raster_image ();
+    inline raster_image () noexcept = default;
 
     void draw (transform2d const& info);
 
     inline raster_image (string_type  const& gPath,
-                         memory_resource&    pAtor  = *memory::get_default_resource (),
                          pixel_format const& gFomat = pixel_format (),
-                         color               gMask  = color        ())
+                         color               gMask  = color        (),
+                         memory_resource&    pAtor  = *memory::get_default_resource ())
     : allocator (pAtor),
       _M_gPixBuffer ({ 0, 0 }, gFomat),
       _M_gColorMask (gMask),
@@ -82,9 +81,9 @@ public:
     { return &_M_gPixBuffer; }
 
 private:
-    virtual_buffer _M_gPixBuffer;
-    color          _M_gColorMask;
-    cbool          _M_bIsLoaded ;
+    virtual_buffer _M_gPixBuffer   ;
+    color          _M_gColorMask   ;
+    cbool          _M_bIsLoaded { };
 
     bool parse_image (string_type const&);
 };

@@ -23,11 +23,70 @@
 #define CPPUAL_GFX_DRAWABLE_POLYGON_H_
 #ifdef __cplusplus
 
-#include <cppual/gfx/drawable/shape.h>
+#include <cppual/gfx/draw.h>
 
 namespace cppual { namespace gfx {
 
+/**
+ * @class gl_polygon
+ * @brief A drawable that creates a OpenGL polygon using
+ * rect coordinates
+ */
 
+class gl_polygon : public drawable2d_interface
+{
+public:
+    typedef std::array<point2i, 3> polygon_array;
+
+    void draw (transform2d const& transform_info);
+
+    color      get_fill_color  ()              const noexcept { return _M_gFillColor;    }
+    color      get_outer_color ()              const noexcept { return _M_gOuterColor;   }
+    uint       size            ()              const noexcept { return _M_uSize;         }
+    void       set_fill_color  (color const& gColor) noexcept { _M_gFillColor  = gColor; }
+    void       set_outer_color (color const& gColor) noexcept { _M_gOuterColor = gColor; }
+    void       set_size        (uint uSize)          noexcept { _M_uSize = uSize;        }
+
+    constexpr gl_polygon () noexcept = default;
+
+    gl_polygon (polygon_array const& coord,
+                color   const& gFillColor,
+                color   const& gOutColor ,
+                uint           uLineSize = 1U) noexcept
+    : _M_coord { coord[0], coord[1], coord[2] },
+      _M_gFillColor (gFillColor), _M_gOuterColor (gOutColor), _M_uSize (uLineSize)
+    { }
+
+    gl_polygon (gl_polygon const& gObj) noexcept
+    : _M_coord { gObj._M_coord[0], gObj._M_coord[1], gObj._M_coord[2] },
+      _M_gFillColor (gObj._M_gFillColor), _M_gOuterColor (gObj._M_gOuterColor), _M_uSize (gObj._M_uSize)
+    { }
+
+    device_backend type () const noexcept
+    {
+        return device_backend::gl;
+    }
+
+    gl_polygon& operator = (gl_polygon const& gObj) noexcept
+    {
+        if (this == &gObj) return *this;
+
+        _M_coord[0]    = gObj._M_coord[0]   ;
+        _M_coord[1]    = gObj._M_coord[1]   ;
+        _M_coord[2]    = gObj._M_coord[2]   ;
+        _M_gFillColor  = gObj._M_gFillColor ;
+        _M_gOuterColor = gObj._M_gOuterColor;
+        _M_uSize       = gObj._M_uSize      ;
+
+        return *this;
+    }
+
+private:
+    point2i _M_coord[3]    { };
+    color   _M_gFillColor  { };
+    color   _M_gOuterColor { };
+    uint    _M_uSize       { };
+};
 
 } } // Graphics
 

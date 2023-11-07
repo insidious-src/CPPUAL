@@ -29,7 +29,7 @@
 
 namespace cppual { namespace gfx {
 
-union  rgb_color   ;
+class  rgb_color   ;
 struct cmyk_color  ;
 struct hsl_color   ;
 struct yuv_color   ;
@@ -68,8 +68,9 @@ enum class color_type : u8
 
 // =========================================================
 
-union rgb_color
+class rgb_color
 {
+public:
     typedef std::size_t size_type;
 
     enum
@@ -78,9 +79,6 @@ union rgb_color
         green_idx,
         blue_idx
     };
-
-    u8 idx[3];
-    u8 red, green, blue;
 
     rgb_color () noexcept = default;
 
@@ -92,24 +90,32 @@ union rgb_color
     { return idx[i]; }
 
     constexpr rgb_color (u8 r, u8 g, u8 b) noexcept : idx { r, g, b } { }
+    constexpr rgb_color (u8 rgb[3]) noexcept : idx { rgb[0], rgb[1], rgb[2] } { }
+    constexpr u8    red () const noexcept { return idx[red_idx]; }
+    constexpr u8  green () const noexcept { return idx[green_idx]; }
+    constexpr u8   blue () const noexcept { return idx[blue_idx]; }
+
     u8& operator [] (size_type i) noexcept { return idx[i]; }
+
+private:
+    u8 idx[3];
 };
 
 constexpr bool operator == (rgb_color const& gObj1, rgb_color const& gObj2) noexcept
 {
-    return (gObj1.red   == gObj2.red   and
-            gObj1.green == gObj2.green and
-            gObj1.blue  == gObj2.blue);
+    return (gObj1.red ()   == gObj2.red ()   and
+            gObj1.green () == gObj2.green () and
+            gObj1.blue ()  == gObj2.blue ());
 }
 
 constexpr bool operator != (rgb_color const& gObj1, rgb_color const& gObj2) noexcept
 {
-    return (gObj1.red != gObj2.red or
-                         gObj1.green != gObj2.green or
-                                        gObj1.blue != gObj2.blue);
+    return (gObj1.red () != gObj2.red () or
+                            gObj1.green () != gObj2.green () or
+                                              gObj1.blue () != gObj2.blue ());
 }
 
-static_assert (sizeof (rgb_color) == 3, "RGBColor is not 24-bit!");
+static_assert (sizeof (rgb_color) == sizeof (u8) * 3, "RGBColor is not 24-bit!");
 static_assert (std::is_pod<rgb_color>::value, "RGBColor is not POD!");
 
 // =========================================================

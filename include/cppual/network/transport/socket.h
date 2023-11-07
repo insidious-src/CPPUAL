@@ -50,14 +50,14 @@ public:
     typedef value_type const const_id ;
 
     transport_socket () = delete;
+    virtual ~transport_socket () noexcept;
     transport_socket (socket_type) noexcept;
     transport_socket (transport_socket&&) noexcept;
     transport_socket& operator = (transport_socket&&) noexcept;
 
-    void set_blocking (bool)   noexcept;
-    bool is_blocking  () const noexcept;
+    void set_blocking (bool block) noexcept;
+    bool is_blocking  ()     const noexcept;
 
-    inline ~transport_socket ()       noexcept { close ();            }
     inline socket_type type  () const noexcept { return _M_eProtocol; }
 
 protected:

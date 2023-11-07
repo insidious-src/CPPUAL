@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <exception>
+#include <algorithm>
 #include <unordered_map>
 
 namespace cppual { namespace ui {
@@ -49,7 +50,8 @@ inline static map_type& map ()
     return views_map;
 }
 
-/*inline void print_map_values (resource_handle wnd)
+#ifdef DEBUG_MODE
+inline void print_map_values (resource_handle wnd)
 {
     std::cout << "wnd value: " << wnd.get<uptr> () << std::endl;
 
@@ -57,7 +59,8 @@ inline static map_type& map ()
     {
         std::cout << "view map key: " << it->first << " value: " << it->second << std::endl;
     }
-}*/
+}
+#endif
 
 inline shared_window create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
 {
@@ -76,11 +79,23 @@ view::view ()
 : view (nullptr, rect (0, 0, default_width, default_height))
 { }
 
-view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type const& gAtor)
-: _M_gChildrenList (gAtor),
+view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
+: _M_gChildrenList (rc ? allocator_type(*rc) : allocator_type ()),
   _M_gMinSize { 0, 0 },
   _M_gMaxSize { 0, 0 },
   _M_pRenderable (internal::create_renderable (pParentObj, gRect, nScreen)),
+  _M_pSurface (_M_pRenderable != nullptr && _M_pRenderable->valid () && !pParentObj ?
+               gfx::draw_factory::instance ()->create_surface (_M_pRenderable->connection ()->native (),
+                                                               _M_pRenderable->connection ()->legacy (),
+                                                               gfx::pixel_format::default2d (),
+                                                               _M_pRenderable->geometry ().size (),
+                                                               _M_pRenderable->handle ()) :
+               pParentObj->_M_pSurface),
+  _M_pContext (_M_pSurface ?
+               gfx::draw_factory::instance ()->create_context (_M_pRenderable->connection ()->native (),
+                                                               _M_pRenderable->connection ()->legacy (),
+                                                               gfx::pixel_format::default2d ()) :
+               pParentObj->_M_pContext),
   _M_pParentObj  (),
   _M_gStateFlags ()
 {
@@ -115,84 +130,127 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
                 connect (event_queue::events ().mouseMove,
                          [](event_queue::handle_type wnd, point2u pos)
                 {
-                    //internal::print_map_values (wnd);
+                    #ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+                    #endif
+
                     internal::map ()[wnd]->mouse_moved_event (pos);
                 });
 
                 connect (event_queue::events ().mousePress,
                         [](event_queue::handle_type wnd, event_type::mbutton_data data)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->mouse_pressed_event (data);
                 });
 
                 connect (event_queue::events ().mouseRelease,
                         [](event_queue::handle_type wnd, event_type::mbutton_data data)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->mouse_released_event (data);
                 });
 
                 connect (event_queue::events ().keyPress,
                         [](event_queue::handle_type wnd, event_type::key_data data)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->key_pressed_event (data);
                 });
 
                 connect (event_queue::events ().keyRelease,
                         [](event_queue::handle_type wnd, event_type::key_data data)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->key_released_event (data);
                 });
 
                 connect (event_queue::events ().scroll,
                         [](event_queue::handle_type wnd, event_type::mwheel_data data)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->mouse_wheel_event (data);
                 });
 
                 connect (event_queue::events ().winPaint,
                         [](event_queue::handle_type wnd, event_type::paint_data data)
                 {
-                    //internal::print_map_values (wnd);
-                    internal::map ()[wnd]->paint (data.region);
+                    auto window = internal::map ()[wnd];
+
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
+                    window->_M_pSurface->paint_background (gfx::color (255, 255, 255));
+                    window->paint (data.region);
                 });
 
                 connect (event_queue::events ().winFocus,
                         [](event_queue::handle_type wnd, bool state)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->focus_event (state);
                 });
 
                 connect (event_queue::events ().winSize,
                         [](event_queue::handle_type wnd, point2u size)
                 {
-                    //internal::print_map_values (wnd);
-                    internal::map ()[wnd]->size (size);
+                    auto window = internal::map ()[wnd];
+
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
+                    window->_M_pSurface->scale (size);
+                    window->_M_pSurface->paint_background (gfx::color (255, 255, 255));
+                    window->size (size);
                 });
 
                 connect (event_queue::events ().winVisible,
                         [](event_queue::handle_type wnd, bool state)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->show_event (state);
                 });
 
                 connect(event_queue::events ().winStep,
                         [](event_queue::handle_type wnd, bool state)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->enter_leave_event (state);
                 });
 
                 connect (event_queue::events ().winProperty,
                         [](event_queue::handle_type wnd, event_type::property_data data)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
 
                     switch (data.prop)
                     {
@@ -207,35 +265,50 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, allocator_type con
                 connect (event_queue::events ().winHelp,
                         [](event_queue::handle_type wnd)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->help_event ();
                 });
 
                 connect (event_queue::events ().winMinimize,
                         [](event_queue::handle_type wnd, bool is_minimized)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->minimize_event (is_minimized);
                 });
 
                 connect (event_queue::events ().winMaximize,
                         [](event_queue::handle_type wnd, bool is_maximized)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->maximize_event (is_maximized);
                 });
 
                 connect (event_queue::events ().winFullscreen,
                         [](event_queue::handle_type wnd, bool is_fullscreen)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->fullscreen_event (is_fullscreen);
                 });
 
                 connect (event_queue::events ().winClose,
                         [](event_queue::handle_type wnd)
                 {
-                    //internal::print_map_values (wnd);
+#                   ifdef DEBUG_MODE
+                    internal::print_map_values (wnd);
+#                   endif
+
                     internal::map ()[wnd]->close_event ();
                 });
 
@@ -314,7 +387,7 @@ void view::destroy_resources ()
     //! if the surface is unique it gets deleted
     _M_pRenderable.reset ();
 
-    internal::map ().erase (uId);
+    if (!_M_pParentObj) internal::map ().erase (uId);
 }
 
 void view::invalidate () noexcept
@@ -374,7 +447,7 @@ bool view::set_parent (view* pParentObj, point2i /*gPos*/)
         pParentObj->_M_gChildrenList.push_back (this);
         //pParentObj->paint ();
 
-        _M_gItFromParent = std::move (pParentObj->_M_gChildrenList.end ());
+        _M_gItFromParent = std::move (--pParentObj->_M_gChildrenList.end ());
     }
     //! pParentObj is invalid and _M_pParentObj is NOT nullptr
     else
@@ -395,10 +468,18 @@ bool view::set_parent (view* pParentObj, point2i /*gPos*/)
 
 void view::paint (rect const& gRect)
 {
+    if (!_M_pContext->active ())
+    {
+        _M_pContext->use (_M_pSurface, _M_pSurface);
+        gfx::context_interface::acquire (_M_pContext);
+    }
+
     paint_event (gRect);
 
     if (_M_gChildrenList.size ())
-        for (auto pChild : _M_gChildrenList) pChild->paint (rect ());
+        for (auto pChild : _M_gChildrenList) pChild->paint (gRect);
+
+    if (_M_pSurface && !_M_pParentObj) _M_pSurface->flush ();
 }
 
 void view::size (point2u gSize)
@@ -407,6 +488,8 @@ void view::size (point2u gSize)
 
     if (_M_gChildrenList.size ())
         for (auto pChild : _M_gChildrenList) pChild->on_parent_size (gSize);
+
+    refresh ();
 }
 
 void view::set_geometry (rect const& gRect)
@@ -445,6 +528,49 @@ void view::move (point2i gPoint)
     {
         _M_pRenderable->move (gPoint);
         move_event (gPoint);
+    }
+}
+
+void view::set_focus ()
+{
+    if (_M_gStateFlags.test (view::is_valid))
+    {
+        _M_pRenderable->raise ();
+        focus_event (true);
+    }
+}
+
+void view::kill_focus ()
+{
+    if (_M_gStateFlags.test (view::is_valid))
+    {
+        for (view* pChild : _M_gChildrenList) pChild->kill_focus ();
+        focus_event (false);
+    }
+}
+
+void view::enable ()
+{
+    if (_M_gStateFlags.test (view::is_valid))
+        for (view* pChild : _M_gChildrenList) pChild->enable ();
+}
+
+void view::disable ()
+{
+    if (_M_gStateFlags.test (view::is_valid))
+        for (view* pChild : _M_gChildrenList) pChild->disable ();
+}
+
+void view::refresh ()
+{
+    update (geometry ());
+}
+
+void view::update (rect const& region)
+{
+    if (_M_gStateFlags.test (view::is_valid))
+    {
+        paint (region);
     }
 }
 
@@ -488,47 +614,6 @@ void view::key_released_event (event_type::key_data const&)
 #   ifdef DEBUG_MODE
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 #   endif
-}
-
-void view::set_focus ()
-{
-    if (_M_gStateFlags.test (view::is_valid))
-    {
-        //if (_M_gChildrenList.size ())
-            //for (pointer pChild : _M_gChildrenList) pChild->set_focus ();
-        _M_pRenderable->raise ();
-        focus_event (true);
-    }
-}
-
-void view::kill_focus ()
-{
-    if (_M_gStateFlags.test (view::is_valid))
-    {
-        for (view* pChild : _M_gChildrenList) pChild->kill_focus ();
-        focus_event (false);
-    }
-}
-
-void view::enable ()
-{
-    if (_M_gStateFlags.test (view::is_valid))
-        for (view* pChild : _M_gChildrenList) pChild->enable ();
-}
-
-void view::disable ()
-{
-    if (_M_gStateFlags.test (view::is_valid))
-        for (view* pChild : _M_gChildrenList) pChild->disable ();
-}
-
-void view::refresh ()
-{
-    if (_M_gStateFlags.test (view::is_valid))
-    {
-        paint_event (geometry ());
-        for (view* pChild : _M_gChildrenList) pChild->refresh ();
-    }
 }
 
 void view::help_event()

@@ -9,7 +9,7 @@ void test1 ()
     typedef cppual::circular_queue<value_type  > value_vector;
     typedef cppual::circular_queue<value_vector> vectors     ;
 
-    constexpr const value_vector::size_type max_vectors = 1000U;
+    constexpr const value_vector::size_type max_vectors = 400U;
 
     cppual::memory::stacked_resource res((sizeof (value_vector) * max_vectors) +
                                          (sizeof (value_type  ) * max_vectors  * max_vectors));
@@ -59,7 +59,7 @@ void test2 ()
     typedef cppual::circular_queue<value_type  > value_vector;
     typedef cppual::circular_queue<value_vector> vectors     ;
 
-    constexpr const value_vector::size_type max_vectors = 1000U;
+    constexpr const value_vector::size_type max_vectors = 400U;
 
     cppual::memory::set_default_resource (*cppual::memory::new_delete_resource ());
 
@@ -111,7 +111,7 @@ void test3 ()
     typedef int                                value_type  ;
     typedef cppual::circular_queue<value_type> value_vector;
 
-    constexpr const value_vector::size_type max_vectors = 1000U;
+    constexpr const value_vector::size_type max_vectors = 400U;
 
     cppual::memory::set_default_resource (*cppual::memory::new_delete_resource ());
 

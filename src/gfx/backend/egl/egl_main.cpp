@@ -22,6 +22,7 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/process/plugin.h>
 #include <cppual/memory/stacked.h>
+#include <cppual/gfx/drawable/painter.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD) or defined (OS_ANDROID)
 
@@ -45,9 +46,8 @@ struct egl_factory final : public draw_factory
                                    pixel_format    format,
                                    shared_context  shared);
 
-    device_backend    backend ();
-    shared_painter    create_painter ();
-    shared_drawable2d create_shape (byte shape_type);
+    device_backend backend ();
+    shared_painter create_painter (shared_surface const& surface);
 };
 
 shared_surface egl_factory::create_surface (connection_type /*native*/,
@@ -80,14 +80,9 @@ device_backend egl_factory::backend ()
     return device_backend::gl;
 }
 
-shared_painter egl_factory::create_painter ()
+shared_painter egl_factory::create_painter (shared_surface const& surface)
 {
-    return shared_painter ();
-}
-
-shared_drawable2d egl_factory::create_shape (byte /*shape_type*/)
-{
-    return shared_drawable2d ();
+    return shared_painter (new gl_painter (surface));
 }
 
 } } // namespace gfx

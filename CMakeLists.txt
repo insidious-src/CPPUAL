@@ -65,7 +65,7 @@ set(EXECUTABLE_OUTPUT_PATH "${LIBRARY_OUTPUT_PATH}")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-include(CompilerConfig REQUIRED)
+#include(CompilerConfig REQUIRED)
 include(CTest)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -77,13 +77,13 @@ find_package(DL            REQUIRED) ## dynamic loading of libraries
 find_package(WM                    ) ## platform window manager
 find_package(XCB COMPONENTS XCB ICCCM EWMH GLX) ## platform window manager (Xcb)
 find_package(X11                   ) ## platform window manager (X11-xcb)
-find_package(Sockets       REQUIRED) ## network interface & interprocess
+find_package(Sockets            ) ## network interface & interprocess
 find_package(PulseAudio            )
 find_package(OpenAL                ) ## will be dropped at some point
 find_package(SndFile               ) ## will be dropped at some point
 find_package(Freetype              ) ## will be dropped at some point
 find_package(GLEW                  )
-find_package(OpenGL        REQUIRED) ## will be dropped at some point
+find_package(OpenGL               ) ## will be dropped at some point
 find_package(EGL                   ) ## will be dropped at some point
 find_package(OpenCL                ) ## backup compute api
 find_package(Vulkan                ) ## primary compute & graphics api
@@ -243,6 +243,8 @@ set(CPPUAL_COMPUTE_HEADERS
     "include/cppual/compute/thread.h"
     )
 
+if(SOCKETS_FOUND)
+
 add_library(cppual-compute SHARED
     "src/compute/bridge.cpp"
     "src/compute/behaviour.cpp"
@@ -261,6 +263,8 @@ add_library(cppual-compute SHARED
     )
 target_compile_definitions(cppual-compute PRIVATE -DAPI_EXPORT)
 target_precompile_headers(cppual-compute PRIVATE ${CPPUAL_COMPUTE_HEADERS})
+
+endif()
 
 set(CPPUAL_FS_HEADERS
     "include/cppual/filesystem/file.h"
@@ -459,6 +463,8 @@ set(CPPUAL_NET_HEADERS
     "src/network/transport/os/bsd.h"
     )
 
+if(SOCKETS_FOUND)
+
 add_library(cppual-network SHARED
     "src/network/address.cpp"
     "src/network/packet.cpp"
@@ -488,6 +494,8 @@ add_library(cppual-network SHARED
     )
 target_compile_definitions(cppual-network PRIVATE -DAPI_EXPORT)
 target_precompile_headers(cppual-network PRIVATE ${CPPUAL_NET_HEADERS})
+
+endif()
 
 # raw device input
 set(CPPUAL_INPUT_HEADERS
@@ -563,7 +571,8 @@ target_precompile_headers(cppual-audio PRIVATE ${CPPUAL_AUDIO_HEADERS})
 
 endif()
 
-if(TARGET cppual-audio AND OPENAL_FOUND)
+#if(TARGET cppual-audio AND OPENAL_FOUND)
+if(OPENAL_FOUND)
 
 # audio backend OpenAL
 set(CPPUAL_AUDIO_AL_HEADERS
@@ -662,11 +671,16 @@ endif()
 # compute video backend
 set(CPPUAL_VIDEO_COMPUTE_HEADERS
     )
+    
+if(TARGET cppual-compute)
 
 add_library(cppual-video-compute MODULE
     "src/multimedia/video/backend/compute_video.cpp"
     )
 target_precompile_headers(cppual-video-compute PRIVATE ${CPPUAL_VIDEO_COMPUTE_HEADERS})
+
+endif()
+
 
 # video library (VAAPI, XVideo, OpenGL)
 set(CPPUAL_VIDEO_HEADERS
@@ -994,7 +1008,7 @@ target_precompile_headers(cppual-ui-xorg PRIVATE ${CPPUAL_UI_XORG_HEADERS})
 
 endif()
 
-if (TARGET cppual-gfx AND WM_FOUND)
+if (TARGET cppual-gfx AND NOT WM_FOUND)
 
 # graphical user interface - platform Wayland
 set(CPPUAL_UI_WL_HEADERS
@@ -1065,7 +1079,7 @@ endif()
 if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     if (XCB_EWMH_FOUND AND XCB_ICCCM_FOUND AND X11_FOUND)
         target_link_libraries(cppual-ui-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
-    elseif (WM_FOUND)
+    elseif (NOT WM_FOUND)
         target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
     endif()
 elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -1077,13 +1091,21 @@ endif()
 target_link_libraries(cppual-host DL::Library cppual-memory)
 target_link_libraries(cppual-memory RT::Library)
 
+if(SOCKETS_FOUND)
 target_link_libraries(cppual-compute cppual-memory cppual-host Sockets::Library)
 target_link_libraries(cppual-network cppual-memory Sockets::Library)
+
+endif()
+
+
 target_link_libraries(cppual-dom cppual-memory)
 target_link_libraries(cppual-json cppual-memory)
 
+if(TARGET cppual-compute)
+
 target_link_libraries(cppual-video-compute cppual-compute)
 
+endif()
 
 if(TARGET cppual-compute AND OPENCL_FOUND)
     target_link_libraries(cppual-compute-opencl cppual-compute cppual-memory OpenCL::Library)
@@ -1098,8 +1120,11 @@ if(SNDFILE_FOUND)
     target_link_libraries(cppual-audio cppual-memory SndFile::Library)
 endif()
 
-if(TARGET cppual-audio AND OPENAL_FOUND)
-    target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
+#if(TARGET cppual-audio AND OPENAL_FOUND)
+if(OPENAL_FOUND)
+#    target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
+    target_link_libraries(cppual-audio-openal
+    OpenAL::Library)
 endif()
 
 
@@ -1113,13 +1138,15 @@ if(TARGET cppual-audio AND TARGET cppual-compute)
 
 endif()
 
+#Cxxdroid-binary: /storage/emulated/0/Documents/Cxxdroid/cppual/bin/Linux-Clang-armv7l/cppual-memory-test
+
 ### testing
-enable_testing()
+#enable_testing()
 
 add_executable (cppual-memory-test "tests/memory_test.cpp")
 target_link_libraries(cppual-memory-test cppual-memory)
 
-add_test (NAME memory_test COMMAND cppual-memory-test)
+#add_test (NAME memory_test COMMAND cppual-memory-test)
 
 #add_test(memory_test ${CMAKE_CTEST_COMMAND}
 #   --build-and-test "${CMAKE_SOURCE_DIR}/Tests/Simple"

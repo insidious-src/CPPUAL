@@ -85,7 +85,8 @@ enum class error_type : u8
     terminate,
     make_current,
     create,
-    destroy
+    destroy,
+    query_surface
 };
 
 inline version_type& version () noexcept
@@ -161,7 +162,7 @@ inline void error <error_type::create> ()
         throw bad_config ("shared context is not an EGL rendering context "
                           "of the same client API type as the newly created context");
     case BadAttribute:
-        throw bad_config ("attribute value is NOT recognized or out of range");
+        throw bad_attrib ("attribute value is NOT recognized or out of range");
     case NoAlloc:
         throw std::bad_alloc ();
     }
@@ -178,6 +179,22 @@ inline void error <error_type::destroy> ()
         throw not_initialized ("EGL is NOT initialized for target display");
     case BadSurface:
         throw bad_surface ("invalid surface handle");
+    }
+}
+
+template <>
+inline void error <error_type::query_surface> ()
+{
+    switch (::eglGetError ())
+    {
+    case BadDisplay:
+        throw bad_display ("invalid display handle");
+    case NotInitialized:
+        throw not_initialized ("EGL is NOT initialized for target display");
+    case BadSurface:
+        throw bad_surface ("invalid surface handle");
+    case BadAttribute:
+        throw bad_attrib ("attribute value is NOT recognized or out of range");
     }
 }
 
@@ -280,7 +297,7 @@ inline surface_pointer create_drawable (config const&                   gConf,
 
     surface_pointer pSurface = ::eglCreateWindowSurface (gConf.display (),
                                                          gConf,
-                                                         uWndHandle.get<EGLNativeWindowType> (),
+                                                         uWndHandle.get<::EGLNativeWindowType> (),
                                                          nSurfaceAttribs);
 
     if (!pSurface) error<error_type::create> ();
@@ -367,20 +384,20 @@ inline context_pointer create_gc (config const& gConf, version_type version, voi
     return pContext;
 }
 
-inline point2u get_size (config const& config, surface::handle_type surface) noexcept
+inline point2u get_size (display_pointer dsp, surface_pointer surface) noexcept
 {
     value_type size[2];
 
-    if (::eglQuerySurface (config.display (), surface, internal::Width , &size[0]) == internal::IntFalse)
-        return point2u ();
+    if (::eglQuerySurface (dsp, surface, internal::Width , &size[0]) == internal::IntFalse)
+        error<error_type::query_surface> ();
 
-    if (::eglQuerySurface (config.display (), surface, internal::Height, &size[1]) == internal::IntFalse)
-        return point2u ();
+    if (::eglQuerySurface (dsp, surface, internal::Height, &size[1]) == internal::IntFalse)
+        error<error_type::query_surface> ();
 
     return { static_cast<u16> (size[0]), static_cast<u16> (size[1]) };
 }
 
-} } // anonymous namespace EGL
+} } // anonymous namespace internal
 
 // ====================================================
 
@@ -423,7 +440,7 @@ config::config (connection_type legacy, format_type gFormat)
     _M_eFeatures = internal::convert_extensions (_M_pDisplay);
     _M_gFormat   = to_format ();
 
-    ::eglSwapInterval (_M_pDisplay, 1);
+    if (_M_eFeatures.test (feature::sync_control)) ::eglSwapInterval (_M_pDisplay, 1);
 
 #   ifdef DEBUG_MODE
     std::cout << ::eglQueryString (_M_pDisplay, internal::Extensions) << std::endl;
@@ -461,7 +478,7 @@ pixel_format config::to_format () const
 config::int_type config::id () const
 {
     if (!_M_pDisplay or !_M_pCfg) return -1;
-    EGLint id;
+    ::EGLint id;
 
     ::eglGetConfigAttrib (_M_pDisplay, _M_pCfg, EGL_CONFIG_ID, &id);
     return id;
@@ -469,7 +486,7 @@ config::int_type config::id () const
 
 void config::print ()
 {
-    static int value;
+    static ::EGLint value;
 
     std::cout << "Buffer Size: " << static_cast<u16> (_M_gFormat.depth + _M_gFormat.alpha);
 
@@ -564,10 +581,7 @@ surface& surface::operator = (surface&& obj) noexcept
 
 surface::~surface ()
 {
-    if (!_M_pHandle) return;
-
-    if(!::eglDestroySurface (connection (), handle ()))
-        internal::error<internal::error_type::destroy>();
+    destroy ();
 }
 
 void surface::flush ()
@@ -582,9 +596,19 @@ void surface::flush ()
     }
 }
 
+void surface::paint_background (color clr)
+{
+    ::glClearColor (static_cast<float> (clr.red   ()) / 255.0f,
+                    static_cast<float> (clr.green ()) / 255.0f,
+                    static_cast<float> (clr.blue  ()) / 255.0f,
+                    1.0f);
+
+    ::glClear      (GL_COLOR_BUFFER_BIT);
+}
+
 point2u surface::size () const noexcept
 {
-    return internal::get_size (config (), _M_pHandle);
+    return internal::get_size (configuration ().display (), _M_pHandle);
 }
 
 /// TODO: finish egl resizing
@@ -592,8 +616,8 @@ void surface::scale (point2u gSize)
 {
     if (context_interface::current ())
     {
-        if (context_interface::current ()->drawable () == this &&
-            context_interface::current ()->readable () == this)
+        if (context_interface::current ()->drawable ().get () == this &&
+            context_interface::current ()->readable ().get () == this)
         {
             ::glMatrixMode (GL_PROJECTION);
             ::glPushMatrix ();
@@ -604,17 +628,16 @@ void surface::scale (point2u gSize)
             ::glMatrixMode (GL_MODELVIEW);
             ::glPushMatrix ();
             ::glLoadIdentity ();
-
-            if (_M_eType == surface_type::double_buffer)
-            {
-                ::eglSwapBuffers (connection (), handle ());
-            }
-            else
-            {
-                ::glFlush ();
-            }
         }
     }
+}
+
+void surface::destroy ()
+{
+    if (!_M_pHandle) return;
+
+    if(!::eglDestroySurface (connection (), handle ()))
+        internal::error<internal::error_type::destroy>();
 }
 
 // ====================================================
@@ -672,7 +695,7 @@ context& context::operator = (context const& obj)
 
     if (_M_pGC)
     {
-        if (active ()) release ();
+        release ();
         ::eglDestroyContext (config ().display (), _M_pGC);
     }
 
@@ -693,7 +716,7 @@ context::~context () noexcept
 {
     if (!_M_pGC) return;
 
-    if (active ()) acquire (nullptr);
+    acquire (nullptr);
 
     ::eglDestroyContext (configuration ().display (), _M_pGC);
 }
@@ -703,7 +726,7 @@ resource_version context::platform_version () noexcept
     return internal::version ();
 }
 
-bool context::use (pointer pDraw, const_pointer pRead) noexcept
+bool context::use (pointer pDraw, pointer pRead) noexcept
 {
     if ((( pDraw and !pRead) or (pDraw and pDraw->device () != device_backend::gl)) or
         ((!pDraw and  pRead) or (pRead and pRead->device () != device_backend::gl)))
@@ -712,23 +735,28 @@ bool context::use (pointer pDraw, const_pointer pRead) noexcept
     _M_pDrawTarget = pDraw;
     _M_pReadTarget = pRead;
 
-    assign ();
     return true;
 }
 
-bool context::assign () noexcept
+bool context::assign (shared_context const& cntxt) noexcept
 {
-    if (!::eglMakeCurrent (configuration ().display (),
-                           _M_pDrawTarget != nullptr ?
-                              _M_pDrawTarget->handle ().get<internal::surface_pointer> () :
-                              internal::surface_pointer (),
-                           _M_pReadTarget != nullptr ?
-                              _M_pReadTarget->handle ().get<internal::surface_pointer> () :
-                              internal::surface_pointer (),
-                           _M_pGC))
+    if (cntxt == nullptr) return false;
+
+    auto local_cntxt = static_cast<context*> (cntxt.get ());
+
+    static_cast<surface*> (local_cntxt->_M_pDrawTarget.get ())->_M_pContext = cntxt;
+    static_cast<surface*> (local_cntxt->_M_pReadTarget.get ())->_M_pContext = cntxt;
+
+    if (!::eglMakeCurrent (local_cntxt->configuration ().display (),
+                           local_cntxt->_M_pDrawTarget != nullptr ?
+                           local_cntxt->_M_pDrawTarget->handle ().get<internal::surface_pointer> () :
+                           internal::surface_pointer (),
+                           local_cntxt->_M_pReadTarget != nullptr ?
+                           local_cntxt->_M_pReadTarget->handle ().get<internal::surface_pointer> () :
+                           internal::surface_pointer (),
+                           local_cntxt->_M_pGC))
         internal::error<internal::error_type::make_current> ();
 
-    acquire (this);
     return true;
 }
 
@@ -738,6 +766,12 @@ void context::release () noexcept
 
     if (!::eglMakeCurrent (configuration ().display (), nullptr, nullptr, nullptr))
         internal::error<internal::error_type::make_current> ();
+
+    if (static_cast<surface*> (_M_pDrawTarget.get ())->_M_pContext.get () == this)
+        static_cast<surface*> (_M_pDrawTarget.get ())->_M_pContext.reset ();
+
+    if (static_cast<surface*> (_M_pReadTarget.get ())->_M_pContext.get () == this)
+        static_cast<surface*> (_M_pReadTarget.get ())->_M_pContext.reset ();
 }
 
 void context::flush () noexcept

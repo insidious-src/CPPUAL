@@ -35,12 +35,12 @@ class SHARED_API window : public view
 public:
     typedef gfx::image_interface image_type;
 
-    window (view*                 parent,
-            rect        const&    rect,
-            string_type const&    title,
-            image_type*           icon   = nullptr,
-            u32                   screen = 0,
-            allocator_type const& ator   = allocator_type ());
+    window (view*              parent,
+            rect        const& rect,
+            string_type const& title,
+            image_type*        icon   = nullptr,
+            u32                screen = 0,
+            resource_type*     rc     = nullptr);
 
     window ();
     window (window const&);

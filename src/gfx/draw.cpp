@@ -22,6 +22,9 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/process/plugin.h>
 
+#include <algorithm>
+#include <iostream>
+
 namespace cppual { namespace gfx {
 
 // ====================================================
@@ -43,8 +46,8 @@ private:
     inline static cchar* plugin_name () noexcept
     {
     #   if defined OS_GNU_LINUX || defined OS_BSD || defined OS_ANDROID
-        return "libcppual-gfx-module-glx";
-        //return "libcppual-gfx-module-egl";
+        //return "libcppual-gfx-module-glx";
+        return "libcppual-gfx-module-egl";
     #   elif defined OS_WINDOWS
         return "libcppual-gfx-module-wgl";
     #   endif
@@ -70,9 +73,9 @@ inline static shared_factory plugin_instance ()
     return inst;
 }
 
-inline context_pointer& current () noexcept
+inline context_interface*& current () noexcept
 {
-    static thread_local context_pointer current_dc;
+    static thread_local context_interface* current_dc = nullptr;
     return current_dc;
 }
 
@@ -89,6 +92,84 @@ resource_interface::~resource_interface ()
 
 surface_interface::~surface_interface ()
 {
+}
+
+// ====================================================
+
+painter_interface::~painter_interface ()
+{
+}
+
+// ====================================================
+
+painter::painter (shared_surface const& surface)
+: _M_pPainter (draw_factory::instance ()->create_painter (surface)),
+  _M_pSurface (surface)
+{
+    _M_gDrawables.reserve (10);
+}
+
+painter::~painter ()
+{
+    std::cout << "drawable count: " << _M_gDrawables.size () << std::endl;
+
+    for (auto i = 0U; i < _M_gDrawables.size (); ++i)
+        _M_gDrawables[i].first->draw (transform2d (_M_gDrawables[i].second, _M_pSurface));
+}
+
+void painter::create_line (rect  const& rct,
+                           color const& color_fill,
+                           uint         line_size,
+                           line_style   style)
+{
+    _M_gDrawables.push_back ({ _M_pPainter->create_line (color_fill, line_size, style), rct });
+}
+
+void painter::create_path (vector<point2i> const& coord,
+                           color           const& clr,
+                           uint                   line_size,
+                           line_style             style)
+{
+    _M_gDrawables.push_back ({ _M_pPainter->create_path (coord, clr, line_size, style), rect () });
+}
+
+void painter::create_elipse (rect const& rct, color fill, color outline, uint size)
+{
+    _M_gDrawables.push_back ({ _M_pPainter->create_elipse (fill, outline, size), rct });
+}
+
+void painter::create_rectangle (rect const& rct, color fill, color outline, uint size)
+{
+    _M_gDrawables.push_back ({ _M_pPainter->create_rectangle (fill, outline, size), rct });
+}
+
+void painter::create_polygon (polygon_array const& coord, color fill, color outline, uint size)
+{
+    i16 X[3] = { coord[0].x, coord[1].x, coord[2].x };
+    i16 Y[3] = { coord[0].y, coord[1].y, coord[2].y };
+
+    i16 Xmax = *std::max_element(X, X + 3);
+    i16 Xmin = *std::min_element(X, X + 3);
+
+    i16 Ymax = *std::max_element(Y, Y + 3);
+    i16 Ymin = *std::min_element(Y, Y + 3);
+
+    _M_gDrawables.push_back ({ _M_pPainter->create_polygon (coord, fill, outline, size),
+                               rect (Xmin, Ymin,
+                                     static_cast<u16> (Xmax - Xmin), static_cast<u16> (Ymax - Ymin)) });
+}
+
+void painter::create_image (string_type  const& path,
+                            rect         const& rct,
+                            pixel_format const& format,
+                            color               mask)
+{
+    _M_gDrawables.push_back ({ _M_pPainter->create_image (path, format, mask), rct });
+}
+
+void painter::create_text (rect const& rct, string_type const& text, font& txt_font)
+{
+    _M_gDrawables.push_back ({ _M_pPainter->create_text (text, txt_font), rct });
 }
 
 // ====================================================
@@ -118,14 +199,14 @@ context_interface* context_interface::current () noexcept
     return internal::current ();
 }
 
-void context_interface::acquire (context_interface* pContext) noexcept
+void context_interface::acquire (shared_context const& pContext) noexcept
 {
-    if (internal::current () != pContext)
-    {
-        if (internal::current ()) internal::current ()->release ();
+    auto current_cntxt = internal::current ();
 
-        internal::current () = pContext;
-    }
+    if (current_cntxt != pContext.get () && current_cntxt != nullptr) current_cntxt->release ();
+
+    internal::current () = pContext.get ();
+    internal::current ()->assign (pContext);
 }
 
 // ====================================================

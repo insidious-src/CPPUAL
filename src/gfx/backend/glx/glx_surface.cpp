@@ -523,9 +523,19 @@ void surface::flush ()
         ::glFlush ();
 }
 
+void surface::paint_background (color clr)
+{
+    ::glClearColor (static_cast<float> (clr.red   ()) / 255.0f,
+                    static_cast<float> (clr.green ()) / 255.0f,
+                    static_cast<float> (clr.blue  ()) / 255.0f,
+                    1.0f);
+
+    ::glClear      (GL_COLOR_BUFFER_BIT);
+}
+
 point2u surface::size () const noexcept
 {
-    return internal::get_size (config (), _M_pHandle);
+    return internal::get_size (configuration (), _M_pHandle);
 }
 
 /// TODO: finish glx resizing
@@ -533,8 +543,8 @@ void surface::scale (point2u gSize)
 {
     if (context_interface::current ())
     {
-        if (context_interface::current ()->drawable () == this &&
-            context_interface::current ()->readable () == this)
+        if (context_interface::current ()->drawable ().get () == this &&
+            context_interface::current ()->readable ().get () == this)
         {
             ::glMatrixMode (GL_PROJECTION);
             ::glPushMatrix ();
@@ -626,7 +636,7 @@ context::~context () noexcept
 {
     if (!_M_pGC) return;
 
-    if (active ()) acquire (nullptr);
+    acquire (nullptr);
 
     ::glXDestroyContext (configuration ().legacy ().get<internal::display_pointer> (),
                          _M_pGC.get<internal::context_pointer> ());
@@ -637,7 +647,7 @@ resource_version context::platform_version () noexcept
     return internal::version ();
 }
 
-bool context::use (pointer pDraw, const_pointer pRead) noexcept
+bool context::use (pointer pDraw, pointer pRead) noexcept
 {
     if ((( pDraw and !pRead) or (pDraw and pDraw->device () != device_backend::gl)) or
         ((!pDraw and  pRead) or (pRead and pRead->device () != device_backend::gl)))
@@ -646,26 +656,31 @@ bool context::use (pointer pDraw, const_pointer pRead) noexcept
     _M_pDrawTarget = pDraw;
     _M_pReadTarget = pRead;
 
-    assign ();
     return true;
 }
 
-bool context::assign () noexcept
+bool context::assign (shared_context const& cntxt) noexcept
 {
-    if (::glXMakeContextCurrent (configuration ().legacy ().get<internal::display_pointer> (),
-                                 _M_pDrawTarget != nullptr ?
-                                    _M_pDrawTarget->handle ().get<internal::surface_id> () :
+    if (cntxt == nullptr) return false;
+
+    auto local_cntxt = static_cast<context*> (cntxt.get ());
+
+    static_cast<surface*> (local_cntxt->_M_pDrawTarget.get ())->_M_pContext = cntxt;
+    static_cast<surface*> (local_cntxt->_M_pReadTarget.get ())->_M_pContext = cntxt;
+
+    if (::glXMakeContextCurrent (local_cntxt->configuration ().legacy ().get<internal::display_pointer> (),
+                                 local_cntxt->_M_pDrawTarget != nullptr ?
+                                    local_cntxt->_M_pDrawTarget->handle ().get<internal::surface_id> () :
                                     internal::surface_id (),
-                                 _M_pReadTarget != nullptr ?
-                                    _M_pReadTarget->handle ().get<internal::surface_id> () :
+                                 local_cntxt->_M_pReadTarget != nullptr ?
+                                    local_cntxt->_M_pReadTarget->handle ().get<internal::surface_id> () :
                                     internal::surface_id (),
-                                 _M_pGC.get<internal::context_pointer> ()))
+                                 local_cntxt->_M_pGC.get<internal::context_pointer> ()))
     {
-        acquire (this);
         return true;
     }
 
-    return true;
+    return false;
 }
 
 void context::release () noexcept
@@ -676,6 +691,12 @@ void context::release () noexcept
                                  internal::surface_id (),
                                  internal::surface_id (),
                                  internal::context_pointer ());
+
+        if (static_cast<surface*> (_M_pDrawTarget.get ())->_M_pContext.get () == this)
+            static_cast<surface*> (_M_pDrawTarget.get ())->_M_pContext.reset ();
+
+        if (static_cast<surface*> (_M_pReadTarget.get ())->_M_pContext.get () == this)
+            static_cast<surface*> (_M_pReadTarget.get ())->_M_pContext.reset ();
     }
 }
 

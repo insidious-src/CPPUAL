@@ -36,8 +36,8 @@ window::window (view* parent,
                 string_type const& title,
                 window::image_type* icon,
                 u32 screen,
-                allocator_type const& ator)
-: view (parent, rect, screen, ator),
+                resource_type* rc)
+: view (parent, rect, screen, rc),
   _M_gFrame (),
   _M_pIcon ()
 {

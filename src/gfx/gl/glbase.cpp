@@ -31,7 +31,7 @@ namespace { // optimize for internal unit usage
 
 inline ::GLuint generate_object (resource_type eType)
 {
-    context_interface* pContext = context_interface::current ();
+    auto pContext = context_interface::current ();
 
     if (!pContext or pContext->device () != device_backend::gl)
         throw bad_context ("NO GL context bound to thread");
@@ -69,7 +69,7 @@ inline ::GLuint generate_object (resource_type eType)
 
 inline ::GLuint generate_shader (::GLenum uType)
 {
-    context_interface* pContext = context_interface::current ();
+    auto pContext = context_interface::current ();
 
     if (!pContext or pContext->device () != device_backend::gl)
         throw bad_context ("NO GL context bound to thread");

@@ -23,7 +23,7 @@
 #define CPPUAL_UI_VIEW_H_
 #ifdef __cplusplus
 
-#include <cppual/gfx/coord.h>
+#include <cppual/gfx/draw.h>
 #include <cppual/circular_queue.h>
 #include <cppual/ui/vsurface.h>
 #include <cppual/input/event.h>
@@ -38,11 +38,14 @@ public:
     typedef input::sys_event                      event_type    ;
     typedef resource_handle                       window_type   ;
     typedef memory::allocator<view*>              allocator_type;
+    typedef memory::memory_resource               resource_type ;
     typedef circular_queue<view*, allocator_type> container     ;
     typedef std::size_t                           size_type     ;
     typedef typename container::iterator          iterator      ;
     typedef string                                string_type   ;
     typedef platform_wnd_interface                platform_wnd  ;
+    typedef gfx::shared_surface                   surface_type  ;
+    typedef gfx::shared_context                   context_type  ;
 
     enum
     {
@@ -55,10 +58,10 @@ public:
     view& operator = (view const&);
     virtual ~view ();
 
-    view (view*       parent,
-          rect const& rect,
-          u32         screen    = 0,
-          allocator_type const& = allocator_type ());
+    view (view*          parent,
+          rect const&    rect,
+          u32            screen = 0,
+          resource_type* rc     = nullptr);
 
     void destroy ();
     void show ();
@@ -70,17 +73,20 @@ public:
     void move (point2i);
     void destroy_children ();
     void refresh ();
+    void update (rect const& region);
     void enable ();
     void disable ();
     void set_focus ();
     void kill_focus ();
 
-    inline weak_window     renderable () const noexcept { return _M_pRenderable; }
-    inline platform_wnd*   renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
-    inline resource_handle platform_handle () const { return renderable ().lock ()->handle (); }
-    inline shared_display  platform_display () const { return renderable ().lock ()->connection (); }
-    inline point2u         minimum_size () const noexcept { return _M_gMinSize; }
-    inline point2u         maximum_size () const noexcept { return _M_gMaxSize; }
+    inline weak_window         renderable () const noexcept { return _M_pRenderable; }
+    inline platform_wnd*       renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
+    inline resource_handle     platform_handle () const { return renderable ().lock ()->handle (); }
+    inline shared_display      platform_display () const { return renderable ().lock ()->connection (); }
+    inline gfx::shared_surface platform_surface () const noexcept { return _M_pSurface; }
+    inline gfx::shared_context platform_context () const noexcept { return _M_pContext; }
+    inline point2u             minimum_size () const noexcept { return _M_gMinSize; }
+    inline point2u             maximum_size () const noexcept { return _M_gMaxSize; }
 
     inline bool valid () const noexcept
     { return _M_gStateFlags.test (view::is_valid); }
@@ -96,6 +102,12 @@ public:
 
     inline rect geometry () const noexcept
     { return _M_gStateFlags.test (view::is_valid) ? _M_pRenderable->geometry () : rect (); }
+
+    inline container& children () noexcept
+    { return _M_gChildrenList; }
+
+    inline container const& children () const noexcept
+    { return _M_gChildrenList; }
 
 protected:
     virtual void mouse_moved_event (point2u);
@@ -141,6 +153,8 @@ private:
     container     _M_gChildrenList;
     point2u       _M_gMinSize, _M_gMaxSize;
     shared_window _M_pRenderable;
+    surface_type  _M_pSurface;
+    context_type  _M_pContext;
     iterator      _M_gItFromParent;
     view*         _M_pParentObj;
     state_flags   _M_gStateFlags;

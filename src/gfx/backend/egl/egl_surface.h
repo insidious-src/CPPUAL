@@ -140,22 +140,30 @@ public:
     surface& operator = (surface&&) noexcept;
     virtual ~surface ();
 
+    void    paint_background (color clr);
     point2u size  () const noexcept;
     void    scale (point2u size);
     void    flush ();
 
-    conf_reference  configuration () const noexcept { return  _M_pConf;             }
-    device_backend  device        () const noexcept { return  device_backend::gl;   }
-    handle_type     handle        () const noexcept { return  _M_pHandle;           }
-    connection_type connection    () const noexcept { return  _M_pConf.display ();  }
-    format_type     format        () const noexcept { return  _M_pConf.format  ();  }
-    surface_type    type          () const noexcept { return  _M_eType;             }
+    conf_reference  configuration () const noexcept { return _M_pConf;             }
+    device_backend  device        () const noexcept { return device_backend::gl;   }
+    handle_type     handle        () const noexcept { return _M_pHandle;           }
+    connection_type connection    () const noexcept { return _M_pConf.display ();  }
+    format_type     format        () const noexcept { return _M_pConf.format  ();  }
+    surface_type    type          () const noexcept { return _M_eType;             }
+    context_type    context       () const noexcept { return _M_pContext;          }
 
 private:
-    conf_value   _M_pConf  ;
-    handle_type  _M_pHandle;
-    handle_type  _M_pWnd   ;
-    surface_type _M_eType  ;
+    void destroy ();
+
+    friend class context;
+
+private:
+    conf_value   _M_pConf   ;
+    handle_type  _M_pHandle ;
+    handle_type  _M_pWnd    ;
+    surface_type _M_eType   ;
+    context_type _M_pContext;
 };
 
 // ====================================================
@@ -179,8 +187,8 @@ public:
 
     static version_type platform_version () noexcept;
 
-    bool use     (pointer, const_pointer) noexcept;
-    bool assign  () noexcept;
+    bool use     (pointer, pointer) noexcept;
+    bool assign  (shared_context const& cntxt) noexcept;
     void flush   () noexcept;
     void finish  () noexcept;
     void release () noexcept;
@@ -189,7 +197,7 @@ public:
     conf_reference configuration () const noexcept
     { return _M_pConf; }
 
-    const_pointer   readable      () const noexcept { return  _M_pReadTarget;       }
+    pointer         readable      () const noexcept { return  _M_pReadTarget;       }
     pointer         drawable      () const noexcept { return  _M_pDrawTarget;       }
     version_type    version       () const noexcept { return  _M_nVersion;          }
     device_backend  device        () const noexcept { return  device_backend::gl;   }
@@ -204,7 +212,7 @@ private:
     conf_value     _M_pConf      ;
     handle_type    _M_pGC        ;
     pointer        _M_pDrawTarget;
-    const_pointer  _M_pReadTarget;
+    pointer        _M_pReadTarget;
     shared_context _M_pShared    ;
     version_type   _M_nVersion   ;
 };
