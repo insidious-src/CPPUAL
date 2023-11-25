@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/gfx/drawable/painter.h>
+#include <cppual/gfx/gl/painter.h>
 #include <cppual/gfx/drawable/text.h>
 #include <cppual/gfx/drawable/line.h>
 #include <cppual/gfx/drawable/image.h>

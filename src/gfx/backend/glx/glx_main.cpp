@@ -22,7 +22,7 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/process/plugin.h>
 #include <cppual/memory/stacked.h>
-#include <cppual/gfx/drawable/painter.h>
+#include <cppual/gfx/gl/painter.h>
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD) or defined (OS_ANDROID)
 

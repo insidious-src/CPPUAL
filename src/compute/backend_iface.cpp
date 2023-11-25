@@ -34,7 +34,7 @@ private:
     typedef libraries_vector&           libraries_vector_reference;
     typedef vector<shared_factory>&     factory_vector_reference  ;
 
-    factory::manager_type  mgr            ;
+    factory::manager_type  manager        ;
     vector<shared_factory> local_factories;
 
     static libraries_vector_reference platform_names () noexcept
@@ -64,9 +64,9 @@ private:
 
         for (auto i = 0U; i < vec.size (); ++i)
         {
-            if (mgr.load_plugin (vec[i]))
+            if (manager.load_plugin (vec[i]))
             {
-                local_factories.push_back (mgr.plugin (vec[i]).iface ());
+                local_factories.push_back (manager.plugin (vec[i]).iface ());
             }
         }
     }

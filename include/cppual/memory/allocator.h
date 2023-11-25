@@ -68,7 +68,7 @@ public:
     /// is inter-process shared memory
     inline virtual bool is_shared () const noexcept { return false; }
 
-    /// upstream memory_resource owne
+    /// upstream memory_resource owner
     inline virtual base_reference owner () const noexcept
     { return const_cast<base_reference> (*this); }
 

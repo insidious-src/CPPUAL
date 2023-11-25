@@ -671,7 +671,7 @@ endif()
 # compute video backend
 set(CPPUAL_VIDEO_COMPUTE_HEADERS
     )
-    
+
 if(TARGET cppual-compute)
 
 add_library(cppual-video-compute MODULE
@@ -790,11 +790,13 @@ if(TARGET cppual-gfx)
         if(EGL_FOUND)
             set(CPPUAL_GFX_EGL_HEADERS
                 "src/gfx/backend/egl/egl_surface.h"
+                "include/cppual/gfx/gl/painter.h"
                 )
 
             add_library(cppual-gfx-module-egl MODULE
                 "src/gfx/backend/egl/egl_surface.cpp"
                 "src/gfx/backend/egl/egl_main.cpp"
+                "src/gfx/gl/painter.cpp"
                 )
             target_precompile_headers(cppual-gfx-module-egl PRIVATE ${CPPUAL_GFX_EGL_HEADERS})
         endif()
@@ -802,11 +804,13 @@ if(TARGET cppual-gfx)
         if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND XCB_GLX_FOUND)
             set(CPPUAL_GFX_GLX_HEADERS
                 "src/gfx/backend/glx/glx_surface.h"
+                "include/cppual/gfx/gl/painter.h"
                 )
 
             add_library(cppual-gfx-module-glx MODULE
                 "src/gfx/backend/glx/glx_main.cpp"
                 "src/gfx/backend/glx/glx_surface.cpp"
+                "src/gfx/gl/painter.cpp"
                 )
             target_precompile_headers(cppual-gfx-module-glx PRIVATE ${CPPUAL_GFX_GLX_HEADERS})
         endif()

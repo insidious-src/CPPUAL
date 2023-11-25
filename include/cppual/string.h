@@ -467,18 +467,18 @@ struct is_string<cstring<wchar, Allocator>> : std::true_type
 
 namespace std {
 
-template <typename Char>
-struct hash<basic_string<Char, char_traits<Char>, cppual::memory::allocator<Char>>>
-{
-    static_assert (cppual::is_char<Char>::value, "hash is not a char!");
+//template <typename Char>
+//struct hash<basic_string<Char, char_traits<Char>, cppual::memory::allocator<Char>>>
+//{
+//    static_assert (cppual::is_char<Char>::value, "hash is not a char!");
 
-    typedef basic_string<Char, char_traits<Char>, cppual::memory::allocator<Char>> string_type;
+//    typedef basic_string<Char, char_traits<Char>, cppual::memory::allocator<Char>> string_type;
 
-    size_t operator () (string_type const& value) const
-    {
-        return cppual::const_hash(value.c_str());
-    }
-};
+//    size_t operator () (string_type const& value) const
+//    {
+//        return cppual::const_hash(value.c_str());
+//    }
+//};
 
 // ====================================================
 
