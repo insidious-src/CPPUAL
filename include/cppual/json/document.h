@@ -22,7 +22,7 @@
 #include "internal/strfunc.h"
 #include "memorystream.h"
 #include "encodedstream.h"
-#include <new>      // placement new
+//#include <new>      // placement new
 #include <limits>
 #ifdef __cpp_lib_three_way_comparison
 #include <compare>

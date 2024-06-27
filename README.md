@@ -2,8 +2,8 @@
 
 # C++ Unified Abstraction Library #
 
-	Latest Supported Language Standard: C++14
-	Future Language Standards: C++17 or D Language
+	Latest Supported Language Standard: C++20
+	Future Language Standards: C++23
 
 ## Framework Goals ##
 
@@ -27,16 +27,15 @@
 * modules **(Done)**
 * utilities **(Done)**
 * cross-platform process management and interprocess communication **(~60%)**
-* query hardware and os information **(Done)**
+* query hardware and os information **(5%)**
 
 ### Compute ###
 * use concurrency as host implementation **(Done)**
-* specialized device & shared memory allocators **(~80%)**
-* unified memory management & allocator patterns **(~90%)**
+* specialized device & shared memory allocators **(~60%)**
+* unified memory management & allocator patterns **(~50%)**
 * host/device out-of-order and continuation tasks **(~50%)**
 * use Vulkan & OpenCL as SINGLE SOURCE backends (SPIR-V is required to implement eventual C++ interpreter) **(~40%)**
 * behaviour-based device scheduling and manipulation **(WIP)**
-* branched device tasks **(WIP)**
 
 ### Active Model View Controller ###
 * node based + smart pointer web
@@ -52,14 +51,14 @@
 
 ### Network ###
 * implementation of the C++17 network library **(~80%)**
-* simplified packet exchange **(Done)**
-* layered protocol interface **(~30%)**
+* simplified packet exchange **(70)**
+* layered protocol interface **(~20%)**
 * http, https, ftp, bittorrent protocols
 
 ### Universal Database Interface ###
 * based on AMVC
-* standard & relational database model extension
-* DOM model extension
+* standard & relational database model
+* DOM model
 
 ### Input ###
 * specialized raw input queues **(WIP)**
@@ -68,8 +67,8 @@
 * all types of mice
 * generic controller interface & support
 * wheel controller
-* Xbox 360/One controller
-* Playstation 1/2/4 controller
+* Xbox 360/One/Series X/Series S controller
+* Playstation 1/2/3/4/5 controller
 * Steam controller
 * extended button layouts
 * touch surfaces
@@ -115,22 +114,20 @@
 ### Utilities ###
 * timer **(Done)**
 * calendar
-* passive timeline with speed adjustment **(Done)**
+* passive timeline with speed adjustment **(95%)**
 * fast COW string **(Done)**
 * circular queue + atomic **(WIP)**
 * signals **(Done)**
 * reactive functional types **(WIP)**
-* simd types
 * resource management **(WIP)**
 
 
 ## Longterm Framework Goals ##
 * completely integrate into the std library **(~40%)**
-* unified dynamic memory management for both host and compute devices **(~80%)**
+* unified dynamic memory management for both host and compute devices **(~20%)**
 * drop opengl, directx, glew, egl **(WIP)**
 * drop freetype **(WIP)**
 * drop openal **(WIP)**
 * drop sndfile
 * transparent filesystem management (using protocols)
 * prepare the library for universal memory (memristors)
-* implement everything in D Language

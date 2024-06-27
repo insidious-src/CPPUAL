@@ -28,7 +28,11 @@
 
 namespace cppual { namespace network {
 
+// =========================================================
+
 class protocol_context;
+
+// =========================================================
 
 class protocol : public non_copyable_virtual
 {
@@ -51,13 +55,15 @@ public:
                                  packet&  input_packet,
                                  packet& output_packet) = 0;
 
-    protocol* upper_layer () const { return _M_pUpperProt; }
-    protocol* lower_layer () const { return _M_pLowerProt; }
+    protocol* upper_layer () const noexcept { return _M_pUpperProt; }
+    protocol* lower_layer () const noexcept { return _M_pLowerProt; }
 
 private:
     protocol* _M_pUpperProt;
     protocol* _M_pLowerProt;
 };
+
+// =========================================================
 
 } } // Network
 

@@ -23,53 +23,53 @@
 #define CPPUAL_COMPUTE_MEMORY_H_
 #ifdef __cplusplus
 
-#include <cppual/compute/object.h>
 #include <cppual/noncopyable.h>
 
-#include <new>
+//#include <new>
+
+// =========================================================
 
 namespace cppual { namespace compute {
 
 // =========================================================
 
-struct memory_source_not_available : std::bad_alloc { };
+class device;
 
 // =========================================================
 
-class memory_chunk : public object<resource_type::buffer>
+class device_memory : public non_copyable
 {
 public:
-    typedef device        device_type           ;
-    typedef device&       device_reference      ;
-    typedef device*       device_pointer        ;
-    typedef device const* device_const_pointer  ;
-    typedef device const& device_const_reference;
+    typedef device      device_type     ;
+    typedef device*     device_pointer  ;
+    typedef device&     device_reference;
+    typedef std::size_t size_type       ;
 
-    memory_chunk (device_const_reference, size_type size);
+    device_memory (device_reference dev, size_type size);
 
-    device_const_reference get_device () const noexcept
+    constexpr device_reference device () const noexcept
     { return *_M_pDevice; }
 
 private:
-    device_const_pointer _M_pDevice;
+    device_pointer _M_pDevice;
 };
 
 } } // namespace Compute
 
 // =========================================================
 
-using cppual::compute::memory_chunk;
+using cppual::compute::device_memory;
 
 // =========================================================
 
-void* operator new    (std::size_t size, memory_chunk& source, std::size_t align = 0);
-void  operator delete (void* ptr, memory_chunk& source);
+void* operator new    (std::size_t size, device_memory& obj);
+void  operator delete (void* ptr, device_memory& obj);
 
-inline void* operator new[] (std::size_t size, memory_chunk& source, std::size_t align = 0)
-{ return ::operator new (size, source, align); }
+inline void* operator new[] (std::size_t size, device_memory& obj)
+{ return ::operator new (size, obj); }
 
-inline void  operator delete[] (void* ptr, memory_chunk& source)
-{ ::operator delete (ptr, source); }
+inline void  operator delete[] (void* ptr, device_memory& obj)
+{ ::operator delete (ptr, obj); }
 
 // =========================================================
 

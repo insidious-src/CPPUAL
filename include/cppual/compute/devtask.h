@@ -47,8 +47,8 @@ public:
     typedef bitset<engine_type> engine_types;
 
     device_queue ();
-    device_queue (device const&, engine_type exec_engine_type);
-    device_queue (device_queue&&);
+    device_queue (device const& dev, engine_type exec_engine_type);
+    device_queue (device_queue&& dev);
     device_queue& operator = (device_queue&&);
 
     static engine_types supported_types (device const&) noexcept;

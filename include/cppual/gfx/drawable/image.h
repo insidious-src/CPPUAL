@@ -23,9 +23,10 @@
 #define CPPUAL_GFX_DRAWABLE_IMAGE_H_
 #ifdef __cplusplus
 
-#include <string>
-#include <cppual/gfx/draw.h>
+#include <cppual/gfx/drawable/shape.h>
 #include <cppual/memory/allocator.h>
+
+//#include <string>
 
 namespace cppual { namespace gfx {
 
@@ -61,7 +62,7 @@ public:
     inline raster_image (string_type  const& gPath,
                          pixel_format const& gFomat = pixel_format (),
                          color               gMask  = color        (),
-                         memory_resource&    pAtor  = *memory::get_default_resource ())
+                         memory_resource&    pAtor  = memory::get_default_resource ())
     : allocator (pAtor),
       _M_gPixBuffer ({ 0, 0 }, gFomat),
       _M_gColorMask (gMask),
@@ -113,7 +114,7 @@ public:
     { return _M_bIsLoaded; }
 
     inline vector_image (string_type const&  gPath,
-                         memory_resource&    pAtor  = *memory::get_default_resource (),
+                         memory_resource&    pAtor  = memory::get_default_resource (),
                          pixel_format const& gFomat = pixel_format ())
     : allocator (pAtor),
       _M_gPixBuffer ({ 0, 0 },   gFomat),

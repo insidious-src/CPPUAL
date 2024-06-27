@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cppual/ui/display.h>
 #include <cppual/ui/manager.h>
 
 namespace cppual { namespace ui {

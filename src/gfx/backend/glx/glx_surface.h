@@ -25,7 +25,7 @@
 
 #include <cppual/gfx/draw.h>
 
-#include <mutex>
+//#include <mutex>
 
 namespace cppual { namespace gfx { namespace gl {
 

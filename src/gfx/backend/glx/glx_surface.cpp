@@ -177,11 +177,11 @@ inline config::feature_types convert_extensions (display_pointer dsp)
 
     for (auto extension = extensions; extension++; extension = std::strchr (extension , ' '))
     {
-        switch (const_hash (extension))
+        switch (constexpr_hash (extension))
         {
-        case const_hash ("GLX_EXT_swap_control"):
+        case constexpr_hash ("GLX_EXT_swap_control"):
             eFeatures += config::feature::sync_control;
-        case const_hash ("GLX_MESA_swap_control"):
+        case constexpr_hash ("GLX_MESA_swap_control"):
             eFeatures += config::feature::mesa_sync_control;
             break;
         }

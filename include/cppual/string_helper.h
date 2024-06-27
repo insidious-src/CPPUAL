@@ -32,11 +32,16 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <array>
 
 #include <assert.h>
 
 namespace cppual {
+
+template <typename>
+class string_list_iterator;
+
+template <typename, std::size_t, typename>
+class string_list;
 
 // ====================================================
 
@@ -103,15 +108,15 @@ template <typename T>
 class string_list_iterator
 {
 public:
+    typedef string_list_iterator<T>         self_type        ;
     typedef T                               buf_type         ;
+    typedef typename T::value_type          value_type       ;
     typedef typename T::pointer             pointer          ;
     typedef typename T::const_pointer       const_pointer    ;
     typedef typename T::reference           reference        ;
     typedef typename T::const_reference     const_reference  ;
     typedef typename T::difference_type     difference_type  ;
     typedef typename T::size_type           size_type        ;
-    typedef typename T::value_type          value_type       ;
-    typedef string_list_iterator<T>         self_type        ;
     typedef std::bidirectional_iterator_tag iterator_category;
 
     typedef typename std::conditional<std::is_const<buf_type>::value,
@@ -250,25 +255,26 @@ operator - (const typename string_list_iterator<T>::difference_type& a,
 
 template <typename T,
           std::size_t N,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if<is_char_v<T>>::type
+          >
 class string_list
 {
 public:
-    typedef T const*                              value_type            ;
-    typedef std::size_t                           size_type             ;
-    typedef T const*                              pointer               ;
-    typedef T const*                              const_pointer         ;
-    typedef T const*                              reference             ;
-    typedef T const*                              const_reference       ;
-    typedef std::ptrdiff_t                        difference_type       ;
     typedef string_list<T, N>                     self_type             ;
+    typedef T const*                              value_type            ;
+    typedef value_type                            pointer               ;
+    typedef value_type                            const_pointer         ;
+    typedef value_type                            reference             ;
+    typedef value_type                            const_reference       ;
+    typedef std::size_t                           size_type             ;
+    typedef std::ptrdiff_t                        difference_type       ;
     typedef string_list_iterator<self_type>       iterator              ;
     typedef string_list_iterator<self_type const> const_iterator        ;
     typedef std::reverse_iterator<iterator>       reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    static_assert (N > 0, "string_list empty!");
-    static_assert (is_char_v<T>, "T is not a character type!");
+    static_assert (N > 0, "string_list is empty!");
+    static_assert (is_char_v<T>, "T is NOT a character type!");
 
     static constexpr const size_type npos = static_cast<size_type> (-1);
 
@@ -278,10 +284,10 @@ public:
     constexpr string_list(U... array) noexcept
     : _M_array { array... }
     {
-        static_assert (are_of_same_type_v<value_type, U...>, "some of the args are not strings!");
+        static_assert (are_of_same_type_v<value_type, U...>, "some of the args are NOT strings!");
     }
 
-    constexpr const_pointer operator [] (size_type i) const
+    constexpr const_reference operator [] (size_type i) const
     {
         assert (i < size());
         return _M_array[i];
@@ -289,7 +295,8 @@ public:
 
     constexpr size_type hash (size_type i) const
     {
-        return const_hash ((*this)[i]);
+        assert (i < size());
+        return constexpr_hash ((*this)[i]);
     }
 
     constexpr const_reference front  () const noexcept { return _M_array[0]; }

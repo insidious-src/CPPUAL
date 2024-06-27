@@ -16,7 +16,7 @@ void test1 ()
 
     cppual::memory::set_default_resource (res);
 
-    std::cout << "stacked_resource max_size: " << cppual::memory::get_default_resource ()->max_size ()
+    std::cout << "stacked_resource max_size: " << cppual::memory::get_default_resource ().max_size ()
               << " bytes" << std::endl;
 
     vectors vec;
@@ -61,7 +61,7 @@ void test2 ()
 
     constexpr const value_vector::size_type max_vectors = 400U;
 
-    cppual::memory::set_default_resource (*cppual::memory::new_delete_resource ());
+    cppual::memory::set_default_resource (cppual::memory::new_delete_resource ());
 
     cppual::memory::dstacked_resource res((sizeof (value_vector) * max_vectors) +
                                           (sizeof (value_type  ) * max_vectors  * max_vectors),
@@ -69,7 +69,7 @@ void test2 ()
 
     cppual::memory::set_default_resource (res);
 
-    std::cout << "dstacked_resource max_size: " << cppual::memory::get_default_resource ()->max_size ()
+    std::cout << "dstacked_resource max_size: " << cppual::memory::get_default_resource ().max_size ()
               << " bytes" << std::endl;
 
     vectors vec;
@@ -113,13 +113,13 @@ void test3 ()
 
     constexpr const value_vector::size_type max_vectors = 400U;
 
-    cppual::memory::set_default_resource (*cppual::memory::new_delete_resource ());
+    cppual::memory::set_default_resource (cppual::memory::new_delete_resource ());
 
     cppual::memory::heap_resource res (max_vectors * max_vectors * sizeof (value_type));
 
     cppual::memory::set_default_resource (res);
 
-    std::cout << "heap_resource max_size: " << cppual::memory::get_default_resource ()->max_size ()
+    std::cout << "heap_resource max_size: " << cppual::memory::get_default_resource ().max_size ()
               << " bytes" << std::endl;
 
     value_vector vec;

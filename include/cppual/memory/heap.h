@@ -34,17 +34,19 @@ class SHARED_API heap_resource final : public memory_resource
 public:
     heap_resource   (size_type size);
     heap_resource   (pointer buffer, size_type size);
-    heap_resource   (memory_resource& allocator, size_type size);
+    heap_resource   (memory_resource& rc, size_type size);
     heap_resource   (shared_memory& shared_name, size_type size);
     ~heap_resource  ();
-    void clear () noexcept;
 
+    void      clear    ()       noexcept;
     size_type max_size () const noexcept;
 
     size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
-                                       static_cast<math_pointer> (_M_pBegin));
+        auto const size = static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
+                                                  static_cast<math_pointer> (_M_pBegin));
+
+        return size > sizeof (free_block) ? size - sizeof (free_block) : size_type ();
     }
 
     bool is_shared () const noexcept
@@ -80,7 +82,7 @@ public:
 
     list_resource (size_type size);
     list_resource (pointer buffer, size_type size);
-    list_resource (memory_resource& allocator, size_type size);
+    list_resource (memory_resource& rc, size_type size);
     list_resource (shared_memory& shared_name, size_type size);
     ~list_resource ();
 
@@ -90,9 +92,10 @@ public:
 
     size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
-                                      (static_cast<math_pointer> (_M_pBegin) +
-                                       sizeof (header)));
+        auto const size = static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
+                                                  static_cast<math_pointer> (_M_pBegin));
+
+        return size > sizeof (header) ? size - sizeof (header) : size_type ();
     }
 
     bool is_shared () const noexcept
@@ -115,14 +118,6 @@ private:
     header*          _M_pFirstFreeBlock;
     cbool            _M_bIsMemShared   ;
 };
-
-// =========================================================
-
-template <class T>
-using heap_allocator = allocator <T>;
-
-template <class T>
-using list_allocator = allocator <T>;
 
 // =========================================================
 

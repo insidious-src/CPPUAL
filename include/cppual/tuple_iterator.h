@@ -43,12 +43,12 @@ namespace cppual { namespace detail {
 template <typename Tuple>
 struct itr_traits_impl
 {
-  private:
+private:
     template <size_t... I>
     static constexpr auto val_type_impl(std::index_sequence<I...> _) ->
         std::variant<std::reference_wrapper<std::tuple_element_t<I, Tuple>>...>;
 
-  public:
+public:
     using value_type     = decltype(val_type_impl(std::make_index_sequence<std::tuple_size_v<Tuple>>()));
     using reference_type = value_type;
 };
@@ -57,12 +57,13 @@ struct itr_traits_impl
 template <typename Tuple>
 struct getters_impl
 {
+public:
     static constexpr auto make_getters()
     {
         return make_getters_impl(std::make_index_sequence<std::tuple_size_v<Tuple>>());
     }
 
-  private:
+private:
     using reference_type = typename itr_traits_impl<Tuple>::reference_type;
     using getter_pointer = reference_type(*)(Tuple&);
     using getter_array   = std::array<const getter_pointer, std::tuple_size_v<Tuple>>;
@@ -86,6 +87,7 @@ struct getters_impl
 template <typename Tuple>
 class tuple_iterator
 {
+private:
     static constexpr const auto kGetters = detail::getters_impl<Tuple>::make_getters();
     using getter_itr = typename decltype(kGetters)::const_iterator;
 
@@ -97,7 +99,7 @@ public:
     using iterator_category = typename std::iterator_traits<getter_itr>::iterator_category;
 
     // Provides the interface for creating tuple iterators.
-    // friend class TupleRange<Tuple>;
+    // friend class tuple_range<Tuple>;
 
     // Returns a singular iterator, that is, an iterator that is not associated with any tuple.
     // Such instances are semantically equivalent to nullptr, and should therefore never be modified

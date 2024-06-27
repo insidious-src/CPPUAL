@@ -24,21 +24,16 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
+#include <cppual/resource.h>
 #include <cppual/compute/device.h>
 
 namespace cppual { namespace compute {
 
-class host_connection : public non_copyable
+class host_connection : public resource<void, resource_handle>
 {
 public:
     typedef u32             size_type;
     typedef resource_handle pointer  ;
-
-    template <typename T>
-    T handle () const noexcept { return _M_pConn.get<T> (); }
-
-private:
-    pointer _M_pConn;
 };
 
 } } // namespace Platform

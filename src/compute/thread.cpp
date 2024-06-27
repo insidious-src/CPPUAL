@@ -49,7 +49,7 @@ enum result
 
 namespace main_thread {
 
-static const thread_handle main_thread_handle = this_thread::handle ();
+static const resource_handle main_thread_handle = this_thread::handle ();
 
 resource_handle handle () noexcept
 {
@@ -219,8 +219,10 @@ bool thread::start (callable&       gFunc,
 #   elif defined (OS_WINDOWS)
 #   endif
 
-    _M_bIsJoinable.store (bJoinable);
-    _M_uStackSize = uStackSize;
+    _M_bIsJoinable = bJoinable ;
+    _M_uStackSize  = uStackSize;
+
+    set_priority (ePrio);
     if (!bJoinable) detach ();
     return true;
 }
@@ -256,8 +258,6 @@ void thread::detach ()
 
 int thread::set_priority (thread_priority ePrio)
 {
-    UNUSED(ePrio);
-
 #   if defined (OS_STD_POSIX) && !defined (OS_ANDROID)
 
     int nPrio = 0;
@@ -288,7 +288,7 @@ int thread::set_priority (thread_priority ePrio)
     case thread_priority::highest:
         nPrio = 99;
         break;
-    case thread_priority::inherit:
+    default:
     {
         ::sched_param gParam;
         ::pthread_getschedparam (_M_gId._M_handle, &nPrio, &gParam);
@@ -308,6 +308,9 @@ int thread::set_priority (thread_priority ePrio)
     }
 
 #   elif defined (OS_WINDOWS)
+    UNUSED(ePrio);
+#   elif defined (OS_ANDROID)
+    UNUSED(ePrio);
 #   endif
 
     return error_unknown;

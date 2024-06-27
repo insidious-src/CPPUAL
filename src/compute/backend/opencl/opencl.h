@@ -35,10 +35,11 @@
 
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
-#include <CL/sycl.hpp>
+//#include <CL/sycl.hpp>
 
 #include <type_traits>
 #include <exception>
+#include <stdexcept>
 
 /*
  * API Typesafe Encapsulation Guide Lines
@@ -59,7 +60,7 @@ namespace cppual { namespace compute { namespace cl {
 
 // =========================================================
 
-using namespace ::cl;
+//using namespace ::cl;
 
 typedef string                  string_type         ;
 typedef ::cl_platform_info      platform_info_type  ;
@@ -160,12 +161,14 @@ template <> struct is_cl_object_helper<queue_type   > : public std::true_type  {
 template <> struct is_cl_object_helper<sampler_type > : public std::true_type  { };
 
 template <typename T>
-struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<typename
-                                                    std::remove_cv<T>::type>::value)>
-{ static_assert (is_cl_object<T>::value, "T is NOT a opencl object type!"); };
+struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<std::remove_cv_t<T>>::value)>
+{ static_assert (is_cl_object<T>::value, "T is NOT an opencl object type!"); };
 
 template <typename T>
 using CLObject = typename std::enable_if<is_cl_object<T>::value, T>::type;
+
+template <typename T>
+inline constexpr auto const is_cl_object_v = is_cl_object<T>::value;
 
 // =========================================================
 
@@ -179,15 +182,18 @@ template <> struct conv_type<resource_type::buffer>  { typedef memory_type   typ
 template <> struct conv_type<resource_type::image>   { typedef memory_type   type; };
 template <> struct conv_type<resource_type::queue>   { typedef queue_type    type; };
 
+template <resource_type T>
+using conv_type_t = conv_type<T>::type;
+
 // =========================================================
 
-class opencl_error : public std::exception
+class opencl_error : public std::runtime_error
 {
 public:
     /// Creates a new opencl_error exception object for \p error.
     explicit opencl_error (i32 error) noexcept
-    : _M_error       (error),
-      _M_error_string(to_string(error))
+    : runtime_error(to_string(error)),
+      _M_error     (error)
     {
     }
 
@@ -203,15 +209,15 @@ public:
     }
 
     /// Returns a string description of the error.
-    string_type error_string() const noexcept
+    cchar* error_string() const noexcept
     {
-        return _M_error_string;
+        return to_string(_M_error);
     }
 
     /// Returns a C-string description of the error.
     cchar* what() const noexcept
     {
-        return _M_error_string.c_str();
+        return to_string(_M_error);
     }
 
     /// Static function which converts the numeric opencl error code \p error
@@ -227,11 +233,10 @@ public:
     /// If the error code is unknown (e.g. not a valid opencl error), a string
     /// containing "Unknown opencl Error" along with the error number will be
     /// returned.
-    static string_type to_string(i32 error);
+    static cchar* to_string(i32 error);
 
 private:
-    i32         _M_error       ;
-    string_type _M_error_string;
+    i32 _M_error;
 };
 
 // =========================================================
@@ -267,8 +272,8 @@ struct bound_info_function
     }
 
     template <class Info>
-    i32 operator()(Info info, size_t input_size, const void *input,
-                   size_t size, void *value, size_t *size_ret) const
+    i32 operator()(Info info, size_t input_size, cvoid* input,
+                   size_t size, void* value, size_t* size_ret) const
     {
         return _M_function(
             _M_object, _M_aux_info, info,
@@ -277,7 +282,7 @@ struct bound_info_function
     }
 
     template <class Info>
-    i32 operator()(Info info, size_t size, void *value, size_t* size_ret) const
+    i32 operator()(Info info, size_t size, void* value, size_t* size_ret) const
     {
         return _M_function(_M_object, _M_aux_info, info, size, value, size_ret);
     }
@@ -383,7 +388,7 @@ struct get_object_info_impl
         T value;
 
         i32 ret = function(info, sizeof(T), &value, 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return value;
     }
@@ -395,7 +400,7 @@ struct get_object_info_impl
         T value;
 
         i32 ret = function(info, input_size, input, sizeof(T), &value, 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return value;
     }
@@ -411,7 +416,7 @@ struct get_object_info_impl<bool>
         cl_bool value;
 
         i32 ret = function(info, sizeof(cl_bool), &value, 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return value == CL_TRUE;
     }
@@ -427,14 +432,14 @@ struct get_object_info_impl<string_type>
         size_t size = 0;
 
         i32 ret = function(info, 0, 0, &size);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         if(size == 0) return string_type();
 
         string_type value(size - 1, 0);
 
         ret = function(info, size, &value[0], 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return value;
     }
@@ -450,14 +455,14 @@ struct get_object_info_impl< vector<T> >
         size_t size = 0;
 
         i32 ret = function(0, 0, &size);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         if(size == 0) return vector<T>();
 
         vector<T> vector(size / sizeof(T));
 
         ret = function(size, &vector[0], 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return vector;
     }
@@ -468,31 +473,31 @@ struct get_object_info_impl< vector<T> >
         size_t size = 0;
 
         i32 ret = function(info, 0, 0, &size);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         if(size == 0) return vector<T>();
 
         vector<T> vector(size / sizeof(T));
 
         ret = function(info, size, &vector[0], 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return vector;
     }
 
     template <class Function, class Info>
     vector<T> operator()(Function function, Info info,
-                         const size_t input_size, const void* input) const
+                         const size_t input_size, cvoid* input) const
     {
         size_t size = 0;
 
         i32 ret = function(info, input_size, input, 0, 0, &size);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         vector<T> vector(size / sizeof(T));
 
         ret = function(info, input_size, input, size, &vector[0], 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return vector;
     }
@@ -507,14 +512,14 @@ struct get_object_info_impl< vector<platform_type*> >
         u32 size = 0;
 
         i32 ret = function(0, 0, &size);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         if(size == 0) return vector<platform_type*>();
 
         vector<platform_type*> vector(size / sizeof(platform_type*));
 
         ret = function(size, &vector[0], 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return vector;
     }
@@ -529,14 +534,14 @@ struct get_object_info_impl< vector<device_type*> >
         u32 size = 0;
 
         i32 ret = function(info, 0, 0, &size);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         if(size == 0) return vector<device_type*>();
 
         vector<device_type*> vector(size / sizeof(device_type*));
 
         ret = function(info, size, &vector[0], 0);
-        if(ret != success) throw (opencl_error(ret));
+        if(ret != success) throw opencl_error(ret);
 
         return vector;
     }
@@ -577,10 +582,10 @@ template <resource_type T>
 class interface : public object<T>
 {
 public:
-    typedef object<T>                              base_type  ;
-    typedef CLObject<typename conv_type<T>::type>* pointer    ;
-    typedef std::size_t                            size_type  ;
-    typedef resource_handle                        handle_type;
+    typedef object<T>                 base_type  ;
+    typedef CLObject<conv_type_t<T>>* pointer    ;
+    typedef std::size_t               size_type  ;
+    typedef resource_handle           handle_type;
 
     interface  () = delete ;
     ~interface () = default;
@@ -611,7 +616,7 @@ public:
     ~interface () noexcept;
 
     interface (interface&&) = default;
-    interface& operator = (interface &&) = default;
+    interface& operator = (interface&&) = default;
 
     constexpr pointer handle () const noexcept
     {

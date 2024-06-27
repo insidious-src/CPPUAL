@@ -30,39 +30,39 @@
 namespace cppual {
 
 template <typename... Ts>
-class Tuple
+class tuple
 {
 public:
     typedef std::size_t size_type;
 
-    Tuple();
+    tuple();
 
-    explicit Tuple(Ts const&...);
-
-    template <typename... U>
-    explicit Tuple(U&&...);
-
-    Tuple(Tuple const&);
-
-    Tuple(Tuple&&);
+    explicit tuple(Ts const&...);
 
     template <typename... U>
-    Tuple(Tuple<U...> const&);
+    explicit tuple(U&&...);
+
+    tuple(tuple const&);
+
+    tuple(tuple&&);
 
     template <typename... U>
-    Tuple(Tuple<U...>&&);
-
-    Tuple& operator=(const Tuple&);
-
-    Tuple& operator=(Tuple&&);
+    tuple(tuple<U...> const&);
 
     template <typename... U>
-    Tuple& operator=(const Tuple<U...>&);
+    tuple(tuple<U...>&&);
+
+    tuple& operator=(const tuple&);
+
+    tuple& operator=(tuple&&);
 
     template <typename... U>
-    Tuple& operator=(Tuple<U...>&&);
+    tuple& operator=(const tuple<U...>&);
 
-    void swap(Tuple&);
+    template <typename... U>
+    tuple& operator=(tuple<U...>&&);
+
+    void swap(tuple&);
 
     static constexpr size_type size () { return sizeof...(Ts); }
 

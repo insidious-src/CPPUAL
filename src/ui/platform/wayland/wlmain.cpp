@@ -76,7 +76,7 @@ extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
     plugin.verMajor = 1                   ;
     plugin.verMinor = 0                   ;
 
-    plugin.iface    = allocate_shared<wl_factory, void> (&static_resource);
+    plugin.iface    = allocate_shared<void, wl_factory> (&static_resource);
 
     return &plugin;
 }

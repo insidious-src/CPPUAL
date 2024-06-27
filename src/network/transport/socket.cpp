@@ -22,7 +22,7 @@
 #include <cppual/network/transport/socket.h>
 #include <cppual/flags.h>
 
-#include <cstring>
+//#include <cstring>
 #include <iostream>
 
 #ifdef OS_GNU_LINUX
@@ -83,7 +83,7 @@ transport_socket::~transport_socket () noexcept
 
 transport_socket& transport_socket::operator = (transport_socket&& gObj) noexcept
 {
-    if (this == gObj) return *this;
+    if (this == &gObj) return *this;
 
     resource::operator = (std::move (gObj));
 

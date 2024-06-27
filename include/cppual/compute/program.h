@@ -27,12 +27,13 @@
 #include <cppual/resource.h>
 #include <cppual/noncopyable.h>
 #include <cppual/compute/devtask.h>
+#include <cppual/compute/behaviour.h>
 
 #include <vector>
 
 namespace cppual { namespace compute {
 
-class program : public object <resource_type::program>
+class program : public object<resource_type::program>
 {
 public:
     typedef std::size_t size_type;

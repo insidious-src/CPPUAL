@@ -46,10 +46,10 @@ private:
     inline static cchar* plugin_name () noexcept
     {
     #   if defined OS_GNU_LINUX || defined OS_BSD || defined OS_ANDROID
-        //return "libcppual-gfx-module-glx";
-        return "libcppual-gfx-module-egl";
+        //return "libcppual-gfx-plugin-glx";
+        return "libcppual-gfx-plugin-egl";
     #   elif defined OS_WINDOWS
-        return "libcppual-gfx-module-wgl";
+        return "libcppual-gfx-plugin-wgl";
     #   endif
     }
 
@@ -133,9 +133,9 @@ void painter::create_path (vector<point2i> const& coord,
     _M_gDrawables.push_back ({ _M_pPainter->create_path (coord, clr, line_size, style), rect () });
 }
 
-void painter::create_elipse (rect const& rct, color fill, color outline, uint size)
+void painter::create_ellipse (rect const& rct, color fill, color outline, uint size)
 {
-    _M_gDrawables.push_back ({ _M_pPainter->create_elipse (fill, outline, size), rct });
+    _M_gDrawables.push_back ({ _M_pPainter->create_ellipse (fill, outline, size), rct });
 }
 
 void painter::create_rectangle (rect const& rct, color fill, color outline, uint size)

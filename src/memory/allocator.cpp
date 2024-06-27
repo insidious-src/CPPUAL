@@ -20,6 +20,7 @@
  */
 
 #include <cppual/memory/allocator.h>
+#include <cppual/compute/device.h>
 
 #include <new>
 #include <cstdlib>
@@ -38,7 +39,7 @@ static const std::thread::id _main_thread_id = std::this_thread::get_id ();
 
 inline static memory_resource::base_pointer_reference internal_default_resource () noexcept
 {
-    static memory_resource::base_pointer def_ptr = new_delete_resource ();
+    static memory_resource::base_pointer def_ptr = &new_delete_resource ();
     return def_ptr;
 }
 
@@ -58,23 +59,17 @@ public:
     using base_type::base_type;
     using base_type::operator=;
 
-    inline bool is_thread_safe () const noexcept { return true; }
-
 private:
-    inline
-    void* do_allocate (size_type /*bytes*/, size_type /*alignment*/)
+    inline void* do_allocate (size_type /*bytes*/, size_type /*align*/)
     { throw std::bad_alloc (); return nullptr; }
 
-    inline
-    void* do_reallocate (pointer /*p*/, size_type /*old_size*/, size_type /*size*/, size_type /*alignment*/)
+    inline void* do_reallocate (pointer /*p*/, size_type /*old_size*/, size_type /*size*/, size_type /*align*/)
     { throw std::bad_alloc (); return nullptr; }
 
-    inline
-    void do_deallocate (void* /*p*/, size_type /*bytes*/, size_type /*alignment*/)
+    inline void do_deallocate (void* /*p*/, size_type /*bytes*/, size_type /*align*/)
     { }
 
-    inline
-    bool do_is_equal (base_const_reference other) const noexcept
+    inline bool do_is_equal (base_const_reference other) const noexcept
     { return this == &other; }
 };
 
@@ -89,22 +84,19 @@ public:
     inline bool is_thread_safe () const noexcept { return true; }
 
 private:
-    inline
-    void* do_allocate (size_type bytes, size_type alignment)
+    inline void* do_allocate (size_type bytes, size_type align)
     {
         if (bytes > max_size ()) throw std::bad_alloc ();
-        return ::operator new (bytes, std::align_val_t (alignment));
+        return ::operator new (bytes, std::align_val_t (align));
     }
 
-    inline
-    void do_deallocate (void* p, size_type bytes, size_type alignment)
+    inline void do_deallocate (void* p, size_type bytes, size_type align)
     {
-        ::operator delete (p, bytes, std::align_val_t (alignment));
+        ::operator delete (p, bytes, std::align_val_t (align));
         //::operator delete (p);
     }
 
-    inline
-    bool do_is_equal (base_const_reference other) const noexcept
+    inline bool do_is_equal (base_const_reference other) const noexcept
     {
         return this == &other;
     }
@@ -121,26 +113,22 @@ public:
     inline bool is_thread_safe () const noexcept { return true; }
 
 private:
-    inline
-    void* do_allocate (size_type bytes, size_type /*alignment*/)
+    inline void* do_allocate (size_type bytes, size_type /*align*/)
     {
         return std::malloc (bytes);
     }
 
-    inline
-    void do_deallocate (void* p, size_type /*bytes*/, size_type /*alignment*/)
+    inline void do_deallocate (void* p, size_type /*bytes*/, size_type /*align*/)
     {
         std::free (p);
     }
 
-    inline
-    void* do_reallocate (void* p, size_type /*old_size*/, size_type new_size, size_type /*alignment*/)
+    inline void* do_reallocate (void* p, size_type /*old_size*/, size_type new_size, size_type /*align*/)
     {
         return p ? std::realloc (p, new_size) : std::malloc (new_size);
     }
 
-    inline
-    bool do_is_equal (base_const_reference other) const noexcept
+    inline bool do_is_equal (base_const_reference other) const noexcept
     {
         return this == &other;
     }
@@ -154,34 +142,39 @@ memory_resource::~memory_resource ()
 {
 }
 
+memory_resource::device_reference memory_resource::host_device () noexcept
+{
+    return device_type::host ();
+}
+
 // =========================================================
 
-memory_resource* new_delete_resource () noexcept
+memory_resource& new_delete_resource () noexcept
 {
     static new_delete_memory_resource res;
-    return &res;
+    return res;
 }
 
-memory_resource* null_resource () noexcept
+memory_resource& null_resource () noexcept
 {
     static null_memory_resource res;
-    return &res;
+    return res;
 }
 
-memory_resource* malloc_resource () noexcept
+memory_resource& malloc_resource () noexcept
 {
     static malloc_memory_resource res;
-    return &res;
+    return res;
 }
 
-memory_resource* get_default_resource () noexcept
+memory_resource& get_default_resource () noexcept
 {
-    return internal_default_resource ();
+    return *internal_default_resource ();
 }
 
-memory_resource* get_default_thread_resource () noexcept
+memory_resource& get_default_thread_resource () noexcept
 {
-    return internal_default_thread_resource ();
+    return *internal_default_thread_resource ();
 }
 
 void set_default_resource(memory_resource& res) noexcept

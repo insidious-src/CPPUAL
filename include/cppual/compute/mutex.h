@@ -27,21 +27,21 @@
 
 #include <atomic>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
 // ====================================================
 
-struct DeferLock { };
+struct defer_lock { };
 
 template <class T>
-class UniqueLock final
+class unique_lock final
 {
 private:
     //T& _M_gMutex;
 };
 
 template <class T>
-class SharedLock final
+class shared_lock final
 {
 public:
     typedef std::atomic_size_t atomic_size;
@@ -55,20 +55,20 @@ private:
 
 // fast mutex - doesn't do any checks
 // still provides some safety but at no performance cost
-class Mutex final : public NonCopyable
+class mutex final : public non_copyable
 {
 public:
-    typedef std::atomic<Thread::Id> atomic_id;
+    typedef std::atomic<thread::id> atomic_id;
 
-    Mutex ();
+    mutex ();
     bool tryLock () noexcept;
     bool tryLockFor (uint millisec);
     void lock ();
     void unlock ();
 
 private:
-    ConditionVariable _M_gCond;
-    atomic_id         _M_gOwner;
+    condition_variable _M_gCond;
+    atomic_id          _M_gOwner;
 };
 
 

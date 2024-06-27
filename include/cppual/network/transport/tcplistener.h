@@ -23,7 +23,6 @@
 #define CPPUAL_NETWORK_TCP_LISTENER_H_
 #ifdef __cplusplus
 
-#include <cppual/network/transport/socket.h>
 #include <cppual/network/transport/tcp.h>
 
 namespace cppual { namespace network {

@@ -23,12 +23,13 @@
 #define CPPUAL_SIGNAL_H_
 #ifdef __cplusplus
 
+#include <cppual/concepts.h>
 #include <cppual/circular_queue.h>
 #include <cppual/functional.h>
 #include <cppual/memory/allocator.h>
 
 #include <vector>
-#include <deque>
+//#include <deque>
 
 namespace cppual {
 
@@ -60,16 +61,16 @@ template <typename T, typename... Args, typename Allocator>
 class SHARED_API signal <T(Args...), Allocator>
 {
 public:
-    typedef Allocator                                    allocator_type        ;
-    typedef DelegateType<typename Allocator::value_type> value_type            ;
-    typedef signal_queue<value_type, allocator_type>     container_type        ;
-    typedef typename container_type::size_type           size_type             ;
-    typedef typename container_type::reference           reference             ;
-    typedef typename container_type::const_reference     const_reference       ;
-    typedef typename container_type::iterator            iterator              ;
-    typedef typename container_type::const_iterator      const_iterator        ;
-    typedef typename container_type::const_iterator      slot_type             ;
-    typedef scoped_connection<T(Args...), Allocator>     scoped_connection_type;
+    typedef memory::AllocatorType<Allocator>              allocator_type        ;
+    typedef DelegateType<typename Allocator::value_type>  value_type            ;
+    typedef signal_queue<value_type, allocator_type>      container_type        ;
+    typedef typename container_type::size_type            size_type             ;
+    typedef typename container_type::reference            reference             ;
+    typedef typename container_type::const_reference      const_reference       ;
+    typedef typename container_type::iterator             iterator              ;
+    typedef typename container_type::const_iterator       const_iterator        ;
+    typedef const_iterator                                slot_type             ;
+    typedef scoped_connection<T(Args...), allocator_type> scoped_connection_type;
 
     template <typename CollectorAllocator>
     using collector_type = std::vector<T, CollectorAllocator>;
@@ -175,6 +176,16 @@ public:
              TRetType_ (TClass::*)(TArgs_...),
              bool);
 
+    template <typename TClass,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (signal<TRetType_(TArgs_...), Allocator_>&,
+             ClassType<TClass>&,
+             bool);
+
     template <typename TRetType_,
               typename... TArgs_,
               typename Allocator_
@@ -211,6 +222,15 @@ public:
                 ClassType<TClass>&,
                 TRetType_ (TClass::*)(TArgs_...));
 
+    template <typename TClass,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend void
+    disconnect (signal<TRetType_(TArgs_...), Allocator_>&,
+                ClassType<TClass>&);
+
     template <typename TRetType_,
               typename... TArgs_,
               typename Allocator_
@@ -229,17 +249,17 @@ template <typename... Args, typename Allocator>
 class SHARED_API signal <void(Args...), Allocator>
 {
 public:
-    typedef Allocator                                    allocator_type        ;
-    typedef DelegateType<typename Allocator::value_type> value_type            ;
-    typedef signal_queue<value_type, allocator_type>     container_type        ;
-    typedef typename Allocator::size_type                size_type             ;
-    typedef typename Allocator::reference                reference             ;
-    typedef typename Allocator::const_reference          const_reference       ;
-    typedef typename container_type::iterator            iterator              ;
-    typedef typename container_type::const_iterator      const_iterator        ;
-    typedef typename container_type::const_iterator      slot_type             ;
-    typedef void                                         collector_type        ;
-    typedef scoped_connection<void(Args...), Allocator>  scoped_connection_type;
+    typedef memory::AllocatorType<Allocator>                 allocator_type        ;
+    typedef DelegateType<typename Allocator::value_type>     value_type            ;
+    typedef signal_queue<value_type, allocator_type>         container_type        ;
+    typedef typename Allocator::size_type                    size_type             ;
+    typedef typename Allocator::reference                    reference             ;
+    typedef typename Allocator::const_reference              const_reference       ;
+    typedef typename container_type::iterator                iterator              ;
+    typedef typename container_type::const_iterator          const_iterator        ;
+    typedef typename container_type::const_iterator          slot_type             ;
+    typedef void                                             collector_type        ;
+    typedef scoped_connection<void(Args...), allocator_type> scoped_connection_type;
 
     void clear () noexcept
     { _M_slots.clear (); }
@@ -325,6 +345,16 @@ public:
              TRetType_ (TClass::*)(TArgs_...),
              bool);
 
+    template <typename TClass,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend typename signal<TRetType_(TArgs_...), Allocator_>::slot_type
+    connect (signal<TRetType_(TArgs_...), Allocator_>&,
+             ClassType<TClass>&,
+             bool);
+
     template <typename TRetType_,
               typename... TArgs_,
               typename Allocator_
@@ -360,6 +390,15 @@ public:
     disconnect (signal<TRetType_(TArgs_...), Allocator_>&,
                 ClassType<TClass>&,
                 TRetType_ (TClass::*)(TArgs_...));
+
+    template <typename TClass,
+              typename TRetType_,
+              typename... TArgs_,
+              typename Allocator_
+              >
+    friend void
+    disconnect (signal<TRetType_(TArgs_...), Allocator_>&,
+                ClassType<TClass>&);
 
     template <typename TRetType_,
               typename... TArgs_,
@@ -487,6 +526,33 @@ connect (signal<TRetType(TArgs...), Allocator>& gSignal,
     return --gSignal._M_slots.end ();
 }
 
+template <typename TClass  ,
+          typename TRetType,
+          typename... TArgs,
+          typename Allocator
+          >
+inline
+typename signal<TRetType(TArgs...), Allocator>::slot_type
+connect (signal<TRetType(TArgs...), Allocator>& gSignal,
+         ClassType<TClass>& pObj,
+         bool bTop = false)
+{
+    auto it = std::find (gSignal.begin (),
+                         gSignal.end   (),
+                         typename signal<TRetType(TArgs...), Allocator>::value_type (pObj));
+
+    if (it != gSignal.end ()) return it;
+
+    if (bTop)
+    {
+        gSignal._M_slots.emplace_front (pObj);
+        return --gSignal._M_slots.begin ();
+    }
+
+    gSignal._M_slots.emplace_back (pObj);
+    return --gSignal._M_slots.end ();
+}
+
 template <typename TRetType,
           typename... TArgs,
           typename Allocator
@@ -559,6 +625,23 @@ disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
     if (it != gSignal.end ()) gSignal._M_slots.erase (it);
 }
 
+template <typename TClass  ,
+          typename TRetType,
+          typename... TArgs,
+          typename Allocator
+          >
+inline
+void
+disconnect (signal<TRetType(TArgs...), Allocator>& gSignal,
+            ClassType<TClass>& pObj)
+{
+    using value_type = typename signal<TRetType(TArgs...), Allocator>::value_type;
+
+    auto it = std::find (gSignal.begin (), gSignal.end (), value_type (pObj));
+
+    if (it != gSignal.end ()) gSignal._M_slots.erase (it);
+}
+
 template <typename TRetType,
           typename... TArgs,
           typename Allocator
@@ -581,10 +664,11 @@ template <typename T, typename... TArgs, typename Allocator>
 class SHARED_API scoped_connection <T(TArgs...), Allocator> : public non_copyable
 {
 public:
-    typedef signal<T(TArgs...), Allocator>   signal_type;
-    typedef signal_type&                     reference  ;
-    typedef signal_type*                     pointer    ;
-    typedef typename signal_type::value_type value_type ;
+    typedef memory::AllocatorType<Allocator>    allocator_type;
+    typedef signal<T(TArgs...), allocator_type> signal_type   ;
+    typedef signal_type&                        reference     ;
+    typedef signal_type*                        pointer       ;
+    typedef typename signal_type::value_type    value_type    ;
 
     scoped_connection () = delete;
     scoped_connection (scoped_connection&&) noexcept = default;

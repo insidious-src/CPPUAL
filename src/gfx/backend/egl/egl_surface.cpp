@@ -25,7 +25,7 @@
 
 #include <cstring>
 #include <iostream>
-#include <algorithm>
+//#include <algorithm>
 
 #include <EGL/egl.h>
 
@@ -41,7 +41,7 @@ typedef ::EGLContext                    context_pointer;
 typedef ::EGLNativeDisplayType          native_display ;
 typedef context_interface::version_type version_type   ;
 
-enum class API
+enum class API : u8
 {
     Unbound = 0,
     OpenGL,
@@ -69,8 +69,9 @@ enum
     BadConfig           = EGL_BAD_CONFIG,
     BadAttribute        = EGL_BAD_ATTRIBUTE,
     NoMatch             = EGL_BAD_MATCH,
+    BadParam            = EGL_BAD_PARAMETER,
     NoAccess            = EGL_BAD_ACCESS,
-    NoAlloc             = EGL_BAD_ALLOC,
+    BadAlloc            = EGL_BAD_ALLOC,
     NotInitialized      = EGL_NOT_INITIALIZED,
     ContextLost         = EGL_CONTEXT_LOST,
     ANGLEFixedSize      = /*EGL_FIXED_SIZE_ANGLE*/ 0x3201,
@@ -86,7 +87,9 @@ enum class error_type : u8
     make_current,
     create,
     destroy,
-    query_surface
+    query_surface,
+    get_configs,
+    choose_config
 };
 
 inline version_type& version () noexcept
@@ -130,12 +133,12 @@ inline void error <error_type::make_current> ()
     case NoAccess:
         throw bad_access ("the context is already current to some other thread");
     case BadNativeWindow:
-        throw bad_window ("the window underlying either draw or read is no longer valid");
+        throw bad_window ("the window underlying either draw or read is NO longer valid");
     case BadCurrentSurface:
         throw bad_surface ("previous context has unflushed commands "
-                           "and the previous surface is no longer valid");
-    case NoAlloc:
-        throw std::bad_alloc ();
+                           "and the previous surface is NO longer valid");
+    case BadAlloc:
+        throw bad_alloc ("EGL failed to allocate resources for the requested operation");
     case ContextLost:
         throw bad_context ("a power management event has occurred");
     }
@@ -147,24 +150,24 @@ inline void error <error_type::create> ()
     switch (::eglGetError ())
     {
     case NoMatch:
-        throw bad_match ("rendering api not bound");
+        throw bad_match ("rendering api NOT bound");
     case BadDisplay:
         throw bad_display ("invalid display handle");
     case NotInitialized:
         throw not_initialized ("EGL is NOT initialized for target display");
     case BadConfig:
         throw bad_config ("NOT an EGL frame buffer configuration, "
-                          "or does not support the current rendering API");
+                          "or does NOT support the current rendering API");
     case BadNativeWindow:
-        throw bad_window ("the window attributes do not correspond to target config "
-                          "or it does not support rendering to windows");
+        throw bad_window ("the window attributes do NOT correspond to target config "
+                          "or it does NOT support rendering to windows");
     case BadContext:
-        throw bad_config ("shared context is not an EGL rendering context "
+        throw bad_config ("shared context is NOT an EGL rendering context "
                           "of the same client API type as the newly created context");
     case BadAttribute:
         throw bad_attrib ("attribute value is NOT recognized or out of range");
-    case NoAlloc:
-        throw std::bad_alloc ();
+    case BadAlloc:
+        throw bad_alloc ("EGL failed to allocate resources for the requested operation");
     }
 }
 
@@ -195,6 +198,37 @@ inline void error <error_type::query_surface> ()
         throw bad_surface ("invalid surface handle");
     case BadAttribute:
         throw bad_attrib ("attribute value is NOT recognized or out of range");
+    }
+}
+
+template <>
+inline void error <error_type::get_configs> ()
+{
+    switch (::eglGetError ())
+    {
+    case BadDisplay:
+        throw bad_display ("display is NOT an EGL display connection");
+    case NotInitialized:
+        throw not_initialized ("display has NOT been initialized");
+    case BadParam:
+        throw std::logic_error ("num_config is NULL");
+    }
+}
+
+template <>
+inline void error <error_type::choose_config> ()
+{
+    switch (::eglGetError ())
+    {
+    case BadDisplay:
+        throw bad_display ("display is NOT an EGL display connection");
+    case NotInitialized:
+        throw not_initialized ("display has NOT been initialized");
+    case BadAttribute:
+        throw bad_attrib ("attribute_list contains an invalid frame buffer configuration "
+                          "attribute or an attribute value that is unrecognized or out of range");
+    case BadParam:
+        throw std::logic_error ("num_config is NULL");
     }
 }
 
@@ -230,10 +264,10 @@ constexpr value_type api_bits (API eAPI) noexcept
                                  eAPI == API::OpenGLES ? GLESBit : none;
 }
 
-constexpr uint const_hash (cchar* input)
+constexpr uint constexpr_hash (cchar* input)
 {
     return *input and *input != ' ' ?
-                                    static_cast<uint> (*input) + 33 * const_hash (input + 1) :
+                                    static_cast<uint> (*input) + 33 * constexpr_hash (input + 1) :
                                     5381;
 }
 
@@ -251,24 +285,24 @@ inline config::feature_types convert_extensions (display_pointer dsp)
          extension = extensions; extension++;
          extension = std::strchr (extension , ' '))
     {
-        switch (const_hash (extension))
+        switch (constexpr_hash (extension))
         {
-        case const_hash ("EGL_KHR_surfaceless_context"):
+        case constexpr_hash ("EGL_KHR_surfaceless_context"):
             eFeatures += config::feature::surfaceless_context;
             break;
-        case const_hash ("EGL_MESA_configless_context"):
+        case constexpr_hash ("EGL_MESA_configless_context"):
             eFeatures += config::feature::configless_context;
             break;
-        case const_hash ("EGL_CHROMIUM_sync_control"):
+        case constexpr_hash ("EGL_CHROMIUM_sync_control"):
             eFeatures += config::feature::sync_control;
             break;
-        case const_hash ("EGL_EXT_create_context_robustness"):
+        case constexpr_hash ("EGL_EXT_create_context_robustness"):
             eFeatures += config::feature::create_robust_context;
             break;
-        case const_hash ("EGL_ANGLE_window_fixed_size"):
+        case constexpr_hash ("EGL_ANGLE_window_fixed_size"):
             eFeatures += config::feature::scalable_surface;
             break;
-        case const_hash ("EGL_KHR_create_context"):
+        case constexpr_hash ("EGL_KHR_create_context"):
             eFeatures += config::feature::context_attributes_ext;
             break;
         }
@@ -409,8 +443,10 @@ config::config (connection_type legacy, format_type gFormat)
 {
     if (!_M_pDisplay) throw std::logic_error ("invalid display");
 
-    internal::value_type nNumConfigs = 0;
-    handle_type::pointer ptr = handle_type::pointer ();
+    static const ::EGLint config_size = 10;
+
+    internal::value_type nNumConfigs = internal::value_type ();
+    ::EGLConfig ptr[config_size];
 
     internal::value_type const nConfigAttribs[]
     {
@@ -423,7 +459,7 @@ config::config (connection_type legacy, format_type gFormat)
         EGL_SURFACE_TYPE,    gFormat.flags.test (pixel_flag::drawable) ?
                     EGL_WINDOW_BIT : gFormat.flags.test (pixel_flag::palette) ?
                         EGL_PBUFFER_BIT : gFormat.flags.test (pixel_flag::bitmap) ?
-                            EGL_PIXMAP_BIT : 0,
+                            EGL_PIXMAP_BIT : internal::value_type (),
         EGL_RENDERABLE_TYPE, internal::api_bits (internal::API::OpenGL),
         internal::none
     };
@@ -432,10 +468,13 @@ config::config (connection_type legacy, format_type gFormat)
 
     UNUSED (init);
 
-    ::eglGetConfigs   (_M_pDisplay, &ptr, 1, &nNumConfigs);
-    ::eglChooseConfig (_M_pDisplay, nConfigAttribs, &ptr, 1, &nNumConfigs);
+    if (::eglGetConfigs   (_M_pDisplay, ptr, config_size, &nNumConfigs) == internal::IntFalse)
+        internal::error<internal::error_type::get_configs> ();
 
-    _M_pCfg = handle_type (ptr);
+    if (::eglChooseConfig (_M_pDisplay, nConfigAttribs, ptr, config_size, &nNumConfigs) == internal::IntFalse)
+        internal::error<internal::error_type::choose_config> ();
+
+    _M_pCfg = nNumConfigs > 0 ? ptr[0] : nullptr;
 
     _M_eFeatures = internal::convert_extensions (_M_pDisplay);
     _M_gFormat   = to_format ();

@@ -157,7 +157,7 @@ struct rect final
     { bottom = static_cast<value_type> (top + uHeight); }
 
     inline void reset () noexcept
-    { left = top = right = bottom = 0; }
+    { left = top = right = bottom = value_type (); }
 
     constexpr bool is_point () const noexcept
     { return (left == right and top == bottom); }

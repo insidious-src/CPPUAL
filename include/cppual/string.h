@@ -23,7 +23,6 @@
 #define CPPUAL_TEXT_STRING_H_
 #ifdef __cplusplus
 
-
 #include <cppual/meta.h>
 #include <cppual/types.h>
 #include <cppual/concepts.h>
@@ -37,7 +36,7 @@
 namespace cppual {
 
 template <typename T, typename TAlloc = memory::allocator<T>>
-class cstring : private TAlloc
+class SHARED_API cstring : private TAlloc
 {
 public:
     typedef std::allocator_traits<TAlloc>              allocator_traits;
@@ -368,35 +367,35 @@ inline cstring<T, TAlloc> operator + (cstring<T, TAlloc> const& gObj,
 // ====================================================
 
 template <typename T,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if_t<is_char<T>::value>>
 using std_string = std::basic_string<T, std::char_traits<T>, std::allocator<T>>;
 
 template <typename T,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if_t<is_char<T>::value>>
 using std_istringstream = std::basic_istringstream<T, std::char_traits<T>, std::allocator<T>>;
 
 template <typename T,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if_t<is_char<T>::value>>
 using std_ostringstream = std::basic_ostringstream<T, std::char_traits<T>, std::allocator<T>>;
 template <typename T,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if_t<is_char<T>::value>>
 using std_stringstream = std::basic_stringstream<T, std::char_traits<T>, std::allocator<T>>;
 
 // ====================================================
 
 template <typename T,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if_t<is_char<T>::value>>
 using used_string = std::basic_string<T, std::char_traits<T>, memory::allocator<T>>;
 
 template <typename T,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if_t<is_char<T>::value>>
 using used_istringstream = std::basic_istringstream<T, std::char_traits<T>, memory::allocator<T>>;
 
 template <typename T,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if_t<is_char<T>::value>>
 using used_ostringstream = std::basic_ostringstream<T, std::char_traits<T>, memory::allocator<T>>;
 template <typename T,
-          typename = typename std::enable_if<is_char<T>::value>::type>
+          typename = typename std::enable_if_t<is_char<T>::value>>
 using used_stringstream = std::basic_stringstream<T, std::char_traits<T>, memory::allocator<T>>;
 
 // ====================================================
@@ -445,21 +444,50 @@ wstringstream;
 
 // ====================================================
 
+/// is of string type
+template <typename T, typename = typename T::allocator_type>
+struct is_string : std::false_type
+{ };
+
+/// is std::basic_string type
 template <typename Allocator>
-struct is_string<cstring<char, Allocator>> : std::true_type
+struct is_string<std::basic_string<char, std::char_traits<char>, Allocator>, Allocator> : std::true_type
+{ };
+
+/// is std::basic_string type
+template <typename Allocator>
+struct is_string<std::basic_string<char16, std::char_traits<char16>, Allocator>, Allocator> : std::true_type
+{ };
+
+/// is std::basic_string type
+template <typename Allocator>
+struct is_string<std::basic_string<char32, std::char_traits<char32>, Allocator>, Allocator> : std::true_type
+{ };
+
+/// is std::basic_string type
+template <typename Allocator>
+struct is_string<std::basic_string<wchar, std::char_traits<wchar>, Allocator>, Allocator> : std::true_type
 { };
 
 template <typename Allocator>
-struct is_string<cstring<char16, Allocator>> : std::true_type
+struct is_string<cstring<char, Allocator>, Allocator> : std::true_type
 { };
 
 template <typename Allocator>
-struct is_string<cstring<char32, Allocator>> : std::true_type
+struct is_string<cstring<char16, Allocator>, Allocator> : std::true_type
 { };
 
 template <typename Allocator>
-struct is_string<cstring<wchar, Allocator>> : std::true_type
+struct is_string<cstring<char32, Allocator>, Allocator> : std::true_type
 { };
+
+template <typename Allocator>
+struct is_string<cstring<wchar, Allocator>, Allocator> : std::true_type
+{ };
+
+/// is of string type -> value
+template <typename T, typename Allocator = typename T::allocator_type>
+inline constexpr auto const is_string_v = is_string<T, Allocator>::value;
 
 } // namespace cppual
 
@@ -476,7 +504,7 @@ namespace std {
 
 //    size_t operator () (string_type const& value) const
 //    {
-//        return cppual::const_hash(value.c_str());
+//        return cppual::constexpr_hash(value.c_str());
 //    }
 //};
 

@@ -64,14 +64,15 @@ inline bool resolve_host_name (cchar* hostname, ::in_addr* addr) noexcept
 bool tcp_client::connect (tcp_stream& stream, address const& server, u16 port) noexcept
 {
     ::sockaddr_in gAddr;
+    auto const server_str = server.to_string ();
 
     gAddr.sin_family = AF_INET;
     gAddr.sin_port   = ::htons (port);
 
-    if (resolve_host_name (server.to_string ().c_str (), &gAddr.sin_addr))
+    if (resolve_host_name (server_str.c_str (), &gAddr.sin_addr))
     {
 #       ifdef OS_STD_UNIX
-        ::inet_pton (PF_INET, server.to_string ().c_str (), &gAddr.sin_addr);
+        ::inet_pton (PF_INET, server_str.c_str (), &gAddr.sin_addr);
 #       endif
     }
 

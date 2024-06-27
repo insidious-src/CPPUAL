@@ -25,18 +25,21 @@
 
 #include <cppual/types.h>
 #include <cppual/string.h>
-#include <cppual/noncopyable.h>
 #include <cppual/containers.h>
+#include <cppual/noncopyable.h>
 
 namespace cppual { namespace network {
 
 // =========================================================
 
-class packet
+class packet : public non_copyable_virtual
 {
 public:
-    typedef std::size_t  size_type  ;
-    typedef vector<char> stream_type;
+    typedef char8              value_type ;
+    typedef value_type const   const_value;
+    typedef std::size_t        size_type  ;
+    typedef u32                stream_size;
+    typedef vector<value_type> stream_type;
 
     typedef bool (packet::* safe_bool)(size_type);
 
@@ -78,17 +81,20 @@ public:
     packet& operator >> (u16string&)   noexcept;
     packet& operator >> (u32string&)   noexcept;
 
-    inline size_type size () const noexcept
+    constexpr size_type size () const noexcept
     { return _M_gData.size (); }
 
-    inline cvoid* data () const noexcept
+    constexpr cvoid* data () const noexcept
     { return !_M_gData.empty () ? &_M_gData[0] : nullptr; }
 
-    inline bool is_end_of_packet () const noexcept
+    constexpr bool is_end_of_packet () const noexcept
     { return _M_uPos >= _M_gData.size (); }
 
+    constexpr bool is_valid () const noexcept
+    { return _M_gData.capacity () > 0; }
+
     constexpr operator safe_bool () const noexcept
-    { return _M_bIsValid ? &packet::can_exchange : nullptr; }
+    { return is_valid () ? &packet::can_exchange : nullptr; }
 
     inline void flush () noexcept
     {
@@ -104,9 +110,8 @@ private:
     bool can_exchange (size_type size_in_bytes) noexcept;
 
 private:
-    stream_type _M_gData   ;
-    size_type   _M_uPos    ;
-    bool        _M_bIsValid;
+    stream_type _M_gData;
+    size_type   _M_uPos ;
 };
 
 // =========================================================

@@ -25,6 +25,7 @@
 
 #include <cppual/decl.h>
 #include <cppual/signal.h>
+#include <cppual/concepts.h>
 
 namespace cppual {
 
@@ -63,9 +64,13 @@ class reactive : signal<void(T const&), A>
 public:
     static_assert (!std::is_void<T>::value, "T is void");
 
-    typedef T        value_type     ;
-    typedef T&       reference      ;
-    typedef T const& const_reference;
+    typedef typename std::remove_cv<T>::type          value_type      ;
+    typedef value_type&                               reference       ;
+    typedef value_type const&                         const_reference ;
+    typedef std::allocator_traits<A>                  allocator_traits;
+    typedef typename allocator_traits::allocator_type allocator_type  ;
+    typedef signal<void(T const&), A>                 base_type       ;
+    typedef typename base_type::value_type            fn_type         ;
 
     constexpr reactive () noexcept = default;
     inline reactive (reactive&&) = default;
@@ -79,7 +84,7 @@ public:
     {
         if (this != &gObj)
         {
-            signal<void(T const&)>::operator = (gObj);
+            signal<void(T const&), A>::operator = (gObj);
             _M_value = gObj._M_value;
             (*this)(_M_value);
         }
@@ -103,6 +108,22 @@ public:
 
     constexpr operator const_reference () const noexcept
     { return _M_value; }
+
+    inline reactive& operator << (fn_type&& fn)
+    {
+        connect (*this, std::move (fn));
+        return   *this;
+    }
+
+    template <typename Object,
+              typename = typename std::enable_if<std::is_object<Object>::value ||
+                                                 std::is_class <Object>::value>::type
+              >
+    inline reactive& operator << (Object& obj)
+    {
+        connect (*this, obj);
+        return   *this;
+    }
 
 private:
     T _M_value;

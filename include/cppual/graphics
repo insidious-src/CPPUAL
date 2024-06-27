@@ -25,11 +25,6 @@
 #include <cppual/gfx/font.h>
 
 #include <cppual/gfx/drawable/shape.h>
-#include <cppual/gfx/drawable/text.h>
-#include <cppual/gfx/drawable/rectangle.h>
-#include <cppual/gfx/drawable/polygon.h>
-#include <cppual/gfx/drawable/line.h>
-#include <cppual/gfx/drawable/elipse.h>
 #include <cppual/gfx/drawable/image.h>
 
 #include <cppual/gfx/formats/bmp.h>

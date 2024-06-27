@@ -28,15 +28,15 @@
 #include <atomic>
 #include <chrono>
 
-namespace cppual { namespace Compute {
+namespace cppual { namespace compute {
 
-class ConditionVariable final
+class condition_variable final
 {
 public:
-    void notifyOne ();
-    void notifyAll ();
-    void waitUntil ();
-    void waitFor ();
+    void notify_one ();
+    void notify_all ();
+    void wait_until ();
+    void wait_for ();
     void wait ();
 };
 

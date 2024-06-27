@@ -28,14 +28,14 @@ namespace cppual { namespace network {
 
 //================================================
 
-data_protocol::data_protocol(string_type const& firstString, string_type const& secondString, Type type)
+data_protocol::data_protocol(string_type const& firstString, string_type const& secondString, msg_type type)
 {
-    _M_gHeader.firstStringSize  = static_cast<size_type>(firstString.size()) ;
-    _M_gHeader.secondStringSize = static_cast<size_type>(secondString.size());
+    _M_gHeader.firstStringSize  = static_cast<stream_size>(firstString.size()) ;
+    _M_gHeader.secondStringSize = static_cast<stream_size>(secondString.size());
     _M_gHeader.type             = type;
     _M_gHeader.dataSize         = 0;
 
-    if(type == Type::Upload)
+    if(type == msg_type::upload)
     {
         std::ifstream file (firstString.c_str ());
         stream_type   bytes;
@@ -45,10 +45,10 @@ data_protocol::data_protocol(string_type const& firstString, string_type const& 
             file.seekg(0, std::ios::end);
 
             bytes.reserve (static_cast<stream_type::size_type>(file.tellg ()));
-            bytes.insert (bytes.begin (), bytes.capacity (), u8());
+            bytes.insert  (bytes.begin (), bytes.capacity (), value_type());
 
             file.seekg (0);
-            file >> &bytes[0];
+            file >> bytes[0];
 
             file.close ();
         }
@@ -59,7 +59,7 @@ data_protocol::data_protocol(string_type const& firstString, string_type const& 
         if(!bytes.empty ())
         {
             _M_gData.insert(_M_gData.end (), bytes.begin (), bytes.end ());
-            _M_gHeader.dataSize = static_cast<size_type>(bytes.size());
+            _M_gHeader.dataSize = static_cast<stream_size>(bytes.size());
         }
     }
     else
@@ -90,32 +90,32 @@ data_protocol::stream_type data_protocol::operator ()() const
     return data;
 }
 
-data_protocol::size_type data_protocol::first_str_size() const noexcept
+data_protocol::stream_size data_protocol::first_str_size() const noexcept
 {
     return _M_gHeader.firstStringSize;
 }
 
-data_protocol::size_type data_protocol::second_str_size() const noexcept
+data_protocol::stream_size data_protocol::second_str_size() const noexcept
 {
     return _M_gHeader.secondStringSize;
 }
 
-data_protocol::size_type data_protocol::data_size() const noexcept
+data_protocol::stream_size data_protocol::data_size() const noexcept
 {
     return _M_gHeader.dataSize;
 }
 
-data_protocol::Type data_protocol::type() const noexcept
+data_protocol::msg_type data_protocol::type() const noexcept
 {
-    return static_cast<Type>(_M_gHeader.type);
+    return static_cast<msg_type>(_M_gHeader.type);
 }
 
-data_protocol::size_type data_protocol::header_size() const noexcept
+data_protocol::stream_size data_protocol::header_size() const noexcept
 {
-    return static_cast<size_type>(sizeof(header));
+    return static_cast<stream_size>(sizeof(header));
 }
 
-data_protocol::size_type data_protocol::size() const noexcept
+data_protocol::stream_size data_protocol::size() const noexcept
 {
     return header_size() + first_str_size() + second_str_size() + data_size();
 }
@@ -125,7 +125,7 @@ data_protocol::stream_type data_protocol::first_string() const noexcept
     stream_type first_string;
 
     first_string.reserve (first_str_size ());
-    first_string.insert  (first_string.end (),
+    first_string.insert  (first_string.begin (),
                           _M_gData.begin (),
                           _M_gData.begin () + stream_type::difference_type (first_str_size ()));
 
@@ -137,7 +137,7 @@ data_protocol::stream_type data_protocol::second_string() const noexcept
     stream_type second_string;
 
     second_string.reserve (second_str_size ());
-    second_string.insert  (second_string.end (),
+    second_string.insert  (second_string.begin (),
                            _M_gData.begin () + stream_type::difference_type (first_str_size ()),
                            _M_gData.begin () + stream_type::difference_type (second_str_size ()));
 
@@ -149,7 +149,7 @@ data_protocol::stream_type data_protocol::data() const noexcept
     stream_type data;
 
     data.reserve (data_size ());
-    data.insert  (data.end (),
+    data.insert  (data.end  (),
                   _M_gData.begin () + stream_type::difference_type (first_str_size () + second_str_size ()),
                   _M_gData.end   ());
 
@@ -159,13 +159,13 @@ data_protocol::stream_type data_protocol::data() const noexcept
 void data_protocol::set_data(stream_type const& bytes)
 {
     std::copy(bytes.begin (),
-              bytes.end (),
+              bytes.end   (),
               _M_gData.begin () + stream_type::difference_type (first_str_size() + second_str_size()));
 
-    _M_gHeader.dataSize = static_cast<size_type> (bytes.size());
+    _M_gHeader.dataSize = static_cast<stream_size> (bytes.size());
 }
 
-void data_protocol::set_type(Type type) noexcept
+void data_protocol::set_type(msg_type type) noexcept
 {
     _M_gHeader.type = type;
 }

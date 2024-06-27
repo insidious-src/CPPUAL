@@ -34,7 +34,7 @@ class SHARED_API hotkey
 {
 public:
     typedef input::sys_event::key_data value_type;
-    typedef std::atomic_bool       bool_type ;
+    typedef std::atomic_bool           bool_type ;
 
     hotkey () noexcept;
     hotkey (value_type const) noexcept;

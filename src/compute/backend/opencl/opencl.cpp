@@ -21,8 +21,8 @@
 
 #include "opencl.h"
 
-#include <cstring>
-#include <memory>
+//#include <cstring>
+//#include <memory>
 
 namespace cppual { namespace compute { namespace cl {
 
@@ -36,9 +36,9 @@ namespace { // optimize for internal unit usage
 
 // =========================================================
 
-string_type opencl_error::to_string(i32 error)
+cchar* opencl_error::to_string(i32 error)
 {
-    switch(error)
+    switch (error)
     {
     case success: return "Success";
     case CL_DEVICE_NOT_FOUND: return "Device Not Found";
@@ -105,9 +105,11 @@ string_type opencl_error::to_string(i32 error)
     #endif // CL_VERSION_2_0
     default:
     {
-        stringstream s;
-        s << "Unknown OpenCL Error (" << error << ")";
-        return s.str();
+        static thread_local string_type error_str;
+        stringstream ss;
+
+        ss << "Unknown OpenCL Error (" << error << ")";
+        return (error_str = ss.str ()).c_str ();
     }
     }
 }

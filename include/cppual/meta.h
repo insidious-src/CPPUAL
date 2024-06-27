@@ -27,7 +27,7 @@
 
 #include <type_traits>
 #include <tuple>
-#include <string>
+//#include <string>
 
 namespace cppual {
 
@@ -47,7 +47,7 @@ template <class... Args>
 struct type_list
 {
     template <std::size_t N>
-    using type = typename std::tuple_element<N, std::tuple<Args...>>::type;
+    using type = typename std::tuple_element_t<N, std::tuple<Args...>>;
 };
 
 // ===================================================
@@ -57,17 +57,17 @@ struct tuple_ref_index;
 
 template <typename T, typename Base, typename... Tail, std::size_t I>
 struct tuple_ref_index<T, std::tuple<Base, Tail...>, I>
-    : std::conditional<std::is_base_of<Base, T>::value || std::is_same<Base, T>::value,
-                       std::integral_constant<std::size_t, I>,
-                       tuple_ref_index<T, std::tuple<Tail...>, I + 1>
-                       >::type
+    : std::conditional_t<std::is_base_of_v<Base, T> || std::is_same_v<Base, T>,
+                         std::integral_constant<std::size_t, I>,
+                         tuple_ref_index<T, std::tuple<Tail...>, I + 1>
+                         >
 { };
 
 /// get base class from derived using a list of bases
 template <typename Derived, typename... Bases>
 using base_from_derived =
-        typename std::tuple_element<tuple_ref_index<Derived, std::tuple<Bases...>>::value,
-                                                    std::tuple<Bases...>>::type;
+        typename std::tuple_element_t<tuple_ref_index<Derived, std::tuple<Bases...>>::value,
+                                                      std::tuple<Bases...>>;
 
 // ===================================================
 
@@ -80,8 +80,7 @@ template <> struct is_char_helper<wchar>  : public std::true_type  { };
 
 /// is char type (char, uchar, char16, char32, wchar)
 template <typename T>
-struct is_char : std::integral_constant<bool, (is_char_helper<typename
-                                               std::remove_cv<T>::type>::value)>
+struct is_char : public is_char_helper<T>
 { };
 
 /// is char type (char, uchar, char16, char32, wchar) -> value
@@ -129,48 +128,20 @@ inline constexpr auto const is_float_v = is_float<T>::value;
 
 // ====================================================
 
-/// is std::basic_string type
-template <typename T, typename Allocator = typename T::allocator_type>
-struct is_string : std::false_type
-{ };
-
-/// is std::basic_string type
-template <typename Allocator>
-struct is_string<std::basic_string<char, std::char_traits<char>, Allocator>> : std::true_type
-{ };
-
-/// is std::basic_string type
-template <typename Allocator>
-struct is_string<std::basic_string<char16, std::char_traits<char16>, Allocator>> : std::true_type
-{ };
-
-/// is std::basic_string type
-template <typename Allocator>
-struct is_string<std::basic_string<char32, std::char_traits<char32>, Allocator>> : std::true_type
-{ };
-
-/// is std::basic_string type
-template <typename Allocator>
-struct is_string<std::basic_string<wchar, std::char_traits<wchar>, Allocator>> : std::true_type
-{ };
-
-/// is std::basic_string type -> value
-template <typename T, typename Allocator = typename T::allocator_type>
-inline constexpr auto const is_string_v = is_string<T, Allocator>::value;
-
-// ====================================================
-
-template <typename T>
+template <typename>
 struct member_function_to_static
 { };
 
-template <typename T, typename Object, typename... Args>
-struct member_function_to_static <T(Object::*)(Args...) const>
+template <typename T, typename C, typename... Args>
+struct member_function_to_static <T(C::*)(Args...) const>
 { using type = T(*)(Args...); };
 
-template <typename T, typename Object, typename... Args>
-struct member_function_to_static <T(Object::*)(Args...)>
+template <typename T, typename C, typename... Args>
+struct member_function_to_static <T(C::*)(Args...)>
 { using type = T(*)(Args...); };
+
+template <typename T>
+using member_function_to_static_t = typename member_function_to_static<T>::type;
 
 // ====================================================
 
@@ -201,10 +172,10 @@ struct are_any_references : std::false_type
 { };
 
 /// are there any references in the template argument list
-template <typename T, typename... TT>
-struct are_any_references<T, TT...>
+template <typename T, typename... Ts>
+struct are_any_references<T, Ts...>
         : std::integral_constant<bool, std::is_reference<typename std::remove_cv<T>::type>{} ||
-                                                         are_any_references<T, TT...>{}>
+                                                         are_any_references<T, Ts...>{}>
 { };
 
 /// are there any references in the template argument list -> value
@@ -219,11 +190,11 @@ struct are_any_objects : std::false_type
 { };
 
 /// are there any objects in the template argument list
-template <typename T, typename... TT>
-struct are_any_objects<T, TT...>
+template <typename T, typename... Ts>
+struct are_any_objects<T, Ts...>
         : std::integral_constant<bool, (std::is_class<typename std::remove_pointer<T>::type>{} &&
                                        !std::is_pointer<T>{}) ||
-                                        are_any_objects<T, TT...>{}
+                                        are_any_objects<T, Ts...>{}
                                  >
 { };
 
@@ -233,11 +204,11 @@ inline constexpr auto const are_any_objects_v = are_any_objects<T...>::value;
 
 // ====================================================
 
-/// char string constexpr hash (ex. usage in switch cases)
-template <typename T, typename = typename std::enable_if<is_char<T>::value>::type>
-constexpr unsigned const_hash (T const* input)
+/// char string constexpr hash (ex. usage in switch cases or as a hash)
+template <typename T, typename = typename std::enable_if_t<is_char_v<T>>>
+constexpr unsigned constexpr_hash (T const* input)
 {
-    return *input ? static_cast<uint>(*input) + 33 * const_hash(input + 1) : 5381;
+    return *input ? static_cast<uint>(*input) + 33 * constexpr_hash(input + 1) : 5381;
 }
 
 } // cppual

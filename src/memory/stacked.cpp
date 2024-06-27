@@ -51,8 +51,8 @@ constexpr memory_resource::math_pointer to_math_ptr (memory_resource::pointer p)
 // =========================================================
 
 stacked_resource::stacked_resource (size_type uSize)
-: _M_gOwner (uSize ? get_default_resource()->max_size() >= (uSize + max_adjust) ?
-                    *get_default_resource() : *new_delete_resource() : *this),
+: _M_gOwner (uSize ? get_default_resource().max_size() >= (uSize + max_adjust) ?
+                     get_default_resource() : new_delete_resource() : *this),
   _M_pMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBegin (_M_pMarker),
   _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + uSize + max_adjust : nullptr),
@@ -73,8 +73,8 @@ stacked_resource::stacked_resource (pointer buffer, size_type uSize)
 
 stacked_resource::stacked_resource (memory_resource& pOwner, size_type uSize)
 : _M_gOwner (uSize ? (uSize + max_adjust) > pOwner.max_size () ?
-                         (uSize + max_adjust) > get_default_resource()->max_size() ?
-                            *new_delete_resource() : *get_default_resource() : pOwner : *this),
+                         (uSize + max_adjust) > get_default_resource().max_size() ?
+                             new_delete_resource() : get_default_resource() : pOwner : *this),
   _M_pMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBegin (_M_pMarker),
   _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + uSize + max_adjust : nullptr),
@@ -185,8 +185,8 @@ void stacked_resource::do_deallocate (void* p, size_type uSize, align_type)
 // =========================================================
 
 dstacked_resource::dstacked_resource (size_type uSize, size_type uHint)
-: _M_gOwner (uSize ? get_default_resource()->max_size() >= (uSize + max_adjust) ?
-                *get_default_resource() : *new_delete_resource() : *this),
+: _M_gOwner (uSize ? get_default_resource().max_size() >= (uSize + max_adjust) ?
+                 get_default_resource() : new_delete_resource() : *this),
   _M_pTopMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBottomMarker (_M_pTopMarker != nullptr ?
             static_cast<math_pointer> (_M_pTopMarker) + uSize + max_adjust : nullptr),
@@ -212,8 +212,8 @@ dstacked_resource::dstacked_resource (pointer buffer, size_type uSize, size_type
 
 dstacked_resource::dstacked_resource (memory_resource& pOwner, size_type uSize, size_type uHint)
 : _M_gOwner (uSize ? uSize > pOwner.max_size () ?
-                         (uSize + max_adjust) > get_default_resource()->max_size() ?
-                                         *new_delete_resource() : *get_default_resource() : pOwner : *this),
+                         (uSize + max_adjust) > get_default_resource().max_size() ?
+                                          new_delete_resource() : get_default_resource() : pOwner : *this),
   _M_pTopMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBottomMarker (_M_pTopMarker != nullptr ?
             static_cast<math_pointer> (_M_pTopMarker) + uSize + max_adjust : nullptr),

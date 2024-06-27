@@ -52,11 +52,6 @@ private:
     { return &gObj == this; }
 };
 
-// =========================================================
-
-template <typename T>
-using page_allocator = allocator<T>;
-
 } } // Memory
 
 #endif // __cplusplus

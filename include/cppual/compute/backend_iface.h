@@ -27,11 +27,11 @@
 #include <cppual/flags.h>
 #include <cppual/containers.h>
 #include <cppual/noncopyable.h>
-#include <cppual/compute/object.h>
 #include <cppual/process/plugin.h>
+#include <cppual/compute/object.h>
 
 #include <memory>
-#include <type_traits>
+//#include <type_traits>
 
 namespace cppual { namespace compute {
 
@@ -131,9 +131,9 @@ public:
     virtual shared_context         create_context (device_vector const& devs) = 0;
 
     virtual shared_buffer          create_buffer (shared_context const& context,
-                                        size_type size,
-                                        memory_access = memory_access::read_write,
-                                        memory_cat    = memory_cat::global) = 0;
+                                                  size_type size,
+                                                  memory_access = memory_access::read_write,
+                                                  memory_cat    = memory_cat::global) = 0;
     \
     virtual shared_cmd_sequence    create_cmd_sequence () = 0;
     virtual shared_image           create_image () = 0;
@@ -203,8 +203,8 @@ public:
     virtual size_type       local_memory_size    () const = 0;
     virtual size_type       const_memory_size    () const = 0;
     virtual size_type       global_memory_size   () const = 0;
+    virtual size_type       max_memory_alloc_size() const = 0;
     virtual u32             compute_units        () const = 0;
-    virtual u64             max_memory_alloc_size() const = 0;
 
 protected:
     using object<resource_type::device>::object;

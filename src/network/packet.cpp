@@ -30,9 +30,9 @@ void packet::append (cvoid* pData, size_type uSize) noexcept
     if (pData && uSize > 0)
     {
         _M_gData.reserve (_M_gData.size () + uSize);
-        _M_gData.insert  (_M_gData.end (),
-                          static_cast<cchar*> (pData),
-                          static_cast<cchar*> (pData) + uSize);
+        _M_gData.insert  (_M_gData.end  (),
+                          static_cast<const_value*> (pData),
+                          static_cast<const_value*> (pData) + uSize);
     }
 }
 
@@ -112,45 +112,45 @@ packet& packet::operator << (cldouble& dData) noexcept
 
 packet& packet::operator << (stream_type const& gData) noexcept
 {
-    cu32 size = static_cast<u32> (gData.size ());
+    auto const size = static_cast<stream_size> (gData.size ());
 
-    append (&size, sizeof (cu32));
+    append (&size, sizeof (stream_size));
     append (&gData, gData.size ());
     return *this;
 }
 
 packet& packet::operator << (string const& gData) noexcept
 {
-    cu32 size = static_cast<u32> (gData.size ());
+    auto const size = static_cast<stream_size> (gData.size ());
 
-    append (&size, sizeof (cu32));
+    append (&size, sizeof (stream_size));
     append (&gData, gData.size ());
     return *this;
 }
 
 packet& packet::operator << (wstring const& gData) noexcept
 {
-    cu32 size = static_cast<u32> (sizeof (wchar) * gData.size ());
+    auto const size = static_cast<stream_size> (sizeof (wchar) * gData.size ());
 
-    append (&size, sizeof (cu32));
+    append (&size, sizeof (stream_size));
     append (&gData, size);
     return *this;
 }
 
 packet& packet::operator << (u16string const& gData) noexcept
 {
-    cu32 size = static_cast<u32> (sizeof (char16) * gData.size ());
+    auto const size = static_cast<stream_size> (sizeof (char16) * gData.size ());
 
-    append (&size, sizeof (cu32));
+    append (&size, sizeof (stream_size));
     append (&gData, size);
     return *this;
 }
 
 packet& packet::operator << (u32string const& gData) noexcept
 {
-    cu32 size = static_cast<u32> (sizeof (char32) * gData.size ());
+    auto const size = static_cast<stream_size> (sizeof (char32) * gData.size ());
 
-    append (&size, sizeof (cu32));
+    append (&size, sizeof (stream_size));
     append (&gData, size);
     return *this;
 }
@@ -288,15 +288,15 @@ packet& packet::operator >> (ldouble& dData) noexcept
 packet& packet::operator >> (stream_type& gData) noexcept
 {
     // First extract string uLength
-    u32 uLength = 0;
+    stream_size uLength = 0;
     *this >> uLength;
 
-    gData.clear ();
+    //gData.clear ();
 
     if ((uLength > 0) && can_exchange (uLength))
     {
         // Then extract characters
-        gData.reserve (gData.size () + uLength);
+        gData.reserve (gData.size () + (uLength - (gData.capacity () - gData.size ())));
 
         gData.insert  (gData.end (),
                        &_M_gData[_M_uPos],
@@ -312,7 +312,7 @@ packet& packet::operator >> (stream_type& gData) noexcept
 packet& packet::operator >> (string& gData) noexcept
 {
     // First extract string uLength
-    u32 uLength = 0;
+    stream_size uLength = 0;
     *this >> uLength;
 
     gData.clear ();
@@ -332,7 +332,7 @@ packet& packet::operator >> (string& gData) noexcept
 packet& packet::operator >> (wstring& gData) noexcept
 {
     // First extract size
-    u32 uLength = 0;
+    stream_size uLength = 0;
     *this >> uLength;
 
     gData.clear ();
@@ -352,7 +352,7 @@ packet& packet::operator >> (wstring& gData) noexcept
 packet& packet::operator >> (u16string& gData) noexcept
 {
     // First extract size
-    u32 uLength = 0;
+    stream_size uLength = 0;
     *this >> uLength;
 
     gData.clear ();
@@ -372,7 +372,7 @@ packet& packet::operator >> (u16string& gData) noexcept
 packet& packet::operator >> (u32string& gData) noexcept
 {
     // First extract size
-    u32 uLength = 0;
+    stream_size uLength = 0;
     *this >> uLength;
 
     gData.clear ();
@@ -404,7 +404,7 @@ void packet::on_receive (cvoid* pData, size_type uSize)
 
 bool packet::can_exchange (size_type uSize) noexcept
 {
-    return _M_bIsValid && ((_M_uPos + uSize) < _M_gData.size ());
+    return is_valid () && ((_M_uPos + uSize) < _M_gData.size ());
 }
 
 // =========================================================

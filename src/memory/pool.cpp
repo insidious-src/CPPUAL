@@ -30,8 +30,8 @@ uniform_pool_resource::uniform_pool_resource (size_type  uBlkCount,
                                               size_type  uBlkSize,
                                               align_type uBlkAlign)
 : _M_gOwner (uBlkCount && uBlkSize ?
-                 get_default_resource()->max_size() >= (uBlkCount * uBlkSize + max_adjust) ?
-                *get_default_resource() : *new_delete_resource() : *this),
+                 get_default_resource().max_size() >= (uBlkCount * uBlkSize + max_adjust) ?
+                 get_default_resource() : new_delete_resource() : *this),
   _M_pBegin (uBlkCount && uBlkSize ?
                     _M_gOwner.allocate (uBlkCount * uBlkSize + max_adjust, uBlkAlign) : nullptr),
   _M_pEnd (_M_pBegin != nullptr ?
@@ -71,8 +71,8 @@ uniform_pool_resource::uniform_pool_resource (memory_resource& pOwner,
                                               align_type       uBlkAlign)
 : _M_gOwner (uBlkCount && uBlkSize ?
                  (uBlkCount * uBlkSize + max_adjust) > pOwner.max_size () ?
-                     (uBlkCount * uBlkSize + max_adjust) > get_default_resource()->max_size () ?
-                         *new_delete_resource () : *get_default_resource () : pOwner : *this),
+                     (uBlkCount * uBlkSize + max_adjust) > get_default_resource().max_size () ?
+                         new_delete_resource () : get_default_resource () : pOwner : *this),
   _M_pBegin (uBlkCount && uBlkSize ?
                  _M_gOwner.allocate (uBlkCount * uBlkSize + max_adjust, uBlkAlign) : nullptr),
   _M_pEnd (_M_pBegin != nullptr ?

@@ -201,11 +201,10 @@ extern "C" plugin_vars* plugin_main (memory_resource* rc)
 
     plugin.name     = "cl_factory"      ;
     plugin.desc     = "OpenCL Factory"  ;
-    plugin.provides = "Compute::Factory";
+    plugin.provides = "compute::factory";
     plugin.verMajor = 1                 ;
     plugin.verMinor = 0                 ;
-
-    plugin.iface    = allocate_shared<cl_factory, void>(&static_resource, *rc);
+    plugin.iface    = allocate_shared<void, cl_factory>(&static_resource, *rc);
 
     return &plugin;
 }

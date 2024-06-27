@@ -25,10 +25,13 @@
 
 #include <cppual/flags.h>
 #include <cppual/string.h>
+#include <cppual/containers.h>
 #include <cppual/noncopyable.h>
 #include <cppual/compute/backend_iface.h>
 
 #include <memory>
+
+// =========================================================
 
 namespace cppual { namespace compute {
 
@@ -42,12 +45,15 @@ class bad_partition_count : public device_exception   { };
 
 // =========================================================
 
-class device
+typedef std::shared_ptr<device_interface> shared_device;
+
+// =========================================================
+
+class device : public object<resource_type::device>
 {
 public:
-    typedef std::shared_ptr<device_interface> shared_device;
-    typedef string                   string_type  ;
-    typedef std::size_t              size_type    ;
+    typedef string      string_type;
+    typedef std::size_t size_type  ;
 
     enum class info_type : u8
     {
@@ -59,22 +65,47 @@ public:
     };
 
     static size_type count () noexcept;
-    static device&   host  () noexcept;
 
-    bool      available    (string_type const& feature);
-    string    info         (info_type nfo);
-    size_type cache        () const;
-    size_type cacheLine    () const;
-    size_type localMemory  () const;
-    size_type globalMemory () const;
+    bool      available          (string_type const& feature);
+    string    info               (info_type nfo);
+    size_type cache_size         () const;
+    size_type cache_line_size    () const;
+    size_type local_memory_size  () const;
+    size_type const_memory_size  () const;
+    size_type global_memory_size () const;
+    size_type max_alloc_size     () const;
+    u32       compute_units      () const;
+    bool      is_host            () const noexcept;
 
-    device_category type     () const noexcept;
-    bool            valid    () const noexcept;
-    backend_type    backend  () const noexcept;
+    device_category type    () const noexcept;
+    bool            valid   () const noexcept;
+    backend_type    backend () const noexcept;
+
+    inline static device& host () noexcept
+    { return get_host_device (); }
 
 private:
-    shared_device _M_devPtr;
+    void assign_dev_from_cat () const;
+
+    inline static device& get_host_device ()
+    {
+        static device host (device_category::cpu);
+        return host;
+    }
+
+    constexpr device (device_category dev_cat) noexcept
+    : _M_pDev      (),
+      _M_eCategory (dev_cat)
+    { }
+
+    friend class factory;
+
+private:
+    shared_device mutable _M_pDev     ;
+    device_category       _M_eCategory;
 };
+
+// =========================================================
 
 } } // Compute
 

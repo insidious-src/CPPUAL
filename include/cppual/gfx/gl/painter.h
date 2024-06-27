@@ -25,28 +25,28 @@
 
 #include <cppual/gfx/draw.h>
 
-namespace cppual { namespace gfx {
+namespace cppual { namespace gfx { namespace gl {
 
-struct SHARED_API gl_painter final : public painter_interface
+struct SHARED_API painter final : public painter_interface
 {
 public:
-    gl_painter  (shared_surface const& surface) noexcept;
-    ~gl_painter () noexcept;
+    painter  (shared_surface const& surface) noexcept;
+    ~painter () noexcept;
 
     shared_drawable2d create_shape (u8 shape_type);
 
     shared_drawable2d create_line (color const& color_fill,
-                                   uint         line_size,
+                                   uint         line_width,
                                    line_style   style);
 
     shared_drawable2d create_path (vector<point2i> const& coord,
                                    color           const& clr,
-                                   uint                   line_size,
+                                   uint                   line_width,
                                    line_style             style);
 
-    shared_drawable2d create_elipse (color fill, color outline, uint outline_size);
-    shared_drawable2d create_rectangle (color fill, color outline, uint outline_size);
-    shared_drawable2d create_polygon (polygon_array const& coord, color fill, color outline, uint outline_size);
+    shared_drawable2d create_ellipse (color fill, color outline, uint outline_size);
+    shared_drawable2d create_rectangle (color fill, color outline, uint outline_width);
+    shared_drawable2d create_polygon (polygon_array const& coord, color fill, color outline, uint outline_width);
 
     shared_drawable2d create_image (string_type  const& path,
                                     pixel_format const& format,
@@ -58,7 +58,7 @@ private:
     shared_surface _M_pSurface;
 };
 
-} } // Graphics
+} } } // OpenGL
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_DRAWABLE_PAINTER_H_

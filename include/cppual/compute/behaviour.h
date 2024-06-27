@@ -23,25 +23,21 @@
 #define CPPUAL_BEHAVIOR_H_
 #ifdef __cplusplus
 
+// =========================================================
+
 namespace cppual { namespace compute {
 
-class device_group
-{ };
+// =========================================================
 
-class vblank_offload : public device_group
-{ };
+class device_group { };
+class vblank_offload : public device_group { };
+class parallel_offload : public device_group { };
+class cpu : public device_group { };
+class gpu : public device_group { };
+class gpgpu : public device_group { };
+class all : public device_group { };
 
-class parallel_offload : public device_group
-{ };
-
-class cpu : public device_group
-{ };
-
-class gpu : public device_group
-{ };
-
-class all : public device_group
-{ };
+// =========================================================
 
 class behaviour
 {
@@ -59,6 +55,8 @@ public:
 private:
     device_group* _M_gDevice;
 };
+
+// =========================================================
 
 } } // namespace Compute
 

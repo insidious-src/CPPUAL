@@ -20,19 +20,19 @@
  */
 
 #include <cppual/gfx/gl/painter.h>
-#include <cppual/gfx/drawable/text.h>
-#include <cppual/gfx/drawable/line.h>
 #include <cppual/gfx/drawable/image.h>
-#include <cppual/gfx/drawable/elipse.h>
-#include <cppual/gfx/drawable/polygon.h>
-#include <cppual/gfx/drawable/rectangle.h>
 #include <cppual/gfx/gl/gldef.h>
+#include <cppual/gfx/gl/text.h>
+#include <cppual/gfx/gl/line.h>
+#include <cppual/gfx/gl/elipse.h>
+#include <cppual/gfx/gl/polygon.h>
+#include <cppual/gfx/gl/rectangle.h>
 
-namespace cppual { namespace gfx {
+namespace cppual { namespace gfx { namespace gl {
 
 // =========================================================
 
-gl_painter::gl_painter (shared_surface const& surface) noexcept
+painter::painter (shared_surface const& surface) noexcept
 : _M_pSurface (surface)
 {
     ::glPushMatrix ();
@@ -40,12 +40,12 @@ gl_painter::gl_painter (shared_surface const& surface) noexcept
     ::glOrtho (0.f, surface->size ().x, surface->size ().y, 0.f, 0.f, 1.f);
 }
 
-gl_painter::~gl_painter () noexcept
+painter::~painter () noexcept
 {
     ::glPopMatrix ();
 }
 
-shared_drawable2d gl_painter::create_shape (u8 shape_type)
+shared_drawable2d painter::create_shape (u8 shape_type)
 {
     switch (shape_type)
     {
@@ -54,63 +54,63 @@ shared_drawable2d gl_painter::create_shape (u8 shape_type)
     case static_cast<u8> (shape::text):
         return shared_drawable2d (new label2d ());
     case static_cast<u8> (shape::line):
-        return shared_drawable2d (new gl_line ());
+        return shared_drawable2d (new line ());
     case static_cast<u8> (shape::path):
-        return shared_drawable2d (new gl_path ());
+        return shared_drawable2d (new path ());
     case static_cast<u8> (shape::elipse):
-        return shared_drawable2d (new gl_elipse ());
+        return shared_drawable2d (new ellipse ());
     case static_cast<u8> (shape::polygon):
-        return shared_drawable2d (new gl_polygon ());
+        return shared_drawable2d (new polygon ());
     case static_cast<u8> (shape::rectangle):
-        return shared_drawable2d (new gl_rectangle ());
+        return shared_drawable2d (new rectangle ());
     default:
         return shared_drawable2d ();
     }
 }
 
-shared_drawable2d gl_painter::create_line (color const& color_fill,
+shared_drawable2d painter::create_line (color const& color_fill,
                                            uint         line_size,
                                            line_style   style)
 {
-    return shared_drawable2d (new gl_line (color_fill, line_size, style));
+    return shared_drawable2d (new line (color_fill, line_size, style));
 }
 
-shared_drawable2d gl_painter::create_path (vector<point2i> const& coord,
+shared_drawable2d painter::create_path (vector<point2i> const& coord,
                                            color           const& clr,
                                            uint                   line_size,
                                            line_style             style)
 {
-    return shared_drawable2d (new gl_path (coord, clr, line_size, style));
+    return shared_drawable2d (new path (coord, clr, line_size, style));
 }
 
-shared_drawable2d gl_painter::create_elipse (color fill, color outline, uint outline_size)
+shared_drawable2d painter::create_ellipse (color fill, color outline, uint outline_size)
 {
-    return shared_drawable2d (new gl_elipse (fill, outline, outline_size));
+    return shared_drawable2d (new ellipse (fill, outline, outline_size));
 }
 
-shared_drawable2d gl_painter::create_rectangle (color fill, color outline, uint outline_size)
+shared_drawable2d painter::create_rectangle (color fill, color outline, uint outline_size)
 {
-    return shared_drawable2d (new gl_rectangle (fill, outline, outline_size));
+    return shared_drawable2d (new rectangle (fill, outline, outline_size));
 }
 
-shared_drawable2d gl_painter::create_polygon (polygon_array const& coord,
-                                              color fill,
-                                              color outline,
-                                              uint outline_size)
+shared_drawable2d painter::create_polygon (polygon_array const& coord,
+                                           color fill,
+                                           color outline,
+                                           uint outline_size)
 {
-    return shared_drawable2d (new gl_polygon (coord, fill, outline, outline_size));
+    return shared_drawable2d (new polygon (coord, fill, outline, outline_size));
 }
 
-shared_drawable2d gl_painter::create_image (string_type  const& path,
-                                            pixel_format const& format,
-                                            color               mask)
+shared_drawable2d painter::create_image (string_type  const& path,
+                                         pixel_format const& format,
+                                         color               mask)
 {
     return shared_drawable2d (new raster_image (path, format, mask));
 }
 
-shared_drawable2d gl_painter::create_text (string_type const& text, font& txt_font)
+shared_drawable2d painter::create_text (string_type const& text, font& txt_font)
 {
     return shared_drawable2d (new label2d (text, txt_font));
 }
 
-} } // namespace Graphics
+} } } // namespace OpenGL

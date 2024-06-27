@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/network/transport/tcplistener.h>
+#include <cppual/network/packet.h>
 #include <cppual/containers.h>
 #include <cppual/string.h>
 
@@ -34,48 +35,53 @@ namespace cppual { namespace network {
 class data_protocol
 {
 public:
-    typedef string       string_type;
-    typedef vector<char> stream_type;
-    typedef u32          size_type  ;
+    typedef packet::value_type  value_type ;
+    typedef value_type const    const_value;
+    typedef string              string_type;
+    typedef packet::stream_type stream_type;
+    typedef packet::stream_size stream_size;
 
-    enum Type
+    enum msg_type
     {
-        Upload       ,
-        Download     ,
-        Publish      ,
-        Subscribe    ,
-        Subscribed   ,
-        Unsubscribe  ,
-        MQTTPublish  ,
-        MQTTSubscribe,
-        MQTTUnsubscribe
+        upload        ,
+        download      ,
+        publish       ,
+        subscribe     ,
+        subscribed    ,
+        unsubscribe   ,
+        mqtt_publish  ,
+        mqtt_subscribe,
+        mqtt_unsubscribe
     };
 
     struct PACKED header
     {
-        size_type firstStringSize  { };
-        size_type secondStringSize { };
-        size_type type             { };
-        size_type dataSize         { };
+        stream_size firstStringSize  { };
+        stream_size secondStringSize { };
+        stream_size type             { };
+        stream_size dataSize         { };
     };
 
-    data_protocol(string_type const& firstString, string_type const& secondString, Type type = Type::Upload);
+    data_protocol(string_type const& firstString,
+                  string_type const& secondString,
+                  msg_type           type = msg_type::upload);
+
     data_protocol(stream_type const& bytes);
     data_protocol() = default;
     stream_type operator ()() const;
 
-    size_type   first_str_size () const noexcept;
-    size_type   second_str_size() const noexcept;
-    size_type   data_size      () const noexcept;
-    size_type   header_size    () const noexcept;
-    size_type   size           () const noexcept;
-    Type        type           () const noexcept;
+    stream_size first_str_size () const noexcept;
+    stream_size second_str_size() const noexcept;
+    stream_size data_size      () const noexcept;
+    stream_size header_size    () const noexcept;
+    stream_size size           () const noexcept;
+    msg_type    type           () const noexcept;
     stream_type first_string   () const noexcept;
     stream_type second_string  () const noexcept;
     stream_type data           () const noexcept;
 
     void set_data(stream_type const&);
-    void set_type(Type) noexcept;
+    void set_type(msg_type) noexcept;
 
 private:
     header      _M_gHeader;

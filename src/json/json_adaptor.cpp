@@ -7,6 +7,7 @@
 #include <cppual/json/prettywriter.h>
 
 #include <iostream>
+#include <fstream>
 #include <cassert>
 
 namespace cppual { namespace json {
@@ -150,7 +151,7 @@ bool doc_parser::save(std::ostream& stream, bool pretty)
     return base_type::Accept(writer);
 }
 
-doc_parser::doc_type doc_parser::type() const
+doc_type doc_parser::type() const
 {
     return _M_type;
 }
@@ -290,9 +291,9 @@ template_base::~template_base()
 template_base::size_type template_base::size() const
 {
     assert(_M_ref != nullptr);
-    return type () == doc_parser::doc_type::object ?
+    return type () == doc_type::object ?
                 _M_ref->MemberCount () :
-                type () == doc_parser::doc_type::array ?
+                type () == doc_type::array ?
                     _M_ref->Size () :
                     size_type ();
 }
@@ -300,9 +301,9 @@ template_base::size_type template_base::size() const
 bool template_base::empty() const
 {
     assert(_M_ref != nullptr);
-    return type () == doc_parser::doc_type::object ?
+    return type () == doc_type::object ?
                 _M_ref->MemberCount () == 0 :
-                type () == doc_parser::doc_type::array ?
+                type () == doc_type::array ?
                     _M_ref->Size ()  == 0 :
                     true;
 }
@@ -420,13 +421,13 @@ void template_object::connections()
         connect(_M_parser->changed, *this, &template_object::on_parser_data_changed);
         connect(_M_parser->about_to_save, *this, &template_object::on_about_to_save);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::object)
+    else if (_M_owner.type() == doc_type::object)
     {
         connect(_M_owner.object()->changed, *this, &template_object::on_object_changed);
         connect(_M_owner.object()->about_to_save, *this, &template_object::on_about_to_save);
         connect(_M_owner.object()->destroyed, *this, &template_object::invalidate);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::array)
+    else if (_M_owner.type() == doc_type::array)
     {
         connect(_M_owner.array()->changed, *this, &template_object::on_array_changed);
         connect(_M_owner.array()->removed, *this, &template_object::on_removed);
@@ -444,13 +445,13 @@ void template_object::disconnections()
         disconnect(_M_parser->changed, *this, &template_object::on_parser_data_changed);
         disconnect(_M_parser->about_to_save, *this, &template_object::on_about_to_save);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::object)
+    else if (_M_owner.type() == doc_type::object)
     {
         disconnect(_M_owner.object()->changed, *this, &template_object::on_object_changed);
         disconnect(_M_owner.object()->about_to_save, *this, &template_object::on_about_to_save);
         disconnect(_M_owner.object()->destroyed, *this, &template_object::invalidate);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::array)
+    else if (_M_owner.type() == doc_type::array)
     {
         disconnect(_M_owner.array()->changed, *this, &template_object::on_array_changed);
         disconnect(_M_owner.array()->removed, *this, &template_object::on_removed);
@@ -462,7 +463,7 @@ void template_object::disconnections()
 void template_object::assign_from_parser_object()
 {
     assert(_M_category.size() > 0);
-    assert(_M_parser->type() == doc_parser::doc_type::object);
+    assert(_M_parser->type() == doc_type::object);
 
     if (!_M_parser->HasMember(_M_category.c_str()))
     {
@@ -484,7 +485,7 @@ void template_object::assign_from_parser_object()
 
 void template_object::assign_from_parser_array()
 {
-    assert(_M_parser->type() == doc_parser::doc_type::array);
+    assert(_M_parser->type() == doc_type::array);
 
     if (_M_parser->size() <= _M_index)
     {
@@ -549,10 +550,10 @@ void template_object::on_parser_data_changed()
 {
     switch (_M_parser->type())
     {
-    case doc_parser::doc_type::array:
+    case doc_type::array:
         assign_from_parser_array();
         break;
-    case doc_parser::doc_type::object:
+    case doc_type::object:
         assign_from_parser_object();
         break;
     default:
@@ -670,13 +671,13 @@ void template_array::connections()
         connect(_M_parser->changed, *this, &template_array::on_parser_data_changed);
         connect(_M_parser->about_to_save, *this, &template_array::on_about_to_save);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::object)
+    else if (_M_owner.type() == doc_type::object)
     {
         connect(_M_owner.object()->changed, *this, &template_array::on_object_changed);
         connect(_M_owner.object()->about_to_save, *this, &template_array::on_about_to_save);
         connect(_M_owner.object()->destroyed, *this, &template_array::invalidate);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::array)
+    else if (_M_owner.type() == doc_type::array)
     {
         connect(_M_owner.array()->changed, *this, &template_array::on_array_changed);
         connect(_M_owner.array()->removed, *this, &template_array::on_removed);
@@ -694,13 +695,13 @@ void template_array::disconnections()
         disconnect(_M_parser->changed, *this, &template_array::on_parser_data_changed);
         disconnect(_M_parser->about_to_save, *this, &template_array::on_about_to_save);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::object)
+    else if (_M_owner.type() == doc_type::object)
     {
         disconnect(_M_owner.object()->changed, *this, &template_array::on_object_changed);
         disconnect(_M_owner.object()->about_to_save, *this, &template_array::on_about_to_save);
         disconnect(_M_owner.object()->destroyed, *this, &template_array::invalidate);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::array)
+    else if (_M_owner.type() == doc_type::array)
     {
         disconnect(_M_owner.array()->changed, *this, &template_array::on_array_changed);
         disconnect(_M_owner.array()->removed, *this, &template_array::on_removed);
@@ -712,7 +713,7 @@ void template_array::disconnections()
 void template_array::assign_from_parser_object()
 {
     assert(_M_category.size() > 0);
-    assert(_M_parser->type() == doc_parser::doc_type::object);
+    assert(_M_parser->type() == doc_type::object);
 
     if (!_M_parser->HasMember(_M_category.c_str()))
     {
@@ -734,7 +735,7 @@ void template_array::assign_from_parser_object()
 
 void template_array::assign_from_parser_array()
 {
-    assert(_M_parser->type() == doc_parser::doc_type::array);
+    assert(_M_parser->type() == doc_type::array);
 
     if (_M_parser->size() <= _M_index)
     {
@@ -841,10 +842,10 @@ void template_array::on_parser_data_changed()
 
     switch (_M_parser->type())
     {
-    case doc_parser::doc_type::array:
+    case doc_type::array:
         assign_from_parser_array();
         break;
-    case doc_parser::doc_type::object:
+    case doc_type::object:
         assign_from_parser_object();
         break;
     default:
@@ -934,12 +935,12 @@ value_reference_base& value_reference_base::operator = (value_reference_base con
 
 void value_reference_base::connections()
 {
-    if (_M_owner.type() == doc_parser::doc_type::object)
+    if (_M_owner.type() == doc_type::object)
     {
         connect(_M_owner.object()->changed, *this, &base_type::assign);
         connect(_M_owner.object()->destroyed, *this, &base_type::invalidate);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::array)
+    else if (_M_owner.type() == doc_type::array)
     {
         connect(_M_owner.array()->changed, *this, &base_type::assign);
         connect(_M_owner.array()->destroyed, *this, &base_type::invalidate);
@@ -948,12 +949,12 @@ void value_reference_base::connections()
 
 void value_reference_base::disconnections()
 {
-    if (_M_owner.type() == doc_parser::doc_type::object)
+    if (_M_owner.type() == doc_type::object)
     {
         disconnect(_M_owner.object()->changed, *this, &base_type::assign);
         disconnect(_M_owner.object()->destroyed, *this, &base_type::invalidate);
     }
-    else if (_M_owner.type() == doc_parser::doc_type::array)
+    else if (_M_owner.type() == doc_type::array)
     {
         disconnect(_M_owner.array()->changed, *this, &base_type::assign);
         disconnect(_M_owner.array()->destroyed, *this, &base_type::invalidate);
@@ -1327,9 +1328,9 @@ factory::factory(std::initializer_list<file_tuple> json_files)
 
         _M_jsonDocs.emplace(std::get<0>(item),
                             std::make_pair(std::get<1>(item),
-                                           memory::allocate_shared<doc_parser> (doc_allocator(),
-                                                                                std::get<1>(item),
-                                                                                std::get<2>(item))));
+                                           memory::allocate_shared (doc_allocator(),
+                                                                    std::get<1>(item),
+                                                                    std::get<2>(item))));
     }
 }
 
@@ -1480,4 +1481,4 @@ bool factory::has_file_name_doc_ext (size_type key) const
     return end != string_type::npos;
 }
 
-} } // namespace Json
+} } // namespace json

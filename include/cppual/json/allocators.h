@@ -136,9 +136,9 @@ public:
     */
     explicit
     MemoryPoolResource(size_type chunkSize = kDefaultChunkCapacity,
-                       BaseResource* baseAllocator = cppual::memory::get_default_resource()) :
+                       BaseResource* baseAllocator = &cppual::memory::get_default_resource()) :
         chunk_capacity_(chunkSize),
-        baseAllocator_(baseAllocator ? baseAllocator : cppual::memory::get_default_resource()),
+        baseAllocator_(baseAllocator ? baseAllocator : &cppual::memory::get_default_resource()),
         shared_(static_cast<SharedData*>(baseAllocator_ ?
                                              baseAllocator_->allocate(SIZEOF_SHARED_DATA +
                                                                       SIZEOF_CHUNK_HEADER) : nullptr))
@@ -171,7 +171,7 @@ public:
         \param baseAllocator The allocator for allocating memory chunks.
     */
     MemoryPoolResource(void *buffer, size_type size, size_type chunkSize = kDefaultChunkCapacity,
-                       BaseResource* baseAllocator = cppual::memory::get_default_resource()) :
+                       BaseResource* baseAllocator = &cppual::memory::get_default_resource()) :
         chunk_capacity_(chunkSize),
         baseAllocator_(baseAllocator),
         shared_(static_cast<SharedData*>(AlignBuffer(buffer, size)))
@@ -370,7 +370,7 @@ private:
     */
     bool AddChunk(size_type capacity) {
         if (!baseAllocator_)
-            shared_->ownBaseAllocator = baseAllocator_ = cppual::memory::get_default_resource();
+            shared_->ownBaseAllocator = baseAllocator_ = &cppual::memory::get_default_resource();
         if (ChunkHeader* chunk = static_cast<ChunkHeader*>(baseAllocator_->allocate
                                                            (SIZEOF_CHUNK_HEADER + capacity)))
         {

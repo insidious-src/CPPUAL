@@ -42,8 +42,8 @@ enum class socket_type : u8
 // ====================================================
 
 class transport_socket
-    : public protocol,
-      public resource<void, int, static_cast<resource_handle::value_type> (-1)>
+    : public virtual protocol,
+      public virtual resource<void, int, static_cast<resource_handle::value_type> (-1)>
 {
 public:
     typedef value_type       socket_id;

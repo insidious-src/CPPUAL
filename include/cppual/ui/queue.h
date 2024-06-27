@@ -29,7 +29,7 @@
 #include <cppual/input/event.h>
 #include <cppual/ui/view.h>
 
-#include <thread>
+//#include <thread>
 #include <atomic>
 #include <memory>
 

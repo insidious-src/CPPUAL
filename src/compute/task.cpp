@@ -104,6 +104,25 @@ private:
 
 // =========================================================
 
+bool thread_pool::reserve (host_queue& gTaskQueue, size_type uAddThreads, bool bDetached)
+{
+    if (uAddThreads == 0) return false;
+
+    write_lock gLock (pool ().threadMutex);
+
+    /// add threads to the container and initialize them
+    while (uAddThreads--)
+    {
+        /// add and initialize a thread with host_queue::operator ()
+        pool ().threads.emplace_back (std::thread (gTaskQueue));
+        if (bDetached) pool ().threads.back ().detach ();
+    }
+
+    return true;
+}
+
+// =========================================================
+
 void host_queue::operator ()()
 {
     assign_queue assign (*this);
@@ -159,27 +178,6 @@ void host_queue::operator ()()
         _M_gTaskCond.notify_all ();
     }
 }
-
-// =========================================================
-
-bool thread_pool::reserve (host_queue& gTaskQueue, size_type uAddThreads, bool bDetached)
-{
-    if (uAddThreads == 0) return false;
-
-    write_lock gLock (pool ().threadMutex);
-
-    /// add threads to the container and initialize them
-    while (uAddThreads--)
-    {
-        /// add and initialize a thread with HostQueue::operator ()
-        pool ().threads.emplace_back (std::thread (gTaskQueue));
-        if (bDetached) pool ().threads.back ().detach ();
-    }
-
-    return true;
-}
-
-// =========================================================
 
 host_queue::host_queue (host_queue const&)
 {

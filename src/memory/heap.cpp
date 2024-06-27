@@ -27,8 +27,8 @@
 namespace cppual { namespace memory {
 
 heap_resource::heap_resource (size_type uSize)
-: _M_gOwner (uSize > sizeof (free_block) ? get_default_resource()->max_size() >= uSize + max_adjust ?
-                                          *get_default_resource() : *new_delete_resource() : *this),
+: _M_gOwner (uSize > sizeof (free_block) ? get_default_resource().max_size() >= uSize + max_adjust ?
+                                           get_default_resource() : new_delete_resource() : *this),
   _M_pBegin (&_M_gOwner != this ?
                  _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pEnd (_M_pBegin != nullptr ?
@@ -67,8 +67,8 @@ heap_resource::heap_resource (pointer buffer, size_type uSize)
 
 heap_resource::heap_resource (memory_resource& pOwner, size_type uSize)
 : _M_gOwner (uSize > sizeof(free_block) ? uSize > pOwner.max_size () ?
-                                          uSize > get_default_resource()->max_size() ?
-                            *new_delete_resource() : *get_default_resource() : pOwner : *this),
+                                          uSize > get_default_resource().max_size() ?
+                             new_delete_resource() : get_default_resource() : pOwner : *this),
   _M_pBegin (&_M_gOwner != this ?
                  _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pEnd (_M_pBegin != nullptr ?
@@ -243,7 +243,7 @@ memory_resource::size_type heap_resource::max_size () const noexcept
     auto size        = _M_pFreeBlocks->size;
     auto pFreeBlocks = _M_pFreeBlocks      ;
 
-    while (pFreeBlocks && pFreeBlocks > _M_pBegin && _M_pEnd > pFreeBlocks)
+    while (pFreeBlocks && _M_pBegin <= pFreeBlocks && (pFreeBlocks  + 1) < _M_pEnd)
     {
         if (pFreeBlocks->size > size) size = pFreeBlocks->size;
         pFreeBlocks = _M_pFreeBlocks->next;
@@ -305,8 +305,8 @@ inline list_resource::header* find (list_resource::header*          hdr,
 // =========================================================
 
 list_resource::list_resource (size_type uSize)
-: _M_gOwner (uSize > sizeof (header) ? get_default_resource ()->max_size () >= uSize + max_adjust ?
-                                      *get_default_resource () : *new_delete_resource () : *this),
+: _M_gOwner (uSize > sizeof (header) ? get_default_resource ().max_size () >= uSize + max_adjust ?
+                                       get_default_resource () : new_delete_resource () : *this),
   _M_pBegin (&_M_gOwner != this ?
                  _M_gOwner.allocate (uSize + max_adjust, alignof (header)) : nullptr),
   _M_pEnd (_M_pBegin != nullptr ?
@@ -341,8 +341,8 @@ list_resource::list_resource (pointer buffer, size_type uSize)
 
 list_resource::list_resource (memory_resource& pOwner, size_type uSize)
 : _M_gOwner (uSize > sizeof (header) ? (uSize + max_adjust)    >  pOwner.max_size () ?
-                                       (uSize + max_adjust)    >  get_default_resource ()->max_size () ?
-                                       *new_delete_resource () : *get_default_resource () : pOwner : *this),
+                                       (uSize + max_adjust)    >  get_default_resource ().max_size () ?
+                                        new_delete_resource () :  get_default_resource () : pOwner : *this),
   _M_pBegin (&_M_gOwner != this ?
                  _M_gOwner.allocate (uSize + max_adjust, alignof (header)) : nullptr),
   _M_pEnd (_M_pBegin != nullptr ?

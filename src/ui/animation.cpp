@@ -27,7 +27,7 @@ namespace cppual { namespace ui {
 
 void motion::play (int nRepeat)
 {
-    if (!_M_bIsPlaying.load () and _M_pObject and _M_pObject->valid ())
+    if (!_M_bIsPlaying.load (std::memory_order_consume) and _M_pObject and _M_pObject->valid ())
     {
         _M_bIsPlaying.store (true);
 
@@ -52,7 +52,7 @@ void motion::resume ()
 
 void fade::play (int)
 {
-    if (!_M_bIsPlaying and _M_pObject and _M_pObject->valid ())
+    if (!_M_bIsPlaying.load (std::memory_order_consume) and _M_pObject and _M_pObject->valid ())
     {
     }
 }

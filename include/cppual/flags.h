@@ -28,17 +28,21 @@
 #include <type_traits>
 #include <cstddef>
 
+// =========================================================
+
 namespace cppual {
+
+// =========================================================
 
 template <typename T>
 class bitset
 {
 public:
-    static_assert (std::is_enum<T>::value, "T is not an enumeration!");
+    static_assert (std::is_enum_v<T>, "T is not an enumeration!");
 
-    typedef T                                      enum_type ;
-    typedef ulong_t                                size_type ;
-    typedef typename std::underlying_type<T>::type value_type;
+    typedef std::remove_cv_t<T>                enum_type ;
+    typedef ulong_t                            size_type ;
+    typedef typename std::underlying_type_t<T> value_type;
 
     constexpr bitset () noexcept = default;
     constexpr bitset (std::nullptr_t) noexcept : _M_flags () { }
@@ -50,11 +54,12 @@ public:
     constexpr operator value_type () const noexcept
     { return _M_flags; }
 
+    /// bitset size in bits
     constexpr static size_type size () noexcept
     { return std::integral_constant<size_type, sizeof (value_type) * 8>::value; }
 
     constexpr bool test (enum_type const eFlag) const noexcept
-    { return (_M_flags & static_cast<value_type> (eFlag)) == static_cast<value_type>(eFlag); }
+    { return (_M_flags & static_cast<value_type> (eFlag)) == static_cast<value_type> (eFlag); }
 
     constexpr bool test (value_type const flags) const noexcept
     { return (_M_flags & flags) == flags; }
@@ -88,7 +93,7 @@ public:
     : _M_flags (flags)
     { }
 
-    // friend functions
+    /// friend functions
 
     template <typename U>
     friend
@@ -96,8 +101,7 @@ public:
 
     template <typename U>
     friend
-    constexpr bool operator == (bitset<U> const&,
-                                typename bitset<U>::value_type const) noexcept;
+    constexpr bool operator == (bitset<U> const&, typename bitset<U>::value_type const) noexcept;
 
     template <typename U>
     friend
@@ -176,6 +180,8 @@ constexpr bool operator != (bitset<T> const& lh,
 template <typename T>
 constexpr bool operator != (bitset<T> const& lh, bitset<T> const& rh) noexcept
 { return !(lh == rh); }
+
+// =========================================================
 
 } // cppual
 

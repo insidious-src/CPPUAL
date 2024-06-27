@@ -25,7 +25,7 @@
 
 #include <cppual/gfx/draw.h>
 
-#include <mutex>
+//#include <mutex>
 
 namespace cppual { namespace gfx { namespace gl {
 
@@ -34,6 +34,8 @@ namespace cppual { namespace gfx { namespace gl {
 class config ;
 class surface;
 class context;
+
+typedef std::shared_ptr<config> shared_config;
 
 // ====================================================
 
@@ -82,7 +84,7 @@ public:
     inline    config& operator = (config const&) noexcept = default;
 
 
-    /// null config constructor
+    //! null config constructor
     constexpr config () noexcept
     : _M_pDisplay    (),
       _M_pCfg        (),

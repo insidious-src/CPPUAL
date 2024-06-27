@@ -28,6 +28,7 @@
 #include <cppual/meta.h>
 
 #include <type_traits>
+#include <functional>
 
 namespace cppual {
 
@@ -81,7 +82,7 @@ public:
 
     constexpr resource_handle () noexcept = default;
     constexpr resource_handle (value_type _handle) noexcept : _M_handle (_handle) { }
-    constexpr resource_handle (pointer    _handle) noexcept : _M_handle (direct_cast<uptr> (_handle)) { }
+    constexpr resource_handle (pointer    _handle) noexcept : _M_handle (direct_cast<value_type> (_handle)) { }
     constexpr resource_handle (std::nullptr_t    ) noexcept : _M_handle ()  { }
 
     inline    resource_handle (resource_handle&&)                  noexcept = default;
@@ -90,9 +91,10 @@ public:
     inline    resource_handle& operator = (resource_handle const&) noexcept = default;
 
     template <typename T,
-              typename = typename std::enable_if<is_integer<T>::value>::type
+              typename = typename std::enable_if_t<is_integer_v<T>>
               >
-    constexpr resource_handle (T _handle) noexcept : _M_handle (static_cast<value_type> (_handle))
+    constexpr resource_handle (T _handle) noexcept
+    : _M_handle (static_cast<value_type> (_handle))
     {
         static_assert (sizeof (T) <= sizeof (pointer), "T is bigger than the size of a pointer!");
     }
@@ -105,7 +107,7 @@ public:
 
     template <typename T,
               typename =
-              typename std::enable_if<is_integer<T>::value>::type
+              typename std::enable_if_t<is_integer_v<T>>
               >
     constexpr T get () const noexcept
     {
@@ -115,10 +117,9 @@ public:
 
     template <typename T,
               typename =
-              typename std::enable_if<(std::is_pointer<T>::value  ||
-                                       std::is_class  <T>::value) &&
-                                      !std::is_same<typename std::remove_cv<T>::type, resource_handle>::value
-                                      >::type
+              typename std::enable_if_t<(std::is_pointer_v<T>  ||
+                                         std::is_class_v  <T>) &&
+                                        !std::is_same_v<typename std::remove_cv<T>::type, resource_handle>>
               >
     constexpr typename std::remove_pointer<T>::type* get () const noexcept
     {
@@ -127,8 +128,7 @@ public:
 
     template <typename T,
               typename =
-              typename std::enable_if<std::is_same<typename std::remove_cv<T>::type, resource_handle>::value
-                                      >::type
+              typename std::enable_if_t<std::is_same<typename std::remove_cv<T>::type, resource_handle>::value>
               >
     constexpr resource_handle get () const noexcept
     {
@@ -138,6 +138,18 @@ public:
     constexpr explicit operator bool () const noexcept
     {
         return _M_handle;
+    }
+
+    template <typename T,
+              typename =
+              typename std::enable_if_t<is_integer_v<T>>
+              >
+    inline resource_handle& operator = (T val) noexcept
+    {
+        static_assert (sizeof (T) <= sizeof (pointer), "T is bigger than the size of a pointer!");
+
+        _M_handle = static_cast<value_type> (val);
+        return *this;
     }
 
     inline resource_handle& operator = (value_type val) noexcept
@@ -271,11 +283,12 @@ public:
     constexpr resource () noexcept = default;
 
 
-    inline resource (resource&& rc) noexcept
+    inline resource (resource&&    rc) noexcept
     : _M_connection (rc._M_connection),
       _M_handle     (rc._M_handle    )
     {
-        rc._M_handle = null_value;
+        rc._M_connection = connection_type ();
+        rc._M_handle     = null_value;
     }
 
     inline resource& operator = (resource&& rc) noexcept
@@ -404,15 +417,13 @@ constexpr bool operator != (resource<void, ID> const& gObj1,
 { return !(gObj1 == gObj2); }
 
 template <class C, class ID>
-constexpr bool operator == (resource<C, ID> const& gObj1,
-                            resource<C, ID> const& gObj2)
+constexpr bool operator == (resource<C, ID> const& gObj1, resource<C, ID> const& gObj2)
 {
     return gObj1._M_connection == gObj2._M_connection && gObj1._M_handle == gObj2._M_handle;
 }
 
 template <class C, class ID>
-constexpr bool operator != (resource<C, ID> const& gObj1,
-                            resource<C, ID> const& gObj2)
+constexpr bool operator != (resource<C, ID> const& gObj1, resource<C, ID> const& gObj2)
 { return !(gObj1 == gObj2); }
 
 // =========================================================

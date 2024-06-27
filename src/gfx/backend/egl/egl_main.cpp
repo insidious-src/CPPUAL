@@ -57,7 +57,7 @@ shared_surface egl_factory::create_surface (connection_type /*native*/,
                                             handle_type     wnd,
                                             surface_type    type)
 {
-    return memory::allocate_shared<gl::surface, surface_interface> (nullptr,
+    return memory::allocate_shared<surface_interface, gl::surface> (nullptr,
                                                                     gl::config (legacy, format),
                                                                     size,
                                                                     wnd,
@@ -69,7 +69,7 @@ shared_context egl_factory::create_context (connection_type /*native*/,
                                             pixel_format    format,
                                             shared_context  shared)
 {
-    return memory::allocate_shared<gl::context, context_interface> (nullptr,
+    return memory::allocate_shared<context_interface, gl::context> (nullptr,
                                                                     gl::config(legacy, format),
                                                                     gl::context::default_version (),
                                                                     shared);
@@ -82,7 +82,7 @@ device_backend egl_factory::backend ()
 
 shared_painter egl_factory::create_painter (shared_surface const& surface)
 {
-    return shared_painter (new gl_painter (surface));
+    return shared_painter (new gl::painter (surface));
 }
 
 } } // namespace gfx
@@ -101,12 +101,12 @@ extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
     static stacked_resource static_resource (buffer, sizeof (buffer));
     static plugin_vars plugin;
 
-    plugin.name     = "egl_factory"      ;
     plugin.desc     = "EGL GFX Factory"  ;
+    plugin.name     = "egl_factory"      ;
     plugin.provides = "gfx::draw_factory";
     plugin.verMajor = 1                  ;
     plugin.verMinor = 0                  ;
-    plugin.iface    = allocate_shared<egl_factory, void> (&static_resource);
+    plugin.iface    = allocate_shared<void, egl_factory> (&static_resource);
 
     return &plugin;
 }

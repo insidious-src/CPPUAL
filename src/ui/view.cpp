@@ -23,9 +23,9 @@
 #include <cppual/ui/manager.h>
 #include <cppual/ui/vsurface.h>
 
-#include <iostream>
-#include <exception>
-#include <algorithm>
+//#include <iostream>
+//#include <exception>
+//#include <algorithm>
 #include <unordered_map>
 
 namespace cppual { namespace ui {
@@ -64,7 +64,7 @@ inline void print_map_values (resource_handle wnd)
 
 inline shared_window create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
 {
-    return pParentObj ? memory::allocate_shared<proxy_renderable, platform_wnd_interface>
+    return pParentObj ? memory::allocate_shared<platform_wnd_interface, proxy_renderable>
                                                                (renderable_allocator (),
                                                                 pParentObj->renderable ().lock (),
                                                                 gRect) :
@@ -327,7 +327,8 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
         _M_gItFromParent = --pParentObj->_M_gChildrenList.end ();
     }
 
-    _M_gStateFlags = view::is_valid | view::enabled;
+    _M_gStateFlags  = state_flag::is_valid;
+    _M_gStateFlags += state_flag::enabled ;
 }
 
 view::view (view const& gObj)
@@ -418,7 +419,7 @@ void view::hide ()
 
 void view::set_minimum_size (point2u gSize)
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
     {
         //m_pRenderable->setMimimumSize (gSize);
         _M_gMinSize = gSize;
@@ -427,7 +428,7 @@ void view::set_minimum_size (point2u gSize)
 
 void view::set_maximum_size (point2u gSize)
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
     {
         //m_pRenderable->setMaximumSize (gSize);
         _M_gMinSize = gSize;
@@ -436,7 +437,7 @@ void view::set_maximum_size (point2u gSize)
 
 bool view::set_parent (view* pParentObj, point2i /*gPos*/)
 {
-    if (!_M_gStateFlags.test (view::is_valid) or _M_pParentObj == pParentObj)
+    if (!_M_gStateFlags.test (state_flag::is_valid) or _M_pParentObj == pParentObj)
         return false;
 
     if (pParentObj)
@@ -494,7 +495,7 @@ void view::size (point2u gSize)
 
 void view::set_geometry (rect const& gRect)
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
     {
         rect gNewRect (gRect);
 
@@ -524,16 +525,16 @@ void view::set_geometry (rect const& gRect)
 
 void view::move (point2i gPoint)
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
     {
         _M_pRenderable->move (gPoint);
         move_event (gPoint);
     }
 }
 
-void view::set_focus ()
+void view::get_focus ()
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
     {
         _M_pRenderable->raise ();
         focus_event (true);
@@ -542,7 +543,7 @@ void view::set_focus ()
 
 void view::kill_focus ()
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
     {
         for (view* pChild : _M_gChildrenList) pChild->kill_focus ();
         focus_event (false);
@@ -551,13 +552,13 @@ void view::kill_focus ()
 
 void view::enable ()
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
         for (view* pChild : _M_gChildrenList) pChild->enable ();
 }
 
 void view::disable ()
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
         for (view* pChild : _M_gChildrenList) pChild->disable ();
 }
 
@@ -568,7 +569,7 @@ void view::refresh ()
 
 void view::update (rect const& region)
 {
-    if (_M_gStateFlags.test (view::is_valid))
+    if (_M_gStateFlags.test (state_flag::is_valid))
     {
         paint (region);
     }

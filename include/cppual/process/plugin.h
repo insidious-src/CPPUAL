@@ -23,18 +23,18 @@
 #define CPPUAL_PROCESS_PLUGIN_H_
 #ifdef __cplusplus
 
+#include <cppual/meta.h>
 #include <cppual/types.h>
 #include <cppual/noncopyable.h>
 #include <cppual/resource.h>
 #include <cppual/concepts.h>
 #include <cppual/string.h>
-#include <cppual/meta.h>
 #include <cppual/containers.h>
 
 #include <memory>
 #include <cstring>
+#include <string_view>
 #include <functional>
-#include <unordered_map>
 
 namespace cppual { namespace process {
 
@@ -45,12 +45,13 @@ class SHARED_API dyn_loader : public non_copyable
 public:
     typedef call_ret_t (DLCALL * function_type)();
 
-    typedef string          string_type;
-    typedef resource_handle handle_type;
+    typedef string           string_type     ;
+    typedef std::string_view string_view_type;
+    typedef resource_handle  handle_type     ;
 
     enum class resolve_policy : u8
     {
-        /// use as data file or load as static library
+        /// use as data file or load as a static library
         statically,
         /// resolve everything on load
         immediate,
@@ -70,39 +71,39 @@ public:
 
     static string_type extension () noexcept;
 
-    string_type    path        () const noexcept { return _M_gLibPath; }
-    void*          handle      () const noexcept { return _M_pHandle;  }
-    resolve_policy policy      () const noexcept { return _M_eResolve; }
-    bool           is_attached () const noexcept { return _M_pHandle;  }
+    inline    string_type    path        () const noexcept { return _M_gLibPath; }
+    constexpr void*          handle      () const noexcept { return _M_pHandle;  }
+    constexpr resolve_policy policy      () const noexcept { return _M_eResolve; }
+    constexpr bool           is_attached () const noexcept { return _M_pHandle;  }
 
-    ~dyn_loader ()
+    inline ~dyn_loader ()
     { if (_M_eResolve != resolve_policy::statically) detach (); }
 
-    bool contains (string_type const& gName) const noexcept
-    { return get_address (gName.c_str ()); }
+    inline bool contains (string_view_type const& gName) const noexcept
+    { return get_address (gName.data ()); }
 
-    bool contains (cchar* pName) const noexcept
+    inline bool contains (cchar* pName) const noexcept
     { return get_address (pName); }
 
     template <typename T>
-    T* import (string_type pName) const noexcept
-    { return static_cast<T*> (get_address (pName.c_str ())); }
+    inline T* import (string_view_type pName) const noexcept
+    { return static_cast<T*> (get_address (pName.data ())); }
 
-    template <typename TRet, typename... TArgs>
-    bool import (string_type pName, TRet(*& fn)(TArgs...)) const
+    template <typename R, typename... Args>
+    inline bool import (string_view_type pName, R(*& fn)(Args...)) const
     {
-        typedef TRet (* Func)(TArgs...);
-        function_type func = get_function (pName.c_str ());
+        typedef R (* Func)(Args...);
+        function_type func = get_function (pName.data ());
         return fn = reinterpret_cast<Func> (func);
     }
 
-    template <typename TRet, typename... TArgs>
-    TRet call (string_type pName, TArgs... args) const
+    template <typename R = void, typename... Args>
+    inline R call (string_view_type pName, Args... args) const
     {
-        auto fn = direct_cast<TRet(*)(TArgs...)> (get_function (pName.c_str ()));
+        auto fn = direct_cast<R(*)(Args...)> (get_function (pName.data ()));
 
-        if (!fn) std::bad_function_call ();
-        return fn (std::forward<TArgs> (args)...);
+        if (!fn) throw std::bad_function_call ();
+        return fn (std::forward<Args> (args)...);
     }
 
 private:
@@ -184,17 +185,18 @@ class SHARED_API plugin_manager : public non_copyable
 public:
     static_assert (memory::is_allocator<Allocator>::value, "invalid allocator object type!");
 
-    typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type;
-    typedef typename std::allocator_traits<Allocator>::size_type      size_type     ;
-    typedef typename std::allocator_traits<Allocator>::value_type     pair_type     ;
-    typedef string                                                    key_type      ;
-    typedef string const                                              const_key     ;
-    typedef std::hash<key_type>                                       hash_type     ;
-    typedef std::equal_to<key_type>                                   equal_type    ;
-    typedef Movable<dyn_loader>                                       loader_type   ;
-    typedef plugin_pair                                               value_type    ;
-    typedef Interface                                                 iface_type    ;
-    typedef std::shared_ptr<iface_type>                               shared_iface  ;
+    typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type  ;
+    typedef typename std::allocator_traits<Allocator>::size_type      size_type       ;
+    typedef typename std::allocator_traits<Allocator>::value_type     pair_type       ;
+    typedef std::string_view                                          string_view_type;
+    typedef string                                                    key_type        ;
+    typedef string const                                              const_key       ;
+    typedef std::hash<key_type>                                       hash_type       ;
+    typedef std::equal_to<key_type>                                   equal_type      ;
+    typedef Movable<dyn_loader>                                       loader_type     ;
+    typedef plugin_pair                                               value_type      ;
+    typedef Interface                                                 iface_type      ;
+    typedef std::shared_ptr<iface_type>                               shared_iface    ;
 
     typedef std::unordered_map
     <key_type, value_type, hash_type, equal_type, allocator_type> map_type;
@@ -293,7 +295,7 @@ public:
     }
 
 private:
-    mutable map_type _M_gPluginMap;
+    map_type mutable _M_gPluginMap;
 };
 
 // =========================================================

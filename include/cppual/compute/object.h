@@ -36,7 +36,7 @@ class host_connection;
 class device;
 /// device and queue load balancing
 class behaviour;
-/// difference types of devices in one queue
+/// different types of devices in one queue
 class mixed_queue;
 /// thread queue
 class host_queue;

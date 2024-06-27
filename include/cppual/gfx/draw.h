@@ -63,8 +63,8 @@ enum class surface_type : u8
 enum class device_backend : u8
 {
     native,
-    gl,
     vulkan,
+    gl,
     direct3d,
     direct3d12,
     direct2d,
@@ -102,6 +102,7 @@ typedef std::weak_ptr  <drawable3d_interface> weak_drawable3d  ;
 
 // ====================================================
 
+struct bad_alloc       : public std::logic_error { using std::logic_error::logic_error; };
 struct bad_match       : public std::logic_error { using std::logic_error::logic_error; };
 struct bad_display     : public std::logic_error { using std::logic_error::logic_error; };
 struct bad_surface     : public std::logic_error { using std::logic_error::logic_error; };
@@ -131,7 +132,7 @@ public:
     {
         return
         {
-            pixel_flag::drawable | pixel_flag::bitmap,
+            pixel_flag::drawable /*| pixel_flag::bitmap*/,
             8,
             8,
             8,
@@ -240,8 +241,8 @@ struct SHARED_API surface_interface : public resource_interface
 
 struct SHARED_API context_interface : public resource_interface
 {
-    typedef shared_surface           pointer      ;
-    typedef resource_version         version_type ;
+    typedef shared_surface   pointer      ;
+    typedef resource_version version_type ;
 
     virtual ~context_interface ();
 
@@ -256,7 +257,7 @@ struct SHARED_API context_interface : public resource_interface
     static context_interface* current () noexcept;
     static void               acquire (shared_context const& cntxt) noexcept;
 
-    bool active () const noexcept
+    inline bool active () const noexcept
     { return this == current (); }
 };
 
@@ -306,7 +307,7 @@ struct SHARED_API drawable2d_interface
     virtual device_backend type () const noexcept    = 0;
     virtual void           draw (transform2d const&) = 0;
 
-    virtual ~drawable2d_interface () { }
+    inline virtual ~drawable2d_interface () { }
 };
 
 // =========================================================
@@ -316,21 +317,21 @@ struct SHARED_API drawable3d_interface
     virtual device_backend type () const noexcept    = 0;
     virtual void           draw (transform3d const&) = 0;
 
-    virtual ~drawable3d_interface () { }
+    inline virtual ~drawable3d_interface () { }
 };
 
 // =========================================================
 
 struct SHARED_API transformable2d_interface
 {
-    virtual ~transformable2d_interface () { }
+    inline virtual ~transformable2d_interface () { }
 };
 
 // =========================================================
 
 struct SHARED_API transformable3d_interface
 {
-    virtual ~transformable3d_interface () { }
+    inline virtual ~transformable3d_interface () { }
 };
 
 // =========================================================
@@ -342,35 +343,24 @@ struct SHARED_API painter_interface : public non_copyable_virtual
     typedef resource_version                 version_type ;
     typedef std::array<point2i, 3>           polygon_array;
 
-    enum shape
-    {
-        image    ,
-        line     ,
-        path     ,
-        elipse   ,
-        polygon  ,
-        rectangle,
-        text
-    };
-
     virtual ~painter_interface ();
 
     virtual shared_drawable2d create_shape (u8 shape_type) = 0;
 
     virtual shared_drawable2d create_line (color const& clr,
-                                           uint         line_size = 1U,
-                                           line_style   style     = line_style::solid) = 0;
+                                           uint         line_width = 1U,
+                                           line_style   style      = line_style::solid) = 0;
 
     virtual shared_drawable2d create_path (vector<point2i> const& coord,
                                            color           const& clr,
-                                           uint                   line_size = 1U,
-                                           line_style             style     = line_style::solid) = 0;
+                                           uint                   line_width = 1U,
+                                           line_style             style      = line_style::solid) = 0;
 
-    virtual shared_drawable2d create_elipse (color fill, color outline, uint outline_size = 1U) = 0;
-    virtual shared_drawable2d create_rectangle (color fill, color outline, uint outline_size = 1U) = 0;
+    virtual shared_drawable2d create_ellipse (color fill, color outline, uint outline_width = 1U) = 0;
+    virtual shared_drawable2d create_rectangle (color fill, color outline, uint outline_width = 1U) = 0;
 
     virtual shared_drawable2d create_polygon (polygon_array const& coord,
-                                              color fill, color outline, uint outline_size = 1U) = 0;
+                                              color fill, color outline, uint outline_width = 1U) = 0;
 
     virtual shared_drawable2d create_image (string_type  const& path,
                                             pixel_format const& format = pixel_format (),
@@ -402,7 +392,7 @@ public:
                       uint                   line_size = 1U,
                       line_style             style     = line_style::solid);
 
-    void create_elipse (rect const& rct, color fill, color outline, uint outline_size = 1U);
+    void create_ellipse (rect const& rct, color fill, color outline, uint outline_size = 1U);
     void create_rectangle (rect const& rct, color fill, color outline, uint outline_size = 1U);
     void create_polygon (polygon_array const& coord, color fill, color outline, uint outline_size = 1U);
 
@@ -424,22 +414,22 @@ private:
 class context_mutex
 {
 public:
-    context_mutex (shared_context const& context) noexcept
+    inline context_mutex (shared_context const& context) noexcept
     : _M_context  (context)
     { }
 
-    ~context_mutex () noexcept
+    inline ~context_mutex () noexcept
     {
         unlock ();
     }
 
-    void lock ()
+    inline void lock ()
     {
         _M_mutex.lock ();
         context_interface::acquire (_M_context);
     }
 
-    bool try_lock ()
+    inline bool try_lock ()
     {
         if (!_M_mutex.try_lock ()) return false;
 
@@ -447,7 +437,7 @@ public:
         return true;
     }
 
-    void unlock ()
+    inline void unlock ()
     {
         context_interface::acquire (nullptr);
         _M_mutex.unlock ();

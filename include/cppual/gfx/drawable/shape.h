@@ -27,13 +27,20 @@
 
 namespace cppual { namespace gfx {
 
-class Shape : public drawable2d_interface, public transformable2d_interface
+class shape : public drawable2d_interface, public transformable2d_interface
 {
 public:
-    Shape (color const& fill_color) noexcept;
-
-protected:
-    color _M_gFillColor;
+    enum type
+    {
+        image    = 1,
+        line     ,
+        path     ,
+        elipse   ,
+        polygon  ,
+        rectangle,
+        text     ,
+        custom   = 255
+    };
 };
 
 } } // Graphics

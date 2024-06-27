@@ -39,9 +39,9 @@ public:
     typedef resource_handle                       window_type   ;
     typedef memory::allocator<view*>              allocator_type;
     typedef memory::memory_resource               resource_type ;
-    typedef circular_queue<view*, allocator_type> container     ;
+    typedef circular_queue<view*, allocator_type> view_container;
     typedef std::size_t                           size_type     ;
-    typedef typename container::iterator          iterator      ;
+    typedef typename view_container::iterator     iterator      ;
     typedef string                                string_type   ;
     typedef platform_wnd_interface                platform_wnd  ;
     typedef gfx::shared_surface                   surface_type  ;
@@ -76,7 +76,7 @@ public:
     void update (rect const& region);
     void enable ();
     void disable ();
-    void set_focus ();
+    void get_focus ();
     void kill_focus ();
 
     inline weak_window         renderable () const noexcept { return _M_pRenderable; }
@@ -89,24 +89,24 @@ public:
     inline point2u             maximum_size () const noexcept { return _M_gMaxSize; }
 
     inline bool valid () const noexcept
-    { return _M_gStateFlags.test (view::is_valid); }
+    { return _M_gStateFlags.test (state_flag::is_valid); }
 
     inline bool is_enabled () const noexcept
-    { return _M_gStateFlags.test (view::enabled); }
+    { return _M_gStateFlags.test (state_flag::enabled); }
 
     inline bool has_focus () const noexcept
-    { return _M_gStateFlags.test (view::focus); }
+    { return _M_gStateFlags.test (state_flag::focus); }
 
     inline bool is_hidden () const noexcept
-    { return !_M_gStateFlags.test (view::is_valid) or !_M_pRenderable->is_mapped (); }
+    { return !_M_gStateFlags.test (state_flag::is_valid) or !_M_pRenderable->is_mapped (); }
 
     inline rect geometry () const noexcept
-    { return _M_gStateFlags.test (view::is_valid) ? _M_pRenderable->geometry () : rect (); }
+    { return _M_gStateFlags.test (state_flag::is_valid) ? _M_pRenderable->geometry () : rect (); }
 
-    inline container& children () noexcept
+    inline view_container& children () noexcept
     { return _M_gChildrenList; }
 
-    inline container const& children () const noexcept
+    inline view_container const& children () const noexcept
     { return _M_gChildrenList; }
 
 protected:
@@ -135,7 +135,7 @@ protected:
     virtual void on_parent_size (point2u);
 
 private:
-    enum state_flag
+    enum class state_flag : u8
     {
         is_valid = 1 << 0,
         focus    = 1 << 1,
@@ -150,14 +150,14 @@ private:
     void invalidate () noexcept;
 
 private:
-    container     _M_gChildrenList;
-    point2u       _M_gMinSize, _M_gMaxSize;
-    shared_window _M_pRenderable;
-    surface_type  _M_pSurface;
-    context_type  _M_pContext;
-    iterator      _M_gItFromParent;
-    view*         _M_pParentObj;
-    state_flags   _M_gStateFlags;
+    view_container _M_gChildrenList;
+    point2u        _M_gMinSize, _M_gMaxSize;
+    shared_window  _M_pRenderable;
+    surface_type   _M_pSurface;
+    context_type   _M_pContext;
+    iterator       _M_gItFromParent;
+    view*          _M_pParentObj;
+    state_flags    _M_gStateFlags;
 };
 
 } } // namespace Ui

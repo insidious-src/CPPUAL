@@ -19,17 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_GFX_VIRTUAL_SURFACE_H_
-#define CPPUAL_GFX_VIRTUAL_SURFACE_H_
+#ifndef CPPUAL_UI_VIRTUAL_SURFACE_H_
+#define CPPUAL_UI_VIRTUAL_SURFACE_H_
 #ifdef __cplusplus
 
 #include <cppual/ui/wm.h>
-#include <cppual/gfx/gl/texture.h>
 #include <cppual/string.h>
 
 namespace cppual { namespace ui {
 
-class SHARED_API proxy_renderable final : public platform_wnd_interface
+class SHARED_API proxy_renderable : public platform_wnd_interface
 {
 public:
     proxy_renderable () = delete;
@@ -71,7 +70,7 @@ public:
     bool   is_below () const { return false; }
 
     window_flags flags () const { return window_flags (); }
-    void        set_flags (window_flags) { }
+    void         set_flags (window_flags) { }
 
     inline ~proxy_renderable    ()       noexcept { unmap ();            }
     inline weak_window owner    () const noexcept { return _M_pParent;    }
@@ -96,4 +95,4 @@ private:
 } } // namespace Ui
 
 #endif // __cplusplus
-#endif // CPPUAL_GFX_VIRTUAL_SURFACE_H_
+#endif // CPPUAL_UI_VIRTUAL_SURFACE_H_

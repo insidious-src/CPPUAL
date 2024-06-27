@@ -13,7 +13,6 @@
 #include <cppual/json/document.h>
 
 #include <iostream>
-#include <fstream>
 #include <utility>
 #include <cassert>
 #include <tuple>
@@ -70,6 +69,11 @@ template <>
 struct is_json_value<std::string> : std::true_type
 { };
 
+template <typename T>
+inline constexpr auto const is_json_value_v = is_json_value<T>::value;
+
+//======================================================
+
 template <typename>
 struct is_json_int : std:: false_type
 { };
@@ -98,10 +102,13 @@ template <>
 struct is_json_int<i64> : std::true_type
 { };
 
+template <typename T>
+inline constexpr auto const is_json_int_v = is_json_int<T>::value;
+
 //======================================================
 
 template <typename>
-struct is_json_float : std:: false_type
+struct is_json_float : std::false_type
 { };
 
 template <>
@@ -111,6 +118,9 @@ struct is_json_float<float> : std::true_type
 template <>
 struct is_json_float<double> : std::true_type
 { };
+
+template <typename T>
+inline constexpr auto const is_json_float_v = is_json_float<T>::value;
 
 //======================================================
 
@@ -126,6 +136,9 @@ template <>
 struct is_json_string<std::string> : std::true_type
 { };
 
+template <typename T>
+inline constexpr auto const is_json_string_v = is_json_string<T>::value;
+
 //======================================================
 
 class doc_parser;
@@ -135,7 +148,7 @@ template <typename T>
 class value_reference_template;
 
 template <typename T,
-          typename = typename std::enable_if<is_json_value<T>::value>::type>
+          typename = typename std::enable_if<is_json_value_v<T>>::type>
 class value_reference;
 
 class template_base  ;
@@ -143,17 +156,37 @@ class template_object;
 class template_array ;
 
 template <typename T,
-          typename A = memory::allocator<value_reference<T>>,
-          typename   = typename std::enable_if<is_json_value<T>::value>::type
+          typename A = memory::allocator<value_reference<std::remove_cv_t<T>>>,
+          typename   = typename std::enable_if<is_json_value_v<T>>::type
           >
 class values_array;
 
 template <typename T,
           typename A = memory::allocator<T>,
-          typename   = typename std::enable_if<std::is_base_of<template_object, T>::value ||
-                                               std::is_base_of<template_array , T>::value>::type
+          typename   = typename std::enable_if<std::is_base_of_v<template_object, T> ||
+                                               std::is_base_of_v<template_array , T>>::type
           >
 class objects_array;
+
+//======================================================
+
+enum class doc_type : u8
+{
+    null,
+    object,
+    array
+};
+
+enum class value_type : u8
+{
+    null       = 0,    //!< null
+    bool_false = 1,    //!< false
+    bool_true  = 2,    //!< true
+    object     = 3,    //!< object
+    array      = 4,    //!< array
+    string     = 5,    //!< string
+    number     = 6     //!< number
+};
 
 //======================================================
 
@@ -172,13 +205,6 @@ public:
     typedef base_type::Object                  object_type    ;
     typedef base_type::Array                   array_type     ;
     typedef std::pair<string_type, value_type> pair_type      ;
-
-    enum class doc_type : u8
-    {
-        null,
-        object,
-        array
-    };
 
     //! construct from file
     doc_parser(string_type const& file, doc_type type = doc_type::object);
@@ -277,13 +303,13 @@ public:
     { }
 
     constexpr template_owner (template_object& obj)
-    : _M_owner (&obj), _M_type (doc_parser::doc_type::object)
+    : _M_owner (&obj), _M_type (doc_type::object)
     {
         assert(_M_owner != nullptr);
     }
 
     constexpr template_owner (template_array& array)
-    : _M_owner (&array), _M_type (doc_parser::doc_type::array)
+    : _M_owner (&array), _M_type (doc_type::array)
     {
         assert(_M_owner != nullptr);
     }
@@ -291,32 +317,32 @@ public:
     constexpr template_object* object () const
     {
         assert(_M_owner != nullptr);
-        assert(_M_type  == doc_parser::doc_type::object);
+        assert(_M_type  == doc_type::object);
         return _M_owner.object;
     }
 
     constexpr template_array* array () const
     {
         assert(_M_owner != nullptr);
-        assert(_M_type  == doc_parser::doc_type::array);
+        assert(_M_type  == doc_type::array);
         return _M_owner.array;
     }
 
     constexpr explicit operator safe_bool () const noexcept
     {
         return _M_owner != nullptr &&
-              (_M_type  == doc_parser::doc_type::object || _M_type == doc_parser::doc_type::array) ?
+              (_M_type  == doc_type::object || _M_type == doc_type::array) ?
                &template_owner::_M_owner : nullptr;
     }
 
-    constexpr doc_parser::doc_type type () const noexcept
+    constexpr doc_type type () const noexcept
     {
         return _M_type;
     }
 
 private:
-    pointer              _M_owner;
-    doc_parser::doc_type _M_type ;
+    pointer  _M_owner;
+    doc_type _M_type ;
 
     friend constexpr bool operator == (template_owner const&, std::nullptr_t) noexcept;
     friend constexpr bool operator == (std::nullptr_t, template_owner const&) noexcept;
@@ -371,7 +397,7 @@ public:
 
     constexpr pointer operator -> () const
     {
-        assert(_M_ref != nullptr && type () != doc_parser::doc_type::null);
+        assert(_M_ref != nullptr && type () != doc_type::null);
         return _M_ref;
     }
 
@@ -395,13 +421,13 @@ public:
         return _M_index;
     }
 
-    constexpr doc_parser::doc_type type () const noexcept
+    constexpr doc_type type () const noexcept
     {
         return  _M_ref != nullptr && _M_ref->GetType () == kObjectType ?
-                    doc_parser::doc_type::object :
+                    doc_type::object :
                     _M_ref != nullptr && _M_ref->GetType () == kArrayType ?
-                    doc_parser::doc_type::array :
-                    doc_parser::doc_type::null;
+                    doc_type::array :
+                    doc_type::null;
     }
 
     constexpr explicit operator bool () const noexcept
@@ -650,12 +676,11 @@ template <typename T>
 class value_reference_template : public value_reference_base
 {
 public:
-    static_assert (is_json_value<T>::value, "invalid type!");
+    static_assert (is_json_value_v<T>, "invalid type!");
 
     typedef value_reference_template<T> self_type;
 
-    typedef typename std::conditional<std::is_same<i16, T>::value ||
-                                      std::is_enum<T>::value,
+    typedef typename std::conditional<std::is_same_v<i16, T> || std::is_enum_v<T>,
             typename std::conditional<sizeof (T) <= sizeof (i32), i32, i64>::type,
             typename std::conditional<std::is_same<u16, T>::value, uint, T>::type
             >::type
@@ -859,7 +884,7 @@ public:
 
     inline value_type value () const noexcept
     {
-        return this->ref()->GetBool();
+        return ref()->GetBool();
     }
 
     inline value_reference& operator = (value_reference const& ref)
@@ -871,7 +896,6 @@ public:
     inline value_reference& operator = (value_type value)
     {
         ref()->SetBool(value);
-
         return *this;
     }
 };
@@ -919,7 +943,6 @@ public:
     inline value_reference& operator = (value_type value)
     {
         ref()->SetUint(static_cast<uint>(value));
-
         return *this;
     }
 };
@@ -967,7 +990,6 @@ public:
     inline value_reference& operator = (value_type value)
     {
         ref()->SetInt(static_cast<int>(value));
-
         return *this;
     }
 };
@@ -1014,7 +1036,6 @@ public:
     inline value_reference& operator = (value_type value)
     {
         ref()->SetUint(value);
-
         return *this;
     }
 };
@@ -1061,7 +1082,6 @@ public:
     inline value_reference& operator = (value_type value) noexcept
     {
         ref()->SetInt(value);
-
         return *this;
     }
 };
@@ -1108,7 +1128,6 @@ public:
     inline value_reference& operator = (value_type const& value)
     {
         ref()->SetUint64(value);
-
         return *this;
     }
 };
@@ -1155,7 +1174,6 @@ public:
     inline value_reference& operator = (value_type const& value)
     {
         ref()->SetInt64(value);
-
         return *this;
     }
 };
@@ -1202,7 +1220,6 @@ public:
     inline value_reference& operator = (value_type const& value)
     {
         ref()->SetFloat(value);
-
         return *this;
     }
 };
@@ -1249,7 +1266,6 @@ public:
     inline value_reference& operator = (value_type const& value)
     {
         ref()->SetDouble(value);
-
         return *this;
     }
 };
@@ -1274,19 +1290,16 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    template <typename Processor,
-              typename = typename std::enable_if<
-                  std::is_same<typename std::result_of<Processor()>::type, value_type>::value,
-                  typename std::result_of<Processor()>::type
-                  >::type
+    template <typename R,
+              typename = typename std::enable_if<std::is_same_v<R, value_type>>::type
               >
-    inline value_reference (template_object*   owner,
-                            string_type const& name,
-                            Processor&&        fn,
-                            value_type  const& default_val = value_type())
+    inline value_reference(template_object*     owner,
+                           string_type const&   name,
+                           function<R()> const& fn,
+                           value_type const&    default_val = value_type())
     : reference_base(owner, name, default_val)
     {
-        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
+        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a string");
 
         connect(json_string_invoked, [func = fn](string_type& val)
         {
@@ -1294,20 +1307,34 @@ public:
         });
     }
 
-    template <typename Processor,
-              typename E = typename std::enable_if<
-                  std::is_enum<typename std::result_of<Processor()>::type>::value,
-                  typename std::result_of<Processor()>::type
-                  >::type
+    template <typename R,
+              typename = typename std::enable_if<std::is_same_v<R, value_type>>::type
               >
-    inline value_reference (template_object*   owner,
-                            string_type const& name,
-                            Processor&&        fn,
-                            value_type  const& default_val = value_type(),
+    inline value_reference (template_array*      owner,
+                            size_type            idx,
+                            function<R()> const& fn,
+                            value_type const&    default_val = value_type())
+    : reference_base(owner, idx, default_val)
+    {
+        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a string");
+
+        connect(json_string_invoked, [func = fn](string_type& val)
+        {
+            val = func ();
+        });
+    }
+
+    template <typename E,
+              typename = typename std::enable_if<std::is_enum_v<E>>::type
+              >
+    inline value_reference (template_object*     owner,
+                            string_type const&   name,
+                            function<E()> const& fn,
+                            value_type  const&   default_val = value_type(),
                             E = E())
     : reference_base(owner, name, default_val)
     {
-        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
+        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a string");
 
         connect(json_enum_invoked, [func = fn](int& val)
         {
@@ -1315,40 +1342,17 @@ public:
         });
     }
 
-    template <typename Processor,
-              typename = typename std::enable_if<
-                  std::is_same<typename std::result_of<Processor()>::type, value_type>::value,
-                  typename std::result_of<Processor()>::type
-                  >::type
+    template <typename E,
+              typename = typename std::enable_if<std::is_enum_v<E>>::type
               >
-    inline value_reference (template_array*   owner,
-                            size_type         idx,
-                            Processor&&       fn,
-                            value_type const& default_val = value_type())
-    : reference_base(owner, idx, default_val)
-    {
-        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
-
-        connect(json_string_invoked, [func = fn](string_type& val)
-        {
-            val = func ();
-        });
-    }
-
-    template <typename Processor,
-              typename E = typename std::enable_if<
-                  std::is_enum<typename std::result_of<Processor()>::type>::value,
-                  typename std::result_of<Processor()>::type
-                  >::type
-              >
-    inline value_reference (template_array*   owner,
-                            size_type         idx,
-                            Processor&&       fn,
-                            value_type const& default_val = value_type(),
+    inline value_reference (template_array*      owner,
+                            size_type            idx,
+                            function<E()> const& fn,
+                            value_type const&    default_val = value_type(),
                             E = E())
     : reference_base(owner, idx, default_val)
     {
-        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT String");
+        if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a string");
 
         connect(json_enum_invoked, [func = fn](int& val)
         {
@@ -1383,7 +1387,7 @@ public:
     template <typename U,
               typename = typename std::enable_if<std::is_enum<U>::value>::type
               >
-    inline U toEnum () const
+    inline U to_enum () const
     {
         int value = 0;
 
@@ -1425,12 +1429,12 @@ public:
     {
         switch (owner().type())
         {
-        case doc_parser::doc_type::object:
+        case doc_type::object:
             ref()->SetString(value.c_str(),
                              static_cast<size_type>(value.size()),
                              owner().object()->parser()->GetAllocator());
             break;
-        case doc_parser::doc_type::array:
+        case doc_type::array:
             ref()->SetString(value.c_str(),
                              static_cast<size_type>(value.size()),
                              owner().array()->parser()->GetAllocator());
@@ -1446,10 +1450,10 @@ public:
     {
         switch (owner().type())
         {
-        case doc_parser::doc_type::object:
+        case doc_type::object:
             ref()->SetString(value, owner().object()->parser()->GetAllocator());
             break;
-        case doc_parser::doc_type::array:
+        case doc_type::array:
             ref()->SetString(value, owner().array()->parser()->GetAllocator());
             break;
         default:
@@ -1589,14 +1593,14 @@ operator + (value_reference<doc_parser::string_type>::value_type::value_type con
 template <typename T>
 inline bool operator == (value_reference<T> const& lh, std::nullptr_t)
 {
-   return lh._M_owner.type() == doc_parser::doc_type::null ||
+   return lh._M_owner.type() == doc_type::null ||
           lh._M_ref == nullptr || lh._M_ref->IsNull();
 }
 
 template <typename T>
 inline bool operator == (std::nullptr_t, value_reference<T> const& rh)
 {
-    return rh._M_owner.type() == doc_parser::doc_type::null ||
+    return rh._M_owner.type() == doc_type::null ||
            rh._M_ref == nullptr || rh._M_ref->IsNull();
 }
 
@@ -1614,12 +1618,13 @@ inline bool operator != (std::nullptr_t, value_reference<T> const& rh)
 
 // ======================================================================
 
-template <typename T, typename Allocator>
-class objects_array<T, Allocator> : public template_array, public Allocator
+template <typename T, typename A>
+class objects_array<T, A> : public template_array, public A
 {
 public:
-    typedef T                                           value_type            ;
-    typedef std::allocator_traits<Allocator>            allocator_traits      ;
+    typedef objects_array<T, A>                         self_type             ;
+    typedef std::remove_cv_t<T>                         value_type            ;
+    typedef std::allocator_traits<A>                    allocator_traits      ;
     typedef typename allocator_traits::allocator_type   allocator_type        ;
     typedef std::deque<value_type, allocator_type>      array_type            ;
     typedef doc_parser::size_type                       size_type             ;
@@ -1816,16 +1821,16 @@ private:
 
     void values_connections ()
     {
-        connect(changed, *this, &objects_array::on_changed);
-        connect(invalidated, *this, &objects_array::on_invalidated);
-        connect(destroyed, *this, &objects_array::on_invalidated);
+        connect(changed, *this, &self_type::on_changed);
+        connect(invalidated, *this, &self_type::on_invalidated);
+        connect(destroyed, *this, &self_type::on_invalidated);
     }
 
     void values_disconnections ()
     {
-        disconnect(changed, *this, &objects_array::on_changed);
-        disconnect(invalidated, *this, &objects_array::on_invalidated);
-        disconnect(destroyed, *this, &objects_array::on_invalidated);
+        disconnect(changed, *this, &self_type::on_changed);
+        disconnect(invalidated, *this, &self_type::on_invalidated);
+        disconnect(destroyed, *this, &self_type::on_invalidated);
     }
 
 private:
@@ -1834,12 +1839,13 @@ private:
 
 // ======================================================================
 
-template <typename T, typename Allocator>
-class values_array<T, Allocator> : public template_array, public Allocator
+template <typename T, typename A>
+class values_array<T, A> : public template_array, public A
 {
 public:
-    typedef value_reference<T>                          value_type            ;
-    typedef std::allocator_traits<Allocator>            allocator_traits      ;
+    typedef values_array<T, A>                          self_type             ;
+    typedef value_reference<std::remove_cv_t<T>>        value_type            ;
+    typedef std::allocator_traits<A>                    allocator_traits      ;
     typedef typename allocator_traits::allocator_type   allocator_type        ;
     typedef std::deque<value_type, allocator_type>      array_type            ;
     typedef doc_parser::size_type                       size_type             ;
@@ -2025,16 +2031,16 @@ private:
 
     void values_connections ()
     {
-        connect(changed, *this, &values_array::on_changed);
-        connect(invalidated, *this, &values_array::on_invalidated);
-        connect(destroyed, *this, &values_array::on_invalidated);
+        connect(changed, *this, &self_type::on_changed);
+        connect(invalidated, *this, &self_type::on_invalidated);
+        connect(destroyed, *this, &self_type::on_invalidated);
     }
 
     void values_disconnections ()
     {
-        disconnect(changed, *this, &values_array::on_changed);
-        disconnect(invalidated, *this, &values_array::on_invalidated);
-        disconnect(destroyed, *this, &values_array::on_invalidated);
+        disconnect(changed, *this, &self_type::on_changed);
+        disconnect(invalidated, *this, &self_type::on_invalidated);
+        disconnect(destroyed, *this, &self_type::on_invalidated);
     }
 
 private:
@@ -2049,25 +2055,25 @@ public:
     template <typename T>
     using shared_ptr = std::shared_ptr<T>;
 
-    typedef doc_parser::string_type                                  string_type        ;
-    typedef doc_parser::size_type                                    size_type          ;
-    typedef shared_ptr<doc_parser>                                   json_ptr           ;
-    typedef std::pair<string_type, json_ptr>                         json_pair          ;
-    typedef std::tuple<size_type, string_type, doc_parser::doc_type> file_tuple         ;
-    typedef shared_ptr<template_object>                              generic_object_ptr ;
-    typedef shared_ptr<template_array>                               generic_array_ptr  ;
-    typedef std::pair<size_type, generic_object_ptr>                 generic_object_pair;
-    typedef std::pair<size_type, generic_array_ptr>                  generic_array_pair ;
-    typedef unordered_map<size_type, json_pair>                      json_map           ;
-    typedef unordered_map<size_type, generic_object_ptr>             objects_container  ;
-    typedef unordered_map<size_type, generic_array_ptr>              arrays_container   ;
-    typedef unordered_map<size_type, objects_container>              objects_map        ;
-    typedef unordered_map<size_type, arrays_container>               arrays_map         ;
-    typedef json_map::iterator                                       iterator           ;
-    typedef json_map::const_iterator                                 const_iterator     ;
-    typedef json_map::mapped_type                                    value_type         ;
-    typedef json_map::mapped_type&                                   reference          ;
-    typedef json_map::mapped_type const&                             const_reference    ;
+    typedef doc_parser::string_type                      string_type        ;
+    typedef doc_parser::size_type                        size_type          ;
+    typedef shared_ptr<doc_parser>                       json_ptr           ;
+    typedef std::pair<string_type, json_ptr>             json_pair          ;
+    typedef std::tuple<size_type, string_type, doc_type> file_tuple         ;
+    typedef shared_ptr<template_object>                  generic_object_ptr ;
+    typedef shared_ptr<template_array>                   generic_array_ptr  ;
+    typedef std::pair<size_type, generic_object_ptr>     generic_object_pair;
+    typedef std::pair<size_type, generic_array_ptr>      generic_array_pair ;
+    typedef unordered_map<size_type, json_pair>          json_map           ;
+    typedef unordered_map<size_type, generic_object_ptr> objects_container  ;
+    typedef unordered_map<size_type, generic_array_ptr>  arrays_container   ;
+    typedef unordered_map<size_type, objects_container>  objects_map        ;
+    typedef unordered_map<size_type, arrays_container>   arrays_map         ;
+    typedef json_map::iterator                           iterator           ;
+    typedef json_map::const_iterator                     const_iterator     ;
+    typedef json_map::mapped_type                        value_type         ;
+    typedef json_map::mapped_type&                       reference          ;
+    typedef json_map::mapped_type const&                 const_reference    ;
 
     // ======================================================================
 
@@ -2101,7 +2107,7 @@ public:
             if (it_key == _M_objects[type].end())
             {
                 _M_objects[type].emplace(key,
-                                         memory::allocate_shared<T, template_object>
+                                         memory::allocate_shared<template_object, T>
                                          (nullptr,
                                           *json->second.second.get(),
                                           std::forward<Args>(args)...));
@@ -2132,7 +2138,7 @@ public:
             if (it_key == _M_arrays[type].end())
             {
                 _M_arrays[type].emplace(key,
-                                        memory::allocate_shared<T, template_array>
+                                        memory::allocate_shared<template_array, T>
                                         (nullptr,
                                          *json->second.second.get(),
                                          std::forward<Args>(args)...));

@@ -31,42 +31,44 @@
 #include <cppual/memory/allocator.h>
 #include <cppual/reactive.h>
 
-#include <memory>
-#include <cstdint>
-#include <cstddef>
+//include <memory>
+//#include <cstdint>
+//#include <cstddef>
 #include <deque>
 #include <vector>
-#include <variant>
-#include <type_traits>
+//#include <variant>
+//#include <type_traits>
 
 namespace cppual {
 
-template <typename T, typename Allocator = memory::allocator<T> >
+template <typename T,
+          typename Allocator = memory::allocator<T>
+          >
 class unbound_matrix
 {
 public:
-    typedef T                                    value_type    ;
-    typedef Allocator                            allocator_type;
-    typedef T*                                   pointer       ;
-    typedef T const*                             const_pointer ;
-    typedef std::vector      <T, allocator_type> vector_type   ;
-    typedef std::deque       <T, allocator_type> array_type    ;
-    typedef signal        <void, allocator_type> signal_type   ;
-    typedef function         <void(value_type&)> fn_type       ;
-    typedef std::vector<fn_type, allocator_type> fn_vector_type;
-    typedef circular_queue   <T, allocator_type> queue_type    ;
-    typedef typename Allocator::size_type        size_type     ;
+    typedef typename std::remove_cv<T>::type         value_type    ;
+    typedef typename std::remove_cv<Allocator>::type allocator_type;
+    typedef T*                                       pointer       ;
+    typedef T const*                                 const_pointer ;
+    typedef std::vector      <T, allocator_type>     vector_type   ;
+    typedef std::deque       <T, allocator_type>     array_type    ;
+    typedef signal      <void(), allocator_type>     signal_type   ;
+    typedef function         <void(value_type&)>     fn_type       ;
+    typedef std::vector<fn_type, allocator_type>     fn_vector_type;
+    typedef circular_queue   <T, allocator_type>     queue_type    ;
+    typedef typename Allocator::size_type            size_type     ;
 
-    enum class Instructions
+    enum class operations : u8
     {
-        Add,
-        Subtract,
-        Multiply,
-        Divide,
-        Modulo,
-        Power,
-        Log,
-        Root
+        add,
+        subtract,
+        multiply,
+        divide,
+        modulo,
+        power,
+        log,
+        root
     };
 
     /// Process sequentially each function using matrix'
@@ -74,12 +76,12 @@ public:
     /// in parallel. Return all results.
     vector_type process (fn_vector_type);
 
-    constexpr size_type    size      () const noexcept { return rows () * cols (); }
-    constexpr size_type    cols      () const noexcept { return _M_uCols;          }
-    constexpr size_type    rows      () const noexcept { return _M_uRows;          }
-    constexpr size_type    max_row   ()       noexcept { return rows () - 1;       }
-    constexpr size_type    max_col   ()       noexcept { return cols () - 1;       }
-    constexpr signal_type& processed ()       noexcept { return _M_signal;         }
+    constexpr size_type    size      () const noexcept { return rows () * cols ();  }
+    constexpr size_type    cols      () const noexcept { return _M_uCols;           }
+    constexpr size_type    rows      () const noexcept { return _M_uRows;           }
+    constexpr size_type    max_row   ()       noexcept { return rows () - 1;        }
+    constexpr size_type    max_col   ()       noexcept { return cols () - 1;        }
+    constexpr signal_type& processed ()       noexcept { return _M_processedSignal; }
 
     constexpr const_pointer data () const noexcept
     { return _M_matrix.data (); }
@@ -144,7 +146,7 @@ public:
 private:
     vector_type _M_matrix          ;
     queue_type  _M_instructionQueue;
-    signal_type _M_signal          ;
+    signal_type _M_processedSignal ;
     size_type   _M_uCols, _M_uRows ;
 };
 

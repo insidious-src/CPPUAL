@@ -198,7 +198,7 @@ dyn_loader::get_function (string_type::const_pointer pName) const noexcept
 
     function_type func = ::GetProcAddress (_M_pHandle.get<HMODULE> (), pName);
     if (!func)
-        std::cerr << "error: " << ::GetLastError () << "\nfunction not found!" << std::endl;
+        std::cerr << "error: " << ::GetLastError () << " :: function not found!" << std::endl;
     return func;
 
 #   endif

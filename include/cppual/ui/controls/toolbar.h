@@ -48,7 +48,7 @@ enum class tool_button : u8
 
 // =========================================================
 
-class tool_bar : public skinnable_view
+class toolbar : public skinnable_view
 {
 public:
     enum tool_flag
@@ -95,22 +95,22 @@ public:
     { return _M_eOrientation; }
 
     inline bool is_movable () const noexcept
-    { return _M_eToolFlags.test (tool_bar::movable); }
+    { return _M_eToolFlags.test (toolbar::movable); }
 
     inline bool is_draggable () const noexcept
-    { return _M_eToolFlags.test (tool_bar::draggable); }
+    { return _M_eToolFlags.test (toolbar::draggable); }
 
     inline bool is_floatable () const noexcept
-    { return _M_eToolFlags.test (tool_bar::floatable); }
+    { return _M_eToolFlags.test (toolbar::floatable); }
 
     inline bool is_auto_hide () const noexcept
-    { return _M_eToolFlags.test (tool_bar::auto_hide); }
+    { return _M_eToolFlags.test (toolbar::auto_hide); }
 
     inline bool has_hot_tracking () const noexcept
-    { return _M_eToolFlags.test (tool_bar::hot_tracking); }
+    { return _M_eToolFlags.test (toolbar::hot_tracking); }
 
     inline bool has_splitter () const noexcept
-    { return _M_eToolFlags.test (tool_bar::splitter); }
+    { return _M_eToolFlags.test (toolbar::splitter); }
 
     inline size_type group_count () const noexcept
     { return _M_gGroups.size (); }

@@ -29,7 +29,7 @@
 #include <cppual/memory/allocator.h>
 
 #include <array>
-#include <memory>
+//#include <memory>
 
 namespace cppual { namespace gfx {
 
@@ -150,7 +150,7 @@ template <u16 C, u16 R, typename T = float>
 class static_matrix
 {
 public:
-    static_assert (1 < C || 1 < R, "Ivalid number of dimensions!");
+    static_assert (1 < C && 1 < R, "Ivalid number of dimensions!");
 
     typedef T                    value_type   ;
     typedef T const*             const_pointer;

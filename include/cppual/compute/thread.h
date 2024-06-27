@@ -29,7 +29,7 @@
 #include <cppual/process/details.h>
 
 #include <atomic>
-#include <thread>
+//#include <thread>
 
 using std::atomic_size_t;
 using std::atomic_bool;
@@ -71,7 +71,7 @@ int			    sleep_for (uint millisec);
 
 // =========================================================
 
-class thread final : public non_copyable
+class thread : public non_copyable
 {
 public:
     typedef function<void()> callable ;
@@ -106,7 +106,7 @@ public:
     void        cancel ();
     void        detach ();
     void        join   ();
-    //bool        tryJoinFor (uint millisec);
+    //bool        try_join_for (uint millisec);
 
     bool start (callable&       func,
                 bool            joinable   = true,
@@ -125,29 +125,23 @@ private:
 
 // =========================================================
 
-inline bool
-operator == (thread::id __x, thread::id __y) noexcept
-{ return thread::id::thread_handles_equal (__x._M_handle, __y._M_handle); }
+inline bool operator == (thread::id x, thread::id y) noexcept
+{ return thread::id::thread_handles_equal (x._M_handle, y._M_handle); }
 
-inline bool
-operator < (thread::id __x, thread::id __y) noexcept
-{ return __x._M_handle < __y._M_handle; }
+inline bool operator < (thread::id x, thread::id y) noexcept
+{ return x._M_handle < y._M_handle; }
 
-inline bool
-operator!=(thread::id __x, thread::id __y) noexcept
-{ return !(__x == __y); }
+inline bool operator != (thread::id x, thread::id y) noexcept
+{ return !(x == y); }
 
-inline bool
-operator<=(thread::id __x, thread::id __y) noexcept
-{ return !(__y < __x); }
+inline bool operator <= (thread::id x, thread::id y) noexcept
+{ return !(y < x); }
 
-inline bool
-operator>(thread::id __x, thread::id __y) noexcept
-{ return __y < __x; }
+inline bool operator > (thread::id x, thread::id y) noexcept
+{ return y < x; }
 
-inline bool
-operator>=(thread::id __x, thread::id __y) noexcept
-{ return !(__x < __y); }
+inline bool operator >= (thread::id x, thread::id y) noexcept
+{ return !(x < y); }
 
 } } // Concurency
 

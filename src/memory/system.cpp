@@ -40,18 +40,16 @@
 #   include "os/ios.h"
 #endif
 
-#include <new>
+//#include <new>
 #include <atomic>
-#include <memory>
+//#include <memory>
 #include <iostream>
 
 #include <cstdlib>
 #include <cstring>
 #include <assert.h>
 
-namespace { // internal unit optimization
-
-using namespace cppual;
+namespace cppual { namespace { // internal unit optimization
 
 inline static void initializer ()
 {
@@ -66,10 +64,10 @@ inline static void initializer ()
 class system_memory_resource final : public memory::memory_resource
 {
 public:
-    using base_type::base_type;
-    using base_type::operator=;
-
-    inline bool is_thread_safe () const noexcept { return true; }
+    inline bool is_thread_safe () const noexcept
+    {
+        return true;
+    }
 
     inline size_type max_size () const noexcept
     {
@@ -85,24 +83,26 @@ public:
 
 private:
     inline
-    void* do_allocate (size_type bytes, size_type /*alignment*/)
+    void* do_allocate (size_type bytes, size_type /*align*/)
     {
         if (!memory::model::is_thread_initialized ()) initializer ();
         return memory::model::allocate (bytes);
     }
 
     inline
-    void* do_reallocate (void* p, size_type old_size, size_type new_size, size_type /*alignment*/)
+    void* do_reallocate (void* p, size_type old_size, size_type new_size, size_type /*align*/)
     {
         if (!memory::model::is_thread_initialized ()) initializer ();
+
         return p != nullptr ? memory::model::reallocate (p, old_size, new_size) :
                               memory::model::allocate (new_size);
     }
 
     inline
-    void do_deallocate (void* p, size_type /*bytes*/, size_type /*alignment*/)
+    void do_deallocate (void* p, size_type /*bytes*/, size_type /*align*/)
     {
         if (!memory::model::is_thread_initialized ()) initializer ();
+
         memory::model::deallocate (p);
     }
 
@@ -113,7 +113,7 @@ private:
     }
 };
 
-} // anonymous namespace
+} } // anonymous namespace
 
 // =========================================================
 
@@ -363,7 +363,7 @@ std::size_t working_size ()
 #define INITIALIZE_THREAD_LOCAL(NAME) pthread_once(&NAME##OnceControl, &Initialize##NAME##TLS);
 #define FREE_THREAD_LOCAL(NAME) pthread_key_delete(NAME);
 #define GET_THREAD_LOCAL(TYPE, NAME) ((TYPE)pthread_getspecific(NAME))
-#define GET_THREAD_LOCAL_LITERAL_VALUE(TYPE, NAME) ((TYPE)((size_t)pthread_getspecific(NAME)))
+#define GET_THREAD_LOCAL_LITERAL_VALUE(TYPE, NAME) ((TYPE)((std::size_t)pthread_getspecific(NAME)))
 #define SET_THREAD_LOCAL(NAME, VALUE) pthread_setspecific(NAME, (void*)VALUE);
 #define CAST_THREAD_LOCAL(NAME, VALUE) reinterpret_cast<void*> \
     (static_cast<uptr>(static_cast<decltype(NAME)>(VALUE)))
@@ -401,14 +401,16 @@ std::size_t working_size ()
 #define GLOBAL_SPAN_CACHE_MULTIPLIER 1
 #else
 // Default - performance priority cache limits
-//! Limit of thread cache in number of spans for each page count class (undefine for unlimited cache - i.e never release spans to global cache unless thread finishes)
+//! Limit of thread cache in number of spans for each page count class
+//! (undefine for unlimited cache - i.e never release spans to global cache unless thread finishes)
 //! Minimum cache size to remain after a release to global cache
 #define MIN_SPAN_CACHE_SIZE 8
 //! Minimum number of spans to transfer between thread and global cache
 #define MIN_SPAN_CACHE_RELEASE 16
 //! Maximum cache size divisor (max cache size will be max allocation count divided by this divisor)
 #define MAX_SPAN_CACHE_DIVISOR 8
-//! Multiplier for global span cache limit (max cache size will be calculated like thread cache and multiplied with this)
+//! Multiplier for global span cache limit (max cache size will be calculated like thread cache and
+//! multiplied with this)
 #define GLOBAL_SPAN_CACHE_MULTIPLIER 4
 #endif
 
@@ -476,8 +478,11 @@ std::size_t working_size ()
 
 #define SINGLE_SEGMENT_MARKER 1
 
-#define pointer_offset(ptr, ofs) static_cast<void*>(reinterpret_cast<char*>(ptr) + static_cast<std::ptrdiff_t>(ofs))
-#define pointer_diff(first, second) reinterpret_cast<ptrdiff_t>(reinterpret_cast<char*>(first) - reinterpret_cast<cchar*>(second))
+#define pointer_offset(ptr, ofs) \
+    static_cast<void*>(reinterpret_cast<char*>(ptr) + static_cast<std::ptrdiff_t>(ofs))
+
+#define pointer_diff(first, second) \
+    reinterpret_cast<ptrdiff_t>(reinterpret_cast<char*>(first) - reinterpret_cast<char*>(second))
 
 //! Size of a span header
 #define SPAN_HEADER_SIZE          48 // Not exactly right, but keeps memory 16-aligned
@@ -520,13 +525,13 @@ struct Segment;
 struct SpanBlock
 {
     //! Free list
-    uint16_t free_list;
+    u16 free_list;
     //! First autolinked block
-    uint16_t first_autolink;
+    u16 first_autolink;
     //! Free count
-    uint16_t free_count;
+    u16 free_count;
     //! Padding
-    uint16_t padding;
+    u16 padding;
 };
 
 union SpanData
@@ -601,13 +606,13 @@ struct Heap
 struct SizeClass
 {
     //! Size of blocks in this class
-    uint16_t size;
+    u16 size;
     //! Number of pages to allocate for a chunk
-    uint16_t page_count;
+    u16 page_count;
     //! Number of blocks in each chunk
-    uint16_t block_count;
+    u16 block_count;
     //! Class index this class is merged with
-    uint16_t class_idx;
+    u16 class_idx;
 };
 
 static_assert(sizeof(SizeClass) == 8, "SizeClass size mismatch");
@@ -665,19 +670,19 @@ static std::atomic<i32> _unmapped_total;
 #endif
 
 static Span*
-_memory_map(size_t page_count);
+_memory_map(std::size_t page_count);
 
 static void
 _memory_unmap(Span* ptr);
 
 static void*
-_memory_allocate_external(size_t bytes);
+_memory_allocate_external(std::size_t bytes);
 
 static void
 _memory_deallocate_external(void* ptr);
 
 static int
-_memory_deallocate_deferred(Heap* heap, size_t size_class);
+_memory_deallocate_deferred(Heap* heap, std::size_t size_class);
 
 Heap* _get_heap_ptr(void* heap) {
     return reinterpret_cast<Heap*>(reinterpret_cast<uptr>(heap) & ~1UL);
@@ -707,7 +712,7 @@ _memory_counter_increase(SpanCounter* counter, u32* global_counter)
 
 //! Insert the given list of memory page spans in the global cache for small/medium blocks
 static void
-_memory_global_cache_insert(Span* first_span, size_t list_size)
+_memory_global_cache_insert(Span* first_span, std::size_t list_size)
 {
     assert((list_size == 1) || (first_span->next_span != 0));
 #if MAX_SPAN_CACHE_DIVISOR > 0
@@ -722,7 +727,7 @@ _memory_global_cache_insert(Span* first_span, size_t list_size)
                         reinterpret_cast<void*>(reinterpret_cast<uptr>(global_span_ptr) & SPAN_MASK));
 
 #ifdef GLOBAL_SPAN_CACHE_MULTIPLIER
-            size_t cache_limit = GLOBAL_SPAN_CACHE_MULTIPLIER * (_memory_max_allocation / MAX_SPAN_CACHE_DIVISOR);
+            std::size_t cache_limit = GLOBAL_SPAN_CACHE_MULTIPLIER * (_memory_max_allocation / MAX_SPAN_CACHE_DIVISOR);
             if ((global_list_size >= cache_limit) && (global_list_size > MIN_SPAN_CACHE_SIZE))
                 break;
 #endif
@@ -750,7 +755,7 @@ _memory_global_cache_insert(Span* first_span, size_t list_size)
     }
 #endif
     //Global cache full, release pages
-    for (size_t ispan = 0; ispan < list_size; ++ispan) {
+    for (std::size_t ispan = 0; ispan < list_size; ++ispan) {
         assert(first_span);
         Span* next_span = first_span->next_span;
         _memory_unmap(first_span);
@@ -799,7 +804,7 @@ _memory_global_cache_extract() {
 /*! Insert the given list of memory page spans in the global cache for large blocks,
 similar to _memory_global_cache_insert */
 static void
-_memory_global_cache_large_insert(Span* span_list, size_t list_size, size_t span_count) {
+_memory_global_cache_large_insert(Span* span_list, std::size_t list_size, std::size_t span_count) {
     assert((list_size == 1) || (span_list->next_span != 0));
     assert(span_list->size_class == (SIZE_CLASS_COUNT + (span_count - 1)));
 #if MAX_SPAN_CACHE_DIVISOR > 0
@@ -811,7 +816,9 @@ _memory_global_cache_large_insert(Span* span_list, size_t list_size, size_t span
             Span* global_span = (Span*)((void*)((uptr)global_span_ptr & SPAN_MASK));
 
 #ifdef GLOBAL_SPAN_CACHE_MULTIPLIER
-            size_t cache_limit = GLOBAL_SPAN_CACHE_MULTIPLIER * (_memory_max_allocation_large[span_count - 1] / MAX_SPAN_CACHE_DIVISOR);
+            std::size_t cache_limit = GLOBAL_SPAN_CACHE_MULTIPLIER *
+                                      (_memory_max_allocation_large[span_count - 1] / MAX_SPAN_CACHE_DIVISOR);
+
             if ((global_list_size >= cache_limit) && (global_list_size > MIN_SPAN_CACHE_SIZE))
                 break;
 #endif
@@ -833,7 +840,7 @@ _memory_global_cache_large_insert(Span* span_list, size_t list_size, size_t span
     }
 #endif
     //Global cache full, release spans
-    for (size_t ispan = 0; ispan < list_size; ++ispan) {
+    for (std::size_t ispan = 0; ispan < list_size; ++ispan) {
         assert(span_list);
         Span* next_span = span_list->next_span;
         _memory_unmap(span_list);
@@ -844,7 +851,7 @@ _memory_global_cache_large_insert(Span* span_list, size_t list_size, size_t span
 /*! Extract a number of memory page spans from the global cache for large blocks,
 similar to _memory_global_cache_extract */
 static Span*
-_memory_global_cache_large_extract(size_t span_count) {
+_memory_global_cache_large_extract(std::size_t span_count) {
     Span* span = nullptr;
     std::atomic<void*>* cache = &_memory_large_cache[span_count - 1];
     std::atomic_thread_fence(std::memory_order_acquire);
@@ -877,16 +884,17 @@ _memory_global_cache_large_extract(size_t span_count) {
 
 //! Allocate a small/medium sized memory block from the given heap
 static void*
-_memory_allocate_from_heap(Heap* heap, size_t size) {
+_memory_allocate_from_heap(Heap* heap, std::size_t size) {
 #if ENABLE_STATISTICS
     //For statistics we need to store the requested size in the memory block
-    size += sizeof(size_t);
+    size += sizeof(std::size_t);
 #endif
 
     //Calculate the size class index and do a dependent lookup of the final class index (in case of merged classes)
-    const size_t class_idx = _memory_size_class[(size <= SMALL_SIZE_LIMIT) ?
+    const std::size_t class_idx = _memory_size_class[(size <= SMALL_SIZE_LIMIT) ?
         ((size + (SMALL_GRANULARITY - 1)) >> SMALL_GRANULARITY_SHIFT) - 1 :
-        SMALL_CLASS_COUNT + ((size - SMALL_SIZE_LIMIT + (MEDIUM_GRANULARITY - 1)) >> MEDIUM_GRANULARITY_SHIFT) - 1].class_idx;
+        SMALL_CLASS_COUNT + ((size - SMALL_SIZE_LIMIT + (MEDIUM_GRANULARITY - 1)) >>
+                             MEDIUM_GRANULARITY_SHIFT) - 1].class_idx;
 
     SpanBlock* active_block = heap->active_block + class_idx;
     SizeClass* size_class = _memory_size_class + class_idx;
@@ -912,13 +920,13 @@ use_active:
             //Span is now completely allocated, set the bookkeeping data in the
             //span itself and reset the active span pointer in the heap
             span->data.block.free_count = 0;
-            span->data.block.first_autolink = (uint16_t)size_class->block_count;
+            span->data.block.first_autolink = (u16)size_class->block_count;
             heap->active_span[class_idx] = nullptr;
         }
         else {
             //Get the next free block, either from linked list or from auto link
             if (active_block->free_list < active_block->first_autolink) {
-                active_block->free_list = (uint16_t)(*block);
+                active_block->free_list = (u16)(*block);
             }
             else {
                 ++active_block->free_list;
@@ -929,7 +937,7 @@ use_active:
 
 #if ENABLE_STATISTICS
         //Store the requested size for statistics
-        *(size_t*)pointer_offset(block, class_size - sizeof(size_t)) = size;
+        *(std::size_t*)pointer_offset(block, class_size - sizeof(std::size_t)) = size;
 #endif
 
         return block;
@@ -962,7 +970,8 @@ use_active:
         span = _memory_global_cache_extract();
 #if ENABLE_STATISTICS
         if (span)
-            heap->global_to_thread += (size_t)span->data.list_size * size_class->page_count * MALLOC_PAGE_SIZE;
+            heap->global_to_thread +=
+                    (std::size_t)span->data.list_size * size_class->page_count * MALLOC_PAGE_SIZE;
 #endif
     }
     if (span) {
@@ -992,14 +1001,14 @@ use_active:
     //set span as new span to use for next allocation
     if (size_class->block_count > 1) {
         //Reset block order to sequential auto linked order
-        active_block->free_count = (uint16_t)(size_class->block_count - 1);
+        active_block->free_count = (u16)(size_class->block_count - 1);
         active_block->free_list = 1;
         active_block->first_autolink = 1;
         heap->active_span[class_idx] = span;
     }
     else {
         span->data.block.free_count = 0;
-        span->data.block.first_autolink = (uint16_t)size_class->block_count;
+        span->data.block.first_autolink = (u16)size_class->block_count;
     }
 
     //Track counters
@@ -1007,7 +1016,7 @@ use_active:
 
 #if ENABLE_STATISTICS
     //Store the requested size for statistics
-    *(size_t*)pointer_offset(span, SPAN_HEADER_SIZE + class_size - sizeof(size_t)) = size;
+    *(std::size_t*)pointer_offset(span, SPAN_HEADER_SIZE + class_size - sizeof(std::size_t)) = size;
 #endif
 
     //Return first block if memory page span
@@ -1016,13 +1025,13 @@ use_active:
 
 //! Allocate a large sized memory block from the given heap
 static void*
-_memory_allocate_large_from_heap(Heap* heap, size_t size) {
+_memory_allocate_large_from_heap(Heap* heap, std::size_t size) {
     //Calculate number of needed max sized spans (including header)
     size += SPAN_HEADER_SIZE;
-    size_t num_spans = size / SPAN_MAX_SIZE;
+    std::size_t num_spans = size / SPAN_MAX_SIZE;
     if (size % SPAN_MAX_SIZE)
         ++num_spans;
-    size_t idx = num_spans - 1;
+    std::size_t idx = num_spans - 1;
 
     if (!idx) {
         Span* span = heap->span_cache;
@@ -1035,7 +1044,8 @@ _memory_allocate_large_from_heap(Heap* heap, size_t size) {
             span = _memory_global_cache_extract();
 #if ENABLE_STATISTICS
             if (span)
-                heap->global_to_thread += (size_t)span->data.list_size * SPAN_MAX_PAGE_COUNT * MALLOC_PAGE_SIZE;
+                heap->global_to_thread +=
+                        (std::size_t)span->data.list_size * SPAN_MAX_PAGE_COUNT * MALLOC_PAGE_SIZE;
 #endif
         }
         if (span) {
@@ -1108,7 +1118,7 @@ use_cache:
     span = _memory_global_cache_large_extract(num_spans);
     if (span) {
 #if ENABLE_STATISTICS
-        heap->global_to_thread += (size_t)span->data.list_size * num_spans * SPAN_MAX_SIZE;
+        heap->global_to_thread += (std::size_t)span->data.list_size * num_spans * SPAN_MAX_SIZE;
 #endif
         //We got a list from global cache, store remainder in thread cache
         if (span->data.list_size > 1) {
@@ -1234,7 +1244,7 @@ _memory_deallocate_to_heap(Heap* heap, Span* span, void* p) {
 
 #if ENABLE_STATISTICS
     heap->allocated -= size_class->size;
-    heap->requested -= *(size_t*)pointer_offset(p, size_class->size - sizeof(size_t));
+    heap->requested -= *(std::size_t*)pointer_offset(p, size_class->size - sizeof(std::size_t));
 #endif
 
     //Check if the span will become completely free
@@ -1259,7 +1269,7 @@ _memory_deallocate_to_heap(Heap* heap, Span* span, void* p) {
     if (block_data->free_count == 0) {
         //add to free list and disable autolink
         _memory_list_add(&heap->size_cache[class_idx], span);
-        block_data->first_autolink = (uint16_t)size_class->block_count;
+        block_data->first_autolink = (u16)size_class->block_count;
     }
     ++block_data->free_count;
     //Span is not yet completely free, so add block to the linked list of free blocks
@@ -1267,7 +1277,7 @@ _memory_deallocate_to_heap(Heap* heap, Span* span, void* p) {
     *block = block_data->free_list;
     count_t block_offset = (count_t)pointer_diff(block, span) - SPAN_HEADER_SIZE;
     count_t block_idx = block_offset / (count_t)size_class->size;
-    block_data->free_list = (uint16_t)block_idx;
+    block_data->free_list = (u16)block_idx;
 }
 
 //! Deallocate the given large memory block from the given heap
@@ -1283,7 +1293,7 @@ _memory_deallocate_large_to_heap(Heap* heap, Span* span) {
     }
 
     //Decrease counter
-    size_t idx = span->size_class - SIZE_CLASS_COUNT;
+    std::size_t idx = span->size_class - SIZE_CLASS_COUNT;
     SpanCounter* counter = heap->large_counter + idx;
     assert(counter->current_allocations > 0);
     --counter->current_allocations;
@@ -1327,7 +1337,7 @@ _memory_deallocate_large_to_heap(Heap* heap, Span* span) {
 
 //! Process pending deferred cross-thread deallocations
 static int
-_memory_deallocate_deferred(Heap* heap, size_t size_class) {
+_memory_deallocate_deferred(Heap* heap, std::size_t size_class) {
     //Grab the current list of deferred deallocations
     std::atomic_thread_fence(std::memory_order_acquire);
     void* p = heap->defer_deallocate.load();
@@ -1370,7 +1380,7 @@ _memory_deallocate_defer(i32 heap_id, void* p) {
 
 //! Allocate a block of the given size
 static void*
-_memory_allocate(size_t size) {
+_memory_allocate(std::size_t size) {
     if (size <= MEDIUM_SIZE_LIMIT)
         return _memory_allocate_from_heap(GET_THREAD_LOCAL(Heap*, _memory_thread_heap), size);
     else if (size <= LARGE_SIZE_LIMIT)
@@ -1378,7 +1388,7 @@ _memory_allocate(size_t size) {
 
     //Oversized, allocate pages directly
     size += SPAN_HEADER_SIZE;
-    size_t num_pages = size / MALLOC_PAGE_SIZE;
+    std::size_t num_pages = size / MALLOC_PAGE_SIZE;
     if (size % MALLOC_PAGE_SIZE)
         ++num_pages;
     Span* span = _memory_map(num_pages);
@@ -1416,7 +1426,7 @@ _memory_deallocate(void* p) {
 
 //! Reallocate the given block to the given size
 static void*
-_memory_reallocate(void* p, size_t size, size_t oldsize, unsigned int flags) {
+_memory_reallocate(void* p, std::size_t size, std::size_t oldsize, unsigned int flags) {
     if (p) {
         //Grab the span (always at start of span, using 64KiB alignment)
         Span* span = static_cast<Span*>((void*)((uptr)p & SPAN_MASK));
@@ -1425,42 +1435,42 @@ _memory_reallocate(void* p, size_t size, size_t oldsize, unsigned int flags) {
             if (span->size_class < SIZE_CLASS_COUNT) {
                 //Small/medium sized block
                 SizeClass* size_class = _memory_size_class + span->size_class;
-                if ((size_t)size_class->size >= size)
+                if ((std::size_t)size_class->size >= size)
                     return p; //Still fits in block, never mind trying to save memory
                 if (!oldsize)
                     oldsize = size_class->size;
             }
             else {
                 //Large block
-                size_t total_size = size + SPAN_HEADER_SIZE;
-                size_t num_spans = total_size / SPAN_MAX_SIZE;
+                std::size_t total_size = size + SPAN_HEADER_SIZE;
+                std::size_t num_spans = total_size / SPAN_MAX_SIZE;
                 if (total_size % SPAN_MAX_SIZE)
                     ++num_spans;
-                size_t current_spans = (span->size_class - SIZE_CLASS_COUNT) + 1;
+                std::size_t current_spans = (span->size_class - SIZE_CLASS_COUNT) + 1;
                 if ((current_spans >= num_spans) && (num_spans >= (current_spans / 2)))
                     return p; //Still fits and less than half of memory would be freed
                 if (!oldsize)
-                    oldsize = (current_spans * (size_t)SPAN_MAX_SIZE) - SPAN_HEADER_SIZE;
+                    oldsize = (current_spans * (std::size_t)SPAN_MAX_SIZE) - SPAN_HEADER_SIZE;
             }
         }
         else {
             //Oversized block
-            size_t total_size = size + SPAN_HEADER_SIZE;
-            size_t num_pages = total_size / MALLOC_PAGE_SIZE;
+            std::size_t total_size = size + SPAN_HEADER_SIZE;
+            std::size_t num_pages = total_size / MALLOC_PAGE_SIZE;
             if (total_size % MALLOC_PAGE_SIZE)
                 ++num_pages;
             //Page count is stored in next_span
-            size_t current_pages = (size_t)span->next_span;
+            std::size_t current_pages = (std::size_t)span->next_span;
             if ((current_pages >= num_pages) && (num_pages >= (current_pages / 2)))
                 return p; //Still fits and less than half of memory would be freed
             if (!oldsize)
-                oldsize = (current_pages * (size_t)MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
+                oldsize = (current_pages * (std::size_t)MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
         }
     }
 
     //Size is greater than block size, need to allocate a new block and deallocate the old
     //Avoid hysteresis by overallocating if increase is small (below 37%)
-    size_t lower_bound = oldsize + (oldsize >> 2) + (oldsize >> 3);
+    std::size_t lower_bound = oldsize + (oldsize >> 2) + (oldsize >> 3);
     void* block = _memory_allocate(size > lower_bound ? size : lower_bound);
     if (p) {
         if (!(flags & NO_PRESERVE))
@@ -1474,7 +1484,7 @@ _memory_reallocate(void* p, size_t size, size_t oldsize, unsigned int flags) {
 #ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 //! Get the usable size of the given block
-static size_t
+static std::size_t
 _memory_usable_size(void* p) {
     //Grab the span (always at start of span, using 64KiB alignment)
     Span* span = static_cast<Span*>((void*)((uptr)p & SPAN_MASK));
@@ -1487,33 +1497,33 @@ _memory_usable_size(void* p) {
         }
 
         //Large block
-        size_t current_spans = (span->size_class - SIZE_CLASS_COUNT) + 1;
-        return (current_spans * (size_t)SPAN_MAX_SIZE) - SPAN_HEADER_SIZE;
+        std::size_t current_spans = (span->size_class - SIZE_CLASS_COUNT) + 1;
+        return (current_spans * (std::size_t)SPAN_MAX_SIZE) - SPAN_HEADER_SIZE;
     }
 
     //Oversized block, page count is stored in next_span
-    size_t current_pages = (size_t)span->next_span;
-    return (current_pages * (size_t)MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
+    std::size_t current_pages = (std::size_t)span->next_span;
+    return (current_pages * (std::size_t)MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE;
 }
 
 #endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 //! Adjust and optimize the size class properties for the given class
 static void
-_memory_adjust_size_class(size_t iclass) {
+_memory_adjust_size_class(std::size_t iclass) {
     //Calculate how many pages are needed for 255 blocks
-    size_t block_size = _memory_size_class[iclass].size;
+    std::size_t block_size = _memory_size_class[iclass].size;
 
     //TODO: STNK Hardcode always 16 pages
-    size_t page_count = QUICK_ALLOCATION_PAGES_COUNT;
-    size_t block_count = ((page_count * MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE) / block_size;
+    std::size_t page_count = QUICK_ALLOCATION_PAGES_COUNT;
+    std::size_t block_count = ((page_count * MALLOC_PAGE_SIZE) - SPAN_HEADER_SIZE) / block_size;
     //Store the final configuration
-    _memory_size_class[iclass].page_count = (uint16_t)page_count;
-    _memory_size_class[iclass].block_count = (uint16_t)block_count;
-    _memory_size_class[iclass].class_idx = (uint16_t)iclass;
+    _memory_size_class[iclass].page_count = (u16)page_count;
+    _memory_size_class[iclass].block_count = (u16)block_count;
+    _memory_size_class[iclass].class_idx = (u16)iclass;
 
     //Check if previous size classes can be merged
-    size_t prevclass = iclass;
+    std::size_t prevclass = iclass;
     while (prevclass > 0) {
         --prevclass;
         //A class can be merged if number of pages and number of blocks are equal
@@ -1535,17 +1545,17 @@ initialize(void) {
     _memory_heap_id = 0;
 
     //Setup all small and medium size classes
-    size_t iclass;
+    std::size_t iclass;
     for (iclass = 0; iclass < SMALL_CLASS_COUNT; ++iclass) {
-        size_t size = (iclass + 1) * SMALL_GRANULARITY;
-        _memory_size_class[iclass].size = (uint16_t)size;
+        std::size_t size = (iclass + 1) * SMALL_GRANULARITY;
+        _memory_size_class[iclass].size = (u16)size;
         _memory_adjust_size_class(iclass);
     }
     for (iclass = 0; iclass < MEDIUM_CLASS_COUNT; ++iclass) {
-        size_t size = SMALL_SIZE_LIMIT + ((iclass + 1) * MEDIUM_GRANULARITY);
+        std::size_t size = SMALL_SIZE_LIMIT + ((iclass + 1) * MEDIUM_GRANULARITY);
         if (size > MEDIUM_SIZE_LIMIT)
             size = MEDIUM_SIZE_LIMIT;
-        _memory_size_class[SMALL_CLASS_COUNT + iclass].size = (uint16_t)size;
+        _memory_size_class[SMALL_CLASS_COUNT + iclass].size = (u16)size;
         _memory_adjust_size_class(SMALL_CLASS_COUNT + iclass);
     }
 
@@ -1563,13 +1573,13 @@ finalize(void) {
     std::atomic_thread_fence(std::memory_order_acquire);
 
     //Free all thread caches
-    for (size_t list_idx = 0; list_idx < HEAP_ARRAY_SIZE; ++list_idx) {
+    for (std::size_t list_idx = 0; list_idx < HEAP_ARRAY_SIZE; ++list_idx) {
         Heap* heap = _get_heap_ptr(_memory_heaps[list_idx].load());
         if (heap) {
             _memory_deallocate_deferred(heap, 0);
 
             {
-                //const size_t page_count = QUICK_ALLOCATION_PAGES_COUNT;
+                //const std::size_t page_count = QUICK_ALLOCATION_PAGES_COUNT;
                 Span* span = heap->span_cache;
                 unsigned int span_count = span ? span->data.list_size : 0;
                 for (unsigned int ispan = 0; ispan < span_count; ++ispan) {
@@ -1580,8 +1590,8 @@ finalize(void) {
             }
 
             //Free large spans
-            for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
-                //const size_t span_count = iclass + 1;
+            for (std::size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+                //const std::size_t span_count = iclass + 1;
                 Span* span = heap->large_cache[iclass];
                 while (span) {
                     Span* next_span = span->next_span;
@@ -1598,7 +1608,7 @@ finalize(void) {
     {
         //Free global caches
         void* span_ptr = _memory_span_cache.load();
-        size_t cache_count = (uptr)span_ptr & ~SPAN_MASK;
+        std::size_t cache_count = (uptr)span_ptr & ~SPAN_MASK;
         Span* span = (Span*)((void*)((uptr)span_ptr & SPAN_MASK));
         while (cache_count) {
             Span* skip_span = span->prev_span;
@@ -1614,9 +1624,9 @@ finalize(void) {
         _memory_span_cache = nullptr;
     }
 
-    for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+    for (std::size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
         void* span_ptr = _memory_large_cache[iclass].load();
-        size_t cache_count = (uptr)span_ptr & ~SPAN_MASK;
+        std::size_t cache_count = (uptr)span_ptr & ~SPAN_MASK;
         Span* span = (Span*)((void*)((uptr)span_ptr & SPAN_MASK));
         while (cache_count) {
             Span* skip_span = span->prev_span;
@@ -1683,7 +1693,7 @@ thread_initialize(void) {
 
         void* heap_ptr = _memory_heaps[GET_THREAD_LOCAL_LITERAL_VALUE(uptr, _memory_preferred_heap)].load();
 
-        for (u32 id = GET_THREAD_LOCAL_LITERAL_VALUE(uptr, _memory_preferred_heap);
+        for (u32 id = GET_THREAD_LOCAL_LITERAL_VALUE(u32, _memory_preferred_heap);
             id < HEAP_ARRAY_SIZE + GET_THREAD_LOCAL_LITERAL_VALUE(u32, _memory_preferred_heap);
             ++id)
         {
@@ -1898,7 +1908,7 @@ void _return_span_to_segment(Segment* segment, Span* span) {
 
 //! Map new pages to virtual memory
 static Span*
-_memory_map(size_t page_count) {
+_memory_map(std::size_t page_count) {
     Span* span = nullptr;
     if (page_count <= QUICK_ALLOCATION_PAGES_COUNT)
     {
@@ -1911,13 +1921,15 @@ _memory_map(size_t page_count) {
             if (!global_segment)
             {
                 // Create a new cachable segment and put it on the cache
-                size_t size = (SPAN_MAX_SIZE * SPANS_PER_SEGMENT) + sizeof(Segment) + SPAN_ADDRESS_GRANULARITY;
+                std::size_t size =
+                        (SPAN_MAX_SIZE * SPANS_PER_SEGMENT) + sizeof(Segment) + SPAN_ADDRESS_GRANULARITY;
                 Segment* segment = static_cast<Segment*>(_memory_allocate_external(size));
                 new (segment) Segment ();
                 span = static_cast<Span*>(pointer_offset(segment, sizeof(Segment)));
                 // Align to the required size of the spans
                 if ((uptr)span & (SPAN_ADDRESS_GRANULARITY - 1))
-                    span = static_cast<Span*>((void*)(((uptr)span & ~((uptr)SPAN_ADDRESS_GRANULARITY - 1)) + SPAN_ADDRESS_GRANULARITY));
+                    span = static_cast<Span*>((void*)(((uptr)span & ~((uptr)SPAN_ADDRESS_GRANULARITY - 1)) +
+                                                      SPAN_ADDRESS_GRANULARITY));
                 span->owner_segment = segment;
 
                 segment->first_span = span;
@@ -1953,12 +1965,13 @@ _memory_map(size_t page_count) {
     // Allocate a segment of the minimal required size
     else
     {
-        size_t size = page_count * MALLOC_PAGE_SIZE + sizeof(Segment) + SPAN_ADDRESS_GRANULARITY;
+        std::size_t size = page_count * MALLOC_PAGE_SIZE + sizeof(Segment) + SPAN_ADDRESS_GRANULARITY;
         Segment* segment = static_cast<Segment*>(_memory_allocate_external(size));
         span = static_cast<Span*>(pointer_offset(segment, sizeof(Segment)));
         // Align to the required size of the spans
         if ((uptr)span & (SPAN_ADDRESS_GRANULARITY - 1))
-            span = static_cast<Span*>((void*)(((uptr)span & ~((uptr)SPAN_ADDRESS_GRANULARITY - 1)) + SPAN_ADDRESS_GRANULARITY));
+            span = static_cast<Span*>((void*)(((uptr)span & ~((uptr)SPAN_ADDRESS_GRANULARITY - 1)) +
+                                              SPAN_ADDRESS_GRANULARITY));
 
         segment->first_span = span;
         segment->next_segment = (void*)SINGLE_SEGMENT_MARKER;
@@ -1992,7 +2005,7 @@ _memory_unmap(Span* span) {
 }
 
 static void*
-_memory_allocate_external(size_t bytes)
+_memory_allocate_external(std::size_t bytes)
 {
 #if ENABLE_STATISTICS
     _mapped_total += (int)(bytes / MALLOC_PAGE_SIZE);
@@ -2046,7 +2059,7 @@ void* reallocate (void* ptr, std::size_t old_size, std::size_t new_size)
 #ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 MALLOC_CALL void*
-alloc(size_t size)
+alloc(std::size_t size)
 {
 #if ENABLE_VALIDATE_ARGS
     if (size >= MAX_ALLOC_SIZE)
@@ -2066,9 +2079,9 @@ free(void* ptr)
 }
 
 MALLOC_CALL void*
-calloc(size_t num, size_t size)
+calloc(std::size_t num, std::size_t size)
 {
-    size_t total;
+    std::size_t total;
 #if ENABLE_VALIDATE_ARGS
 #ifdef OS_WINDOWS
     int err = ::SizeTMult(num, size, &total);
@@ -2094,7 +2107,7 @@ calloc(size_t num, size_t size)
 }
 
 void*
-realloc(void* ptr, size_t size)
+realloc(void* ptr, std::size_t size)
 {
 #if ENABLE_VALIDATE_ARGS
     if (size >= MAX_ALLOC_SIZE) {
@@ -2106,7 +2119,7 @@ realloc(void* ptr, size_t size)
 }
 
 void*
-aligned_realloc(void* ptr, size_t alignment, size_t size, size_t oldsize,
+aligned_realloc(void* ptr, std::size_t alignment, std::size_t size, std::size_t oldsize,
     unsigned int flags)
 {
     (void)alignment; // Silence warning
@@ -2123,7 +2136,7 @@ aligned_realloc(void* ptr, size_t alignment, size_t size, size_t oldsize,
 }
 
 MALLOC_CALL void*
-aligned_alloc(size_t alignment, size_t size)
+aligned_alloc(std::size_t alignment, std::size_t size)
 {
     if (alignment <= 16)
         return alloc(size);
@@ -2149,7 +2162,7 @@ aligned_alloc(size_t alignment, size_t size)
     return ptr;
 }
 
-size_t
+std::size_t
 alloc_usable_size(void* ptr)
 {
     return ptr ? _memory_usable_size(ptr) : 0;
@@ -2181,7 +2194,7 @@ get_thread_statistics(thread_statistics* stats)
         p = next;
     }
 
-    for (size_t isize = 0; isize < SIZE_CLASS_COUNT; ++isize)
+    for (std::size_t isize = 0; isize < SIZE_CLASS_COUNT; ++isize)
     {
         if (heap->active_block[isize].free_count)
             stats->active += heap->active_block[isize].free_count *
@@ -2197,7 +2210,7 @@ get_thread_statistics(thread_statistics* stats)
     }
 
     if (heap->span_cache)
-        stats->spancache = static_cast<size_t>(heap->span_cache->data.list_size) *
+        stats->spancache = static_cast<std::size_t>(heap->span_cache->data.list_size) *
                            QUICK_ALLOCATION_PAGES_COUNT * MALLOC_PAGE_SIZE;
 }
 
@@ -2217,18 +2230,18 @@ get_global_statistics(global_statistics* stats)
             global_span_ptr = _memory_span_cache.load();
         }
         uptr global_span_count = reinterpret_cast<uptr>(global_span_ptr) & ~SPAN_MASK;
-        size_t list_bytes = global_span_count * QUICK_ALLOCATION_PAGES_COUNT * MALLOC_PAGE_SIZE;
+        std::size_t list_bytes = global_span_count * QUICK_ALLOCATION_PAGES_COUNT * MALLOC_PAGE_SIZE;
         stats->cached += list_bytes;
     }
 
-    for (size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
+    for (std::size_t iclass = 0; iclass < LARGE_CLASS_COUNT; ++iclass) {
         void* global_span_ptr = _memory_large_cache[iclass].load();
         while (global_span_ptr == SPAN_LIST_LOCK_TOKEN) {
             thread_yield();
             global_span_ptr = _memory_large_cache[iclass].load();
         }
         uptr global_span_count = reinterpret_cast<uptr>(global_span_ptr) & ~SPAN_MASK;
-        size_t list_bytes = global_span_count * (iclass + 1) * SPAN_MAX_PAGE_COUNT * MALLOC_PAGE_SIZE;
+        std::size_t list_bytes = global_span_count * (iclass + 1) * SPAN_MAX_PAGE_COUNT * MALLOC_PAGE_SIZE;
         stats->cached_large += list_bytes;
     }
 }

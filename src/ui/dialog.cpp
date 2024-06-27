@@ -51,7 +51,7 @@ void dialog::show_modal (ui::window* pOwner) noexcept
         }
 
         show ();
-        set_focus ();
+        get_focus ();
     }
 }
 
@@ -67,7 +67,7 @@ void dialog::close_event ()
     if (_M_pOwnerWnd)
     {
         _M_pOwnerWnd->enable ();
-        _M_pOwnerWnd->set_focus ();
+        _M_pOwnerWnd->get_focus ();
         _M_pOwnerWnd = nullptr;
     }
 }

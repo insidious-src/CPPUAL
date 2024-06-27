@@ -28,3 +28,8 @@
 #include <cppual/gfx/gl/texture.h>
 #include <cppual/gfx/gl/vbo.h>
 #include <cppual/gfx/gl/glsl.h>
+#include <cppual/gfx/gl/text.h>
+#include <cppual/gfx/gl/rectangle.h>
+#include <cppual/gfx/gl/polygon.h>
+#include <cppual/gfx/gl/line.h>
+#include <cppual/gfx/gl/elipse.h>

@@ -114,9 +114,12 @@ public:
         return _M_devices;
     }
 
-private:
-    device_ids_vector _M_devices;
+    device_ids_vector& devices () noexcept
+    {
+        return _M_devices;
+    }
 
+private:
     platform (pointer platform_handle) noexcept
     : interface  (platform_handle),
       _M_devices (get_devices  ())
@@ -139,6 +142,9 @@ private:
     }
 
     friend class device;
+
+private:
+    device_ids_vector _M_devices;
 };
 
 // =========================================================
@@ -310,7 +316,7 @@ device::device_vector device::get_devices (memory::memory_resource& rc)
     devices.reserve (device_ids.size());
 
     for (auto i = 0U; i < device_ids.size(); ++i)
-        devices.emplace_back(memory::allocate_shared<device, device_interface>(&rc, device_ids[i]));
+        devices.emplace_back(memory::allocate_shared<device_interface, device>(&rc, device_ids[i]));
 
     return devices;
 }

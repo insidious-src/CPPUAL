@@ -51,7 +51,7 @@ elseif(WIN64)
 endif()
 
 project("C++ Unified Abstraction Library" VERSION 1.0.5)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_AUTOUIC OFF)
@@ -72,18 +72,25 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll" ".DLL" ".a")
 endif()
 
+# ccache
+find_program(CCACHE_PROGRAM ccache)
+
+if(CCACHE_PROGRAM)
+  set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+endif()
+
 find_package(RT            REQUIRED) ## run-time library
 find_package(DL            REQUIRED) ## dynamic loading of libraries
 find_package(WM                    ) ## platform window manager
 find_package(XCB COMPONENTS XCB ICCCM EWMH GLX) ## platform window manager (Xcb)
 find_package(X11                   ) ## platform window manager (X11-xcb)
-find_package(Sockets            ) ## network interface & interprocess
+find_package(Sockets               ) ## network interface & interprocess
 find_package(PulseAudio            )
 find_package(OpenAL                ) ## will be dropped at some point
 find_package(SndFile               ) ## will be dropped at some point
 find_package(Freetype              ) ## will be dropped at some point
 find_package(GLEW                  )
-find_package(OpenGL               ) ## will be dropped at some point
+find_package(OpenGL                ) ## will be dropped at some point
 find_package(EGL                   ) ## will be dropped at some point
 find_package(OpenCL                ) ## backup compute api
 find_package(Vulkan                ) ## primary compute & graphics api
@@ -146,6 +153,7 @@ set(CPPUAL_HOST_HEADERS
     "include/cppual/resource.h"
     "include/cppual/bigint.h"
     "include/cppual/byte.h"
+    "include/cppual/interface.h"
     )
 
 # process, modules
@@ -154,6 +162,7 @@ add_library(cppual-host SHARED
     "src/process/interproc.cpp"
     "src/process/plugin.cpp"
     "src/system/sysinfo.cpp"
+    "src/interface.cpp"
 
     "include/cppual/decl"
     "include/cppual/resource"
@@ -173,6 +182,8 @@ add_library(cppual-host SHARED
     "include/cppual/exception"
     "include/cppual/reactive"
     "include/cppual/byte"
+    "include/cppual/unbound_matrix"
+    "include/cppual/interface"
     )
 target_compile_definitions(cppual-host PRIVATE -DAPI_EXPORT)
 target_precompile_headers(cppual-host PRIVATE ${CPPUAL_HOST_HEADERS})
@@ -340,10 +351,10 @@ set(CPPUAL_COMPUTE_VK_HEADERS
     "src/compute/backend/vulkan/vulkan.h"
     )
 
-add_library(cppual-compute-vulkan MODULE
+add_library(cppual-compute-plugin-vulkan MODULE
     "src/compute/backend/vulkan/vulkan.cpp"
     )
-target_precompile_headers(cppual-compute-vulkan PRIVATE ${CPPUAL_COMPUTE_VK_HEADERS})
+target_precompile_headers(cppual-compute-plugin-vulkan PRIVATE ${CPPUAL_COMPUTE_VK_HEADERS})
 
 endif()
 
@@ -362,7 +373,7 @@ set(CPPUAL_COMPUTE_CL_HEADERS
     "src/compute/backend/opencl/climage.h"
     )
 
-add_library(cppual-compute-opencl MODULE
+add_library(cppual-compute-plugin-opencl MODULE
     "src/compute/backend/opencl/opencl.cpp"
     "src/compute/backend/opencl/cldevice.cpp"
     "src/compute/backend/opencl/clprogram.cpp"
@@ -375,7 +386,7 @@ add_library(cppual-compute-opencl MODULE
     "src/compute/backend/opencl/climage.cpp"
     "src/compute/backend/opencl/clentry.cpp"
     )
-target_precompile_headers(cppual-compute-opencl PRIVATE ${CPPUAL_COMPUTE_CL_HEADERS})
+target_precompile_headers(cppual-compute-plugin-opencl PRIVATE ${CPPUAL_COMPUTE_CL_HEADERS})
 
 endif()
 
@@ -587,7 +598,7 @@ set(CPPUAL_AUDIO_AL_HEADERS
     "include/cppual/multimedia/audio/al/recorder.h"
     )
 
-add_library(cppual-audio-openal MODULE
+add_library(cppual-audio-plugin-openal MODULE
     "src/multimedia/audio/al/alobject.cpp"
     "src/multimedia/audio/al/aldevice.cpp"
     "src/multimedia/audio/al/albuffer.cpp"
@@ -600,8 +611,8 @@ add_library(cppual-audio-openal MODULE
 
     "include/cppual/openal"
     )
-target_compile_definitions(cppual-audio-openal PRIVATE -DAPI_EXPORT)
-target_precompile_headers(cppual-audio-openal PRIVATE ${CPPUAL_AUDIO_AL_HEADERS})
+target_compile_definitions(cppual-audio-plugin-openal PRIVATE -DAPI_EXPORT)
+target_precompile_headers(cppual-audio-plugin-openal PRIVATE ${CPPUAL_AUDIO_AL_HEADERS})
 
 endif()
 
@@ -612,11 +623,11 @@ set(CPPUAL_AUDIO_COMPUTE_HEADERS
     "src/multimedia/audio/backend/compute/linux/pulse_device.h"
     )
 
-add_library(cppual-audio-compute MODULE
+add_library(cppual-audio-plugin-compute MODULE
     "src/multimedia/audio/backend/compute/linux/pulse_device.cpp"
     "src/multimedia/audio/backend/compute/compute_main.cpp"
     )
-target_precompile_headers(cppual-audio-compute PRIVATE ${CPPUAL_AUDIO_COMPUTE_HEADERS})
+target_precompile_headers(cppual-audio-plugin-compute PRIVATE ${CPPUAL_AUDIO_COMPUTE_HEADERS})
 
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
@@ -625,11 +636,11 @@ set(CPPUAL_AUDIO_COMPUTE_WIN_HEADERS
     "src/multimedia/audio/backend/compute/win/win_device.h"
     )
 
-add_library(cppual-audio-compute MODULE
+add_library(cppual-audio-plugin-compute MODULE
     "src/multimedia/audio/backend/compute/win/win_device.cpp"
     "src/multimedia/audio/backend/compute/compute_main.cpp"
     )
-target_precompile_headers(cppual-audio-compute PRIVATE ${CPPUAL_AUDIO_COMPUTE_WIN_HEADERS})
+target_precompile_headers(cppual-audio-plugin-compute PRIVATE ${CPPUAL_AUDIO_COMPUTE_WIN_HEADERS})
 
 endif()
 
@@ -652,19 +663,19 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 set(CPPUAL_VIDEO_VAAPI_HEADERS
     )
 
-add_library(cppual-video-vaapi MODULE
+add_library(cppual-video-plugin-vaapi MODULE
     "src/multimedia/video/backend/vaapi.cpp"
     )
-target_precompile_headers(cppual-video-vaapi PRIVATE ${CPPUAL_VIDEO_VAAPI_HEADERS})
+target_precompile_headers(cppual-video-plugin-vaapi PRIVATE ${CPPUAL_VIDEO_VAAPI_HEADERS})
 
 # Xorg video backend
 set(CPPUAL_VIDEO_XORG_HEADERS
     )
 
-add_library(cppual-video-xorg MODULE
+add_library(cppual-video-plugin-xorg MODULE
     "src/multimedia/video/backend/xvideo.cpp"
     )
-target_precompile_headers(cppual-video-xorg PRIVATE ${CPPUAL_VIDEO_XORG_HEADERS})
+target_precompile_headers(cppual-video-plugin-xorg PRIVATE ${CPPUAL_VIDEO_XORG_HEADERS})
 
 endif()
 
@@ -674,10 +685,10 @@ set(CPPUAL_VIDEO_COMPUTE_HEADERS
 
 if(TARGET cppual-compute)
 
-add_library(cppual-video-compute MODULE
+add_library(cppual-video-plugin-compute MODULE
     "src/multimedia/video/backend/compute_video.cpp"
     )
-target_precompile_headers(cppual-video-compute PRIVATE ${CPPUAL_VIDEO_COMPUTE_HEADERS})
+target_precompile_headers(cppual-video-plugin-compute PRIVATE ${CPPUAL_VIDEO_COMPUTE_HEADERS})
 
 endif()
 
@@ -707,11 +718,6 @@ set(CPPUAL_GFX_HEADERS
     "include/cppual/gfx/formats/bmp.h"
     "include/cppual/gfx/drawable/shape.h"
     "include/cppual/gfx/drawable/image.h"
-    "include/cppual/gfx/drawable/text.h"
-    "include/cppual/gfx/drawable/elipse.h"
-    "include/cppual/gfx/drawable/rectangle.h"
-    "include/cppual/gfx/drawable/polygon.h"
-    "include/cppual/gfx/drawable/line.h"
     )
 
 add_library(cppual-gfx SHARED
@@ -720,11 +726,6 @@ add_library(cppual-gfx SHARED
     "src/gfx/draw.cpp"
     "src/gfx/formats/bmp.cpp"
     "src/gfx/drawable/image.cpp"
-    "src/gfx/drawable/text.cpp"
-    "src/gfx/drawable/elipse.cpp"
-    "src/gfx/drawable/rectangle.cpp"
-    "src/gfx/drawable/polygon.cpp"
-    "src/gfx/drawable/line.cpp"
 
     "include/cppual/graphics"
     )
@@ -762,6 +763,12 @@ set(CPPUAL_GL_HEADERS
     "include/cppual/gfx/gl/query.h"
     "include/cppual/gfx/gl/batch.h"
     "include/cppual/gfx/gl/instance.h"
+    "include/cppual/gfx/gl/painter.h"
+    "include/cppual/gfx/gl/text.h"
+    "include/cppual/gfx/gl/elipse.h"
+    "include/cppual/gfx/gl/rectangle.h"
+    "include/cppual/gfx/gl/polygon.h"
+    "include/cppual/gfx/gl/line.h"
     )
 
 add_library(cppual-gl SHARED
@@ -776,6 +783,12 @@ add_library(cppual-gl SHARED
     "src/gfx/gl/query.cpp"
     "src/gfx/gl/batch.cpp"
     "src/gfx/gl/instance.cpp"
+    "src/gfx/gl/painter.cpp"
+    "src/gfx/gl/text.cpp"
+    "src/gfx/gl/elipse.cpp"
+    "src/gfx/gl/rectangle.cpp"
+    "src/gfx/gl/polygon.cpp"
+    "src/gfx/gl/line.cpp"
 
     "include/cppual/opengl"
     )
@@ -790,29 +803,25 @@ if(TARGET cppual-gfx)
         if(EGL_FOUND)
             set(CPPUAL_GFX_EGL_HEADERS
                 "src/gfx/backend/egl/egl_surface.h"
-                "include/cppual/gfx/gl/painter.h"
                 )
 
-            add_library(cppual-gfx-module-egl MODULE
+            add_library(cppual-gfx-plugin-egl MODULE
                 "src/gfx/backend/egl/egl_surface.cpp"
                 "src/gfx/backend/egl/egl_main.cpp"
-                "src/gfx/gl/painter.cpp"
                 )
-            target_precompile_headers(cppual-gfx-module-egl PRIVATE ${CPPUAL_GFX_EGL_HEADERS})
+            target_precompile_headers(cppual-gfx-plugin-egl PRIVATE ${CPPUAL_GFX_EGL_HEADERS})
         endif()
 
         if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND XCB_GLX_FOUND)
             set(CPPUAL_GFX_GLX_HEADERS
                 "src/gfx/backend/glx/glx_surface.h"
-                "include/cppual/gfx/gl/painter.h"
                 )
 
-            add_library(cppual-gfx-module-glx MODULE
+            add_library(cppual-gfx-plugin-glx MODULE
                 "src/gfx/backend/glx/glx_main.cpp"
                 "src/gfx/backend/glx/glx_surface.cpp"
-                "src/gfx/gl/painter.cpp"
                 )
-            target_precompile_headers(cppual-gfx-module-glx PRIVATE ${CPPUAL_GFX_GLX_HEADERS})
+            target_precompile_headers(cppual-gfx-plugin-glx PRIVATE ${CPPUAL_GFX_GLX_HEADERS})
         endif()
     endif()
 
@@ -820,10 +829,10 @@ if(TARGET cppual-gfx)
         set(CPPUAL_GFX_VK_HEADERS
             )
 
-        add_library(cppual-gfx-module-vulkan MODULE
+        add_library(cppual-gfx-plugin-vulkan MODULE
             "src/gfx/backend/vulkan/vk_main.cpp"
             )
-        target_precompile_headers(cppual-gfx-module-vulkan PRIVATE ${CPPUAL_GFX_VK_HEADERS})
+        target_precompile_headers(cppual-gfx-plugin-vulkan PRIVATE ${CPPUAL_GFX_VK_HEADERS})
     endif()
 
 
@@ -1001,14 +1010,14 @@ set(CPPUAL_UI_XORG_HEADERS
     "src/ui/platform/xorg/xcb_window.h"
     )
 
-add_library(cppual-ui-xorg MODULE
+add_library(cppual-ui-plugin-xorg MODULE
     "include/cppual/ui/platforms/xcb/proto/xkb.hpp"
     "src/ui/platform/xorg/xmain.cpp"
     "src/ui/platform/xorg/xbackend.cpp"
     "src/ui/platform/xorg/xwindow.cpp"
     "src/ui/platform/xorg/xinput.cpp"
     )
-target_precompile_headers(cppual-ui-xorg PRIVATE ${CPPUAL_UI_XORG_HEADERS})
+target_precompile_headers(cppual-ui-plugin-xorg PRIVATE ${CPPUAL_UI_XORG_HEADERS})
 
 endif()
 
@@ -1021,13 +1030,13 @@ set(CPPUAL_UI_WL_HEADERS
     "src/ui/platform/wayland/wlinput.h"
     )
 
-add_library(cppual-ui-wayland MODULE
+add_library(cppual-ui-plugin-wayland MODULE
     "src/ui/platform/wayland/wlbackend.cpp"
     "src/ui/platform/wayland/wlsurface.cpp"
     "src/ui/platform/wayland/wlinput.cpp"
     "src/ui/platform/wayland/wlmain.cpp"
     )
-target_precompile_headers(cppual-ui-wayland PRIVATE ${CPPUAL_UI_WL_HEADERS})
+target_precompile_headers(cppual-ui-plugin-wayland PRIVATE ${CPPUAL_UI_WL_HEADERS})
 
 endif()
 
@@ -1040,18 +1049,22 @@ set(CPPUAL_UI_WIN_HEADERS
     "src/ui/platform/winapi/w32input.h"
     )
 
-add_library(cppual-ui-win MODULE
+add_library(cppual-ui-plugin-win MODULE
     "src/ui/platform/winapi/w32window.cpp"
     "src/ui/platform/winapi/w32backend.cpp"
     "src/ui/platform/winapi/w32input.cpp"
     "src/ui/platform/winapi/w32main.cpp"
     )
-target_precompile_headers(cppual-ui-win PRIVATE ${CPPUAL_UI_WIN_HEADERS})
+target_precompile_headers(cppual-ui-plugin-win PRIVATE ${CPPUAL_UI_WIN_HEADERS})
 
 endif()
 
 
 ### link targets
+if(TARGET cppual-memory-system)
+    target_link_libraries(cppual-memory-system cppual-memory)
+endif()
+
 if(TARGET cppual-gfx)
     target_link_libraries(cppual-gfx cppual-host cppual-memory)
 
@@ -1064,15 +1077,15 @@ if(TARGET cppual-gfx)
     endif()
 
     if(TARGET cppual-gl AND EGL_FOUND)
-        target_link_libraries(cppual-gfx-module-egl cppual-gfx cppual-gl OpenGL::Library EGL::Library GLEW::Library)
+        target_link_libraries(cppual-gfx-plugin-egl cppual-gfx cppual-gl OpenGL::Library EGL::Library GLEW::Library)
     endif()
 
     if(TARGET cppual-gl AND XCB_GLX_FOUND)
-        target_link_libraries(cppual-gfx-module-glx cppual-gfx cppual-gl OpenGL::Library X11::Library GLEW::Library)
+        target_link_libraries(cppual-gfx-plugin-glx cppual-gfx cppual-gl OpenGL::Library X11::Library GLEW::Library)
     endif()
 
     if(VULKAN_FOUND)
-        target_link_libraries(cppual-gfx-module-vulkan cppual-gfx Vulkan::Library)
+        target_link_libraries(cppual-gfx-plugin-vulkan cppual-gfx Vulkan::Library)
     endif()
 
     target_link_libraries(cppual-ui cppual-host cppual-gfx cppual-memory)
@@ -1082,12 +1095,12 @@ endif()
 
 if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     if (XCB_EWMH_FOUND AND XCB_ICCCM_FOUND AND X11_FOUND)
-        target_link_libraries(cppual-ui-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
+        target_link_libraries(cppual-ui-plugin-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
     elseif (NOT WM_FOUND)
-        target_link_libraries(cppual-ui-wayland cppual-memory WM::Library)
+        target_link_libraries(cppual-ui-plugin-wayland cppual-memory WM::Library)
     endif()
 elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(cppual-ui-win cppual-memory cppual-ui WM::Library)
+    target_link_libraries(cppual-ui-plugin-win cppual-memory cppual-ui WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 #    target_link_libraries(cppual-ui-android cppual-memory WM::Library)
 endif()
@@ -1107,16 +1120,16 @@ target_link_libraries(cppual-json cppual-memory)
 
 if(TARGET cppual-compute)
 
-target_link_libraries(cppual-video-compute cppual-compute)
+target_link_libraries(cppual-video-plugin-compute cppual-compute)
 
 endif()
 
 if(TARGET cppual-compute AND OPENCL_FOUND)
-    target_link_libraries(cppual-compute-opencl cppual-compute cppual-memory OpenCL::Library)
+    target_link_libraries(cppual-compute-plugin-opencl cppual-compute cppual-memory OpenCL::Library)
 endif()
 
 if(TARGET cppual-compute AND VULKAN_FOUND)
-    target_link_libraries(cppual-compute-vulkan cppual-compute cppual-memory Vulkan::Library)
+    target_link_libraries(cppual-compute-plugin-vulkan cppual-compute cppual-memory Vulkan::Library)
 endif()
 
 
@@ -1126,8 +1139,8 @@ endif()
 
 #if(TARGET cppual-audio AND OPENAL_FOUND)
 if(OPENAL_FOUND)
-#    target_link_libraries(cppual-audio-openal cppual-audio OpenAL::Library)
-    target_link_libraries(cppual-audio-openal
+#    target_link_libraries(cppual-audio-plugin-openal cppual-audio OpenAL::Library)
+    target_link_libraries(cppual-audio-plugin-openal
     OpenAL::Library)
 endif()
 
@@ -1135,9 +1148,9 @@ endif()
 if(TARGET cppual-audio AND TARGET cppual-compute)
 
     if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND PulseAudio_FOUND)
-        target_link_libraries(cppual-audio-compute cppual-audio cppual-compute PulseAudio::Library)
+        target_link_libraries(cppual-audio-plugin-compute cppual-audio cppual-compute PulseAudio::Library)
     elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-        target_link_libraries(cppual-audio-compute cppual-audio cppual-compute)
+        target_link_libraries(cppual-audio-plugin-compute cppual-audio cppual-compute)
     endif()
 
 endif()

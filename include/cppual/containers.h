@@ -23,7 +23,6 @@
 #define CPPUAL_CONTAINERS_H_
 #ifdef __cplusplus
 
-
 #include <cppual/memory/allocator.h>
 
 #include <vector>

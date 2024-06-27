@@ -47,8 +47,8 @@ public:
     size_type       local_memory_size    () const;
     size_type       const_memory_size    () const;
     size_type       global_memory_size   () const;
+    size_type       max_memory_alloc_size() const;
     u32             compute_units        () const;
-    u64             max_memory_alloc_size() const;
 
     device (pointer handle) noexcept : interface (handle) { }
 

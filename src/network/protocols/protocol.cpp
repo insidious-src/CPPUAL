@@ -28,30 +28,36 @@ void protocol::add_upper_layer (protocol* layer)
 {
     if (_M_pUpperProt != nullptr)
     {
-        auto const lower_layer = _M_pUpperProt;
+        auto const prev_upper_layer = _M_pUpperProt;
 
-        _M_pUpperProt = layer;
-        _M_pUpperProt->lowest_layer ()->add_lower_layer (lower_layer);
+        prev_upper_layer->_M_pLowerProt = layer;
+        layer->_M_pUpperProt = prev_upper_layer;
     }
     else
     {
-        _M_pUpperProt = layer;
+        layer->_M_pUpperProt = nullptr;
     }
+
+    layer->_M_pLowerProt = this;
+    _M_pUpperProt = layer;
 }
 
 void protocol::add_lower_layer (protocol* layer)
 {
     if (_M_pLowerProt != nullptr)
     {
-        auto const lower_layer = _M_pLowerProt;
+        auto const prev_lower_layer = _M_pLowerProt;
 
-        _M_pLowerProt = layer;
-        _M_pLowerProt->add_upper_layer (lower_layer);
+        prev_lower_layer->_M_pUpperProt = layer;
+        layer->_M_pLowerProt = prev_lower_layer;
     }
     else
     {
-        _M_pLowerProt = layer;
+        layer->_M_pLowerProt = nullptr;
     }
+
+    layer->_M_pUpperProt = this;
+    _M_pLowerProt = layer;
 }
 
 protocol* protocol::uppest_layer () const
@@ -64,7 +70,7 @@ protocol* protocol::uppest_layer () const
         return pUppestProt;
     }
 
-    return nullptr;
+    return const_cast<protocol*> (this);
 }
 
 protocol* protocol::lowest_layer () const
@@ -77,7 +83,7 @@ protocol* protocol::lowest_layer () const
         return pLowestProt;
     }
 
-    return nullptr;
+    return const_cast<protocol*> (this);
 }
 
 uint protocol::required_output_size (uint)

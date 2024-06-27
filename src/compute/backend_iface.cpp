@@ -39,14 +39,13 @@ private:
 
     static libraries_vector_reference platform_names () noexcept
     {
-        static char buffer[sizeof (cchar*) * 3];
+        static char buffer[sizeof (cchar*) * 2];
         static memory::stacked_resource static_resource (buffer, sizeof (buffer));
 
         static libraries_vector ret_vec
         {
             "libcppual-compute-opencl",
-            "libcppual-compute-vulkan",
-            "libcppual-compute-cuda"
+            "libcppual-compute-vulkan"
         };
 
         return ret_vec;

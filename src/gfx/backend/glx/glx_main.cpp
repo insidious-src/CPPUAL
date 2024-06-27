@@ -84,7 +84,7 @@ device_backend glx_factory::backend ()
 
 shared_painter glx_factory::create_painter (shared_surface const& surface)
 {
-    return shared_painter (new gl_painter (surface));
+    return shared_painter (new gl::painter (surface));
 }
 
 } } // namespace gfx
@@ -109,7 +109,7 @@ extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
     plugin.verMajor = 1                    ;
     plugin.verMinor = 0                    ;
 
-    plugin.iface    = allocate_shared<glx_factory, void> (&static_resource);
+    plugin.iface    = allocate_shared<void, glx_factory> (&static_resource);
 
     return &plugin;
 }

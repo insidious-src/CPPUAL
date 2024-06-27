@@ -30,8 +30,8 @@
 #include <cppual/unbound_matrix.h>
 #include <cppual/types.h>
 
-#include <deque>
-#include <vector>
+//#include <deque>
+//#include <vector>
 #include <shared_mutex>
 #include <condition_variable>
 
@@ -227,12 +227,12 @@ private:
 
 // =========================================================
 
-//! host concurrent continuation task
+//! host unbound continuation task
 //!
 //! Use a matrix to calculate several results into one
 //! with only a single thread.
 template <typename T>
-class concurrent_task : private host_queue
+class unbound_task : private host_queue
 {
 public:
     static_assert (!std::is_void<T>::value, "T = void ... use std::async instead");
@@ -248,7 +248,7 @@ public:
     void when_all () { when_all_finish (); }
     void finish   () { quit       (false); }
 
-    concurrent_task ()
+    unbound_task ()
     { thread_pool::reserve (*this); }
 
     bool valid () const noexcept
@@ -274,18 +274,18 @@ public:
     }
 
     template <class X>
-    concurrent_task (fn_vector_type<void (X::*)(value_type&)> const& functions) : concurrent_task ()
+    unbound_task (fn_vector_type<void (X::*)(value_type&)> const& functions) : unbound_task ()
     { then (functions); }
 
-    concurrent_task (fn_vector_type<void (*)(value_type&)> const& functions) : concurrent_task ()
+    unbound_task (fn_vector_type<void (*)(value_type&)> const& functions) : unbound_task ()
     { then (functions); }
 
     template <typename Callable>
-    concurrent_task (fn_vector_type<Callable&&> const& functions) : concurrent_task ()
+    unbound_task (fn_vector_type<Callable&&> const& functions) : unbound_task ()
     { then (functions); }
 
     template <class X>
-    concurrent_task& then (fn_vector_type<void (X::*)(value_type&)> const& functions)
+    unbound_task& then (fn_vector_type<void (X::*)(value_type&)> const& functions)
     {
         schedule (call_type ([&]
         {
@@ -297,7 +297,7 @@ public:
         return *this;
     }
 
-    concurrent_task& then (fn_vector_type<void (*)(value_type&)> const& functions)
+    unbound_task& then (fn_vector_type<void (*)(value_type&)> const& functions)
     {
         schedule (call_type ([&]
         {
@@ -310,7 +310,7 @@ public:
     }
 
     template <typename U>
-    concurrent_task& then (fn_vector_type<CallableType<U>&&> const& functions)
+    unbound_task& then (fn_vector_type<CallableType<U>&&> const& functions)
     {
         schedule (call_type ([&]
         {

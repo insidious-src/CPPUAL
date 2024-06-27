@@ -4,7 +4,7 @@
 #include <cppual/ui/platforms/xcb/generic.hpp>
 #include <cppual/string.h>
 
-#include <vector>
+//#include <vector>
 
 #include <xcb/xkb.h>
 
