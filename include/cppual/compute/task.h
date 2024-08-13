@@ -23,19 +23,25 @@
 #define CPPUAL_PROCESS_TASK
 #ifdef __cplusplus
 
+#include <cppual/types.h>
 #include <cppual/concepts.h>
 #include <cppual/functional.h>
 #include <cppual/containers.h>
 #include <cppual/circular_queue.h>
 #include <cppual/unbound_matrix.h>
-#include <cppual/types.h>
 
 //#include <deque>
 //#include <vector>
+#include <atomic>
+#include <iostream>
 #include <shared_mutex>
 #include <condition_variable>
 
+// =========================================================
+
 namespace cppual { namespace compute {
+
+// =========================================================
 
 class host_queue
 {
@@ -43,17 +49,19 @@ public:
     typedef std::condition_variable_any  cv_type   ;
     typedef function<void()>             call_type ;
     typedef fu16                         size_type ;
-    typedef std::shared_timed_mutex      mutex_type;
-    typedef std::lock_guard <mutex_type> write_lock;
+    typedef std::shared_mutex            mutex_type;
+    typedef std::scoped_lock<mutex_type> write_lock;
     typedef std::shared_lock<mutex_type> read_lock ;
     typedef circular_queue  <call_type > queue_type;
 
     enum state_type
     {
         interrupted = -1,
-        inactive,
-        running
+        inactive    =  0,
+        running     =  1
     };
+
+    typedef std::atomic<state_type> atomic_state;
 
     host_queue (host_queue&&                 );
     host_queue (host_queue const&            );
@@ -78,44 +86,44 @@ public:
 
     size_type assigned () const
     {
-        read_lock gLock (_M_gQueueMutex);
+        read_lock lock (_M_gQueueMutex);
         return _M_uNumAssigned;
     }
 
     size_type num_finished () const
     {
-        read_lock gLock (_M_gQueueMutex);
+        read_lock lock (_M_gQueueMutex);
         return _M_uNumCompleted;
     }
 
     state_type state () const
     {
-        read_lock gLock (_M_gQueueMutex);
         return _M_eState;
     }
 
     bool empty () const
     {
-        read_lock gLock (_M_gQueueMutex);
+        read_lock lock (_M_gQueueMutex);
         return _M_gTaskQueue.empty ();
     }
 
     // remove all tasks from the queue
     void clear ()
     {
-        write_lock gLock (_M_gQueueMutex);
+        write_lock lock (_M_gQueueMutex);
         _M_gTaskQueue.clear ();
     }
 
     friend class assign_queue;
 
 private:
-    mutable mutex_type _M_gQueueMutex;
+    mutex_type mutable _M_gQueueMutex;
     queue_type         _M_gTaskQueue;
-    state_type         _M_eState { host_queue::inactive };
+    atomic_state       _M_eState { state_type::inactive };
     size_type          _M_uNumAssigned { };
     size_type          _M_uNumCompleted { };
     cv_type            _M_gTaskCond;
+    cv_type            _M_gSchedCond;
 
     template <typename>
     friend class host_task;
@@ -137,14 +145,14 @@ namespace thread_pool
 
 // =========================================================
 
-//! host continuation task
+/// host continuation task
 template <typename T>
 class host_task : private host_queue
 {
 public:
-    static_assert (!std::is_void<T>::value, "T = void ... use std::async instead");
+    typedef std::remove_cv_t<T> value_type;
 
-    typedef T value_type;
+    static_assert (!std::is_void_v<T>, "T = void... use std::async instead");
 
     void when_any () { when_any_finish (); }
     void when_all () { when_all_finish (); }
@@ -172,25 +180,26 @@ public:
     inline value_type operator ()()
     {
         when_all ();
+        std::cout << "host_task :: All tasks completed, returning value" << std::endl;
         return _M_value;
     }
 
-    template <class X, typename... Args>
-    host_task (X* obj, value_type (X::* fn)(Args...), Args&&... args) : host_task ()
+    template <class C, typename... Args>
+    host_task (C* obj, value_type (C::* fn)(Args...), Args&&... args) : host_task ()
     { then (obj, fn, std::forward<Args> (args)...); }
 
     template <typename... Args>
-    host_task (value_type (fn)(Args...), Args&&... args) : host_task ()
+    host_task (value_type (* fn)(Args...), Args&&... args) : host_task ()
     { then (fn, std::forward<Args> (args)...); }
 
     template <typename Callable, typename... Args>
     host_task (Callable&& fn, Args&&... args) : host_task ()
     { then (std::forward<Callable> (fn), std::forward<Args> (args)...); }
 
-    template <class X, typename... Args>
-    host_task& then (X* obj, value_type (X::* fn)(Args...), Args&&... args)
+    template <class C, typename... Args>
+    host_task& then (C* obj, value_type (C::* fn)(Args...), Args&&... args)
     {
-        schedule (call_type ([&]
+        schedule (call_type ([this, obj, fn, &args...]
         {
             _M_value = std::move ((obj->*fn)(std::forward<Args> (args)...));
         }));
@@ -199,9 +208,9 @@ public:
     }
 
     template <typename... Args>
-    host_task& then (value_type (fn)(Args...), Args&&... args)
+    host_task& then (value_type (* fn)(Args...), Args&&... args)
     {
-        schedule (call_type ([&]
+        schedule (call_type ([this, fn, &args...]
         {
             _M_value = std::move (fn (std::forward<Args> (args)...));
         }));
@@ -209,13 +218,14 @@ public:
         return *this;
     }
 
-    template <typename U, typename... Args>
-    host_task& then (U&& closure, Args&&... args)
+    template <typename Callable, typename... Args>
+    host_task& then (Callable&& fn, Args&&... args)
     {
-        schedule (call_type ([&]
+        schedule (call_type ([this, fn, &args...]
         {
-            _M_value = std::move
-                      (closure.U::operator () (std::forward<Args> (args)...));
+            //_M_value = std::move (fn.Callable::operator () (std::forward<Args> (args)...));
+            _M_value = std::move (fn (std::forward<Args> (args)...));
+            std::cout << "host_task :: Task completed, value: " << _M_value << std::endl;
         }));
 
         return *this;
@@ -227,22 +237,20 @@ private:
 
 // =========================================================
 
-//! host unbound continuation task
-//!
-//! Use a matrix to calculate several results into one
-//! with only a single thread.
+/// host unbound continuation task
+///
+/// Use a matrix to calculate multiple results in parallel
+/// with only a single thread.
 template <typename T>
 class unbound_task : private host_queue
 {
 public:
-    static_assert (!std::is_void<T>::value, "T = void ... use std::async instead");
+    typedef std::remove_cv_t<T>                 value_type    ;
+    typedef vector<value_type>                  vector_type   ;
+    typedef unbound_matrix<value_type>          matrix_type   ;
+    typedef vector<function<void(value_type&)>> fn_vector_type;
 
-    typedef T                 value_type ;
-    typedef vector<T>         vector_type;
-    typedef unbound_matrix<T> matrix_type;
-
-    template <typename F>
-    using fn_vector_type = vector<function<F>>;
+    static_assert (!std::is_void_v<T>, "T = void... use std::async instead");
 
     void when_any () { when_any_finish (); }
     void when_all () { when_all_finish (); }
@@ -267,50 +275,17 @@ public:
         return true;
     }
 
-    inline value_type operator ()()
+    inline vector_type operator ()()
     {
         when_all ();
         return _M_values;
     }
 
-    template <class X>
-    unbound_task (fn_vector_type<void (X::*)(value_type&)> const& functions) : unbound_task ()
+    unbound_task (fn_vector_type const& functions) : unbound_task ()
     { then (functions); }
 
-    unbound_task (fn_vector_type<void (*)(value_type&)> const& functions) : unbound_task ()
-    { then (functions); }
-
-    template <typename Callable>
-    unbound_task (fn_vector_type<Callable&&> const& functions) : unbound_task ()
-    { then (functions); }
-
-    template <class X>
-    unbound_task& then (fn_vector_type<void (X::*)(value_type&)> const& functions)
-    {
-        schedule (call_type ([&]
-        {
-            matrix_type matrix;
-
-            _M_values = std::move (matrix.process (functions));
-        }));
-
-        return *this;
-    }
-
-    unbound_task& then (fn_vector_type<void (*)(value_type&)> const& functions)
-    {
-        schedule (call_type ([&]
-        {
-            matrix_type matrix;
-
-            _M_values = std::move (matrix.process (functions));
-        }));
-
-        return *this;
-    }
-
-    template <typename U>
-    unbound_task& then (fn_vector_type<CallableType<U>&&> const& functions)
+    template <class C>
+    unbound_task& then (fn_vector_type const& functions)
     {
         schedule (call_type ([&]
         {
@@ -325,6 +300,8 @@ public:
 private:
     vector_type _M_values;
 };
+
+// =========================================================
 
 } } // namespace Concurency
 

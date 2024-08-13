@@ -43,17 +43,18 @@ class behaviour
 {
 public:
     behaviour (device_group&);
+    ~behaviour ();
+
     behaviour (behaviour&&) = default;
     behaviour& operator = (behaviour&&) = default;
-    ~behaviour ();
 
     bool set (device_group&);
 
     device_group& devices () const noexcept
-    { return *_M_gDevice; }
+    { return *_M_gDevGroup; }
 
 private:
-    device_group* _M_gDevice;
+    device_group* _M_gDevGroup;
 };
 
 // =========================================================

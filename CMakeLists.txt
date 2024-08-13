@@ -112,6 +112,11 @@ include_directories(
     )
 
 
+link_directories(
+    ${PHOENIX_LIBRARIES_DIR}
+    )
+
+
 ### compile libraries
 
 set(CPPUAL_HOST_HEADERS
@@ -1160,7 +1165,8 @@ endif()
 ### testing
 #enable_testing()
 
-add_executable (cppual-memory-test "tests/memory_test.cpp")
+add_executable(cppual-memory-test "tests/memory_test.cpp")
+
 target_link_libraries(cppual-memory-test cppual-memory)
 
 #add_test (NAME memory_test COMMAND cppual-memory-test)

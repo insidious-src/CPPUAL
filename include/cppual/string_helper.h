@@ -255,7 +255,7 @@ operator - (const typename string_list_iterator<T>::difference_type& a,
 
 template <typename T,
           std::size_t N,
-          typename = typename std::enable_if<is_char_v<T>>::type
+          typename = typename std::enable_if_t<is_char_v<T>>
           >
 class string_list
 {
@@ -276,15 +276,15 @@ public:
     static_assert (N > 0, "string_list is empty!");
     static_assert (is_char_v<T>, "T is NOT a character type!");
 
-    static constexpr const size_type npos = static_cast<size_type> (-1);
+    static constexpr const auto npos = static_cast<size_type> (-1);
 
     string_list () = delete;
 
-    template <typename... U>
-    constexpr string_list(U... array) noexcept
+    template <typename... Ts>
+    constexpr string_list(Ts... array) noexcept
     : _M_array { array... }
     {
-        static_assert (are_of_same_type_v<value_type, U...>, "some of the args are NOT strings!");
+        static_assert (are_of_same_type_v<value_type, Ts...>, "some of the args are NOT strings!");
     }
 
     constexpr const_reference operator [] (size_type i) const
@@ -336,9 +336,9 @@ constexpr auto make_string_list (Ts... ts) -> string_list<T, sizeof... (Ts)>
 template <typename T,
           typename Char = char,
           typename Ator = memory::allocator<Char>,
-          typename      = typename std::enable_if<(is_integer<T>::value ||
-                                                   is_float<T>::value)  &&
-                                                   is_char<Char>::value>::type
+          typename      = typename std::enable_if_t<(is_integer<T>::value ||
+                                                     is_float<T>::value)  &&
+                                                     is_char<Char>::value>
           >
 inline auto number_to_string (T val)
 {
@@ -371,8 +371,8 @@ inline auto number_to_string (T val)
 template <typename T,
           typename Char  = char,
           typename Alloc = memory::allocator<Char>,
-          typename       = typename std::enable_if<is_char<Char>::value &&
-                                                   is_char<typename Alloc::value_type>::value>::type
+          typename       = typename std::enable_if_t<is_char<Char>::value &&
+                                                     is_char<typename Alloc::value_type>::value>
           >
 inline
 auto to_string (T val, Alloc const& a = Alloc ())
@@ -391,7 +391,7 @@ auto to_string (T val, Alloc const& a = Alloc ())
 // ====================================================
 
 template <typename Char = char,
-          typename      = typename std::enable_if<is_char<Char>::value>::type
+          typename      = typename std::enable_if_t<is_char<Char>::value>
           >
 inline
 auto to_std_string (used_string<Char> const& val)

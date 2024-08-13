@@ -33,11 +33,7 @@
 
 // =========================================================
 
-namespace cppual { namespace compute {
-
-class device;
-
-} } // namespace compute
+namespace cppual { namespace compute { class device; } } // namespace compute
 
 // =========================================================
 
@@ -83,7 +79,7 @@ public:
     constexpr device_reference device () const noexcept
     { return *_M_pDevice; }
 
-    /// is thread safe (ex. using mutex)
+    /// is thread safe (ex. using mutex or atomic variables)
     inline virtual bool is_thread_safe () const noexcept
     { return false; }
 
@@ -455,7 +451,7 @@ using AllocatorType = typename std::enable_if_t<is_allocator_v<T>, T>;
 // =========================================================
 
 template <typename T, typename... Args,
-          typename = typename std::enable_if_t<!std::is_void_v<T>>
+          typename =  typename std::enable_if_t<!std::is_void_v<T>>
           >
 inline std::shared_ptr<T> allocate_shared (memory_resource* rc, Args&&... args)
 {
@@ -464,8 +460,7 @@ inline std::shared_ptr<T> allocate_shared (memory_resource* rc, Args&&... args)
 }
 
 template <typename U, typename T, typename... Args,
-          typename = typename std::enable_if_t<!std::is_void_v<T>>,
-          typename = typename std::enable_if_t<!std::is_same_v<U, T>>
+          typename =  typename std::enable_if_t<!std::is_void_v<T> && !std::is_same_v<U, T>>
           >
 inline std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
 {
@@ -475,7 +470,7 @@ inline std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
 }
 
 template <typename T, typename... Args,
-          typename = typename std::enable_if_t<!std::is_void_v<T>>
+          typename =  typename std::enable_if_t<!std::is_void_v<T>>
           >
 inline std::shared_ptr<T> allocate_shared (allocator<T> const& ator, Args&&... args)
 {
@@ -483,8 +478,7 @@ inline std::shared_ptr<T> allocate_shared (allocator<T> const& ator, Args&&... a
 }
 
 template <typename U, typename T, typename... Args,
-          typename = typename std::enable_if_t<!std::is_void_v<T>>,
-          typename = typename std::enable_if_t<!std::is_same_v<U, T>>
+          typename =  typename std::enable_if_t<!std::is_void_v<T> && !std::is_same_v<U, T>>
           >
 inline std::shared_ptr<U> allocate_shared (allocator<T> const& ator, Args&&... args)
 {

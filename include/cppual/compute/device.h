@@ -52,7 +52,6 @@ typedef std::shared_ptr<device_interface> shared_device;
 class device : public object<resource_type::device>
 {
 public:
-    typedef string      string_type;
     typedef std::size_t size_type  ;
 
     enum class info_type : u8
@@ -94,8 +93,8 @@ private:
     }
 
     constexpr device (device_category dev_cat) noexcept
-    : _M_pDev      (),
-      _M_eCategory (dev_cat)
+    : _M_pDev        (),
+      _M_eCategory   (dev_cat)
     { }
 
     friend class factory;

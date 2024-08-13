@@ -26,7 +26,11 @@
 #include <cppual/flags.h>
 #include <cppual/compute/device.h>
 
+// =========================================================
+
 namespace cppual { namespace compute {
+
+// =========================================================
 
 class device_queue : public object<resource_type::queue>
 {
@@ -47,22 +51,27 @@ public:
     typedef bitset<engine_type> engine_types;
 
     device_queue ();
-    device_queue (device const& dev, engine_type exec_engine_type);
+    device_queue (device& dev, engine_type exec_engine_type);
     device_queue (device_queue&& dev);
     device_queue& operator = (device_queue&&);
 
-    static engine_types supported_types (device const&) noexcept;
+    static engine_types supported_types (device const& dev) noexcept;
 
     engine_type type () const noexcept { return _M_eQueueType; }
 
 private:
+    device*     _M_pDevice   ;
     engine_type _M_eQueueType;
 };
+
+// =========================================================
 
 template <typename T>
 class device_task : private device_queue
 {
 };
+
+// =========================================================
 
 } } // namespace Compute
 

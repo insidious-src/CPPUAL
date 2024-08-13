@@ -23,4 +23,40 @@
 
 namespace cppual { namespace compute {
 
+device_queue::device_queue ()
+{
+
+}
+
+device_queue::device_queue (device& dev, engine_type exec_engine_type)
+: _M_pDevice    (&dev),
+  _M_eQueueType (exec_engine_type)
+{
+
+}
+
+device_queue::device_queue (device_queue&& obj)
+: _M_pDevice    (obj._M_pDevice   ),
+  _M_eQueueType (obj._M_eQueueType)
+{
+    obj._M_pDevice    = nullptr       ;
+    obj._M_eQueueType = engine_type ();
+}
+
+device_queue& device_queue::operator = (device_queue&& obj)
+{
+    if (this != &obj)
+    {
+        std::swap (_M_pDevice   , obj._M_pDevice   );
+        std::swap (_M_eQueueType, obj._M_eQueueType);
+    }
+
+    return *this;
+}
+
+device_queue::engine_types device_queue::supported_types (device const& /*dev*/) noexcept
+{
+    return engine_types ();
+}
+
 } } // namespace Compute

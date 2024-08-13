@@ -1,9 +1,9 @@
-![Logo](https://bitbucket.org/repo/jXXjaG/images/1113278086-cppual.png "C++ Unified Abstraction Library")
+![Logo](https://raw.githubusercontent.com/insidious-src/CPPUAL/master/cppual.png "C++ Unified Abstraction Library")
 
 # C++ Unified Abstraction Library #
 
-	Latest Supported Language Standard: C++20
-	Future Language Standards: C++23
+    Latest Supported Language Standard: C++20
+    Future Language Standards: C++23
 
 ## Framework Goals ##
 

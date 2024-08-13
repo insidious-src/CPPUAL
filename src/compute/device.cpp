@@ -54,7 +54,7 @@ bool device::available (string_type const& /*feature*/)
     return false;
 }
 
-string device::info (info_type nfo)
+device::string_type device::info (info_type nfo)
 {
     if (_M_pDev == nullptr) assign_dev_from_cat ();
 
@@ -145,7 +145,7 @@ void device::assign_dev_from_cat () const
         if (!devs.empty ())
         {
             /// if device_category == cpu -> by default it tries to get the host device.
-            /// every compute backend creates host as cpu at index 0
+            /// every compute backend creates host as cpu at index 0.
             _M_pDev = std::move (devs[0]);
             return;
         }

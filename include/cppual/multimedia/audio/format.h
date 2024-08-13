@@ -56,7 +56,8 @@ enum audio_format
     CAF       = 24,
     WVE       = 25,
     MPC2K     = 26,
-    RF64      = 27
+    RF64      = 27,
+    custom
 };
 
 struct descriptor

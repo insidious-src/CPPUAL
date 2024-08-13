@@ -29,6 +29,8 @@
 #include <cppual/string.h>
 #include <cppual/resource.h>
 
+#include <string_view>
+
 namespace cppual { namespace compute {
 
 /// application instance info
@@ -52,7 +54,7 @@ class event;
 
 // =========================================================
 
-template <resource_type Type>
+template <resource_type R>
 class object : public resource<void, void*>
 {
 public:
@@ -64,7 +66,7 @@ public:
     object (object&&) noexcept = default;
     object& operator = (object&&) = default;
 
-    constexpr static resource_type type () noexcept { return Type; }
+    constexpr static resource_type type () noexcept { return R; }
 
     constexpr operator handle_type::value_type () const noexcept
     { return handle<handle_type::value_type>(); }

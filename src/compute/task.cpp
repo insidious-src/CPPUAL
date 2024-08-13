@@ -36,8 +36,8 @@ struct thread_pool_initializer final
     typedef host_queue::read_lock  read_lock ;
 
     inline thread_pool_initializer ()
-    : threadMutex ( ),
-      threads     (5)
+    : threadMutex (),
+      threads     ()
     { }
 
     inline ~thread_pool_initializer ()
@@ -72,6 +72,8 @@ class assign_queue final
 {
 public:
     typedef host_queue::write_lock write_lock;
+    typedef host_queue::read_lock  read_lock ;
+    typedef host_queue::mutex_type mutex_type;
 
     assign_queue (host_queue& gTasks) : _M_queue (gTasks)
     {
@@ -79,11 +81,13 @@ public:
         {
             write_lock lock (_M_queue._M_gQueueMutex);
 
-            _M_queue._M_eState = host_queue::running;
+            _M_queue._M_eState = host_queue::state_type::running;
+
             ++_M_queue._M_uNumAssigned;
         }
 
-        _M_queue._M_gTaskCond.notify_all ();
+        _M_queue._M_gSchedCond.notify_all ();
+        _M_queue._M_gTaskCond.notify_all  ();
     }
 
     ~assign_queue ()
@@ -95,7 +99,8 @@ public:
             --_M_queue._M_uNumAssigned;
         }
 
-        _M_queue._M_gTaskCond.notify_all ();
+        _M_queue._M_gSchedCond.notify_all ();
+        _M_queue._M_gTaskCond.notify_all  ();
     }
 
 private:
@@ -108,13 +113,13 @@ bool thread_pool::reserve (host_queue& gTaskQueue, size_type uAddThreads, bool b
 {
     if (uAddThreads == 0) return false;
 
-    write_lock gLock (pool ().threadMutex);
+    read_lock lock (pool ().threadMutex);
 
     /// add threads to the container and initialize them
     while (uAddThreads--)
     {
         /// add and initialize a thread with host_queue::operator ()
-        pool ().threads.emplace_back (std::thread (gTaskQueue));
+        pool ().threads.emplace_back (gTaskQueue);
         if (bDetached) pool ().threads.back ().detach ();
     }
 
@@ -125,58 +130,99 @@ bool thread_pool::reserve (host_queue& gTaskQueue, size_type uAddThreads, bool b
 
 void host_queue::operator ()()
 {
-    assign_queue assign (*this);
-    call_type    run;
+    //assign_queue assign (*this);
+    call_type run;
+
+    std::cout << __FUNCTION__ << " :: thread started..." << std::endl;
+
+    _M_eState = state_type::running;
+
+    /// isolation brackets
+    {
+        write_lock lock (_M_gQueueMutex);
+
+        ++_M_uNumAssigned;
+    }
+
+    _M_gSchedCond.notify_all ();
+    _M_gTaskCond.notify_all  ();
 
     while (true)
     {
         /// RAII lock
         {
-            read_lock gReadLock (_M_gQueueMutex);
+            read_lock lock (_M_gQueueMutex);
 
-            std::cout << "waiting for a task..." << std::endl;
+            std::cout << __FUNCTION__ << " :: waiting for a task..." << std::endl;
 
-            if (running == _M_eState and _M_gTaskQueue.empty ())
+            if (_M_eState != state_type::running || _M_gTaskQueue.empty ())
             {
-                _M_gTaskCond.wait (gReadLock, [this]
+                _M_gTaskCond.wait (lock, [this/*, &lock*/]
                 {
-                    return running > _M_eState or !_M_gTaskQueue.empty ();
+                    std::cout << __FUNCTION__ << " :: task count: " << _M_gTaskQueue.size () << std::endl;
+
+                    _M_gSchedCond.notify_all ();
+
+                    return _M_eState != state_type::running || !_M_gTaskQueue.empty ();
                 });
             }
 
-            std::cout << "check for queue state..." << std::endl;
+            std::cout << __FUNCTION__ << " :: check for queue state..." << std::endl;
 
             /// process a task if there is one scheduled,
             /// otherwise return if the execution state
             /// requires it
-            if (running > _M_eState)
+            ///
+            /// RAII lock
+            if (_M_eState != state_type::running)
             {
-                std::cout << "exit thread..." << std::endl;
+                std::cout << __FUNCTION__ << " :: exit thread..." << std::endl;
                 break;
             }
 
-            std::cout << "task scheduled..." << std::endl;
+            std::cout << __FUNCTION__ << " :: task count: " << _M_gTaskQueue.size () << std::endl;
 
-            run = std::move (_M_gTaskQueue.front ());
+            if (!_M_gTaskQueue.empty ())
+            {
+                run = _M_gTaskQueue.front ();
+
+                if (run != nullptr) std::cout << __FUNCTION__ << " :: task scheduled..." << std::endl;
+            }
         }
 
         /// RAII lock
         {
-            write_lock gWriteLock (_M_gQueueMutex);
+            write_lock lock (_M_gQueueMutex);
+
             _M_gTaskQueue.pop_front ();
         }
 
         /// run the aquired task if valid
-        run ();
+        if (run != nullptr)
+        {
+            run ();
+            run = nullptr;
+        }
 
         /// RAII lock
         {
-            write_lock gWriteLock (_M_gQueueMutex);
+            write_lock lock (_M_gQueueMutex);
+
             ++_M_uNumCompleted;
         }
 
         _M_gTaskCond.notify_all ();
     }
+
+    /// isolation brackets
+    {
+        write_lock lock (_M_gQueueMutex);
+
+        --_M_uNumAssigned;
+    }
+
+    _M_gSchedCond.notify_all ();
+    _M_gTaskCond.notify_all  ();
 }
 
 host_queue::host_queue (host_queue const&)
@@ -200,26 +246,48 @@ host_queue& host_queue::operator = (host_queue const&)
 
 bool host_queue::schedule (call_type const& callable)
 {
+    if (callable == nullptr) return false;
+
+    size_type task_count = 0;
+
     /// RAII lock
     {
-        /// isolation brackets
-        {
-            read_lock gLock (_M_gQueueMutex);
+        read_lock lock (_M_gQueueMutex);
 
-            _M_gTaskCond.wait (gLock, [this]
-            {
-                return _M_eState == running;
-            });
-        }
-
-        write_lock gLock (_M_gQueueMutex);
-
-        /// schedule task
-        _M_gTaskQueue.push_back (callable);
+        if (_M_eState != state_type::running) _M_gSchedCond.wait (lock);
     }
 
-    /// wake a thread to receive the task
-    _M_gTaskCond.notify_one ();
+    /// RAII lock
+    {
+        read_lock lock (_M_gQueueMutex);
+
+        task_count = _M_gTaskQueue.size ();
+    }
+
+    /// RAII lock
+    {
+        write_lock lock (_M_gQueueMutex);
+
+        _M_gTaskQueue.push_back(callable);
+    }
+
+    /// RAII lock
+    {
+        read_lock lock (_M_gQueueMutex);
+
+        if ((task_count + 1) == _M_gTaskQueue.size ())
+        {
+            std::cout <<  __FUNCTION__ << " :: task added. Task count: " << _M_gTaskQueue.size() << std::endl;
+        }
+        else
+        {
+            std::cout <<  __FUNCTION__ << " :: cannot schedule task, queue is not running" << std::endl;
+            return false;
+        }
+    }
+
+    _M_gTaskCond.notify_one();
+    std::cout <<  __FUNCTION__ << " :: Notified waiting thread" << std::endl;
     return true;
 }
 
@@ -227,8 +295,6 @@ void host_queue::quit (bool bInterrupt) noexcept
 {
     /// RAII lock
     {
-        write_lock gLock (_M_gQueueMutex);
-
         if (_M_eState != running) return;
         _M_eState = bInterrupt ? interrupted : inactive;
     }
@@ -239,30 +305,30 @@ void host_queue::quit (bool bInterrupt) noexcept
 
 void host_queue::when_any_finish ()
 {
-    read_lock gLock (_M_gQueueMutex);
+    read_lock lock (_M_gQueueMutex);
 
-    _M_gTaskCond.wait (gLock, [this, num_completed = _M_uNumCompleted]
+    _M_gTaskCond.wait (lock, [this, num_completed = _M_uNumCompleted]
     {
-        return _M_uNumAssigned == 0 or num_completed < _M_uNumCompleted;
+        return _M_uNumAssigned == 0 || num_completed < _M_uNumCompleted;
     });
 }
 
 void host_queue::when_all_finish ()
 {
-    read_lock gLock (_M_gQueueMutex);
+    read_lock lock (_M_gQueueMutex);
 
-    _M_gTaskCond.wait (gLock, [this, num_completed = _M_uNumCompleted]
+    _M_gTaskCond.wait (lock, [this, num_completed = _M_uNumCompleted]
     {
-        return _M_uNumAssigned == 0 or
-                (num_completed < _M_uNumCompleted and _M_gTaskQueue.empty ());
+        return _M_uNumAssigned == 0 ||
+                (num_completed < _M_uNumCompleted && _M_gTaskQueue.empty ());
     });
 }
 
 void host_queue::when_all_exit ()
 {
-    read_lock gLock (_M_gQueueMutex);
+    read_lock lock (_M_gQueueMutex);
 
-    _M_gTaskCond.wait (gLock, [this]
+    _M_gTaskCond.wait (lock, [this]
     {
         return _M_uNumAssigned == 0;
     });

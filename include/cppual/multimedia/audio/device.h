@@ -76,7 +76,7 @@ public:
     ~playback_device () noexcept;
 };
 
-class capture_device : public virtual device
+class SHARED_API capture_device : public virtual device
 {
 public:
     capture_device  () noexcept;

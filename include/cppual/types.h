@@ -74,7 +74,7 @@ typedef const std::uintptr_t cuptr;
 typedef std::ptrdiff_t ptrdiff;
 typedef const std::ptrdiff_t cptrdiff;
 
-template <class Out, class In>
+template <typename Out, typename In>
 union cast_union
 {
     Out out;
@@ -84,14 +84,14 @@ union cast_union
     constexpr cast_union (In val) noexcept : in (val) { }
 };
 
-template <class Out, class In>
+template <typename Out, typename In>
 constexpr Out direct_cast (In val) noexcept
 {
     static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are not equal!");
     return cast_union<Out, In> (val).out;
 }
 
-template <class Out, class In>
+template <typename Out, typename In>
 constexpr Out unsafe_direct_cast (In val) noexcept
 {
     return cast_union<Out, In> (val).out;

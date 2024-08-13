@@ -313,14 +313,15 @@
 #   define TXT(quote) quote
 #endif
 
+
 template <typename T, typename U>
-inline T pointer_cast (U value)
+constexpr T pointer_cast (U ptr)
 {
-#   ifdef DEBUG_MODE
-    return dynamic_cast<T> (value);
-#   else
-    return static_cast<T>  (value);
-#   endif
+#ifdef DEBUG_MODE
+    return dynamic_cast<T> (ptr);
+#else
+    return static_cast<T> (ptr);
+#endif
 }
 
 namespace cppual {
@@ -418,6 +419,17 @@ typedef const float cfloat;
 typedef const double cdouble;
 typedef long double ldouble;
 typedef const long double cldouble;
+
+
+template <typename T, typename U>
+constexpr T* object_ptr_cast (U* ptr)
+{
+#ifdef DEBUG_MODE
+    return dynamic_cast<T*> (ptr);
+#else
+    return static_cast<T*> (ptr);
+#endif
+}
 
 } // cppual
 
