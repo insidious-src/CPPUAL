@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ protected:
 class push_button : public abstract_button
 {
 public:
-    push_button (view* parent, string const& text);
+    push_button (view* parent, string_type const& text);
     void press ();
     void release ();
 
@@ -69,7 +69,7 @@ private:
 class radio_box : public abstract_button
 {
 public:
-    radio_box (view* parent, string const& text, bool selected = false);
+    radio_box (view* parent, string_type const& text, bool selected = false);
     void select ();
     void clear ();
 
@@ -99,9 +99,9 @@ enum class check_state : u8
 class check_box : public abstract_button
 {
 public:
-    check_box (view*         parent,
-               string const& text  ,
-               check_state   state = check_state::unchecked);
+    check_box (view*              parent,
+               string_type const& text  ,
+               check_state        state = check_state::unchecked);
 
     void set_state (check_state);
 

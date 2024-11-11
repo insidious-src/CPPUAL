@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,40 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define  API_EXPORT
-#include <cppual/ui/display.h>
+#include "wlbackend.h"
 
 #if defined (OS_GNU_LINUX) or defined (OS_BSD)
 
-#include <wayland-client-protocol.h>
-
 namespace cppual { namespace ui {
 
-class SHARED_API wl_display final : public display_interface
-{
-public:
-    wl_display () = delete;
 
-    ~wl_display () noexcept
-    { if (native ()) ::wl_display_disconnect (native<::wl_display> ()); }
-
-
-    string_type name        () const noexcept { return _M_gName;        }
-    uint        screen_count () const noexcept { return _M_nScreenCount; }
-
-    void flush () noexcept
-    { ::wl_display_flush (native<::wl_display> ()); }
-
-    wl_display (string_type const& strName) noexcept
-    : display_interface       (::wl_display_connect (strName.c_str()), nullptr),
-      _M_nScreenCount (),
-      _M_gName        (strName)
-    { }
-
-private:
-    uint        _M_nScreenCount;
-    string_type _M_gName;
-};
 
 } } // namespace Graphics
 

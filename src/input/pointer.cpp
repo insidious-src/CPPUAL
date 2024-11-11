@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@
 
 #include <cppual/input/pointer.h>
 
-namespace cppual { namespace input {
+namespace cppual::input {
 
 bool mouse_queue::pop_front (event_type&, bool) noexcept
 {
     return false;
 }
 
-} } // namespace Input
+} // namespace Input

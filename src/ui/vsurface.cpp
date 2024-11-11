@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,29 +25,29 @@ namespace cppual { namespace ui {
 
 // ====================================================
 
-proxy_renderable::proxy_renderable (shared_window const& pParent, rect const& gRect) noexcept
+proxy_renderable::proxy_renderable (wnd_const_reference pParent, rect const& gRect) noexcept
 : platform_wnd_interface (pParent != nullptr ? pParent->connection () : nullptr,
-                          pParent != nullptr ? pParent->handle     () : nullptr),
+                          pParent != nullptr ? pParent->handle<resource_handle> () : nullptr),
   _M_pParent (pParent),
   _M_gRect (gRect),
   _M_bIsVisible ()
 {
 }
 
-proxy_renderable::proxy_renderable (platform_wnd_interface*) noexcept
+proxy_renderable::proxy_renderable (base_type*) noexcept
 {
 }
 
-proxy_renderable::proxy_renderable (proxy_renderable const&) noexcept
+proxy_renderable::proxy_renderable (self_type const&) noexcept
 {
 }
 
-proxy_renderable& proxy_renderable::operator = (platform_wnd_interface*) noexcept
+proxy_renderable& proxy_renderable::operator = (base_type*) noexcept
 {
     return *this;
 }
 
-proxy_renderable& proxy_renderable::operator = (proxy_renderable const& gObj) noexcept
+proxy_renderable& proxy_renderable::operator = (self_type const& gObj) noexcept
 {
     if (this == &gObj) return *this;
     return *this;
@@ -57,7 +57,7 @@ void proxy_renderable::set_geometry (rect const&) noexcept
 {
 }
 
-void proxy_renderable::set_owner (const_pointer) noexcept
+void proxy_renderable::set_owner (wnd_const_reference) noexcept
 {
 }
 

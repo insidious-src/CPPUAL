@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,28 +23,33 @@
 #define CPPUAL_MEMORY_MODEL_H_
 #ifdef __cplusplus
 
+#include <cppual/decl.h>
 #include <cppual/types.h>
 
 #include <cstddef>
 
-namespace cppual { namespace memory {
+// =========================================================
+
+namespace cppual::memory {
+
+// =========================================================
 
 class memory_resource;
 
 // =========================================================
 
-static_assert (sizeof  (std::size_t) == sizeof  (byte*), "size_t is not equal to the size of a pointer!");
-static_assert (alignof (std::size_t) == alignof (byte*), "alignment is wrong!");
+static_assert (sizeof  (std::size_t) == sizeof  (u8*), "size_t is NOT equal to the size of a pointer!");
+static_assert (alignof (std::size_t) == alignof (u8*), "alignment is wrong!");
 
 // =========================================================
 
-/// Get size of the total physical memory installed
+//! Get size of the total physical memory installed
 std::size_t SHARED_API capacity ();
 
-/// Largest available system memory block
+//! Largest available system memory block
 std::size_t SHARED_API max_size ();
 
-/// Get size the current process allocated memory
+//! Get size the current process allocated memory
 std::size_t SHARED_API working_size ();
 
 // =========================================================
@@ -102,6 +107,8 @@ struct thread_statistics
     //! Total number of bytes transitioned from global cache to thread cache
     std::size_t global_to_thread;
 };
+
+// =========================================================
 
 extern int
 initialize(void);
@@ -161,7 +168,9 @@ alloc_usable_size(void* ptr);
 
 #endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
-} } } // namespace Model
+// =========================================================
+
+} } // namespace Model
 
 #endif // __cplusplus
 #endif // CPPUAL_MEMORY_MODEL_H_

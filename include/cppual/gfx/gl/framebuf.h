@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 namespace cppual { namespace gfx { namespace gl {
 
 
-class frame_buffer final : public buffer_object
+class frame_buffer final : public buffer
 {
 public:
     frame_buffer () noexcept;

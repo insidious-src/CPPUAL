@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 #include <cppual/gfx/draw.h>
 
-namespace cppual { namespace gfx { namespace gl {
+namespace cppual::gfx::gl {
 
 struct SHARED_API painter final : public painter_interface
 {
@@ -58,7 +58,7 @@ private:
     shared_surface _M_pSurface;
 };
 
-} } } // OpenGL
+} // OpenGL
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_DRAWABLE_PAINTER_H_

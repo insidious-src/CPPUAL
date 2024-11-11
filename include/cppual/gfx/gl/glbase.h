@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,13 @@
 
 #include <cstddef>
 
-namespace cppual { namespace gfx { namespace gl {
+// ====================================================
+
+namespace cppual::gfx::gl {
 
 // ====================================================
 
-class buffer_object         ;
+class buffer                ;
 class shader                ;
 class fragment_shader       ;
 class vertex_shader         ;
@@ -69,11 +71,11 @@ public:
     typedef std::size_t    size_type      ;
 
     object  () noexcept = default;
-    object  (resource_type type);
-    object  (shader_type   shader_type);
+    object  (resource_type      type);
+    object  (shader_type shader_type);
     ~object () noexcept;
 
-    resource_type type () const noexcept
+    constexpr resource_type type () const noexcept
     { return _M_eResType; }
 
 private:
@@ -82,7 +84,7 @@ private:
 
 // ====================================================
 
-} } } // namespace GL
+} // namespace GL
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_GL_BASE_H_

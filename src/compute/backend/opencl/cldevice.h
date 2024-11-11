@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,46 +25,63 @@
 
 #include "opencl.h"
 
-namespace cppual { namespace compute { namespace cl {
+// =========================================================
+
+namespace cppual::compute::cl {
 
 // =========================================================
 
-class device final : public device_object
+class device final : public device_interface
 {
 public:
-    typedef vector<pointer>        device_ids_vector;
-    typedef factory::device_vector device_vector    ;
+    typedef device                   self_type        ;
+    typedef device_interface         base_type        ;
+    typedef CLObject<device_id_type> value_type       ;
+    typedef value_type*              pointer          ;
+    typedef vector<pointer>          device_ids_vector;
+    typedef factory::device_vector   device_vector    ;
+    typedef std::size_t              size_type        ;
+    typedef resource_handle          handle_type      ;
 
-    string_type     name                 () const;
-    string_type     vendor               () const;
-    profile_type    profile              () const;
-    backend_type    backend              () const;
-    device_ils      supported_ils        () const;
-    device_category dev_type             () const;
-    version_type    version              () const;
-    size_type       cache_size           () const;
-    size_type       cache_line_size      () const;
-    size_type       local_memory_size    () const;
-    size_type       const_memory_size    () const;
-    size_type       global_memory_size   () const;
-    size_type       max_memory_alloc_size() const;
-    u32             compute_units        () const;
+    device  () = delete;
+    ~device () noexcept;
 
-    device (pointer handle) noexcept : interface (handle) { }
+    explicit device (pointer handle) noexcept;
+
+    inline device (self_type&&) = default;
+    inline self_type& operator = (self_type&&) = default;
+
+    constexpr pointer handle () const noexcept
+    { return base_type::handle<pointer> (); }
+
+    string_type     name                  () const;
+    string_type     vendor                () const;
+    profile_type    profile               () const;
+    backend_type    backend               () const;
+    device_ils      supported_ils         () const;
+    device_type     dev_type              () const;
+    version_type    version               () const;
+    size_type       cache_size            () const;
+    size_type       cache_line_size       () const;
+    size_type       local_memory_size     () const;
+    size_type       const_memory_size     () const;
+    size_type       global_memory_size    () const;
+    size_type       max_memory_alloc_size () const;
+    u32             compute_units_count   () const;
 
 private:
-    vector<string_type> extensions() const;
-    bool supports_extension(string_type const& name) const;
+    vector<string_type> extensions () const;
+    bool supports_extension (string_type const& name) const;
 
-    static device_ids_vector get_device_ids();
-    static device_ids_vector get_device_ids(device_vector const& devs);
-    static device_vector     get_devices(memory::memory_resource& rc);
-    static size_type         count();
+    static device_ids_vector get_device_ids ();
+    static device_ids_vector get_device_ids (device_vector const& devs);
+    static device_vector     get_devices (memory::memory_resource& rc);
+    static size_type         count ();
 
     template <typename T>
     T get_info (device_info_type info) const
     {
-        return get_object_info<T> (::clGetDeviceInfo, handle(), info);
+        return get_object_info<T> (::clGetDeviceInfo, handle (), info);
     }
 
     friend class platform  ;
@@ -74,7 +91,7 @@ private:
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace CL
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_OPENCL_DEVICE_H_

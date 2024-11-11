@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ int sound::open_read_only (string const& gFile) noexcept
         _M_gFlags += flag::read;
 
         /// using format to save an int copy
-        if (!(gInfo.format = on_open ()))
+        if (gInfo.format = on_open (); !gInfo.format)
         {
             close ();
             return gInfo.format;

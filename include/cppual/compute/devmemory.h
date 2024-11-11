@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 // =========================================================
 
-namespace cppual { namespace compute {
+namespace cppual::compute {
 
 // =========================================================
 
@@ -54,21 +54,22 @@ private:
     device_pointer _M_pDevice;
 };
 
-} } // namespace Compute
+} // namespace Compute
 
 // =========================================================
 
+using cppual::compute::device       ;
 using cppual::compute::device_memory;
 
 // =========================================================
 
-void* operator new    (std::size_t size, device_memory& obj);
-void  operator delete (void* ptr, device_memory& obj);
+void* operator new    (std::size_t size, device& obj);
+void  operator delete (void* ptr, device& obj);
 
-inline void* operator new[] (std::size_t size, device_memory& obj)
+inline void* operator new[] (std::size_t size, device& obj)
 { return ::operator new (size, obj); }
 
-inline void  operator delete[] (void* ptr, device_memory& obj)
+inline void  operator delete[] (void* ptr, device& obj)
 { ::operator delete (ptr, obj); }
 
 // =========================================================

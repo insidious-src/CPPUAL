@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include <new>
 #include <cstdlib>
 
-namespace cppual { namespace memory {
+namespace cppual::memory {
 
 // =========================================================
 
@@ -93,7 +93,6 @@ private:
     inline void do_deallocate (void* p, size_type bytes, size_type align)
     {
         ::operator delete (p, bytes, std::align_val_t (align));
-        //::operator delete (p);
     }
 
     inline bool do_is_equal (base_const_reference other) const noexcept
@@ -137,10 +136,6 @@ private:
 } // anonymous namespace
 
 // =========================================================
-
-memory_resource::~memory_resource ()
-{
-}
 
 memory_resource::device_reference memory_resource::host_device () noexcept
 {
@@ -194,4 +189,4 @@ std::thread::id main_thread_id () noexcept
 
 // =========================================================
 
-} } // Memory
+} // Memory

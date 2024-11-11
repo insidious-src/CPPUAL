@@ -4,7 +4,7 @@
 #include <cppual/ui/platforms/xcb/generic/factory.hpp>
 #include <cppual/ui/platforms/xcb/generic/signature.hpp>
 #include <cppual/ui/platforms/xcb/generic/iterator_traits.hpp>
-#include <cppual/string.h>
+#include <cppual/containers.h>
 
 #include <cstdlib> // size_t
 #include <memory>

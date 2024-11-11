@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  */
 
 #include <cppual/network/transport/socket.h>
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 
 //#include <cstring>
 #include <iostream>
@@ -102,7 +102,7 @@ void transport_socket::set_blocking (bool bBlock) noexcept
         if (bBlock) status_flags -= socket_flag::non_blocking;
         else        status_flags += socket_flag::non_blocking;
 
-        ::fcntl (handle (), F_SETFL, status_flags);
+        ::fcntl (handle (), F_SETFL, status_flags.value ());
 #       endif
     }
 }

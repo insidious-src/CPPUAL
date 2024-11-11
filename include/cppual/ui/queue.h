@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@
 #define CPPUAL_UI_QUEUE_H
 #ifdef __cplusplus
 
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/signal.h>
+#include <cppual/ui/view.h>
 #include <cppual/noncopyable.h>
 #include <cppual/input/event.h>
-#include <cppual/ui/view.h>
 
 //#include <thread>
 #include <atomic>
@@ -46,7 +46,7 @@ typedef std::shared_ptr<display_queue_interface> shared_queue;
 class SHARED_API display_queue_interface : public non_copyable_virtual
 {
 public:
-    typedef input::sys_event         event_type     ;
+    typedef input::event             event_type     ;
     typedef shared_display           connection_type;
     typedef platform_wnd_interface   window_type    ;
     typedef std::atomic_bool         bool_type      ;
@@ -126,10 +126,10 @@ public:
     }
 
     void send (control_type const& window, event_type const& event)
-    { queue->send (*window.renderable ().lock ().get (), event); }
+    { queue->send (*window.renderable (), event); }
 
     void post (control_type const& window, event_type const& event)
-    { queue->post (*window.renderable ().lock ().get (), event); }
+    { queue->post (*window.renderable (), event); }
 
     void quit ()
     { polling = false; }

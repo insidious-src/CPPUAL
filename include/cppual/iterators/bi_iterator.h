@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,11 @@
 
 #include <iterator>
 
+// ====================================================
+
 namespace cppual {
+
+// ====================================================
 
 template <typename T>
 class is_input_iterator : public
@@ -35,11 +39,27 @@ class is_input_iterator : public
 { };
 
 template <typename T>
+inline constexpr auto const is_input_iterator_v = is_input_iterator<T>::value;
+
+template <typename T>
+concept input_iterator_t = is_input_iterator_v<T>;
+
+// ====================================================
+
+template <typename T>
 class is_output_iterator : public
         std::conditional<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
         std::output_iterator_tag>::value, std::true_type, std::false_type>::type
 { };
+
+template <typename T>
+inline constexpr auto const is_output_iterator_v = is_output_iterator<T>::value;
+
+template <typename T>
+concept output_iterator_t = is_output_iterator_v<T>;
+
+// ====================================================
 
 template <typename T>
 class is_forward_iterator : public
@@ -49,11 +69,27 @@ class is_forward_iterator : public
 { };
 
 template <typename T>
+inline constexpr auto const is_forward_iterator_v = is_forward_iterator<T>::value;
+
+template <typename T>
+concept forward_iterator_t = is_forward_iterator_v<T>;
+
+// ====================================================
+
+template <typename T>
 class is_bidirectional_iterator : public
         std::conditional<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
         std::bidirectional_iterator_tag>::value, std::true_type, std::false_type>::type
 { };
+
+template <typename T>
+inline constexpr auto const is_bidirectional_iterator_v = is_bidirectional_iterator<T>::value;
+
+template <typename T>
+concept bidirectional_iterator_t = is_bidirectional_iterator_v<T>;
+
+// ====================================================
 
 template <typename T>
 class is_random_access_iterator : public
@@ -63,6 +99,14 @@ class is_random_access_iterator : public
 { };
 
 template <typename T>
+inline constexpr auto const is_random_access_iterator_v = is_random_access_iterator<T>::value;
+
+template <typename T>
+concept random_access_iterator_t = is_random_access_iterator_v<T>;
+
+// ====================================================
+
+template <typename T>
 class is_iterator : public
         std::conditional<is_input_iterator<T>::value ||
         is_output_iterator<T>::value                 ||
@@ -70,6 +114,12 @@ class is_iterator : public
         is_bidirectional_iterator<T>::value          ||
         is_random_access_iterator<T>::value, std::true_type, std::false_type>::type
 { };
+
+template <typename T>
+inline constexpr auto const is_iterator_v = is_iterator<T>::value;
+
+template <typename T>
+concept iterator_t = is_iterator_v<T>;
 
 // ====================================================
 
@@ -121,7 +171,9 @@ template <typename T>
 class bidirectional_iterator
 {
 public:
-    typedef T                               buf_type         ;
+    typedef bidirectional_iterator<T>       self_type        ;
+    typedef std::remove_reference_t<T>      buf_type         ;
+    typedef std::remove_cvref_t<T>          buf_clean_type   ;
     typedef typename T::pointer             pointer          ;
     typedef typename T::const_pointer       const_pointer    ;
     typedef typename T::reference           reference        ;
@@ -129,46 +181,43 @@ public:
     typedef typename T::difference_type     difference_type  ;
     typedef typename T::size_type           size_type        ;
     typedef typename T::value_type          value_type       ;
-    typedef bidirectional_iterator<T>       self_type        ;
+    typedef value_type const                const_value      ;
     typedef std::bidirectional_iterator_tag iterator_category;
 
-    typedef typename std::conditional<std::is_const<buf_type>::value,
-    value_type const, value_type>::type
-    elem_type;
+    template <typename U>
+    using self_type_t = bidirectional_iterator<U>;
 
-    constexpr const static size_type npos = size_type(-1);
+    typedef std::conditional_t<std::is_const_v<buf_type>, const_value, value_type> elem_type;
+
+    inline constexpr static size_type const npos = size_type (-1);
 
     friend class bidirectional_iterator<buf_type const>;
-    friend class bidirectional_iterator<typename std::remove_const<buf_type>::type>;
+    friend class bidirectional_iterator<std::remove_const_t<buf_type>>;
 
-    constexpr elem_type& operator *  () const { return   get ()[_M_uPos];  }
+    constexpr elem_type& operator *  () const { return  (get ()[_M_uPos]); }
     constexpr elem_type* operator -> () const { return &(get ()[_M_uPos]); }
 
-    constexpr bidirectional_iterator () noexcept
-    : _M_pBuf (0), _M_uPos (0)
-    { }
+    constexpr bidirectional_iterator () noexcept = default;
 
     constexpr bidirectional_iterator (buf_type& b, size_type p) noexcept
     : _M_pBuf (&b), _M_uPos (p)
     { }
 
-    /// Converting a non-const iterator to a const iterator
+    //! converting a const iterator to a non-const iterator
     constexpr
-    bidirectional_iterator (bidirectional_iterator<typename std::remove_const<buf_type>::type>
-                            const& other) noexcept
+    bidirectional_iterator (self_type_t<buf_type const> const& other) noexcept
+    : _M_pBuf (const_cast<buf_type*> (other._M_pBuf)), _M_uPos (other._M_uPos)
+    { }
+
+    //! converting a non-const iterator to a const iterator
+    constexpr
+    bidirectional_iterator (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
     : _M_pBuf (other._M_pBuf), _M_uPos (other._M_uPos)
     { }
 
-    /// Converting a const iterator iterator to a non-const
-    constexpr
-    bidirectional_iterator (bidirectional_iterator<buf_type const> const& other) noexcept
-    : _M_pBuf (const_cast<buf_type*>(other._M_pBuf)), _M_uPos (other._M_uPos)
-    { }
-
-    /// Converting a non-const iterator to a const iterator
+    //! converting a non-const iterator to a const iterator
     inline
-    bidirectional_iterator& operator = (bidirectional_iterator<typename std::remove_const<buf_type>::type>
-                                        const& other) noexcept
+    self_type& operator = (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
     {
         if (this == &other) return *this;
 
@@ -253,15 +302,12 @@ public:
     constexpr bool operator <= (self_type const& other) const
     { return _M_uPos == npos ? true : _M_uPos <= other._M_uPos; }
 
-    constexpr buf_type& get () const noexcept
-    { return *_M_pBuf; }
-
-    constexpr size_type pos () const noexcept
-    { return _M_uPos; }
+    constexpr buf_type& get () const noexcept { return *_M_pBuf; }
+    constexpr size_type pos () const noexcept { return  _M_uPos; }
 
 private:
-    buf_type* _M_pBuf;
-    size_type _M_uPos;
+    buf_type* _M_pBuf { };
+    size_type _M_uPos { };
 };
 
 // =========================================================

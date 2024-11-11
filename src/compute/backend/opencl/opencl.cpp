@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 //#include <cstring>
 //#include <memory>
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 // =========================================================
 
@@ -36,7 +36,7 @@ namespace { // optimize for internal unit usage
 
 // =========================================================
 
-cchar* opencl_error::to_string(i32 error)
+cchar* opencl_error::to_string (i32 error)
 {
     switch (error)
     {
@@ -111,56 +111,99 @@ cchar* opencl_error::to_string(i32 error)
         ss << "Unknown OpenCL Error (" << error << ")";
         return (error_str = ss.str ()).c_str ();
     }
-    }
+    } //!< switch
 }
 
 // =========================================================
 
-interface<resource_type::device>::~interface() noexcept
-{
-    if (handle ()) ::clReleaseDevice (handle ());
-}
+// resource_object<resource_type::context>::resource_object (pointer handle) noexcept
+// : base_type (handle)
+// {
+//     ::clRetainContext (handle);
+// }
 
-interface<resource_type::context>::~interface () noexcept
-{
-    if (handle ()) ::clReleaseContext (handle ());
-}
+// resource_object<resource_type::context>::~resource_object () noexcept
+// {
+//     if (handle ()) ::clReleaseContext (handle ());
+// }
 
-interface<resource_type::shader>::~interface () noexcept
-{
-    if (handle ()) ::clReleaseKernel (handle ());
-}
+// resource_object<resource_type::source_code>::resource_object (pointer handle) noexcept
+// : base_type (handle)
+// {
+//     ::clRetainKernel (handle);
+// }
 
-interface<resource_type::program>::~interface () noexcept
-{
-    if (handle ()) ::clReleaseProgram (handle ());
-}
+// resource_object<resource_type::source_code>::~resource_object () noexcept
+// {
+//     if (handle ()) ::clReleaseKernel (handle ());
+// }
 
-interface<resource_type::queue>::~interface () noexcept
-{
-    if (handle ()) ::clReleaseCommandQueue (handle ());
-}
+// resource_object<resource_type::program>::resource_object (pointer handle) noexcept
+// : base_type (handle)
+// {
+//     ::clRetainProgram (handle);
+// }
 
-interface<resource_type::buffer>::~interface () noexcept
-{
-    if (handle ()) ::clReleaseMemObject (handle ());
-}
+// resource_object<resource_type::program>::~resource_object () noexcept
+// {
+//     if (handle ()) ::clReleaseProgram (handle ());
+// }
 
-interface<resource_type::image>::~interface () noexcept
-{
-    if (handle ()) ::clReleaseMemObject (handle ());
-}
+// resource_object<resource_type::queue>::resource_object (pointer handle) noexcept
+// : base_type (handle)
+// {
+//     ::clRetainCommandQueue (handle);
+// }
 
-interface<resource_type::event>::~interface () noexcept
-{
-    if (handle ()) ::clReleaseEvent (handle ());
-}
+// resource_object<resource_type::queue>::~resource_object () noexcept
+// {
+//     if (handle ()) ::clReleaseCommandQueue (handle ());
+// }
 
-interface<resource_type::sampler>::~interface () noexcept
-{
-    if (handle ()) ::clReleaseSampler(handle ());
-}
+// resource_object<resource_type::buffer>::resource_object (pointer handle) noexcept
+// : base_type (handle)
+// {
+//     ::clRetainMemObject (handle);
+// }
+
+// resource_object<resource_type::buffer>::~resource_object () noexcept
+// {
+//     if (handle ()) ::clReleaseMemObject (handle ());
+// }
+
+// resource_object<resource_type::image>::resource_object (pointer handle) noexcept
+// : base_type (handle)
+// {
+//     ::clRetainMemObject (handle);
+// }
+
+// resource_object<resource_type::image>::~resource_object () noexcept
+// {
+//     if (handle ()) ::clReleaseMemObject (handle ());
+// }
+
+// resource_object<resource_type::event>::resource_object (pointer handle) noexcept
+// : base_type (handle)
+// {
+//     ::clRetainEvent (handle);
+// }
+
+// resource_object<resource_type::event>::~resource_object () noexcept
+// {
+//     if (handle ()) ::clReleaseEvent (handle ());
+// }
+
+// resource_object<resource_type::sampler>::resource_object (pointer handle) noexcept
+// : base_type (handle)
+// {
+//     ::clRetainSampler (handle);
+// }
+
+// resource_object<resource_type::sampler>::~resource_object () noexcept
+// {
+//     if (handle ()) ::clReleaseSampler(handle ());
+// }
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace cl

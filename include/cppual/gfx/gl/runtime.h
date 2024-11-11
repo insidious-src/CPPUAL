@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,25 +30,26 @@ namespace cppual { namespace gfx { namespace gl {
 
 // ====================================================
 
-enum class StringQuery : u8
+enum class string_query : u8
 {
-    Renderer,
-    Vendor  ,
-    Version ,
-    SLVersion
+    renderer,
+    vendor  ,
+    version ,
+    sl_version
 };
 
 // ====================================================
 
 struct platform
 {
-    typedef struct resource_version version_type;
+    typedef resource_version version_type;
+    typedef string           string_type ;
 
     static version_type version ();
     static version_type sl_version ();
-    static string       label (StringQuery);
-    static bool         is_extension_supported (string const& name);
-    static void         draw_test_triagle(float axis);
+    static string_type  label (string_query);
+    static bool         is_extension_supported (string_type const& name);
+    static void         draw_test_triagle (float axis);
 };
 
 // ====================================================

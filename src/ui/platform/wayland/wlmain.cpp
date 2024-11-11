@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@
 
 #define  API_EXPORT
 #include "wlinput.h"
-#include "wlsurface.cpp"
-#include "wlbackend.cpp"
+#include "wlsurface.h"
+#include "wlbackend.h"
 
-namespace cppual { namespace ui { namespace platform {
+namespace cppual::ui::platform {
 
 struct wl_factory final : factory
 {
@@ -53,11 +53,11 @@ shared_window wl_factory::createWindow (rect const& gRect, u32 nScreen, shared_d
     return shared_window (new wl_surface (gRect, nScreen, pDisplay));
 }
 
-} } } // namespace Platform
+} // namespace Platform
 
 // =========================================================
 
-using cppual::ui::platform::wl_factory ;
+using cppual::ui::platform::wl_factory;
 using cppual::process::plugin_vars    ;
 using cppual::memory::memory_resource ;
 using cppual::memory::stacked_resource;
@@ -70,7 +70,7 @@ extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
     static stacked_resource static_resource (buffer, sizeof (buffer));
     static plugin_vars plugin;
 
-    plugin.name     = "wl_factory"         ;
+    plugin.name     = "wl_factory"        ;
     plugin.desc     = "Wayland UI Factory";
     plugin.provides = "Ui::Factory"       ;
     plugin.verMajor = 1                   ;

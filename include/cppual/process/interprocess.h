@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/process/interproc.h>
+#ifndef CPPUAL_PROCESS_INTER_PROCESS_H
+#define CPPUAL_PROCESS_INTER_PROCESS_H
+#ifdef __cplusplus
+
+#include <cppual/process/process_model.h>
 
 namespace cppual { namespace process {
 
+class inter_process_queue
+{
+};
 
 } } // namespace Process
+
+#endif // __cplusplus
+#endif // CPPUAL_PROCESS_INTER_PROCESS_H

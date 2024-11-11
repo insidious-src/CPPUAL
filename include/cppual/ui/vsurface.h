@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,50 +31,53 @@ namespace cppual { namespace ui {
 class SHARED_API proxy_renderable : public platform_wnd_interface
 {
 public:
-    proxy_renderable () = delete;
-    proxy_renderable (platform_wnd_interface*) noexcept;
-    proxy_renderable (proxy_renderable const&) noexcept;
-    proxy_renderable (shared_window const& owner, rect const& rect) noexcept;
-    proxy_renderable& operator = (platform_wnd_interface*) noexcept;
-    proxy_renderable& operator = (proxy_renderable const&) noexcept;
+    typedef proxy_renderable       self_type;
+    typedef platform_wnd_interface base_type;
 
-    string title () const noexcept { return string (); }
-    void   set_title (string const&) noexcept { }
-    void   set_shaded (bool) noexcept { }
-    bool   is_shaded () const noexcept { return false; }
-    void   set_modal (bool) noexcept { }
-    bool   is_modal () const noexcept { return false; }
-    void   set_fullscreen (bool) noexcept { }
-    bool   is_fullscreen () const noexcept { return false; }
-    void   set_maximized (bool) noexcept { }
-    bool   is_maximized () const noexcept { return false; }
-    void   set_minimized (bool) noexcept { }
-    bool   is_minimized () const noexcept { return false; }
-    void   set_visible_in_taskbar (bool) noexcept { }
-    bool   is_visible_in_taskbar () const noexcept { return false; }
-    void   set_visible_in_pager (bool) noexcept { }
-    bool   is_visible_in_pager () const noexcept { return false; }
-    void   setMimimumSize (point2u) noexcept { }
-    void   setMaximumSize (point2u) noexcept { }
-    void   flash (uint) noexcept { }
-    void   set_geometry (rect const&) noexcept;
-    void   set_owner (const_pointer) noexcept;
-    void   move (point2i) noexcept;
-    void   map () noexcept;
-    void   map_minimized () noexcept { }
-    void   map_maximized () noexcept { }
-    void   unmap () noexcept;
-    void   keep_above (bool) { }
-    bool   is_above () const { return false; }
-    void   keep_below (bool) { }
-    bool   is_below () const { return false; }
+    proxy_renderable () = delete;
+    proxy_renderable (base_type*) noexcept;
+    proxy_renderable (self_type const&) noexcept;
+    proxy_renderable (wnd_const_reference owner, rect const& rect) noexcept;
+    proxy_renderable& operator = (base_type*) noexcept;
+    proxy_renderable& operator = (self_type const&) noexcept;
+
+    string_type title () const noexcept { return string_type (); }
+    void        set_title (string_type const&) noexcept { }
+    void        set_shaded (bool) noexcept { }
+    bool        is_shaded () const noexcept { return false; }
+    void        set_modal (bool) noexcept { }
+    bool        is_modal () const noexcept { return false; }
+    void        set_fullscreen (bool) noexcept { }
+    bool        is_fullscreen () const noexcept { return false; }
+    void        set_maximized (bool) noexcept { }
+    bool        is_maximized () const noexcept { return false; }
+    void        set_minimized (bool) noexcept { }
+    bool        is_minimized () const noexcept { return false; }
+    void        set_visible_in_taskbar (bool) noexcept { }
+    bool        is_visible_in_taskbar () const noexcept { return false; }
+    void        set_visible_in_pager (bool) noexcept { }
+    bool        is_visible_in_pager () const noexcept { return false; }
+    void        setMimimumSize (point2u) noexcept { }
+    void        setMaximumSize (point2u) noexcept { }
+    void        flash (uint) noexcept { }
+    void        set_geometry (rect const&) noexcept;
+    void        set_owner (wnd_const_reference) noexcept;
+    void        move (point2i) noexcept;
+    void        map () noexcept;
+    void        map_minimized () noexcept { }
+    void        map_maximized () noexcept { }
+    void        unmap () noexcept;
+    void        keep_above (bool) { }
+    bool        is_above () const { return false; }
+    void        keep_below (bool) { }
+    bool        is_below () const { return false; }
 
     window_flags flags () const { return window_flags (); }
     void         set_flags (window_flags) { }
 
-    inline ~proxy_renderable    ()       noexcept { unmap ();            }
-    inline weak_window owner    () const noexcept { return _M_pParent;    }
-    inline rect        geometry () const noexcept { return _M_gRect;      }
+    inline ~proxy_renderable     ()       noexcept { unmap ();             }
+    inline wnd_pointer owner     () const noexcept { return _M_pParent;    }
+    inline rect        geometry  () const noexcept { return _M_gRect;      }
     inline bool        is_mapped () const noexcept { return _M_bIsVisible; }
 
     inline u32 screen () const noexcept
@@ -87,9 +90,9 @@ public:
     { if (_M_pParent != nullptr) _M_pParent->lower (); }
 
 private:
-    shared_window _M_pParent;
-    rect          _M_gRect;
-    bool          _M_bIsVisible;
+    wnd_pointer _M_pParent   ;
+    rect        _M_gRect     ;
+    bool        _M_bIsVisible;
 };
 
 } } // namespace Ui

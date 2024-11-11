@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #define CPPUAL_BITFIELD_H_
 #ifdef __cplusplus
 
-#include <cppual/meta.h>
 #include <cppual/types.h>
 
 #include <type_traits>
@@ -33,14 +32,16 @@ namespace cppual {
 template <std::size_t LastBit>
 struct minimum_type_helper
 {
-    typedef
-        typename std::conditional<LastBit ==  0, void,
-        typename std::conditional<LastBit <=  8, u8  ,
-        typename std::conditional<LastBit <= 16, u16 ,
-        typename std::conditional<LastBit <= 32, u32 ,
-        typename std::conditional<LastBit <= 64, u64 ,
-        void>::type>::type>::type>::type>::type  type;
+    typedef std::conditional_t<LastBit ==  0, void,
+            std::conditional_t<LastBit <=  8, u8  ,
+            std::conditional_t<LastBit <= 16, u16 ,
+            std::conditional_t<LastBit <= 32, u32 ,
+            std::conditional_t<LastBit <= 64, u64 ,
+            void>>>>> type;
 };
+
+template <std::size_t LastBit>
+using minimum_type_t = minimum_type_helper<LastBit>::type;
 
 // =========================================================
 
@@ -49,22 +50,24 @@ class bitfield
 {
 private:
     enum { Mask = (1u << Bits) - 1u };
-    typedef typename minimum_type_helper<Index + Bits>::type value_type;
+
+    typedef bitfield<Index, Bits>        self_type ;
+    typedef minimum_type_t<Index + Bits> value_type;
 
 public:
-    template <class U>
-    bitfield& operator = (U value)
+    template <class T>
+    self_type& operator = (T value)
     {
         _M_value = (_M_value & ~(Mask << Index)) | ((value & Mask) << Index);
         return *this;
     }
 
-    operator      value_type() const { return (_M_value >> Index) & Mask;  }
-    explicit   operator bool() const { return  _M_value & (Mask << Index); }
-    bitfield&  operator ++  ()       { return *this = *this + 1;          }
-    value_type operator ++  (int)    { value_type r = *this; ++*this; return r;    }
-    bitfield&  operator --  ()       { return *this = *this - 1;          }
-    value_type operator --  (int)    { value_type r = *this; --*this; return r;    }
+    operator      value_type () const { return (_M_value >> Index) & Mask;          }
+    explicit   operator bool () const { return  _M_value & (Mask << Index);         }
+    self_type& operator ++   ()       { return *this = *this + 1;                   }
+    value_type operator ++   (int)    { value_type r = *this; ++*this; return r;    }
+    self_type& operator --   ()       { return *this = *this - 1;                   }
+    value_type operator --   (int)    { value_type r = *this; --*this; return r;    }
 
 private:
     value_type _M_value;
@@ -73,25 +76,22 @@ private:
 // =========================================================
 
 template <std::size_t Index>
-class bitfield<Index, 1>
+class bitfield <Index, 1>
 {
-private:
-    enum
-    {
-        Bits = 1,
-        Mask = 0x01
-    };
+public:
+    enum { Bits = 1, Mask = 0x01 };
 
-    typedef typename minimum_type_helper<Index + Bits>::type value_type;
+    typedef bitfield<Index, Bits>        self_type ;
+    typedef minimum_type_t<Index + Bits> value_type;
 
 public:
-    bitfield& operator = (bool value)
+    self_type& operator = (bool value)
     {
         _M_value = (_M_value & ~(Mask << Index)) | (value << Index);
         return *this;
     }
 
-    explicit operator bool() const
+    explicit operator bool () const
     { return _M_value & (Mask << Index); }
 
 private:
@@ -100,27 +100,19 @@ private:
 
 // =========================================================
 
-// function to reverse bits of a number
-template <typename T,
-          typename = typename std::enable_if<is_integer<T>::value>::type>
-T reverse_bits(T n)
+//! function to reverse bits of a number
+template <typename T, typename = std::enable_if_t<is_integer_v<T>>>
+T reverse_bits (T n)
 {
     T rev = 0;
 
-    // traversing bits of 'n' from the right
-    while (n > 0)
+    while (n > 0) // traversing bits of 'n' from the right
     {
-        // bitwise left shift
-        // 'rev' by 1
-        rev <<= 1;
+        rev <<= 1; // bitwise left shift 'rev' by 1
 
-        // if current bit is '1'
-        if ((n & 1) == 1)
-            rev ^= 1;
+        if ((n & 1) == 1) rev ^= 1; // if current bit is '1'
 
-        // bitwise right shift
-        // 'n' by 1
-        n >>= 1;
+        n >>= 1; // bitwise right shift 'n' by 1
     }
 
     return rev;

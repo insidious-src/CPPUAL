@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 #define CPPUAL_COMPUTE_DEVICE_H_
 #ifdef __cplusplus
 
-#include <cppual/flags.h>
-#include <cppual/string.h>
+#include <cppual/bitset.h>
+//#include <cppual/string.h>
 #include <cppual/containers.h>
 #include <cppual/noncopyable.h>
 #include <cppual/compute/backend_iface.h>
@@ -33,7 +33,7 @@
 
 // =========================================================
 
-namespace cppual { namespace compute {
+namespace cppual::compute {
 
 // =========================================================
 
@@ -45,14 +45,10 @@ class bad_partition_count : public device_exception   { };
 
 // =========================================================
 
-typedef std::shared_ptr<device_interface> shared_device;
-
-// =========================================================
-
 class device : public object<resource_type::device>
 {
 public:
-    typedef std::size_t size_type  ;
+    typedef std::size_t size_type;
 
     enum class info_type : u8
     {
@@ -76,9 +72,9 @@ public:
     u32       compute_units      () const;
     bool      is_host            () const noexcept;
 
-    device_category type    () const noexcept;
-    bool            valid   () const noexcept;
-    backend_type    backend () const noexcept;
+    device_type  type    () const noexcept;
+    bool         valid   () const noexcept;
+    backend_type backend () const noexcept;
 
     inline static device& host () noexcept
     { return get_host_device (); }
@@ -88,11 +84,11 @@ private:
 
     inline static device& get_host_device ()
     {
-        static device host (device_category::cpu);
+        static device host (device_type::cpu);
         return host;
     }
 
-    constexpr device (device_category dev_cat) noexcept
+    constexpr device (device_type dev_cat) noexcept
     : _M_pDev        (),
       _M_eCategory   (dev_cat)
     { }
@@ -101,12 +97,12 @@ private:
 
 private:
     shared_device mutable _M_pDev     ;
-    device_category       _M_eCategory;
+    device_type           _M_eCategory;
 };
 
 // =========================================================
 
-} } // Compute
+} // Compute
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_DEVICE_H_

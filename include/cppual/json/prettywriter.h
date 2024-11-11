@@ -119,7 +119,7 @@ public:
         return Base::EndValue(Base::WriteString(str, length));
     }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     bool String(const std::basic_string<Ch>& str) {
         return String(str.data(), SizeType(str.size()));
     }
@@ -133,7 +133,7 @@ public:
 
     bool Key(const Ch* str, SizeType length, bool copy = false) { return String(str, length, copy); }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     bool Key(const std::basic_string<Ch>& str) {
         return Key(str.data(), SizeType(str.size()));
     }

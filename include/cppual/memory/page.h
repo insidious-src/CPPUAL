@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 #define CPPUAL_MEMORY_PAGE_ALLOCATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/string.h>
 #include <cppual/memory/allocator.h>
+#include <cppual/string.h>
 
 namespace cppual { namespace memory {
 
@@ -35,20 +35,20 @@ public:
 
     void clear () noexcept;
 
-    inline size_type count () const noexcept
+    constexpr size_type count () const noexcept
     { return 0; }
 
-    inline size_type capacity () const noexcept
+    constexpr size_type capacity () const noexcept
     { return 0; }
 
-    inline size_type max_size () const noexcept
+    constexpr size_type max_size () const noexcept
     { return 0; }
 
 private:
     void* do_allocate   (size_type size, align_type align);
     void  do_deallocate (void* p, size_type size, align_type align);
 
-    bool  do_is_equal   (base_type const& gObj) const noexcept
+    constexpr bool do_is_equal (base_type const& gObj) const noexcept
     { return &gObj == this; }
 };
 

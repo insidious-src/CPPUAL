@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,24 +81,6 @@ inline context_interface*& current () noexcept
 
 
 } } // anonymous namespace internal
-
-// ====================================================
-
-resource_interface::~resource_interface ()
-{
-}
-
-// ====================================================
-
-surface_interface::~surface_interface ()
-{
-}
-
-// ====================================================
-
-painter_interface::~painter_interface ()
-{
-}
 
 // ====================================================
 
@@ -189,10 +171,6 @@ bool draw_factory::has_valid_instance () noexcept
 }
 
 // ====================================================
-
-context_interface::~context_interface ()
-{
-}
 
 context_interface* context_interface::current () noexcept
 {

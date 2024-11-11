@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@
 #define CPPUAL_GFX_FONT_H_
 #ifdef __cplusplus
 
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/string.h>
 #include <cppual/containers.h>
 
-#include <string>
-#include <vector>
+//#include <string>
+//#include <vector>
 
 namespace cppual { namespace gfx {
 

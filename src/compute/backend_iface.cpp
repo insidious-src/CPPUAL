@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #include <cppual/process/plugin.h>
 #include <cppual/memory/stacked.h>
 
+#include <array>
+
 namespace cppual { namespace compute {
 
 namespace { // optimize for internal unit usage
@@ -30,19 +32,20 @@ namespace { // optimize for internal unit usage
 class initializer final
 {
 private:
-    typedef factories::libraries_vector libraries_vector          ;
-    typedef libraries_vector&           libraries_vector_reference;
-    typedef vector<shared_factory>&     factory_vector_reference  ;
+    typedef factories::value_type                 value_type                ;
+    typedef factories::vector_type                vector_type               ;
+    typedef factories::vector_reference           vector_reference          ;
+    typedef factories::vector_const_reference     vector_const_reference    ;
+    typedef factories::lib_vector                 lib_vector                ;
+    typedef factories::lib_vector_reference       lib_vector_reference      ;
+    typedef factories::lib_vector_const_reference lib_vector_const_reference;
 
-    factory::manager_type  manager        ;
-    vector<shared_factory> local_factories;
+    factory::manager_type manager        ;
+    vector_type           local_factories;
 
-    static libraries_vector_reference platform_names () noexcept
+    inline static lib_vector_reference platform_names () noexcept
     {
-        static char buffer[sizeof (cchar*) * 2];
-        static memory::stacked_resource static_resource (buffer, sizeof (buffer));
-
-        static libraries_vector ret_vec
+        static std::array<cchar*, 2> ret_vec
         {
             "libcppual-compute-opencl",
             "libcppual-compute-vulkan"
@@ -59,7 +62,7 @@ private:
 
     inline initializer ()
     {
-        static libraries_vector_reference vec = platform_names ();
+        static lib_vector_reference vec = platform_names ();
 
         for (auto i = 0U; i < vec.size (); ++i)
         {
@@ -71,7 +74,7 @@ private:
     }
 
 public:
-    inline static factory_vector_reference instances () noexcept
+    inline static vector_reference instances () noexcept
     {
         return platforms ().local_factories;
     }
@@ -79,7 +82,7 @@ public:
 
 } // anonymous namespace
 
-factories::factory_vector_reference factories::instances ()
+factories::vector_reference factories::instances ()
 {
     return initializer::instances ();
 }

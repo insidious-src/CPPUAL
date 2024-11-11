@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,7 +169,7 @@ inline point2u get_size (config const& config, surface::handle_type surface) noe
 
 inline config::feature_types convert_extensions (display_pointer dsp)
 {
-    config::feature_types eFeatures (nullptr);
+    config::feature_types eFeatures;
 
     auto extensions = ::glXQueryExtensionsString (dsp, 0);
 
@@ -177,11 +177,11 @@ inline config::feature_types convert_extensions (display_pointer dsp)
 
     for (auto extension = extensions; extension++; extension = std::strchr (extension , ' '))
     {
-        switch (constexpr_hash (extension))
+        switch (constexpr_char_hash (extension))
         {
-        case constexpr_hash ("GLX_EXT_swap_control"):
+        case constexpr_char_hash ("GLX_EXT_swap_control"):
             eFeatures += config::feature::sync_control;
-        case constexpr_hash ("GLX_MESA_swap_control"):
+        case constexpr_char_hash ("GLX_MESA_swap_control"):
             eFeatures += config::feature::mesa_sync_control;
             break;
         }
@@ -647,7 +647,7 @@ resource_version context::platform_version () noexcept
     return internal::version ();
 }
 
-bool context::use (pointer pDraw, pointer pRead) noexcept
+bool context::use (shared_surface pDraw, shared_surface pRead) noexcept
 {
     if ((( pDraw and !pRead) or (pDraw and pDraw->device () != device_backend::gl)) or
         ((!pDraw and  pRead) or (pRead and pRead->device () != device_backend::gl)))

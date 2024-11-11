@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ namespace cppual { namespace process {
 
 namespace { // optimize for internal unit usage
 
-static dyn_loader::string_type ext() noexcept
+inline static dyn_loader::string_type ext() noexcept
 {
 #   if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
     return ".so";
@@ -50,7 +50,7 @@ static dyn_loader::string_type ext() noexcept
 #   endif
 }
 
-static dyn_loader::string_type format (dyn_loader::string_type const& path) noexcept
+inline static dyn_loader::string_type format (dyn_loader::string_type const& path) noexcept
 {
     static const auto _ext = ext();
 

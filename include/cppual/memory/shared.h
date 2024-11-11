@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,95 +24,108 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
-#include <cppual/string.h>
+#include <cppual/resource.h>
+#include <cppual/containers.h>
 #include <cppual/noncopyable.h>
 
-#include <memory>
+//#include <memory>
 
-namespace cppual { namespace memory {
+namespace cppual::memory {
 
-enum class Mode : u8
+enum class mode_type : u8
 {
-    Create,
-    CreateOrOpen,
-    Open
+    create,
+    create_or_open,
+    open
 };
 
-enum class State : u8
+enum class state_type : u8
 {
-    ReadOnly,
-    ReadWrite,
-    CopyOnWrite,
-    ReadPrivate,
-    Invalid
+    read_only,
+    read_write,
+    copy_on_write,
+    read_private,
+    invalid
 };
 
-class SHARED_API shared_object final : public non_copyable
+class SHARED_API shared_object : public non_copyable
 {
 public:
-    typedef std::size_t size_type;
-    typedef u16         offset   ;
+    typedef shared_object self_type  ;
+    typedef std::size_t   size_type  ;
+    typedef u16           offset_type;
+    typedef string        string_type;
 
-    shared_object  (string const&, Mode = Mode::CreateOrOpen, State = State::ReadWrite);
+    shared_object  (string_type const& name,
+                    mode_type          mode  = mode_type::create_or_open,
+                    state_type         state = state_type::read_write);
+
     ~shared_object () noexcept;
-    bool truncate (size_type mem_size) noexcept;
+    bool truncate  (size_type mem_size) noexcept;
 
-    inline State  state () const noexcept { return _M_eState   ; }
-    inline Mode   mode  () const noexcept { return _M_eMode    ; }
-    inline int    id    () const noexcept { return _M_nId      ; }
-    inline bool   valid () const noexcept { return _M_nId != -1; }
-    inline string name  () const noexcept { return _M_gName    ; }
+    constexpr state_type  state () const noexcept { return _M_eState  ; }
+    constexpr mode_type   mode  () const noexcept { return _M_eMode   ; }
+    constexpr int         id    () const noexcept { return _M_nId     ; }
+    constexpr bool        valid () const noexcept { return _M_nId > -1; }
+    constexpr string_type name  () const noexcept { return _M_gName   ; }
 
-    inline shared_object () noexcept
-    : _M_gName  (),
-      _M_eMode  (),
-      _M_eState (),
+    constexpr shared_object () noexcept
+    : _M_gName  (  ),
+      _M_eMode  (  ),
+      _M_eState (  ),
       _M_nId    (-1)
     { }
 
 private:
-    string _M_gName ;
-    Mode   _M_eMode ;
-    State  _M_eState;
-    int    _M_nId   ;
+    string     _M_gName ;
+    mode_type  _M_eMode ;
+    state_type _M_eState;
+    int        _M_nId   ;
 };
 
-class SHARED_API shared_memory final : public non_copyable
+class SHARED_API shared_memory : public non_copyable
 {
 public:
-    typedef std::size_t size_type;
-    typedef u16         offset   ;
+    typedef shared_memory   self_type  ;
+    typedef shared_object   object_type;
+    typedef std::size_t     size_type  ;
+    typedef u16             offset_type;
+    typedef void*           pointer    ;
+    typedef resource_handle handle_type;
 
-    shared_memory (shared_object& obj, size_type size, bool writable = true);
+    shared_memory  (object_type& obj, size_type size, bool writable = true);
     ~shared_memory () noexcept;
 
-    inline bool writable () const noexcept
+    constexpr bool writable () const noexcept
     { return _M_bWritable; }
 
-    inline bool valid () const noexcept
+    constexpr bool valid () const noexcept
     { return _M_pRegion; }
 
-    inline void* address () const noexcept
-    { return _M_pRegion; }
+    constexpr pointer address () const noexcept
+    { return _M_pRegion.get<pointer> (); }
 
-    inline size_type size () const noexcept
+    constexpr size_type size () const noexcept
     { return _M_uSize; }
 
-    inline shared_object& object () const noexcept
-    { return _M_gObject; }
+    constexpr object_type const& object () const noexcept
+    { return *_M_gObject; }
+
+    constexpr object_type& object () noexcept
+    { return *_M_gObject; }
 
     template <typename T>
     constexpr T* ptr (T* pOffset) const noexcept
-    { return _M_pRegion + pOffset; }
+    { return _M_pRegion.get<T*> () + pOffset; }
 
 private:
-    shared_object& _M_gObject  ;
-    void*          _M_pRegion  ;
-    size_type      _M_uSize    ;
-    bool           _M_bWritable;
+    object_type* _M_gObject  ;
+    handle_type  _M_pRegion  ;
+    size_type    _M_uSize    ;
+    bool         _M_bWritable;
 };
 
-} } // namespace Memory
+} // namespace Memory
 
 #endif // __cplusplus
 #endif // CPPUAL_MEMORY_SHARED_H_

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public:
     void set_blocking (bool block) noexcept;
     bool is_blocking  ()     const noexcept;
 
-    inline socket_type type  () const noexcept { return _M_eProtocol; }
+    inline socket_type type () const noexcept { return _M_eProtocol; }
 
 protected:
     static socket_id create_socket (socket_type) noexcept;

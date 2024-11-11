@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #define CPPUAL_GFX_GL_SL_H_
 #ifdef __cplusplus
 
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/common.h>
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/gl/glbase.h>
@@ -65,12 +65,13 @@ struct binary
 class shader : public object, public binary
 {
 public:
+    typedef shader self_type  ;
     typedef string string_type;
 
     shader () = default;
     shader (shader_type type) noexcept;
-    shader (shader&&) noexcept;
-    shader& operator = (shader&&) noexcept;
+    shader (self_type&&) noexcept;
+    self_type& operator = (self_type&&) noexcept;
 
     string_type log ();
     bool        compile () noexcept;
@@ -82,10 +83,10 @@ public:
     shader_type        type   () const noexcept { return _M_eType  ; }
 
     bool is_loaded () const noexcept
-    { return _M_gStates.test (shader::IsLoaded); }
+    { return _M_gStates.test (shader::loaded); }
 
     bool is_compiled () const noexcept
-    { return _M_gStates.test (shader::IsCompiled); }
+    { return _M_gStates.test (shader::compiled); }
 
     bool load (string_type const& gString, load_from const eMode = load_from::file)
     {
@@ -101,13 +102,13 @@ public:
     }
 
 private:
-    enum State
+    enum state
     {
-        IsLoaded   = 1 << 0,
-        IsCompiled = 1 << 1
+        loaded   = 1 << 0,
+        compiled = 1 << 1
     };
 
-    typedef bitset<shader::State> states;
+    typedef bitset<shader::state> states;
 
 private:
     string_type _M_gSource;
@@ -120,7 +121,7 @@ private:
 class fragment_shader : public shader
 {
 public:
-    typedef string string_type;
+    typedef fragment_shader self_type;
 
     fragment_shader () noexcept
     : shader (shader_type::fragment)
@@ -136,7 +137,7 @@ public:
 class vertex_shader : public shader
 {
 public:
-    typedef string string_type;
+    typedef vertex_shader self_type;
 
     vertex_shader () noexcept
     : shader (shader_type::vertex)
@@ -152,7 +153,7 @@ public:
 class geometry_shader : public shader
 {
 public:
-    typedef string string_type;
+    typedef geometry_shader self_type;
 
     geometry_shader () noexcept
     : shader (shader_type::geometry)
@@ -168,7 +169,7 @@ public:
 class compute_shader : public shader
 {
 public:
-    typedef string string_type;
+    typedef compute_shader self_type;
 
     compute_shader () noexcept
     : shader (shader_type::compute)
@@ -184,7 +185,7 @@ public:
 class tess_control_shader : public shader
 {
 public:
-    typedef string string_type;
+    typedef tess_control_shader self_type;
 
     tess_control_shader () noexcept
     : shader (shader_type::tess_control)
@@ -200,7 +201,7 @@ public:
 class tess_evaluation_shader : public shader
 {
 public:
-    typedef string string_type;
+    typedef tess_evaluation_shader self_type;
 
     tess_evaluation_shader () noexcept
     : shader (shader_type::tess_evaluation)
@@ -216,19 +217,23 @@ public:
 class sl_program final : public object, public binary
 {
 public:
-    typedef string string_type;
+    typedef sl_program self_type  ;
+    typedef string     string_type;
 
-    enum State
+    enum state
     {
-        IsLinked        = 1 << 0,
-        BinaryAvailable = 1 << 1
+        linked           = 1 << 0,
+        binary_available = 1 << 1
     };
 
-    typedef std::unordered_map<string_type, int,
-                               std::hash<string_type>, std::equal_to<string_type>,
-                               memory::allocator<std::pair<const string_type, int>>> map_type;
+    typedef std::unordered_map<string_type,
+                               int,
+                               std::hash<string_type>,
+                               std::equal_to<string_type>,
+                               memory::allocator<std::pair<string_type const, int>>
+                               > map_type;
 
-    typedef bitset<sl_program::State> States;
+    typedef bitset<sl_program::state> states;
 
     sl_program () noexcept;
     sl_program (string_type const& binary_name) noexcept;
@@ -251,7 +256,7 @@ public:
     { return _M_uShaderCount; }
 
     bool is_linked () const noexcept
-    { return _M_gStates.test (sl_program::IsLinked); }
+    { return _M_gStates.test (sl_program::linked); }
 
     int attribute (string_type const& gName)
     { return _M_gAttribLocList[gName]; }
@@ -278,7 +283,7 @@ private:
     map_type     _M_gAttribLocList, _M_gUniformLocList;
     uint         _M_uShaderCount;
     shader_types _M_gShaderTypes;
-    States       _M_gStates;
+    states       _M_gStates;
 };
 
 } } } // namespace GL

@@ -13,8 +13,8 @@ namespace cppual { namespace input {
 template<typename Derived, typename Connection>
 class interface;
 
-namespace event { template<typename Connection> class dispatcher; }
-namespace error { class dispatcher; }
+namespace events { template<typename Connection> class dispatcher; }
+namespace error  { class dispatcher; }
 
 class extension
         : public cppual::generic::extension<extension, &xcb_input_id>
@@ -25,11 +25,11 @@ public:
     template<typename Derived, typename Connection>
     using interface = cppual::input::interface<Derived, Connection>;
     template<typename Connection>
-    using event_dispatcher = cppual::input::event::dispatcher<Connection>;
+    using event_dispatcher = events::dispatcher<Connection>;
     using error_dispatcher = cppual::input::error::dispatcher;
 };
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_valuator
         : public cppual::generic::event<xcb_input_device_valuator_event_t>
@@ -81,7 +81,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_key_press
         : public cppual::generic::event<xcb_input_device_key_press_event_t>
@@ -176,7 +176,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_key_release
         : public cppual::generic::event<xcb_input_device_key_press_event_t>
@@ -271,7 +271,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_button_press
         : public cppual::generic::event<xcb_input_device_key_press_event_t>
@@ -366,7 +366,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_button_release
         : public cppual::generic::event<xcb_input_device_key_press_event_t>
@@ -461,7 +461,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_motion_notify
         : public cppual::generic::event<xcb_input_device_key_press_event_t>
@@ -556,7 +556,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_focus_in
         : public cppual::generic::event<xcb_input_device_focus_in_event_t>
@@ -625,7 +625,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_focus_out
         : public cppual::generic::event<xcb_input_device_focus_in_event_t>
@@ -694,7 +694,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class proximity_in
         : public cppual::generic::event<xcb_input_device_key_press_event_t>
@@ -789,7 +789,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class proximity_out
         : public cppual::generic::event<xcb_input_device_key_press_event_t>
@@ -884,7 +884,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_state_notify
         : public cppual::generic::event<xcb_input_device_state_notify_event_t>
@@ -936,7 +936,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_mapping_notify
         : public cppual::generic::event<xcb_input_device_mapping_notify_event_t>
@@ -988,7 +988,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class change_device_notify
         : public cppual::generic::event<xcb_input_change_device_notify_event_t>
@@ -1040,7 +1040,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_key_state_notify
         : public cppual::generic::event<xcb_input_device_key_state_notify_event_t>
@@ -1092,7 +1092,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_button_state_notify
         : public cppual::generic::event<xcb_input_device_button_state_notify_event_t>
@@ -1144,7 +1144,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_presence_notify
         : public cppual::generic::event<xcb_input_device_presence_notify_event_t>
@@ -1196,7 +1196,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_property_notify
         : public cppual::generic::event<xcb_input_device_property_notify_event_t>
@@ -1265,7 +1265,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class device_changed
         : public cppual::generic::event<xcb_input_device_changed_event_t>
@@ -1317,7 +1317,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class key_press
         : public cppual::generic::event<xcb_input_key_press_event_t>
@@ -1412,7 +1412,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class key_release
         : public cppual::generic::event<xcb_input_key_press_event_t>
@@ -1507,7 +1507,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class button_press
         : public cppual::generic::event<xcb_input_button_press_event_t>
@@ -1602,7 +1602,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class button_release
         : public cppual::generic::event<xcb_input_button_press_event_t>
@@ -1697,7 +1697,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class motion
         : public cppual::generic::event<xcb_input_button_press_event_t>
@@ -1792,7 +1792,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class enter
         : public cppual::generic::event<xcb_input_enter_event_t>
@@ -1887,7 +1887,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class leave
         : public cppual::generic::event<xcb_input_enter_event_t>
@@ -1982,7 +1982,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class focus_in
         : public cppual::generic::event<xcb_input_enter_event_t>
@@ -2077,7 +2077,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class focus_out
         : public cppual::generic::event<xcb_input_enter_event_t>
@@ -2172,7 +2172,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class hierarchy
         : public cppual::generic::event<xcb_input_hierarchy_event_t>
@@ -2224,7 +2224,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class property
         : public cppual::generic::event<xcb_input_property_event_t>
@@ -2293,7 +2293,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class raw_key_press
         : public cppual::generic::event<xcb_input_raw_key_press_event_t>
@@ -2345,7 +2345,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class raw_key_release
         : public cppual::generic::event<xcb_input_raw_key_press_event_t>
@@ -2397,7 +2397,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class raw_button_press
         : public cppual::generic::event<xcb_input_raw_button_press_event_t>
@@ -2449,7 +2449,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class raw_button_release
         : public cppual::generic::event<xcb_input_raw_button_press_event_t>
@@ -2501,7 +2501,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class raw_motion
         : public cppual::generic::event<xcb_input_raw_button_press_event_t>
@@ -2553,7 +2553,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class touch_begin
         : public cppual::generic::event<xcb_input_touch_begin_event_t>
@@ -2648,7 +2648,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class touch_update
         : public cppual::generic::event<xcb_input_touch_begin_event_t>
@@ -2743,7 +2743,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class touch_end
         : public cppual::generic::event<xcb_input_touch_begin_event_t>
@@ -2838,7 +2838,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class touch_ownership
         : public cppual::generic::event<xcb_input_touch_ownership_event_t>
@@ -2933,7 +2933,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class raw_touch_begin
         : public cppual::generic::event<xcb_input_raw_touch_begin_event_t>
@@ -2985,7 +2985,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class raw_touch_update
         : public cppual::generic::event<xcb_input_raw_touch_begin_event_t>
@@ -3037,7 +3037,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class raw_touch_end
         : public cppual::generic::event<xcb_input_raw_touch_begin_event_t>
@@ -3089,7 +3089,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class barrier_hit
         : public cppual::generic::event<xcb_input_barrier_hit_event_t>
@@ -3184,7 +3184,7 @@ protected:
 } // namespace event
 
 
-namespace event {
+namespace events {
 template<typename Connection>
 class barrier_leave
         : public cppual::generic::event<xcb_input_barrier_hit_event_t>
@@ -7904,7 +7904,7 @@ public:
 
 }; // class interface
 
-namespace event {
+namespace events {
 
 template<typename Connection>
 class dispatcher
@@ -7926,116 +7926,116 @@ public:
     template<typename Handler>
     bool
     operator()(Handler handler,
-               const std::shared_ptr<xcb_generic_event_t> & event) const
+               const std::shared_ptr<xcb_generic_event_t>& event) const
     {
         switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_INPUT_DEVICE_VALUATOR:
-            handler(cppual::input::event::device_valuator<Connection>(_M_c, _M_first_event, event));
+            handler(device_valuator<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_KEY_PRESS:
-            handler(cppual::input::event::device_key_press<Connection>(_M_c, _M_first_event, event));
+            handler(device_key_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_KEY_RELEASE:
-            handler(cppual::input::event::device_key_release<Connection>(_M_c, _M_first_event, event));
+            handler(device_key_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_BUTTON_PRESS:
-            handler(cppual::input::event::device_button_press<Connection>(_M_c, _M_first_event, event));
+            handler(device_button_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_BUTTON_RELEASE:
-            handler(cppual::input::event::device_button_release<Connection>(_M_c, _M_first_event, event));
+            handler(device_button_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_MOTION_NOTIFY:
-            handler(cppual::input::event::device_motion_notify<Connection>(_M_c, _M_first_event, event));
+            handler(device_motion_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_FOCUS_IN:
-            handler(cppual::input::event::device_focus_in<Connection>(_M_c, _M_first_event, event));
+            handler(device_focus_in<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_FOCUS_OUT:
-            handler(cppual::input::event::device_focus_out<Connection>(_M_c, _M_first_event, event));
+            handler(device_focus_out<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_PROXIMITY_IN:
-            handler(cppual::input::event::proximity_in<Connection>(_M_c, _M_first_event, event));
+            handler(proximity_in<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_PROXIMITY_OUT:
-            handler(cppual::input::event::proximity_out<Connection>(_M_c, _M_first_event, event));
+            handler(proximity_out<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_STATE_NOTIFY:
-            handler(cppual::input::event::device_state_notify<Connection>(_M_c, _M_first_event, event));
+            handler(device_state_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_MAPPING_NOTIFY:
-            handler(cppual::input::event::device_mapping_notify<Connection>(_M_c, _M_first_event, event));
+            handler(device_mapping_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_CHANGE_DEVICE_NOTIFY:
-            handler(cppual::input::event::change_device_notify<Connection>(_M_c, _M_first_event, event));
+            handler(change_device_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_KEY_STATE_NOTIFY:
-            handler(cppual::input::event::device_key_state_notify<Connection>(_M_c, _M_first_event, event));
+            handler(device_key_state_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_BUTTON_STATE_NOTIFY:
-            handler(cppual::input::event::device_button_state_notify<Connection>(_M_c, _M_first_event, event));
+            handler(device_button_state_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_PRESENCE_NOTIFY:
-            handler(cppual::input::event::device_presence_notify<Connection>(_M_c, _M_first_event, event));
+            handler(device_presence_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_DEVICE_PROPERTY_NOTIFY:
-            handler(cppual::input::event::device_property_notify<Connection>(_M_c, _M_first_event, event));
+            handler(device_property_notify<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_MOTION:
-            handler(cppual::input::event::raw_motion<Connection>(_M_c, _M_first_event, event));
+            handler(raw_motion<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_TOUCH_BEGIN:
-            handler(cppual::input::event::touch_begin<Connection>(_M_c, _M_first_event, event));
+            handler(touch_begin<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_TOUCH_UPDATE:
-            handler(cppual::input::event::touch_update<Connection>(_M_c, _M_first_event, event));
+            handler(touch_update<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_TOUCH_END:
-            handler(cppual::input::event::touch_end<Connection>(_M_c, _M_first_event, event));
+            handler(touch_end<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_TOUCH_OWNERSHIP:
-            handler(cppual::input::event::touch_ownership<Connection>(_M_c, _M_first_event, event));
+            handler(touch_ownership<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_TOUCH_BEGIN:
-            handler(cppual::input::event::raw_touch_begin<Connection>(_M_c, _M_first_event, event));
+            handler(raw_touch_begin<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_TOUCH_UPDATE:
-            handler(cppual::input::event::raw_touch_update<Connection>(_M_c, _M_first_event, event));
+            handler(raw_touch_update<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_TOUCH_END:
-            handler(cppual::input::event::raw_touch_end<Connection>(_M_c, _M_first_event, event));
+            handler(raw_touch_end<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_BARRIER_HIT:
-            handler(cppual::input::event::barrier_hit<Connection>(_M_c, _M_first_event, event));
+            handler(barrier_hit<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_BARRIER_LEAVE:
-            handler(cppual::input::event::barrier_leave<Connection>(_M_c, _M_first_event, event));
+            handler(barrier_leave<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };
@@ -8043,67 +8043,67 @@ public:
         switch ((event->response_type & ~0x80) - _M_first_event) {
 
         case XCB_INPUT_DEVICE_CHANGED:
-            handler(cppual::input::event::device_changed<Connection>(_M_c, _M_first_event, event));
+            handler(device_changed<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_KEY_PRESS:
-            handler(cppual::input::event::key_press<Connection>(_M_c, _M_first_event, event));
+            handler(key_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_KEY_RELEASE:
-            handler(cppual::input::event::key_release<Connection>(_M_c, _M_first_event, event));
+            handler(key_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_BUTTON_PRESS:
-            handler(cppual::input::event::button_press<Connection>(_M_c, _M_first_event, event));
+            handler(button_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_BUTTON_RELEASE:
-            handler(cppual::input::event::button_release<Connection>(_M_c, _M_first_event, event));
+            handler(button_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_MOTION:
-            handler(cppual::input::event::motion<Connection>(_M_c, _M_first_event, event));
+            handler(motion<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_ENTER:
-            handler(cppual::input::event::enter<Connection>(_M_c, _M_first_event, event));
+            handler(enter<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_LEAVE:
-            handler(cppual::input::event::leave<Connection>(_M_c, _M_first_event, event));
+            handler(leave<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_FOCUS_IN:
-            handler(cppual::input::event::focus_in<Connection>(_M_c, _M_first_event, event));
+            handler(focus_in<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_FOCUS_OUT:
-            handler(cppual::input::event::focus_out<Connection>(_M_c, _M_first_event, event));
+            handler(focus_out<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_HIERARCHY:
-            handler(cppual::input::event::hierarchy<Connection>(_M_c, _M_first_event, event));
+            handler(hierarchy<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_PROPERTY:
-            handler(cppual::input::event::property<Connection>(_M_c, _M_first_event, event));
+            handler(property<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_KEY_PRESS:
-            handler(cppual::input::event::raw_key_press<Connection>(_M_c, _M_first_event, event));
+            handler(raw_key_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_KEY_RELEASE:
-            handler(cppual::input::event::raw_key_release<Connection>(_M_c, _M_first_event, event));
+            handler(raw_key_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_BUTTON_PRESS:
-            handler(cppual::input::event::raw_button_press<Connection>(_M_c, _M_first_event, event));
+            handler(raw_button_press<Connection>(_M_c, _M_first_event, event));
             return true;
 
         case XCB_INPUT_RAW_BUTTON_RELEASE:
-            handler(cppual::input::event::raw_button_release<Connection>(_M_c, _M_first_event, event));
+            handler(raw_button_release<Connection>(_M_c, _M_first_event, event));
             return true;
 
         };

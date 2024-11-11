@@ -138,15 +138,15 @@
 //!@endcond
 
 ///////////////////////////////////////////////////////////////////////////////
-// RAPIDJSON_HAS_STDSTRING
+// JSON_HAS_STDSTRING
 
-#ifndef RAPIDJSON_HAS_STDSTRING
+#ifndef JSON_HAS_STDSTRING
 #ifdef RAPIDJSON_DOXYGEN_RUNNING
-#define RAPIDJSON_HAS_STDSTRING 1 // force generation of documentation
+#define JSON_HAS_STDSTRING 1 // force generation of documentation
 #else
-#define RAPIDJSON_HAS_STDSTRING 0 // no string support by default
+#define JSON_HAS_STDSTRING 0 // no string support by default
 #endif
-/*! \def RAPIDJSON_HAS_STDSTRING
+/*! \def JSON_HAS_STDSTRING
     \ingroup RAPIDJSON_CONFIG
     \brief Enable RapidJSON support for \c string
 
@@ -156,11 +156,11 @@
 
     \hideinitializer
 */
-#endif // !defined(RAPIDJSON_HAS_STDSTRING)
+#endif // !defined(JSON_HAS_STDSTRING)
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
 #include <string>
-#endif // RAPIDJSON_HAS_STDSTRING
+#endif // JSON_HAS_STDSTRING
 
 ///////////////////////////////////////////////////////////////////////////////
 // RAPIDJSON_USE_MEMBERSMAP
@@ -418,7 +418,10 @@ typedef unsigned SizeType;
 
 // always import std::size_t to rapidjson namespace
 namespace cppual { namespace json {
-using std::size_t;
+
+using   std::size_t     ;
+typedef size_t size_type;
+
 } } // namespace Json
 
 ///////////////////////////////////////////////////////////////////////////////

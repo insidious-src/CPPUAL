@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,59 +40,61 @@
 #   include "os/ios.h"
 #endif
 
-namespace cppual { namespace memory {
+namespace cppual::memory { namespace { /// optimized for internal usage
 
 #if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
 
-constexpr int convert_state (State eState) noexcept
+constexpr int convert_state (state_type eState) noexcept
 {
-    return eState == State::ReadOnly ?
-                O_RDONLY | O_EXCL : eState == State::ReadWrite ? O_RDWR | O_EXCL : O_EXCL;
+    return eState == state_type::read_only ?
+                O_RDONLY | O_EXCL : eState == state_type::read_write ? O_RDWR | O_EXCL : O_EXCL;
 }
 
-constexpr int convert_mode (Mode eMode) noexcept
+constexpr int convert_mode (mode_type eMode) noexcept
 {
-    return eMode == Mode::Create ? O_CREAT : 0;
+    return eMode == mode_type::create ? O_CREAT : 0;
 }
 
 #endif
 
-shared_object::shared_object (string const& gName, Mode eMode, State eState)
-: _M_gName (gName),
-  _M_eMode (eMode),
+} /// anonymous namespace
+
+shared_object::shared_object (string_type const& gName, mode_type eMode, state_type eState)
+: _M_gName  (gName),
+  _M_eMode  (eMode),
   _M_eState (eState)
 #if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
-  , _M_nId (::shm_open (gName.c_str (), convert_mode (eMode) | convert_state (eState), 0600u))
+  , _M_nId  (::shm_open (gName.c_str (), convert_mode (eMode) | convert_state (eState), 0600u))
 #endif
 { }
 
 shared_object::~shared_object () noexcept
 {
 #   if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
-    if (_M_nId != -1) ::shm_unlink (_M_gName.c_str ());
+    if (_M_nId > -1) ::shm_unlink (_M_gName.c_str ());
 #   endif
 }
 
-bool shared_object::truncate (size_type) noexcept
+bool shared_object::truncate (size_type /*mem_size*/) noexcept
 {
     return false;
 }
 
-shared_memory::shared_memory (shared_object& gObj, size_type uSize, bool bWritable)
-: _M_gObject (gObj),
-  _M_pRegion (),
-  _M_uSize (gObj.valid () ? uSize : 0)
+shared_memory::shared_memory (object_type& gObj, size_type uSize, bool bWritable)
+: _M_gObject   (&gObj),
+  // _M_pRegion   (),
+  _M_uSize     (gObj.valid () ? uSize : 0),
+  _M_bWritable (bWritable)
 {
     if (gObj.valid ())
     {
-        if (gObj.mode () != Mode::Open) gObj.truncate (uSize);
+        if (gObj.mode () != mode_type::open) gObj.truncate (uSize);
 
 #       ifdef OS_STD_UNIX
         _M_pRegion = ::mmap (nullptr, uSize,
                              bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
                              MAP_SHARED, gObj.id (), 0);
 #       elif defined OS_WINDOWS
-        bWritable = bWritable;
 #       endif
     }
 }
@@ -104,4 +106,4 @@ shared_memory::~shared_memory () noexcept
 #   endif
 }
 
-} } // namespace Memory
+} // namespace Memory

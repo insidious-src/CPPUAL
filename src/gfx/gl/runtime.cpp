@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,35 +20,36 @@
  */
 
 #include <cppual/gfx/gl/runtime.h>
-#include <cppual/gfx/draw.h>
-#include <cppual/containers.h>
 #include <cppual/gfx/gl/gldef.h>
+#include <cppual/containers.h>
+#include <cppual/gfx/draw.h>
 
-#include <algorithm>
-#include <vector>
-#include <cmath>
+
 #include <unordered_map>
+#include <algorithm>
 #include <stdexcept>
+#include <vector>
+//#include <cmath>
 
-namespace cppual { namespace gfx { namespace gl {
+namespace cppual::gfx::gl {
 
-namespace {
+namespace { /// optimize for internal usage
 
 typedef unordered_map<resource_version, resource_version> version_map  ;
 typedef vector<string>                                    string_vector;
 typedef std::size_t                                       size_type    ;
 
-constexpr GLenum query_to_gl_enum (StringQuery query) noexcept
+constexpr GLenum query_to_gl_enum (string_query query) noexcept
 {
-    return query == StringQuery::Renderer ? InfoRenderer :
-           query == StringQuery::Vendor   ? InfoVendor   :
-           query == StringQuery::Version  ? InfoVersion  : InfoSLVersion;
+    return query == string_query::renderer ? InfoRenderer :
+           query == string_query::vendor   ? InfoVendor   :
+           query == string_query::version  ? InfoVersion  : InfoSLVersion;
 }
 
 resource_version get_gl_version ()
 {
-    GLint major = GLint ();
-    GLint minor = GLint ();
+    auto major = ::GLint ();
+    auto minor = ::GLint ();
 
     ::glGetIntegerv (InfoMajorVersion, &major);
     ::glGetIntegerv (InfoMinorVersion, &minor);
@@ -61,6 +62,7 @@ version_map get_sl_versions ()
     version_map slVersions;
 
     slVersions.reserve(12);
+
     slVersions.emplace(resource_version(2, 0), resource_version(1, 10));
     slVersions.emplace(resource_version(2, 1), resource_version(1, 20));
     slVersions.emplace(resource_version(3, 0), resource_version(1, 30));
@@ -101,10 +103,10 @@ string_vector get_gl_labels ()
 
     labels.reserve(4);
 
-    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(StringQuery::Renderer))));
-    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(StringQuery::Vendor))));
-    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(StringQuery::Version))));
-    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(StringQuery::SLVersion))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(string_query::renderer))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(string_query::vendor))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(string_query::version))));
+    labels.push_back (reinterpret_cast<cchar*> (::glGetString(query_to_gl_enum(string_query::sl_version))));
 
     return labels;
 }
@@ -131,7 +133,7 @@ platform::version_type platform::sl_version ()
     return versions[version()];
 }
 
-string platform::label (StringQuery query)
+platform::string_type platform::label (string_query query)
 {
     if(!context_interface::current() || context_interface::current()->device() != device_backend::gl)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
@@ -141,7 +143,7 @@ string platform::label (StringQuery query)
     return labels[static_cast<size_type>(query)];
 }
 
-bool platform::is_extension_supported (string const& name)
+bool platform::is_extension_supported (string_type const& name)
 {
     if(!context_interface::current() || context_interface::current()->device() != device_backend::gl)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
@@ -174,4 +176,4 @@ void platform::draw_test_triagle(float fAxis)
     ::glPopMatrix ();
 }
 
-} } } // namespace GL
+} // namespace GL

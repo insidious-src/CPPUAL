@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,19 +25,27 @@
 
 #include "opencl.h"
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 // =========================================================
 
-class image final : public image_object
+class image final : public image_interface
 {
 public:
-    typedef image_object base_type;
+    typedef image                 self_type  ;
+    typedef image_interface       base_type  ;
+    typedef CLObject<memory_type> value_type ;
+    typedef value_type*           pointer    ;
+    typedef std::size_t           size_type  ;
+    typedef resource_handle       handle_type;
 
-    image (pointer handle) noexcept : base_type (handle) { }
+    constexpr image (pointer handle) noexcept : base_type (handle) { }
+
+    constexpr pointer handle () const noexcept
+    { return base_type::handle<pointer> (); }
 
 private:
-    template<typename T>
+    template <typename T>
     T get_info (image_info_type info) const
     {
         return get_object_info< vector<T> > (::clGetImageInfo, handle(), info);
@@ -46,7 +54,7 @@ private:
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace CL
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_OPENCL_IMAGE_H_

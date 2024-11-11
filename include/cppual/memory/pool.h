@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,58 +37,58 @@ public:
     /// local memory
     uniform_pool_resource (size_type  blk_count,
                            size_type  blk_size,
-                           align_type blk_align = alignof(uptr));
+                           align_type blk_align = alignof (uptr));
 
     /// local memory from allocated buffer (stack or heap)
     uniform_pool_resource (pointer    buffer,
                            size_type  blk_count,
                            size_type  blk_size,
-                           align_type blk_align = alignof(uptr));
+                           align_type blk_align = alignof (uptr));
 
     /// nested allocators
     uniform_pool_resource (memory_resource& allocator,
                            size_type        blk_count,
                            size_type        blk_size,
-                           align_type       blk_align = alignof(uptr));
+                           align_type       blk_align = alignof (uptr));
 
     /// shared memory
     uniform_pool_resource (shared_memory& shared_obj,
                            size_type      blk_count,
                            size_type      blk_size,
-                           align_type     blk_align = alignof(uptr));
+                           align_type     blk_align = alignof (uptr));
 
     ~uniform_pool_resource ();
     void clear () noexcept;
 
-    size_type block_size  () const noexcept { return _M_uBlkSize ; }
-    size_type block_align () const noexcept { return _M_uBlkAlign; }
-    size_type block_count () const noexcept { return _M_uBlkNum  ; }
+    constexpr size_type block_size  () const noexcept { return _M_uBlkSize ; }
+    constexpr size_type block_align () const noexcept { return _M_uBlkAlign; }
+    constexpr size_type block_count () const noexcept { return _M_uBlkNum  ; }
 
-    size_type max_size () const noexcept
+    constexpr size_type max_size () const noexcept
     {
         return capacity () - _M_usedMemory;
     }
 
-    size_type capacity () const noexcept
+    constexpr size_type capacity () const noexcept
     {
         return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
                                       (static_cast<math_pointer> (_M_pBegin) +
                                        align_adjust (_M_pBegin, _M_uBlkAlign)));
     }
 
-    bool is_shared () const noexcept
+    constexpr bool is_shared () const noexcept
     { return false; }
 
-    memory_resource& owner () const noexcept
+    constexpr memory_resource& owner () const noexcept
     { return _M_gOwner; }
 
 private:
     void  initialize    () noexcept;
     void* do_allocate   (size_type size, align_type align);
-    void  do_deallocate (void* p, size_type size, align_type align) ;
+    void  do_deallocate (void* p, size_type size, align_type align);
 
-    bool  do_is_equal   (base_const_reference gObj) const noexcept
-    { return &gObj == this; }
+    constexpr bool do_is_equal (base_const_reference gObj) const noexcept
+    { return this == &gObj; }
 
 private:
     memory_resource& _M_gOwner        ;
@@ -101,11 +101,6 @@ private:
     size_type        _M_usedMemory    ;
     cbool            _M_bIsMemShared  ;
 };
-
-// =========================================================
-
-template <typename T>
-using uniform_pool_allocator = allocator <T>;
 
 // =========================================================
 

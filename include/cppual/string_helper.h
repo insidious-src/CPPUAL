@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,45 +24,300 @@
 #ifdef __cplusplus
 
 #include <cppual/decl.h>
-#include <cppual/meta.h>
 #include <cppual/string.h>
+#include <cppual/type_meta.h>
 #include <cppual/containers.h>
+#include <cppual/concept/concepts.h>
+#include <cppual/memory/allocator.h>
 
 #include <cstring>
 #include <string>
 #include <vector>
 #include <memory>
-
-#include <assert.h>
+#include <cassert>
 
 namespace cppual {
 
 template <typename>
 class string_list_iterator;
 
-template <typename, std::size_t, typename>
+template <std::size_t, char_t>
 class string_list;
 
 // ====================================================
 
-template <typename T    = char,
-          typename Ator = memory::allocator<T>,
-          typename      = typename std::enable_if<is_char<T>::value>::type>
-auto split_string (std::basic_string<T, std::char_traits<T>, Ator> const& str,
-                   T delim)
+using memory::allocator_t;
+
+// ====================================================
+
+template <typename T>
+class string_list_iterator
 {
-    typedef std::basic_string<T, std::char_traits<T>, Ator> string_type;
+public:
+    typedef string_list_iterator<T>         self_type        ;
+    typedef std::remove_reference_t<T>      buf_type         ;
+    typedef T::value_type                   value_type       ;
+    typedef value_type const                const_value      ;
+    typedef T::pointer                      pointer          ;
+    typedef T::const_pointer                const_pointer    ;
+    typedef T::reference                    reference        ;
+    typedef T::const_reference              const_reference  ;
+    typedef T::string_type                  string_type      ;
+    typedef T::difference_type              difference_type  ;
+    typedef T::size_type                    size_type        ;
+    typedef std::bidirectional_iterator_tag iterator_category;
 
-    using allocator_type = typename std::allocator_traits<Ator>::template rebind_alloc<string_type>;
+    template <typename U>
+    using self_type_t = string_list_iterator<U>;
 
-    std::vector<string_type, allocator_type> out (std::is_same<Ator, memory::allocator<T>>::value ?
-                                                  allocator_type (str.get_allocator ()) : allocator_type ());
+    typedef std::conditional_t<std::is_const_v<buf_type>, const_value, value_type> elem_type;
 
-    std::size_t start;
-    std::size_t end = 0U;
+    friend class string_list_iterator<buf_type const>;
+    friend class string_list_iterator<std::remove_const_t<buf_type>>;
 
-    std::size_t const delim_count =
-            static_cast<std::size_t> (std::count (str.cbegin (), str.cend (), delim));
+    constexpr string_type  operator  * () const { return  (*_M_buf)[_M_pos]; }
+    constexpr string_type* operator -> () const { return &(*_M_buf)[_M_pos]; }
+
+    constexpr string_list_iterator () noexcept
+    : _M_buf (), _M_pos ()
+    { }
+
+    constexpr string_list_iterator (buf_type& b, size_type p) noexcept
+    : _M_buf (&b), _M_pos (p)
+    { }
+
+    /// converting a non-const iterator to a const iterator
+    constexpr
+    string_list_iterator (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
+    : _M_buf (other._M_buf), _M_pos (other._M_pos)
+    { }
+
+    constexpr
+    self_type& operator = (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
+    {
+        _M_buf = other._M_buf;
+        _M_pos = other._M_pos;
+
+        return *this;
+    }
+
+    constexpr self_type& operator ++ () noexcept
+    {
+        ++_M_pos;
+        return *this;
+    }
+
+    constexpr self_type operator ++ (int) noexcept
+    {
+        self_type ret_obj (*this);
+        ++_M_pos;
+        return ret_obj;
+    }
+
+    constexpr self_type& operator -- () noexcept
+    {
+        --_M_pos;
+        return *this;
+    }
+    constexpr self_type operator -- (int) noexcept
+    {
+        self_type ret_obj (*this);
+        --_M_pos;
+        return ret_obj;
+    }
+
+    constexpr self_type& operator += (difference_type n) noexcept
+    {
+        _M_pos += static_cast<size_type> (n);
+        return *this;
+    }
+
+    constexpr self_type& operator -= (difference_type n) noexcept
+    {
+        _M_pos -= static_cast<size_type> (n);
+        return *this;
+    }
+
+    constexpr buf_type& get () const noexcept
+    { return *_M_buf; }
+
+    constexpr size_type pos () const noexcept
+    { return _M_pos; }
+
+    template <typename U>
+    friend
+    inline self_type_t<U> operator + (self_type_t<U> const&, typename self_type_t<U>::difference_type);
+
+    template <typename U>
+    friend
+    inline self_type_t<U> operator - (self_type_t<U> const&, typename self_type_t<U>::difference_type);
+
+private:
+    buf_type* _M_buf;
+    size_type _M_pos;
+};
+
+// =========================================================
+
+template <typename T>
+constexpr bool operator == (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
+{ return lhObj.pos () == other.pos () && &lhObj.get () == &other.get (); }
+
+template <typename T>
+constexpr bool operator != (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
+{ return !(lhObj == other); }
+
+template <typename T>
+constexpr bool operator > (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
+{ return lhObj.pos () > other.pos (); }
+
+template <typename T>
+constexpr bool operator >= (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
+{ return lhObj.pos () >= other.pos (); }
+
+template <typename T>
+constexpr bool operator < (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
+{ return lhObj.pos () < other.pos (); }
+
+template <typename T>
+constexpr bool operator <= (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
+{ return lhObj.pos () <= other.pos (); }
+
+// =========================================================
+
+template <typename T>
+inline string_list_iterator<T> operator + (string_list_iterator<T> const& lhObj,
+                                           typename string_list_iterator<T>::difference_type n)
+{
+    string_list_iterator<T> ret_obj (lhObj);
+    ret_obj._M_pos += static_cast<string_list_iterator<T>::size_type> (n);
+    return ret_obj;
+}
+
+template <typename T>
+inline string_list_iterator<T> operator - (string_list_iterator<T> const& lhObj,
+                                           typename string_list_iterator<T>::difference_type n)
+{
+    string_list_iterator<T> ret_obj (lhObj);
+    ret_obj._M_pos -= static_cast<string_list_iterator<T>::size_type> (n);
+    return ret_obj;
+}
+
+template <typename T>
+constexpr
+string_list_iterator<T>::difference_type
+operator + (string_list_iterator<T> const& a, string_list_iterator<T> const& b)
+{ return static_cast<string_list_iterator<T>::difference_type> (a.pos () + b.pos ()); }
+
+template <typename T>
+constexpr
+string_list_iterator<T>::difference_type
+operator - (string_list_iterator<T> const& a, string_list_iterator<T> const& b)
+{ return static_cast<string_list_iterator<T>::difference_type> (a.pos () - b.pos ()); }
+
+//======================================================
+
+template <std::size_t N, char_t T = char>
+class string_list
+{
+public:
+    typedef string_list<N, T>                     self_type             ;
+    typedef T                                     value_type            ;
+    typedef value_type const                      const_value           ;
+    typedef value_type const*                     pointer               ;
+    typedef value_type const*                     const_pointer         ;
+    typedef value_type const&                     reference             ;
+    typedef value_type const&                     const_reference       ;
+    typedef std::basic_string_view<T>             string_type           ;
+    typedef string_type&                          str_reference         ;
+    typedef string_type const&                    str_const_reference   ;
+    typedef std::size_t                           size_type             ;
+    typedef size_type                             const_size            ;
+    typedef std::ptrdiff_t                        difference_type       ;
+    typedef string_list_iterator<self_type>       iterator              ;
+    typedef string_list_iterator<self_type const> const_iterator        ;
+    typedef std::reverse_iterator<iterator>       reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+    static_assert (N > 0, "string_list is empty!");
+
+    inline constexpr static const_size npos = static_cast<size_type> (-1);
+
+    string_list () = delete;
+
+    template <c_str_const_t... Ts>
+    consteval string_list (Ts... array) noexcept
+    : _M_array { array... }
+    {
+        static_assert (are_of_same_type_v<const_pointer, Ts...>, "some of the args are NOT C strings!");
+    }
+
+    constexpr str_const_reference operator [] (size_type i) const noexcept
+    {
+        assert (i < N && "index out of range!");
+        return _M_array[i];
+    }
+
+    constexpr size_type hash (size_type i) const noexcept
+    {
+        assert (i < N && "index out of range!");
+        return constexpr_char_hash ((*this)[i]);
+    }
+
+    constexpr str_const_reference front  () const noexcept { return _M_array[0]; }
+    constexpr str_const_reference back   () const noexcept { return _M_array[size () - 1]; }
+    constexpr const_iterator      begin  () const noexcept { return const_iterator (*this, 0); }
+    constexpr const_iterator      cbegin () const noexcept { return const_iterator (*this, 0); }
+    constexpr const_iterator      end    () const noexcept { return const_iterator (*this, size ()); }
+    constexpr const_iterator      cend   () const noexcept { return const_iterator (*this, size ()); }
+
+    constexpr const_reverse_iterator rbegin () const noexcept
+    {  return const_reverse_iterator (const_iterator (*this, size () - 1)); }
+
+    constexpr const_reverse_iterator rend () const noexcept
+    {  return const_reverse_iterator (const_iterator (*this, npos)); }
+
+    constexpr const_reverse_iterator crbegin () const noexcept
+    {  return const_reverse_iterator (const_iterator (*this, size () - 1)); }
+
+    constexpr const_reverse_iterator crend () const noexcept
+    {  return const_reverse_iterator (const_iterator (*this, npos)); }
+
+    consteval static size_type size () noexcept { return N; }
+
+private:
+    string_type _M_array[N];
+};
+
+//======================================================
+
+template <char_t T = char, c_str_const_t... Ts>
+consteval auto make_string_list (Ts... ts) -> string_list<sizeof... (Ts), T>
+{
+    return { std::forward<Ts> (ts)... };
+}
+
+// ====================================================
+
+template <char_t T = char, allocator_t A = memory::allocator<T>>
+auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str, T delim)
+{
+    static_assert (std::is_same_v<T, typename A::value_type>, "");
+
+    typedef std::size_t size_type;
+    typedef std::basic_string<T, std::char_traits<T>, A> string_type;
+
+    using allocator_type =
+        typename std::allocator_traits<A>::template rebind_alloc<string_type>;
+
+    std::vector<string_type, allocator_type> out (std::is_same_v<A, memory::allocator<T>> ?
+                                                     allocator_type (str.get_allocator ()) : allocator_type ());
+
+    size_type start;
+    size_type end = 0U;
+
+    size_type const delim_count =
+        static_cast<size_type> (std::count (str.cbegin (), str.cend (), delim));
 
     if (delim_count > 0) out.reserve (delim_count + 1);
 
@@ -77,18 +332,17 @@ auto split_string (std::basic_string<T, std::char_traits<T>, Ator> const& str,
 
 // ====================================================
 
-template <typename T    = char,
-          typename Ator = memory::allocator<T>,
-          typename      = typename std::enable_if<is_char<T>::value>::type>
-auto split_string (std::basic_string<T, std::char_traits<T>, Ator> const& str,
-                   std::basic_string<T, std::char_traits<T>, Ator> const& delim)
+template <char_t T = char, allocator_t A = memory::allocator<T>>
+auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str,
+                  std::basic_string<T, std::char_traits<T>, A> const& delim)
 {
-    typedef std::basic_string<T, std::char_traits<T>, Ator> string_type;
+    typedef std::basic_string<T, std::char_traits<T>, A> string_type;
 
-    using allocator_type = typename std::allocator_traits<Ator>::template rebind_alloc<string_type>;
+    using allocator_type =
+        typename std::allocator_traits<A>::template rebind_alloc<string_type>;
 
-    std::vector<string_type, allocator_type> out (std::is_same<Ator, memory::allocator<T>>::value ?
-                                                  allocator_type (str.get_allocator ()) : allocator_type ());
+    std::vector<string_type, allocator_type> out (std::is_same_v<A, memory::allocator<T>> ?
+                                                     allocator_type (str.get_allocator ()) : allocator_type ());
 
     std::size_t start;
     std::size_t end = 0U;
@@ -104,258 +358,27 @@ auto split_string (std::basic_string<T, std::char_traits<T>, Ator> const& str,
 
 // ====================================================
 
-template <typename T>
-class string_list_iterator
-{
-public:
-    typedef string_list_iterator<T>         self_type        ;
-    typedef T                               buf_type         ;
-    typedef typename T::value_type          value_type       ;
-    typedef typename T::pointer             pointer          ;
-    typedef typename T::const_pointer       const_pointer    ;
-    typedef typename T::reference           reference        ;
-    typedef typename T::const_reference     const_reference  ;
-    typedef typename T::difference_type     difference_type  ;
-    typedef typename T::size_type           size_type        ;
-    typedef std::bidirectional_iterator_tag iterator_category;
-
-    typedef typename std::conditional<std::is_const<buf_type>::value,
-    value_type const, value_type>::type
-    elem_type;
-
-    friend class string_list_iterator<buf_type const>;
-
-    constexpr elem_type operator * () const { return get ()[_M_pos]; }
-
-    constexpr string_list_iterator () noexcept
-    : _M_buf (), _M_pos ()
-    { }
-
-    constexpr string_list_iterator (buf_type& b, size_type p) noexcept
-    : _M_buf (&b), _M_pos (p)
-    { }
-
-    /// Converting a non-const iterator to a const iterator
-    constexpr
-    string_list_iterator (string_list_iterator<typename std::remove_const<buf_type>::type> const& other)
-    noexcept
-    : _M_buf (other._M_buf), _M_pos (other._M_pos)
-    { }
-
-    inline
-    string_list_iterator& operator = (string_list_iterator<typename std::remove_const<buf_type>::type>
-                                      const& other) noexcept
-    {
-        _M_buf = other._M_buf;
-        _M_pos = other._M_pos;
-
-        return *this;
-    }
-
-    inline self_type& operator ++ ()
-    {
-        ++_M_pos;
-        return *this;
-    }
-
-    inline self_type operator ++ (int)
-    {
-        self_type tmp (*this);
-        ++_M_pos;
-        return tmp;
-    }
-
-    inline self_type& operator -- ()
-    {
-        --_M_pos;
-        return *this;
-    }
-    inline self_type operator -- (int)
-    {
-        self_type tmp (*this);
-        --_M_pos;
-        return tmp;
-    }
-
-    inline self_type operator + (difference_type n) const
-    {
-        self_type tmp (*this);
-        tmp._M_pos += static_cast<size_type> (n);
-        return tmp;
-    }
-
-    inline self_type& operator += (difference_type n)
-    {
-        _M_pos += static_cast<size_type> (n);
-        return *this;
-    }
-
-    inline self_type operator - (difference_type n) const
-    {
-        self_type tmp (*this);
-        tmp._M_pos -= static_cast<size_type> (n);
-        return tmp;
-    }
-
-    inline self_type& operator -= (difference_type n)
-    {
-        _M_pos -= static_cast<size_type> (n);
-        return *this;
-    }
-
-    constexpr difference_type operator - (self_type const& c) const
-    { return difference_type (_M_pos - c._M_pos); }
-
-    constexpr bool operator == (self_type const& other) const
-    { return _M_pos == other._M_pos and _M_buf == other._M_buf; }
-
-    constexpr bool operator != (self_type const& other) const
-    { return _M_pos != other._M_pos or _M_buf != other._M_buf; }
-
-    constexpr bool operator > (self_type const& other) const
-    { return _M_pos > other._M_pos; }
-
-    constexpr bool operator >= (self_type const& other) const
-    { return _M_pos >= other._M_pos; }
-
-    constexpr bool operator < (self_type const& other) const
-    { return _M_pos < other._M_pos; }
-
-    constexpr bool operator <= (self_type const& other) const
-    { return _M_pos <= other._M_pos; }
-
-    constexpr buf_type& get () const noexcept
-    { return *_M_buf; }
-
-    constexpr size_type pos () const noexcept
-    { return _M_pos; }
-
-private:
-    buf_type* _M_buf;
-    size_type _M_pos;
-};
-
-// =========================================================
-
-template <typename T>
-constexpr
-string_list_iterator<T>
-operator + (const typename string_list_iterator<T>::difference_type& a,
-            const string_list_iterator<T>                          & b)
-{ return string_list_iterator<T> (b) + a; }
-
-template <typename T>
-constexpr
-string_list_iterator<T>
-operator - (const typename string_list_iterator<T>::difference_type& a,
-            const string_list_iterator<T>                          & b)
-{ return string_list_iterator<T> (b) - a; }
-
-//======================================================
-
-template <typename T,
-          std::size_t N,
-          typename = typename std::enable_if_t<is_char_v<T>>
-          >
-class string_list
-{
-public:
-    typedef string_list<T, N>                     self_type             ;
-    typedef T const*                              value_type            ;
-    typedef value_type                            pointer               ;
-    typedef value_type                            const_pointer         ;
-    typedef value_type                            reference             ;
-    typedef value_type                            const_reference       ;
-    typedef std::size_t                           size_type             ;
-    typedef std::ptrdiff_t                        difference_type       ;
-    typedef string_list_iterator<self_type>       iterator              ;
-    typedef string_list_iterator<self_type const> const_iterator        ;
-    typedef std::reverse_iterator<iterator>       reverse_iterator      ;
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-
-    static_assert (N > 0, "string_list is empty!");
-    static_assert (is_char_v<T>, "T is NOT a character type!");
-
-    static constexpr const auto npos = static_cast<size_type> (-1);
-
-    string_list () = delete;
-
-    template <typename... Ts>
-    constexpr string_list(Ts... array) noexcept
-    : _M_array { array... }
-    {
-        static_assert (are_of_same_type_v<value_type, Ts...>, "some of the args are NOT strings!");
-    }
-
-    constexpr const_reference operator [] (size_type i) const
-    {
-        assert (i < size());
-        return _M_array[i];
-    }
-
-    constexpr size_type hash (size_type i) const
-    {
-        assert (i < size());
-        return constexpr_hash ((*this)[i]);
-    }
-
-    constexpr const_reference front  () const noexcept { return _M_array[0]; }
-    constexpr const_reference back   () const noexcept { return _M_array[N - 1]; }
-    constexpr size_type       size   () const noexcept { return N; }
-    constexpr const_iterator  begin  () const noexcept { return const_iterator (*this, 0); }
-    constexpr const_iterator  end    () const noexcept { return const_iterator (*this, size ()); }
-    constexpr const_iterator  cbegin () const noexcept { return const_iterator (*this, 0); }
-    constexpr const_iterator  cend   () const noexcept { return const_iterator (*this, size ()); }
-
-    constexpr const_reverse_iterator rbegin () const noexcept
-    { return const_reverse_iterator (const_iterator (*this, size () - 1)); }
-
-    constexpr const_reverse_iterator rend () const noexcept
-    { return const_reverse_iterator (const_iterator (*this, npos)); }
-
-    constexpr const_reverse_iterator crbegin () const noexcept
-    { return const_reverse_iterator (const_iterator (*this, size () - 1)); }
-
-    constexpr const_reverse_iterator crend () const noexcept
-    { return const_reverse_iterator (const_iterator (*this, npos)); }
-
-private:
-    const_pointer _M_array[N];
-};
-
-//======================================================
-
-template <typename T = char, typename... Ts>
-constexpr auto make_string_list (Ts... ts) -> string_list<T, sizeof... (Ts)>
-{
-    return { std::forward<Ts> (ts)... };
-}
-
-// ====================================================
-
-template <typename T,
-          typename Char = char,
-          typename Ator = memory::allocator<Char>,
-          typename      = typename std::enable_if_t<(is_integer<T>::value ||
-                                                     is_float<T>::value)  &&
-                                                     is_char<Char>::value>
+template <number_t    T,
+          char_t      Char = char,
+          allocator_t A    = memory::allocator<Char>
           >
 inline auto number_to_string (T val)
 {
-    typedef std::basic_string<Char, std::char_traits<Char>, Ator> string_type;
+    typedef std::basic_string<Char, std::char_traits<Char>, A> string_type;
+    typedef std::size_t size_type;
 
     string_type str_val (sizeof (T), ' ');
 
-    unordered_map<std::size_t, cchar*> formats_map
+    unordered_map<size_type, cchar*> formats_map
     {
-        std::make_pair (typeid(short).hash_code   (), "%hd"),
-        std::make_pair (typeid(int).hash_code     (), "%d"),
-        std::make_pair (typeid(long).hash_code    (), "%ld"),
-        std::make_pair (typeid(long64).hash_code  (), "%lld"),
         std::make_pair (typeid(ushort).hash_code  (), "%hu"),
+        std::make_pair (typeid(short).hash_code   (), "%hd"),
         std::make_pair (typeid(uint).hash_code    (), "%u"),
+        std::make_pair (typeid(int).hash_code     (), "%d"),
         std::make_pair (typeid(ulong).hash_code   (), "%lu"),
+        std::make_pair (typeid(long).hash_code    (), "%ld"),
         std::make_pair (typeid(ulong64).hash_code (), "%llu"),
+        std::make_pair (typeid(long64).hash_code  (), "%lld"),
         std::make_pair (typeid(float).hash_code   (), "%f"),
         std::make_pair (typeid(double).hash_code  (), "%lf"),
         std::make_pair (typeid(ldouble).hash_code (), "%Lf")
@@ -368,37 +391,32 @@ inline auto number_to_string (T val)
 
 // ====================================================
 
-template <typename T,
-          typename Char  = char,
-          typename Alloc = memory::allocator<Char>,
-          typename       = typename std::enable_if_t<is_char<Char>::value &&
-                                                     is_char<typename Alloc::value_type>::value>
+template <non_void_t  T,
+          char_t      Char = char,
+          allocator_t A    = memory::allocator<Char>,
+          typename         = std::enable_if_t<std::is_same_v<Char, typename A::value_type>>
           >
-inline
-auto to_string (T val, Alloc const& a = Alloc ())
+inline auto to_string (T val, A const& ator = A ())
 {
-    typedef std::basic_string<Char, std::char_traits<Char>, Alloc>        out_string_type  ;
-    typedef std::basic_ostringstream<Char, std::char_traits<Char>, Alloc> out_ostringstream;
+    typedef std::basic_string<Char, std::char_traits<Char>, A>        string_type  ;
+    typedef std::basic_ostringstream<Char, std::char_traits<Char>, A> ostringstream;
 
-    out_string_type in_str (a);
+    string_type   in_str (ator);
+    ostringstream ss   (in_str);
 
-    out_ostringstream ss(in_str);
     ss << val;
 
-    return ss.str();
+    return ss.str ();
 }
 
 // ====================================================
 
-template <typename Char = char,
-          typename      = typename std::enable_if_t<is_char<Char>::value>
-          >
-inline
-auto to_std_string (used_string<Char> const& val)
+template <char_t Char = char>
+inline auto to_std_string (used_string<Char> const& val)
 {
-    typedef std::basic_string<Char, std::char_traits<Char>, std::allocator<Char>> out_string_type;
+    typedef std::basic_string<Char, std::char_traits<Char>, std::allocator<Char>> std_string_type;
 
-    return out_string_type(val.c_str(), val.size());
+    return std_string_type (val.c_str (), val.size ());
 }
 
 //======================================================

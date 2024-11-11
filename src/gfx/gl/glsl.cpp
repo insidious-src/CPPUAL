@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 namespace cppual { namespace gfx { namespace gl {
 
-namespace { // optimize for internal unit usage
+namespace { //! optimize for internal unit usage
 
 typedef sl_program::string_type string_type;
 
@@ -38,7 +38,7 @@ string_type sync_read_file (string_type const& gFilePath, std::ios_base::openmod
 {
     typedef string_type::size_type size_type;
 
-    std::ifstream gFile (gFilePath.c_str(), eMode);
+    std::ifstream gFile (gFilePath, eMode);
     string_type   gContent;
 
     if (gFile.is_open ())
@@ -47,7 +47,7 @@ string_type sync_read_file (string_type const& gFilePath, std::ios_base::openmod
         size_type uSize = static_cast<size_type> (gFile.tellg ());
         gContent.reserve (uSize);
 
-        // copy to string
+        //! copy to string
         {
             std::istream_iterator<string_type::value_type> itCur (gFile);
 
@@ -118,12 +118,12 @@ shader::string_type shader::log ()
     string_type gLogString;
     int         nLogLen   ;
 
-    glGetShaderiv (handle (), gl::LogLength, &nLogLen);
+    ::glGetShaderiv (handle (), gl::LogLength, &nLogLen);
 
     if (nLogLen > 1)
     {
         gLogString.resize  (static_cast<string_type::size_type> (nLogLen));
-        glGetShaderInfoLog (handle (), nLogLen, nullptr,  &gLogString[0]);
+        ::glGetShaderInfoLog (handle (), nLogLen, nullptr,  &gLogString[0]);
     }
 
     return gLogString;
@@ -141,16 +141,16 @@ bool shader::load_from_file (string_type const& gFile)
         if (context_interface::current ()->version () < 3)
         {
             string_type::const_pointer pBuffer = _M_gSource.c_str ();
-            glShaderSource (handle (), 1, &pBuffer, nullptr);
+            ::glShaderSource (handle (), 1, &pBuffer, nullptr);
         }
         else
         {
             string_type::const_pointer pBuffer = _M_gSource.c_str ();
-            glShaderSourceARB (handle (), 1, &pBuffer, nullptr);
+            ::glShaderSourceARB (handle (), 1, &pBuffer, nullptr);
         }
 
-        _M_gStates += shader::IsLoaded;
-        _M_gStates -= shader::IsCompiled;
+        _M_gStates += shader::loaded;
+        _M_gStates -= shader::compiled;
         return true;
     }
 
@@ -166,12 +166,11 @@ bool shader::load_From_binary (string_type const& gFile)
     {
         uint uId = handle ();
 
-        glShaderBinary (1, &uId, 0, gContent.c_str (),
-                static_cast<GLsizei> (gContent.length ()));
+        ::glShaderBinary (1, &uId, 0, gContent.c_str (), static_cast<GLsizei> (gContent.length ()));
 
         _M_gSource.clear ()             ;
-        _M_gStates -= shader::IsLoaded  ;
-        _M_gStates += shader::IsCompiled;
+        _M_gStates -= shader::loaded  ;
+        _M_gStates += shader::compiled;
         return true;
     }
 
@@ -187,36 +186,36 @@ bool shader::load_from_memory (string_type const& gSource)
 
     if (context_interface::current ()->version () < 3)
     {
-        glShaderSource (handle (), 1, &pBuffer, nullptr);
+        ::glShaderSource (handle (), 1, &pBuffer, nullptr);
     }
     else
     {
-        glShaderSourceARB (handle (), 1, &pBuffer, nullptr);
+        ::glShaderSourceARB (handle (), 1, &pBuffer, nullptr);
     }
 
-    _M_gStates += shader::IsLoaded  ;
-    _M_gStates -= shader::IsCompiled;
+    _M_gStates += shader::loaded  ;
+    _M_gStates -= shader::compiled;
     return true;
 }
 
 bool shader::compile () noexcept
 {
-    if      ( _M_gStates.test (shader::IsCompiled)) return  true;
-    else if (!_M_gStates.test (shader::IsLoaded  )) return false;
+    if      ( _M_gStates.test (shader::compiled)) return  true;
+    else if (!_M_gStates.test (shader::loaded  )) return false;
 
     int nStatus;
 
     // compile the shader
     context_interface::current ()->version () < 3  ?
-                    glCompileShader     (handle ()) :
-                    glCompileShaderARB  (handle ()) ;
+                     ::glCompileShader    (handle ()) :
+                     ::glCompileShaderARB (handle ()) ;
 
     // check the compilation status
-    glGetShaderiv (handle (), gl::CompileStatus, &nStatus);
-    nStatus == gl::TRUE ? _M_gStates += shader::IsCompiled :
-                          _M_gStates -= shader::IsCompiled ;
+    ::glGetShaderiv (handle (), gl::CompileStatus, &nStatus);
+    nStatus == gl::TRUE ? _M_gStates += shader::compiled :
+                          _M_gStates -= shader::compiled ;
 
-    return _M_gStates.test (shader::IsCompiled);
+    return _M_gStates.test (shader::compiled);
 }
 
 sl_program::sl_program () noexcept
@@ -239,27 +238,27 @@ sl_program::sl_program (string_type const& gBinaryName) noexcept
 
 bool sl_program::link () noexcept
 {
-    if (handle () and !_M_gStates.test (sl_program::IsLinked) and _M_uShaderCount >= 2)
+    if (handle () and !_M_gStates.test (sl_program::linked) and _M_uShaderCount >= 2)
     {
         int nStatus;
 
         // link the program
         if (context_interface::current ()->version () < 3)
         {
-            glLinkProgram  (handle ());
-            glGetProgramiv (handle (), gl::LinkStatus, &nStatus);
+            ::glLinkProgram  (handle ());
+            ::glGetProgramiv (handle (), gl::LinkStatus, &nStatus);
         }
         else
         {
-            glLinkProgramARB  (handle ());
-            glGetProgramivARB (handle (), gl::LinkStatus, &nStatus);
+            ::glLinkProgramARB  (handle ());
+            ::glGetProgramivARB (handle (), gl::LinkStatus, &nStatus);
         }
 
         // check linking status
-        nStatus == gl::TRUE ? _M_gStates += sl_program::IsLinked:
-                              _M_gStates -= sl_program::IsLinked;
+        nStatus == gl::TRUE ? _M_gStates += sl_program::linked:
+                              _M_gStates -= sl_program::linked;
 
-        return _M_gStates.test (sl_program::IsLinked);
+        return _M_gStates.test (sl_program::linked);
     }
 
     return false;
@@ -274,13 +273,13 @@ bool sl_program::validate () noexcept
         // validate and check status
         if (context_interface::current ()->version () < 3)
         {
-            glValidateProgram (handle ());
-            glGetProgramiv    (handle () , gl::ValidateStatus, &nStatus);
+            ::glValidateProgram (handle ());
+            ::glGetProgramiv    (handle () , gl::ValidateStatus, &nStatus);
         }
         else
         {
-            glValidateProgramARB (handle ());
-            glGetProgramivARB    (handle () , gl::ValidateStatus, &nStatus);
+            ::glValidateProgramARB (handle ());
+            ::glGetProgramivARB    (handle () , gl::ValidateStatus, &nStatus);
         }
 
         return nStatus;
@@ -292,27 +291,27 @@ bool sl_program::validate () noexcept
 int sl_program::add_attribute (string_type const& gName)
 {
     _M_gAttribLocList[gName] = context_interface::current ()->version () < 3 ?
-                                  glGetAttribLocation    (handle (), gName.c_str ()) :
-                                  glGetAttribLocationARB (handle (), gName.c_str ());
+                                  ::glGetAttribLocation    (handle (), gName.c_str ()) :
+                                  ::glGetAttribLocationARB (handle (), gName.c_str ());
     return _M_gAttribLocList[gName];
 }
 
 int sl_program::add_uniform (string_type const& gName)
 {
     _M_gUniformLocList[gName] = context_interface::current ()->version () < 3 ?
-                                   glGetUniformLocation    (handle (), gName.c_str ()) :
-                                   glGetUniformLocationARB (handle (), gName.c_str ());
+                                   ::glGetUniformLocation    (handle (), gName.c_str ()) :
+                                   ::glGetUniformLocationARB (handle (), gName.c_str ());
     return _M_gUniformLocList[gName];
 }
 
 void sl_program::use () noexcept
 {
-    if (_M_gStates.test (sl_program::IsLinked)) glUseProgram (handle ());
+    if (_M_gStates.test (sl_program::linked)) ::glUseProgram (handle ());
 }
 
 void sl_program::disable () noexcept
 {
-    if (_M_gStates.test (sl_program::IsLinked)) glUseProgram (0);
+    if (_M_gStates.test (sl_program::linked)) ::glUseProgram (0);
 }
 
 bool sl_program::load_from_binary (string_type const& gFile)
@@ -326,22 +325,22 @@ bool sl_program::load_from_binary (string_type const& gFile)
         int  nStatus = 0, nCount = 0, nType = 0;
 
         // load binary
-        glProgramBinary (handle (),
+        ::glProgramBinary (handle (),
                          0,
                          gData.c_str (),
                          static_cast<GLsizei> (gData.length ()));
 
         // check linking status
         context_interface::current ()->version () < 3 ?
-                    glGetProgramiv    (handle (), gl::LinkStatus, &nStatus) :
-                    glGetProgramivARB (handle (), gl::LinkStatus, &nStatus);
+                    ::glGetProgramiv    (handle (), gl::LinkStatus, &nStatus) :
+                    ::glGetProgramivARB (handle (), gl::LinkStatus, &nStatus);
 
         _M_gShaderTypes = 0;
 
         if (nStatus == gl::FALSE)
         {
             _M_uShaderCount = 0;
-            _M_gStates     -= sl_program::IsLinked;
+            _M_gStates     -= sl_program::linked;
             return false;
         }
 
@@ -368,7 +367,7 @@ bool sl_program::load_from_binary (string_type const& gFile)
                 _M_gShaderTypes += convert_shader_type (nType);
         }
 
-        _M_gStates += sl_program::IsLinked;
+        _M_gStates += sl_program::linked;
     }
 
     return true;
@@ -378,7 +377,7 @@ void* sl_program::binary () noexcept
 {
     void* pBinary = nullptr;
 
-    if (_M_gStates.test (sl_program::IsLinked))
+    if (_M_gStates.test (sl_program::linked))
     {
         int nBuffSize;
 
@@ -396,22 +395,22 @@ uint sl_program::binary_format () noexcept
 {
     uint uFormat = 0;
 
-    if (_M_gStates.test (sl_program::IsLinked))
+    if (_M_gStates.test (sl_program::linked))
     {
-        if (!_M_gStates.test (sl_program::BinaryAvailable))
+        if (!_M_gStates.test (sl_program::binary_available))
         {
             context_interface::current ()->version () < 3 ?
-                        glProgramParameteri    (handle (),
+                        ::glProgramParameteri    (handle (),
                                                 gl::IsProgramBinaryRetrievable,
                                                 gl::TRUE) :
-                        glProgramParameteriARB (handle (),
+                        ::glProgramParameteriARB (handle (),
                                                 gl::IsProgramBinaryRetrievable,
                                                 gl::TRUE);
 
-            _M_gStates += sl_program::BinaryAvailable;
+            _M_gStates += sl_program::binary_available;
         }
 
-        glGetProgramBinary (handle (), 0, nullptr, &uFormat, nullptr);
+        ::glGetProgramBinary (handle (), 0, nullptr, &uFormat, nullptr);
     }
 
     return uFormat;
@@ -423,8 +422,8 @@ bool sl_program::attach (shader const& gShader)
         return false;
 
     context_interface::current ()->version () < 3 ?
-                glAttachShader    (handle (), gShader.handle ()) :
-                glAttachObjectARB (handle (), gShader.handle ());
+                ::glAttachShader    (handle (), gShader.handle ()) :
+                ::glAttachObjectARB (handle (), gShader.handle ());
 
     _M_gShaderTypes += gShader.type ();
     ++_M_uShaderCount;
@@ -437,8 +436,8 @@ bool sl_program::detach (shader const& gShader)
         return false;
 
     context_interface::current ()->version () < 3 ?
-                glDetachShader    (handle (), gShader.handle ()) :
-                glDetachObjectARB (handle (), gShader.handle ());
+                ::glDetachShader    (handle (), gShader.handle ()) :
+                ::glDetachObjectARB (handle (), gShader.handle ());
 
     _M_gShaderTypes -= gShader.type ();
     --_M_uShaderCount;
@@ -454,14 +453,14 @@ bool sl_program::is_attached (shader const& gShader)
 
     // get list of attached shaders
     context_interface::current ()->version () < 3 ?
-                glGetAttachedShaders    (handle (),
-                                         static_cast<GLsizei> (_M_uShaderCount),
-                                         nullptr,
-                                         uAttached) :
-                glGetAttachedObjectsARB (handle (),
-                                         static_cast<GLsizei> (_M_uShaderCount),
-                                         nullptr,
-                                         uAttached);
+                ::glGetAttachedShaders    (handle (),
+                                           static_cast<GLsizei> (_M_uShaderCount),
+                                           nullptr,
+                                           uAttached) :
+                ::glGetAttachedObjectsARB (handle (),
+                                           static_cast<GLsizei> (_M_uShaderCount),
+                                           nullptr,
+                                           uAttached);
 
     // check if the shader is attached
     while (uCount) if (uAttached[--uCount] == gShader.handle ()) return true;
@@ -476,13 +475,13 @@ sl_program::string_type sl_program::log ()
     int         nLogLen   ;
 
     context_interface::current ()->version () < 3 ?
-                glGetProgramiv    (handle (), gl::LogLength, &nLogLen) :
-                glGetProgramivARB (handle (), gl::LogLength, &nLogLen) ;
+                ::glGetProgramiv    (handle (), gl::LogLength, &nLogLen) :
+                ::glGetProgramivARB (handle (), gl::LogLength, &nLogLen) ;
 
     if (nLogLen > 1)
     {
         gLogString.reserve (static_cast<string_type::size_type> (nLogLen));
-        glGetProgramInfoLog (handle (), nLogLen, nullptr, &gLogString[0]);
+        ::glGetProgramInfoLog (handle (), nLogLen, nullptr, &gLogString[0]);
     }
 
     return gLogString;

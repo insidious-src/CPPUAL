@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,10 +166,10 @@ packet& packet::operator >> (bool& bData) noexcept
 
 packet& packet::operator >> (i8& nData) noexcept
 {
-    if (can_exchange (sizeof (nData)))
+    if (can_exchange (sizeof (i8)))
     {
         nData    = *direct_cast<ci8*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (nData);
+        _M_uPos +=  sizeof (i8);
     }
 
     return *this;
@@ -177,10 +177,10 @@ packet& packet::operator >> (i8& nData) noexcept
 
 packet& packet::operator >> (u8& uData) noexcept
 {
-    if (can_exchange (sizeof (uData)))
+    if (can_exchange (sizeof (u8)))
     {
         uData    = *direct_cast<cu8*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (uData);
+        _M_uPos +=  sizeof (u8);
     }
 
     return *this;
@@ -188,10 +188,10 @@ packet& packet::operator >> (u8& uData) noexcept
 
 packet& packet::operator >> (i16& nData) noexcept
 {
-    if (can_exchange (sizeof (nData)))
+    if (can_exchange (sizeof (i16)))
     {
         nData    = *direct_cast<ci16*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (nData);
+        _M_uPos +=  sizeof (i16);
     }
 
     return *this;
@@ -199,10 +199,10 @@ packet& packet::operator >> (i16& nData) noexcept
 
 packet& packet::operator >> (u16& uData) noexcept
 {
-    if (can_exchange (sizeof (uData)))
+    if (can_exchange (sizeof (u16)))
     {
         uData    = *direct_cast<cu16*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (uData);
+        _M_uPos +=  sizeof (u16);
     }
 
     return *this;
@@ -210,10 +210,10 @@ packet& packet::operator >> (u16& uData) noexcept
 
 packet& packet::operator >> (i32& nData) noexcept
 {
-    if (can_exchange (sizeof (nData)))
+    if (can_exchange (sizeof (i32)))
     {
         nData    = *direct_cast<ci32*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (nData);
+        _M_uPos +=  sizeof (i32);
     }
 
     return *this;
@@ -221,10 +221,10 @@ packet& packet::operator >> (i32& nData) noexcept
 
 packet& packet::operator >> (u32& uData) noexcept
 {
-    if (can_exchange (sizeof (uData)))
+    if (can_exchange (sizeof (u32)))
     {
         uData    = *direct_cast<cu32*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (uData);
+        _M_uPos +=  sizeof (u32);
     }
 
     return *this;
@@ -232,10 +232,10 @@ packet& packet::operator >> (u32& uData) noexcept
 
 packet& packet::operator >> (i64& nData) noexcept
 {
-    if (can_exchange (sizeof (nData)))
+    if (can_exchange (sizeof (i64)))
     {
         nData    = *direct_cast<ci64*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (nData);
+        _M_uPos +=  sizeof (i64);
     }
 
     return *this;
@@ -243,10 +243,10 @@ packet& packet::operator >> (i64& nData) noexcept
 
 packet& packet::operator >> (u64& uData) noexcept
 {
-    if (can_exchange (sizeof (uData)))
+    if (can_exchange (sizeof (u64)))
     {
         uData    = *direct_cast<cu64*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (uData);
+        _M_uPos +=  sizeof (u64);
     }
 
     return *this;
@@ -254,10 +254,10 @@ packet& packet::operator >> (u64& uData) noexcept
 
 packet& packet::operator >> (float& fData) noexcept
 {
-    if (can_exchange (sizeof (fData)))
+    if (can_exchange (sizeof (float)))
     {
         fData    = *direct_cast<cfloat*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (fData);
+        _M_uPos +=  sizeof (float);
     }
 
     return *this;
@@ -265,10 +265,10 @@ packet& packet::operator >> (float& fData) noexcept
 
 packet& packet::operator >> (double& dData) noexcept
 {
-    if (can_exchange (sizeof (dData)))
+    if (can_exchange (sizeof (double)))
     {
         dData    = *direct_cast<cdouble*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (dData);
+        _M_uPos +=  sizeof (double);
     }
 
     return *this;
@@ -276,10 +276,10 @@ packet& packet::operator >> (double& dData) noexcept
 
 packet& packet::operator >> (ldouble& dData) noexcept
 {
-    if (can_exchange (sizeof (dData)))
+    if (can_exchange (sizeof (ldouble)))
     {
         dData    = *direct_cast<cldouble*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (dData);
+        _M_uPos +=  sizeof (ldouble);
     }
 
     return *this;

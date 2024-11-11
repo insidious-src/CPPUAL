@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
  */
 
 #include <cppual/memory/pool.h>
+#include <cppual/cast.h>
 
 #include <cassert>
 #include <iostream>
@@ -40,7 +41,6 @@ uniform_pool_resource::uniform_pool_resource (size_type  uBlkCount,
   _M_uBlkSize  (uBlkSize),
   _M_uBlkAlign (uBlkAlign),
   _M_uBlkNum   (),
-
   _M_usedMemory (),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
@@ -113,7 +113,7 @@ void uniform_pool_resource::initialize () noexcept
 
         _M_uBlkNum = (uSize - uAdjust) / _M_uBlkSize;
 
-        for (size_type i = 0; i < _M_uBlkNum - 1U; ++i)
+        for (size_type i = 0; i < (_M_uBlkNum - 1U); ++i)
         {
             *p = reinterpret_cast<pointer>  (direct_cast<uptr> (p) + _M_uBlkSize);
              p = reinterpret_cast<pointer*> (*p);

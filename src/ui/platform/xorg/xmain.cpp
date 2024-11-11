@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,9 +71,9 @@ extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
     static stacked_resource static_resource (buffer, sizeof (buffer));
     static plugin_vars plugin;
 
-    plugin.name     = "XFactory"       ;
+    plugin.name     = "xcb_factory"    ;
     plugin.desc     = "Xorg UI Factory";
-    plugin.provides = "Ui::Factory"    ;
+    plugin.provides = "ui::xcb_factory";
     plugin.verMajor = 1                ;
     plugin.verMinor = 0                ;
 

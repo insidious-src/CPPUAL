@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +23,15 @@
 #define CPPUAL_PROCESS_PLUGIN_H_
 #ifdef __cplusplus
 
-#include <cppual/meta.h>
+
 #include <cppual/types.h>
-#include <cppual/noncopyable.h>
-#include <cppual/resource.h>
-#include <cppual/concepts.h>
 #include <cppual/string.h>
+#include <cppual/resource.h>
+#include <cppual/type_meta.h>
 #include <cppual/containers.h>
+#include <cppual/noncopyable.h>
+#include <cppual/memory/allocator.h>
+#include <cppual/concept/concepts.h>
 
 #include <memory>
 #include <cstring>
@@ -43,11 +45,12 @@ namespace cppual { namespace process {
 class SHARED_API dyn_loader : public non_copyable
 {
 public:
-    typedef call_ret_t (DLCALL * function_type)();
+    typedef call_ret_t (DLCALL* function_type)();
 
-    typedef string           string_type     ;
-    typedef std::string_view string_view_type;
-    typedef resource_handle  handle_type     ;
+    typedef dyn_loader       self_type  ;
+    typedef string           string_type;
+    typedef std::string_view string_view;
+    typedef resource_handle  handle_type;
 
     enum class resolve_policy : u8
     {
@@ -60,8 +63,8 @@ public:
     };
 
     dyn_loader () = default;
-    dyn_loader (dyn_loader&&) noexcept;
-    dyn_loader& operator = (dyn_loader&&) noexcept;
+    dyn_loader (self_type&&) noexcept;
+    self_type& operator = (self_type&&) noexcept;
     bool attach () noexcept;
     void detach () noexcept;
 
@@ -79,26 +82,21 @@ public:
     inline ~dyn_loader ()
     { if (_M_eResolve != resolve_policy::statically) detach (); }
 
-    inline bool contains (string_view_type const& gName) const noexcept
+    inline bool contains (string_view const& gName) const noexcept
     { return get_address (gName.data ()); }
 
-    inline bool contains (cchar* pName) const noexcept
-    { return get_address (pName); }
-
     template <typename T>
-    inline T* import (string_view_type pName) const noexcept
+    inline T* import (string_view const& pName) const noexcept
     { return static_cast<T*> (get_address (pName.data ())); }
 
     template <typename R, typename... Args>
-    inline bool import (string_view_type pName, R(*& fn)(Args...)) const
+    inline auto import (string_view const& pName) const -> R(*)(Args...)
     {
-        typedef R (* Func)(Args...);
-        function_type func = get_function (pName.data ());
-        return fn = reinterpret_cast<Func> (func);
+        return direct_cast<R(*)(Args...)> (get_function (pName.data ()));
     }
 
     template <typename R = void, typename... Args>
-    inline R call (string_view_type pName, Args... args) const
+    inline R call (string_view const& pName, Args... args) const
     {
         auto fn = direct_cast<R(*)(Args...)> (get_function (pName.data ()));
 
@@ -174,39 +172,43 @@ typedef std::pair<dyn_loader const, plugin_vars> plugin_pair;
 // =========================================================
 
 template <typename Interface,
-          typename Allocator = memory::allocator< std::pair<string const, plugin_pair> >,
-          typename = typename std::enable_if<
-              std::is_same<typename std::allocator_traits<Allocator>::value_type,
-                           std::pair<string const, plugin_pair>
-                           >{}>::type
+          typename A = memory::allocator<std::pair<string const, plugin_pair>>,
+          typename   = std::enable_if_t<
+              std::is_same_v<typename std::allocator_traits<A>::value_type,
+                             std::pair<string const, plugin_pair>
+                             >>
           >
 class SHARED_API plugin_manager : public non_copyable
 {
 public:
-    static_assert (memory::is_allocator<Allocator>::value, "invalid allocator object type!");
+    static_assert (memory::is_allocator_v<A>, "invalid allocator object type!");
 
-    typedef typename std::allocator_traits<Allocator>::allocator_type allocator_type  ;
-    typedef typename std::allocator_traits<Allocator>::size_type      size_type       ;
-    typedef typename std::allocator_traits<Allocator>::value_type     pair_type       ;
-    typedef std::string_view                                          string_view_type;
-    typedef string                                                    key_type        ;
-    typedef string const                                              const_key       ;
-    typedef std::hash<key_type>                                       hash_type       ;
-    typedef std::equal_to<key_type>                                   equal_type      ;
-    typedef Movable<dyn_loader>                                       loader_type     ;
-    typedef plugin_pair                                               value_type      ;
-    typedef Interface                                                 iface_type      ;
-    typedef std::shared_ptr<iface_type>                               shared_iface    ;
+    typedef std::allocator_traits<A>          traits_type     ;
+    typedef traits_type::allocator_type       allocator_type  ;
+    typedef traits_type::size_type            size_type       ;
+    typedef traits_type::value_type           pair_type       ;
+    typedef std::string_view                  string_type     ;
+    typedef string                            key_type        ;
+    typedef string const                      const_key       ;
+    typedef std::hash<key_type>               hash_type       ;
+    typedef std::equal_to<key_type>           equal_type      ;
+    typedef MovableType<dyn_loader>           loader_type     ;
+    typedef plugin_pair                       mapped_type     ;
+    typedef std::pair<const_key, plugin_pair> value_type      ;
+    typedef Interface                         iface_type      ;
+    typedef std::shared_ptr<iface_type>       shared_iface    ;
 
     typedef std::unordered_map
-    <key_type, value_type, hash_type, equal_type, allocator_type> map_type;
+    <key_type, mapped_type, hash_type, equal_type, allocator_type> map_type;
 
-    typedef typename map_type::mapped_type&       reference      ;
-    typedef typename map_type::mapped_type const& const_reference;
-    typedef typename map_type::mapped_type*       pointer        ;
-    typedef typename map_type::mapped_type const* const_pointer  ;
-    typedef typename map_type::iterator           iterator       ;
-    typedef typename map_type::const_iterator     const_iterator ;
+    typedef mapped_type&                          reference             ;
+    typedef mapped_type const&                    const_reference       ;
+    typedef mapped_type*                          pointer               ;
+    typedef mapped_type const*                    const_pointer         ;
+    typedef map_type::iterator                    iterator              ;
+    typedef map_type::const_iterator              const_iterator        ;
+    typedef std::reverse_iterator<iterator>       reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
 
     class plugin_pointer
     {
@@ -219,7 +221,7 @@ public:
         { return &_M_ref->second; }
 
         constexpr shared_iface iface () const
-        { return std::static_pointer_cast<iface_type>(_M_ref->second.iface); }
+        { return std::static_pointer_cast<iface_type> (_M_ref->second.iface); }
 
     private:
         constexpr plugin_pointer (const_reference ref) noexcept
@@ -233,7 +235,7 @@ public:
         const_pointer _M_ref;
     };
 
-    constexpr static const auto plugin_main = "plugin_main";
+    inline constexpr static const auto plugin_main = "plugin_main";
 
     plugin_manager (plugin_manager&&) = default;
     plugin_manager& operator = (plugin_manager&&) = default;
@@ -258,11 +260,11 @@ public:
     { }
 
     template <typename... Args>
-    bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args... args)
+    bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args&&... args)
     {
-        static_assert (!are_any_references_v<Args...>,
+        static_assert (!are_any_of_type_v<traits_enum_t::reference, Args...>,
                 "References are not a 'C' concept!");
-        static_assert (!are_any_objects_v<Args...>,
+        static_assert (!are_any_of_type_v<traits_enum_t::class_type, Args...>,
                 "Class instances are not allowed as C function arguments!");
 
         loader_type loader (path);
@@ -275,8 +277,7 @@ public:
 
         for (auto& pair : _M_gPluginMap)
         {
-            if (std::strcmp(pair.second.second.provides, plugin->provides) == 0)
-                return false;
+            if (std::strcmp(pair.second.second.provides, plugin->provides) == 0) return false;
         }
 
         _M_gPluginMap.emplace (path, std::make_pair (std::move (loader), std::move(*plugin)));

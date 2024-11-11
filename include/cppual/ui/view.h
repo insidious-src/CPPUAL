@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,42 +23,47 @@
 #define CPPUAL_UI_VIEW_H_
 #ifdef __cplusplus
 
-#include <cppual/gfx/draw.h>
-#include <cppual/circular_queue.h>
-#include <cppual/ui/vsurface.h>
-#include <cppual/input/event.h>
-#include <cppual/memory/allocator.h>
 #include <cppual/string.h>
+#include <cppual/gfx/draw.h>
+#include <cppual/input/event.h>
+#include <cppual/ui/vsurface.h>
+#include <cppual/circular_queue.h>
+#include <cppual/memory/allocator.h>
 
-namespace cppual { namespace ui {
+namespace cppual::ui {
 
 class SHARED_API view
 {
 public:
-    typedef input::sys_event                      event_type    ;
-    typedef resource_handle                       window_type   ;
-    typedef memory::allocator<view*>              allocator_type;
-    typedef memory::memory_resource               resource_type ;
-    typedef circular_queue<view*, allocator_type> view_container;
-    typedef std::size_t                           size_type     ;
-    typedef typename view_container::iterator     iterator      ;
-    typedef string                                string_type   ;
-    typedef platform_wnd_interface                platform_wnd  ;
-    typedef gfx::shared_surface                   surface_type  ;
-    typedef gfx::shared_context                   context_type  ;
+    typedef view                                       self_type     ;
+    typedef input::event                               event_type    ;
+    typedef memory::memory_resource                    resource_type ;
+    typedef memory::allocator<self_type*>              allocator_type;
+    typedef circular_queue<self_type*, allocator_type> view_container;
+    typedef std::size_t                                size_type     ;
+    typedef view_container::iterator                   iterator      ;
+    typedef view_container::const_iterator             const_iterator;
+    typedef std::string_view                           string_type   ;
+    typedef platform_wnd_interface                     platform_wnd  ;
+    typedef gfx::shared_surface                        surface_type  ;
+    typedef gfx::shared_context                        context_type  ;
+    typedef shared_window                              window_type   ;
+    typedef resource_handle                            handle_type   ;
 
     enum
     {
-        default_width  = 800,
-        default_height = 600
+        default_width  = 640,
+        default_height = 480
     };
 
     view ();
-    view (view const&);
-    view& operator = (view const&);
+    view (self_type &&);
+    view (self_type const&);
+    self_type& operator = (self_type &&);
+    self_type& operator = (self_type const&);
     virtual ~view ();
 
-    view (view*          parent,
+    view (self_type*     parent,
           rect const&    rect,
           u32            screen = 0,
           resource_type* rc     = nullptr);
@@ -66,7 +71,7 @@ public:
     void destroy ();
     void show ();
     void hide ();
-    bool set_parent (view* parent, point2i pos = point2i ());
+    bool set_parent (self_type* parent, point2i pos = point2i ());
     void set_geometry (rect const&);
     void set_minimum_size (point2u);
     void set_maximum_size (point2u);
@@ -79,14 +84,14 @@ public:
     void get_focus ();
     void kill_focus ();
 
-    inline weak_window         renderable () const noexcept { return _M_pRenderable; }
-    inline platform_wnd*       renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
-    inline resource_handle     platform_handle () const { return renderable ().lock ()->handle (); }
-    inline shared_display      platform_display () const { return renderable ().lock ()->connection (); }
-    inline gfx::shared_surface platform_surface () const noexcept { return _M_pSurface; }
-    inline gfx::shared_context platform_context () const noexcept { return _M_pContext; }
-    inline point2u             minimum_size () const noexcept { return _M_gMinSize; }
-    inline point2u             maximum_size () const noexcept { return _M_gMaxSize; }
+    inline window_type    renderable        () const noexcept { return _M_pRenderable; }
+    inline platform_wnd*  renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
+    inline handle_type    platform_handle   () const { return renderable ()->handle (); }
+    inline shared_display platform_display  () const { return renderable ()->connection (); }
+    inline surface_type   platform_surface  () const noexcept { return _M_pSurface; }
+    inline context_type   platform_context  () const noexcept { return _M_pContext; }
+    inline point2u        minimum_size      () const noexcept { return _M_gMinSize; }
+    inline point2u        maximum_size      () const noexcept { return _M_gMaxSize; }
 
     inline bool valid () const noexcept
     { return _M_gStateFlags.test (state_flag::is_valid); }
@@ -150,17 +155,17 @@ private:
     void invalidate () noexcept;
 
 private:
-    view_container _M_gChildrenList;
+    view_container _M_gChildrenList        ;
     point2u        _M_gMinSize, _M_gMaxSize;
-    shared_window  _M_pRenderable;
-    surface_type   _M_pSurface;
-    context_type   _M_pContext;
-    iterator       _M_gItFromParent;
-    view*          _M_pParentObj;
-    state_flags    _M_gStateFlags;
+    window_type    _M_pRenderable          ;
+    surface_type   _M_pSurface             ;
+    context_type   _M_pContext             ;
+    iterator       _M_gItFromParent        ;
+    self_type*     _M_pParentObj           ;
+    state_flags    _M_gStateFlags          ;
 };
 
-} } // namespace Ui
+} // namespace Ui
 
 #endif // __cplusplus
 #endif // CPPUAL_UI_VIEW_H_

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,8 +55,8 @@ public:
                                  packet&  input_packet,
                                  packet& output_packet) = 0;
 
-    protocol* upper_layer () const noexcept { return _M_pUpperProt; }
-    protocol* lower_layer () const noexcept { return _M_pLowerProt; }
+    constexpr protocol* upper_layer () const noexcept { return _M_pUpperProt; }
+    constexpr protocol* lower_layer () const noexcept { return _M_pLowerProt; }
 
 private:
     protocol* _M_pUpperProt;

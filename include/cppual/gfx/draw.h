@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,17 +23,17 @@
 #define CPPUAL_GFX_DRAW_H_
 #ifdef __cplusplus
 
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
+#include <cppual/string.h>
 #include <cppual/resource.h>
 #include <cppual/containers.h>
 #include <cppual/noncopyable.h>
-#include <cppual/string.h>
 #include <cppual/gfx/color.h>
 #include <cppual/gfx/coord.h>
 
 #include <memory>
 
-namespace cppual { namespace gfx {
+namespace cppual::gfx {
 
 class font;
 
@@ -117,7 +117,7 @@ struct not_initialized : public std::logic_error { using std::logic_error::logic
 
 // =========================================================
 
-class pixel_format final
+class pixel_format
 {
 public:
     pixel_flags flags;
@@ -187,15 +187,15 @@ public:
     typedef std::size_t   size_type  ;
     typedef color         value_type ;
 
-    inline format_type  format () const noexcept { return _M_gFormat; }
-    inline vector_type& data   ()       noexcept { return _M_gPixels; }
+    constexpr format_type  format () const noexcept { return _M_gFormat; }
+    constexpr vector_type& data   ()       noexcept { return _M_gPixels; }
 
-    inline virtual_buffer () noexcept
-    : _M_gFormat (pixel_format::default2d ()),
+    constexpr virtual_buffer (pixel_format const& gFormat = pixel_format::default2d ()) noexcept
+    : _M_gFormat (gFormat),
       _M_gPixels ()
     { }
 
-    inline virtual_buffer (point2i gSize, pixel_format const& gFormat = pixel_format::default2d ())
+    constexpr virtual_buffer (point2i gSize, pixel_format const& gFormat = pixel_format::default2d ())
     : _M_gFormat (gFormat),
       _M_gPixels (size_type (gSize.x * gSize.y))
     { }
@@ -207,52 +207,45 @@ private:
 
 // =========================================================
 
-struct SHARED_API resource_interface
+struct SHARED_API resource_interface : public resource<resource_handle, resource_handle>
 {
-    typedef resource_connection connection_type;
-    typedef resource_handle     handle_type    ;
-    typedef pixel_format        format_type    ;
+    typedef resource_interface self_type  ;
+    typedef pixel_format       format_type;
 
-    virtual ~resource_interface ();
-
-    virtual connection_type     connection () const = 0;
-    virtual format_type         format     () const = 0;
-    virtual handle_type         handle     () const = 0;
-    virtual device_backend      device     () const = 0;
-    virtual void                flush      ()       = 0;
+    virtual connection_type connection () const = 0;
+    virtual format_type     format     () const = 0;
+    virtual handle_type     handle     () const = 0;
+    virtual device_backend  device     () const = 0;
+    virtual void            flush      ()       = 0;
 };
 
 // =========================================================
 
 struct SHARED_API surface_interface : public resource_interface
 {
-    typedef shared_context context_type;
+    typedef surface_interface self_type;
 
-    virtual ~surface_interface ();
-
-    virtual point2u      size  () const = 0;
-    virtual surface_type type  () const = 0;
-    virtual void         scale (point2u size) = 0;
-    virtual void         paint_background (color clr) = 0;
-    virtual context_type context () const = 0;
+    virtual point2u        size  () const = 0;
+    virtual surface_type   type  () const = 0;
+    virtual void           scale (point2u size) = 0;
+    virtual void           paint_background (color clr) = 0;
+    virtual shared_context context () const = 0;
 };
 
 // =========================================================
 
 struct SHARED_API context_interface : public resource_interface
 {
-    typedef shared_surface   pointer      ;
-    typedef resource_version version_type ;
+    typedef context_interface self_type   ;
+    typedef resource_version  version_type;
 
-    virtual ~context_interface ();
-
-    virtual pointer      drawable () const = 0;
-    virtual pointer      readable () const = 0;
-    virtual version_type version  () const = 0;
-    virtual bool         assign   (shared_context const& cntxt) = 0;
-    virtual bool         use      (pointer, pointer) = 0;
-    virtual void         finish   () = 0;
-    virtual void         release  () = 0;
+    virtual shared_surface drawable () const = 0;
+    virtual shared_surface readable () const = 0;
+    virtual version_type   version  () const = 0;
+    virtual bool           assign   (shared_context const& cntxt) = 0;
+    virtual bool           use      (shared_surface, shared_surface) = 0;
+    virtual void           finish   () = 0;
+    virtual void           release  () = 0;
 
     static context_interface* current () noexcept;
     static void               acquire (shared_context const& cntxt) noexcept;
@@ -263,87 +256,108 @@ struct SHARED_API context_interface : public resource_interface
 
 // =========================================================
 
-class transform2d
+class SHARED_API transform2d
 {
 public:
-    constexpr transform2d () noexcept = default;
+    typedef transform2d self_type;
 
-    inline transform2d (rect gRect,
-                        shared_surface const& surface,
-                        float rotate = .0f) noexcept
-    : _M_gRect   (gRect  ),
+    inline transform2d (rect const& gRect, shared_surface const& surface, float rotate = .0f) noexcept
+    : _M_rect    (gRect  ),
       _M_surface (surface),
       _M_rotate  (rotate )
     { }
 
-    constexpr rect           geometry () const noexcept { return _M_gRect  ; }
-    inline    shared_surface surface  () const noexcept { return _M_surface; }
+    constexpr transform2d () noexcept = default;
+
+    inline transform2d (self_type&&)                noexcept = default;
+    inline transform2d (self_type const&)           noexcept = default;
+    inline self_type& operator = (self_type&&)      noexcept = default;
+    inline self_type& operator = (self_type const&) noexcept = default;
+
+    constexpr rect           geometry () const noexcept { return _M_rect              ; }
+    inline    shared_surface surface  () const noexcept { return _M_surface           ; }
     inline    shared_context context  () const noexcept { return _M_surface->context(); }
-    constexpr float          rotation () const noexcept { return _M_rotate ; }
+    constexpr float          rotation () const noexcept { return _M_rotate            ; }
 
 private:
-    rect           _M_gRect     ;
+    rect           _M_rect      ;
     shared_surface _M_surface   ;
     float          _M_rotate { };
 };
 
 // =========================================================
 
-class transform3d
-{ };
+class SHARED_API transform3d
+{
+    typedef transform3d self_type;
+
+    constexpr transform3d () noexcept = default;
+
+    inline transform3d (self_type&&)                noexcept = default;
+    inline transform3d (self_type const&)           noexcept = default;
+    inline self_type& operator = (self_type&&)      noexcept = default;
+    inline self_type& operator = (self_type const&) noexcept = default;
+};
 
 // =========================================================
 
-struct SHARED_API drawable2d_interface
+struct SHARED_API drawable2d_interface : public non_copyable_virtual
 {
+    typedef drawable2d_interface self_type;
+
     enum class line_style : u8
     {
-        solid,
-        dash,
-        dot,
+        solid = 1,
+        dash     ,
+        dot      ,
         dash_dot_dot
     };
 
+    constexpr drawable2d_interface () noexcept = default;
+
     virtual device_backend type () const noexcept    = 0;
     virtual void           draw (transform2d const&) = 0;
-
-    inline virtual ~drawable2d_interface () { }
 };
 
 // =========================================================
 
-struct SHARED_API drawable3d_interface
+struct SHARED_API drawable3d_interface : public non_copyable_virtual
 {
+    typedef drawable3d_interface self_type;
+
+    constexpr drawable3d_interface () noexcept = default;
+
     virtual device_backend type () const noexcept    = 0;
     virtual void           draw (transform3d const&) = 0;
-
-    inline virtual ~drawable3d_interface () { }
 };
 
 // =========================================================
 
-struct SHARED_API transformable2d_interface
+struct SHARED_API transformable2d_interface : public non_copyable_virtual
 {
-    inline virtual ~transformable2d_interface () { }
+    typedef transformable2d_interface self_type;
+
+    constexpr transformable2d_interface () noexcept = default;
 };
 
 // =========================================================
 
-struct SHARED_API transformable3d_interface
+struct SHARED_API transformable3d_interface : public non_copyable_virtual
 {
-    inline virtual ~transformable3d_interface () { }
+    typedef transformable3d_interface self_type;
+
+    constexpr transformable3d_interface () noexcept = default;
 };
 
 // =========================================================
 
 struct SHARED_API painter_interface : public non_copyable_virtual
 {
+    typedef painter_interface                self_type    ;
     typedef string                           string_type  ;
     typedef drawable2d_interface::line_style line_style   ;
     typedef resource_version                 version_type ;
     typedef std::array<point2i, 3>           polygon_array;
-
-    virtual ~painter_interface ();
 
     virtual shared_drawable2d create_shape (u8 shape_type) = 0;
 
@@ -371,9 +385,10 @@ struct SHARED_API painter_interface : public non_copyable_virtual
 
 // ====================================================
 
-class painter : public non_copyable
+class SHARED_API painter : public non_copyable
 {
 public:
+    typedef painter                                    self_type         ;
     typedef string                                     string_type       ;
     typedef vector<std::pair<shared_drawable2d, rect>> drawable_container;
     typedef drawable2d_interface::line_style           line_style        ;
@@ -411,16 +426,24 @@ private:
 
 // ====================================================
 
-class context_mutex
+class SHARED_API context_mutex
 {
 public:
+    typedef std::recursive_mutex           mutex_type        ;
+    typedef mutex_type::native_handle_type native_handle_type;
+
     inline context_mutex (shared_context const& context) noexcept
-    : _M_context  (context)
+    : _M_context (context)
     { }
 
     inline ~context_mutex () noexcept
     {
-        unlock ();
+        if (context_interface::current () == _M_context.get ()) unlock ();
+    }
+
+    constexpr native_handle_type native_handle () const noexcept
+    {
+        return _M_mutex.native_handle ();
     }
 
     inline void lock ()
@@ -444,14 +467,15 @@ public:
     }
 
 private:
-    std::recursive_mutex _M_mutex  ;
-    shared_context       _M_context;
+    mutex_type mutable _M_mutex  ;
+    shared_context     _M_context;
 };
 
 // ====================================================
 
 struct SHARED_API draw_factory : public non_copyable_virtual
 {
+    typedef draw_factory                        self_type      ;
     typedef string                              string_type    ;
     typedef resource_interface::connection_type connection_type;
     typedef resource_interface::handle_type     handle_type    ;
@@ -460,15 +484,15 @@ struct SHARED_API draw_factory : public non_copyable_virtual
 
     virtual shared_surface create_surface (connection_type native,
                                            connection_type legacy,
-                                           pixel_format format,
-                                           point2u size,
-                                           handle_type wnd,
-                                           surface_type type = surface_type::double_buffer) = 0;
+                                           pixel_format    format,
+                                           point2u         size  ,
+                                           handle_type     wnd   ,
+                                           surface_type    type = surface_type::double_buffer) = 0;
 
     virtual shared_context create_context (connection_type native,
                                            connection_type legacy,
-                                           pixel_format format,
-                                           shared_context shared = nullptr) = 0;
+                                           pixel_format    format,
+                                           shared_context  shared = nullptr) = 0;
 
     virtual device_backend backend () = 0;
     virtual shared_painter create_painter (shared_surface const& surface) = 0;
@@ -479,7 +503,7 @@ struct SHARED_API draw_factory : public non_copyable_virtual
 
 // ====================================================
 
-} } // namespace gfx
+} // namespace gfx
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_DRAW_H_

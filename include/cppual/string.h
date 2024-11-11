@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,271 +23,588 @@
 #define CPPUAL_TEXT_STRING_H_
 #ifdef __cplusplus
 
-#include <cppual/meta.h>
 #include <cppual/types.h>
-#include <cppual/concepts.h>
+#include <cppual/str_meta.h>
 #include <cppual/memory/allocator.h>
+#include <cppual/concept/concepts.h>
+#include <cppual/iterators/bi_iterator.h>
 
 #include <memory>
 #include <string>
-#include <cstring>
 #include <sstream>
+#include <cstddef>
+#include <type_traits>
+#include <string_view>
+
+// ====================================================
 
 namespace cppual {
 
-template <typename T, typename TAlloc = memory::allocator<T>>
-class SHARED_API cstring : private TAlloc
+// ====================================================
+
+using memory::allocator_t;
+
+template <typename T>
+concept str_view_like_t = requires (T t)
+{
+    typename T::value_type ;
+    typename T::traits_type;
+
+    { t } -> std::convertible_to<std::basic_string_view<typename T::value_type>>;
+};
+
+// ====================================================
+
+/**
+ ** @fstring (fast string) is a string implementation with locale traits and
+ ** small string optimization (SSO) for better performance with small strings.
+ ** for SSO it allocates memory on the stack. for char & char8_t -> 15 chars,
+ ** for char16_t -> 7 chars and for char32_t -> 3 chars.
+ ** the last character is always '\0'.
+ **/
+template <char_t T = char, allocator_t A = memory::allocator<T>>
+class SHARED_API fstring : private A
 {
 public:
-    typedef std::allocator_traits<TAlloc>              allocator_traits;
-    typedef typename allocator_traits::allocator_type  allocator_type  ;
-    typedef typename allocator_traits::size_type       size_type       ;
-    typedef typename allocator_traits::value_type      value_type      ;
-    typedef typename allocator_traits::pointer         pointer         ;
-    typedef typename allocator_traits::const_pointer   const_pointer   ;
-    typedef typename allocator_traits::reference       reference       ;
-    typedef typename allocator_traits::const_reference const_reference ;
+    typedef fstring<T, A>                           self_type             ;
+    typedef std::char_traits<T>                     traits_type           ;
+    typedef std::allocator_traits<A>                alloc_traits          ;
+    typedef alloc_traits::allocator_type            allocator_type        ;
+    typedef alloc_traits::value_type                value_type            ;
+    typedef alloc_traits::pointer                   pointer               ;
+    typedef alloc_traits::const_pointer             const_pointer         ;
+    typedef alloc_traits::reference                 reference             ;
+    typedef alloc_traits::const_reference           const_reference       ;
+    typedef std::size_t                             size_type             ;
+    typedef size_type const                         const_size            ;
+    typedef bidirectional_iterator<self_type>       iterator              ;
+    typedef bidirectional_iterator<self_type const> const_iterator        ;
+    typedef std::reverse_iterator<iterator>         reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+    typedef std::basic_string_view<value_type>      string_view           ;
+    typedef ptrdiff                                 difference            ;
 
-    static_assert (is_char<value_type>::value &&
-                   std::is_same<value_type, typename std::remove_cv<T>::type>::value,
-                   "T is not a char!");
+    static_assert (std::is_same_v<T, value_type>, "T & value_type are NOT the same!");
 
-    struct Buffer
+    inline constexpr static const_size npos = size_type (-1);
+
+    union buffer final
     {
-        CharType<value_type>* data     { };
-        size_type             capacity { };
+        struct buffer_heap ;
+        struct buffer_stack;
+
+        inline constexpr static size_type const sso_capacity =
+            (sizeof (buffer_heap) / sizeof (value_type)) - 1;
+        inline constexpr static size_type const sso_bytes = sizeof (buffer_heap) - sizeof (value_type);
+
+        struct buffer_heap
+        {
+            pointer   data     { };
+            size_type capacity { };
+
+            consteval buffer_heap () noexcept = default;
+            consteval buffer_heap (buffer_heap const&) = default;
+
+            consteval buffer_heap (size_type cap, pointer pdata = nullptr) noexcept
+            : data (pdata), capacity (cap)
+            { }
+        }
+        heap;
+
+        struct buffer_stack
+        {
+            value_type data[sso_capacity + 1];
+
+            consteval buffer_stack () noexcept = default;
+            consteval buffer_stack (buffer_stack const&) = default;
+        }
+        stack;
+
+        consteval buffer () noexcept = default;
+        consteval buffer (buffer const&) = default;
+
+        consteval buffer (size_type cap, pointer pdata = nullptr) noexcept
+        : heap (cap, pdata)
+        { }
     };
 
-    constexpr cstring () noexcept = default;
-    cstring substr (size_type begin_pos, size_type end_pos);
+    constexpr fstring () noexcept = default;
 
-    constexpr const_pointer  c_str         () const noexcept { return  _M_gBuffer.data    ; }
-    constexpr const_pointer  data          () const noexcept { return  _M_gBuffer.data    ; }
-    constexpr size_type      capacity      () const noexcept { return  _M_gBuffer.capacity; }
-    constexpr size_type      length        () const noexcept { return  _M_uLength         ; }
-    constexpr size_type      size          () const noexcept { return  _M_uLength         ; }
-    constexpr bool           empty         () const noexcept { return !_M_uLength         ; }
-    constexpr allocator_type get_allocator () const noexcept { return *this               ; }
-
-    inline cstring& operator = (T const* pText) noexcept
-    { return assign_to_string (*this, pText, std::strlen (pText)); }
-
-    inline cstring& operator = (cstring<T, TAlloc> const& gObj) noexcept
-    { return assign_to_string (*this, gObj._M_gBuffer.data, gObj._M_uLength); }
-
-    constexpr reference operator [] (size_type uPos) noexcept
-    { return *(_M_gBuffer.data + uPos); }
-
-    constexpr const_reference operator [] (size_type uPos) const noexcept
-    { return *(_M_gBuffer.data + uPos); }
-
-    inline ~cstring () noexcept
-    { if (_M_gBuffer.data) TAlloc::deallocate (_M_gBuffer.data, 0); }
-
-    inline explicit cstring (pointer       pText,
-                             TAlloc const& gAtor = TAlloc ()) noexcept
-    : allocator_type (gAtor),
-      _M_gBuffer ()
-    { copy_to_string (*this, pText, std::strlen (pText)); }
-
-    constexpr cstring (TAlloc const& gAtor) noexcept
-    : allocator_type (gAtor),
-      _M_gBuffer (),
-      _M_uLength ()
-    { }
-
-    inline cstring (pointer pText) noexcept
-    : allocator_type (), _M_gBuffer { pText, std::strlen (pText) }
-    { _M_uLength = _M_gBuffer.capacity; }
-
-    inline cstring (cstring<T, TAlloc> const& gObj) noexcept
-    : allocator_type (gObj), _M_gBuffer ()
-    { copy_to_string (*this, gObj._M_gBuffer.data, gObj._M_uLength); }
-
-    inline cstring (cstring<T, TAlloc>&& gObj) noexcept
-    : allocator_type (gObj),
-      _M_gBuffer (gObj._M_gBuffer),
-      _M_uLength (gObj._M_uLength)
+    constexpr fstring (string_view const& sv) noexcept
+    : allocator_type (),
+      _M_uLength (sv.size ()),
+      _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
     {
-        gObj._M_gBuffer.data     = nullptr;
-        gObj._M_gBuffer.capacity = gObj._M_uLength = 0;
-    }
-
-    inline cstring (size_type uCapacity) noexcept : cstring (nullptr)
-    {
-        if (uCapacity)
+        if (is_on_stack ())
         {
-            _M_gBuffer.data = TAlloc::allocate (uCapacity + 1U);
-            _M_uLength = _M_gBuffer.capacity = (_M_gBuffer.data ? uCapacity : 0);
+            std::copy (sv.begin (), sv.end (), _M_gBuffer.stack.data)
+            *(_M_gBuffer.stack.data + size ()) = value_type (0);
+        }
+        else
+        {
+            copy_to_string (*this, sv.data (), size ());
         }
     }
 
-    constexpr cstring (std::nullptr_t) noexcept
-    : allocator_type (), _M_gBuffer (), _M_uLength ()
+    template <str_view_like_t U>
+    constexpr fstring (U const& sv) noexcept
+    : allocator_type (),
+      _M_uLength (sv.size ()),
+      _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
+    {
+        if (is_on_stack ())
+        {
+            std::copy (sv.begin (), sv.end (), _M_gBuffer.stack.data);
+            *(_M_gBuffer.stack.data + size ()) = value_type (0);
+        }
+        else
+        {
+            copy_to_string (*this, sv.data (), size ());
+        }
+    }
+
+    inline explicit fstring (const_pointer pText, allocator_type const& ator = allocator_type ())
+    : allocator_type (ator),
+      _M_uLength (traits_type::length (pText)),
+      _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
+    {
+        if (is_on_stack ())
+        {
+            std::copy (pText, pText + _M_uLength, _M_gBuffer.stack.data);
+            *(_M_gBuffer.stack.data + size ()) = value_type (0);
+        }
+        else
+        {
+            copy_to_string (*this, pText, size ());
+        }
+    }
+
+    template <iterator_t Iterator>
+    inline fstring (Iterator first, Iterator last,
+                    allocator_type const& ator = allocator_type ())
+    : allocator_type (ator),
+      _M_uLength (last - first),
+      _M_gBuffer ()
+    {
+        if (is_on_stack ())
+        {
+            std::copy (first, last, _M_gBuffer.stack.data);
+            *(_M_gBuffer.stack.data + size ()) = value_type (0);
+        }
+        else
+        {
+            copy_to_string (*this, first, size ());
+        }
+    }
+
+    inline fstring (std::initializer_list<value_type> list,
+                    allocator_type const& ator = allocator_type ())
+    : allocator_type (ator),
+      _M_uLength (list.size ()),
+      _M_gBuffer ()
+    {
+        if (is_on_stack ())
+        {
+            std::copy (list.begin (), list.end (), _M_gBuffer.stack.data);
+            *(_M_gBuffer.stack.data + size ()) = value_type (0);
+        }
+        else
+        {
+            copy_to_string (*this, list.begin (), size ());
+        }
+    }
+
+    constexpr fstring (allocator_type const& ator) noexcept
+    : allocator_type (ator), self_type ()
     { }
 
-    inline cstring& operator = (cstring<T, TAlloc>&& gObj) noexcept
+    inline fstring (self_type const& gObj)
+    : allocator_type (gObj),
+      _M_uLength (gObj._M_uLength),
+      _M_gBuffer (_M_uLength)
     {
+        if (is_on_stack ())
+        {
+            std::copy (gObj.begin (), gObj.end (), _M_gBuffer.stack.data);
+            *(_M_gBuffer.stack.data + size ()) = value_type (0);
+        }
+        else
+        {
+            copy_to_string (*this, gObj.begin (), size ());
+        }
+    }
+
+    constexpr fstring (self_type&& gObj) noexcept
+    : allocator_type (gObj),
+      _M_uLength (),
+      _M_gBuffer (size_type ())
+    { swap (*this, gObj); }
+
+    inline fstring (size_type uCapacity)
+    : self_type ()
+    {
+        if (uCapacity > buffer::sso_capacity)
+        {
+            _M_gBuffer.heap.data     = allocator_type::allocate (uCapacity + 1);
+            _M_gBuffer.heap.capacity = (_M_gBuffer.heap.data ? uCapacity : size_type ());
+        }
+    }
+
+    constexpr fstring (std::nullptr_t) noexcept
+    : allocator_type (), self_type ()
+    { }
+
+    inline ~fstring ()
+    {
+        if (!is_on_stack () && size () > buffer::sso_capacity)
+            allocator_type::deallocate (_M_gBuffer.heap.data, capacity () + 1);
+    }
+
+    inline self_type& operator = (self_type&& gObj) noexcept
+    {
+        if (this == &gObj) return *this;
+
+        if (!is_on_stack () && size () > buffer::sso_capacity)
+            allocator_type::deallocate (_M_gBuffer.heap.data, capacity () + 1);
+
         _M_uLength      = gObj._M_uLength;
         _M_gBuffer      = gObj._M_gBuffer;
-        gObj._M_gBuffer = { 0 }         ;
-        gObj._M_uLength =   0           ;
+        gObj._M_gBuffer = { 0 }          ;
+        gObj._M_uLength = size_type ()   ;
+
         return *this;
+    }
+
+    inline self_type& operator = (const_pointer pText) noexcept
+    { return assign_to_string (*this, pText, traits_type::length (pText)); }
+
+    inline self_type& operator = (self_type const& gObj) noexcept
+    {
+        if (this == &gObj) return *this;
+        return assign_to_string (*this, gObj._M_gBuffer.heap.data, gObj._M_uLength);
+    }
+
+    self_type substr  (size_type begin_pos, size_type end_pos = npos);
+    bool      contains (string_view const& sv) const noexcept;
+    bool      contains (value_type ch) const noexcept;
+    bool      contains (const_pointer str) const;
+    bool      starts_with (string_view sv) const noexcept;
+    bool      starts_with (value_type ch) const noexcept;
+    bool      starts_with (const_pointer str) const;
+    bool      ends_with (string_view sv) const noexcept;
+    bool      ends_with (value_type ch) const noexcept;
+    bool      ends_with (const_pointer str) const;
+    void      resize (size_type count);
+    void      resize (size_type count, value_type ch);
+    size_type copy (pointer dest, size_type count, size_type pos = size_type ()) const;
+    void      push_back (value_type ch);
+    void      clear () noexcept;
+    void      find (self_type const& str, size_type pos = 0, size_type count = 0);
+    void      find (value_type const& str, size_type pos = 0, size_type count = 0);
+    void      find (value_type ch, size_type pos = 0);
+
+    template <str_view_like_t U>
+    void find (U const& sv, size_type pos = 0, size_type count = 0);
+
+    void      rfind (self_type const& str, size_type pos = npos, size_type count = 0);
+    void      rfind (value_type const& str, size_type pos = npos, size_type count = 0);
+    void      rfind (value_type ch, size_type pos = npos);
+
+    template <str_view_like_t U>
+    void rfind (U const& sv, size_type pos = npos, size_type count = 0);
+
+    constexpr const_pointer  c_str         () const noexcept { return  _M_gBuffer.heap.data; }
+    constexpr const_pointer  data          () const noexcept { return  _M_gBuffer.heap.data; }
+    constexpr pointer        data          ()       noexcept { return  _M_gBuffer.heap.data; }
+    constexpr size_type      length        () const noexcept { return  _M_uLength          ; }
+    constexpr size_type      size          () const noexcept { return  _M_uLength          ; }
+    constexpr bool           empty         () const noexcept { return !_M_uLength          ; }
+    constexpr allocator_type get_allocator () const noexcept { return *this                ; }
+
+    constexpr size_type size_bytes () const noexcept
+    { return  _M_uLength * sizeof (value_type); }
+
+    constexpr size_type capacity () const noexcept
+    { return  is_on_stack () ? buffer::sso_capacity : _M_gBuffer.heap.capacity; }
+
+    //! full means the allocated memory equals the length of the string (capacity == size)
+    constexpr bool full () const noexcept
+    { return  capacity () == size (); }
+
+    //! how many characters remain to fill the whole allocated memory (capacity > size)
+    constexpr size_type space_remaining () const noexcept
+    { return  capacity () - size (); }
+
+    constexpr iterator begin () noexcept
+    {  return iterator (*this, size_type ()); }
+
+    constexpr const_iterator begin () const noexcept
+    {  return const_iterator (*this, size_type ()); }
+
+    constexpr const_iterator cbegin () noexcept
+    {  return const_iterator (*this, size_type ()); }
+
+    constexpr const_iterator cbegin () const noexcept
+    {  return const_iterator (*this, size_type ()); }
+
+    constexpr iterator end () noexcept
+    {  return iterator (*this, size ()); }
+
+    constexpr const_iterator end () const noexcept
+    {  return const_iterator (*this, size ()); }
+
+    constexpr const_iterator cend () noexcept
+    {  return const_iterator (*this, size ()); }
+
+    constexpr const_iterator cend () const noexcept
+    {  return const_iterator (*this, size ()); }
+
+    constexpr reverse_iterator rbegin () noexcept
+    {  return reverse_iterator (*this, size () - 1); }
+
+    constexpr const_reverse_iterator rbegin () const noexcept
+    {  return const_reverse_iterator (*this, size () - 1); }
+
+    constexpr const_reverse_iterator crbegin () noexcept
+    {  return const_reverse_iterator (*this, size () - 1); }
+
+    constexpr const_reverse_iterator crbegin () const noexcept
+    {  return const_reverse_iterator (*this, size () - 1); }
+
+    constexpr reverse_iterator rend () noexcept
+    {  return reverse_iterator (*this, npos); }
+
+    constexpr const_reverse_iterator rend () const noexcept
+    {  return const_reverse_iterator (*this, npos); }
+
+    constexpr const_reverse_iterator crend () noexcept
+    {  return const_reverse_iterator (*this, npos); }
+
+    constexpr const_reverse_iterator crend () const noexcept
+    {  return const_reverse_iterator (*this, npos); }
+
+    constexpr reference front () noexcept
+    { return *_M_gBuffer.heap.data; }
+
+    constexpr const_reference front () const noexcept
+    { return *_M_gBuffer.heap.data; }
+
+    constexpr reference back () noexcept
+    { return *(_M_gBuffer.heap.data + (size () - 1)); }
+
+    constexpr const_reference back () const noexcept
+    { return *(_M_gBuffer.heap.data + (size () - 1)); }
+
+    constexpr reference at (size_type uPos) noexcept
+    {
+        assert  (uPos < size ());
+        return *(_M_gBuffer.heap.data + uPos);
+    }
+
+    constexpr const_reference at (size_type uPos) const noexcept
+    {
+        assert  (uPos < size ());
+        return *(_M_gBuffer.heap.data + uPos);
+    }
+
+    constexpr reference operator [] (size_type uPos) noexcept
+    { return *(_M_gBuffer.heap.data + uPos); }
+
+    constexpr const_reference operator [] (size_type uPos) const noexcept
+    { return *(_M_gBuffer.heap.data + uPos); }
+
+    constexpr operator string_view () const noexcept
+    { return string_view (data (), size ()); }
+
+    inline void pop_back () noexcept
+    {
+        back () = value_type (0);
+        --_M_uLength;
+    }
+
+    inline void reserve (size_type new_cap)
+    {
+        if (new_cap <= capacity ()) return;
+
+        pointer pNewData = allocator_type::allocate (new_cap + 1);
+
+        std::copy (begin (), end (), pNewData);
+        if (!is_on_stack ()) allocator_type::deallocate (data (), capacity () + 1);
+
+        _M_gBuffer.heap.data     = pNewData;
+        _M_gBuffer.heap.capacity = new_cap;
+    }
+
+    inline void shrink_to_fit ()
+    {
+        if (is_on_stack () || full ()) return;
+
+        const_size new_cap = size ();
+        pointer   pNewData = allocator_type::allocate (new_cap + 1);
+
+        std::copy (begin (), end (), pNewData);
+        allocator_type::deallocate (data (), capacity () + 1);
+
+        _M_gBuffer.heap.data     = pNewData;
+        _M_gBuffer.heap.capacity = _M_uLength = new_cap;
     }
 
     inline void erase () noexcept
     {
-        if (!_M_gBuffer.data or !_M_uLength) return;
-        _M_gBuffer.data[0] = '\0';
-        _M_uLength = 0;
+        if (!_M_uLength || !_M_gBuffer.heap.data) return;
+        _M_gBuffer.heap.data[0] = value_type (0);
+        _M_uLength              = size_type  ( );
     }
 
-    template <typename U, class TAtor>
-    friend void copy_to_string (cstring<U, TAtor>& copy_to,
-                                U const*           copy_from,
-                                size_type          length) noexcept;
+    template <char_t U, allocator_t _A, iterator_t Iterator>
+    friend fstring<U, _A>& copy_to_string (fstring<U, _A>& copy_to,
+                                           Iterator        copy_from,
+                                           size_type       length) noexcept;
 
-    template <typename U, class TAtor>
-    friend cstring<U, TAtor>& assign_to_string (cstring<U, TAtor>& assign_to,
-                                                U const*           assign_from,
-                                                size_type          length) noexcept;
+    template <char_t U, allocator_t _A, iterator_t Iterator>
+    friend fstring<U, _A>& assign_to_string (fstring<U, _A>& assign_to,
+                                             Iterator        assign_from,
+                                             size_type       length) noexcept;
 
-    template <typename U, class TAtor>
-    friend cstring<U, TAtor>& add_to_string (cstring<U, TAtor>& add_to,
-                                             U const*           add_from,
-                                             size_type          add_length) noexcept;
+    template <char_t U, allocator_t _A, iterator_t Iterator>
+    friend fstring<U, _A>& add_to_string (fstring<U, _A>& add_to,
+                                          Iterator        add_from,
+                                          size_type       add_length) noexcept;
 
-    template <typename U, class TAtor>
-    friend cstring<U, TAtor> operator + (cstring<U, TAtor> const& obj1,
-                                         cstring<U, TAtor> const& obj2) noexcept;
+    template <char_t U, allocator_t _A>
+    friend fstring<U, _A> operator + (fstring<U, _A> const& obj1, fstring<U, _A> const& obj2) noexcept;
 
-    template <typename U, class TAtor>
-    friend cstring<U, TAtor> operator + (cstring<U, TAtor> const& obj1,
-                                         U const*                 obj2) noexcept;
+    template <char_t U, allocator_t _A>
+    friend fstring<U, _A> operator + (fstring<U, _A> const& obj1, U const* obj2) noexcept;
 
-    template <typename U, class TAtor>
-    friend cstring<U, TAtor>& operator += (cstring<U, TAtor>&       obj1,
-                                           cstring<U, TAtor> const& obj2) noexcept;
+    template <char_t U, allocator_t _A>
+    friend fstring<U, _A>& operator += (fstring<U, _A>& obj1, fstring<U, _A> const& obj2) noexcept;
 
-    template <typename U, class TAtor>
-    friend cstring<U, TAtor>& operator += (cstring<U, TAtor>& obj1,
-                                           U const*           obj2) noexcept;
+    template <char_t U, allocator_t _A>
+    friend fstring<U, _A>& operator += (fstring<U, _A>& obj1, U const* obj2) noexcept;
 
-    template <typename U, class TAtor>
-    friend bool operator == (cstring<U, TAtor> const& obj1,
-                             cstring<U, TAtor> const& obj2) noexcept;
-
-    template <typename U, class TAtor>
-    friend bool operator == (cstring<U, TAtor> const& obj1,
-                             U const*                text2) noexcept;
+    template <char_t U, allocator_t _A>
+    friend constexpr void swap (fstring<U, _A>& lhs, fstring<U, _A>& rhs) noexcept;
 
 private:
-    Buffer    _M_gBuffer;
-    size_type _M_uLength;
+    constexpr bool is_on_stack () const noexcept
+    { return _M_uLength <= buffer::sso_capacity; }
+
+private:
+    size_type _M_uLength { };
+    buffer    _M_gBuffer { };
 };
 
-template <typename T, class TAlloc>
-cstring<T, TAlloc> cstring<T, TAlloc>::substr (size_type uBeginPos,
-                                               size_type uEndPos)
+// ====================================================
+
+template <char_t T, allocator_t A>
+fstring<T, A> fstring<T, A>::substr (size_type uBeginPos, size_type uEndPos)
 {
-    typedef cstring<T, TAlloc> fstring;
+    if (empty () || static_cast<difference> (uEndPos - uBeginPos) <= 0 || uBeginPos >= _M_uLength)
+        return self_type ();
 
-    if (empty () or
-            static_cast<ptrdiff> (uEndPos - uBeginPos) <= 0 or
-            uBeginPos > (_M_uLength - 1))
-        return fstring (nullptr);
+    self_type gSubStr (uEndPos - uBeginPos);
+    //size_type i = 0;
 
-    fstring   gSubStr (uEndPos - uBeginPos);
-    size_type i = 0;
+    std::copy (begin () + uBeginPos,
+               begin () + uBeginPos + gSubStr.capacity (), gSubStr.begin ());
 
-    while (uBeginPos <= uEndPos and i < _M_uLength)
-        gSubStr._M_gBuffer.data[i++] = _M_gBuffer.data[uBeginPos++];
+    //while (uBeginPos <= uEndPos && i < _M_uLength)
+    //    gSubStr._M_gBuffer.heap.data[i++] = _M_gBuffer.heap.data[uBeginPos++];
 
-    gSubStr[i] = T (0);
-    return std::move (gSubStr); // ?
+    *gSubStr.end () = value_type (0);
+
+    return std::move (gSubStr);
 }
 
 // ====================================================
 
-template <typename T, class TAlloc>
-void copy_to_string (cstring<T, TAlloc>&                    gObj,
-                     T const*                               pFromText,
-                     typename cstring<T, TAlloc>::size_type uLength) noexcept
+template <char_t T, allocator_t A, iterator_t Iterator>
+fstring<T, A>& copy_to_string (fstring<T, A>&                    gObj,
+                               Iterator                          pFromText,
+                               typename fstring<T, A>::size_type uLength)
 {
-    if (pFromText)
-    {
-        if (!(gObj._M_gBuffer.data = gObj.allocate (++uLength)))
-            return;
+    typedef typename fstring<T, A>::size_type size_type;
 
-        std::copy (pFromText, pFromText + uLength, gObj._M_gBuffer.data);
-
-        gObj._M_gBuffer.data[--uLength] = '\0';
-        gObj._M_gBuffer.capacity = gObj._M_uLength = uLength;
-    }
-}
-
-// ====================================================
-
-template <typename T>
-constexpr T const* strend (T const* pBegin, std::size_t uLen) noexcept
-{ return pBegin + uLen + sizeof (T); }
-
-
-template <typename T, class TAlloc>
-cstring<T, TAlloc>& assign_to_string (cstring<T, TAlloc>&                    gObj,
-                                      T const*                               pFromText,
-                                      typename cstring<T, TAlloc>::size_type uLength) noexcept
-{
     if (!pFromText) return gObj;
 
-    if (uLength > gObj._M_gBuffer.capacity)
+    if (uLength > gObj.capacity ())
     {
-        gObj.TAlloc::deallocate (gObj._M_gBuffer.data);
-        if (!(gObj._M_gBuffer.data = gObj.TAlloc::allocate (uLength + 1)))
+        if (!gObj.is_on_stack ()) gObj.deallocate (gObj.data (), gObj.capacity () + 1);
+
+        if (!(gObj._M_gBuffer.heap.data = gObj.allocate (uLength + 1)))
         {
-            gObj._M_gBuffer.capacity = gObj._M_uLength = 0;
+            gObj._M_uLength = size_type ();
+            gObj.stack.data[0] = fstring<T, T>::value_type ();
             return gObj;
         }
 
-        gObj._M_gBuffer.capacity = uLength;
+        gObj._M_gBuffer.heap.capacity = uLength;
     }
 
-    std::copy (pFromText, strend (pFromText, uLength),
-               gObj._M_gBuffer.data);
+    std::copy (pFromText, pFromText + uLength, gObj._M_gBuffer.heap.data);
     gObj._M_uLength = uLength;
 
-    gObj._M_gBuffer.data[uLength] = '\0';
+    gObj._M_gBuffer.heap.data[uLength] = typename fstring<T, A>::value_type ();
     return gObj;
 }
 
 // ====================================================
 
-template <typename T, class TAlloc>
-cstring<T, TAlloc>& add_to_string (cstring<T, TAlloc>& gObj,
-                                   T const*            pFromText,
-                                   std::size_t         uAddLength) noexcept
+template <char_t T, allocator_t A, iterator_t Iterator>
+fstring<T, A>& assign_to_string (fstring<T, A>&                    gObj,
+                                 Iterator                          pFromText,
+                                 typename fstring<T, A>::size_type uLength)
 {
-    typename cstring<T, TAlloc>::size_type const uLength =
-             gObj._M_uLength + uAddLength;
+    typedef typename fstring<T, A>::size_type size_type;
 
-    if (uLength > gObj._M_gBuffer.capacity)
+    if (!pFromText) return gObj;
+
+    if (uLength > gObj.capacity ())
     {
-        T* const pOldBuffer = gObj._M_gBuffer.data;
-
-        if (!(gObj._M_gBuffer.data = gObj.TAlloc::allocate (uLength + 1)))
+        gObj.deallocate (gObj.data (), gObj.capacity () + 1);
+        if (!(gObj._M_gBuffer.heap.data = gObj.allocate (uLength + 1)))
+        {
+            gObj._M_uLength = size_type ();
+            gObj.stack.data[0] = fstring<T, T>::value_type ();
             return gObj;
+        }
 
-        std::copy (pOldBuffer,
-                   pOldBuffer + (sizeof (T) * gObj._M_uLength),
-                   gObj._M_gBuffer.data);
-
-        gObj._M_gBuffer.capacity = uLength;
-        gObj.TAlloc::deallocate (pOldBuffer);
+        gObj._M_gBuffer.heap.capacity = uLength;
     }
 
-    std::copy (pFromText,
-               pFromText + ++uAddLength,
-               gObj._M_gBuffer.data + gObj._M_uLength);
+    std::copy (pFromText, pFromText + uLength, gObj._M_gBuffer.heap.data);
+    gObj._M_uLength = uLength;
+
+    gObj._M_gBuffer.heap.data[uLength] = fstring<T, A>::value_type ();
+    return gObj;
+}
+
+// ====================================================
+
+template <char_t T, allocator_t A, iterator_t Iterator>
+fstring<T, A>& add_to_string (fstring<T, A>& gObj,
+                              Iterator       pFromText,
+                              std::size_t    uAddLength)
+{
+    typedef typename fstring<T, A>::size_type size_type;
+
+    size_type const uLength = gObj.size () + uAddLength;
+
+    if (uLength > gObj.capacity ())
+    {
+        T* const pOldBuffer = gObj.data ();
+        size_type const uOldCapacity = gObj.capacity ();
+
+        if (!(gObj._M_gBuffer.heap.data = gObj.allocate (uLength + 1))) return gObj;
+
+        std::copy (pOldBuffer, pOldBuffer + gObj.size (), gObj.data ());
+
+        gObj._M_gBuffer.heap.capacity = uLength;
+        gObj.A::deallocate (pOldBuffer, uOldCapacity + 1);
+    }
+
+    std::copy (pFromText, pFromText + ++uAddLength, gObj.data () + gObj.size ());
 
     gObj._M_uLength = uLength;
     return gObj;
@@ -295,222 +612,212 @@ cstring<T, TAlloc>& add_to_string (cstring<T, TAlloc>& gObj,
 
 // ====================================================
 
-template <typename T, class TAlloc>
-bool operator == (cstring<T, TAlloc> const& lhObj,
-                  cstring<T, TAlloc> const& rhObj) noexcept
+template <char_t T, allocator_t A>
+constexpr bool operator <=> (fstring<T, A> const& lhs, fstring<T, A> const& rhs) noexcept
 {
-    if (lhObj._M_uLength != rhObj._M_uLength) return false;
+    return std::basic_string_view<T> (lhs) <=> std::basic_string_view<T> (rhs);
+}
 
-    for (auto i = 0; i < lhObj._M_uLength; ++i)
-        if (lhObj._M_gBuffer.data[i] != rhObj._M_gBuffer.data[i]) return false;
-    return true;
+template <char_t T, allocator_t A>
+constexpr bool operator <=> (fstring<T, A> const& lhs, T const* rhs) noexcept
+{
+    return std::basic_string_view<T> (lhs) <=> std::basic_string_view<T> (rhs);
+}
+
+template <char_t T, allocator_t A>
+constexpr bool operator <=> (T const* lhs, fstring<T, A> const& rhs) noexcept
+{
+    return std::basic_string_view<T> (lhs) <=> std::basic_string_view<T> (rhs);
 }
 
 // ====================================================
 
-template <typename T, class TAlloc>
-bool operator == (cstring<T, TAlloc> const& lhObj, T const* pText2) noexcept
+template <char_t T, allocator_t A>
+constexpr bool operator == (fstring<T, A> const& lhs, fstring<T, A> const& rhs) noexcept
 {
-    const auto uSize2 = strlen (pText2);
-    if (lhObj._M_uLength != uSize2) return false;
+    return std::basic_string_view<T> (lhs) == std::basic_string_view<T> (rhs);
+}
 
-    for (auto i = 0; i < uSize2; ++i)
-        if (lhObj._M_gBuffer.data[i] != pText2[i]) return false;
-    return true;
+template <char_t T, allocator_t A>
+constexpr bool operator == (fstring<T, A> const& lhs, T const* rhs) noexcept
+{
+    return std::basic_string_view<T> (lhs) == std::basic_string_view<T> (rhs);
+}
+
+template <char_t T, allocator_t A>
+constexpr bool operator == (T const* lhs, fstring<T, A> const& rhs) noexcept
+{
+    return std::basic_string_view<T> (lhs) == std::basic_string_view<T> (rhs);
 }
 
 // ====================================================
 
-template <typename T, class TAlloc>
-bool operator != (cstring<T, TAlloc> const& lhObj,
-                  cstring<T, TAlloc> const& rhObj) noexcept
+template <char_t T, allocator_t A>
+constexpr bool operator != (fstring<T, A> const& lhObj, fstring<T, A> const& rhObj) noexcept
 { return !(lhObj == rhObj); }
 
-
-template <typename T, class TAlloc>
-bool operator != (cstring<T, TAlloc> const& lhObj,
-                  T const*                  pText2) noexcept
+template <char_t T, allocator_t A>
+constexpr bool operator != (fstring<T, A> const& lhObj, T const* pText2) noexcept
 { return !(lhObj == pText2); }
 
-// ====================================================
-
-template <typename T, class TAlloc>
-inline cstring<T, TAlloc>& operator += (cstring<T, TAlloc>&       lhObj,
-                                        cstring<T, TAlloc> const& rhObj) noexcept
-{ return add_to_string (lhObj, rhObj._M_gBuffer.data, rhObj._M_uLength); }
-
-template <typename T, class TAlloc>
-inline cstring<T, TAlloc>& operator += (cstring<T>& gObj,
-                                        T const*    pText) noexcept
-{ return add_to_string (gObj, pText, std::strlen (pText)); }
+template <char_t T, allocator_t A>
+constexpr bool operator != (T const* pText1, fstring<T, A> const& rhObj) noexcept
+{ return !(pText1 == rhObj); }
 
 // ====================================================
 
-template <typename T, class TAlloc>
-inline cstring<T, TAlloc> operator + (cstring<T, TAlloc> const& lhObj,
-                                      cstring<T, TAlloc> const& rhObj) noexcept
+template <char_t T, allocator_t A>
+inline fstring<T, A>& operator += (fstring<T, A>& lhObj, fstring<T, A> const& rhObj) noexcept
+{ return add_to_string (lhObj, rhObj._M_gBuffer.heap.data, rhObj._M_uLength); }
+
+template <char_t T, allocator_t A>
+inline fstring<T, A>& operator += (fstring<T>& gObj, T const* pText) noexcept
+{ return add_to_string (gObj, pText, std::char_traits<T>::length (pText)); }
+
+// ====================================================
+
+template <char_t T, allocator_t A>
+inline fstring<T, A> operator + (fstring<T, A> const& lhObj, fstring<T, A> const& rhObj) noexcept
 {
-    cstring<T, TAlloc> gStr (lhObj);
-    return add_to_string (gStr, rhObj._M_gBuffer.data, rhObj._M_uLength);
+    fstring<T, A> gStr (lhObj);
+    return std::move (add_to_string (gStr, rhObj._M_gBuffer.heap.data, rhObj._M_uLength));
 }
 
 // ====================================================
 
-template <typename T, class TAlloc>
-inline cstring<T, TAlloc> operator + (cstring<T, TAlloc> const& gObj,
-                                      T const*                  pText) noexcept
+template <char_t T, allocator_t A>
+inline fstring<T, A> operator + (fstring<T, A> const& gObj, T const* pText) noexcept
 {
-    cstring<T, TAlloc> gStr (gObj);
-    return add_to_string (gStr, pText, std::strlen (pText));
+    fstring<T, A> gStr (gObj);
+    return std::move (add_to_string (gStr, pText, std::char_traits<T>::length (pText)));
 }
 
 // ====================================================
 
-template <typename T,
-          typename = typename std::enable_if_t<is_char<T>::value>>
+template <char_t T, allocator_t A>
+constexpr void swap (fstring<T, A>& lhs, fstring<T, A>& rhs) noexcept
+{
+    std::swap (lhs._M_gBuffer, rhs._M_gBuffer);
+    std::swap (lhs._M_uLength, rhs._M_uLength);
+}
+
+// ====================================================
+
+typedef fstring<char8 , memory::allocator<char8>>  fu8string ;
+typedef fstring<char16, memory::allocator<char16>> fu16string;
+typedef fstring<char32, memory::allocator<char32>> fu32string;
+typedef fstring<wchar , memory::allocator<wchar>>  fwstring  ;
+
+// ====================================================
+
+template <char_t T>
 using std_string = std::basic_string<T, std::char_traits<T>, std::allocator<T>>;
 
-template <typename T,
-          typename = typename std::enable_if_t<is_char<T>::value>>
-using std_istringstream = std::basic_istringstream<T, std::char_traits<T>, std::allocator<T>>;
+template <char_t T>
+using std_isstream = std::basic_istringstream<T, std::char_traits<T>, std::allocator<T>>;
 
-template <typename T,
-          typename = typename std::enable_if_t<is_char<T>::value>>
-using std_ostringstream = std::basic_ostringstream<T, std::char_traits<T>, std::allocator<T>>;
-template <typename T,
-          typename = typename std::enable_if_t<is_char<T>::value>>
-using std_stringstream = std::basic_stringstream<T, std::char_traits<T>, std::allocator<T>>;
+template <char_t T>
+using std_osstream = std::basic_ostringstream<T, std::char_traits<T>, std::allocator<T>>;
+template <char_t T>
+using std_sstream = std::basic_stringstream<T, std::char_traits<T>, std::allocator<T>>;
 
 // ====================================================
 
-template <typename T,
-          typename = typename std::enable_if_t<is_char<T>::value>>
+template <char_t T>
 using used_string = std::basic_string<T, std::char_traits<T>, memory::allocator<T>>;
 
-template <typename T,
-          typename = typename std::enable_if_t<is_char<T>::value>>
-using used_istringstream = std::basic_istringstream<T, std::char_traits<T>, memory::allocator<T>>;
+template <char_t T>
+using used_isstream = std::basic_istringstream<T, std::char_traits<T>, memory::allocator<T>>;
 
-template <typename T,
-          typename = typename std::enable_if_t<is_char<T>::value>>
-using used_ostringstream = std::basic_ostringstream<T, std::char_traits<T>, memory::allocator<T>>;
-template <typename T,
-          typename = typename std::enable_if_t<is_char<T>::value>>
-using used_stringstream = std::basic_stringstream<T, std::char_traits<T>, memory::allocator<T>>;
-
-// ====================================================
-
-typedef std::basic_string<char  , std::char_traits<char>  , memory::allocator<char>>   string    ;
-typedef std::basic_string<char16, std::char_traits<char16>, memory::allocator<char16>> u16string ;
-typedef std::basic_string<char32, std::char_traits<char32>, memory::allocator<char32>> u32string ;
-typedef std::basic_string<wchar , std::char_traits<wchar> , memory::allocator<wchar>>  wstring   ;
-typedef cstring<char  , memory::allocator<char>>                                       fstring   ;
-typedef cstring<char16, memory::allocator<char16>>                                     fu16string;
-typedef cstring<char32, memory::allocator<char32>>                                     fu32string;
-typedef cstring<wchar , memory::allocator<wchar>>                                      fwstring  ;
-
-// ====================================================
-
-typedef std::basic_istringstream<char  , std::char_traits<char>  , memory::allocator<char>>
-istringstream;
-typedef std::basic_istringstream<char16, std::char_traits<char16>, memory::allocator<char16>>
-u16istringstream;
-typedef std::basic_istringstream<char32, std::char_traits<char32>, memory::allocator<char32>>
-u32istringstream;
-typedef std::basic_istringstream<wchar , std::char_traits<wchar> , memory::allocator<wchar>>
-wistringstream;
-
-// ====================================================
-
-typedef std::basic_ostringstream<char  , std::char_traits<char>  , memory::allocator<char>>
-ostringstream;
-typedef std::basic_ostringstream<char16, std::char_traits<char16>, memory::allocator<char16>>
-u16ostringstream;
-typedef std::basic_ostringstream<char32, std::char_traits<char32>, memory::allocator<char32>>
-u32ostringstream;
-typedef std::basic_ostringstream<wchar , std::char_traits<wchar> , memory::allocator<wchar>>
-wostringstream;
-
-// ====================================================
-
-typedef std::basic_stringstream<char  , std::char_traits<char>  , memory::allocator<char>>
-stringstream;
-typedef std::basic_stringstream<char16, std::char_traits<char16>, memory::allocator<char16>>
-u16stringstream;
-typedef std::basic_stringstream<char32, std::char_traits<char32>, memory::allocator<char32>>
-u32stringstream;
-typedef std::basic_stringstream<wchar , std::char_traits<wchar> , memory::allocator<wchar>>
-wstringstream;
+template <char_t T>
+using used_osstream = std::basic_ostringstream<T, std::char_traits<T>, memory::allocator<T>>;
+template <char_t T>
+using used_sstream = std::basic_stringstream<T, std::char_traits<T>, memory::allocator<T>>;
 
 // ====================================================
 
 /// is of string type
-template <typename T, typename = typename T::allocator_type>
+template <typename T>
 struct is_string : std::false_type
 { };
 
 /// is std::basic_string type
-template <typename Allocator>
-struct is_string<std::basic_string<char, std::char_traits<char>, Allocator>, Allocator> : std::true_type
+template <allocator_t A>
+struct is_string<std::basic_string<char, std::char_traits<char>, A>> : std::true_type
 { };
 
 /// is std::basic_string type
-template <typename Allocator>
-struct is_string<std::basic_string<char16, std::char_traits<char16>, Allocator>, Allocator> : std::true_type
+template <allocator_t A>
+struct is_string<std::basic_string<char8, std::char_traits<char8>, A>> : std::true_type
 { };
 
 /// is std::basic_string type
-template <typename Allocator>
-struct is_string<std::basic_string<char32, std::char_traits<char32>, Allocator>, Allocator> : std::true_type
+template <allocator_t A>
+struct is_string<std::basic_string<char16, std::char_traits<char16>, A>> : std::true_type
 { };
 
 /// is std::basic_string type
-template <typename Allocator>
-struct is_string<std::basic_string<wchar, std::char_traits<wchar>, Allocator>, Allocator> : std::true_type
+template <allocator_t A>
+struct is_string<std::basic_string<char32, std::char_traits<char32>, A>> : std::true_type
 { };
 
-template <typename Allocator>
-struct is_string<cstring<char, Allocator>, Allocator> : std::true_type
+/// is std::basic_string type
+template <allocator_t A>
+struct is_string<std::basic_string<wchar, std::char_traits<wchar>, A>> : std::true_type
 { };
 
-template <typename Allocator>
-struct is_string<cstring<char16, Allocator>, Allocator> : std::true_type
+template <allocator_t A>
+struct is_string<fstring<char, A>> : std::true_type
 { };
 
-template <typename Allocator>
-struct is_string<cstring<char32, Allocator>, Allocator> : std::true_type
+template <allocator_t A>
+struct is_string<fstring<char8, A>> : std::true_type
 { };
 
-template <typename Allocator>
-struct is_string<cstring<wchar, Allocator>, Allocator> : std::true_type
+template <allocator_t A>
+struct is_string<fstring<char16, A>> : std::true_type
+{ };
+
+template <allocator_t A>
+struct is_string<fstring<char32, A>> : std::true_type
+{ };
+
+template <allocator_t A>
+struct is_string<fstring<wchar, A>> : std::true_type
 { };
 
 /// is of string type -> value
-template <typename T, typename Allocator = typename T::allocator_type>
-inline constexpr auto const is_string_v = is_string<T, Allocator>::value;
+template <typename T>
+inline constexpr auto const is_string_v = is_string<T>::value;
+
+template <typename T>
+using StringType = std::enable_if_t<is_string_v<T>, T>;
+
+template <typename T>
+concept string_t = is_string_v<T>;
 
 } // namespace cppual
 
 // ====================================================
 
-namespace std {
+// namespace std {
 
-//template <typename Char>
-//struct hash<basic_string<Char, char_traits<Char>, cppual::memory::allocator<Char>>>
-//{
-//    static_assert (cppual::is_char<Char>::value, "hash is not a char!");
+// using cppual::char_t;
 
+// template <char_t Char>
+// struct hash<basic_string<Char, char_traits<Char>, cppual::memory::allocator<Char>>>
+// {
 //    typedef basic_string<Char, char_traits<Char>, cppual::memory::allocator<Char>> string_type;
 
 //    size_t operator () (string_type const& value) const
 //    {
-//        return cppual::constexpr_hash(value.c_str());
+//        return cppual::constexpr_char_hash (value.c_str());
 //    }
-//};
+// };
 
-// ====================================================
+// // ====================================================
 
-} // namespace std
+// } // namespace std
 
 #endif // __cplusplus
 #endif // CPPUAL_TEXT_STRING_H_

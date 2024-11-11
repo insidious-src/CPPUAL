@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,10 +64,16 @@ protocol* protocol::uppest_layer () const
 {
     if (_M_pUpperProt != nullptr)
     {
-        auto pUppestProt = _M_pUpperProt;
+        auto pUppestProt     = _M_pUpperProt;
+        auto pPrevUppestProt = pUppestProt  ;
 
-        while (pUppestProt != nullptr) pUppestProt = pUppestProt->upper_layer ();
-        return pUppestProt;
+        while (pUppestProt != nullptr)
+        {
+            pPrevUppestProt = pUppestProt;
+            pUppestProt     = pUppestProt->upper_layer ();
+        }
+
+        return pPrevUppestProt;
     }
 
     return const_cast<protocol*> (this);
@@ -77,10 +83,16 @@ protocol* protocol::lowest_layer () const
 {
     if (_M_pLowerProt != nullptr)
     {
-        auto pLowestProt = _M_pLowerProt;
+        auto pLowestProt     = _M_pLowerProt;
+        auto pPrevLowestProt = pLowestProt  ;
 
-        while (pLowestProt != nullptr) pLowestProt = pLowestProt->lower_layer ();
-        return pLowestProt;
+        while (pLowestProt != nullptr)
+        {
+            pPrevLowestProt = pLowestProt;
+            pLowestProt     = pLowestProt->lower_layer ();
+        }
+
+        return pPrevLowestProt;
     }
 
     return const_cast<protocol*> (this);

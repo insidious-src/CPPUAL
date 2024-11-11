@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@
 
 #include <iostream>
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 // =========================================================
 
-namespace {
+namespace { // optimized for internal unit usage
 
 constexpr ::cl_mem_flags convert_access (memory_access access) noexcept
 {
@@ -35,7 +35,7 @@ constexpr ::cl_mem_flags convert_access (memory_access access) noexcept
            access == memory_access::write_only ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE;
 }
 
-}
+} // anonymous namespace
 
 // =========================================================
 
@@ -43,7 +43,7 @@ memory_chunk::memory_chunk (shared_context const& cntxt,
                             size_type             size,
                             memory_access         access,
                             memory_cat)
-: base_type (::clCreateBuffer (cntxt->handle<context_object::pointer> (),
+: base_type (::clCreateBuffer (cntxt->handle<context::pointer> (),
                                convert_access (access),
                                size,
                                nullptr,
@@ -61,4 +61,4 @@ memory_chunk::memory_chunk (shared_context const& cntxt,
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace CL

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,15 @@
 #define CPPUAL_UI_VIEW_MANAGER_H_
 #ifdef __cplusplus
 
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/resource.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/ui/display.h>
 
 #include <thread>
-#include <chrono>
+//#include <chrono>
 #include <memory>
+#include <string_view>
 
 namespace cppual { namespace ui {
 
@@ -58,16 +59,22 @@ typedef bitset         <window_flag           > window_flags ;
 
 // ====================================================
 
-class SHARED_API platform_wnd_interface : public resource <shared_display, resource_handle>
+class SHARED_API platform_wnd_interface : public resource<shared_display, resource_handle>
 {
 public:
     using resource<shared_display, resource_handle>::resource;
 
-    typedef shared_window const& const_pointer;
-    typedef std::size_t          size_type    ;
-    typedef string               string_type  ;
+    typedef platform_wnd_interface                 self_type          ;
+    typedef shared_display                         connection_type    ;
+    typedef resource_handle                        handle_type        ;
+    typedef resource<connection_type, handle_type> base_type          ;
+    typedef shared_window                          wnd_pointer        ;
+    typedef wnd_pointer&                           wnd_reference      ;
+    typedef wnd_pointer const&                     wnd_const_reference;
+    typedef std::size_t                            size_type          ;
+    typedef std::string_view                       string_type        ;
 
-    virtual weak_window  owner () const = 0;
+    virtual wnd_pointer  owner () const = 0;
     virtual window_flags flags () const = 0;
     virtual string_type  title () const = 0;
     virtual void         set_title (string_type const&) = 0;
@@ -90,7 +97,7 @@ public:
     virtual rect         geometry () const = 0;
     virtual u32          screen () const = 0;
     virtual bool         is_mapped () const = 0;
-    virtual void         set_owner (const_pointer) = 0;
+    virtual void         set_owner (wnd_const_reference) = 0;
     virtual void         set_geometry (rect const&) = 0;
     virtual void         raise () = 0;
     virtual void         lower () = 0;

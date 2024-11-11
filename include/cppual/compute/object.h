@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +23,12 @@
 #define CPPUAL_COMPUTE_OBJECT_H_
 #ifdef __cplusplus
 
-#include <cppual/meta.h>
 #include <cppual/types.h>
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/string.h>
 #include <cppual/resource.h>
 
-#include <string_view>
+//#include <string_view>
 
 namespace cppual { namespace compute {
 
@@ -55,21 +54,22 @@ class event;
 // =========================================================
 
 template <resource_type R>
-class object : public resource<void, void*>
+class SHARED_API object : public resource<void, void*>
 {
 public:
-    typedef std::size_t size_type  ;
-    typedef string      string_type;
+    typedef object<R>             self_type  ;
+    typedef resource<void, void*> base_type  ;
+    typedef std::size_t           size_type  ;
+    typedef string                string_type;
 
-    constexpr object () noexcept = default;
-
-    object (object&&) noexcept = default;
-    object& operator = (object&&) = default;
+    constexpr object () noexcept               = default;
+    inline object (self_type&&) noexcept       = default;
+    inline self_type& operator = (self_type&&) = default;
 
     constexpr static resource_type type () noexcept { return R; }
 
     constexpr operator handle_type::value_type () const noexcept
-    { return handle<handle_type::value_type>(); }
+    { return handle<handle_type::value_type> (); }
 
 protected:
     constexpr object (handle_type handle) noexcept

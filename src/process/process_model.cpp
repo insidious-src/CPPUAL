@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/process/proc_model.h>
+#include <cppual/process/process_model.h>
+
 #include <cstdlib>
 #include <stdexcept>
 
@@ -29,7 +30,7 @@
 
 namespace cppual { namespace process {
 
-process_handle This::handle () noexcept
+process_handle this_process::handle () noexcept
 {
 #   ifdef OS_STD_POSIX
     return ::getpid ();
@@ -58,7 +59,7 @@ process_handle create (cchar* path, char* args[])
 
 int terminate (process_handle hProc)
 {
-    if (This::handle () == hProc)
+    if (this_process::handle () == hProc)
         throw std::logic_error ("using terminate on current process");
 
 #   ifdef OS_STD_POSIX

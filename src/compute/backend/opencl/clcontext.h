@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,9 @@
 
 #include "opencl.h"
 
-namespace cppual { namespace compute { namespace cl {
+// =========================================================
+
+namespace cppual::compute::cl {
 
 // =========================================================
 
@@ -33,15 +35,23 @@ typedef ::cl_context_properties context_props_type;
 
 // =========================================================
 
-class context final : public context_object
+class context final : public context_interface
 {
 public:
-    typedef context_object         base_type    ;
+    typedef context                self_type    ;
+    typedef context_interface      base_type    ;
     typedef factory::device_vector device_vector;
+    typedef CLObject<context_type> value_type   ;
+    typedef value_type*            pointer      ;
+    typedef std::size_t            size_type    ;
+    typedef resource_handle        handle_type  ;
 
     context (device_vector const& devs, context_props_type* props);
 
-    context (pointer handle) noexcept : base_type (handle) { }
+    constexpr context (pointer handle) noexcept : base_type (handle) { }
+
+    constexpr pointer handle () const noexcept
+    { return base_type::handle<pointer> (); }
 
 private:
     template<typename T>
@@ -56,7 +66,7 @@ private:
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace CL
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_OPENCL_CONTEXT_H_

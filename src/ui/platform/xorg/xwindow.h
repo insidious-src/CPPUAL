@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ public:
     void        flash (uint);
     rect        geometry () const;
     bool        is_mapped () const;
-    void        set_owner (const_pointer);
+    void        set_owner (wnd_const_reference);
     void        set_geometry (rect const&);
     void        raise ();
     void        lower ();
@@ -78,7 +78,7 @@ public:
     bool        is_below () const;
 
     window_flags flags  () const noexcept { return _M_eFlags     ; }
-    weak_window  owner  () const noexcept { return  weak_window(); }
+    wnd_pointer  owner  () const noexcept { return  wnd_pointer(); }
     u32          screen () const noexcept { return _M_uScreen    ; }
 
     inline x::display_type* display () const noexcept

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 
 //#include <mutex>
 
-namespace cppual { namespace gfx { namespace gl {
+namespace cppual::gfx::gl {
 
 // ====================================================
 
@@ -43,6 +43,7 @@ class config
 {
 public:
     typedef resource_handle                     handle_type    ;
+    typedef handle_type::pointer                pointer        ;
     typedef i32                                 int_type       ;
     typedef handle_type  config::*              safe_bool      ;
     typedef resource_interface::connection_type connection_type;
@@ -77,7 +78,7 @@ public:
 
     ~config();
 
-    config (connection_type legacy,
+    config (connection_type native,
             format_type     format = format_type::default2d ());
 
     constexpr config (config const&) noexcept = default;
@@ -96,7 +97,7 @@ public:
     constexpr feature_types   features ()   const noexcept { return _M_eFeatures; }
     constexpr format_type     format   ()   const noexcept { return _M_gFormat  ; }
     constexpr handle_type     operator ()() const noexcept { return _M_pCfg     ; }
-    constexpr operator        void*    ()   const noexcept { return _M_pCfg     ; }
+    constexpr operator        pointer  ()   const noexcept { return _M_pCfg     ; }
 
     constexpr explicit operator safe_bool () const noexcept
     { return _M_pCfg ? &config::_M_pCfg : nullptr; }
@@ -153,7 +154,7 @@ public:
     connection_type connection    () const noexcept { return _M_pConf.display ();  }
     format_type     format        () const noexcept { return _M_pConf.format  ();  }
     surface_type    type          () const noexcept { return _M_eType;             }
-    context_type    context       () const noexcept { return _M_pContext;          }
+    shared_context  context       () const noexcept { return _M_pContext;          }
 
 private:
     void destroy ();
@@ -161,11 +162,11 @@ private:
     friend class context;
 
 private:
-    conf_value   _M_pConf   ;
-    handle_type  _M_pHandle ;
-    handle_type  _M_pWnd    ;
-    surface_type _M_eType   ;
-    context_type _M_pContext;
+    conf_value     _M_pConf   ;
+    handle_type    _M_pHandle ;
+    handle_type    _M_pWnd    ;
+    surface_type   _M_eType   ;
+    shared_context _M_pContext;
 };
 
 // ====================================================
@@ -189,7 +190,7 @@ public:
 
     static version_type platform_version () noexcept;
 
-    bool use     (pointer, pointer) noexcept;
+    bool use     (shared_surface, shared_surface) noexcept;
     bool assign  (shared_context const& cntxt) noexcept;
     void flush   () noexcept;
     void finish  () noexcept;
@@ -199,8 +200,8 @@ public:
     conf_reference configuration () const noexcept
     { return _M_pConf; }
 
-    pointer         readable      () const noexcept { return  _M_pReadTarget;       }
-    pointer         drawable      () const noexcept { return  _M_pDrawTarget;       }
+    shared_surface  readable      () const noexcept { return  _M_pReadTarget;       }
+    shared_surface  drawable      () const noexcept { return  _M_pDrawTarget;       }
     version_type    version       () const noexcept { return  _M_nVersion;          }
     device_backend  device        () const noexcept { return  device_backend::gl;   }
     handle_type     handle        () const noexcept { return  _M_pGC;               }
@@ -213,15 +214,15 @@ public:
 private:
     conf_value     _M_pConf      ;
     handle_type    _M_pGC        ;
-    pointer        _M_pDrawTarget;
-    pointer        _M_pReadTarget;
+    shared_surface _M_pDrawTarget;
+    shared_surface _M_pReadTarget;
     shared_context _M_pShared    ;
     version_type   _M_nVersion   ;
 };
 
 // ====================================================
 
-} } } // namespace gl
+} // namespace gl
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_EGL_SURFACE_H_

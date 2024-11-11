@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@
 #ifdef __cplusplus
 
 
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/containers.h>
 #include <cppual/multimedia/audio/format.h>
 #include <cppual/string.h>
 
-#include <array>
+//#include <array>
 #include <chrono>
 
 namespace cppual { namespace audio {

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,14 @@
 #define CPPUAL_TYPES_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
-
 #include <cstddef>
 #include <cstdint>
 
 namespace cppual {
 
-// int typedefs
+// =========================================================
+
+/// int typedefs
 typedef std::int8_t i8;
 typedef std::int_fast8_t fi8;
 typedef const std::int8_t ci8;
@@ -74,28 +74,20 @@ typedef const std::uintptr_t cuptr;
 typedef std::ptrdiff_t ptrdiff;
 typedef const std::ptrdiff_t cptrdiff;
 
-template <typename Out, typename In>
-union cast_union
-{
-    Out out;
-    In  in ;
+// =========================================================
 
-    cast_union () = delete;
-    constexpr cast_union (In val) noexcept : in (val) { }
-};
+template <std::size_t Bits = 64>
+inline constexpr std::size_t const arch_bits_v = Bits / 8;
 
-template <typename Out, typename In>
-constexpr Out direct_cast (In val) noexcept
-{
-    static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are not equal!");
-    return cast_union<Out, In> (val).out;
-}
+inline constexpr std::size_t const arch_16_bits_v = arch_bits_v<16>;
 
-template <typename Out, typename In>
-constexpr Out unsafe_direct_cast (In val) noexcept
-{
-    return cast_union<Out, In> (val).out;
-}
+inline constexpr std::size_t const arch_32_bits_v = arch_bits_v<32>;
+
+inline constexpr std::size_t const arch_64_bits_v = arch_bits_v<64>;
+
+inline constexpr std::size_t const arch_128_bits_v = arch_bits_v<128>;
+
+// =========================================================
 
 } // cppual
 

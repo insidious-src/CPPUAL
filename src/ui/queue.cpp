@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
 #include <cppual/ui/queue.h>
 #include <cppual/ui/manager.h>
 
-namespace cppual { namespace ui {
+namespace cppual::ui {
 
-namespace { namespace internal { // optimize for internal unit usage
+namespace { namespace internal { /// optimize for internal unit usage
 
 inline static const shared_queue& queue ()
 {
@@ -46,4 +46,4 @@ bool display_queue_interface::has_valid_instance () noexcept
     return internal::queue () != nullptr;
 }
 
-} } // namespace Input
+} // namespace Input

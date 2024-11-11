@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,15 +27,16 @@ namespace cppual {
 
 struct non_constructible
 {
+private:
     non_constructible () = delete;
     non_constructible (non_constructible const&) = delete;
-    non_constructible& operator = (non_constructible const&) = delete;
 };
 
 // ====================================================
 
 struct non_default_constructible
 {
+private:
     non_default_constructible () = delete;
 };
 
@@ -43,15 +44,20 @@ struct non_default_constructible
 
 struct non_default_constructible_virtual
 {
-    non_default_constructible_virtual () = delete;
     inline virtual ~non_default_constructible_virtual () { }
+
+private:
+    non_default_constructible_virtual () = delete;
 };
 
 // ====================================================
 
 struct non_copyable
 {
+public:
     constexpr non_copyable () = default;
+
+private:
     non_copyable (non_copyable const&) = delete;
     non_copyable& operator = (non_copyable const&) = delete;
 };
@@ -60,20 +66,26 @@ struct non_copyable
 
 struct non_copyable_virtual
 {
+public:
     constexpr non_copyable_virtual () = default;
+    virtual  ~non_copyable_virtual () { }
+
+private:
     non_copyable_virtual (non_copyable_virtual const&) = delete;
     non_copyable_virtual& operator = (non_copyable_virtual const&) = delete;
-    virtual ~non_copyable_virtual () { }
 };
 
 // ====================================================
 
 struct non_copyable_movable
 {
+public:
     constexpr non_copyable_movable () = default;
-    non_copyable_movable (non_copyable&&) = delete;
-    non_copyable_movable (non_copyable const&) = delete;
-    non_copyable_movable& operator = (non_copyable&&) = delete;
+
+private:
+    non_copyable_movable (non_copyable_movable&&) = delete;
+    non_copyable_movable (non_copyable_movable const&) = delete;
+    non_copyable_movable& operator = (non_copyable_movable&&) = delete;
     non_copyable_movable& operator = (non_copyable_movable const&) = delete;
 };
 
@@ -81,19 +93,25 @@ struct non_copyable_movable
 
 struct non_copyable_movable_virtual
 {
+public:
     constexpr non_copyable_movable_virtual () = default;
+    virtual  ~non_copyable_movable_virtual () { }
+
+private:
     non_copyable_movable_virtual (non_copyable_movable_virtual&&) = delete;
     non_copyable_movable_virtual (non_copyable_movable_virtual const&) = delete;
     non_copyable_movable_virtual& operator = (non_copyable_movable_virtual&&) = delete;
     non_copyable_movable_virtual& operator = (non_copyable_movable_virtual const&) = delete;
-    virtual ~non_copyable_movable_virtual () { }
 };
 
 // ====================================================
 
 struct non_copy_constructible
 {
+public:
     constexpr non_copy_constructible () = default;
+
+private:
     non_copy_constructible (non_copy_constructible const&) = delete;
 };
 
@@ -101,26 +119,35 @@ struct non_copy_constructible
 
 struct non_copy_constructible_virtual
 {
+public:
     constexpr non_copy_constructible_virtual () = default;
+    virtual  ~non_copy_constructible_virtual () { }
+
+private:
     non_copy_constructible_virtual (non_copy_constructible_virtual const&) = delete;
-    virtual ~non_copy_constructible_virtual () noexcept { }
 };
 
 // ====================================================
 
 struct non_copy_assignable
 {
+public:
     constexpr non_copy_assignable () = default;
-    non_copy_assignable& operator = (non_copy_assignable  const&) = delete;
+
+private:
+    non_copy_assignable& operator = (non_copy_assignable const&) = delete;
 };
 
 // ====================================================
 
 struct non_copy_assignable_virtual
 {
+public:
     constexpr non_copy_assignable_virtual () = default;
+    virtual  ~non_copy_assignable_virtual () { }
+
+private:
     non_copy_assignable_virtual& operator = (non_copy_assignable_virtual const&) = delete;
-    virtual ~non_copy_assignable_virtual () noexcept { }
 };
 
 } // cppual

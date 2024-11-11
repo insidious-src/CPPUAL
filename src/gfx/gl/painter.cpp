@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,15 @@
  */
 
 #include <cppual/gfx/gl/painter.h>
-#include <cppual/gfx/drawable/image.h>
 #include <cppual/gfx/gl/gldef.h>
 #include <cppual/gfx/gl/text.h>
 #include <cppual/gfx/gl/line.h>
 #include <cppual/gfx/gl/elipse.h>
 #include <cppual/gfx/gl/polygon.h>
 #include <cppual/gfx/gl/rectangle.h>
+#include <cppual/gfx/drawable/image.h>
 
-namespace cppual { namespace gfx { namespace gl {
+namespace cppual::gfx::gl {
 
 // =========================================================
 
@@ -113,4 +113,4 @@ shared_drawable2d painter::create_text (string_type const& text, font& txt_font)
     return shared_drawable2d (new label2d (text, txt_font));
 }
 
-} } } // namespace OpenGL
+} // namespace OpenGL

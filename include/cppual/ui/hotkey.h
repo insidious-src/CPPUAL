@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ namespace cppual { namespace ui {
 class SHARED_API hotkey
 {
 public:
-    typedef input::sys_event::key_data value_type;
-    typedef std::atomic_bool           bool_type ;
+    typedef input::event::key_data value_type;
+    typedef std::atomic_bool       bool_type ;
 
     hotkey () noexcept;
     hotkey (value_type const) noexcept;

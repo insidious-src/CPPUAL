@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/coord.h>
 
-namespace cppual { namespace input {
+namespace cppual::input {
 
 struct touch_event;
-struct mouse;
+struct mouse      ;
 struct mouse_event;
 
 // =========================================================
@@ -81,7 +81,7 @@ struct mouse
     static bool    is_connected () noexcept;
 };
 
-} } // namespace Input
+} // namespace Input
 
 #endif // __cplusplus
 #endif // CPPUAL_DEVICES_MOUSE_H_

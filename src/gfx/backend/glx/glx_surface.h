@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,14 +158,14 @@ public:
     connection_type connection    () const noexcept { return _M_pConf.native (); }
     format_type     format        () const noexcept { return _M_pConf.format (); }
     surface_type    type          () const noexcept { return _M_eType;           }
-    context_type    context       () const noexcept { return _M_pContext;        }
+    shared_context  context       () const noexcept { return _M_pContext;        }
 
 private:
-    conf_value   _M_pConf   ;
-    handle_type  _M_pHandle ;
-    handle_type  _M_pWnd    ;
-    surface_type _M_eType   ;
-    context_type _M_pContext;
+    conf_value     _M_pConf   ;
+    handle_type    _M_pHandle ;
+    handle_type    _M_pWnd    ;
+    surface_type   _M_eType   ;
+    shared_context _M_pContext;
 
     friend class context;
 };
@@ -189,7 +189,7 @@ public:
 
     static version_type platform_version () noexcept;
 
-    bool use     (pointer, pointer) noexcept;
+    bool use     (shared_surface, shared_surface) noexcept;
     bool assign  (shared_context const& cntxt) noexcept;
     void flush   () noexcept;
     void finish  () noexcept;
@@ -199,8 +199,8 @@ public:
     conf_reference configuration () const noexcept
     { return _M_pConf; }
 
-    pointer         readable      () const noexcept { return  _M_pReadTarget;       }
-    pointer         drawable      () const noexcept { return  _M_pDrawTarget;       }
+    shared_surface  readable      () const noexcept { return  _M_pReadTarget;       }
+    shared_surface  drawable      () const noexcept { return  _M_pDrawTarget;       }
     version_type    version       () const noexcept { return  _M_nVersion;          }
     device_backend  device        () const noexcept { return  device_backend::gl;   }
     handle_type     handle        () const noexcept { return  _M_pGC;               }
@@ -211,11 +211,11 @@ public:
     { return version_type { 3, 0 }; }
 
 private:
-    conf_value   _M_pConf      ;
-    handle_type  _M_pGC        ;
-    pointer      _M_pDrawTarget;
-    pointer      _M_pReadTarget;
-    version_type _M_nVersion   ;
+    conf_value     _M_pConf      ;
+    handle_type    _M_pGC        ;
+    shared_surface _M_pDrawTarget;
+    shared_surface _M_pReadTarget;
+    version_type   _M_nVersion   ;
 };
 
 // ====================================================

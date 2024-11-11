@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/containers.h>
 #include <cppual/noncopyable.h>
 #include <cppual/process/plugin.h>
@@ -37,7 +37,7 @@ namespace cppual { namespace compute {
 
 // =========================================================
 
-enum device_category
+enum device_type
 {
     none        =      0,
     cpu         = 1 << 0,
@@ -50,13 +50,13 @@ enum device_category
 enum class backend_type : u8
 {
     native,
-    opencl,
     vulkan,
+    opencl,
     d3d12 ,
     metal
 };
 
-enum class il_type : u16
+enum class il_type : u8
 {
     none   =      0,
     native = 1 << 0,
@@ -81,15 +81,15 @@ enum class memory_access : u8
     read_write
 };
 
-typedef bitset<device_category> device_categories;
-typedef bitset<il_type>         device_ils       ;
+typedef bitset<device_type> device_types;
+typedef bitset<il_type>     device_ils  ;
 
 // =========================================================
 
 class factory;
 class device_interface;
 class context_interface;
-class buffer_interface;
+class memory_interface;
 class cmd_seq_interface;
 class image_interface;
 class pipeline_interface;
@@ -106,7 +106,7 @@ class sampler_interface;
 typedef std::shared_ptr<factory>                   shared_factory        ;
 typedef std::shared_ptr<device_interface>          shared_device         ;
 typedef std::shared_ptr<context_interface>         shared_context        ;
-typedef std::shared_ptr<buffer_interface>          shared_buffer         ;
+typedef std::shared_ptr<memory_interface>          shared_memory         ;
 typedef std::shared_ptr<cmd_seq_interface>         shared_cmd_sequence   ;
 typedef std::shared_ptr<image_interface>           shared_image          ;
 typedef std::shared_ptr<pipeline_interface>        shared_pipeline       ;
@@ -127,13 +127,13 @@ public:
     typedef vector<shared_device>            device_vector;
     typedef process::plugin_manager<factory> manager_type ;
 
-    virtual device_vector          get_devices (device_categories type = device_category::any) = 0;
+    virtual device_vector          get_devices (device_types type = device_type::any) = 0;
     virtual shared_context         create_context (device_vector const& devs) = 0;
 
-    virtual shared_buffer          create_buffer (shared_context const& context,
-                                                  size_type size,
-                                                  memory_access = memory_access::read_write,
-                                                  memory_cat    = memory_cat::global) = 0;
+    virtual shared_memory          allocate_memory (shared_context const& context,
+                                                    size_type size,
+                                                    memory_access = memory_access::read_write,
+                                                    memory_cat    = memory_cat::global) = 0;
     \
     virtual shared_cmd_sequence    create_cmd_sequence () = 0;
     virtual shared_image           create_image () = 0;
@@ -145,7 +145,7 @@ public:
     virtual shared_state           create_state () = 0;
     virtual shared_queue           create_queue () = 0;
     virtual shared_sampler         create_sampler () = 0;
-    virtual size_type              device_count (device_categories type = device_category::any) = 0;
+    virtual size_type              device_count (device_types type = device_type::any) = 0;
 };
 
 // =========================================================
@@ -153,29 +153,33 @@ public:
 class SHARED_API factories : public non_copyable_virtual
 {
 public:
-    typedef vector<shared_factory> factory_vector          ;
-    typedef factory_vector&        factory_vector_reference;
-    typedef vector<cchar*>         libraries_vector        ;
-    typedef std::size_t            size_type               ;
+    typedef shared_factory        value_type                ;
+    typedef vector<value_type>    vector_type               ;
+    typedef vector_type&          vector_reference          ;
+    typedef vector_type const&    vector_const_reference    ;
+    typedef std::array<cchar*, 2> lib_vector                ;
+    typedef lib_vector&           lib_vector_reference      ;
+    typedef lib_vector const&     lib_vector_const_reference;
+    typedef std::size_t           size_type                 ;
 
-    factories (libraries_vector const&);
+    factories (lib_vector_const_reference);
 
     inline size_type size () const noexcept
     {
         return _M_factory_vec.size ();
     }
 
-    constexpr factory_vector_reference get_factories () noexcept
+    constexpr vector_reference get_factories () noexcept
     {
         return _M_factory_vec;
     }
 
 public:
-    static factory_vector_reference instances();
-    static bool                     has_valid_instance() noexcept;
+    static vector_reference instances          ();
+    static bool             has_valid_instance () noexcept;
 
 private:
-    factory_vector _M_factory_vec;
+    vector_type _M_factory_vec;
 };
 
 // =========================================================
@@ -183,7 +187,9 @@ private:
 class SHARED_API device_interface : public object<resource_type::device>
 {
 public:
-    typedef resource_version version_type;
+    typedef device_interface              self_type   ;
+    typedef object<resource_type::device> base_type   ;
+    typedef resource_version              version_type;
 
     enum class profile_type : u8
     {
@@ -191,20 +197,20 @@ public:
         embedded
     };
 
-    virtual string_type     name                 () const = 0;
-    virtual string_type     vendor               () const = 0;
-    virtual profile_type    profile              () const = 0;
-    virtual backend_type    backend              () const = 0;
-    virtual device_ils      supported_ils        () const = 0;
-    virtual device_category dev_type             () const = 0;
-    virtual version_type    version              () const = 0;
-    virtual size_type       cache_size           () const = 0;
-    virtual size_type       cache_line_size      () const = 0;
-    virtual size_type       local_memory_size    () const = 0;
-    virtual size_type       const_memory_size    () const = 0;
-    virtual size_type       global_memory_size   () const = 0;
-    virtual size_type       max_memory_alloc_size() const = 0;
-    virtual u32             compute_units        () const = 0;
+    virtual string_type     name                  () const = 0;
+    virtual string_type     vendor                () const = 0;
+    virtual profile_type    profile               () const = 0;
+    virtual backend_type    backend               () const = 0;
+    virtual device_ils      supported_ils         () const = 0;
+    virtual device_type     dev_type              () const = 0;
+    virtual version_type    version               () const = 0;
+    virtual size_type       cache_size            () const = 0;
+    virtual size_type       cache_line_size       () const = 0;
+    virtual size_type       local_memory_size     () const = 0;
+    virtual size_type       const_memory_size     () const = 0;
+    virtual size_type       global_memory_size    () const = 0;
+    virtual size_type       max_memory_alloc_size () const = 0;
+    virtual u32             compute_units_count   () const = 0;
 
 protected:
     using object<resource_type::device>::object;
@@ -220,7 +226,7 @@ protected:
 
 // =========================================================
 
-class SHARED_API buffer_interface : public object<resource_type::buffer>
+class SHARED_API memory_interface : public object<resource_type::buffer>
 {
 public:
     enum class address_space : u8
@@ -233,15 +239,15 @@ public:
 
     enum class memory_flag : u16
     {
-        ReadWrite     = 1 << 0,
-        ReadOnly      = 1 << 1,
-        WriteOnly     = 1 << 2,
-        UseHostPtr    = 1 << 3,
-        AllocHostPtr  = 1 << 4,
-        CopyHostPtr   = 1 << 5,
-        HostWriteOnly = 1 << 6,
-        HostReadOnly  = 1 << 7,
-        HostNoAccess  = 1 << 8
+        read_write      = 1 << 0,
+        read_only       = 1 << 1,
+        write_only      = 1 << 2,
+        use_host_ptr    = 1 << 3,
+        alloc_host_ptr  = 1 << 4,
+        copy_host_ptr   = 1 << 5,
+        host_write_only = 1 << 6,
+        host_read_only  = 1 << 7,
+        host_no_access  = 1 << 8
     };
 
     typedef bitset<memory_flag> memory_flags;
@@ -284,10 +290,10 @@ protected:
 
 // =========================================================
 
-class SHARED_API shader_interface : public object<resource_type::shader>
+class SHARED_API shader_interface : public object<resource_type::source_code>
 {
 protected:
-    using object<resource_type::shader>::object;
+    using object<resource_type::source_code>::object;
 };
 
 // =========================================================

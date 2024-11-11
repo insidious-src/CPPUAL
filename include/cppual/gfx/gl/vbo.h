@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,74 +23,76 @@
 #define CPPUAL_GFX_VERTEX_H_
 #ifdef __cplusplus
 
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/common.h>
 #include <cppual/string.h>
 #include <cppual/gfx/coord.h>
+#include <cppual/containers.h>
 #include <cppual/noncopyable.h>
 #include <cppual/gfx/gl/buffer.h>
 
-#include <vector>
-
 namespace cppual { namespace gfx { namespace gl {
 
-enum class UsageType : unsigned char
+enum class usage_type : uchar
 {
-    StreamDraw,
-    StreamRead,
-    StreamCopy,
-    StaticDraw,
-    StaticRead,
-    StaticCopy,
-    DynamicDraw,
-    DynamicRead,
-    DynamicCopy
+    stream_draw ,
+    stream_read ,
+    stream_copy ,
+    static_draw ,
+    static_read ,
+    static_copy ,
+    dynamic_draw,
+    dynamic_read,
+    dynamic_copy
 };
 
-struct GLMapFlag final
+struct gl_map_flag
 {
-    enum Type
+    enum type
     {
-        Read             = 1 << 0,
-        Write             = 1 << 1,
-        InvalidateRange  = 1 << 2,
-        InvalidateBuffer = 1 << 3,
-        ExplicitFlush     = 1 << 4,
-        Unsynchronized     = 1 << 5,
-        Persistent         = 1 << 6,
-        Coherent         = 1 << 7
+        read              = 1 << 0,
+        write             = 1 << 1,
+        invalidate_range  = 1 << 2,
+        invalidate_buffer = 1 << 3,
+        explicit_flush    = 1 << 4,
+        unsynchronized    = 1 << 5,
+        persistent        = 1 << 6,
+        coherent          = 1 << 7
     };
 };
 
 // ====================================================
 
-typedef bitset<GLMapFlag::Type> GLMapFlags;
+typedef bitset<gl_map_flag::type> gl_map_flags;
 
 // ====================================================
 
-class vertex_buffer final : public buffer_object
+class vertex_buffer : public buffer
 {
 public:
-    typedef byte              value_type;
-    typedef std::vector<byte> vector_type;
-    typedef byte*             pointer;
-    typedef byte const*       const_pointer;
+    typedef vertex_buffer      self_type    ;
+    typedef buffer             base_type    ;
+    typedef u8                 value_type   ;
+    typedef value_type*        pointer      ;
+    typedef value_type const*  const_pointer;
+    typedef vector<value_type> vector_type  ;
 
     vertex_buffer () noexcept;
     vertex_buffer (size_type size) noexcept;
+
     void* map_buffer_to_memory (access_mode access) noexcept;
-    void* map_subbuffer_to_memory (difference_type offset, difference_type length, GLMapFlags flags) noexcept;
+    void* map_subbuffer_to_memory (difference_type offset, difference_type length, gl_map_flags flags) noexcept;
     void  unmap_buffer () noexcept;
-    void  bind (BufferType type) noexcept;
-    void  upload (UsageType usage_hint);
+    void  bind (buffer_type type) noexcept;
+    void  upload (usage_type usage_hint);
     void  add_data (pointer data, size_type data_size);
 
-    inline const_pointer getDataPointer () const noexcept
-    { return _M_bIsUploaded ? &_M_gData[0] : nullptr; }
+    constexpr const_pointer get_data_pointer () const noexcept
+    { return _M_bIsUploaded ? _M_gData.data () : nullptr; }
 
 private:
-    vector_type _M_gData;
-    BufferType  _M_eType;
+    vector_type _M_gData      ;
+    buffer_type _M_eType      ;
     bool        _M_bIsUploaded;
 };
 

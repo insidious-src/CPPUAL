@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,17 @@
 #define CPPUAL_SYS_INFO_H_
 #ifdef __cplusplus
 
-#include <string>
 #include <cppual/string.h>
 
-namespace cppual { namespace system {
+// =========================================================
 
-enum class QueryCategory : u8
+namespace cppual::system {
+
+// =========================================================
+
+enum class query_category : u8
 {
-    Motherboard,
+    Motherboard = 1,
     CPU,
     GPU,
     PPU,
@@ -41,7 +44,7 @@ enum class QueryCategory : u8
     Environment
 };
 
-struct Motherboard final
+struct motherboard final
 {
     enum
     {
@@ -57,7 +60,7 @@ struct Motherboard final
     };
 };
 
-struct CPU final
+struct cpu final
 {
     enum
     {
@@ -74,7 +77,7 @@ struct CPU final
     };
 };
 
-struct GPU final
+struct gpu final
 {
     enum
     {
@@ -89,13 +92,19 @@ struct GPU final
     };
 };
 
-struct InfoQuery final
+// =========================================================
+
+struct info_query final
 {
-    static string label (QueryCategory category, uint query_id);
-    static int    value (QueryCategory category, uint query_id);
+    typedef string string_type;
+
+    static string label (query_category category, uint query_id);
+    static int    value (query_category category, uint query_id);
 };
 
-} } // namespace System
+// =========================================================
+
+} // namespace System
 
 #endif // __cplusplus
 #endif // CPPUAL_SYS_INFO_H_

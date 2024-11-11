@@ -1,23 +1,106 @@
 #ifndef CPPUAL_JSON_ADAPTOR_H
 #define CPPUAL_JSON_ADAPTOR_H
 
-#define RAPIDJSON_HAS_STDSTRING 1
+#undef  JSON_HAS_STDSTRING
+#define JSON_HAS_STDSTRING 1
 
 #include <cppual/memory/allocator.h>
 #include <cppual/functional.h>
 #include <cppual/signal.h>
 #include <cppual/types.h>
-#include <cppual/meta.h>
 #include <cppual/string.h>
 #include <cppual/containers.h>
 #include <cppual/json/document.h>
+#include <cppual/concept/concepts.h>
 
 #include <iostream>
 #include <utility>
 #include <cassert>
 #include <tuple>
 
-namespace cppual { namespace json {
+// ====================================================
+
+namespace cppual::json {
+
+//======================================================
+
+using memory::allocator_t;
+
+//======================================================
+
+template <typename>
+struct is_json_int : std::false_type
+{ };
+
+template <>
+struct is_json_int<u16> : std::true_type
+{ };
+
+template <>
+struct is_json_int<i16> : std::true_type
+{ };
+
+template <>
+struct is_json_int<u32> : std::true_type
+{ };
+
+template <>
+struct is_json_int<i32> : std::true_type
+{ };
+
+template <>
+struct is_json_int<u64> : std::true_type
+{ };
+
+template <>
+struct is_json_int<i64> : std::true_type
+{ };
+
+template <typename T>
+inline constexpr auto const is_json_int_v = is_json_int<T>::value;
+
+template <typename T>
+concept json_int_t = is_json_int_v<T>;
+
+//======================================================
+
+template <typename>
+struct is_json_float : std::false_type
+{ };
+
+template <>
+struct is_json_float<float> : std::true_type
+{ };
+
+template <>
+struct is_json_float<double> : std::true_type
+{ };
+
+template <typename T>
+inline constexpr auto const is_json_float_v = is_json_float<T>::value;
+
+template <typename T>
+concept json_float_t = is_json_float_v<T>;
+
+//======================================================
+
+template <typename>
+struct is_json_string : std::false_type
+{ };
+
+template <>
+struct is_json_string<string> : std::true_type
+{ };
+
+template <>
+struct is_json_string<std::string> : std::true_type
+{ };
+
+template <typename T>
+inline constexpr auto const is_json_string_v = is_json_string<T>::value;
+
+template <typename T>
+concept json_string_t = is_json_string_v<T>;
 
 // ====================================================
 
@@ -72,99 +155,33 @@ struct is_json_value<std::string> : std::true_type
 template <typename T>
 inline constexpr auto const is_json_value_v = is_json_value<T>::value;
 
-//======================================================
-
-template <typename>
-struct is_json_int : std:: false_type
-{ };
-
-template <>
-struct is_json_int<u32> : std::true_type
-{ };
-
-template <>
-struct is_json_int<i32> : std::true_type
-{ };
-
-template <>
-struct is_json_int<u16> : std::true_type
-{ };
-
-template <>
-struct is_json_int<i16> : std::true_type
-{ };
-
-template <>
-struct is_json_int<u64> : std::true_type
-{ };
-
-template <>
-struct is_json_int<i64> : std::true_type
-{ };
-
 template <typename T>
-inline constexpr auto const is_json_int_v = is_json_int<T>::value;
-
-//======================================================
-
-template <typename>
-struct is_json_float : std::false_type
-{ };
-
-template <>
-struct is_json_float<float> : std::true_type
-{ };
-
-template <>
-struct is_json_float<double> : std::true_type
-{ };
-
-template <typename T>
-inline constexpr auto const is_json_float_v = is_json_float<T>::value;
-
-//======================================================
-
-template <typename>
-struct is_json_string : std::false_type
-{ };
-
-template <>
-struct is_json_string<string> : std::true_type
-{ };
-
-template <>
-struct is_json_string<std::string> : std::true_type
-{ };
-
-template <typename T>
-inline constexpr auto const is_json_string_v = is_json_string<T>::value;
+concept json_value_t = is_json_value_v<T> || std::is_enum_v<T>;
 
 //======================================================
 
 class doc_parser;
 class value_reference_base;
 
-template <typename T>
+template <json_value_t T>
 class value_reference_template;
 
-template <typename T,
-          typename = typename std::enable_if<is_json_value_v<T>>::type>
+template <json_value_t T>
 class value_reference;
 
 class template_base  ;
 class template_object;
 class template_array ;
 
-template <typename T,
-          typename A = memory::allocator<value_reference<std::remove_cv_t<T>>>,
-          typename   = typename std::enable_if<is_json_value_v<T>>::type
+template <json_value_t T,
+          allocator_t  A = memory::allocator<value_reference<std::remove_cvref_t<T>>>
           >
 class values_array;
 
-template <typename T,
-          typename A = memory::allocator<T>,
-          typename   = typename std::enable_if<std::is_base_of_v<template_object, T> ||
-                                               std::is_base_of_v<template_array , T>>::type
+template <typename    T,
+          allocator_t A = memory::allocator<T>,
+          typename      = std::enable_if_t<std::is_base_of_v<template_object, T> ||
+                                           std::is_base_of_v<template_array , T>>
           >
 class objects_array;
 
@@ -172,7 +189,7 @@ class objects_array;
 
 enum class doc_type : u8
 {
-    null,
+    null  ,
     object,
     array
 };
@@ -194,6 +211,7 @@ class SHARED_API doc_parser : protected Document
 {
 public:
     typedef Document                           base_type      ;
+    typedef doc_parser                         self_type      ;
     typedef SizeType                           size_type      ;
     typedef string                             string_type    ;
     typedef Value                              value_type     ;
@@ -231,16 +249,16 @@ public:
     friend class template_object;
     friend class template_array ;
 
-    template <typename, typename, typename>
+    template <json_value_t, allocator_t>
     friend class values_array;
 
-    template <typename, typename, typename>
+    template <typename, allocator_t, typename>
     friend class objects_array;
 
-    template <typename T>
+    template <json_value_t T>
     friend class value_reference_template;
 
-    template <typename T, typename>
+    template <json_value_t T>
     friend class value_reference;
 
 private:
@@ -251,6 +269,8 @@ private:
 
 union SHARED_API template_pointer
 {
+    typedef template_pointer self_type;
+
     template_object* object;
     template_array*  array ;
     void*            ptr   ;
@@ -260,13 +280,13 @@ union SHARED_API template_pointer
     constexpr template_pointer (template_array * ptr) noexcept : array  (ptr) { }
 
     friend
-    constexpr bool operator == (template_pointer const&, template_pointer const&) noexcept;
+    constexpr bool operator == (self_type const&, self_type const&) noexcept;
 
     friend
-    constexpr bool operator == (template_pointer const&, std::nullptr_t) noexcept;
+    constexpr bool operator == (self_type const&, std::nullptr_t) noexcept;
 
     friend
-    constexpr bool operator == (std::nullptr_t, template_pointer const&) noexcept;
+    constexpr bool operator == (std::nullptr_t, self_type const&) noexcept;
 };
 
 // =========================================================
@@ -294,8 +314,9 @@ constexpr bool operator != (std::nullptr_t, template_pointer const& rh) noexcept
 class SHARED_API template_owner
 {
 public:
-    typedef template_pointer          pointer  ;
-    typedef pointer template_owner::* safe_bool;
+    typedef template_owner       self_type;
+    typedef template_pointer     pointer  ;
+    typedef pointer self_type::* safe_bool;
 
     constexpr template_owner () noexcept
     : _M_owner (),
@@ -332,7 +353,7 @@ public:
     {
         return _M_owner != nullptr &&
               (_M_type  == doc_type::object || _M_type == doc_type::array) ?
-               &template_owner::_M_owner : nullptr;
+               &self_type::_M_owner : nullptr;
     }
 
     constexpr doc_type type () const noexcept
@@ -344,8 +365,8 @@ private:
     pointer  _M_owner;
     doc_type _M_type ;
 
-    friend constexpr bool operator == (template_owner const&, std::nullptr_t) noexcept;
-    friend constexpr bool operator == (std::nullptr_t, template_owner const&) noexcept;
+    friend constexpr bool operator == (self_type const&, std::nullptr_t) noexcept;
+    friend constexpr bool operator == (std::nullptr_t, self_type const&) noexcept;
 };
 
 // =========================================================
@@ -367,6 +388,7 @@ constexpr bool operator != (std::nullptr_t, template_owner const& rh) noexcept
 class SHARED_API template_base
 {
 public:
+    typedef template_base                      self_type      ;
     typedef doc_parser::size_type              size_type      ;
     typedef doc_parser::value_type             value_type     ;
     typedef doc_parser::reference              reference      ;
@@ -380,15 +402,15 @@ public:
     static constexpr auto npos = static_cast<size_type> (-1);
 
     template_base () = delete;
-    template_base (template_base&&);
-    template_base (template_base const&);
+    template_base (self_type&&);
+    template_base (self_type const&);
     template_base (doc_parser& _parser, string_type const& _category);
     template_base (doc_parser& _parser, size_type _index);
     template_base (template_object* _owner, string_type const& _category);
     template_base (template_array* _owner, size_type _idx);
 
-    template_base& operator = (template_base const&);
-    template_base& operator = (template_base&&);
+    self_type& operator = (self_type const&);
+    self_type& operator = (self_type&&);
 
     virtual ~template_base();
 
@@ -455,16 +477,16 @@ private:
 
     friend class value_reference_base;
 
-    template <typename>
+    template <json_value_t>
     friend class value_reference_template;
 
-    template <typename, typename>
+    template <json_value_t>
     friend class value_reference;
 
-    template <typename, typename, typename>
+    template <json_value_t, allocator_t>
     friend class values_array;
 
-    template <typename, typename, typename>
+    template <typename, allocator_t, typename>
     friend class objects_array;
 
     friend class template_object;
@@ -476,16 +498,19 @@ private:
 class SHARED_API template_object : public template_base
 {
 public:
+    typedef template_object self_type;
+    typedef template_base   base_type;
+
     template_object () = delete;
-    template_object (template_object&&);
-    template_object (template_object const&);
+    template_object (self_type&&);
+    template_object (self_type const&);
     template_object (doc_parser& _parser, string_type const& _category);
     template_object (doc_parser& _parser, size_type _index);
     template_object (template_object* _owner, string_type const& _category);
     template_object (template_array* _owner, size_type _idx);
 
-    template_object& operator = (template_object const&);
-    template_object& operator = (template_object&&);
+    self_type& operator = (self_type const&);
+    self_type& operator = (self_type&&);
 
     virtual ~template_object();
 
@@ -511,13 +536,13 @@ private:
 private:
     friend class value_reference_base;
 
-    template <typename>
+    template <json_value_t>
     friend class value_reference_template;
 
-    template <typename, typename, typename>
+    template <json_value_t, allocator_t>
     friend class values_array;
 
-    template <typename, typename, typename>
+    template <typename, allocator_t, typename>
     friend class objects_array;
 
     friend class template_array;
@@ -528,16 +553,19 @@ private:
 class SHARED_API template_array : public template_base
 {
 public:
+    typedef template_array self_type;
+    typedef template_base  base_type;
+
     template_array () = delete;
-    template_array (template_array&&);
-    template_array (template_array const&);
+    template_array (self_type&&);
+    template_array (self_type const&);
     template_array (doc_parser& _parser, string_type const& _category);
     template_array (doc_parser& _parser, size_type _index);
     template_array (template_object* _owner, string_type const& _category);
     template_array (template_array* _owner, size_type _idx);
 
-    template_array& operator = (template_array const&);
-    template_array& operator = (template_array&&);
+    self_type& operator = (self_type const&);
+    self_type& operator = (self_type&&);
 
     virtual ~template_array ();
 
@@ -556,13 +584,13 @@ public:
     void on_array_changed();
     void on_removed(size_type idx);
 
-    signal<void()>          about_to_save;
+    signal<void()>          about_to_save  ;
     signal<void()>          about_to_append;
-    signal<void()>          appended;
+    signal<void()>          appended       ;
     signal<void(size_type)> about_to_remove;
-    signal<void(size_type)> removed;
-    signal<void()>          about_to_clear;
-    signal<void()>          cleared;
+    signal<void(size_type)> removed        ;
+    signal<void()>          about_to_clear ;
+    signal<void()>          cleared        ;
 
 private:
     void connections();
@@ -575,13 +603,13 @@ private:
 private:
     friend class value_reference_base;
 
-    template <typename>
+    template <json_value_t>
     friend class value_reference_template;
 
-    template <typename, typename, typename>
+    template <json_value_t, allocator_t>
     friend class values_array;
 
-    template <typename, typename, typename>
+    template <typename, allocator_t, typename>
     friend class objects_array;
 
     friend class template_object;
@@ -592,8 +620,8 @@ private:
 class SHARED_API value_reference_base
 {
 public:
-    typedef value_reference_base       base_type  ;
-    typedef function<void(base_type*)> func_type  ;
+    typedef value_reference_base       self_type  ;
+    typedef function<void(self_type*)> func_type  ;
     typedef doc_parser::pointer        pointer    ;
     typedef doc_parser::size_type      size_type  ;
     typedef doc_parser::value_type     json_type  ;
@@ -606,11 +634,11 @@ public:
         return ref()->GetType();
     }
 
-    value_reference_base () = delete;
-    value_reference_base (value_reference_base&&) = delete;
-    value_reference_base& operator = (value_reference_base&&) = delete;
-    value_reference_base (value_reference_base const&);
-    value_reference_base& operator = (value_reference_base const&);
+    value_reference_base  () = delete;
+    value_reference_base  (self_type&&) = delete;
+    self_type& operator = (self_type&&) = delete;
+    value_reference_base  (self_type const&);
+    self_type& operator = (self_type const&);
     virtual ~value_reference_base ();
 
     constexpr pointer ref () const
@@ -651,16 +679,16 @@ private:
     template_owner _M_owner;
     func_type      _M_fn   ;
 
-    template <typename>
+    template <json_value_t>
     friend class value_reference_template;
 
-    template <typename, typename>
+    template <json_value_t>
     friend class value_reference;
 
-    template <typename, typename, typename>
+    template <json_value_t, allocator_t>
     friend class values_array;
 
-    template <typename, typename, typename>
+    template <typename, allocator_t, typename>
     friend class objects_array;
 
     template <typename U>
@@ -672,21 +700,19 @@ private:
 
 // ======================================================================
 
-template <typename T>
+template <json_value_t T>
 class value_reference_template : public value_reference_base
 {
 public:
-    static_assert (is_json_value_v<T>, "invalid type!");
-
-    typedef value_reference_template<T> self_type;
+    typedef value_reference_template<T> self_type ;
+    typedef value_reference_base        base_type ;
+    typedef std::remove_cvref_t<T>      value_type;
 
     typedef typename std::conditional<std::is_same_v<i16, T> || std::is_enum_v<T>,
             typename std::conditional<sizeof (T) <= sizeof (i32), i32, i64>::type,
             typename std::conditional<std::is_same<u16, T>::value, uint, T>::type
             >::type
             default_type;
-
-    typedef typename std::remove_cv_t<T> value_type;
 
 protected:
     inline value_reference_template (template_object*    owner,
@@ -758,10 +784,10 @@ protected:
 
     friend class value_reference<T>;
 
-    template <typename, typename, typename>
+    template <json_value_t, allocator_t>
     friend class values_array;
 
-    template <typename, typename, typename>
+    template <typename, allocator_t, typename>
     friend class objects_array;
 };
 
@@ -772,6 +798,7 @@ class SHARED_API value_reference_template<doc_parser::string_type> : public valu
 {
 public:
     typedef value_reference_template<doc_parser::string_type> self_type ;
+    typedef value_reference_base                              base_type ;
     typedef doc_parser::string_type                           value_type;
 
 protected:
@@ -786,42 +813,41 @@ protected:
 private:
     friend class value_reference<value_type>;
 
-    template <typename, typename, typename>
+    template <json_value_t, allocator_t>
     friend class values_array;
 
-    template <typename, typename, typename>
+    template <typename, allocator_t, typename>
     friend class objects_array;
 };
 
 //======================================================
 
-template <typename T>
-class value_reference<T> : public value_reference_template<T>
+template <json_value_t T>
+class value_reference : public value_reference_template<T>
 {
 public:
-    static_assert (std::is_enum_v<T>, "T is NOT an enum!");
-
-    typedef value_reference_template<T>           reference_base;
-    typedef doc_parser::size_type                 size_type     ;
-    typedef typename reference_base::json_type    json_type     ;
-    typedef typename reference_base::string_type  string_type   ;
-    typedef typename reference_base::value_type   value_type    ;
-    typedef typename reference_base::default_type default_type  ;
+    typedef value_reference<T>          self_type     ;
+    typedef value_reference_template<T> base_type     ;
+    typedef doc_parser::size_type       size_type     ;
+    typedef base_type::json_type        json_type     ;
+    typedef base_type::string_type      string_type   ;
+    typedef base_type::value_type       value_type    ;
+    typedef base_type::default_type     default_type  ;
 
     inline value_reference (template_object*    owner,
                             string_type  const& name,
                             default_type const& default_val = default_type())
-    : reference_base(owner, name, default_val)
+    : base_type (owner, name, default_val)
     { }
 
     inline value_reference (template_array*     owner,
                             size_type           idx,
                             default_type const& default_val = default_type())
-    : reference_base(owner, idx, default_val)
+    : base_type (owner, idx, default_val)
     { }
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    constexpr value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
@@ -837,18 +863,18 @@ public:
                                                                    this->ref()->GetInt64 ());
     }
 
-    inline value_reference& operator = (value_reference const& ref)
+    inline self_type& operator = (self_type const& ref)
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type value)
+    inline self_type& operator = (value_type value)
     {
         if (sizeof (default_type) <= sizeof (i32))
-            this->ref()->SetInt (static_cast<i32> (value));
+            this->ref ()->SetInt (static_cast<i32> (value));
         else
-            this->ref()->SetInt64 (static_cast<i64>(value));
+            this->ref ()->SetInt64 (static_cast<i64>(value));
 
         return *this;
     }
@@ -860,10 +886,11 @@ template <>
 class SHARED_API value_reference<bool> : public value_reference_template<bool>
 {
 public:
-    typedef value_reference_template<bool>       reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef value_reference<bool>          self_type  ;
+    typedef value_reference_template<bool> base_type  ;
+    typedef base_type::json_type           json_type  ;
+    typedef base_type::string_type         string_type;
+    typedef base_type::value_type          value_type ;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -873,29 +900,29 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return ref()->GetBool();
+        return ref ()->GetBool ();
     }
 
     inline value_type value () const noexcept
     {
-        return ref()->GetBool();
+        return ref ()->GetBool ();
     }
 
-    inline value_reference& operator = (value_reference const& ref)
+    inline self_type& operator = (self_type const& ref)
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type value)
+    inline self_type& operator = (value_type value)
     {
-        ref()->SetBool(value);
+        ref ()->SetBool (value);
         return *this;
     }
 };
@@ -906,11 +933,12 @@ template <>
 class SHARED_API value_reference<u16> : public value_reference_template<u16>
 {
 public:
-    typedef value_reference_template<u16>         reference_base;
-    typedef typename reference_base::json_type    json_type     ;
-    typedef typename reference_base::string_type  string_type   ;
-    typedef typename reference_base::value_type   value_type    ;
-    typedef typename reference_base::default_type default_type  ;
+    typedef value_reference<u16>          self_type   ;
+    typedef value_reference_template<u16> base_type   ;
+    typedef base_type::json_type          json_type   ;
+    typedef base_type::string_type        string_type ;
+    typedef base_type::value_type         value_type  ;
+    typedef base_type::default_type       default_type;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -920,29 +948,29 @@ public:
                      size_type       idx,
                      value_type      default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return static_cast<value_type>(ref()->GetUint());
+        return static_cast<value_type>(ref ()->GetUint ());
     }
 
     inline value_type value () const noexcept
     {
-        return static_cast<value_type>(ref()->GetUint());
+        return static_cast<value_type>(ref ()->GetUint ());
     }
 
-    inline value_reference& operator = (value_reference const& ref) noexcept
+    inline self_type& operator = (self_type const& ref) noexcept
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type value)
+    inline self_type& operator = (value_type value)
     {
-        ref()->SetUint(static_cast<uint>(value));
+        ref ()->SetUint (static_cast<uint>(value));
         return *this;
     }
 };
@@ -953,11 +981,12 @@ template <>
 class SHARED_API value_reference<i16> : public value_reference_template<i16>
 {
 public:
-    typedef value_reference_template<i16>         reference_base;
-    typedef typename reference_base::json_type    json_type     ;
-    typedef typename reference_base::string_type  string_type   ;
-    typedef typename reference_base::value_type   value_type    ;
-    typedef typename reference_base::default_type default_type  ;
+    typedef value_reference<i16>          self_type   ;
+    typedef value_reference_template<i16> base_type   ;
+    typedef base_type::json_type          json_type   ;
+    typedef base_type::string_type        string_type ;
+    typedef base_type::value_type         value_type  ;
+    typedef base_type::default_type       default_type;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -967,29 +996,29 @@ public:
                      size_type       idx,
                      value_type      default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return static_cast<value_type>(ref()->GetInt());
+        return static_cast<value_type> (ref ()->GetInt ());
     }
 
     inline value_type value () const noexcept
     {
-        return static_cast<value_type>(ref()->GetInt());
+        return static_cast<value_type> (ref ()->GetInt ());
     }
 
-    inline value_reference& operator = (value_reference const& ref) noexcept
+    inline self_type& operator = (self_type const& ref) noexcept
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type value)
+    inline self_type& operator = (value_type value)
     {
-        ref()->SetInt(static_cast<int>(value));
+        ref ()->SetInt (static_cast<int> (value));
         return *this;
     }
 };
@@ -1000,10 +1029,11 @@ template <>
 class SHARED_API value_reference<u32> : public value_reference_template<u32>
 {
 public:
-    typedef value_reference_template<u32>        reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef value_reference<u32>          self_type  ;
+    typedef value_reference_template<u32> base_type  ;
+    typedef base_type::json_type          json_type  ;
+    typedef base_type::string_type        string_type;
+    typedef base_type::value_type         value_type ;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -1013,29 +1043,29 @@ public:
                      size_type       idx,
                      value_type      default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return ref()->GetUint();
+        return ref ()->GetUint ();
     }
 
     inline value_type value () const noexcept
     {
-        return ref()->GetUint();
+        return ref ()->GetUint ();
     }
 
-    inline value_reference& operator = (value_reference const& ref) noexcept
+    inline self_type& operator = (self_type const& ref) noexcept
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type value)
+    inline self_type& operator = (value_type value)
     {
-        ref()->SetUint(value);
+        ref ()->SetUint (value);
         return *this;
     }
 };
@@ -1046,42 +1076,43 @@ template <>
 class SHARED_API value_reference<i32> : public value_reference_template<i32>
 {
 public:
-    typedef value_reference_template<i32>        reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef value_reference<i32>          self_type  ;
+    typedef value_reference_template<i32> base_type  ;
+    typedef base_type::json_type          json_type  ;
+    typedef base_type::string_type        string_type;
+    typedef base_type::value_type         value_type ;
 
     value_reference (template_object*   owner,
-                     string_type const& name,
+                     string_type const& name ,
                      value_type  const& default_val = value_type());
 
     value_reference (template_array*   owner,
-                     size_type         idx,
+                     size_type         idx  ,
                      value_type const& default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return ref()->GetInt();
+        return ref ()->GetInt ();
     }
 
     inline value_type value () const noexcept
     {
-        return ref()->GetInt();
+        return ref ()->GetInt ();
     }
 
-    inline value_reference& operator = (value_reference const& ref) noexcept
+    inline self_type& operator = (self_type const& ref) noexcept
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type value) noexcept
+    inline self_type& operator = (value_type value) noexcept
     {
-        ref()->SetInt(value);
+        ref ()->SetInt (value);
         return *this;
     }
 };
@@ -1092,10 +1123,11 @@ template <>
 class SHARED_API value_reference<u64> : public value_reference_template<u64>
 {
 public:
-    typedef value_reference_template<u64>        reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef value_reference<u64>          self_type  ;
+    typedef value_reference_template<u64> base_type  ;
+    typedef base_type::json_type          json_type  ;
+    typedef base_type::string_type        string_type;
+    typedef base_type::value_type         value_type ;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -1105,29 +1137,29 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return ref()->GetUint64();
+        return ref ()->GetUint64 ();
     }
 
     inline value_type value () const noexcept
     {
-        return ref()->GetUint64();
+        return ref ()->GetUint64 ();
     }
 
-    inline value_reference& operator = (value_reference const& ref) noexcept
+    inline self_type& operator = (self_type const& ref) noexcept
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type const& value)
+    inline self_type& operator = (value_type const& value)
     {
-        ref()->SetUint64(value);
+        ref ()->SetUint64 (value);
         return *this;
     }
 };
@@ -1138,10 +1170,11 @@ template <>
 class SHARED_API value_reference<i64> : public value_reference_template<i64>
 {
 public:
-    typedef value_reference_template<i64>        reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef value_reference<i64>          self_type  ;
+    typedef value_reference_template<i64> base_type  ;
+    typedef base_type::json_type          json_type  ;
+    typedef base_type::string_type        string_type;
+    typedef base_type::value_type         value_type ;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -1151,29 +1184,29 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return ref()->GetInt64();
+        return ref ()->GetInt64 ();
     }
 
     inline value_type value () const noexcept
     {
-        return ref()->GetInt64();
+        return ref ()->GetInt64 ();
     }
 
-    inline value_reference& operator = (value_reference const& ref) noexcept
+    inline self_type& operator = (self_type const& ref) noexcept
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type const& value)
+    inline self_type& operator = (value_type const& value)
     {
-        ref()->SetInt64(value);
+        ref ()->SetInt64 (value);
         return *this;
     }
 };
@@ -1184,10 +1217,11 @@ template <>
 class SHARED_API value_reference<float> : public value_reference_template<float>
 {
 public:
-    typedef value_reference_template<float>      reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef value_reference<float>          self_type  ;
+    typedef value_reference_template<float> base_type  ;
+    typedef base_type::json_type            json_type  ;
+    typedef base_type::string_type          string_type;
+    typedef base_type::value_type           value_type ;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -1197,29 +1231,29 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return ref()->GetFloat();
+        return ref ()->GetFloat ();
     }
 
     inline value_type value () const noexcept
     {
-        return ref()->GetFloat();
+        return ref ()->GetFloat ();
     }
 
-    inline value_reference& operator = (value_reference const& ref) noexcept
+    inline self_type& operator = (self_type const& ref) noexcept
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type const& value)
+    inline self_type& operator = (value_type const& value)
     {
-        ref()->SetFloat(value);
+        ref ()->SetFloat (value);
         return *this;
     }
 };
@@ -1230,10 +1264,11 @@ template <>
 class SHARED_API value_reference<double> : public value_reference_template<double>
 {
 public:
-    typedef value_reference_template<double>     reference_base;
-    typedef typename reference_base::json_type   json_type     ;
-    typedef typename reference_base::string_type string_type   ;
-    typedef typename reference_base::value_type  value_type    ;
+    typedef value_reference<double>          self_type  ;
+    typedef value_reference_template<double> base_type  ;
+    typedef base_type::json_type             json_type  ;
+    typedef base_type::string_type           string_type;
+    typedef base_type::value_type            value_type ;
 
     value_reference (template_object*   owner,
                      string_type const& name,
@@ -1243,29 +1278,29 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj)
+    inline value_reference (self_type const& obj)
+    : base_type (obj)
     { }
 
     inline operator value_type () const noexcept
     {
-        return ref()->GetDouble();
+        return ref ()->GetDouble ();
     }
 
     inline value_type value () const noexcept
     {
-        return ref()->GetDouble();
+        return ref ()->GetDouble ();
     }
 
-    inline value_reference& operator = (value_reference const& ref) noexcept
+    inline self_type& operator = (self_type const& ref) noexcept
     {
-        reference_base::operator = (ref);
+        if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline value_reference& operator = (value_type const& value)
+    inline self_type& operator = (value_type const& value)
     {
-        ref()->SetDouble(value);
+        ref ()->SetDouble (value);
         return *this;
     }
 };
@@ -1277,27 +1312,28 @@ class SHARED_API value_reference<doc_parser::string_type> : public
                  value_reference_template<doc_parser::string_type>
 {
 public:
-    typedef value_reference_template<doc_parser::string_type> reference_base;
-    typedef typename reference_base::json_type                json_type     ;
-    typedef reference_base::string_type                       string_type   ;
-    typedef reference_base::value_type                        value_type    ;
+    typedef value_reference<doc_parser::string_type>          self_type  ;
+    typedef value_reference_template<doc_parser::string_type> base_type  ;
+    typedef base_type::json_type                              json_type  ;
+    typedef base_type::string_type                            string_type;
+    typedef base_type::value_type                             value_type ;
 
     value_reference (template_object*   owner,
-                     string_type const& name,
+                     string_type const& name  ,
                      value_type  const& default_val = value_type());
 
     value_reference (template_array*   owner,
-                     size_type         idx,
+                     size_type         idx  ,
                      value_type const& default_val = value_type());
 
     template <typename R,
-              typename = typename std::enable_if<std::is_same_v<R, value_type>>::type
+              typename = std::enable_if_t<std::is_same_v<R, value_type>>
               >
     inline value_reference(template_object*     owner,
-                           string_type const&   name,
-                           function<R()> const& fn,
+                           string_type const&   name ,
+                           function<R()> const& fn   ,
                            value_type const&    default_val = value_type())
-    : reference_base(owner, name, default_val)
+    : base_type (owner, name, default_val)
     {
         if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a string");
 
@@ -1308,13 +1344,13 @@ public:
     }
 
     template <typename R,
-              typename = typename std::enable_if<std::is_same_v<R, value_type>>::type
+              typename = std::enable_if_t<std::is_same_v<R, value_type>>
               >
     inline value_reference (template_array*      owner,
                             size_type            idx,
                             function<R()> const& fn,
                             value_type const&    default_val = value_type())
-    : reference_base(owner, idx, default_val)
+    : base_type (owner, idx, default_val)
     {
         if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a string");
 
@@ -1325,14 +1361,14 @@ public:
     }
 
     template <typename E,
-              typename = typename std::enable_if<std::is_enum_v<E>>::type
+              typename = std::enable_if_t<std::is_enum_v<E>>
               >
     inline value_reference (template_object*     owner,
                             string_type const&   name,
                             function<E()> const& fn,
                             value_type  const&   default_val = value_type(),
                             E = E())
-    : reference_base(owner, name, default_val)
+    : base_type (owner, name, default_val)
     {
         if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a string");
 
@@ -1343,14 +1379,14 @@ public:
     }
 
     template <typename E,
-              typename = typename std::enable_if<std::is_enum_v<E>>::type
+              typename = std::enable_if_t<std::is_enum_v<E>>
               >
     inline value_reference (template_array*      owner,
                             size_type            idx,
                             function<E()> const& fn,
                             value_type const&    default_val = value_type(),
                             E = E())
-    : reference_base(owner, idx, default_val)
+    : base_type (owner, idx, default_val)
     {
         if (!_M_ref->IsString()) throw std::runtime_error("Reference is NOT a string");
 
@@ -1360,63 +1396,63 @@ public:
         });
     }
 
-    inline value_reference (value_reference const& obj)
-    : reference_base(obj),
+    inline value_reference (self_type const& obj)
+    : base_type (obj),
       json_enum_invoked(obj.json_enum_invoked),
       json_string_invoked(obj.json_string_invoked)
     { }
 
     inline operator value_type () const
     {
-        return value_type(ref()->GetString(), ref()->GetStringLength());
+        return value_type(ref ()->GetString (), ref ()->GetStringLength ());
     }
 
     inline value_type value () const noexcept
     {
-        return value_type(ref()->GetString(), ref()->GetStringLength());
+        return value_type(ref ()->GetString (), ref ()->GetStringLength ());
     }
 
     inline value_type operator () () const
     {
         value_type value;
 
-        json_string_invoked(value);
+        json_string_invoked (value);
         return value;
     }
 
     template <typename U,
-              typename = typename std::enable_if<std::is_enum<U>::value>::type
+              typename = std::enable_if_t<std::is_enum_v<U>>
               >
     inline U to_enum () const
     {
         int value = 0;
 
-        json_enum_invoked(value);
-        return static_cast<U>(value);
+        json_enum_invoked (value);
+        return static_cast<U> (value);
     }
 
-    inline cchar* c_str() const
+    inline cchar* c_str () const
     {
-        return ref()->GetString();
+        return ref ()->GetString ();
     }
 
     //! string length
-    inline size_type length() const
+    inline size_type length () const
     {
         return ref()->GetStringLength();
     }
 
     //! string length
-    inline size_type size() const
+    inline size_type size () const
     {
-        return length();
+        return length ();
     }
 
-    inline value_reference& operator = (value_reference const& rh) noexcept
+    inline self_type& operator = (self_type const& rh) noexcept
     {
         if (this != &rh)
         {
-            reference_base::operator = (rh);
+            base_type::operator = (rh);
 
             json_enum_invoked   = rh.json_enum_invoked  ;
             json_string_invoked = rh.json_string_invoked;
@@ -1425,19 +1461,19 @@ public:
         return *this;
     }
 
-    inline value_reference& operator = (value_type const& value)
+    inline self_type& operator = (value_type const& value)
     {
         switch (owner().type())
         {
         case doc_type::object:
-            ref()->SetString(value.c_str(),
-                             static_cast<size_type>(value.size()),
-                             owner().object()->parser()->GetAllocator());
+            ref ()->SetString(value.c_str (),
+                              static_cast<size_type> (value.size ()),
+                              owner ().object ()->parser ()->GetAllocator ());
             break;
         case doc_type::array:
-            ref()->SetString(value.c_str(),
-                             static_cast<size_type>(value.size()),
-                             owner().array()->parser()->GetAllocator());
+            ref ()->SetString(value.c_str (),
+                              static_cast<size_type>(value.size ()),
+                              owner ().array ()->parser ()->GetAllocator ());
             break;
         default:
             break;
@@ -1446,15 +1482,15 @@ public:
         return *this;
     }
 
-    inline value_reference& operator = (value_type::value_type const* value)
+    inline self_type& operator = (value_type::value_type const* value)
     {
-        switch (owner().type())
+        switch (owner ().type ())
         {
         case doc_type::object:
-            ref()->SetString(value, owner().object()->parser()->GetAllocator());
+            ref ()->SetString (value, owner ().object ()->parser ()->GetAllocator ());
             break;
         case doc_type::array:
-            ref()->SetString(value, owner().array()->parser()->GetAllocator());
+            ref ()->SetString (value, owner ().array ()->parser ()->GetAllocator ());
             break;
         default:
             break;
@@ -1473,7 +1509,7 @@ private:
 inline bool operator == (value_reference<doc_parser::string_type> const& str1,
                          value_reference<doc_parser::string_type> const& str2)
 {
-   return str1.value() == str2.value();
+   return str1.value () == str2.value ();
 }
 
 inline bool operator != (value_reference<doc_parser::string_type> const& str1,
@@ -1485,7 +1521,7 @@ inline bool operator != (value_reference<doc_parser::string_type> const& str1,
 inline bool operator == (value_reference<doc_parser::string_type> const& str1,
                          value_reference<doc_parser::string_type>::value_type const& str2)
 {
-   return str1.value() == str2;
+   return str1.value () == str2;
 }
 
 inline bool operator != (value_reference<doc_parser::string_type> const& str1,
@@ -1497,7 +1533,7 @@ inline bool operator != (value_reference<doc_parser::string_type> const& str1,
 inline bool operator == (value_reference<doc_parser::string_type>::value_type const& str1,
                          value_reference<doc_parser::string_type> const& str2)
 {
-   return str1 == str2.value();
+   return str1 == str2.value ();
 }
 
 inline bool operator != (value_reference<doc_parser::string_type>::value_type const& str1,
@@ -1508,7 +1544,7 @@ inline bool operator != (value_reference<doc_parser::string_type>::value_type co
 
 inline bool operator == (cchar* str1, value_reference<doc_parser::string_type> const& str2) noexcept
 {
-   return str1 == str2.value();
+   return str1 == str2.value ();
 }
 
 inline bool operator != (cchar* str1, value_reference<doc_parser::string_type> const& str2) noexcept
@@ -1518,7 +1554,7 @@ inline bool operator != (cchar* str1, value_reference<doc_parser::string_type> c
 
 inline bool operator == (value_reference<doc_parser::string_type> const& str1, cchar* str2) noexcept
 {
-   return str1.value() == str2;
+   return str1.value () == str2;
 }
 
 inline bool operator != (value_reference<doc_parser::string_type> const& str1, cchar* str2) noexcept
@@ -1535,7 +1571,7 @@ operator + (value_reference<doc_parser::string_type> const& ref,
 {
     typedef value_reference<doc_parser::string_type>::value_type value_type;
 
-    return value_type(ref.value() + str);
+    return value_type (ref.value () + str);
 }
 
 inline
@@ -1545,7 +1581,7 @@ operator + (value_reference<doc_parser::string_type> const& ref,
 {
     typedef value_reference<doc_parser::string_type>::value_type value_type;
 
-    return value_type(ref.value() + str);
+    return value_type(ref.value () + str);
 }
 
 inline
@@ -1555,7 +1591,7 @@ operator + (value_reference<doc_parser::string_type> const& ref,
 {
     typedef value_reference<doc_parser::string_type>::value_type value_type;
 
-    return value_type(ref.value() + str);
+    return value_type(ref.value () + str);
 }
 
 inline
@@ -1565,7 +1601,7 @@ operator + (value_reference<doc_parser::string_type>::value_type const& str,
 {
     typedef value_reference<doc_parser::string_type>::value_type value_type;
 
-    return value_type(str + ref.c_str());
+    return value_type(str + ref.c_str ());
 }
 
 inline
@@ -1575,7 +1611,7 @@ operator + (value_reference<doc_parser::string_type>::value_type::value_type str
 {
     typedef value_reference<doc_parser::string_type>::value_type value_type;
 
-    return value_type(str + ref.value());
+    return value_type(str + ref.value ());
 }
 
 inline
@@ -1585,7 +1621,7 @@ operator + (value_reference<doc_parser::string_type>::value_type::value_type con
 {
     typedef value_reference<doc_parser::string_type>::value_type value_type;
 
-    return value_type(str + ref.value());
+    return value_type(str + ref.value ());
 }
 
 //======================================================
@@ -1593,15 +1629,15 @@ operator + (value_reference<doc_parser::string_type>::value_type::value_type con
 template <typename T>
 inline bool operator == (value_reference<T> const& lh, std::nullptr_t)
 {
-   return lh._M_owner.type() == doc_type::null ||
-          lh._M_ref == nullptr || lh._M_ref->IsNull();
+   return lh._M_owner.type ()  == doc_type::null    ||
+          lh._M_ref == nullptr || lh._M_ref->IsNull ();
 }
 
 template <typename T>
 inline bool operator == (std::nullptr_t, value_reference<T> const& rh)
 {
-    return rh._M_owner.type() == doc_type::null ||
-           rh._M_ref == nullptr || rh._M_ref->IsNull();
+    return rh._M_owner.type ()  == doc_type::null    ||
+           rh._M_ref == nullptr || rh._M_ref->IsNull ();
 }
 
 template <typename T>
@@ -1618,40 +1654,41 @@ inline bool operator != (std::nullptr_t, value_reference<T> const& rh)
 
 // ======================================================================
 
-template <typename T, typename A>
+template <typename T, allocator_t A>
 class objects_array<T, A> : public template_array, public A
 {
 public:
-    typedef objects_array<T, A>                         self_type             ;
-    typedef std::remove_cv_t<T>                         value_type            ;
-    typedef std::allocator_traits<A>                    allocator_traits      ;
-    typedef typename allocator_traits::allocator_type   allocator_type        ;
-    typedef std::deque<value_type, allocator_type>      array_type            ;
-    typedef doc_parser::size_type                       size_type             ;
-    typedef doc_parser::size_type const                 const_size            ;
-    typedef typename array_type::difference_type        difference_type       ;
-    typedef typename array_type::reference              reference             ;
-    typedef typename array_type::const_reference        const_reference       ;
-    typedef typename array_type::iterator               iterator              ;
-    typedef typename array_type::const_iterator         const_iterator        ;
-    typedef typename array_type::reverse_iterator       reverse_iterator      ;
-    typedef typename array_type::const_reverse_iterator const_reverse_iterator;
+    typedef objects_array<T, A>                    self_type             ;
+    typedef template_array                         base_type             ;
+    typedef std::remove_cvref_t<T>                 value_type            ;
+    typedef std::allocator_traits<A>               traits_type           ;
+    typedef traits_type::allocator_type            allocator_type        ;
+    typedef std::deque<value_type, allocator_type> array_type            ;
+    typedef doc_parser::size_type                  size_type             ;
+    typedef doc_parser::size_type const            const_size            ;
+    typedef array_type::difference_type            difference_type       ;
+    typedef array_type::reference                  reference             ;
+    typedef array_type::const_reference            const_reference       ;
+    typedef array_type::iterator                   iterator              ;
+    typedef array_type::const_iterator             const_iterator        ;
+    typedef array_type::reverse_iterator           reverse_iterator      ;
+    typedef array_type::const_reverse_iterator     const_reverse_iterator;
 
-    objects_array (doc_parser&           prsr,
+    objects_array (doc_parser&           prsr    ,
                    string_type    const& category,
-                   allocator_type const& ator = allocator_type())
-    : template_array (prsr, category),
+                   allocator_type const& ator = allocator_type ())
+    : base_type (prsr, category),
       allocator_type (ator)
     {
-        for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back(this, i);
+        for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
 
         values_connections ();
     }
 
-    objects_array (template_object*      owner,
+    objects_array (template_object*      owner   ,
                    string_type    const& category,
-                   allocator_type const& ator = allocator_type())
-    : template_array (owner, category),
+                   allocator_type const& ator = allocator_type ())
+    : base_type (owner, category),
       allocator_type (ator)
     {
         for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
@@ -1660,9 +1697,9 @@ public:
     }
 
     objects_array (template_array*       owner,
-                   size_type             id,
-                   allocator_type const& ator = allocator_type())
-    : template_array (owner, id),
+                   size_type             id   ,
+                   allocator_type const& ator = allocator_type ())
+    : base_type (owner, id),
       allocator_type (ator)
     {
         for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
@@ -1839,14 +1876,15 @@ private:
 
 // ======================================================================
 
-template <typename T, typename A>
-class values_array<T, A> : public template_array, public A
+template <json_value_t T, allocator_t A>
+class values_array : public template_array, public A
 {
 public:
     typedef values_array<T, A>                          self_type             ;
-    typedef value_reference<std::remove_cv_t<T>>        value_type            ;
-    typedef std::allocator_traits<A>                    allocator_traits      ;
-    typedef typename allocator_traits::allocator_type   allocator_type        ;
+    typedef template_array                              base_type             ;
+    typedef value_reference<std::remove_cvref_t<T>>     value_type            ;
+    typedef std::allocator_traits<A>                    traits_type           ;
+    typedef traits_type::allocator_type                 allocator_type        ;
     typedef std::deque<value_type, allocator_type>      array_type            ;
     typedef doc_parser::size_type                       size_type             ;
     typedef doc_parser::size_type const                 const_size            ;
@@ -1861,7 +1899,7 @@ public:
     values_array (doc_parser&           prsr,
                   string_type    const& category,
                   allocator_type const& ator = allocator_type())
-    : template_array (prsr, category),
+    : base_type (prsr, category),
       allocator_type (ator)
     {
         for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
@@ -1872,7 +1910,7 @@ public:
     values_array (template_object*      owner,
                   string_type    const& category,
                   allocator_type const& ator = allocator_type())
-    : template_array (owner, category),
+    : base_type (owner, category),
       allocator_type (ator)
     {
         for (size_type i = 0; i < _M_ref->Size (); ++i) _M_values.emplace_back (this, i);
@@ -2055,6 +2093,7 @@ public:
     template <typename T>
     using shared_ptr = std::shared_ptr<T>;
 
+    typedef factory                                      self_type          ;
     typedef doc_parser::string_type                      string_type        ;
     typedef doc_parser::size_type                        size_type          ;
     typedef shared_ptr<doc_parser>                       json_ptr           ;
@@ -2209,9 +2248,9 @@ public:
     signal<void(size_type)> after_reset_doc   ;
 
 private:
-    mutable json_map    _M_jsonDocs;
-    mutable objects_map _M_objects ;
-    mutable arrays_map  _M_arrays  ;
+    json_map    mutable _M_jsonDocs;
+    objects_map mutable _M_objects ;
+    arrays_map  mutable _M_arrays  ;
 };
 
 // ======================================================================
@@ -2221,7 +2260,7 @@ inline std::ostream& operator << (std::ostream& stream, value_reference<doc_pars
    return stream << ref.value();
 }
 
-} } // namespace Json
+} // namespace Json
 
 
 #endif // CPPUAL_JSON_ADAPTOR_H

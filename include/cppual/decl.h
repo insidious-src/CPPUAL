@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,12 +45,14 @@
 #undef OS_WIN32
 #undef OS_WIN64
 #undef OS_WINDOWS
-#undef OS_PS3       // undefined
+#undef OS_PS3         // undefined
 #undef OS_PS4
-#undef OS_XBOX360   // undefined
-#undef OS_XBOXONE   // undefined
-#undef OS_WII_U     // undefined
-#undef OS_FREERT    // undefined
+#undef OS_PS5         // undefined
+#undef OS_XBOX360     // undefined
+#undef OS_XBOXONE     // undefined
+#undef OS_XBOX_SERIES // undefined
+#undef OS_WII_U       // undefined
+#undef OS_FREERT      // undefined
 #undef ARCH_64BITS
 #undef ARCH_32BITS
 #undef TXT
@@ -123,17 +125,17 @@
 #       define OS_CURRENT OS_BSD
 #       define OS_STD_POSIX
 #   elif defined (__ANDROID__)
-#       define OS_ANDROID
+#       define OS_ANDROID 5
 #       define OS_CURRENT OS_ANDROID
 #       define OS_STD_POSIX
 #   elif defined (_AIX)
-#       define OS_AIX 5
+#       define OS_AIX 6
 #       define OS_CURRENT OS_AIX
 #   elif (defined (__sun) or defined (__sun__)) and (defined (__SVR4) or defined (__SVR4__))
-#       define OS_SOLARIS 6
+#       define OS_SOLARIS 7
 #       define OS_CURRENT OS_SOLARIS
 #   elif defined(__ORBIS__)
-#       define OS_PS4 7
+#       define OS_PS4 8
 #       define OS_CURRENT OS_PS4
 #       define OS_STD_POSIX
 #   endif
@@ -313,17 +315,6 @@
 #   define TXT(quote) quote
 #endif
 
-
-template <typename T, typename U>
-constexpr T pointer_cast (U ptr)
-{
-#ifdef DEBUG_MODE
-    return dynamic_cast<T> (ptr);
-#else
-    return static_cast<T> (ptr);
-#endif
-}
-
 namespace cppual {
 
 /// void typedefs
@@ -333,51 +324,42 @@ typedef const void cvoid;
 typedef const bool cbool;
 
 /// 1 byte size typedefs
-using  byte = std::byte;
-using cbyte = std::byte const;
+typedef std::byte        byte;
+typedef std::byte const cbyte;
 
-/// ASCII & UTF-8 sized typedefs
-typedef const char cchar;
+/// ASCII typedefs
+typedef char const cchar;
 typedef unsigned char uchar;
-typedef const unsigned char cuchar;
+typedef unsigned char const cuchar;
 
-typedef char char8;
-typedef cchar cchar8;
-typedef uchar uchar8;
-typedef cuchar cuchar8;
+/// UTF-8 sized typedefs
+typedef char8_t char8;
+typedef char8_t const cchar8;
 
 /// UTF-16 sized typedefs
 typedef char16_t char16;
-typedef const char16_t cchar16;
+typedef char16_t const cchar16;
 
 /// UTF-32 sized typedefs
 typedef char32_t char32;
-typedef const char32_t cchar32;
+typedef char32_t const cchar32;
 
 /// old UNICODE typedefs
 typedef wchar_t wchar;
-typedef const wchar_t cwchar;
+typedef wchar_t const cwchar;
 
 #ifdef TXT_STD_UTF16
 typedef char16 tchar;
 typedef cchar16 ctchar;
-typedef uchar16 utchar;
-typedef cuchar16 cutchar;
 #elif defined (TXT_STD_UTF32)
 typedef char32 tchar;
 typedef cchar32 ctchar;
-typedef uchar32 utchar;
-typedef cuchar32 cutchar;
 #elif defined (TXT_STD_OLD_UNICODE)
 typedef wchar tchar;
 typedef cwchar ctchar;
-typedef wchar utchar;
-typedef cwchar cutchar;
 #else
-typedef char8 tchar;
-typedef cchar8 ctchar;
-typedef uchar8 utchar;
-typedef cuchar8 cutchar;
+typedef char tchar;
+typedef cchar ctchar;
 #endif
 
 /// short int typedefs
@@ -419,17 +401,6 @@ typedef const float cfloat;
 typedef const double cdouble;
 typedef long double ldouble;
 typedef const long double cldouble;
-
-
-template <typename T, typename U>
-constexpr T* object_ptr_cast (U* ptr)
-{
-#ifdef DEBUG_MODE
-    return dynamic_cast<T*> (ptr);
-#else
-    return static_cast<T*> (ptr);
-#endif
-}
 
 } // cppual
 

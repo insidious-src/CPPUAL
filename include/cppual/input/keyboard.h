@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include <cppual/types.h>
 #include <cppual/noncopyable.h>
 
-namespace cppual { namespace input {
+namespace cppual::input {
 
 struct keyboard ;
 struct key_event;
@@ -55,9 +55,9 @@ struct keyboard
 
     enum class lock : u8
     {
-        caps,
-        num,
-        scroll
+        caps_lock,
+        num_lock ,
+        scroll_lock
     };
 
     enum Code
@@ -488,7 +488,7 @@ struct keyboard
     static bool is_connected  () noexcept;
 };
 
-} } // namespace Input
+} // namespace Input
 
 #endif // __cplusplus
 #endif // CPPUAL_DEVICES_KEYBOARD_H_

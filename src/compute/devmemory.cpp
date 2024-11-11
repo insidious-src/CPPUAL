@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,19 +25,19 @@
 #include <iostream>
 #include <new>
 
-void* operator new (std::size_t size, device_memory& obj)
+void* operator new (std::size_t size, device& obj)
 {
     using namespace cppual;
 
-    if (!obj.device ().valid ()) throw compute::bad_device ();
-    if ( obj.device ().max_alloc_size () < size) throw std::bad_alloc ();
+    if (!obj.valid ()) throw compute::bad_device ();
+    if ( obj.max_alloc_size () < size) throw std::bad_alloc ();
 
     return reinterpret_cast<void*> (1);
 }
 
-void operator delete (void* /*ptr*/, device_memory& obj)
+void operator delete (void* /*ptr*/, device& obj)
 {
-    if (!obj.device ().valid ())
+    if (!obj.valid ())
     {
         std::cerr << "compute device NOT valid!";
         return;

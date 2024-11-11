@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,19 +23,16 @@
 #define CPPUAL_MATH_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
-#include <cppual/meta.h>
+#include <cppual/concept/concepts.h>
 
 #include <cmath>
 
 namespace cppual {
 
-template <typename T = int,
-          typename U,
-          typename = typename std::enable_if<is_float_v<U>>::type>
-T round(U const& value)
+template <number_t T>
+inline T round (T const& value) noexcept
 {
-    return static_cast<T>(std::round(value));
+    return static_cast<T> (std::round (value));
 }
 
 } // cppual

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,33 +61,33 @@ public:
     void set_filtering (MagFilter mag, MinFilter min) noexcept;
     void release () noexcept;
 
-    texture (string      const& file,
+    texture (string       const& file,
              pixel_format const& format     = pixel_format (),
-             bool               gen_mipmap = false);
+             bool                gen_mipmap = false);
 
     bool load_texture_2d (cvoid*             pixels,
-                          point2i     const& size,
+                          point2i      const& size,
                           pixel_format const& format     = pixel_format (),
-                          bool               gen_mipmap = false);
+                          bool                gen_mipmap = false);
 
-    bool load_texture_2d (string      const& path,
+    bool load_texture_2d (string       const& path,
                           pixel_format const& format     = pixel_format (),
-                          bool               gen_mipmap = false);
+                          bool                gen_mipmap = false);
 
-    MinFilter   min_filter () const noexcept { return _M_eMin; }
-    MagFilter   mag_filter () const noexcept { return _M_eMag; }
-    pixel_format format     () const noexcept { return _M_gFormat; }
-    uint        sample     () const noexcept { return _M_uSampleId; }
+    MinFilter    min_filter () const noexcept { return _M_eMin     ; }
+    MagFilter    mag_filter () const noexcept { return _M_eMag     ; }
+    pixel_format format     () const noexcept { return _M_gFormat  ; }
+    uint         sample     () const noexcept { return _M_uSampleId; }
 
     bool is_loaded () const noexcept
-    { return _M_gStates.test (texture::IsLoaded); }
+    { return _M_gStates.test (texture::loaded); }
 
     bool has_mip_maps () const noexcept
-    { return _M_gStates.test (texture::HasMipMaps); }
+    { return _M_gStates.test (texture::has_mipmaps); }
 
 private:
-    enum    Flag { IsLoaded = 1 << 0, HasMipMaps = 1 << 1 };
-    typedef bitset<texture::Flag> flags;
+    enum    flag { loaded = 1 << 0, has_mipmaps = 1 << 1 };
+    typedef bitset<texture::flag> flags;
 
     pixel_format _M_gFormat;
     point2i     _M_gSize;

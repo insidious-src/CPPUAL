@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 // =========================================================
 
-namespace cppual { namespace compute {
+namespace cppual::compute {
 
 // =========================================================
 
@@ -40,10 +40,7 @@ device::size_type device::count () noexcept
     auto const mgr       = factories::instances ();
     size_type  dev_count = 0;
 
-    for (auto inst : mgr)
-    {
-         dev_count += inst->device_count (device_category::any);
-    }
+    for (auto inst : mgr) dev_count += inst->device_count (device_type::any);
 
     return dev_count;
 }
@@ -64,6 +61,8 @@ device::string_type device::info (info_type nfo)
         return _M_pDev->name ();
     case info_type::vendor:
         return _M_pDev->vendor ();
+    case info_type::version:
+        return _M_pDev->version ().to_string ();
     default:
         return string_type ();
     }
@@ -108,7 +107,7 @@ device::size_type device::max_alloc_size () const
 u32 device::compute_units () const
 {
     if (_M_pDev == nullptr) assign_dev_from_cat ();
-    return _M_pDev->compute_units ();
+    return _M_pDev->compute_units_count ();
 }
 
 bool device::is_host () const noexcept
@@ -116,7 +115,7 @@ bool device::is_host () const noexcept
     return this == &host ();
 }
 
-device_category device::type () const noexcept
+device_type device::type () const noexcept
 {
     if (_M_pDev == nullptr) assign_dev_from_cat ();
     return _M_pDev->dev_type ();
@@ -154,4 +153,4 @@ void device::assign_dev_from_cat () const
 
 // =========================================================
 
-} } // Compute
+} // Compute

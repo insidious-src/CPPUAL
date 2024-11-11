@@ -10,7 +10,9 @@
 #include <fstream>
 #include <cassert>
 
-namespace cppual { namespace json {
+// ======================================================================
+
+namespace cppual::json {
 
 // ======================================================================
 
@@ -937,13 +939,13 @@ void value_reference_base::connections()
 {
     if (_M_owner.type() == doc_type::object)
     {
-        connect(_M_owner.object()->changed, *this, &base_type::assign);
-        connect(_M_owner.object()->destroyed, *this, &base_type::invalidate);
+        connect(_M_owner.object()->changed, *this, &self_type::assign);
+        connect(_M_owner.object()->destroyed, *this, &self_type::invalidate);
     }
     else if (_M_owner.type() == doc_type::array)
     {
-        connect(_M_owner.array()->changed, *this, &base_type::assign);
-        connect(_M_owner.array()->destroyed, *this, &base_type::invalidate);
+        connect(_M_owner.array()->changed, *this, &self_type::assign);
+        connect(_M_owner.array()->destroyed, *this, &self_type::invalidate);
     }
 }
 
@@ -951,13 +953,13 @@ void value_reference_base::disconnections()
 {
     if (_M_owner.type() == doc_type::object)
     {
-        disconnect(_M_owner.object()->changed, *this, &base_type::assign);
-        disconnect(_M_owner.object()->destroyed, *this, &base_type::invalidate);
+        disconnect(_M_owner.object()->changed, *this, &self_type::assign);
+        disconnect(_M_owner.object()->destroyed, *this, &self_type::invalidate);
     }
     else if (_M_owner.type() == doc_type::array)
     {
-        disconnect(_M_owner.array()->changed, *this, &base_type::assign);
-        disconnect(_M_owner.array()->destroyed, *this, &base_type::invalidate);
+        disconnect(_M_owner.array()->changed, *this, &self_type::assign);
+        disconnect(_M_owner.array()->destroyed, *this, &self_type::invalidate);
     }
 }
 
@@ -1054,7 +1056,7 @@ value_reference_template<doc_parser::string_type>::value_reference_template (tem
 value_reference<bool>::value_reference(template_object*   owner,
                                        string_type const& name,
                                        value_type const&  default_val)
-: reference_base(owner, name, default_val)
+: base_type (owner, name, default_val)
 {
     if (!ref()->IsBool())
     {
@@ -1066,7 +1068,7 @@ value_reference<bool>::value_reference(template_object*   owner,
 value_reference<bool>::value_reference(template_array*   owner,
                                        size_type         idx,
                                        value_type const& default_val)
-: reference_base(owner, idx, default_val)
+: base_type (owner, idx, default_val)
 {
     if (!ref()->IsBool())
     {
@@ -1080,7 +1082,7 @@ value_reference<bool>::value_reference(template_array*   owner,
 value_reference<u16>::value_reference(template_object*   owner,
                                       string_type const& name,
                                       value_type         default_val)
-: reference_base(owner, name, static_cast<default_type>(default_val))
+: base_type (owner, name, static_cast<default_type>(default_val))
 {
     if (!ref()->IsUint())
     {
@@ -1092,7 +1094,7 @@ value_reference<u16>::value_reference(template_object*   owner,
 value_reference<u16>::value_reference(template_array* owner,
                           size_type      idx,
                           value_type     default_val)
-: reference_base(owner, idx, static_cast<default_type>(default_val))
+: base_type (owner, idx, static_cast<default_type>(default_val))
 {
     if (!ref()->IsUint())
     {
@@ -1106,7 +1108,7 @@ value_reference<u16>::value_reference(template_array* owner,
 value_reference<i16>::value_reference (template_object*    owner,
                                        string_type  const& name,
                                        value_type          default_val)
-: reference_base(owner, name, static_cast<default_type>(default_val))
+: base_type (owner, name, static_cast<default_type>(default_val))
 {
     if (!ref()->IsInt())
     {
@@ -1118,7 +1120,7 @@ value_reference<i16>::value_reference (template_object*    owner,
 value_reference<i16>::value_reference (template_array* owner,
                                        size_type       idx,
                                        value_type      default_val)
-: reference_base(owner, idx, static_cast<default_type>(default_val))
+: base_type (owner, idx, static_cast<default_type>(default_val))
 {
     if (!ref()->IsInt())
     {
@@ -1132,7 +1134,7 @@ value_reference<i16>::value_reference (template_array* owner,
 value_reference<uint>::value_reference (template_object*   owner,
                                         string_type const& name,
                                         value_type         default_val)
-: reference_base(owner, name, default_val)
+: base_type (owner, name, default_val)
 {
     if (!ref()->IsUint())
     {
@@ -1144,7 +1146,7 @@ value_reference<uint>::value_reference (template_object*   owner,
 value_reference<uint>::value_reference (template_array* owner,
                                         size_type       idx,
                                         value_type      default_val)
-: reference_base(owner, idx, default_val)
+: base_type (owner, idx, default_val)
 {
     if (!ref()->IsUint())
     {
@@ -1158,7 +1160,7 @@ value_reference<uint>::value_reference (template_array* owner,
 value_reference<int>::value_reference (template_object*   owner,
                                        string_type const& name,
                                        value_type  const& default_val)
-: reference_base(owner, name, default_val)
+: base_type (owner, name, default_val)
 {
     if (!ref()->IsInt())
     {
@@ -1170,7 +1172,7 @@ value_reference<int>::value_reference (template_object*   owner,
 value_reference<int>::value_reference (template_array*   owner,
                                        size_type         idx,
                                        value_type const& default_val)
-: reference_base(owner, idx, default_val)
+: base_type (owner, idx, default_val)
 {
     if (!ref()->IsInt())
     {
@@ -1184,7 +1186,7 @@ value_reference<int>::value_reference (template_array*   owner,
 value_reference<u64>::value_reference (template_object*   owner,
                                        string_type const& name,
                                        value_type  const& default_val)
-: reference_base(owner, name, default_val)
+: base_type (owner, name, default_val)
 {
     if (!ref()->IsUint64())
     {
@@ -1196,7 +1198,7 @@ value_reference<u64>::value_reference (template_object*   owner,
 value_reference<u64>::value_reference (template_array*   owner,
                                        size_type         idx,
                                        value_type const& default_val)
-: reference_base(owner, idx, default_val)
+: base_type (owner, idx, default_val)
 {
     if (!ref()->IsUint64())
     {
@@ -1210,7 +1212,7 @@ value_reference<u64>::value_reference (template_array*   owner,
 value_reference<i64>::value_reference (template_object*   owner,
                                        string_type const& name,
                                        value_type  const& default_val)
-: reference_base(owner, name, default_val)
+: base_type (owner, name, default_val)
 {
     if (!ref()->IsInt64())
     {
@@ -1222,7 +1224,7 @@ value_reference<i64>::value_reference (template_object*   owner,
 value_reference<i64>::value_reference (template_array*   owner,
                                        size_type         idx,
                                        value_type const& default_val)
-: reference_base(owner, idx, default_val)
+: base_type (owner, idx, default_val)
 {
     if (!ref()->IsInt64())
     {
@@ -1236,7 +1238,7 @@ value_reference<i64>::value_reference (template_array*   owner,
 value_reference<float>::value_reference (template_object*   owner,
                                          string_type const& name,
                                          value_type  const& default_val)
-: reference_base(owner, name, default_val)
+: base_type (owner, name, default_val)
 {
     if (!ref()->IsNumber())
     {
@@ -1248,7 +1250,7 @@ value_reference<float>::value_reference (template_object*   owner,
 value_reference<float>::value_reference (template_array*   owner,
                                          size_type         idx,
                                          value_type const& default_val)
-: reference_base(owner, idx, default_val)
+: base_type (owner, idx, default_val)
 {
     if (!ref()->IsNumber())
     {
@@ -1262,7 +1264,7 @@ value_reference<float>::value_reference (template_array*   owner,
 value_reference<double>::value_reference (template_object*   owner,
                                           string_type const& name,
                                           value_type  const& default_val)
-: reference_base(owner, name, default_val)
+: base_type (owner, name, default_val)
 {
     if (!ref()->IsNumber())
     {
@@ -1274,7 +1276,7 @@ value_reference<double>::value_reference (template_object*   owner,
 value_reference<double>::value_reference (template_array*   owner,
                                           size_type         idx,
                                           value_type const& default_val)
-: reference_base(owner, idx, default_val)
+: base_type (owner, idx, default_val)
 {
     if (!ref()->IsNumber())
     {
@@ -1288,7 +1290,7 @@ value_reference<double>::value_reference (template_array*   owner,
 value_reference<doc_parser::string_type>::value_reference (template_object*   owner,
                                                            string_type const& name,
                                                            value_type  const& default_val)
-: reference_base(owner, name, default_val)
+: base_type (owner, name, default_val)
 {
     if (!ref()->IsString())
     {
@@ -1300,7 +1302,7 @@ value_reference<doc_parser::string_type>::value_reference (template_object*   ow
 value_reference<doc_parser::string_type>::value_reference (template_array*   owner,
                                                            size_type         idx,
                                                            value_type const& default_val)
-: reference_base(owner, idx, default_val)
+: base_type (owner, idx, default_val)
 {
     if (!ref()->IsString())
     {
@@ -1315,7 +1317,7 @@ factory::factory(std::initializer_list<file_tuple> json_files)
 {
     typedef memory::allocator<doc_parser> doc_allocator;
 
-    _M_jsonDocs.reserve(json_files.size());
+    _M_jsonDocs.reserve (json_files.size ());
 
     for (const auto& item : json_files)
     {
@@ -1323,14 +1325,14 @@ factory::factory(std::initializer_list<file_tuple> json_files)
         {
             std::fstream file;
 
-            file.open(std::get<1>(item).c_str(), std::ios::out | std::ios::app);
+            file.open(std::get<1> (item).c_str (), std::ios::out | std::ios::app);
         }
 
         _M_jsonDocs.emplace(std::get<0>(item),
-                            std::make_pair(std::get<1>(item),
-                                           memory::allocate_shared (doc_allocator(),
-                                                                    std::get<1>(item),
-                                                                    std::get<2>(item))));
+                            std::make_pair(std::get<1> (item),
+                                           memory::allocate_shared (doc_allocator (),
+                                                                    std::get<1> (item),
+                                                                    std::get<2> (item))));
     }
 }
 
@@ -1481,4 +1483,4 @@ bool factory::has_file_name_doc_ext (size_type key) const
     return end != string_type::npos;
 }
 
-} } // namespace json
+} // namespace json

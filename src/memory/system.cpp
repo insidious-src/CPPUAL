@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@
 #include <cstring>
 #include <assert.h>
 
-namespace cppual { namespace { // internal unit optimization
+namespace cppual { namespace memory { namespace { // internal unit optimization
 
 inline static void initializer ()
 {
@@ -61,7 +61,7 @@ inline static void initializer ()
 
 // =========================================================
 
-class system_memory_resource final : public memory::memory_resource
+class system_memory_resource final : public memory_resource
 {
 public:
     inline bool is_thread_safe () const noexcept
@@ -113,7 +113,7 @@ private:
     }
 };
 
-} } // anonymous namespace
+} } } // anonymous namespace
 
 // =========================================================
 

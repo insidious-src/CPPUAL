@@ -466,7 +466,7 @@ inline GenericStringRef<CharType> StringRef(const CharType* str, size_t length) 
     return GenericStringRef<CharType>(str, SizeType(length));
 }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
 //! Mark a string object as constant string
 /*! Mark a string object (e.g. \c string) as a "string literal".
     This function can be used to avoid copying a string to be referenced as a
@@ -477,7 +477,7 @@ inline GenericStringRef<CharType> StringRef(const CharType* str, size_t length) 
     \param str Constant string, lifetime assumed to be longer than the use of the string in e.g. a GenericValue
     \return GenericStringRef string reference object
     \relatesalso GenericStringRef
-    \note Requires the definition of the preprocessor symbol \ref RAPIDJSON_HAS_STDSTRING.
+    \note Requires the definition of the preprocessor symbol \ref JSON_HAS_STDSTRING.
 */
 template<typename CharType>
 inline GenericStringRef<CharType> StringRef(const std::basic_string<CharType>& str) {
@@ -594,7 +594,7 @@ struct TypeHelper<ValueType, const typename ValueType::Ch*> {
     static ValueType& Set(ValueType& v, const StringType data, typename ValueType::AllocatorType& a) { return v.SetString(data, a); }
 };
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
 template<typename ValueType>
 struct TypeHelper<ValueType, std::basic_string<typename ValueType::Ch> > {
     typedef std::basic_string<typename ValueType::Ch> StringType;
@@ -838,9 +838,9 @@ public:
     GenericValue(const Ch*s, Allocator& allocator)
         : data_(), ator_(&allocator) { SetStringRaw(StringRef(s), allocator); }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     //! Constructor for copy-string from a string object (i.e. do make a copy of string)
-    /*! \note Requires the definition of the preprocessor symbol \ref RAPIDJSON_HAS_STDSTRING.
+    /*! \note Requires the definition of the preprocessor symbol \ref JSON_HAS_STDSTRING.
      */
     GenericValue(const std::basic_string<Ch>& s, Allocator& allocator) : data_() { SetStringRaw(StringRef(s), allocator); }
 #endif
@@ -1060,9 +1060,9 @@ public:
     //! Equal-to operator with const C-string pointer
     bool operator==(const Ch* rhs) const { return *this == GenericValue(StringRef(rhs)); }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     //! Equal-to operator with string object
-    /*! \note Requires the definition of the preprocessor symbol \ref RAPIDJSON_HAS_STDSTRING.
+    /*! \note Requires the definition of the preprocessor symbol \ref JSON_HAS_STDSTRING.
      */
     bool operator==(const std::basic_string<Ch>& rhs) const { return *this == GenericValue(StringRef(rhs)); }
 #endif
@@ -1236,7 +1236,7 @@ public:
     template <typename SourceAllocator>
     const GenericValue& operator[](const GenericValue<Encoding, SourceAllocator>& name) const { return const_cast<GenericValue&>(*this)[name]; }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     //! Get a value from an object associated with name (string object).
     GenericValue& operator[](const std::basic_string<Ch>& name) { return (*this)[GenericValue(StringRef(name))]; }
     const GenericValue& operator[](const std::basic_string<Ch>& name) const { return (*this)[GenericValue(StringRef(name))]; }
@@ -1277,7 +1277,7 @@ public:
     */
     bool HasMember(const Ch* name) const { return FindMember(name) != MemberEnd(); }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     //! Check whether a member exists in the object with string object.
     /*!
         \param name Member name to be searched.
@@ -1341,7 +1341,7 @@ public:
     }
     template <typename SourceAllocator> ConstMemberIterator FindMember(const GenericValue<Encoding, SourceAllocator>& name) const { return const_cast<GenericValue&>(*this).FindMember(name); }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     //! Find member by string object name.
     /*!
         \param name Member name to be searched.
@@ -1384,7 +1384,7 @@ public:
         return AddMember(name, v, allocator);
     }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     //! Add a string object as member (name-value pair) to the object.
     /*! \param name A string value as name of member.
         \param value constant string reference as value of member.
@@ -1516,7 +1516,7 @@ public:
         return RemoveMember(n);
     }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     bool RemoveMember(const std::basic_string<Ch>& name) { return RemoveMember(GenericValue(StringRef(name))); }
 #endif
 
@@ -1589,7 +1589,7 @@ public:
         return EraseMember(n);
     }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     bool EraseMember(const std::basic_string<Ch>& name) { return EraseMember(GenericValue(StringRef(name))); }
 #endif
 
@@ -1877,13 +1877,13 @@ public:
     */
     GenericValue& SetString(StringRefType s, Allocator& allocator) { this->~GenericValue(); SetStringRaw(s, allocator); return *this; }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     //! Set this value as a string by copying from source string.
     /*! \param s source string.
         \param allocator Allocator for allocating copied buffer. Commonly use GenericDocument::GetAllocator().
         \return The value itself for fluent API.
         \post IsString() == true && GetString() != s.data() && strcmp(GetString(),s.data() == 0 && GetStringLength() == s.size()
-        \note Requires the definition of the preprocessor symbol \ref RAPIDJSON_HAS_STDSTRING.
+        \note Requires the definition of the preprocessor symbol \ref JSON_HAS_STDSTRING.
     */
     GenericValue& SetString(const std::basic_string<Ch>& s, Allocator& allocator) { return SetString(StringRef(s), allocator); }
 #endif
@@ -2727,7 +2727,7 @@ public:
         return Parse<kParseDefaultFlags>(str, length);
     }
 
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     template <unsigned parseFlags, typename SourceEncoding>
     GenericDocument& Parse(const std::basic_string<typename SourceEncoding::Ch>& str) {
         // c_str() is constant complexity according to standard. Should be faster than Parse(const char*, size_t)
@@ -2742,7 +2742,7 @@ public:
     GenericDocument& Parse(const std::basic_string<Ch>& str) {
         return Parse<kParseDefaultFlags>(str);
     }
-#endif // RAPIDJSON_HAS_STDSTRING
+#endif // JSON_HAS_STDSTRING
 
     //!@}
 
@@ -2957,25 +2957,25 @@ public:
     bool ObjectEmpty() const { return value_.ObjectEmpty(); }
     template <typename T> ValueType& operator[](T* name) const { return value_[name]; }
     template <typename SourceAllocator> ValueType& operator[](const GenericValue<EncodingType, SourceAllocator>& name) const { return value_[name]; }
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     ValueType& operator[](const std::basic_string<Ch>& name) const { return value_[name]; }
 #endif
     MemberIterator MemberBegin() const { return value_.MemberBegin(); }
     MemberIterator MemberEnd() const { return value_.MemberEnd(); }
     GenericObject MemberReserve(SizeType newCapacity, AllocatorType &allocator) const { value_.MemberReserve(newCapacity, allocator); return *this; }
     bool HasMember(const Ch* name) const { return value_.HasMember(name); }
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     bool HasMember(const std::basic_string<Ch>& name) const { return value_.HasMember(name); }
 #endif
     template <typename SourceAllocator> bool HasMember(const GenericValue<EncodingType, SourceAllocator>& name) const { return value_.HasMember(name); }
     MemberIterator FindMember(const Ch* name) const { return value_.FindMember(name); }
     template <typename SourceAllocator> MemberIterator FindMember(const GenericValue<EncodingType, SourceAllocator>& name) const { return value_.FindMember(name); }
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     MemberIterator FindMember(const std::basic_string<Ch>& name) const { return value_.FindMember(name); }
 #endif
     GenericObject AddMember(ValueType& name, ValueType& value, AllocatorType& allocator) const { value_.AddMember(name, value, allocator); return *this; }
     GenericObject AddMember(ValueType& name, StringRefType value, AllocatorType& allocator) const { value_.AddMember(name, value, allocator); return *this; }
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     GenericObject AddMember(ValueType& name, std::basic_string<Ch>& value, AllocatorType& allocator) const { value_.AddMember(name, value, allocator); return *this; }
 #endif
     template <typename T> RAPIDJSON_DISABLEIF_RETURN((internal::OrExpr<internal::IsPointer<T>, internal::IsGenericValue<T> >), (ValueType&)) AddMember(ValueType& name, T value, AllocatorType& allocator) const { value_.AddMember(name, value, allocator); return *this; }
@@ -2990,7 +2990,7 @@ public:
     template <typename T> RAPIDJSON_DISABLEIF_RETURN((internal::OrExpr<internal::IsPointer<T>, internal::IsGenericValue<T> >), (GenericObject)) AddMember(StringRefType name, T value, AllocatorType& allocator) const { value_.AddMember(name, value, allocator); return *this; }
     void RemoveAllMembers() { value_.RemoveAllMembers(); }
     bool RemoveMember(const Ch* name) const { return value_.RemoveMember(name); }
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     bool RemoveMember(const std::basic_string<Ch>& name) const { return value_.RemoveMember(name); }
 #endif
     template <typename SourceAllocator> bool RemoveMember(const GenericValue<EncodingType, SourceAllocator>& name) const { return value_.RemoveMember(name); }
@@ -2998,7 +2998,7 @@ public:
     MemberIterator EraseMember(ConstMemberIterator pos) const { return value_.EraseMember(pos); }
     MemberIterator EraseMember(ConstMemberIterator first, ConstMemberIterator last) const { return value_.EraseMember(first, last); }
     bool EraseMember(const Ch* name) const { return value_.EraseMember(name); }
-#if RAPIDJSON_HAS_STDSTRING
+#if JSON_HAS_STDSTRING
     bool EraseMember(const std::basic_string<Ch>& name) const { return EraseMember(ValueType(StringRef(name))); }
 #endif
     template <typename SourceAllocator> bool EraseMember(const GenericValue<EncodingType, SourceAllocator>& name) const { return value_.EraseMember(name); }

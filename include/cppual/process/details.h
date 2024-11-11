@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #ifdef OS_STD_POSIX
 #   include <pthread.h>
 #   include <unistd.h>
-#   include <errno.h>
+//#   include <errno.h>
 #   include <signal.h>
 #elif defined (OS_WINDOWS)
 #   include <windows.h>
@@ -49,11 +49,11 @@ namespace compute {
 #ifdef OS_STD_POSIX
 typedef pthread_t       thread_handle;
 typedef pthread_mutex_t mutex_object;
-typedef pid_t           process_handle;
+//typedef pid_t           process_handle;
 #elif defined (OS_WINDOWS)
 typedef DWORD  thread_handle;
 typedef HANDLE mutex_object;
-typedef HANDLE process_handle;
+//typedef HANDLE process_handle;
 #endif
 
 struct task_traits final

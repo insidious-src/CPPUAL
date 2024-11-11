@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 #define CPPUAL_UTILITY_TIMELINE_H_
 #ifdef __cplusplus
 
-#include <atomic>
 #include <cppual/types.h>
 #include <cppual/system/clock.h>
+
+#include <atomic>
 
 namespace cppual {
 
@@ -34,14 +35,15 @@ using namespace std::chrono_literals;
 class pasive_timeline
 {
 public:
-    typedef clock::pausable_timer<std::chrono::steady_clock> timer_type  ;
-    typedef std::chrono::milliseconds::rep                   rep         ;
-    typedef std::chrono::milliseconds                        duration    ;
-    typedef std::atomic<float>                               atomic_ratio;
-    typedef std::atomic_uint_fast8_t                         atomic_state;
-    typedef ushort                                           count_type  ;
-    typedef float                                            ratio_type  ;
-    typedef u8                                               state_type  ;
+    typedef std::chrono::steady_clock         clock_type  ;
+    typedef clock::pausable_timer<clock_type> timer_type  ;
+    typedef std::chrono::milliseconds::rep    rep         ;
+    typedef std::chrono::milliseconds         duration    ;
+    typedef u16                               count_type  ;
+    typedef float                             ratio_type  ;
+    typedef std::uint_fast8_t                 state_type  ;
+    typedef std::atomic<ratio_type>           atomic_ratio;
+    typedef std::atomic<state_type>           atomic_state;
 
     constexpr static cfloat instant        = 10.0f;
     constexpr static cfloat very_fast      =  5.0f;
@@ -60,21 +62,19 @@ public:
     enum
     {
         inactive,
-        active,
+        active  ,
         paused
     };
 
     pasive_timeline (duration length, ratio_type speed = normal) noexcept
-    : _M_timer      (),
-      _M_length     (length),
-      _M_speed      (speed),
-      _M_state      ()
+    : _M_length     (length),
+      _M_speed      (speed)
     { }
 
     duration length () const noexcept
     { return _M_length; }
 
-    void length (duration len) noexcept
+    void set_length (duration len) noexcept
     { if (!is_active ()) _M_length = len; }
 
     rep frame () const noexcept
@@ -84,13 +84,13 @@ public:
     { return state () == pasive_timeline::active; }
 
     void reverse () noexcept
-    { _M_speed = -(_M_speed.load (std::memory_order_relaxed)); }
+    { scale (-(_M_speed.load (std::memory_order_relaxed))); }
 
-    void forward () noexcept
-    { if (_M_speed < ratio_type()) _M_speed = -(_M_speed.load (std::memory_order_relaxed)); }
+    void set_forward () noexcept
+    { if (_M_speed < ratio_type ()) scale (-(_M_speed.load (std::memory_order_relaxed))); }
 
-    void backward () noexcept
-    { if (_M_speed > ratio_type()) _M_speed = -(_M_speed.load (std::memory_order_relaxed)); }
+    void set_backward () noexcept
+    { if (_M_speed > ratio_type ()) scale (-(_M_speed.load (std::memory_order_relaxed))); }
 
     void stop () noexcept
     { _M_state = pasive_timeline::inactive; }
@@ -110,12 +110,14 @@ public:
         stop ();
         _M_count = loop_count;
         _M_timer.reset ();
+        _M_accumulated_time = duration ();
+        _M_last_speed_change_time = clock_type::now ();
         _M_state = pasive_timeline::active;
     }
 
     state_type state () const noexcept
     {
-        auto curstate = _M_state.load (std::memory_order_relaxed);
+        auto const curstate = _M_state.load (std::memory_order_relaxed);
 
         switch (curstate)
         {
@@ -153,6 +155,25 @@ public:
         }
     }
 
+    // duration time () const noexcept
+    // {
+    //     switch (_M_state.load (std::memory_order_relaxed))
+    //     {
+    //     case pasive_timeline::inactive:
+    //         return duration ();
+    //     case pasive_timeline::paused:
+    //         return _M_saved;
+    //     default:
+    //         rep elapsed    = normalize_elapsed ();
+    //         rep play_count = elapsed / _M_length.count ();
+
+    //         // get current position
+    //         return !_M_count or play_count < _M_count ?
+    //                    duration (elapsed - (play_count * _M_length.count ())) :
+    //                    duration ();
+    //     }
+    // }
+
     duration time () const noexcept
     {
         switch (_M_state.load (std::memory_order_relaxed))
@@ -162,13 +183,15 @@ public:
         case pasive_timeline::paused:
             return _M_saved;
         default:
-            rep elapsed    = normalize_elapsed ();
-            rep play_count = elapsed / _M_length.count ();
-
-            // get current position
-            return !_M_count or play_count < _M_count ?
-                        duration (elapsed - (play_count * _M_length.count ())) :
-                        duration ();
+            auto now            = std::chrono::steady_clock::now ();
+            auto current_speed  = _M_speed.load (std::memory_order_relaxed);
+            auto recent_elapsed = std::chrono::duration_cast<duration> (now - _M_last_speed_change_time);
+            auto total_elapsed  = _M_accumulated_time + duration(rep(ratio_type(recent_elapsed.count()) *
+                                                                                current_speed));
+            rep play_count      = total_elapsed.count () / _M_length.count ();
+            return (!_M_count || play_count < _M_count) ?
+                       duration (total_elapsed.count () - (play_count * _M_length.count ())) :
+                       duration ();
         }
     }
 
@@ -181,11 +204,13 @@ private:
     }
 
 private:
-    timer_type           _M_timer;
-    duration             _M_length, _M_saved;
-    atomic_ratio         _M_speed;
-    count_type           _M_count;
-    mutable atomic_state _M_state;
+    timer_type             _M_timer                  { };
+    duration               _M_length { }, _M_saved   { };
+    duration               _M_accumulated_time       { };
+    clock_type::time_point _M_last_speed_change_time { };
+    atomic_ratio           _M_speed                  { };
+    count_type             _M_count                  { };
+    mutable atomic_state   _M_state                  { };
 };
 
 } // namespace cppual

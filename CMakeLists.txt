@@ -58,6 +58,10 @@ set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_AUTORCC OFF)
 
+# Enable unity builds globally
+set(CMAKE_UNITY_BUILD ON)
+set(CMAKE_UNITY_BUILD_BATCH_SIZE 10)
+
 set(LIBRARY_OUTPUT_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_SYSTEM_PROCESSOR})
 
@@ -121,12 +125,11 @@ link_directories(
 
 set(CPPUAL_HOST_HEADERS
     "include/cppual/functional.h"
-    "include/cppual/tuple_iterator.h"
+    "include/cppual/iterators/tuple_iterator.h"
     "include/cppual/bitfield.h"
-    "include/cppual/coroutines/coroutines.h"
     "include/cppual/fibers/fibers.h"
     "include/cppual/unbound_matrix.h"
-    "include/cppual/flags.h"
+    "include/cppual/bitset.h"
     "include/cppual/signal.h"
     "include/cppual/object.h"
     "include/cppual/types.h"
@@ -137,16 +140,18 @@ set(CPPUAL_HOST_HEADERS
     "include/cppual/string_helper.h"
     "include/cppual/math.h"
     "include/cppual/reactive.h"
-    "include/cppual/meta.h"
-    "include/cppual/concepts.h"
-    "include/cppual/iterator.h"
+    "include/cppual/type_meta.h"
+    "include/cppual/fn_meta.h"
+    "include/cppual/str_meta.h"
+    "include/cppual/concept/concepts.h"
+    "include/cppual/iterators/bi_iterator.h"
     "include/cppual/circular_queue.h"
     "include/cppual/decl.h"
     "include/cppual/types.h"
-    "include/cppual/timeline.h"
+    "include/cppual/passive_timeline.h"
     "include/cppual/noncopyable.h"
-    "include/cppual/process/proc_model.h"
-    "include/cppual/process/interproc.h"
+    "include/cppual/process/process_model.h"
+    "include/cppual/process/interprocess.h"
     "include/cppual/process/details.h"
     "include/cppual/process/pipe.h"
     "include/cppual/process/plugin.h"
@@ -158,16 +163,16 @@ set(CPPUAL_HOST_HEADERS
     "include/cppual/resource.h"
     "include/cppual/bigint.h"
     "include/cppual/byte.h"
-    "include/cppual/interface.h"
+    "include/cppual/unbound_interface.h"
     )
 
 # process, modules
 add_library(cppual-host SHARED
-    "src/process/proc_model.cpp"
-    "src/process/interproc.cpp"
+    "src/process/process_model.cpp"
+    "src/process/interprocess.cpp"
     "src/process/plugin.cpp"
     "src/system/sysinfo.cpp"
-    "src/interface.cpp"
+    "src/unbound_interface.cpp"
 
     "include/cppual/decl"
     "include/cppual/resource"
@@ -188,7 +193,7 @@ add_library(cppual-host SHARED
     "include/cppual/reactive"
     "include/cppual/byte"
     "include/cppual/unbound_matrix"
-    "include/cppual/interface"
+    "include/cppual/unbound_interface"
     )
 target_compile_definitions(cppual-host PRIVATE -DAPI_EXPORT)
 target_precompile_headers(cppual-host PRIVATE ${CPPUAL_HOST_HEADERS})
@@ -949,7 +954,7 @@ endif()
 
 if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-if(TARGET cppual-gfx AND XCB_EWMH_FOUND AND XCB_ICCCM_FOUND AND X11_FOUND)
+if(XCB_EWMH_FOUND AND XCB_ICCCM_FOUND AND X11_FOUND)
 
 # graphical user interface - platform Xorg
 set(CPPUAL_UI_XORG_HEADERS
@@ -1026,7 +1031,7 @@ target_precompile_headers(cppual-ui-plugin-xorg PRIVATE ${CPPUAL_UI_XORG_HEADERS
 
 endif()
 
-if (TARGET cppual-gfx AND NOT WM_FOUND)
+if (WM_FOUND)
 
 # graphical user interface - platform Wayland
 set(CPPUAL_UI_WL_HEADERS

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@
 
 #include "cldevice.h"
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 // =========================================================
 
-namespace { // optimize for internal unit usage
+namespace { //! optimize for internal unit usage
 
 enum device_internal_type
 {
@@ -55,34 +55,39 @@ enum
     device_info_extensions         = CL_DEVICE_EXTENSIONS
 };
 
-constexpr compute::device_category convert (device_internal_type type) noexcept
+constexpr compute::device_type convert (device_internal_type type) noexcept
 {
-    return type == device_internal_type::cpu         ? compute::device_category::cpu         :
-           type == device_internal_type::gpu         ? compute::device_category::gpu         :
-           type == device_internal_type::accelerator ? compute::device_category::gpgpu       :
-           type == device_internal_type::custom      ? compute::device_category::specialized :
-                                                       compute::device_category::any         ;
+    return type == device_internal_type::cpu         ? compute::device_type::cpu         :
+           type == device_internal_type::gpu         ? compute::device_type::gpu         :
+           type == device_internal_type::accelerator ? compute::device_type::gpgpu       :
+           type == device_internal_type::custom      ? compute::device_type::specialized :
+                                                       compute::device_type::any         ;
 }
 
-//constexpr device_internal_type convert (compute::device_category type) noexcept
-//{
-//    return type == compute::device_category::cpu         ? device_internal_type::cpu         :
-//           type == compute::device_category::gpu         ? device_internal_type::gpu         :
-//           type == compute::device_category::gpgpu       ? device_internal_type::accelerator :
-//           type == compute::device_category::specialized ? device_internal_type::custom      :
-//                                                           device_internal_type::any         ;
-//}
+// constexpr device_internal_type convert (compute::device_type type) noexcept
+// {
+//    return type == compute::device_type::cpu         ? device_internal_type::cpu         :
+//           type == compute::device_type::gpu         ? device_internal_type::gpu         :
+//           type == compute::device_type::gpgpu       ? device_internal_type::accelerator :
+//           type == compute::device_type::specialized ? device_internal_type::custom      :
+//                                                       device_internal_type::any         ;
+// }
 
 } // anonymous namespace
 
 // =========================================================
 
-class platform final : public platform_object
+class platform final : public object<resource_type::instance>
 {
 public:
-    typedef std::size_t               size_type          ;
-    typedef vector<platform_type*>    platform_ids_vector;
-    typedef device::device_ids_vector device_ids_vector  ;
+    typedef platform                        self_type          ;
+    typedef object<resource_type::instance> base_type          ;
+    typedef std::size_t                     size_type          ;
+    typedef CLObject<platform_id_type>      value_type         ;
+    typedef value_type*                     pointer            ;
+    typedef resource_handle                 handle_type        ;
+    typedef vector<platform_id_type*>       platform_ids_vector;
+    typedef device::device_ids_vector       device_ids_vector  ;
 
     enum class platform_info : platform_info_type
     {
@@ -93,6 +98,9 @@ public:
     };
 
     platform () = delete;
+
+    constexpr pointer handle () const noexcept
+    { return base_type::handle<pointer> (); }
 
     string info (platform_info info) const
     { return get_info<string> (static_cast<platform_info_type> (info)); }
@@ -121,7 +129,7 @@ public:
 
 private:
     platform (pointer platform_handle) noexcept
-    : interface  (platform_handle),
+    : base_type  (platform_handle),
       _M_devices (get_devices  ())
     { }
 
@@ -148,6 +156,17 @@ private:
 };
 
 // =========================================================
+
+device::device (pointer handle) noexcept
+: base_type (handle)
+{
+    ::clRetainDevice (handle);
+}
+
+device::~device () noexcept
+{
+    if (handle ()) ::clReleaseDevice (handle ());
+}
 
 device::string_type device::name () const
 {
@@ -184,27 +203,20 @@ device_ils device::supported_ils () const
     return ils;
 }
 
-device_category device::dev_type () const
+device_type device::dev_type () const
 {
-    return convert (device_internal_type (get_info<device_category_type> (device_info_cat)));
+    return convert (device_internal_type (get_info<device_cat_type> (device_info_cat)));
 }
 
 device::version_type device::version () const
 {
-    static auto const version_fn = [this]
-    {
-        auto const version_str = get_info<string_type> (device_info_version);
+    auto const version_str = get_info<string_type> (device_info_version);
 
-        version_type  ver;
-        istringstream stream (version_str);
+    version_type  ver;
+    istringstream stream (version_str);
 
-        //! skip 'OpenCL ' :: assign major :: skip '.' :: assign minor
-        ((stream.ignore(7) >> ver.major).ignore(1)) >> ver.minor;
-
-        return ver;
-    };
-
-    static const version_type ver = version_fn ();
+    //! skip 'OpenCL ' :: assign major :: skip '.' :: assign minor
+    ((stream.ignore(7) >> ver.major).ignore(1)) >> ver.minor;
 
     return ver;
 }
@@ -234,7 +246,7 @@ device::size_type device::global_memory_size () const
     return get_info<size_type> (device_info_global_mem_size);
 }
 
-u32 device::compute_units () const
+u32 device::compute_units_count () const
 {
     return get_info<u32> (device_info_max_compute_units);
 }
@@ -281,7 +293,7 @@ device::device_ids_vector device::get_device_ids ()
 
     for (auto i = 0U; i < platform_ids.size(); ++i)
     {
-        auto const platform_inst = platform(platform_ids[i]);
+        auto const platform_inst = platform (platform_ids[i]);
 
         for (auto n = 0U; n < platform_inst.count(); ++n)
         {
@@ -316,7 +328,7 @@ device::device_vector device::get_devices (memory::memory_resource& rc)
     devices.reserve (device_ids.size());
 
     for (auto i = 0U; i < device_ids.size(); ++i)
-        devices.emplace_back(memory::allocate_shared<device_interface, device>(&rc, device_ids[i]));
+        devices.emplace_back(memory::allocate_shared<device_interface, device> (&rc, device_ids[i]));
 
     return devices;
 }
@@ -328,4 +340,4 @@ device::size_type device::count ()
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace CL

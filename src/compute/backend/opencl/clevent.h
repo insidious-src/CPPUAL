@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,21 +25,29 @@
 
 #include "opencl.h"
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 // =========================================================
 
-class event final : public event_object
+class event final : public event_interface
 {
 public:
-    typedef event_object                base_type        ;
+    typedef event                       self_type        ;
+    typedef event_interface             base_type        ;
+    typedef CLObject<event_type>        value_type       ;
+    typedef value_type*                 pointer          ;
+    typedef std::size_t                 size_type        ;
+    typedef resource_handle             handle_type      ;
     typedef std::vector<event::pointer> device_ids_vector;
     typedef factory::device_vector      device_vector    ;
 
-    event (pointer handle) noexcept : base_type (handle) { }
+    constexpr event (pointer handle) noexcept : base_type (handle) { }
+
+    constexpr pointer handle () const noexcept
+    { return base_type::handle<pointer> (); }
 
 private:
-    template<typename T>
+    template <typename T>
     T get_info (event_info_type info) const
     {
         return get_object_info< vector<T> > (::clGetEventInfo, handle(), info);
@@ -48,7 +56,7 @@ private:
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace CL
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_OPENCL_EVENT_H_

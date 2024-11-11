@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +25,18 @@
 
 #include <cppual/types.h>
 #include <cppual/string.h>
+#include <cppual/resource.h>
+#include <cppual/containers.h>
 #include <cppual/noncopyable.h>
 #include <cppual/compute/object.h>
 #include <cppual/compute/device.h>
+#include <cppual/concept/concepts.h>
 #include <cppual/compute/backend_iface.h>
-#include <cppual/containers.h>
 
 #define CL_TARGET_OPENCL_VERSION 200
 
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
-//#include <CL/sycl.hpp>
 
 #include <type_traits>
 #include <exception>
@@ -50,22 +51,20 @@
  * for object encapsulation use template specialization,
  * inline & constexpr functions as much as possible;
  * if the api requires some initialization then use STL containers + cppual polymorphic allocators;
- * if possible prefer static allocators (cpu stack memory);
+ * if possible prefer stack allocators (cpu stack memory);
  * define all class typedefs according to STL (ex. typedef T value_type);
  * maintain strict typesafety;
  *
  */
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 // =========================================================
-
-//using namespace ::cl;
 
 typedef string                  string_type         ;
 typedef ::cl_platform_info      platform_info_type  ;
 typedef ::cl_device_info        device_info_type    ;
-typedef ::cl_device_type        device_category_type;
+typedef ::cl_device_type        device_cat_type     ;
 typedef ::cl_mem_info           memory_info_type    ;
 typedef ::cl_context_info       context_info_type   ;
 typedef ::cl_kernel_info        kernel_info_type    ;
@@ -77,30 +76,30 @@ typedef ::cl_image_info         image_info_type     ;
 
 // =========================================================
 
-typedef std::remove_pointer<::cl_platform_id  >::type platform_type;
-typedef std::remove_pointer<::cl_device_id    >::type device_type  ;
-typedef std::remove_pointer<::cl_event        >::type event_type   ;
-typedef std::remove_pointer<::cl_kernel       >::type kernel_type  ;
-typedef std::remove_pointer<::cl_program      >::type program_type ;
-typedef std::remove_pointer<::cl_context      >::type context_type ;
-typedef std::remove_pointer<::cl_mem          >::type memory_type  ;
-typedef std::remove_pointer<::cl_command_queue>::type queue_type   ;
-typedef std::remove_pointer<::cl_sampler      >::type sampler_type ;
+typedef std::remove_pointer_t<::cl_platform_id  > platform_id_type;
+typedef std::remove_pointer_t<::cl_device_id    > device_id_type  ;
+typedef std::remove_pointer_t<::cl_event        > event_type      ;
+typedef std::remove_pointer_t<::cl_kernel       > kernel_type     ;
+typedef std::remove_pointer_t<::cl_program      > program_type    ;
+typedef std::remove_pointer_t<::cl_context      > context_type    ;
+typedef std::remove_pointer_t<::cl_mem          > memory_type     ;
+typedef std::remove_pointer_t<::cl_command_queue> queue_type      ;
+typedef std::remove_pointer_t<::cl_sampler      > sampler_type    ;
 
 // =========================================================
 
-template <resource_type T> class interface;
+// template <resource_type> class resource_object;
 
-typedef interface<resource_type::instance> platform_object;
-typedef interface<resource_type::device  > device_object  ;
-typedef interface<resource_type::buffer  > buffer_object  ;
-typedef interface<resource_type::image   > image_object   ;
-typedef interface<resource_type::context > context_object ;
-typedef interface<resource_type::shader  > cmd_object     ;
-typedef interface<resource_type::program > cmd_seq_object ;
-typedef interface<resource_type::queue   > queue_object   ;
-typedef interface<resource_type::event   > event_object   ;
-typedef interface<resource_type::sampler > sampler_object ;
+// typedef resource_object<resource_type::instance   > platform_object;
+// typedef resource_object<resource_type::device     > device_object  ;
+// typedef resource_object<resource_type::buffer     > buffer_object  ;
+// typedef resource_object<resource_type::image      > image_object   ;
+// typedef resource_object<resource_type::context    > context_object ;
+// typedef resource_object<resource_type::source_code> cmd_object     ;
+// typedef resource_object<resource_type::program    > cmd_seq_object ;
+// typedef resource_object<resource_type::queue      > queue_object   ;
+// typedef resource_object<resource_type::event      > event_object   ;
+// typedef resource_object<resource_type::sampler    > sampler_object ;
 
 // =========================================================
 
@@ -146,41 +145,46 @@ class command_queue;
 class sampler      ;
 
 // =========================================================
-// opencl Object Concept
+// OpenCL Object Concept
 // =========================================================
 
-template <typename> struct is_cl_object_helper        : public std::false_type { };
-template <> struct is_cl_object_helper<platform_type> : public std::true_type  { };
-template <> struct is_cl_object_helper<device_type  > : public std::true_type  { };
-template <> struct is_cl_object_helper<event_type   > : public std::true_type  { };
-template <> struct is_cl_object_helper<kernel_type  > : public std::true_type  { };
-template <> struct is_cl_object_helper<program_type > : public std::true_type  { };
-template <> struct is_cl_object_helper<context_type > : public std::true_type  { };
-template <> struct is_cl_object_helper<memory_type  > : public std::true_type  { };
-template <> struct is_cl_object_helper<queue_type   > : public std::true_type  { };
-template <> struct is_cl_object_helper<sampler_type > : public std::true_type  { };
+template <typename> struct is_cl_object_helper           : public std::false_type { };
+template <> struct is_cl_object_helper<platform_id_type> : public std::true_type  { };
+template <> struct is_cl_object_helper<device_id_type  > : public std::true_type  { };
+template <> struct is_cl_object_helper<context_type    > : public std::true_type  { };
+template <> struct is_cl_object_helper<kernel_type     > : public std::true_type  { };
+template <> struct is_cl_object_helper<program_type    > : public std::true_type  { };
+template <> struct is_cl_object_helper<memory_type     > : public std::true_type  { };
+template <> struct is_cl_object_helper<event_type      > : public std::true_type  { };
+template <> struct is_cl_object_helper<queue_type      > : public std::true_type  { };
+template <> struct is_cl_object_helper<sampler_type    > : public std::true_type  { };
 
 template <typename T>
-struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<std::remove_cv_t<T>>::value)>
+struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<std::remove_cvref_t<T>>::value)>
 { static_assert (is_cl_object<T>::value, "T is NOT an opencl object type!"); };
 
 template <typename T>
-using CLObject = typename std::enable_if<is_cl_object<T>::value, T>::type;
+inline constexpr bool const is_cl_object_v = is_cl_object<T>::value;
 
 template <typename T>
-inline constexpr auto const is_cl_object_v = is_cl_object<T>::value;
+using CLObject = std::enable_if_t<is_cl_object_v<T>, T>;
+
+template <typename T>
+concept cl_object_t = is_cl_object_v<T>;
 
 // =========================================================
 
-template <resource_type> struct conv_type            { typedef platform_type type; };
-template <> struct conv_type<resource_type::device>  { typedef device_type   type; };
-template <> struct conv_type<resource_type::event>   { typedef event_type    type; };
-template <> struct conv_type<resource_type::shader>  { typedef kernel_type   type; };
-template <> struct conv_type<resource_type::program> { typedef program_type  type; };
-template <> struct conv_type<resource_type::context> { typedef context_type  type; };
-template <> struct conv_type<resource_type::buffer>  { typedef memory_type   type; };
-template <> struct conv_type<resource_type::image>   { typedef memory_type   type; };
-template <> struct conv_type<resource_type::queue>   { typedef queue_type    type; };
+template <resource_type = resource_type::instance>
+struct conv_type { typedef platform_id_type type; };
+
+template <> struct conv_type<resource_type::device>      { typedef device_type  type; };
+template <> struct conv_type<resource_type::event>       { typedef event_type   type; };
+template <> struct conv_type<resource_type::source_code> { typedef kernel_type  type; };
+template <> struct conv_type<resource_type::program>     { typedef program_type type; };
+template <> struct conv_type<resource_type::context>     { typedef context_type type; };
+template <> struct conv_type<resource_type::buffer>      { typedef memory_type  type; };
+template <> struct conv_type<resource_type::image>       { typedef memory_type  type; };
+template <> struct conv_type<resource_type::queue>       { typedef queue_type   type; };
 
 template <resource_type T>
 using conv_type_t = conv_type<T>::type;
@@ -191,33 +195,33 @@ class opencl_error : public std::runtime_error
 {
 public:
     /// Creates a new opencl_error exception object for \p error.
-    explicit opencl_error (i32 error) noexcept
-    : runtime_error(to_string(error)),
-      _M_error     (error)
+    explicit opencl_error  (i32 error) noexcept
+    : runtime_error (to_string (error)),
+      _M_error      (error)
     {
     }
 
     /// Destroys the opencl_error object.
-    ~opencl_error() noexcept
+    ~opencl_error () noexcept
     {
     }
 
     /// Returns the numeric error code.
-    constexpr i32 error_code() const noexcept
+    constexpr i32 error_code () const noexcept
     {
         return _M_error;
     }
 
     /// Returns a string description of the error.
-    cchar* error_string() const noexcept
+    cchar* error_string () const noexcept
     {
-        return to_string(_M_error);
+        return to_string (_M_error);
     }
 
     /// Returns a C-string description of the error.
-    cchar* what() const noexcept
+    cchar* what () const noexcept
     {
-        return to_string(_M_error);
+        return to_string (_M_error);
     }
 
     /// Static function which converts the numeric opencl error code \p error
@@ -233,7 +237,7 @@ public:
     /// If the error code is unknown (e.g. not a valid opencl error), a string
     /// containing "Unknown opencl Error" along with the error number will be
     /// returned.
-    static cchar* to_string(i32 error);
+    static cchar* to_string (i32 error);
 
 private:
     i32 _M_error;
@@ -244,18 +248,18 @@ private:
 struct no_platform_found : public std::exception
 {
     /// Returns a string containing a human-readable error message.
-    cchar* what() const noexcept
+    cchar* what () const noexcept
     {
-        return "NO opencl platforms found!";
+        return "NO OpenCL platforms found!";
     }
 };
 
 struct no_device_found : public std::exception
 {
     /// Returns a string containing a human-readable error message.
-    cchar* what() const noexcept
+    cchar* what () const noexcept
     {
-        return "NO opencl devices found!";
+        return "NO OpenCL devices found!";
     }
 };
 
@@ -312,28 +316,28 @@ struct bound_info_function<Function, Object, void>
 };
 
 template <class Function>
-struct bound_info_function<Function, platform_type*, void>
+struct bound_info_function<Function, platform_id_type*, void>
 {
-    bound_info_function(Function function, platform_type* object)
+    bound_info_function(Function function, platform_id_type* object)
     : _M_function(function),
       _M_object  (object  )
     {
     }
 
-    template<class Info>
-    i32 operator()(Info info, u32 size, device_type** value, u32* size_ret) const
+    template <class Info>
+    i32 operator () (Info info, u32 size, device_id_type** value, u32* size_ret) const
     {
         return _M_function(_M_object, info, size, value, size_ret);
     }
 
-    template<class Info>
-    i32 operator()(Info info, std::size_t size, void* value, std::size_t* size_ret) const
+    template <class Info>
+    i32 operator () (Info info, std::size_t size, void* value, std::size_t* size_ret) const
     {
         return _M_function(_M_object, info, size, value, size_ret);
     }
 
-    Function       _M_function;
-    platform_type* _M_object  ;
+    Function          _M_function;
+    platform_id_type* _M_object  ;
 };
 
 template <class Function>
@@ -344,12 +348,12 @@ struct bound_info_function<Function, void, void>
     {
     }
 
-    i32 operator()(size_t size, void *value, size_t* size_ret) const
+    i32 operator () (std::size_t size, void* value, std::size_t* size_ret) const
     {
         return _M_function(size, value, size_ret);
     }
 
-    i32 operator()(u32 size, platform_type** value, u32* size_ret) const
+    i32 operator () (u32 size, platform_id_type** value, u32* size_ret) const
     {
         return _M_function(size, value, size_ret);
     }
@@ -429,9 +433,9 @@ struct get_object_info_impl<string_type>
     template <class Function, class Info>
     string_type operator()(Function function, Info info) const
     {
-        size_t size = 0;
+        std::size_t size = 0;
 
-        i32 ret = function(info, 0, 0, &size);
+        i32 ret = function(info, 0, nullptr, &size);
         if(ret != success) throw opencl_error(ret);
 
         if(size == 0) return string_type();
@@ -449,17 +453,19 @@ struct get_object_info_impl<string_type>
 template <class T>
 struct get_object_info_impl< vector<T> >
 {
+    typedef vector<T> value_type;
+
     template <class Function>
-    vector<T> operator()(Function function) const
+    value_type operator()(Function function) const
     {
         size_t size = 0;
 
         i32 ret = function(0, 0, &size);
-        if(ret != success) throw opencl_error(ret);
+        if (ret != success) throw opencl_error(ret);
 
         if(size == 0) return vector<T>();
 
-        vector<T> vector(size / sizeof(T));
+        value_type vector (size / sizeof(T));
 
         ret = function(size, &vector[0], 0);
         if(ret != success) throw opencl_error(ret);
@@ -468,16 +474,16 @@ struct get_object_info_impl< vector<T> >
     }
 
     template <class Function, class Info>
-    vector<T> operator()(Function function, Info info) const
+    value_type operator()(Function function, Info info) const
     {
-        size_t size = 0;
+        u32 size = 0;
 
-        i32 ret = function(info, 0, 0, &size);
+        i32 ret = function(info, 0U, 0U, &size);
         if(ret != success) throw opencl_error(ret);
 
-        if(size == 0) return vector<T>();
+        if(size == 0) return value_type();
 
-        vector<T> vector(size / sizeof(T));
+        value_type vector(size / sizeof(T));
 
         ret = function(info, size, &vector[0], 0);
         if(ret != success) throw opencl_error(ret);
@@ -486,7 +492,7 @@ struct get_object_info_impl< vector<T> >
     }
 
     template <class Function, class Info>
-    vector<T> operator()(Function function, Info info,
+    value_type operator()(Function function, Info info,
                          const size_t input_size, cvoid* input) const
     {
         size_t size = 0;
@@ -494,7 +500,7 @@ struct get_object_info_impl< vector<T> >
         i32 ret = function(info, input_size, input, 0, 0, &size);
         if(ret != success) throw opencl_error(ret);
 
-        vector<T> vector(size / sizeof(T));
+        value_type vector(size / sizeof(T));
 
         ret = function(info, input_size, input, size, &vector[0], 0);
         if(ret != success) throw opencl_error(ret);
@@ -504,19 +510,21 @@ struct get_object_info_impl< vector<T> >
 };
 
 template <>
-struct get_object_info_impl< vector<platform_type*> >
+struct get_object_info_impl< vector<platform_id_type*> >
 {
+    typedef vector<platform_id_type*> value_type;
+
     template <class Function>
-    vector<platform_type*> operator()(Function function) const
+    value_type operator()(Function function) const
     {
         u32 size = 0;
 
         i32 ret = function(0, 0, &size);
         if(ret != success) throw opencl_error(ret);
 
-        if(size == 0) return vector<platform_type*>();
+        if(size == 0) return value_type();
 
-        vector<platform_type*> vector(size / sizeof(platform_type*));
+        value_type vector(size / sizeof(platform_id_type*));
 
         ret = function(size, &vector[0], 0);
         if(ret != success) throw opencl_error(ret);
@@ -528,17 +536,19 @@ struct get_object_info_impl< vector<platform_type*> >
 template <>
 struct get_object_info_impl< vector<device_type*> >
 {
+    typedef vector<device_type*> value_type;
+
     template <class Function, class Info>
-    vector<device_type*> operator()(Function function, Info info) const
+    value_type operator()(Function function, Info info) const
     {
         u32 size = 0;
 
         i32 ret = function(info, 0, 0, &size);
         if(ret != success) throw opencl_error(ret);
 
-        if(size == 0) return vector<device_type*>();
+        if(size == 0) return value_type();
 
-        vector<device_type*> vector(size / sizeof(device_type*));
+        value_type vector(size / sizeof(device_type*));
 
         ret = function(info, size, &vector[0], 0);
         if(ret != success) throw opencl_error(ret);
@@ -573,262 +583,67 @@ inline T get_object_info(Function f, Object o, Info i, AuxInfo j, const size_t k
     return get_object_info_impl<T>()(bind_info_function(f, o, j), i, k, l);
 }
 
-// =========================================================
-// simplified implementation for managing opencl handles
-// =========================================================
+//! ================================================================================
+//! simplified implementation for managing opencl handles & a polymorphic interface
+//! ================================================================================
 
-//! Handle Class
-template <resource_type T>
-class interface : public object<T>
-{
-public:
-    typedef object<T>                 base_type  ;
-    typedef CLObject<conv_type_t<T>>* pointer    ;
-    typedef std::size_t               size_type  ;
-    typedef resource_handle           handle_type;
+// template <resource_type T>
+// class resource_object : public object<T>
+// {
+// public:
+//     typedef resource_object<T>       self_type  ;
+//     typedef object<T>                base_type  ;
+//     typedef CLObject<conv_type_t<T>> value_type ;
+//     typedef value_type*              pointer    ;
+//     typedef std::size_t              size_type  ;
+//     typedef resource_handle          handle_type;
 
-    interface  () = delete ;
-    ~interface () = default;
+//     resource_object  () = delete ;
+//     ~resource_object () = default;
 
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
+//     inline resource_object (self_type&&) = default;
+//     inline self_type& operator = (self_type&&) = default;
 
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
+//     constexpr pointer handle () const noexcept
+//     {
+//         return base_type::template handle<pointer> ();
+//     }
 
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
-
-// =========================================================
-
-template <>
-class interface<resource_type::device> : public device_interface
-{
-public:
-    typedef device_interface       base_type  ;
-    typedef CLObject<device_type>* pointer    ;
-    typedef std::size_t            size_type  ;
-    typedef resource_handle        handle_type;
-
-    ~interface () noexcept;
-
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
-
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
-
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
+// protected:
+//     constexpr explicit resource_object (pointer handle) noexcept : base_type (handle) { }
+// };
 
 // =========================================================
 
-template <>
-class interface<resource_type::buffer> : public buffer_interface
-{
-public:
-    typedef buffer_interface       base_type  ;
-    typedef CLObject<memory_type>* pointer    ;
-    typedef std::size_t            size_type  ;
-    typedef resource_handle        handle_type;
+// template <>
+// class resource_object<resource_type::context> : public context_interface
+// {
+// public:
+//     typedef resource_object<resource_type::context> self_type  ;
+//     typedef context_interface                       base_type  ;
+//     typedef CLObject<context_type>                  value_type ;
+//     typedef value_type*                             pointer    ;
+//     typedef std::size_t                             size_type  ;
+//     typedef resource_handle                         handle_type;
 
-    ~interface () noexcept;
+//     resource_object  () = delete;
+//     ~resource_object () noexcept;
 
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
+//     inline resource_object (self_type&&) = default;
+//     inline self_type& operator = (self_type&&) = default;
 
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
+//     constexpr pointer handle () const noexcept
+//     {
+//         return base_type::handle<pointer> ();
+//     }
 
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
-
-// =========================================================
-
-template <>
-class interface<resource_type::image> : public image_interface
-{
-public:
-    typedef image_interface        base_type  ;
-    typedef CLObject<memory_type>* pointer    ;
-    typedef std::size_t            size_type  ;
-    typedef resource_handle        handle_type;
-
-    ~interface () noexcept;
-
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
-
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
-
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
+// protected:
+//     explicit resource_object (pointer handle) noexcept;
+// };
 
 // =========================================================
 
-template <>
-class interface<resource_type::context> : public context_interface
-{
-public:
-    typedef context_interface       base_type  ;
-    typedef CLObject<context_type>* pointer    ;
-    typedef std::size_t             size_type  ;
-    typedef resource_handle         handle_type;
-
-    ~interface () noexcept;
-
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
-
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
-
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
-
-// =========================================================
-
-template <>
-class interface<resource_type::shader> : public shader_interface
-{
-public:
-    typedef shader_interface       base_type  ;
-    typedef CLObject<kernel_type>* pointer    ;
-    typedef std::size_t            size_type  ;
-    typedef resource_handle        handle_type;
-
-    ~interface () noexcept;
-
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
-
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
-
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
-
-// =========================================================
-
-template <>
-class interface<resource_type::program> : public cmd_seq_interface
-{
-public:
-    typedef cmd_seq_interface       base_type  ;
-    typedef CLObject<program_type>* pointer    ;
-    typedef std::size_t             size_type  ;
-    typedef resource_handle         handle_type;
-
-    ~interface () noexcept;
-
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
-
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
-
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
-
-// =========================================================
-
-template <>
-class interface<resource_type::queue> : public queue_interface
-{
-public:
-    typedef queue_interface       base_type  ;
-    typedef CLObject<queue_type>* pointer    ;
-    typedef std::size_t           size_type  ;
-    typedef resource_handle       handle_type;
-
-    ~interface () noexcept;
-
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
-
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
-
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
-
-// =========================================================
-
-template <>
-class interface<resource_type::event> : public event_interface
-{
-public:
-    typedef event_interface       base_type  ;
-    typedef CLObject<event_type>* pointer    ;
-    typedef std::size_t           size_type  ;
-    typedef resource_handle       handle_type;
-
-    ~interface () noexcept;
-
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
-
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
-
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
-
-// =========================================================
-
-template <>
-class interface<resource_type::sampler> : public sampler_interface
-{
-public:
-    typedef sampler_interface       base_type  ;
-    typedef CLObject<sampler_type>* pointer    ;
-    typedef std::size_t             size_type  ;
-
-    ~interface () noexcept;
-
-    interface (interface&&) = default;
-    interface& operator = (interface&&) = default;
-
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer>();
-    }
-
-protected:
-    constexpr explicit interface (pointer handle) noexcept : base_type (handle) { }
-};
-
-// =========================================================
-
-} } } // namespace CL
+} // namespace CL
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_BACKEND_OPENCL_H_

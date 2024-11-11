@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,33 +25,33 @@
 
 #include <cppual/gfx/gl/glbase.h>
 
-namespace cppual { namespace gfx { namespace gl {
+namespace cppual::gfx::gl {
 
-enum class BufferType : unsigned char
+enum class buffer_type : uchar
 {
-    Array,
-    AtomicCounter,
-    CopyRead,
-    CopyWrite,
-    DrawIndirect,
-    DispatchIndirect,
-    ElementArray,
-    PixelPack,
-    PixelUnpack,
-    Query,
-    ShaderStorage,
-    Texture,
-    TransformFeedback,
-    Uniform
+    array             ,
+    atomic_counter    ,
+    copy_read         ,
+    copy_write        ,
+    draw_indirect     ,
+    dispatch_indirect ,
+    element_array     ,
+    pixel_pack        ,
+    pixel_unpack      ,
+    query             ,
+    shader_storage    ,
+    texture           ,
+    transform_feedback,
+    uniform
 };
 
-class buffer_object : public object
+class buffer : public object
 {
 public:
-    buffer_object () noexcept;
+    buffer () noexcept;
 };
 
-} } } // namespace GL
+} // namespace GL
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_GL_BUFFER_H_

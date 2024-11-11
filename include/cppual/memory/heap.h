@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@
 #define CPPUAL_MEMORY_HEAP_ALLOCATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/string.h>
 #include <cppual/memory/allocator.h>
 #include <cppual/memory/shared.h>
+#include <cppual/string.h>
 
 namespace cppual { namespace memory {
 
@@ -41,7 +41,7 @@ public:
     void      clear    ()       noexcept;
     size_type max_size () const noexcept;
 
-    size_type capacity () const noexcept
+    constexpr size_type capacity () const noexcept
     {
         auto const size = static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
                                                   static_cast<math_pointer> (_M_pBegin));
@@ -49,21 +49,20 @@ public:
         return size > sizeof (free_block) ? size - sizeof (free_block) : size_type ();
     }
 
-    bool is_shared () const noexcept
-    { return _M_bIsMemShared; }
-
-    memory_resource& owner () const noexcept
-    { return _M_gOwner; }
+    constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
+    constexpr memory_resource& owner     () const noexcept { return _M_gOwner      ; }
 
 private:
     struct header     { size_type size, adjust;           };
     struct free_block { size_type size; free_block* next; };
 
-    void* do_allocate   (size_type size, align_type align);
-    void  do_deallocate (void* p, size_type size, align_type align);
+    static_assert (sizeof (header) >= sizeof (free_block), "header is NOT big enough!");
 
-    bool do_is_equal (base_type const& gObj) const noexcept
-    { return &gObj == &_M_gOwner; }
+    void* do_allocate   (size_type size, align_type align);
+    void  do_deallocate (pointer p, size_type size, align_type align);
+
+    constexpr bool do_is_equal (base_const_reference gObj) const noexcept
+    { return this == &gObj; }
 
 private:
     memory_resource& _M_gOwner      ;
@@ -90,7 +89,7 @@ public:
     void      defragment () noexcept;
     void      clear      () noexcept;
 
-    size_type capacity () const noexcept
+    constexpr size_type capacity () const noexcept
     {
         auto const size = static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
                                                   static_cast<math_pointer> (_M_pBegin));
@@ -98,18 +97,18 @@ public:
         return size > sizeof (header) ? size - sizeof (header) : size_type ();
     }
 
-    bool is_shared () const noexcept
+    constexpr bool is_shared () const noexcept
     { return _M_bIsMemShared; }
 
-    memory_resource& owner () const noexcept
+    constexpr memory_resource& owner () const noexcept
     { return _M_gOwner; }
 
 private:
     void* do_allocate   (size_type size, align_type align);
-    void  do_deallocate (void* p, size_type size, size_type align);
+    void  do_deallocate (pointer p, size_type size, size_type align);
 
-    bool  do_is_equal   (base_type const& gObj) const noexcept
-    { return &gObj == this; }
+    constexpr bool do_is_equal (base_const_reference gObj) const noexcept
+    { return this == &gObj; }
 
 private:
     memory_resource& _M_gOwner         ;

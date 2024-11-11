@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,16 +25,24 @@
 
 #include "opencl.h"
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 // =========================================================
 
-class kernel final : public cmd_object
+class kernel final : public shader_interface
 {
 public:
-    typedef cmd_object base_type;
+    typedef kernel                self_type  ;
+    typedef shader_interface      base_type  ;
+    typedef CLObject<kernel_type> value_type ;
+    typedef value_type*           pointer    ;
+    typedef std::size_t           size_type  ;
+    typedef resource_handle       handle_type;
 
-    kernel (pointer handle) noexcept : base_type (handle) { }
+    constexpr kernel (pointer handle) noexcept : base_type (handle) { }
+
+    constexpr pointer handle () const noexcept
+    { return base_type::handle<pointer> (); }
 
 private:
     template<typename T>
@@ -46,7 +54,7 @@ private:
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace CL
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_OPENCL_KERNEL_H_

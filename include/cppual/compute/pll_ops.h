@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@
 namespace cppual { namespace compute {
 
 template <typename T>
-void sort (T begin, T end, device_queue& queue)
+void sort (T /*begin*/, T /*end*/, device_queue& /*queue*/)
 {
 }
 
 template <typename T>
-void copy (T begin, T end, T dst, device_queue& queue)
+void copy (T /*begin*/, T /*end*/, T /*dst*/, device_queue& /*queue*/)
 {
 }
 

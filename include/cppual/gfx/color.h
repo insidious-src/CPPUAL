@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ struct ypb_pr_color
 // =========================================================
 
 struct Gradient
-{ rgb_color color; byte position; };
+{ rgb_color color; u8 position; };
 
 inline bool operator == (Gradient const& gObj1, Gradient const& gObj2) noexcept
 { return (gObj1.position == gObj2.position and gObj1.color == gObj2.color); }

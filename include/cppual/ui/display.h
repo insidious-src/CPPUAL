@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 #include <memory>
 
-namespace cppual { namespace ui {
+namespace cppual::ui {
 
 class   display_interface;
 typedef std::shared_ptr<display_interface> shared_display;
@@ -75,7 +75,7 @@ private:
     handle_type _M_native { }, _M_legacy { };
 };
 
-} } // namespace Ui
+} // namespace Ui
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_DISPLAY_H_

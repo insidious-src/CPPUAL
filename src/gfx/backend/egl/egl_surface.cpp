@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,9 @@
 
 #include <EGL/egl.h>
 
-namespace cppual { namespace gfx { namespace gl {
+namespace cppual::gfx::gl {
+
+// ====================================================
 
 namespace { namespace internal { // optimize for internal unit usage
 
@@ -264,18 +266,11 @@ constexpr value_type api_bits (API eAPI) noexcept
                                  eAPI == API::OpenGLES ? GLESBit : none;
 }
 
-constexpr uint constexpr_hash (cchar* input)
-{
-    return *input and *input != ' ' ?
-                                    static_cast<uint> (*input) + 33 * constexpr_hash (input + 1) :
-                                    5381;
-}
-
 // ====================================================
 
 inline config::feature_types convert_extensions (display_pointer dsp)
 {
-    config::feature_types eFeatures (nullptr);
+    config::feature_types eFeatures;
 
     auto const extensions = ::eglQueryString (dsp, internal::Extensions);
 
@@ -285,24 +280,24 @@ inline config::feature_types convert_extensions (display_pointer dsp)
          extension = extensions; extension++;
          extension = std::strchr (extension , ' '))
     {
-        switch (constexpr_hash (extension))
+        switch (constexpr_char_hash (extension))
         {
-        case constexpr_hash ("EGL_KHR_surfaceless_context"):
+        case constexpr_char_hash ("EGL_KHR_surfaceless_context"):
             eFeatures += config::feature::surfaceless_context;
             break;
-        case constexpr_hash ("EGL_MESA_configless_context"):
+        case constexpr_char_hash ("EGL_MESA_configless_context"):
             eFeatures += config::feature::configless_context;
             break;
-        case constexpr_hash ("EGL_CHROMIUM_sync_control"):
+        case constexpr_char_hash ("EGL_CHROMIUM_sync_control"):
             eFeatures += config::feature::sync_control;
             break;
-        case constexpr_hash ("EGL_EXT_create_context_robustness"):
+        case constexpr_char_hash ("EGL_EXT_create_context_robustness"):
             eFeatures += config::feature::create_robust_context;
             break;
-        case constexpr_hash ("EGL_ANGLE_window_fixed_size"):
+        case constexpr_char_hash ("EGL_ANGLE_window_fixed_size"):
             eFeatures += config::feature::scalable_surface;
             break;
-        case constexpr_hash ("EGL_KHR_create_context"):
+        case constexpr_char_hash ("EGL_KHR_create_context"):
             eFeatures += config::feature::context_attributes_ext;
             break;
         }
@@ -435,8 +430,8 @@ inline point2u get_size (display_pointer dsp, surface_pointer surface) noexcept
 
 // ====================================================
 
-config::config (connection_type legacy, format_type gFormat)
-: _M_pDisplay   (::eglGetDisplay (legacy.get<internal::native_display> ())),
+config::config (connection_type native, format_type gFormat)
+: _M_pDisplay   (::eglGetDisplay (native.get<internal::native_display> ())),
   _M_pCfg       (),
   _M_gFormat    (),
   _M_eFeatures  ()
@@ -765,7 +760,7 @@ resource_version context::platform_version () noexcept
     return internal::version ();
 }
 
-bool context::use (pointer pDraw, pointer pRead) noexcept
+bool context::use (shared_surface pDraw, shared_surface pRead) noexcept
 {
     if ((( pDraw and !pRead) or (pDraw and pDraw->device () != device_backend::gl)) or
         ((!pDraw and  pRead) or (pRead and pRead->device () != device_backend::gl)))
@@ -823,4 +818,4 @@ void context::finish () noexcept
     if (active ()) ::eglWaitGL ();
 }
 
-} } } // namespace EGL
+} // namespace EGL

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,16 +25,16 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/gldef.h>
 
-namespace cppual { namespace gfx { namespace gl {
+namespace cppual::gfx::gl {
 
 namespace { // optimize for internal unit usage
 
 inline ::GLuint generate_object (resource_type eType)
 {
-    auto pContext = context_interface::current ();
+    auto const pContext = context_interface::current ();
 
-    if (!pContext or pContext->device () != device_backend::gl)
-        throw bad_context ("NO GL context bound to thread");
+    if (!pContext || pContext->device () != device_backend::gl)
+        throw bad_context ("NO GL context bound to thread!");
 
     ::GLuint uId;
 
@@ -69,10 +69,10 @@ inline ::GLuint generate_object (resource_type eType)
 
 inline ::GLuint generate_shader (::GLenum uType)
 {
-    auto pContext = context_interface::current ();
+    auto const pContext = context_interface::current ();
 
-    if (!pContext or pContext->device () != device_backend::gl)
-        throw bad_context ("NO GL context bound to thread");
+    if (!pContext || pContext->device () != device_backend::gl)
+        throw bad_context ("NO GL context bound to thread!");
 
     return pContext->version () < 3 ?
                ::glCreateShader (uType) : ::glCreateShaderObjectARB (uType);
@@ -110,7 +110,7 @@ object::object (resource_type eType)
 
 object::object (shader_type eShaderType)
 : resource     (generate_shader (convert_shader_type (eShaderType))),
-  _M_eResType  (resource_type::shader)
+  _M_eResType  (resource_type::source_code)
 { }
 
 object::~object () noexcept
@@ -135,7 +135,7 @@ object::~object () noexcept
             case resource_type::query:
                 ::glDeleteQueries (1, &uId);
                 break;
-            case resource_type::shader:
+            case resource_type::source_code:
                 ::glDeleteShader (uId);
                 break;
             case resource_type::texture:
@@ -166,4 +166,4 @@ object::~object () noexcept
     }
 }
 
-} } } // namespace GL
+} // namespace GL

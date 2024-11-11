@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,20 +32,20 @@
 #include "clcmdqueue.h"
 #include "clsampler.h"
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 class cl_factory final : factory
 {
 public:
-    typedef device_vector& device_const_reference;
+    typedef device_vector& devices_const_reference;
 
-    constexpr cl_factory(memory::memory_resource& rc) noexcept
+    constexpr cl_factory (memory::memory_resource& rc) noexcept
     : _M_rc(&rc)
     { }
 
-    device_vector          get_devices(device_categories = device_category::any);
+    device_vector          get_devices(device_types = device_type::any);
     shared_context         create_context (device_vector const&);
-    shared_buffer          create_buffer(shared_context const&, size_type, memory_access, memory_cat);
+    shared_memory          allocate_memory(shared_context const&, size_type, memory_access, memory_cat);
     shared_cmd_sequence    create_cmd_sequence();
     shared_image           create_image();
     shared_pipeline        create_pipeline();
@@ -56,10 +56,10 @@ public:
     shared_state           create_state();
     shared_queue           create_queue();
     shared_sampler         create_sampler();
-    size_type              device_count(device_categories);
+    size_type              device_count(device_types);
 
 private:
-    device_const_reference all_devices() const;
+    devices_const_reference all_devices() const;
 
 private:
     memory::memory_resource* _M_rc;
@@ -67,7 +67,7 @@ private:
 
 // =========================================================
 
-cl_factory::device_const_reference cl_factory::all_devices() const
+cl_factory::devices_const_reference cl_factory::all_devices() const
 {
     static auto devs = device::get_devices(*_M_rc);
     return devs;
@@ -75,20 +75,20 @@ cl_factory::device_const_reference cl_factory::all_devices() const
 
 // =========================================================
 
-factory::device_vector cl_factory::get_devices(device_categories types)
+factory::device_vector cl_factory::get_devices(device_types types)
 {
-    device_const_reference devs = all_devices();
+    devices_const_reference devs = all_devices ();
 
-    if (types != device_category::any)
+    if (types != device_type::any)
     {
         device_vector ret_devs;
-        auto const    dev_count = device_count(types);
+        auto const    dev_count = device_count (types);
 
-        if (dev_count) ret_devs.reserve(dev_count);
+        if (dev_count) ret_devs.reserve (dev_count);
 
-        for (auto i = 0U; i < devs.size(); ++i)
+        for (auto i = 0U; i < devs.size (); ++i)
         {
-            if (types.test(devs[i]->dev_type())) ret_devs.push_back(devs[i]);
+            if (types.test(devs[i]->dev_type ())) ret_devs.push_back (devs[i]);
         }
 
         return ret_devs;
@@ -97,23 +97,23 @@ factory::device_vector cl_factory::get_devices(device_categories types)
     return devs;
 }
 
-factory::size_type cl_factory::device_count(device_categories types)
+factory::size_type cl_factory::device_count(device_types types)
 {
-    device_const_reference devs = all_devices();
+    devices_const_reference devs = all_devices ();
 
-    if (types != device_category::any)
+    if (types != device_type::any)
     {
         auto dev_count = size_type ();
 
-        for (auto i = 0U; i < devs.size(); ++i)
+        for (auto i = 0U; i < devs.size (); ++i)
         {
-            if (types.test(devs[i]->dev_type())) ++dev_count;
+            if (types.test(devs[i]->dev_type ())) ++dev_count;
         }
 
         return dev_count;
     }
 
-    return devs.size();
+    return devs.size ();
 }
 
 shared_context cl_factory::create_context (device_vector const& devs)
@@ -121,22 +121,22 @@ shared_context cl_factory::create_context (device_vector const& devs)
     return shared_context (new context (devs, nullptr));
 }
 
-shared_buffer cl_factory::create_buffer (shared_context const& cntxt,
-                                         size_type size,
-                                         memory_access access,
-                                         memory_cat cat)
+shared_memory cl_factory::allocate_memory (shared_context const& cntxt,
+                                           size_type size,
+                                           memory_access access,
+                                           memory_cat cat)
 {
-    return shared_buffer (new memory_chunk (cntxt, size, access, cat));
+    return shared_memory (new memory_chunk (cntxt, size, access, cat));
+}
+
+shared_image cl_factory::create_image ()
+{
+    return shared_image (new image (nullptr));
 }
 
 shared_cmd_sequence cl_factory::create_cmd_sequence ()
 {
     return shared_cmd_sequence (new program (nullptr));
-}
-
-shared_image cl_factory::create_image ()
-{
-    return shared_image (new cl::image (nullptr));
 }
 
 shared_pipeline cl_factory::create_pipeline ()
@@ -161,7 +161,7 @@ shared_descriptor_pool cl_factory::create_descriptor_pool ()
 
 shared_event cl_factory::create_event ()
 {
-    return shared_event (new cl::event (nullptr));
+    return shared_event (new event (nullptr));
 }
 
 shared_state cl_factory::create_state ()
@@ -171,16 +171,16 @@ shared_state cl_factory::create_state ()
 
 shared_queue cl_factory::create_queue ()
 {
-    return shared_queue (new cl::command_queue (nullptr));
+    return shared_queue (new command_queue (nullptr));
 }
 
 shared_sampler cl_factory::create_sampler ()
 {
-    return shared_sampler (new cl::sampler (nullptr));
+    return shared_sampler (new sampler (nullptr));
 }
 
 
-} } } // namespace CL
+} // namespace CL
 
 // =========================================================
 
@@ -204,7 +204,7 @@ extern "C" plugin_vars* plugin_main (memory_resource* rc)
     plugin.provides = "compute::factory";
     plugin.verMajor = 1                 ;
     plugin.verMinor = 0                 ;
-    plugin.iface    = allocate_shared<void, cl_factory>(&static_resource, *rc);
+    plugin.iface    = allocate_shared<void, cl_factory> (&static_resource, *rc);
 
     return &plugin;
 }

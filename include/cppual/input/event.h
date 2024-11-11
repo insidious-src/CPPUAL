@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
 #ifdef __cplusplus
 
 #include <cppual/types.h>
-#include <cppual/flags.h>
+#include <cppual/bitset.h>
 #include <cppual/gfx/coord.h>
 #include <cppual/input/keyboard.h>
 #include <cppual/input/pointer.h>
 #include <cppual/input/joystick.h>
 #include <cppual/noncopyable.h>
 
-namespace cppual { namespace input {
+namespace cppual::input {
 
 struct system_message final
 {
@@ -45,7 +45,7 @@ struct system_message final
 
 // =========================================================
 
-class sys_event
+class event
 {
 public:
     typedef std::size_t size_type;
@@ -198,27 +198,27 @@ public:
     typedef data_value&       reference      ;
     typedef data_value const& const_reference;
 
-    constexpr sys_event () noexcept : _M_data (), _M_type { } { }
+    constexpr event () noexcept : _M_data (), _M_type { } { }
     constexpr const_reference data () const noexcept { return _M_data; }
-    constexpr bits            type () const noexcept { return _M_type; }
+    constexpr bit_flags       type () const noexcept { return _M_type; }
 
-    constexpr sys_event (bits type, const_reference data = value_type()) noexcept
+    constexpr event (bits type, const_reference data = value_type()) noexcept
     : _M_data (data),
       _M_type (type)
     { }
 
 protected:
     value_type _M_data;
-    bits       _M_type;
+    bit_flags  _M_type;
 };
 
 // =========================================================
 
-struct message_event : public sys_event
+struct message_event : public event
 {
     inline
     message_event (int nMsg) noexcept
-    : sys_event   (sys_event::sys_message)
+    : event   (event::sys_message)
     {
         _M_data.message = nMsg;
     }
@@ -226,11 +226,11 @@ struct message_event : public sys_event
 
 // =========================================================
 
-struct visibility_event : public sys_event
+struct visibility_event : public event
 {
     inline
     visibility_event (bool bVis) noexcept
-    : sys_event      (sys_event::visibility)
+    : event      (event::visibility)
     {
         _M_data.state = bVis;
     }
@@ -238,11 +238,11 @@ struct visibility_event : public sys_event
 
 // =========================================================
 
-struct paint_event : public sys_event
+struct paint_event : public event
 {
     inline
     paint_event (rect gRect) noexcept
-    : sys_event (sys_event::paint)
+    : event (event::paint)
     {
         _M_data.paint.region = gRect;
     }
@@ -250,11 +250,11 @@ struct paint_event : public sys_event
 
 // =========================================================
 
-struct size_event : public sys_event
+struct size_event : public event
 {
     inline
     size_event (point2u size) noexcept
-    : sys_event(sys_event::size)
+    : event(event::size)
     {
         _M_data.size = size;
     }
@@ -262,11 +262,11 @@ struct size_event : public sys_event
 
 // =========================================================
 
-struct focus_event : public sys_event
+struct focus_event : public event
 {
     inline
     focus_event (bool in) noexcept
-    : sys_event (sys_event::focus)
+    : event (event::focus)
     {
         _M_data.state = in;
     }
@@ -274,11 +274,11 @@ struct focus_event : public sys_event
 
 // =========================================================
 
-struct step_event : public sys_event
+struct step_event : public event
 {
     inline
     step_event (bool in) noexcept
-    : sys_event(sys_event::step)
+    : event(event::step)
     {
         _M_data.state = in;
     }
@@ -286,11 +286,11 @@ struct step_event : public sys_event
 
 // =========================================================
 
-struct property_event : public sys_event
+struct property_event : public event
 {
     inline
     property_event (u32 prop, i32 value) noexcept
-    : sys_event    (sys_event::property)
+    : event    (event::property)
     {
         _M_data.property.prop  = prop ;
         _M_data.property.value = value;
@@ -299,12 +299,12 @@ struct property_event : public sys_event
 
 // =========================================================
 
-struct key_event : public sys_event
+struct key_event : public event
 {
     constexpr key_event (keyboard::key nKey,
                          keyboard::modifier uMask = keyboard::modifier::none,
                          bool is_pressed = true) noexcept
-    : sys_event (is_pressed ? sys_event::key_pressed : sys_event::key_released, { key_data { nKey, uMask } })
+    : event (is_pressed ? event::key_pressed : event::key_released, { key_data { nKey, uMask } })
     { }
 };
 
@@ -330,20 +330,20 @@ struct key_release_event : public key_event
 
 // =========================================================
 
-struct mouse_event : public sys_event
+struct mouse_event : public event
 {
     constexpr mouse_event (u8 nBtn, point2u gPos, bool is_down) noexcept
-    : sys_event (is_down ? sys_event::mbutton_down : sys_event::mbutton_up, { mbutton_data { gPos, nBtn } })
+    : event (is_down ? event::mbutton_down : event::mbutton_up, { mbutton_data { gPos, nBtn } })
     { }
 
     inline mouse_event (point2u gPos) noexcept
-    : sys_event (sys_event::mouse_move)
+    : event (event::mouse_move)
     {
         _M_data.position = gPos;
     }
 
     inline mouse_event (i32 nDelta, point2u gPos) noexcept
-    : sys_event (sys_event::mwheel_step)
+    : event (event::mwheel_step)
     {
         _M_data.wheel.delta = nDelta;
         _M_data.wheel.pos   = gPos;
@@ -390,11 +390,11 @@ struct wheel_event : public mouse_event
 
 // =========================================================
 
-struct touch_event : public sys_event
+struct touch_event : public event
 {
     inline
     touch_event (i32 pid, point2u gPos, bits action) noexcept
-    : sys_event (action)
+    : event (action)
     {
         _M_data.touch.pid = pid;
         _M_data.touch.pos = gPos;
@@ -407,7 +407,7 @@ struct touch_press_event : public touch_event
 {
     inline
     touch_press_event (i32 pid, point2u gPos) noexcept
-    : touch_event     (pid, gPos, sys_event::touch_press)
+    : touch_event     (pid, gPos, event::touch_press)
     { }
 };
 
@@ -417,7 +417,7 @@ struct touch_release_event : public touch_event
 {
     inline
     touch_release_event (i32 pid, point2u gPos) noexcept
-    : touch_event       (pid, gPos, sys_event::touch_release)
+    : touch_event       (pid, gPos, event::touch_release)
     { }
 };
 
@@ -427,13 +427,13 @@ struct touch_moved_event : public touch_event
 {
     inline
     touch_moved_event (i32 pid, point2u gPos) noexcept
-    : touch_event     (pid, gPos, sys_event::touch_move)
+    : touch_event     (pid, gPos, event::touch_move)
     { }
 };
 
 // =========================================================
 
-} } // namespace Input
+} // namespace Input
 
 #endif // __cplusplus
 #endif // CPPUAL_DEVICES_EVENT_H

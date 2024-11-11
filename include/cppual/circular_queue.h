@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,15 @@
 #define CPPUAL_CIRCULAR_QUEUE_H_
 #ifdef __cplusplus
 
-#include <cppual/concepts.h>
-#include <cppual/iterator.h>
 #include <cppual/noncopyable.h>
 #include <cppual/memory/allocator.h>
+#include <cppual/concept/concepts.h>
+#include <cppual/iterators/bi_iterator.h>
 
 #include <atomic>
 #include <memory>
 #include <cstring>
+#include <iterator>
 #include <algorithm>
 #include <type_traits>
 
@@ -38,56 +39,63 @@ namespace cppual {
 
 // ====================================================
 
-template <typename T,
-          typename Allocator = memory::allocator<T>,
-          bool     Atomic    = false
+using memory::allocator_t;
+
+// ====================================================
+
+template <non_void_t  T,
+          allocator_t A = memory::allocator<T>,
+          bool   Atomic = false
           >
-class SHARED_API circular_queue : private Allocator
+class SHARED_API circular_queue : private A
 {
 public:
-    static_assert (!std::is_void_v<T>              , "T is void");
     static_assert ( std::is_move_constructible_v<T>, "T is not move constructible!");
     static_assert ( std::is_move_assignable_v<T>   , "T is not move assignable!");
 
-    typedef std::allocator_traits<Allocator>           allocator_traits      ;
-    typedef typename allocator_traits::allocator_type  allocator_type        ;
-    typedef T                                          value_type            ;
-    typedef value_type*                                pointer               ;
-    typedef value_type const*                          const_pointer         ;
-    typedef value_type&                                reference             ;
-    typedef value_type const&                          const_reference       ;
-    typedef typename allocator_traits::size_type       size_type             ;
-    typedef typename allocator_traits::size_type const const_size            ;
-    typedef typename allocator_traits::difference_type difference_type       ;
-    typedef circular_queue<T, allocator_type, Atomic>  self_type             ;
-    typedef bidirectional_iterator<self_type>          iterator              ;
-    typedef bidirectional_iterator<self_type const>    const_iterator        ;
-    typedef std::reverse_iterator<iterator>            reverse_iterator      ;
-    typedef std::reverse_iterator<const_iterator>      const_reverse_iterator;
-    typedef std::pair<pointer, size_type>              array_range           ;
-    typedef std::pair<const_pointer, size_type>        const_array_range     ;
+    typedef circular_queue<T, A, Atomic>            self_type             ;
+    typedef std::allocator_traits<A>                traits_type           ;
+    typedef traits_type::allocator_type             allocator_type        ;
+    typedef std::remove_cvref_t<T>                  value_type            ;
+    typedef value_type*                             pointer               ;
+    typedef value_type const*                       const_pointer         ;
+    typedef value_type&                             reference             ;
+    typedef value_type const&                       const_reference       ;
+    typedef traits_type::size_type                  size_type             ;
+    typedef traits_type::size_type const            const_size            ;
+    typedef traits_type::difference_type            difference_type       ;
+    typedef bidirectional_iterator<self_type>       iterator              ;
+    typedef bidirectional_iterator<self_type const> const_iterator        ;
+    typedef std::reverse_iterator<iterator>         reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+    typedef std::pair<pointer, size_type>           array_range           ;
+    typedef std::pair<const_pointer, size_type>     const_array_range     ;
+    typedef std::pair<iterator, bool>               iterator_pair         ;
 
-    constexpr const static size_type npos = size_type (-1);
+    inline constexpr static size_type const npos = size_type (-1);
 
-    circular_queue& operator = (circular_queue const&);
+    self_type& operator = (self_type const&);
 
     void resize (size_type new_capacity);
     void erase  (const_iterator it);
 
     constexpr const_pointer   data    () const noexcept { return  _M_pArray  ; }
-    constexpr const_reference front   () const          { return *_M_beginPos; }
-    constexpr const_reference back    () const          { return *_M_endPos  ; }
-    constexpr reference       front   ()                { return *_M_beginPos; }
-    constexpr reference       back    ()                { return *_M_endPos  ; }
+    constexpr const_reference front   () const noexcept { return *_M_beginPos; }
+    constexpr const_reference back    () const noexcept { return *_M_endPos  ; }
+    constexpr reference       front   ()       noexcept { return *_M_beginPos; }
+    constexpr reference       back    ()       noexcept { return *_M_endPos  ; }
 
     constexpr allocator_type  get_allocator () const noexcept { return  *this; }
     inline    void            pop_front     () { if (!empty ()) _pop_front (); }
     inline    void            pop_back      () { if (!empty ()) _pop_back  (); }
 
     constexpr iterator begin () noexcept
-    { return iterator (*this, size_type ()); }
+    { return  iterator (*this, size_type ()); }
 
     constexpr const_iterator begin () const noexcept
+    { return const_iterator (*this, size_type ()); }
+
+    constexpr const_iterator cbegin () noexcept
     { return const_iterator (*this, size_type ()); }
 
     constexpr const_iterator cbegin () const noexcept
@@ -99,6 +107,9 @@ public:
     constexpr const_iterator end () const noexcept
     { return const_iterator (*this, size ()); }
 
+    constexpr const_iterator cend () noexcept
+    { return const_iterator (*this, size ()); }
+
     constexpr const_iterator cend () const noexcept
     { return const_iterator (*this, size ()); }
 
@@ -108,6 +119,9 @@ public:
     constexpr const_reverse_iterator rbegin () const noexcept
     { return const_reverse_iterator (const_iterator (*this, size () - 1)); }
 
+    constexpr const_reverse_iterator crbegin () noexcept
+    { return const_reverse_iterator (const_iterator (*this, size () - 1)); }
+
     constexpr const_reverse_iterator crbegin () const noexcept
     { return const_reverse_iterator (const_iterator (*this, size () - 1)); }
 
@@ -115,6 +129,9 @@ public:
     { return reverse_iterator (iterator (*this, npos)); }
 
     constexpr const_reverse_iterator rend () const noexcept
+    { return const_reverse_iterator (const_iterator (*this, npos)); }
+
+    constexpr const_reverse_iterator crend () noexcept
     { return const_reverse_iterator (const_iterator (*this, npos)); }
 
     constexpr const_reverse_iterator crend () const noexcept
@@ -128,8 +145,8 @@ public:
       _M_uCapacity   ()
     { }
 
-    inline circular_queue (size_type             uCapacity,
-                    allocator_type const& gAtor = allocator_type ())
+    constexpr circular_queue (size_type             uCapacity,
+                              allocator_type const& gAtor = allocator_type ())
     : allocator_type (gAtor),
       _M_pArray      (uCapacity ? allocator_type::allocate (uCapacity) : pointer ()),
       _M_beginPos    (),
@@ -147,15 +164,15 @@ public:
 
     inline circular_queue (std::initializer_list<value_type> list)
     : allocator_type (),
-      _M_pArray      (allocator_type::allocate (list.size())),
+      _M_pArray      (allocator_type::allocate (list.size ())),
       _M_beginPos    (),
       _M_endPos      (),
-      _M_uCapacity   (_M_pArray ? list.size() : size_type())
+      _M_uCapacity   (_M_pArray ? list.size () : size_type ())
     {
-        if (_M_pArray && list.size ()) for (auto val : list) push_back (std::move(val));
+        if (_M_pArray && list.size ()) for (auto& val : list) push_back (std::move (val));
     }
 
-    inline circular_queue (circular_queue const& gObj)
+    inline circular_queue (self_type const& gObj)
     : allocator_type (gObj),
       _M_pArray      (!gObj.empty () ? allocator_type::allocate (gObj.size ()) : pointer ()),
       _M_beginPos    (_M_pArray && !gObj.empty () ? _M_pArray : pointer ()),
@@ -166,26 +183,22 @@ public:
 
         for (auto it = gObj.cbegin (), dst_it = cbegin (); it != gObj.cend (); ++it, ++dst_it)
         {
-            allocator_traits::construct (*this, &(*dst_it), *it);
+            traits_type::construct (*this, &(*dst_it), *it);
         }
     }
 
-    inline circular_queue (circular_queue&& gObj) noexcept
+    inline circular_queue (self_type&& gObj) noexcept
     : allocator_type (gObj),
       _M_pArray      (gObj._M_pArray   ),
       _M_beginPos    (gObj._M_beginPos ),
       _M_endPos      (gObj._M_endPos   ),
       _M_uCapacity   (gObj._M_uCapacity)
     {
-        gObj._M_pArray    = nullptr;
-        gObj._M_beginPos  = nullptr;
-        gObj._M_endPos    = nullptr;
+        gObj._M_pArray    = gObj._M_beginPos = gObj._M_endPos = nullptr;
         gObj._M_uCapacity = size_type ();
     }
 
-    template <typename Iterator,
-              typename = typename std::enable_if_t<is_iterator<Iterator>::value>
-              >
+    template <iterator_t Iterator>
     inline circular_queue (Iterator gBegin, Iterator gEnd,
                            allocator_type const&     gAtor = allocator_type ())
     : allocator_type (gAtor),
@@ -198,7 +211,7 @@ public:
         {
             for (auto dst_it = begin (); gBegin != gEnd; ++gBegin, ++dst_it)
             {
-                allocator_traits::construct (*this, &(*dst_it), *gBegin);
+                traits_type::construct (*this, &(*dst_it), *gBegin);
             }
         }
     }
@@ -211,7 +224,7 @@ public:
         allocator_type::deallocate (_M_pArray, _M_uCapacity);
     }
 
-    inline circular_queue& operator = (circular_queue&& gObj)
+    inline self_type& operator = (self_type&& gObj)
     {
         if (this == &gObj) return *this;
 
@@ -278,32 +291,32 @@ public:
     constexpr bool full () const noexcept
     { return _M_beginPos == normalize (_M_endPos + 1); }
 
-    void reserve (size_type uNewCapacity)
-    { resize (capacity () + uNewCapacity); }
+    inline void reserve (size_type uNewCapacity)
+    { resize (uNewCapacity); }
 
-    void shrink_to_fit ()
+    inline void shrink_to_fit ()
     { if (capacity () != size ()) swap (self_type (*this)); }
 
-    void push_back (value_type&& val)
-    { emplace_back (std::move (val)); }
+    inline iterator_pair push_back (value_type&& val)
+    { return emplace_back (std::move (val)); }
 
-    void push_back (value_type const& val)
-    { emplace_back (val); }
+    inline iterator_pair push_back (value_type const& val)
+    { return emplace_back (val); }
 
-    void push_front (value_type&& val)
-    { emplace_front (std::move (val)); }
+    inline iterator_pair push_front (value_type&& val)
+    { return emplace_front (std::move (val)); }
 
-    void push_front (value_type const& val)
-    { emplace_front (val); }
+    inline iterator_pair push_front (value_type const& val)
+    { return emplace_front (val); }
 
-    const_reference at (size_type n) const
-    { return size () > n ? (*this)[n] : throw std::out_of_range ("index is out of range"); }
+    inline const_reference at (size_type n) const
+    { return size () > n ? (*this)[n] : throw std::out_of_range ("index is out of range!"); }
 
-    reference at (size_type n)
-    { return size () > n ? (*this)[n] : throw std::out_of_range ("index is out of range"); }
+    inline reference at (size_type n)
+    { return size () > n ? (*this)[n] : throw std::out_of_range ("index is out of range!"); }
 
     template <typename... Args>
-    void emplace_front (Args&&... args)
+    inline iterator_pair emplace_front (Args&&... args)
     {
         // ++front--
         // no storage allocated or full
@@ -315,11 +328,13 @@ public:
         if (empty ()) set_first_pos ();
         else _M_beginPos = normalize (--_M_beginPos);
 
-        allocator_traits::construct (*this, _M_beginPos, std::forward<Args> (args)...);
+        traits_type::construct (*this, _M_beginPos, std::forward<Args> (args)...);
+
+        return std::move (std::pair (begin (), true));
     }
 
     template <typename... Args>
-    void emplace_back (Args&&... args)
+    inline iterator_pair emplace_back (Args&&... args)
     {
         // --back++
         // no storage allocated or full
@@ -331,13 +346,14 @@ public:
         if (empty ()) set_first_pos ();
         else _M_endPos = normalize (++_M_endPos);
 
-        allocator_traits::construct (*this, _M_endPos, std::forward<Args> (args)...);
+        traits_type::construct (*this, _M_endPos, std::forward<Args> (args)...);
+
+        return std::move (std::pair (iterator (*this, empty () ? 0 : size () - 1), true));
     }
 
-    void swap (self_type& gObj) noexcept
+    inline void swap (self_type& gObj) noexcept
     {
-        std::swap (static_cast<allocator_type&> (*this),
-                   static_cast<allocator_type&> (gObj));
+        std::swap (static_cast<allocator_type&> (*this), static_cast<allocator_type&> (gObj));
 
         std::swap (_M_pArray,    gObj._M_pArray   );
         std::swap (_M_beginPos,  gObj._M_beginPos );
@@ -345,11 +361,11 @@ public:
         std::swap (_M_uCapacity, gObj._M_uCapacity);
     }
 
-    void clear ()
+    inline void clear ()
     {
         auto i = size ();
 
-        while (i > 0) allocator_traits::destroy (*this, &(*this)[--i]);
+        while (i-- > 0) traits_type::destroy (*this, &(*this)[i]);
         invalidate_pos ();
     }
 
@@ -360,7 +376,7 @@ private:
     inline void _pop_front ()
     {
         // ++front--
-        allocator_traits::destroy (*this, _M_beginPos);
+        traits_type::destroy (*this, _M_beginPos);
 
         if (size () == 1) invalidate_pos ();
         else _M_beginPos = normalize (++_M_beginPos);
@@ -369,7 +385,7 @@ private:
     inline void _pop_back ()
     {
         // --back++
-        allocator_traits::destroy (*this, _M_endPos);
+        traits_type::destroy (*this, _M_endPos);
 
         if (size () == 1) invalidate_pos ();
         else _M_endPos = normalize (--_M_endPos);
@@ -395,24 +411,24 @@ private:
                     npos;
     }
 
-    template <typename Iterator>
+    template <iterator_t Iterator>
     constexpr static size_type diff (Iterator i1, Iterator i2) noexcept
     { return i1 >= i2 ? size_type (i1 - i2) : size_type (i2 - i1); }
 
     void dispose ();
 
 private:
-    pointer   _M_pArray   ;
-    pointer   _M_beginPos ;
-    pointer   _M_endPos   ;
-    size_type _M_uCapacity;
+    pointer   _M_pArray    { };
+    pointer   _M_beginPos  { };
+    pointer   _M_endPos    { };
+    size_type _M_uCapacity { };
 };
 
 // ====================================================
 
-template <typename T, typename Allocator, bool Atomic>
-circular_queue<T, Allocator, Atomic>&
-circular_queue<T, Allocator, Atomic>::operator = (circular_queue const& gObj)
+template <non_void_t T, allocator_t A, bool Atomic>
+circular_queue<T, A, Atomic>::self_type&
+circular_queue<T, A, Atomic>::operator = (self_type const& gObj)
 {
     if (this == &gObj) return *this;
 
@@ -446,8 +462,8 @@ circular_queue<T, Allocator, Atomic>::operator = (circular_queue const& gObj)
     return *this;
 }
 
-template <typename T, typename Allocator, bool Atomic>
-void circular_queue<T, Allocator, Atomic>::resize (size_type uNewCapacity)
+template <non_void_t T, allocator_t A, bool Atomic>
+void circular_queue<T, A, Atomic>::resize (size_type uNewCapacity)
 {
     if (capacity () >= uNewCapacity) return;
 
@@ -458,11 +474,11 @@ void circular_queue<T, Allocator, Atomic>::resize (size_type uNewCapacity)
     swap (gObj);
 }
 
-template <typename T, typename Allocator, bool Atomic>
-void circular_queue<T, Allocator, Atomic>::erase (const_iterator gIt)
+template <non_void_t T, allocator_t A, bool Atomic>
+void circular_queue<T, A, Atomic>::erase (const_iterator gIt)
 {
     if (empty () || gIt < cbegin () || cend () <= gIt)
-        throw std::out_of_range ("iterator is out of range");
+        throw std::out_of_range ("iterator is out of range!");
 
     if (&(*gIt) == _M_beginPos) _pop_front ();
     else if (&(*gIt) == _M_endPos) _pop_back ();
@@ -474,7 +490,7 @@ void circular_queue<T, Allocator, Atomic>::erase (const_iterator gIt)
         {
             std::move (it + 1, end (), it);
 
-            allocator_traits::destroy (*this, _M_endPos);
+            traits_type::destroy (*this, _M_endPos);
 
             _M_endPos = normalize (--_M_endPos);
         }
@@ -482,15 +498,15 @@ void circular_queue<T, Allocator, Atomic>::erase (const_iterator gIt)
         {
             std::move_backward (begin (), it, it + 1);
 
-            allocator_traits::destroy (*this, _M_beginPos);
+            traits_type::destroy (*this, _M_beginPos);
 
             _M_beginPos = normalize (++_M_beginPos);
         }
     }
 }
 
-template <typename T, typename Allocator, bool Atomic>
-void circular_queue<T, Allocator, Atomic>::dispose ()
+template <non_void_t T, allocator_t A, bool Atomic>
+void circular_queue<T, A, Atomic>::dispose ()
 {
     if (!capacity ()) return;
 
@@ -503,8 +519,113 @@ void circular_queue<T, Allocator, Atomic>::dispose ()
 
 // ====================================================
 
-// lock-free circular queue (1 producer / 1 consumer)
-// ex. sufficient for event handling
+//! [UNFINISHED] feature complete lock-free multi-producer/multi-consumer bidirectional queue
+//! ex. game messaging queue
+template <typename T, allocator_t A>
+class SHARED_API circular_queue <T, A, true> : A, non_copyable
+{
+public:
+    static_assert (!std::is_void_v<T>              , "T is void");
+    static_assert ( std::is_move_constructible_v<T>, "T is not move constructible!");
+    static_assert ( std::is_move_assignable_v<T>   , "T is not move assignable!");
+
+    typedef circular_queue<T, A, true>   self_type      ;
+    typedef std::allocator_traits<A>     traits_type    ;
+    typedef traits_type::allocator_type  allocator_type ;
+    typedef std::remove_cvref_t<T>       value_type     ;
+    typedef value_type *                 pointer        ;
+    typedef value_type const*            const_pointer  ;
+    typedef value_type &                 reference      ;
+    typedef value_type const&            const_reference;
+    typedef std::atomic_size_t           atomic_size    ;
+    typedef traits_type::size_type       size_type      ;
+    typedef traits_type::size_type const const_size     ;
+    typedef traits_type::difference_type ifference_type ;
+
+    circular_queue () noexcept;
+
+    void reserve (size_type);
+    void reserve_unsafe (size_type);
+    bool push_back (const_reference);
+    bool bounded_push_back (const_reference);
+    bool unsynchronized_push_back (const_reference);
+    bool pop_front (reference);
+    bool unsynchronized_pop_front (reference);
+
+    inline size_type size () const noexcept
+    {
+        const_size uBeginPos = _M_beginPos.load (std::memory_order_relaxed);
+        const_size uEndPos   = _M_endPos.load (std::memory_order_relaxed);
+
+        return ((uEndPos - uBeginPos) + capacity()) % capacity();
+    }
+
+    constexpr bool is_linearized () const noexcept
+    {
+        return _M_beginPos.load (std::memory_order_relaxed) <=
+               _M_endPos.load (std::memory_order_relaxed);
+    }
+
+    constexpr size_type capacity () noexcept
+    { return _M_uCapacity; }
+
+    bool is_lock_free () const noexcept
+    { return _M_endPos.is_lock_free () and _M_beginPos.is_lock_free (); }
+
+    inline bool empty () const noexcept
+    { return _M_beginPos == _M_endPos; }
+
+    inline bool full () const noexcept
+    { return ((_M_endPos.load () + 1) % capacity ()) == _M_beginPos.load (); }
+
+    template <typename F>
+    inline bool consume_one (F& fn)
+    {
+        value_type element;
+        bool       success = pop_front (element);
+
+        if (success) fn (element);
+        return success;
+    }
+
+    template <typename F>
+    inline bool consume_one (F const& fn)
+    {
+        value_type element;
+        bool       success = pop_front (element);
+
+        if (success) fn (element);
+        return success;
+    }
+
+    template <typename F>
+    inline size_type consume_all (F& fn)
+    {
+        size_type element_count = 0;
+
+        for (value_type element; pop_front (element); ++element_count) fn (element);
+        return element_count;
+    }
+
+    template <typename F>
+    inline size_type consume_all (F const& fn)
+    {
+        size_type element_count = 0;
+
+        for (value_type element; pop_front (element); ++element_count) fn (element);
+        return element_count;
+    }
+
+private:
+    pointer     _M_pArray;
+    atomic_size _M_beginPos, _M_endPos;
+    size_type   _M_uCapacity;
+};
+
+// ====================================================
+
+//! [UNFINISHED] lock-free circular queue (1 producer / 1 consumer)
+//! ex. sufficient for event handling
 template <typename T, std::size_t N>
 class SHARED_API uniform_queue : public non_copyable
 {
@@ -513,15 +634,15 @@ public:
     static_assert ( std::is_move_constructible_v<T>, "T is not move constructible!");
     static_assert ( std::is_move_assignable_v<T>   , "T is not move assignable!");
 
-    typedef T                   value_type     ;
-    typedef T*                  pointer        ;
-    typedef T const*            const_pointer  ;
-    typedef T&                  reference      ;
-    typedef T const&            const_reference;
-    typedef std::size_t         size_type      ;
-    typedef std::size_t const   const_size     ;
-    typedef std::ptrdiff_t      difference_type;
-    typedef uniform_queue<T, N> self_type      ;
+    typedef uniform_queue<T, N>    self_type      ;
+    typedef std::remove_cvref_t<T> value_type     ;
+    typedef value_type *           pointer        ;
+    typedef value_type const*      const_pointer  ;
+    typedef value_type &           reference      ;
+    typedef value_type const&      const_reference;
+    typedef std::size_t            size_type      ;
+    typedef std::size_t const      const_size     ;
+    typedef std::ptrdiff_t         difference_type;
 
     inline size_type size () const noexcept
     {
@@ -563,13 +684,13 @@ public:
     { push_back (std::forward<Args> (args)...); }
 
     constexpr uniform_queue () noexcept
-    : _M_uReadPos (), _M_uWritePos ()
+        : _M_uReadPos (), _M_uWritePos ()
     { }
 
     template <typename Iterator>
     uniform_queue  (InputIteratorType<Iterator> gBegin, InputIteratorType<Iterator> gEnd) noexcept
-    : _M_uReadPos  (),
-      _M_uWritePos (size_type (gEnd - gBegin) > N ? N : size_type (gEnd - gBegin))
+        : _M_uReadPos  (),
+        _M_uWritePos (size_type (gEnd - gBegin) > N ? N : size_type (gEnd - gBegin))
     { std::copy (gBegin, gBegin + _M_uWritePos, _M_Array); }
 
     void push_back (value_type&& value)
@@ -627,109 +748,6 @@ private:
 };
 
 // ====================================================
-
-// feature complete lock-free multi-producer/multi-consumer bidirectional queue
-// ex. game messaging queue
-template <typename T, class Allocator>
-class SHARED_API circular_queue <T, Allocator, true> : Allocator, non_copyable
-{
-public:
-    static_assert (!std::is_void_v<T>              , "T is void");
-    static_assert ( std::is_move_constructible_v<T>, "T is not move constructible!");
-    static_assert ( std::is_move_assignable_v<T>   , "T is not move assignable!");
-
-    typedef std::allocator_traits<Allocator>           allocator_traits;
-    typedef typename allocator_traits::allocator_type  allocator_type  ;
-    typedef T                                          value_type      ;
-    typedef T*                                         pointer         ;
-    typedef T const*                                   const_pointer   ;
-    typedef T&                                         reference       ;
-    typedef T const&                                   const_reference ;
-    typedef std::atomic_size_t                         atomic_size     ;
-    typedef typename allocator_traits::size_type       size_type       ;
-    typedef typename allocator_traits::size_type const const_size      ;
-    typedef typename allocator_traits::difference_type difference_type ;
-    typedef circular_queue<T, Allocator, true>         self_type       ;
-
-    circular_queue () noexcept;
-
-    void reserve (size_type);
-    void reserve_unsafe (size_type);
-    bool push_back (const_reference);
-    bool bounded_push_back (const_reference);
-    bool unsynchronized_push_back (const_reference);
-    bool pop_front (reference);
-    bool unsynchronized_pop_front (reference);
-
-    inline size_type size () const noexcept
-    {
-        const_size uBeginPos = _M_beginPos.load (std::memory_order_relaxed);
-        const_size uEndPos   = _M_endPos.load (std::memory_order_relaxed);
-
-        return (uEndPos - uBeginPos + capacity()) % capacity();
-    }
-
-    constexpr bool is_linearized () const noexcept
-    {
-        return _M_beginPos.load (std::memory_order_relaxed) <=
-               _M_endPos.load (std::memory_order_relaxed);
-    }
-
-    constexpr size_type capacity () noexcept
-    { return _M_uCapacity; }
-
-    bool is_lock_free () const noexcept
-    { return _M_endPos.is_lock_free () and _M_beginPos.is_lock_free (); }
-
-    bool empty () const noexcept
-    { return _M_beginPos == _M_endPos; }
-
-    bool full () const noexcept
-    { return ((_M_endPos.load () + 1) % capacity ()) == _M_beginPos.load (); }
-
-    template <typename Functor>
-    bool consume_one (Functor& fn)
-    {
-        value_type element;
-        bool       success = pop_front (element);
-
-        if (success) fn (element);
-        return success;
-    }
-
-    template <typename Functor>
-    bool consume_one (Functor const& fn)
-    {
-        value_type element;
-        bool       success = pop_front (element);
-
-        if (success) fn (element);
-        return success;
-    }
-
-    template <typename Functor>
-    size_type consume_all (Functor& fn)
-    {
-        size_type element_count = 0;
-
-        for (value_type element; pop_front (element); ++element_count) fn (element);
-        return element_count;
-    }
-
-    template <typename Functor>
-    size_type consume_all (Functor const& fn)
-    {
-        size_type element_count = 0;
-
-        for (value_type element; pop_front (element); ++element_count) fn (element);
-        return element_count;
-    }
-
-private:
-    pointer     _M_pArray;
-    atomic_size _M_beginPos, _M_endPos;
-    size_type   _M_uCapacity;
-};
 
 } // cppual
 

@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,19 +25,27 @@
 
 #include "opencl.h"
 
-namespace cppual { namespace compute { namespace cl {
+namespace cppual::compute::cl {
 
 // =========================================================
 
-class sampler final : public sampler_object
+class sampler final : public sampler_interface
 {
 public:
-    typedef sampler_object base_type;
+    typedef sampler                self_type  ;
+    typedef sampler_interface      base_type  ;
+    typedef CLObject<sampler_type> value_type ;
+    typedef value_type*            pointer    ;
+    typedef std::size_t            size_type  ;
+    typedef resource_handle        handle_type;
 
-    sampler (pointer handle) noexcept : base_type (handle) { }
+    constexpr sampler (pointer handle) noexcept : base_type (handle) { }
+
+    constexpr pointer handle () const noexcept
+    { return base_type::handle<pointer> (); }
 
 private:
-    template<typename T>
+    template <typename T>
     T get_info (sampler_info_type info) const
     {
         return get_object_info< vector<T> > (::clGetSamplerInfo, handle(), info);
@@ -46,7 +54,7 @@ private:
 
 // =========================================================
 
-} } } // namespace CL
+} // namespace CL
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_OPENCL_SAMPLER_H_

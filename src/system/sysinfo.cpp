@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,18 +21,22 @@
 
 #include <cppual/system/sysinfo.h>
 
-namespace cppual { namespace system {
+// =========================================================
 
-string InfoQuery::label (QueryCategory, uint)
+namespace cppual::system {
+
+// =========================================================
+
+info_query::string_type info_query::label (query_category, uint)
 {
-    return string ();
+    return string_type ();
 }
 
-int InfoQuery::value (QueryCategory, uint)
+int info_query::value (query_category, uint)
 {
     return 0;
 }
 
+// =========================================================
 
-
-} } // namespace System
+} // namespace System

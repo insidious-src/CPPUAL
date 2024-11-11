@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,30 +28,65 @@
 //#include <algorithm>
 #include <unordered_map>
 
-namespace cppual { namespace ui {
+// =========================================================
+
+namespace std {
+
+// =========================================================
+
+using cppual::uptr;
+using cppual::ui::event_queue;
+
+// =========================================================
+
+template <>
+struct hash <event_queue::handle_type>
+{
+    constexpr size_t operator () (event_queue::handle_type const& val) const
+    {
+        return sizeof (uptr) == 8 ? (val.get<uptr> ()) >> 3 : (val.get<uptr> ()) >> 1;
+    }
+};
+
+// =========================================================
+
+} // namespace std
+
+// =========================================================
+
+namespace cppual::ui {
 
 namespace { namespace internal {
 
-typedef memory::allocator<std::pair<const uptr, view*>> map_allocator       ;
-typedef memory::allocator<proxy_renderable>             renderable_allocator;
+typedef event_queue::handle_type                               handle_type         ;
+typedef memory::allocator<std::pair<handle_type const, view*>> view_allocator      ;
+typedef memory::allocator<proxy_renderable>                    renderable_allocator;
+typedef vector<std::pair<handle_type, view*>>                  vec_type            ;
 
-typedef std::unordered_map<
-                           uptr,
+typedef std::unordered_map<handle_type,
                            view*,
-                           std::hash<uptr>,
-                           std::equal_to<uptr>,
-                           map_allocator
+                           std::hash<handle_type>,
+                           std::equal_to<handle_type>,
+                           view_allocator
                            >
                            map_type;
 
-inline static map_type& map ()
+inline map_type& map ()
 {
     static map_type views_map;
     return views_map;
 }
 
+inline vec_type& vec ()
+{
+    static vec_type views_vec;
+
+    if (views_vec.capacity () == 0) views_vec.reserve (5);
+    return views_vec;
+}
+
 #ifdef DEBUG_MODE
-inline void print_map_values (resource_handle wnd)
+inline void print_map_values (handle_type wnd)
 {
     std::cout << "wnd value: " << wnd.get<uptr> () << std::endl;
 
@@ -62,11 +97,11 @@ inline void print_map_values (resource_handle wnd)
 }
 #endif
 
-inline shared_window create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
+inline view::window_type create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
 {
     return pParentObj ? memory::allocate_shared<platform_wnd_interface, proxy_renderable>
                                                                (renderable_allocator (),
-                                                                pParentObj->renderable ().lock (),
+                                                                pParentObj->renderable (),
                                                                 gRect) :
                         platform::factory::instance ()->createWindow (gRect, nScreen);
 }
@@ -76,10 +111,10 @@ inline shared_window create_renderable (view* pParentObj, rect const& gRect, u32
 // =========================================================
 
 view::view ()
-: view (nullptr, rect (0, 0, default_width, default_height))
+: self_type (nullptr, rect (0, 0, default_width, default_height))
 { }
 
-view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
+view::view (self_type* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
 : _M_gChildrenList (rc ? allocator_type(*rc) : allocator_type ()),
   _M_gMinSize { 0, 0 },
   _M_gMaxSize { 0, 0 },
@@ -102,7 +137,7 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
     if (_M_pRenderable == nullptr || !_M_pRenderable->valid ())
     {
         _M_pRenderable.reset ();
-        throw std::logic_error ("failed to create renderable");
+        throw std::logic_error ("FAILED to create renderable!");
     }
     else
     {
@@ -110,13 +145,34 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
 
         if (!pParentObj)
         {
-            uptr const key = _M_pRenderable->handle ();
+            using internal::vec_type;
 
-            if (internal::map ().count (key) == 1) internal::map ()[key] = this;
-            else if (!internal::map ().emplace (std::make_pair (key, this)).second)
+            internal::map_type::key_type const key = _M_pRenderable->handle ();
+
+            if (internal::map ().contains (key))
             {
-                _M_pRenderable.reset ();
-                throw std::runtime_error ("failed to register view object");
+                internal::map ()[key] = this;
+
+                for (auto& it : internal::vec ())
+                {
+                    if (it.first == key) { it.second = this; break; }
+                }
+            }
+            else
+            {
+                if (!internal::map ().emplace (key, this).second)
+                {
+                    _M_pRenderable.reset ();
+                    throw std::runtime_error ("FAILED to register view object!");
+
+                    internal::vec ().emplace_back (key, this);
+
+                    std::sort (internal::vec ().begin (), internal::vec ().end (),
+                               [](vec_type::reference a, vec_type::reference b)
+                    {
+                        return a.first.get () < b.first.get ();
+                    });
+                }
             }
 
             display_queue_interface::primary ()->
@@ -134,7 +190,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
                     #endif
 
-                    internal::map ()[wnd]->mouse_moved_event (pos);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->mouse_moved_event (pos);
+                    else
+                        internal::map ()[wnd]->mouse_moved_event (pos);
                 });
 
                 connect (event_queue::events ().mousePress,
@@ -144,7 +203,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->mouse_pressed_event (data);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->mouse_pressed_event (data);
+                    else
+                        internal::map ()[wnd]->mouse_pressed_event (data);
                 });
 
                 connect (event_queue::events ().mouseRelease,
@@ -154,7 +216,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->mouse_released_event (data);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->mouse_released_event (data);
+                    else
+                        internal::map ()[wnd]->mouse_released_event (data);
                 });
 
                 connect (event_queue::events ().keyPress,
@@ -164,7 +229,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->key_pressed_event (data);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->key_pressed_event (data);
+                    else
+                        internal::map ()[wnd]->key_pressed_event (data);
                 });
 
                 connect (event_queue::events ().keyRelease,
@@ -174,7 +242,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->key_released_event (data);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->key_released_event (data);
+                    else
+                        internal::map ()[wnd]->key_released_event (data);
                 });
 
                 connect (event_queue::events ().scroll,
@@ -184,13 +255,18 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->mouse_wheel_event (data);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->mouse_wheel_event (data);
+                    else
+                        internal::map ()[wnd]->mouse_wheel_event (data);
                 });
 
                 connect (event_queue::events ().winPaint,
                         [](event_queue::handle_type wnd, event_type::paint_data data)
                 {
-                    auto window = internal::map ()[wnd];
+                    auto const window = internal::vec ().size () == 1 ?
+                                        internal::vec ()[0].second :
+                                        internal::map ()[wnd];
 
 #                   ifdef DEBUG_MODE
                     internal::print_map_values (wnd);
@@ -207,13 +283,18 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->focus_event (state);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->focus_event (state);
+                    else
+                        internal::map ()[wnd]->focus_event (state);
                 });
 
                 connect (event_queue::events ().winSize,
                         [](event_queue::handle_type wnd, point2u size)
                 {
-                    auto window = internal::map ()[wnd];
+                    auto const window = internal::vec ().size () == 1 ?
+                                        internal::vec ()[0].second :
+                                        internal::map ()[wnd];
 
 #                   ifdef DEBUG_MODE
                     internal::print_map_values (wnd);
@@ -231,7 +312,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->show_event (state);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->focus_event (state);
+                    else
+                        internal::map ()[wnd]->focus_event (state);
                 });
 
                 connect(event_queue::events ().winStep,
@@ -241,7 +325,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->enter_leave_event (state);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->enter_leave_event (state);
+                    else
+                        internal::map ()[wnd]->enter_leave_event (state);
                 });
 
                 connect (event_queue::events ().winProperty,
@@ -255,7 +342,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     switch (data.prop)
                     {
                     case 0:
-                        internal::map ()[wnd]->min_max_size_event (point2u ());
+                        if (internal::vec ().size () == 1)
+                            internal::vec ()[0].second->min_max_size_event (point2u ());
+                        else
+                            internal::map ()[wnd]->min_max_size_event (point2u ());
                         break;
                     default:
                         break;
@@ -269,7 +359,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->help_event ();
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->help_event ();
+                    else
+                        internal::map ()[wnd]->help_event ();
                 });
 
                 connect (event_queue::events ().winMinimize,
@@ -279,7 +372,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->minimize_event (is_minimized);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->minimize_event (is_minimized);
+                    else
+                        internal::map ()[wnd]->minimize_event (is_minimized);
                 });
 
                 connect (event_queue::events ().winMaximize,
@@ -289,7 +385,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->maximize_event (is_maximized);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->maximize_event (is_maximized);
+                    else
+                        internal::map ()[wnd]->maximize_event (is_maximized);
                 });
 
                 connect (event_queue::events ().winFullscreen,
@@ -299,7 +398,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->fullscreen_event (is_fullscreen);
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->fullscreen_event (is_fullscreen);
+                    else
+                        internal::map ()[wnd]->fullscreen_event (is_fullscreen);
                 });
 
                 connect (event_queue::events ().winClose,
@@ -309,7 +411,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
                     internal::print_map_values (wnd);
 #                   endif
 
-                    internal::map ()[wnd]->close_event ();
+                    if (internal::vec ().size () == 1)
+                        internal::vec ()[0].second->close_event ();
+                    else
+                        internal::map ()[wnd]->close_event ();
                 });
 
                 bRegEvents = true;
@@ -320,7 +425,7 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
 
     if (pParentObj)
     {
-        _M_pRenderable->set_owner (pParentObj->renderable ().lock ());
+        _M_pRenderable->set_owner (pParentObj->renderable ());
         _M_pParentObj = pParentObj;
 
         pParentObj->_M_gChildrenList.push_back (this);
@@ -329,6 +434,10 @@ view::view (view* pParentObj, rect const& gRect, u32 nScreen, resource_type* rc)
 
     _M_gStateFlags  = state_flag::is_valid;
     _M_gStateFlags += state_flag::enabled ;
+}
+
+view::view (view&& /*gObj*/)
+{
 }
 
 view::view (view const& gObj)
@@ -341,6 +450,11 @@ view::view (view const& gObj)
         if (!gObj.is_enabled ()) disable ();
         if (!gObj.is_hidden  ()) show    ();
     }
+}
+
+view& view::operator = (view&& /*gObj*/)
+{
+    return *this;
 }
 
 view& view::operator = (view const& gObj)
@@ -757,4 +871,4 @@ void view::on_parent_size(point2u)
 #   endif
 }
 
-} } // namespace Ui
+} // namespace Ui

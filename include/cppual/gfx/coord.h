@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,37 +23,37 @@
 #define CPPUAL_COORDINATES_H_
 #ifdef __cplusplus
 
-#include <cppual/concepts.h>
+#include <cppual/concept/concepts.h>
 #include <cppual/types.h>
 
 namespace cppual {
 
-template <typename> struct point2;
-template <typename> struct point3;
-template <typename> struct point4;
-template <typename> struct angle ;
+template <arithmetic_t> struct point2;
+template <arithmetic_t> struct point3;
+template <arithmetic_t> struct point4;
+template <arithmetic_t> struct angle ;
 
-typedef point2<i16   > point2i;
-typedef point2<u16   > point2u;
+typedef point2<i16   > point2i  ;
+typedef point2<u16   > point2u  ;
 typedef point2<u32   > point2u32;
-typedef point2<float > point2f;
-typedef point3<float > point3f;
-typedef point3<float > vec3   ;
-typedef point3<double> point3d;
-typedef point3<i16   > point3i;
+typedef point2<float > point2f  ;
+typedef point3<float > point3f  ;
+typedef point3<float > vec3     ;
+typedef point3<double> point3d  ;
+typedef point3<i16   > point3i  ;
 typedef point3<u32   > point3u32;
-typedef point4<float > point4f;
-typedef point4<float > vec4   ;
-typedef point4<float > point4d;
-typedef angle <float > anglef ;
-typedef angle <double> angled ;
+typedef point4<float > point4f  ;
+typedef point4<float > vec4     ;
+typedef point4<double> point4d  ;
+typedef angle <float > anglef   ;
+typedef angle <double> angled   ;
 
 // ====================================================
 
-template <typename T>
-struct point2 final
+template <arithmetic_t T>
+struct point2
 {
-    Arithmetic<T> x, y;
+    T x, y;
 
     constexpr point2 () noexcept = default;
 
@@ -63,43 +63,43 @@ struct point2 final
     { }
 };
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator == (point2<T> const& gObj1,
                             point2<T> const& gObj2) noexcept
 { return (gObj1.x == gObj2.x and gObj1.y == gObj2.y); }
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator != (point2<T> const& gObj1,
                             point2<T> const& gObj2) noexcept
 { return (gObj1.x != gObj2.x or gObj1.y != gObj2.y); }
 
 // ====================================================
 
-template <typename T>
-struct point3 final
+template <arithmetic_t T>
+struct point3
 {
-    Arithmetic<T> x, y, z;
+    T x, y, z;
 };
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator == (point3<T> const& gObj1,
                             point3<T> const& gObj2) noexcept
 { return (gObj1.x == gObj2.x and gObj1.y == gObj2.y and gObj1.z == gObj2.z); }
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator != (point3<T> const& gObj1,
                             point3<T> const& gObj2) noexcept
 { return !(gObj1 == gObj2); }
 
 // ====================================================
 
-template <typename T>
-struct point4 final
+template <arithmetic_t T>
+struct point4
 {
-    Arithmetic<T> x, y, z, w;
+    T x, y, z, w;
 };
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator == (point4<T> const& gObj1,
                             point4<T> const& gObj2) noexcept
 {
@@ -109,21 +109,18 @@ constexpr bool operator == (point4<T> const& gObj1,
             gObj1.w == gObj2.w);
 }
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator != (point4<T> const& gObj1,
                             point4<T> const& gObj2) noexcept
 { return !(gObj1 == gObj2); }
 
 // ====================================================
 
-struct rect final
+struct rect
 {
     typedef i16 value_type;
 
-    value_type left   { };
-    value_type top    { };
-    value_type right  { };
-    value_type bottom { };
+    value_type left { }, top { }, right { }, bottom { };
 
     constexpr rect () noexcept = default;
 
@@ -160,18 +157,18 @@ struct rect final
     { left = top = right = bottom = value_type (); }
 
     constexpr bool is_point () const noexcept
-    { return (left == right and top == bottom); }
+    { return (left == right && top == bottom); }
 
     constexpr bool intersects (rect const& gObj) const noexcept
     {
-        return (right > gObj.left  and bottom > gObj.top   ) or
-               (left  < gObj.right and top    < gObj.bottom);
+        return (right > gObj.left  && bottom > gObj.top   ) ||
+               (left  < gObj.right && top    < gObj.bottom);
     }
 
     constexpr bool contains (point2i gPoint) const noexcept
     {
-        return (left < gPoint.x and gPoint.x < right and
-                top  < gPoint.y and gPoint.y < bottom);
+        return (left < gPoint.x && gPoint.x < right &&
+                top  < gPoint.y && gPoint.y < bottom);
     }
 
     inline rect& operator = (point2i gPoint) noexcept
@@ -186,67 +183,67 @@ struct rect final
 
 constexpr bool operator == (rect const& gObj1, rect const& gObj2) noexcept
 {
-    return (gObj1.left  == gObj2.left  and gObj1.top    == gObj2.top and
-            gObj1.right == gObj2.right and gObj1.bottom == gObj2.bottom);
+    return (gObj1.left  == gObj2.left  && gObj1.top    == gObj2.top &&
+            gObj1.right == gObj2.right && gObj1.bottom == gObj2.bottom);
 }
 
 constexpr bool operator != (rect const& gObj1, rect const& gObj2) noexcept
 { return !(gObj1 == gObj2); }
 
-//inline Rect& operator += (Rect& gObj, point2i gPoint) noexcept
-//{
-//    gObj.left   += gPoint.x;
-//    gObj.right  += gPoint.x;
-//    gObj.top    += gPoint.y;
-//    gObj.bottom += gPoint.y;
-//    return gObj;
-//}
+inline rect& operator += (rect& gObj, point2i gPoint) noexcept
+{
+   gObj.left   += gPoint.x;
+   gObj.right  += gPoint.x;
+   gObj.top    += gPoint.y;
+   gObj.bottom += gPoint.y;
+   return gObj;
+}
 
-//inline Rect& operator -= (Rect& gObj, point2i gPoint) noexcept
-//{
-//    gObj.left   -= gPoint.x;
-//    gObj.right  -= gPoint.x;
-//    gObj.top    -= gPoint.y;
-//    gObj.bottom -= gPoint.y;
-//    return gObj;
-//}
+inline rect& operator -= (rect& gObj, point2i gPoint) noexcept
+{
+   gObj.left   -= gPoint.x;
+   gObj.right  -= gPoint.x;
+   gObj.top    -= gPoint.y;
+   gObj.bottom -= gPoint.y;
+   return gObj;
+}
 
 // ====================================================
 
-template <typename T>
+template <arithmetic_t T>
 struct angle final
 {
-    Arithmetic<T> radians { };
+    T radians { };
 
     constexpr angle () noexcept = default;
 
-    template <typename U>
+    template <arithmetic_t U>
     constexpr angle (angle<U> const& gObj) noexcept
     : radians (T (gObj.radians))
     { }
 };
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator == (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians == b.radians; }
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator != (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians != b.radians; }
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator < (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians < b.radians; }
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator > (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians > b.radians; }
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator <= (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians <= b.radians; }
 
-template <typename T>
+template <arithmetic_t T>
 constexpr bool operator >= (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians >= b.radians; }
 

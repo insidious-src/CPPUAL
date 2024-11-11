@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include <cppual/noncopyable.h>
 #include <cppual/string.h>
 
-namespace cppual { namespace input {
+namespace cppual::input {
 
 // =========================================================
 
@@ -89,7 +89,7 @@ struct joystick : non_copyable_virtual
     virtual void      vibrate (ushort) noexcept = 0;
 };
 
-} } // namespace Input
+} // namespace Input
 
 #endif // __cplusplus
 #endif // CPPUAL_DEVICES_JOYSTICK_H_

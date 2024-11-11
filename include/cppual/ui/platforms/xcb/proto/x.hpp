@@ -2,7 +2,7 @@
 #define CPPUAL_X_HPP
 
 #include <cppual/ui/platforms/xcb/generic.hpp>
-#include <cppual/string.h>
+#include <cppual/containers.h>
 
 #include <vector>
 

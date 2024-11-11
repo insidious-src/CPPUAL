@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
      *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #define CPPUAL_SYSTEM_CLOCK_H_
 #ifdef __cplusplus
 
-#include <cppual/meta.h>
+#include <cppual/type_meta.h>
 
 #include <chrono>
 
@@ -74,8 +74,8 @@ public:
 
     void reset () noexcept
     {
-        _M_pause = time_point ();
         _M_epoch = clock_type::now ();
+        _M_pause = time_point ();
     }
 
     template <typename T = std::chrono::milliseconds>
@@ -84,6 +84,11 @@ public:
         return std::chrono::duration_cast<T>
                 (_M_pause.time_since_epoch ().count () ? _M_pause.time_since_epoch () :
                                                         clock_type::now () - _M_epoch);
+    }
+
+    bool is_paused () const noexcept
+    {
+        return _M_pause.time_since_epoch ().count ();
     }
 
     void pause () noexcept

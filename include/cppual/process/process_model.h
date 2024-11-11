@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,17 +19,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_COROUTINES_H_
-#define CPPUAL_COROUTINES_H_
+#ifndef CPPUAL_PROCESS_MODEL_H_
+#define CPPUAL_PROCESS_MODEL_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
+#include <cppual/process/details.h>
+#include <cppual/string.h>
 
-namespace cppual {
+namespace cppual { namespace process {
 
+process_handle create    (string const& path, char* args[]);
+process_handle clone     ();
+int            terminate (process_handle process_id);
+bool           running   (cchar*) noexcept;
 
+// =========================================================
 
-} // cppual
+namespace this_process {
+
+process_handle handle () noexcept;
+
+} // this_process
+
+} } // namespace Process
 
 #endif // __cplusplus
-#endif // CPPUAL_COROUTINES_H_
+#endif // CPPUAL_PROCESS_MODEL_H_

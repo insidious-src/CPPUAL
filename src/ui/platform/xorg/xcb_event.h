@@ -3,7 +3,7 @@
  * Author: fymfifa
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -387,7 +387,7 @@ class event_handle final
 {
 public:
     typedef base_event_type        base_type              ;
-    typedef input::sys_event       event_type             ;
+    typedef input::event           event_type             ;
     typedef event_handle           self_type              ;
     typedef event_handle*          pointer                ;
     typedef ui::shared_display     display_pointer        ;

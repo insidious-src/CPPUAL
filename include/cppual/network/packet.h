@@ -3,7 +3,7 @@
  * Author: K. Petrov
  * Description: This file is a part of CPPUAL.
  *
- * Copyright (C) 2012 - 2022 K. Petrov
+ * Copyright (C) 2012 - 2024 K. Petrov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace cppual { namespace network {
 class packet : public non_copyable_virtual
 {
 public:
-    typedef char8              value_type ;
+    typedef char               value_type ;
     typedef value_type const   const_value;
     typedef std::size_t        size_type  ;
     typedef u32                stream_size;
@@ -57,8 +57,8 @@ public:
     packet& operator << (cfloat&)            noexcept;
     packet& operator << (cdouble&)           noexcept;
     packet& operator << (cldouble&)          noexcept;
-    packet& operator << (string const&)      noexcept;
     packet& operator << (stream_type const&) noexcept;
+    packet& operator << (string const&)      noexcept;
     packet& operator << (wstring const&)     noexcept;
     packet& operator << (u16string const&)   noexcept;
     packet& operator << (u32string const&)   noexcept;
@@ -75,8 +75,8 @@ public:
     packet& operator >> (float&)       noexcept;
     packet& operator >> (double&)      noexcept;
     packet& operator >> (ldouble&)     noexcept;
-    packet& operator >> (string&)      noexcept;
     packet& operator >> (stream_type&) noexcept;
+    packet& operator >> (string&)      noexcept;
     packet& operator >> (wstring&)     noexcept;
     packet& operator >> (u16string&)   noexcept;
     packet& operator >> (u32string&)   noexcept;
@@ -85,7 +85,7 @@ public:
     { return _M_gData.size (); }
 
     constexpr cvoid* data () const noexcept
-    { return !_M_gData.empty () ? &_M_gData[0] : nullptr; }
+    { return !_M_gData.empty () ? _M_gData.data () : nullptr; }
 
     constexpr bool is_end_of_packet () const noexcept
     { return _M_uPos >= _M_gData.size (); }
