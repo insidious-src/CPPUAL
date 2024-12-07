@@ -21,3 +21,4 @@
 
 #include <cppual/string.h>
 #include <cppual/string_helper.h>
+#include <cppual/rope.h>

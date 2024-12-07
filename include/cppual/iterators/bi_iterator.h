@@ -173,13 +173,14 @@ class bidirectional_iterator
 public:
     typedef bidirectional_iterator<T>       self_type        ;
     typedef std::remove_reference_t<T>      buf_type         ;
-    typedef std::remove_cvref_t<T>          buf_clean_type   ;
+    typedef std::remove_cvref_t<buf_type>   buf_clean_type   ;
     typedef typename T::pointer             pointer          ;
     typedef typename T::const_pointer       const_pointer    ;
     typedef typename T::reference           reference        ;
     typedef typename T::const_reference     const_reference  ;
     typedef typename T::difference_type     difference_type  ;
     typedef typename T::size_type           size_type        ;
+    typedef size_type const                 const_size       ;
     typedef typename T::value_type          value_type       ;
     typedef value_type const                const_value      ;
     typedef std::bidirectional_iterator_tag iterator_category;
@@ -199,7 +200,7 @@ public:
 
     constexpr bidirectional_iterator () noexcept = default;
 
-    constexpr bidirectional_iterator (buf_type& b, size_type p) noexcept
+    constexpr explicit bidirectional_iterator (buf_type& b, const_size p = size_type ()) noexcept
     : _M_pBuf (&b), _M_uPos (p)
     { }
 

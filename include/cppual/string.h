@@ -29,12 +29,13 @@
 #include <cppual/concept/concepts.h>
 #include <cppual/iterators/bi_iterator.h>
 
-#include <memory>
-#include <string>
-#include <sstream>
-#include <cstddef>
 #include <type_traits>
 #include <string_view>
+#include <iterator>
+#include <sstream>
+#include <cstddef>
+#include <memory>
+#include <string>
 
 // ====================================================
 
@@ -51,12 +52,17 @@ concept str_view_like_t = requires (T t)
     typename T::traits_type;
 
     { t } -> std::convertible_to<std::basic_string_view<typename T::value_type>>;
+    { t.size  () } -> std::convertible_to<std::size_t>;
+    { t.data  () } -> std::convertible_to<typename T::value_type const*>;
+    { t.begin () } -> std::convertible_to<typename T::value_type const*>;
+    { t.end   () } -> std::convertible_to<typename T::value_type const*>;
+    { t[0]       } -> std::convertible_to<typename T::value_type>;
 };
 
 // ====================================================
 
 /**
- ** @fstring (fast string) is a string implementation with locale traits and
+ ** @brief fstring (fast string) is a string implementation with locale traits and
  ** small string optimization (SSO) for better performance with small strings.
  ** for SSO it allocates memory on the stack. for char & char8_t -> 15 chars,
  ** for char16_t -> 7 chars and for char32_t -> 3 chars.
@@ -67,7 +73,7 @@ class SHARED_API fstring : private A
 {
 public:
     typedef fstring<T, A>                           self_type             ;
-    typedef std::char_traits<T>                     traits_type           ;
+    typedef std::char_traits<T>                     char_traits           ;
     typedef std::allocator_traits<A>                alloc_traits          ;
     typedef alloc_traits::allocator_type            allocator_type        ;
     typedef alloc_traits::value_type                value_type            ;
@@ -75,14 +81,14 @@ public:
     typedef alloc_traits::const_pointer             const_pointer         ;
     typedef alloc_traits::reference                 reference             ;
     typedef alloc_traits::const_reference           const_reference       ;
-    typedef std::size_t                             size_type             ;
+    typedef alloc_traits::size_type                 size_type             ;
     typedef size_type const                         const_size            ;
     typedef bidirectional_iterator<self_type>       iterator              ;
     typedef bidirectional_iterator<self_type const> const_iterator        ;
     typedef std::reverse_iterator<iterator>         reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
     typedef std::basic_string_view<value_type>      string_view           ;
-    typedef ptrdiff                                 difference            ;
+    typedef ptrdiff                                 difference_type       ;
 
     static_assert (std::is_same_v<T, value_type>, "T & value_type are NOT the same!");
 
@@ -130,27 +136,11 @@ public:
 
     constexpr fstring () noexcept = default;
 
-    constexpr fstring (string_view const& sv) noexcept
-    : allocator_type (),
-      _M_uLength (sv.size ()),
-      _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
-    {
-        if (is_on_stack ())
-        {
-            std::copy (sv.begin (), sv.end (), _M_gBuffer.stack.data)
-            *(_M_gBuffer.stack.data + size ()) = value_type (0);
-        }
-        else
-        {
-            copy_to_string (*this, sv.data (), size ());
-        }
-    }
-
     template <str_view_like_t U>
     constexpr fstring (U const& sv) noexcept
-    : allocator_type (),
-      _M_uLength (sv.size ()),
-      _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
+    : allocator_type ()
+    , _M_uLength (sv.size ())
+    , _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
     {
         if (is_on_stack ())
         {
@@ -164,9 +154,9 @@ public:
     }
 
     inline explicit fstring (const_pointer pText, allocator_type const& ator = allocator_type ())
-    : allocator_type (ator),
-      _M_uLength (traits_type::length (pText)),
-      _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
+    : allocator_type (ator)
+    , _M_uLength (char_traits::length (pText))
+    , _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
     {
         if (is_on_stack ())
         {
@@ -182,9 +172,9 @@ public:
     template <iterator_t Iterator>
     inline fstring (Iterator first, Iterator last,
                     allocator_type const& ator = allocator_type ())
-    : allocator_type (ator),
-      _M_uLength (last - first),
-      _M_gBuffer ()
+    : allocator_type (ator)
+    , _M_uLength (last - first)
+    , _M_gBuffer ()
     {
         if (is_on_stack ())
         {
@@ -199,9 +189,9 @@ public:
 
     inline fstring (std::initializer_list<value_type> list,
                     allocator_type const& ator = allocator_type ())
-    : allocator_type (ator),
-      _M_uLength (list.size ()),
-      _M_gBuffer ()
+    : allocator_type (ator)
+    , _M_uLength (list.size ())
+    , _M_gBuffer ()
     {
         if (is_on_stack ())
         {
@@ -219,9 +209,9 @@ public:
     { }
 
     inline fstring (self_type const& gObj)
-    : allocator_type (gObj),
-      _M_uLength (gObj._M_uLength),
-      _M_gBuffer (_M_uLength)
+    : allocator_type (gObj.allocator_type::select_on_container_copy_construction ())
+    , _M_uLength (gObj._M_uLength)
+    , _M_gBuffer (_M_uLength)
     {
         if (is_on_stack ())
         {
@@ -235,9 +225,9 @@ public:
     }
 
     constexpr fstring (self_type&& gObj) noexcept
-    : allocator_type (gObj),
-      _M_uLength (),
-      _M_gBuffer (size_type ())
+    : allocator_type (gObj)
+    , _M_uLength ()
+    , _M_gBuffer (size_type ())
     { swap (*this, gObj); }
 
     inline fstring (size_type uCapacity)
@@ -251,7 +241,8 @@ public:
     }
 
     constexpr fstring (std::nullptr_t) noexcept
-    : allocator_type (), self_type ()
+    : allocator_type ()
+    , self_type ()
     { }
 
     inline ~fstring ()
@@ -276,7 +267,7 @@ public:
     }
 
     inline self_type& operator = (const_pointer pText) noexcept
-    { return assign_to_string (*this, pText, traits_type::length (pText)); }
+    { return assign_to_string (*this, pText, char_traits::length (pText)); }
 
     inline self_type& operator = (self_type const& gObj) noexcept
     {
@@ -500,7 +491,7 @@ private:
 template <char_t T, allocator_t A>
 fstring<T, A> fstring<T, A>::substr (size_type uBeginPos, size_type uEndPos)
 {
-    if (empty () || static_cast<difference> (uEndPos - uBeginPos) <= 0 || uBeginPos >= _M_uLength)
+    if (empty () || static_cast<difference_type> (uEndPos - uBeginPos) <= 0 || uBeginPos >= _M_uLength)
         return self_type ();
 
     self_type gSubStr (uEndPos - uBeginPos);
@@ -802,7 +793,8 @@ concept string_t = is_string_v<T>;
 
 // namespace std {
 
-// using cppual::char_t;
+//  using cppual::char_t;
+// using cppual::memory::allocator_t;
 
 // template <char_t Char>
 // struct hash<basic_string<Char, char_traits<Char>, cppual::memory::allocator<Char>>>
@@ -815,7 +807,10 @@ concept string_t = is_string_v<T>;
 //    }
 // };
 
-// // ====================================================
+// template <template <char_t T = char, allocator_t A = cppual::memory::allocator<T>>
+// class uses_allocator <cppual::fstring<T, A>, A> : public std::true_type { };
+
+// ====================================================
 
 // } // namespace std
 

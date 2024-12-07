@@ -26,6 +26,7 @@
 #include <cppual/concept/concepts.h>
 
 #include <type_traits>
+#include <bit>
 
 namespace cppual {
 
@@ -40,6 +41,18 @@ union cast_union
     cast_union () = delete;
     constexpr cast_union (In val) noexcept : in (val) { }
 };
+
+// =========================================================
+
+template<typename To, typename From>
+constexpr To safe_member_cast (From from)
+{
+    static_assert (sizeof (To) == sizeof (From));
+    static_assert (std::is_trivially_copyable_v<To>);
+    static_assert (std::is_trivially_copyable_v<From>);
+
+    return std::bit_cast<To> (from);
+}
 
 // =========================================================
 

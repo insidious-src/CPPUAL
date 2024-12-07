@@ -30,6 +30,7 @@
 
 #include <string_view>
 #include <type_traits>
+#include <iterator>
 #include <cstddef>
 #include <cassert>
 #include <array>
@@ -54,19 +55,19 @@ public:
     typedef bitset<T>                 bitset_type;
     typedef std::underlying_type_t<T> value_type ;
 
-    constexpr reference_proxy (bitset_type& b, value_type const m)
-    : bs (&b), mask (m)
+    constexpr reference_proxy (bitset_type& bitset, value_type const mask)
+    : _M_bs (&bitset), _M_mask (mask)
     { }
 
     constexpr self_type& operator = (bool const x) noexcept
-    { (x) ? bs->_M_flags |= mask : bs->_M_flags &= ~mask; return *this; }
+    { (x) ? _M_bs->_M_flags |= _M_mask : _M_bs->_M_flags &= ~_M_mask; return *this; }
 
     constexpr operator bool () const noexcept
-    { return (bs->_M_flags & mask) != 0; }
+    { return (_M_bs->_M_flags & _M_mask) != 0; }
 
 private:
-    bitset_type* bs  ;
-    value_type   mask;
+    bitset_type* _M_bs  ;
+    value_type   _M_mask;
 };
 
 // =========================================================
@@ -77,10 +78,11 @@ class bitset
 public:
     typedef bitset<T>                                       self_type             ;
     typedef std::remove_cvref_t<T>                          enum_type             ;
-    typedef std::size_t                                     size_type             ;
-    typedef std::underlying_type_t<T>                       value_type            ;
+    typedef std::underlying_type_t<enum_type>               value_type            ;
     typedef std::string_view                                string_view           ;
     typedef string                                          string_type           ;
+    typedef std::size_t                                     size_type             ;
+    typedef size_type                                       const_size            ;
     typedef reference_proxy<T>                              ref_proxy_type        ;
     typedef set_bit_iterator<T>                             iterator              ;
     typedef set_bit_iterator<T const>                       const_iterator        ;
@@ -327,7 +329,7 @@ public:
 
         for (size_type i = 0; i < str.size () && i < size (); ++i)
         {
-            if (str[i] == '1') result = static_cast<enum_type> (static_cast<value_type> (1) << i);
+            if (str[i] == '1') result += static_cast<enum_type> (static_cast<value_type> (1) << i);
         }
 
         return result;

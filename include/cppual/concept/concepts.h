@@ -42,7 +42,7 @@ template <> struct is_bool<bool>   : std::true_type  { };
 
 /// is bool value
 template <typename T>
-inline constexpr auto const is_bool_v = is_bool<T>::value;
+inline constexpr cbool is_bool_v = is_bool<T>::value;
 
 // ===================================================
 
@@ -61,7 +61,7 @@ struct is_char : public is_char_helper<T>
 
 /// is char value
 template <typename T>
-inline constexpr auto const is_char_v = is_char<T>::value;
+inline constexpr cbool is_char_v = is_char<T>::value;
 
 // ===================================================
 
@@ -78,7 +78,7 @@ struct is_stream_char : public is_stream_helper<T>
 
 /// is char value
 template <typename T>
-inline constexpr auto const is_stream_char_v = is_stream_char<T>::value;
+inline constexpr cbool is_stream_char_v = is_stream_char<T>::value;
 
 // ====================================================
 
@@ -95,7 +95,20 @@ template <> struct is_integer<long64>  : std::true_type  { };
 
 /// is integer value
 template <typename T>
-inline constexpr auto const is_integer_v = is_integer<T>::value;
+inline constexpr cbool is_integer_v = is_integer<T>::value;
+
+// ====================================================
+
+/// is unsigned integer type
+template <typename> struct is_signed_integer  : std::false_type { };
+template <> struct is_signed_integer<short>  : std::true_type  { };
+template <> struct is_signed_integer<int>    : std::true_type  { };
+template <> struct is_signed_integer<long>   : std::true_type  { };
+template <> struct is_signed_integer<long64> : std::true_type  { };
+
+/// is unsigned integer value
+template <typename T>
+inline constexpr cbool is_signed_integer_v = is_signed_integer<T>::value;
 
 // ====================================================
 
@@ -108,7 +121,7 @@ template <> struct is_unsigned_integer<ulong64> : std::true_type  { };
 
 /// is unsigned integer value
 template <typename T>
-inline constexpr auto const is_unsigned_integer_v = is_unsigned_integer<T>::value;
+inline constexpr cbool is_unsigned_integer_v = is_unsigned_integer<T>::value;
 
 // ====================================================
 
@@ -122,7 +135,7 @@ template <> struct is_unsigned<ulong64> : std::true_type  { };
 
 /// is unsigned value
 template <typename T>
-inline constexpr auto const is_unsigned_v = is_unsigned<T>::value;
+inline constexpr cbool is_unsigned_v = is_unsigned<T>::value;
 
 // ====================================================
 
@@ -134,7 +147,11 @@ template <> struct is_float<ldouble> : std::true_type  { };
 
 /// is float value
 template <typename T>
-inline constexpr auto const is_float_v = is_float<T>::value;
+inline constexpr cbool is_float_v = is_float<T>::value;
+
+template <typename T>
+inline constexpr cbool is_pod_v = std::is_trivial_v<T> && std::is_standard_layout_v<T>;
+
 
 // ====================================================
 
@@ -174,19 +191,13 @@ template <typename T>
 concept unsigned_t = is_unsigned_v<T>;
 
 template <typename T>
-concept integral_t = std::is_integral_v<T>;
-
-template <typename T>
 concept integer_t = is_integer_v<T>;
 
 template <typename T>
 concept unsigned_integer_t = is_unsigned_integer_v<T>;
 
 template <typename T>
-concept unsigned_integral_t = std::is_integral_v<T> && std::is_unsigned_v<T>;
-
-template <typename T>
-concept signed_integral_t = std::is_integral_v<T> && std::is_signed_v<T>;
+concept signed_integer_t = is_signed_integer_v<T>;
 
 template <typename T>
 concept floating_point_t = is_float_v<T>;
@@ -196,6 +207,9 @@ concept number_t = is_integer_v<T> || is_float_v<T>;
 
 template <typename T>
 concept char_t = is_char_v<T>;
+
+template <typename T>
+concept switch_t = is_integer_v<T> || std::is_enum_v<T> || is_char_v<T>;
 
 template <typename T>
 concept c_str_t = std::is_same_v<T, char*>;
@@ -222,6 +236,12 @@ template <typename T>
 concept c_str32_const_t = std::is_same_v<T, cchar32*>;
 
 template <typename T>
+concept c_wstr_t = std::is_same_v<T, wchar*>;
+
+template <typename T>
+concept c_wstr_const_t = std::is_same_v<T, cwchar*>;
+
+template <typename T>
 concept stream_char_t = is_stream_char_v<T>;
 
 template <typename T>
@@ -242,7 +262,8 @@ concept non_function_t = !std::is_function_v<std::remove_pointer_t<T>> &&
                          !std::is_member_function_pointer_v<T>;
 
 template <typename T>
-concept callable_object_t = std::is_class_v<T> && requires (T& t) { t.T::operator (); };
+concept callable_class_t = std::is_class_v<T> &&
+requires (T) { &std::decay_t<T>::operator (); };
 
 /// lambda concepts
 template <typename T>
@@ -254,12 +275,19 @@ concept lambda_capture_t = !std::is_constructible_v<
         member_function_to_static_t<decltype (&std::decay_t<T>::operator())>, T>;
 
 template <typename T>
+concept lambda_t = lambda_non_capture_t<T> || lambda_capture_t<T>;
+
+template <typename T>
+concept callable_object_t = (std::is_class_v<T> && requires (T&) { &T::operator (); }) ||
+                             lambda_non_capture_t<T>                                   ||
+                             lambda_capture_t<T>;
+
+template <typename T>
 concept callable_t = lambda_non_capture_t<T>  ||
  lambda_capture_t<T>                          ||
  std::is_member_function_pointer_v<T>         ||
  std::is_function_v<std::remove_pointer_t<T>> ||
-(std::is_class_v<T>                           &&
-requires (T& t) { t.T::operator (); });
+ callable_object_t<T>;
 
 /// type category concepts
 template <typename T>
@@ -287,20 +315,21 @@ template <typename T>
 concept array_t = std::is_array_v<T>;
 
 template <typename T>
-concept union_t = std::is_union_v<std::remove_cvref_t<T>>;
+concept union_t = std::is_union_v<T>;
 
 template <typename T>
 concept null_ptr_t = std::is_null_pointer_v<T>;
 
 template <typename T>
-concept object_t = std::is_object_v<std::remove_cvref_t<T>>;
+concept object_t = std::is_object_v<T>;
 
 template <typename T>
-concept class_t = std::is_class_v<std::remove_cvref_t<T>>;
+concept class_t = std::is_class_v<T>;
 
 template <typename T>
 concept abstract_t = std::is_abstract_v<T>;
 
+/// pointer concepts
 template <typename T>
 concept ptr_t = std::is_pointer_v<T>;
 
@@ -309,6 +338,9 @@ concept member_ptr_t = std::is_member_pointer_v<T>;
 
 template <typename T>
 concept member_object_ptr_t = std::is_member_object_pointer_v<T>;
+
+template <typename T>
+concept void_ptr_t =  std::is_pointer_v<T> && std::is_void_v<std::remove_pointer_t<T>>;
 
 template <typename P, typename T, typename U>
 concept pair_t = std::is_same_v<P, std::pair<T, U>>;
@@ -399,9 +431,9 @@ concept random_access_range_t = std::ranges::random_access_range<T>;
 template <typename T>
 concept optional_like_t = requires (T t)
 {
-    { t.has_value() } -> std::convertible_to<bool>;
+    { t.has_value () } -> std::convertible_to<bool>;
     { *t } -> std::same_as<typename T::value_type&>;
-    { t.value() } -> std::same_as<typename T::value_type&>;
+    { t.value () } -> std::same_as<typename T::value_type&>;
 };
 
 template <typename T>
@@ -469,7 +501,7 @@ concept container_t = requires (T a, const T b)
 };
 
 template <typename T>
-concept reversible_container_t = container_t<T> && requires (T a, const T b)
+concept reversible_container_t = container_t<T> && requires (T a, T const b)
 {
     { a.rbegin() } -> std::same_as<typename T::reverse_iterator>;
     { a.rend() } -> std::same_as<typename T::reverse_iterator>;

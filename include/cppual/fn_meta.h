@@ -43,6 +43,9 @@ namespace cppual {
 //! forward declarations
 class vtable_base;
 
+template <auto...>
+struct switch_map;
+
 // =========================================================
 
 /**
@@ -72,6 +75,110 @@ consteval auto overload (R (C::* fn)(Args...) const) noexcept -> decltype (fn)
 template <typename... Args, typename R>
 consteval auto overload (R (* fn)(Args...)) noexcept -> decltype (fn)
 { return fn; }
+
+// ====================================================
+
+template <switch_t T, T Begin, T End, functional_t FN = function<void()>>
+struct switch_range
+{
+    typedef std::size_t               size_type  ;
+    typedef size_type  const          const_size ;
+    typedef std::underlying_type_t<T> value_type ;
+    typedef value_type const          const_value;
+    typedef FN                        fn_type    ;
+
+    inline constexpr static const_value begin       = static_cast<value_type> (Begin);
+    inline constexpr static const_value end         = static_cast<value_type> (End  );
+    inline constexpr static const_size  size        = const_size (end - begin) + const_size (1);
+    inline constexpr static const_value offset      = begin;
+    inline constexpr static auto        dispatchers = std::array<fn_type, size> { };
+
+    template <enum_t E>
+    consteval static const_size to_index (E const val) noexcept
+    {
+        constexpr const_value value = static_cast<const_value> (val);
+        return (value < begin || end < value) ?
+                   const_size (-1) : static_cast<const_size> (value - offset);
+    }
+
+    consteval static const_size to_index (const_value value) noexcept
+    {
+        return (value < begin || end < value) ?
+                   const_size (-1) : static_cast<const_size> (value - offset);
+    }
+
+    template <enum_t E>
+    consteval static fn_type get_fn (E const value) noexcept
+    {
+        const_size idx = to_index (value);
+        if (idx >= size) return nullptr;
+        return dispatchers[idx];
+    }
+
+    consteval static fn_type get_fn (const_value value) noexcept
+    {
+        const_size idx = to_index (value);
+        if (idx >= size) return nullptr;
+        return dispatchers[idx];
+    }
+};
+
+// ====================================================
+
+template <switch_t T, functional_t U, std::pair<T, U>... Cases>
+requires (pair_t<decltype (Cases), T, U> && ...)
+struct switch_map <Cases...>
+{
+    typedef switch_map<Cases...>              self_type  ;
+    typedef std::pair<T, U>                   pair_type  ;
+    typedef std::size_t                       size_type  ;
+    typedef size_type  const                  const_size ;
+    typedef std::remove_cv_t<T>               elem_type  ;
+    typedef elem_type  const                  const_elem ;
+    typedef std::underlying_type_t<elem_type> value_type ;
+    typedef value_type const                  const_value;
+    typedef std::remove_cv_t<U>               fn_type    ;
+
+    inline constexpr static auto dispatchers = std::array { Cases... };
+
+    consteval static size_type size () noexcept
+    {
+        return sizeof... (Cases);
+    }
+
+    consteval static size_type to_index (const_value value) noexcept
+    {
+        const_size idx = ((Cases.first == value ? const_size (1) : const_size ()) + ...);
+        return     idx - 1;  // -1 if no match found or to make an index because index starts from 0
+    }
+
+    template <enum_t E>
+    consteval static size_type to_index (E const value) noexcept
+    {
+        return to_index (static_cast<const_value> (value));
+    }
+
+    consteval static fn_type get_fn (const_value value) noexcept
+    {
+        constexpr const_size idx = to_index (value);
+        if constexpr (idx >= dispatchers.size ()) return fn_type ();
+        return dispatchers[idx].second;
+    }
+
+    template <enum_t E>
+    consteval static fn_type get_fn (E const value) noexcept
+    {
+        return get_fn (static_cast<const_value> (value));
+    }
+};
+
+// ====================================================
+
+template <switch_t T, functional_t U = function<void()>>
+constexpr static std::pair<T, U> make_case_pair (T value, U fn) noexcept
+{
+    return { value, fn };
+}
 
 // ====================================================
 

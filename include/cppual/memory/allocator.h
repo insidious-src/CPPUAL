@@ -28,11 +28,11 @@
 #include <cppual/noncopyable.h>
 #include <cppual/concept/concepts.h>
 
+#include <memory_resource>
+#include <algorithm>
 #include <thread>
 #include <memory>
 #include <limits>
-#include <algorithm>
-#include <memory_resource>
 
 // =========================================================
 
@@ -375,8 +375,11 @@ public:
     { }
 
     template <non_void_t U>
-    constexpr explicit allocator (self_type_t<U>&& obj) noexcept
-    { swap (*this, obj); }
+    constexpr explicit allocator (self_type_t<U>&& ator) noexcept
+    : _M_pRc (ator._M_pRc)
+    {
+        ator._M_pRc = &get_default_resource ();
+    }
 
     template <non_void_t U>
     constexpr self_type& operator = (self_type_t<U> const& ator) noexcept
@@ -386,9 +389,9 @@ public:
     }
 
     template <non_void_t U>
-    constexpr self_type& operator = (self_type_t<U>&& obj) noexcept
+    constexpr self_type& operator = (self_type_t<U>&& ator) noexcept
     {
-        if (this != &obj) swap (*this, obj);
+        if (this != &ator) ator._M_pRc = &get_default_resource ();
         return *this;
     }
 
@@ -518,27 +521,26 @@ constexpr void swap (allocator<U1>& lhs, allocator<U2>& rhs) noexcept
 
 /// is allocator primary template declaration
 template <class_t A>
-struct is_allocator
+struct is_allocator_helper : public std::false_type
 {
-    typedef A    type      ;
-    typedef bool value_type;
-
-    inline constexpr static value_type const value = is_allocator<A>::value;
-
-     static_assert (is_allocator<A>::value, "A is NOT an allocator!");
+    typedef A type;
 };
 
 template <non_void_t T>
-struct is_allocator < allocator<T> > : public std::true_type
+struct is_allocator_helper <allocator<T>> : public std::true_type
 { typedef allocator<T> type; };
 
 template <non_void_t T>
-struct is_allocator < std::allocator<T> > : public std::true_type
+struct is_allocator_helper <std::allocator<T>> : public std::true_type
 { typedef std::allocator<T> type; };
 
 template <non_void_t T>
-struct is_allocator < std::pmr::polymorphic_allocator<T> > : public std::true_type
+struct is_allocator_helper <std::pmr::polymorphic_allocator<T>> : public std::true_type
 { typedef std::pmr::polymorphic_allocator<T> type; };
+
+template <class_t A>
+struct is_allocator : public is_allocator_helper<A>
+{ /* static_assert (is_allocator<A>::value, "A is NOT an allocator!"); */ };
 
 template <class_t A>
 using is_allocator_t = is_allocator<A>::type;

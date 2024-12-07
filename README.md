@@ -3,17 +3,22 @@
 # C++ Unified Abstraction Library #
 
     Latest Supported Language Standard: C++20
-    Future Language Standards: C++23
+    Future Language Standard: C++23
 
 ## Framework Goals ##
 
 #### Why reinvent the wheel and replace parts of the standard library and Qt? ####
-- the whole idea is to implement everything as a host and compute devices for parallelism, deprecating OpenGL, DirectX, VA, VDPAU, OVD, XVideo, TrueAudio and OpenAL completely.
+- the whole idea is to implement everything as a host and compute devices for parallelism, 
+  deprecating OpenGL, DirectX, VA, VDPAU, OVD, XVideo, TrueAudio and OpenAL completely.
 - behaviour-based device processing and explicit events
 
-**So the real question is:** Why would you want to have all these libraries when OpenCL is pushing hard and you can program it pretty much like a regular CPU? It's just a matter of time until OpenCL evolves and turns into an all-in-one standard.
+**So the real question is:** Why would you want to have all these libraries 
+**when OpenCL is pushing hard and you can program it pretty much like a regular CPU?
+**It's just a matter of time until OpenCL evolves and turns into an all-in-one standard.
 
-**March 6th 2015:** Well,... it evolved into Vulkan (GLNext), however OpenCL still remains as a new revision was released (2.1). Both are using a common IL - SPIR-V.
+**March 6th 2015:** Well,... it evolved into Vulkan (GLNext), 
+**however OpenCL still remains as a new version was released (3.0). 
+**Both are using a common IL - SPIR-V.
 
 
 ## Concept Goals ##
@@ -115,19 +120,20 @@
 * timer **(Done)**
 * calendar
 * passive timeline with speed adjustment **(95%)**
-* fast COW string **(Done)**
+* SSO fast string **(Done)**
+* rope using SSO fast string
 * circular queue + atomic **(WIP)**
+* atomic uniform circular queue **(WIP)**
 * signals **(Done)**
-* reactive functional types **(WIP)**
-* resource management **(WIP)**
+* reactive functional types **(Done)**
+* resource management **(50%)**
 
 
 ## Longterm Framework Goals ##
 * completely integrate into the std library **(~40%)**
 * unified dynamic memory management for both host and compute devices **(~20%)**
-* drop opengl, directx, glew, egl **(WIP)**
+* drop opengl, directx, glew, egl, glx, wgl, agl **(WIP)**
 * drop freetype **(WIP)**
 * drop openal **(WIP)**
 * drop sndfile
 * transparent filesystem management (using protocols)
-* prepare the library for universal memory (memristors)

@@ -173,7 +173,7 @@ public:
     }
 
     inline circular_queue (self_type const& gObj)
-    : allocator_type (gObj),
+    : allocator_type (gObj.allocator_type::select_on_container_copy_construction ()),
       _M_pArray      (!gObj.empty () ? allocator_type::allocate (gObj.size ()) : pointer ()),
       _M_beginPos    (_M_pArray && !gObj.empty () ? _M_pArray : pointer ()),
       _M_endPos      (_M_pArray && !gObj.empty () ? _M_pArray + (gObj.size () - 1) : pointer ()),

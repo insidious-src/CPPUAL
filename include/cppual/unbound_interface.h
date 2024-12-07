@@ -19,8 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_INTERFACE_H_
-#define CPPUAL_INTERFACE_H_
+#ifndef CPPUAL_UNBOUND_INTERFACE_H_
+#define CPPUAL_UNBOUND_INTERFACE_H_
 #ifdef __cplusplus
 
 #include <cppual/cast.h>
@@ -61,6 +61,9 @@ public:
 
     template <typename S>
     using fn_type = function<S>;
+
+    template <typename, typename>
+    struct fn_signatures_match;
 
     // ====================================================
 
@@ -131,6 +134,19 @@ public:
 
     // ====================================================
 
+    template <typename R1, typename... Args1, typename R2, typename... Args2>
+    struct fn_signatures_match <R1(Args1...), R2(Args2...)>
+    {
+        inline constexpr static cbool value = std::is_same_v<R1, R2>                 &&
+                                              sizeof... (Args1) == sizeof... (Args2) &&
+                                             (std::is_same_v<Args1, Args2> && ...);
+    };
+
+    template <typename U1, typename U2>
+    inline constexpr static cbool fn_signatures_match_v = fn_signatures_match<U1, U2>::value;
+
+    // ====================================================
+
     class function_rtti
     {
     public:
@@ -153,8 +169,9 @@ public:
                   typename = std::enable_if_t<std::is_base_of_v<base_type, C>>
                   >
         constexpr function_rtti (C& obj, member_fn_type<C, R, Args...> fn)
-        : _M_fn           (obj, direct_cast<any_member_fn_type<C>> (fn)),
-          _M_args_typeids ({ typeid_type (typeid (Args))... }/*, typeid_vector::allocator_type ()*/),
+        : _M_fn           (direct_cast<fn_type<void()>> (fn_type<R(Args...)> (obj, fn))),
+          _M_args_typeids ({ typeid_type (typeid (Args))... },
+                             typeid_vector::allocator_type (/*class_cast<base_type> (obj)._M_rc*/)),
           _M_ret_type     (typeid (R))
         { }
 
@@ -163,8 +180,9 @@ public:
                   typename = std::enable_if_t<std::is_base_of_v<base_type, C>>
                   >
         constexpr function_rtti (C& obj, const_member_fn_type<C, R, Args...> fn)
-        : _M_fn           (obj, direct_cast<any_const_member_fn_type<C>> (fn)),
-          _M_args_typeids ({ typeid_type (typeid (Args))... }/*, typeid_vector::allocator_type ()*/),
+        : _M_fn           (direct_cast<fn_type<void()>> (fn_type<R(Args...)> (obj, fn))),
+          _M_args_typeids ({ typeid_type (typeid (Args))... },
+                             typeid_vector::allocator_type (/*class_cast<base_type> (obj)._M_rc*/)),
           _M_ret_type     (typeid (R))
         { }
 
@@ -187,9 +205,9 @@ public:
         constexpr self_type& operator = (self_type const&) noexcept = default;
 
         template <typename R = void, typename... Args>
-        constexpr R operator () (R* = ret<R>, Args... args) const
+        constexpr R operator () (R* = ret<void>, Args... args) const
         {
-            return _M_iface->call<R> (_M_fn_name, std::forward<Args> (args)...);
+            return _M_iface->call<R, Args...> (_M_fn_name, std::forward<Args> (args)...);
         }
 
         friend class unbound_interface;
@@ -210,23 +228,23 @@ public:
     unbound_interface () = delete;
     inline virtual ~unbound_interface () = default;
 
-    template <typename R = void, typename... Args>
+    template <typename R, typename... Args>
     inline R call (string_view const& fn_name, Args... args) const
     {
         auto it = _M_fn_map.find (fn_name.data ());
 
-        if (!check_return_type<R> (fn_rtti (it).return_typeid ()))
+        if (!check_return_type<R> (rtti (it).return_typeid ()))
         {
             throw std::runtime_error ("return type mismatch!");
         }
 
-        if (!check_args_types<Args...> (fn_rtti (it).args_typeids ()))
+        if (!check_args_types<Args...> (rtti (it).args_typeids ()))
         {
             throw std::runtime_error ("argument type mismatch!");
         }
 
         return (static_cast<fn_type<R(Args...)> const&>
-               (fn_rtti (it).functor ()))(std::forward<Args> (args)...);
+               (rtti (it).functor ()))(std::forward<Args> (args)...);
     }
 
     constexpr function_proxy operator [] (string_view const& fn_name) const
@@ -234,26 +252,26 @@ public:
         return function_proxy (*this, fn_name);
     }
 
-    inline mapped_type const& fn_rtti (const_iterator const& it) const
+    inline mapped_type const& rtti (const_iterator const& it) const
+    {
+        if    (it == _M_fn_map.cend ()) throw std::runtime_error ("function NOT found!");
+        return it->second;
+    }
+
+    inline mapped_type& rtti (iterator const& it)
     {
         if    (it == _M_fn_map.end ()) throw std::runtime_error ("function NOT found!");
         return it->second;
     }
 
-    inline mapped_type& fn_rtti (iterator const& it)
-    {
-        if    (it == _M_fn_map.end ()) throw std::runtime_error ("function NOT found!");
-        return it->second;
-    }
-
-    inline mapped_type const& fn_rtti (string_view const& fn_name) const
+    inline mapped_type const& rtti (string_view const& fn_name) const
     {
         auto   it  = _M_fn_map.find (fn_name.data ());
         if    (it == _M_fn_map.end  ()) throw std::runtime_error ("function NOT found!");
         return it->second;
     }
 
-    inline mapped_type& fn_rtti (string_view const& fn_name)
+    inline mapped_type& rtti (string_view const& fn_name)
     {
         auto   it  = _M_fn_map.find (fn_name.data ());
         if    (it == _M_fn_map.end  ()) throw std::runtime_error ("function NOT found!");
@@ -318,16 +336,15 @@ private:
     }
 
     template <typename R>
-    constexpr bool check_return_type (typeid_type const& expected_type) const
+    constexpr static bool check_return_type (typeid_type const& expected_type) noexcept
     {
-        return typeid (R) == expected_type;
+        return expected_type == typeid (R);
     }
 
     template <typename... Args>
-    constexpr bool check_args_types (typeid_vector const& expected_types) const
+    constexpr static bool check_args_types (typeid_vector const& expected_types) noexcept
     {
-        typeid_vector actual_types { typeid_type (typeid (Args))... };
-        return expected_types  ==  actual_types;
+        return expected_types == typeid_vector { typeid_type (typeid (Args))... };
     }
 
     friend class function_rtti;
@@ -375,4 +392,4 @@ private:
 } // cppual
 
 #endif // __cplusplus
-#endif // CPPUAL_INTERFACE_H_
+#endif // CPPUAL_UNBOUND_INTERFACE_H_

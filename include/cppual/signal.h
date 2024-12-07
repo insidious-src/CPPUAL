@@ -471,6 +471,34 @@ connect (signal<R(Args...), A>& gSignal,
 }
 
 template <class_t     C,
+         typename    R,
+         typename... Args,
+         allocator_t A
+          >
+inline
+typename signal<R(Args...), A>::slot_type
+connect (signal<R(Args...), A>& gSignal,
+         ClassType<C>& pObj,
+         R(C::* fn)(Args...),
+         bool bTop = false)
+{
+    auto it = std::find (gSignal.begin (),
+                         gSignal.end   (),
+                         typename signal<R(Args...), A>::value_type (pObj, fn));
+
+    if (it != gSignal.end ()) return it;
+
+    if (bTop)
+    {
+        gSignal.get_slots ().emplace_front (pObj, fn);
+        return --gSignal.get_slots ().begin ();
+    }
+
+    gSignal.get_slots ().emplace_back (pObj, fn);
+    return --gSignal.get_slots ().end ();
+}
+
+template <class_t     C,
           typename    R,
           typename... Args,
           allocator_t A
@@ -479,7 +507,7 @@ inline
 typename signal<R(Args...), A>::slot_type
 connect (signal<R(Args...), A>& gSignal,
          ClassType<C>& pObj,
-         R(C::* fn)(Args...),
+         R(C::* fn)(Args...) const,
          bool bTop = false)
 {
     auto it = std::find (gSignal.begin (),
@@ -581,8 +609,24 @@ template <class_t     C,
           allocator_t A
           >
 inline
-void
-disconnect (signal<R(Args...), A>& gSignal, ClassType<C>& pObj, R(C::* fn)(Args...))
+void disconnect (signal<R(Args...), A>& gSignal, ClassType<C>& pObj, R(C::* fn)(Args...))
+{
+    using value_type = typename signal<R(Args...), A>::value_type;
+
+    auto it = std::find (gSignal.begin (), gSignal.end (), value_type (pObj, fn));
+
+    if (it != gSignal.end ()) gSignal.get_slots ().erase (it);
+}
+
+
+
+template <class_t     C,
+          typename    R,
+          typename... Args,
+          allocator_t A
+          >
+inline
+void disconnect (signal<R(Args...), A>& gSignal, ClassType<C>& pObj, R(C::* fn)(Args...) const)
 {
     using value_type = typename signal<R(Args...), A>::value_type;
 
