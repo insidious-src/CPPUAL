@@ -28,6 +28,7 @@
 #include <cppual/types.h>
 #include <cppual/functional.h>
 #include <cppual/containers.h>
+#include <cppual/string_helper.h>
 #include <cppual/concept/concepts.h>
 
 #include <span>
@@ -43,8 +44,10 @@ namespace cppual {
 //! forward declarations
 class vtable_base;
 
-template <auto...>
-struct switch_map;
+// ====================================================
+
+template <typename P, typename T, typename U>
+concept switch_map_pair_t = switch_value_t<T> && functional_t<U> && std::same_as<P, std::pair<T, U>>;
 
 // =========================================================
 
@@ -78,111 +81,136 @@ consteval auto overload (R (* fn)(Args...)) noexcept -> decltype (fn)
 
 // ====================================================
 
-template <switch_t T, T Begin, T End, functional_t FN = function<void()>>
-struct switch_range
+template <typename T, std::size_t N>
+struct tuple_repeat_helper
 {
-    typedef std::size_t               size_type  ;
-    typedef size_type  const          const_size ;
-    typedef std::underlying_type_t<T> value_type ;
-    typedef value_type const          const_value;
-    typedef FN                        fn_type    ;
+    template <std::size_t... I>
+    static auto make_tuple (std::index_sequence<I...>)
+    {
+        return std::tuple<std::conditional_t<(I>=0), T, T>...>{};
+    }
 
-    inline constexpr static const_value begin       = static_cast<value_type> (Begin);
-    inline constexpr static const_value end         = static_cast<value_type> (End  );
-    inline constexpr static const_size  size        = const_size (end - begin) + const_size (1);
-    inline constexpr static const_value offset      = begin;
-    inline constexpr static auto        dispatchers = std::array<fn_type, size> { };
+    using type = decltype (make_tuple (std::make_index_sequence<N>{}));
+};
+
+template <typename T, std::size_t N>
+using tuple_repeat_t = typename tuple_repeat_helper<T, N>::type;
+
+// ====================================================
+
+template <switch_value_t T, functional_t U, std::size_t N>
+struct switch_map
+{
+    typedef switch_map<T, U, N>           self_type  ;
+    typedef std::pair<T, U>               pair_type  ;
+    typedef tuple_repeat_t<pair_type, N>  base_type  ;
+    typedef std::size_t                   size_type  ;
+    typedef size_type const               const_size ;
+    typedef std::remove_cvref_t<T>        key_type   ;
+    typedef key_type const                const_key  ;
+    typedef std::remove_cvref_t<U>        value_type ;
+
+    consteval static size_type size () noexcept { return N; }
+
+    static_assert (size () > 0, "switch_map is empty!");
+
+    inline constexpr static const_size npos = const_size (-1);
 
     template <enum_t E>
-    consteval static const_size to_index (E const val) noexcept
-    {
-        constexpr const_value value = static_cast<const_value> (val);
-        return (value < begin || end < value) ?
-                   const_size (-1) : static_cast<const_size> (value - offset);
-    }
+    constexpr void operator () (E const   k) noexcept { get_value (k)(); }
+    constexpr void operator () (const_key k) noexcept { get_value (k)(); }
 
-    consteval static const_size to_index (const_value value) noexcept
+private:
+    constexpr switch_map (std::array<pair_type, size ()> const& pairs) noexcept
+    : _M_pairs (pairs)
+    { }
+
+    //! runtime to_index function
+    constexpr size_type to_index (const_key k) const noexcept
     {
-        return (value < begin || end < value) ?
-                   const_size (-1) : static_cast<const_size> (value - offset);
+        for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].first == k) return i;
+        return npos;
     }
 
     template <enum_t E>
-    consteval static fn_type get_fn (E const value) noexcept
+    constexpr size_type to_index (E const k) const noexcept
     {
-        const_size idx = to_index (value);
-        if (idx >= size) return nullptr;
-        return dispatchers[idx];
+        for (size_type i = 0; i < size (); ++i)
+        {
+            if (_M_pairs[i].first == static_cast<const_key> (k)) return i;
+        }
+
+        return npos;
     }
 
-    consteval static fn_type get_fn (const_value value) noexcept
+    //! compile-time to_index function
+    template <const_key K>
+    consteval size_type to_index () const noexcept
     {
-        const_size idx = to_index (value);
-        if (idx >= size) return nullptr;
-        return dispatchers[idx];
+        for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].first == K) return i;
+        return npos;
     }
+
+    template <enum_t E, E K>
+    consteval size_type to_index () const noexcept
+    {
+        for (size_type i = 0; i < size (); ++i)
+        {
+            if (_M_pairs[i].first == static_cast<const_key> (K)) return i;
+        }
+
+        return npos;
+    }
+
+    constexpr value_type get_value (const_key k) const noexcept
+    {
+        auto i = to_index (k);
+        if (i != npos) return _M_pairs[i].second;
+        return value_type (); // Return a default-constructed value if key not found
+    }
+
+    template <enum_t E>
+    constexpr value_type get_value (E const k) const noexcept
+    {
+        auto i = to_index (static_cast<const_key> (k));
+        if (i != npos) return _M_pairs[i].second;
+        return value_type (); // Return a default-constructed value if key not found
+    }
+
+    template <const_key K>
+    consteval value_type get_value () const noexcept
+    {
+        constexpr const_size I = to_index<K> ();
+        static_assert (I != npos, "Key not found in switch_map");
+        return _M_pairs[I].second;
+    }
+
+    template <enum_t E, E K>
+    consteval value_type get_value () const noexcept
+    {
+        constexpr const_size I = to_index<E, K> ();
+        static_assert (I != npos, "Key not found in switch_map");
+        return _M_pairs[I].second;
+    }
+
+    template <switch_value_t V, functional_t F, std::size_t SZ>
+    friend constexpr auto make_switch_map (std::array<std::pair<V, F>, SZ> const&) noexcept;
+
+private:
+    std::array<pair_type, N> _M_pairs;
 };
 
 // ====================================================
 
-template <switch_t T, functional_t U, std::pair<T, U>... Cases>
-requires (pair_t<decltype (Cases), T, U> && ...)
-struct switch_map <Cases...>
+template <switch_value_t T, functional_t U = function<void()>, std::size_t N>
+constexpr auto make_switch_map (std::array<std::pair<T, U>, N> const& case_pairs) noexcept
 {
-    typedef switch_map<Cases...>              self_type  ;
-    typedef std::pair<T, U>                   pair_type  ;
-    typedef std::size_t                       size_type  ;
-    typedef size_type  const                  const_size ;
-    typedef std::remove_cv_t<T>               elem_type  ;
-    typedef elem_type  const                  const_elem ;
-    typedef std::underlying_type_t<elem_type> value_type ;
-    typedef value_type const                  const_value;
-    typedef std::remove_cv_t<U>               fn_type    ;
-
-    inline constexpr static auto dispatchers = std::array { Cases... };
-
-    consteval static size_type size () noexcept
-    {
-        return sizeof... (Cases);
-    }
-
-    consteval static size_type to_index (const_value value) noexcept
-    {
-        const_size idx = ((Cases.first == value ? const_size (1) : const_size ()) + ...);
-        return     idx - 1;  // -1 if no match found or to make an index because index starts from 0
-    }
-
-    template <enum_t E>
-    consteval static size_type to_index (E const value) noexcept
-    {
-        return to_index (static_cast<const_value> (value));
-    }
-
-    consteval static fn_type get_fn (const_value value) noexcept
-    {
-        constexpr const_size idx = to_index (value);
-        if constexpr (idx >= dispatchers.size ()) return fn_type ();
-        return dispatchers[idx].second;
-    }
-
-    template <enum_t E>
-    consteval static fn_type get_fn (E const value) noexcept
-    {
-        return get_fn (static_cast<const_value> (value));
-    }
-};
-
-// ====================================================
-
-template <switch_t T, functional_t U = function<void()>>
-constexpr static std::pair<T, U> make_case_pair (T value, U fn) noexcept
-{
-    return { value, fn };
+    return switch_map<T, U, N> (case_pairs);
 }
 
 // ====================================================
 
-template <typename... Ts>
+template <non_void_t... Ts>
 struct type_list
 {
 
@@ -699,7 +727,7 @@ protected:
                 throw std::invalid_argument ("arguments > 0 but args_ptr is NULLPTR!");
             }
 
-            auto  fn         = *static_cast<R(D::*)(Args...)> (fn_ptr);
+            auto  fn         =  static_cast<R(D::*)(Args...)> (fn_ptr);
             auto& tuple_args = *static_cast<std::tuple<Args...>*> (args_ptr);
             auto& derived    =  class_cast<D> (base);
 
@@ -748,6 +776,31 @@ private:
 // ====================================================
 
 } // cppual
+
+// ====================================================
+
+namespace std {
+
+// ====================================================
+
+using cppual::LAMBDA_DEFAULT_MAX_SIZE;
+
+template <std::size_t N = LAMBDA_DEFAULT_MAX_SIZE>
+using delegate = cppual::function<void(), N>;
+
+// ====================================================
+
+template <size_t N = LAMBDA_DEFAULT_MAX_SIZE, cppual::switch_value_t T, typename... Args>
+constexpr auto make_pair (T const _case, Args&&... fn_args) noexcept
+{
+    using fn_type = delegate<N>;
+
+    return pair<T, fn_type> (_case, cppual::make_fn (forward<Args> (fn_args)...));
+}
+
+// ====================================================
+
+} // std
 
 #endif // __cplusplus
 #endif // CPPUAL_FUNCTIONAL_META_H_

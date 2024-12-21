@@ -169,7 +169,7 @@ public:
                   typename = std::enable_if_t<std::is_base_of_v<base_type, C>>
                   >
         constexpr function_rtti (C& obj, member_fn_type<C, R, Args...> fn)
-        : _M_fn           (direct_cast<fn_type<void()>> (fn_type<R(Args...)> (obj, fn))),
+        : _M_fn           (fn_cast<void()> (fn_type<R(Args...)> (obj, fn))),
           _M_args_typeids ({ typeid_type (typeid (Args))... },
                              typeid_vector::allocator_type (/*class_cast<base_type> (obj)._M_rc*/)),
           _M_ret_type     (typeid (R))
@@ -180,7 +180,7 @@ public:
                   typename = std::enable_if_t<std::is_base_of_v<base_type, C>>
                   >
         constexpr function_rtti (C& obj, const_member_fn_type<C, R, Args...> fn)
-        : _M_fn           (direct_cast<fn_type<void()>> (fn_type<R(Args...)> (obj, fn))),
+        : _M_fn           (fn_cast<void()> (fn_type<R(Args...)> (obj, fn))),
           _M_args_typeids ({ typeid_type (typeid (Args))... },
                              typeid_vector::allocator_type (/*class_cast<base_type> (obj)._M_rc*/)),
           _M_ret_type     (typeid (R))
@@ -207,7 +207,7 @@ public:
         template <typename R = void, typename... Args>
         constexpr R operator () (R* = ret<void>, Args... args) const
         {
-            return _M_iface->call<R, Args...> (_M_fn_name, std::forward<Args> (args)...);
+            return _M_iface->call<R> (_M_fn_name, std::forward<Args> (args)...);
         }
 
         friend class unbound_interface;
@@ -243,8 +243,7 @@ public:
             throw std::runtime_error ("argument type mismatch!");
         }
 
-        return (static_cast<fn_type<R(Args...)> const&>
-               (rtti (it).functor ()))(std::forward<Args> (args)...);
+        return (fn_cast<R(Args...)> (rtti (it).functor ()))(std::forward<Args> (args)...);
     }
 
     constexpr function_proxy operator [] (string_view const& fn_name) const
@@ -286,21 +285,21 @@ public:
 protected:
     /// a pair of Ts... consists of const char* and
     /// member function pointer (ex. void(object::*)())
-    template <typename... Ts>
-    requires (member_fn_pair_t<Ts, key_type, typename Ts::second_type> && ...)
-    inline unbound_interface (Ts... pairs)
-    : _M_rc (sizeof... (Ts) *  sizeof (map_type::value_type) +
-            (sizeof... (Ts) * (sizeof (typeid_type) *  10U))),
+    template <typename... Ps>
+    requires (member_fn_pair_t<Ps, key_type, typename Ps::second_type> && ...)
+    inline unbound_interface (Ps... pairs)
+    : _M_rc (sizeof... (Ps) *  sizeof (map_type::value_type) +
+            (sizeof... (Ps) * (sizeof (typeid_type) *  10U))),
       _M_fn_map (map_type::allocator_type (_M_rc))
     {
-        check_pairs_types<std::tuple<Ts...>> ();
+        check_pairs_types<std::tuple<Ps...>> ();
 
 #       ifdef DEBUG_MODE
-        std::cout << "unbound_interface size: " << sizeof... (Ts) * sizeof (map_type::value_type)
+        std::cout << "unbound_interface size: " << sizeof... (Ps) * sizeof (map_type::value_type)
                   << " bytes\nstacked_resource max size: " << _M_rc.max_size () << " bytes" << std::endl;
 #       endif
 
-        _M_fn_map.reserve (sizeof... (Ts));
+        _M_fn_map.reserve (sizeof... (Ps));
 
         add_all_member_functions (std::make_tuple (pairs...));
     }

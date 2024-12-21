@@ -201,13 +201,13 @@ public:
     }
 
     /// callable object (signal/slot) connect
-    template <class_t C, typename = std::enable_if_t<!std::is_same_v<value_type, C>>>
-    inline self_type& operator << (C& obj)
+    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    inline self_type& operator << (C& obj) const
     {
         if (this == &obj) return *this;
 
-        static_assert (std::is_same_v<return_type, decltype (C::operator ())>,
-                       "C::operator () return type is NOT the same as return_type!");
+        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
+                      "C::operator () return type is NOT void!");
 
         connect (*this, obj);
         return   *this;
@@ -345,13 +345,13 @@ public:
     }
 
     /// callable object (signal/slot) connect
-    template <class_t C, typename = std::enable_if_t<!std::is_same_v<value_type, C>>>
+    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
     inline self_type& operator << (C& obj) const
     {
         if (this == &obj) return *this;
 
-        static_assert (std::is_same_v<return_type, decltype (C::operator ())>,
-                       "C::operator () return type is NOT void!");
+        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
+                      "C::operator () return type is NOT void!");
 
         connect (*this, obj);
         return   *this;
@@ -471,9 +471,9 @@ connect (signal<R(Args...), A>& gSignal,
 }
 
 template <class_t     C,
-         typename    R,
-         typename... Args,
-         allocator_t A
+          typename    R,
+          typename... Args,
+          allocator_t A
           >
 inline
 typename signal<R(Args...), A>::slot_type

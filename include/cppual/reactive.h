@@ -103,22 +103,20 @@ public:
 
     inline self_type& operator = (self_type const& gObj)
     {
-        if (this != &gObj)
-        {
-            base_type::operator = (gObj);
-            (*this)(_M_value = gObj._M_value);
-        }
+        if (this != &gObj) return *this;
+
+        base_type::operator = (gObj);
+        (*this)(_M_value = gObj._M_value);
 
         return *this;
     }
 
     inline self_type& operator = (self_type&& gObj)
     {
-        if (this != &gObj)
-        {
-            base_type::operator = (std::move (gObj));
-            (*this)(_M_value = std::move (gObj._M_value));
-        }
+        if (this != &gObj) return *this;
+
+        base_type::operator = (std::move (gObj));
+        (*this)(_M_value = std::move (gObj._M_value));
 
         return *this;
     }
@@ -166,10 +164,10 @@ public:
     }
 
     /// callable object reactive (signal/slot) connect
-    template <callable_t C, typename = std::enable_if_t<!std::is_same_v<fn_type, C>>>
+    template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
     inline self_type& operator << (C& obj) const
     {
-        static_assert (std::is_same_v<void, decltype (C::operator ())>,
+        static_assert (std::is_same_v<void, callable_return_t<C, arg_type>>,
                        "C::operator () return type is NOT void!");
 
         connect (*this, obj);

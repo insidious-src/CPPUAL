@@ -172,14 +172,18 @@ struct member_function_to_static
 
 template <class C, typename R, typename... Args>
 struct member_function_to_static <R(C::*)(Args...) const>
-{ using type = R(*)(Args...); };
+{ typedef R(* type)(Args...); };
 
 template <class C, typename R, typename... Args>
 struct member_function_to_static <R(C::*)(Args...)>
-{ using type = R(*)(Args...); };
+{ typedef R(* type)(Args...); };
 
-template <typename T>
-using member_function_to_static_t = member_function_to_static<T>::type;
+template <typename F>
+using member_function_to_static_t = member_function_to_static<F>::type;
+
+template <typename F, F MEM_FN>
+inline constexpr auto const member_function_to_static_v =
+    static_cast<member_function_to_static<F>::type> (MEM_FN);
 
 // ====================================================
 
@@ -209,7 +213,7 @@ template <typename T>
 concept char_t = is_char_v<T>;
 
 template <typename T>
-concept switch_t = is_integer_v<T> || std::is_enum_v<T> || is_char_v<T>;
+concept switch_value_t = is_integer_v<T> || std::is_enum_v<T> || is_char_v<T> || is_stream_char_v<T>;
 
 template <typename T>
 concept c_str_t = std::is_same_v<T, char*>;
@@ -262,6 +266,9 @@ concept non_function_t = !std::is_function_v<std::remove_pointer_t<T>> &&
                          !std::is_member_function_pointer_v<T>;
 
 template <typename T>
+concept void_callable_t = requires (T t) { { t () } -> std::same_as<void>; };
+
+template <typename T>
 concept callable_class_t = std::is_class_v<T> &&
 requires (T) { &std::decay_t<T>::operator (); };
 
@@ -276,6 +283,10 @@ concept lambda_capture_t = !std::is_constructible_v<
 
 template <typename T>
 concept lambda_t = lambda_non_capture_t<T> || lambda_capture_t<T>;
+
+template <typename T>
+concept callable_non_capture_object_t = (std::is_class_v<T> && requires (T&) { &T::operator (); }) ||
+                                         lambda_non_capture_t<T>;
 
 template <typename T>
 concept callable_object_t = (std::is_class_v<T> && requires (T&) { &T::operator (); }) ||

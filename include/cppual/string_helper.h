@@ -39,10 +39,10 @@
 namespace cppual {
 
 template <typename>
-class string_list_iterator;
+class consteval_array_iterator;
 
-template <std::size_t, char_t>
-class string_list;
+template <non_void_t, std::size_t>
+class consteval_array;
 
 // ====================================================
 
@@ -51,10 +51,10 @@ using memory::allocator_t;
 // ====================================================
 
 template <typename T>
-class string_list_iterator
+class consteval_array_iterator
 {
 public:
-    typedef string_list_iterator<T>         self_type        ;
+    typedef consteval_array_iterator<T>     self_type        ;
     typedef std::remove_reference_t<T>      buf_type         ;
     typedef T::value_type                   value_type       ;
     typedef value_type const                const_value      ;
@@ -68,30 +68,35 @@ public:
     typedef std::bidirectional_iterator_tag iterator_category;
 
     template <typename U>
-    using self_type_t = string_list_iterator<U>;
+    using self_type_t = consteval_array_iterator<U>;
 
     typedef std::conditional_t<std::is_const_v<buf_type>, const_value, value_type> elem_type;
 
-    friend class string_list_iterator<buf_type const>;
-    friend class string_list_iterator<std::remove_const_t<buf_type>>;
+    friend class consteval_array_iterator<buf_type const>;
+    friend class consteval_array_iterator<std::remove_const_t<buf_type>>;
 
     constexpr string_type  operator  * () const { return  (*_M_buf)[_M_pos]; }
     constexpr string_type* operator -> () const { return &(*_M_buf)[_M_pos]; }
 
-    constexpr string_list_iterator () noexcept
-    : _M_buf (), _M_pos ()
+    consteval consteval_array_iterator () noexcept = default;
+
+    constexpr consteval_array_iterator (buf_type& b, size_type p) noexcept
+    : _M_buf (&b), _M_pos (p)
     { }
 
-    constexpr string_list_iterator (buf_type& b, size_type p) noexcept
-    : _M_buf (&b), _M_pos (p)
+    //! converting a const iterator to a non-const iterator
+    constexpr
+    consteval_array_iterator (self_type_t<buf_type const> const& other) noexcept
+    : _M_buf (const_cast<buf_type*> (other._M_buf)), _M_pos (other._M_pos)
     { }
 
     /// converting a non-const iterator to a const iterator
     constexpr
-    string_list_iterator (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
+    consteval_array_iterator (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
     : _M_buf (other._M_buf), _M_pos (other._M_pos)
     { }
 
+    /// converting a non-const iterator to a const iterator
     constexpr
     self_type& operator = (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
     {
@@ -153,146 +158,151 @@ public:
     inline self_type_t<U> operator - (self_type_t<U> const&, typename self_type_t<U>::difference_type);
 
 private:
-    buf_type* _M_buf;
-    size_type _M_pos;
+    buf_type* _M_buf { };
+    size_type _M_pos { };
 };
 
 // =========================================================
 
 template <typename T>
-constexpr bool operator == (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
-{ return lhObj.pos () == other.pos () && &lhObj.get () == &other.get (); }
+constexpr bool operator == (consteval_array_iterator<T> const& lhObj, consteval_array_iterator<T> const& rhObj)
+{ return lhObj.pos () == rhObj.pos () && &lhObj.get () == &rhObj.get (); }
 
 template <typename T>
-constexpr bool operator != (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
-{ return !(lhObj == other); }
+constexpr bool operator != (consteval_array_iterator<T> const& lhObj, consteval_array_iterator<T> const& rhObj)
+{ return !(lhObj == rhObj); }
 
 template <typename T>
-constexpr bool operator > (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
-{ return lhObj.pos () > other.pos (); }
+constexpr bool operator > (consteval_array_iterator<T> const& lhObj, consteval_array_iterator<T> const& rhObj)
+{ return lhObj.pos () > rhObj.pos (); }
 
 template <typename T>
-constexpr bool operator >= (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
-{ return lhObj.pos () >= other.pos (); }
+constexpr bool operator >= (consteval_array_iterator<T> const& lhObj, consteval_array_iterator<T> const& rhObj)
+{ return lhObj.pos () >= rhObj.pos (); }
 
 template <typename T>
-constexpr bool operator < (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
-{ return lhObj.pos () < other.pos (); }
+constexpr bool operator < (consteval_array_iterator<T> const& lhObj, consteval_array_iterator<T> const& rhObj)
+{ return lhObj.pos () < rhObj.pos (); }
 
 template <typename T>
-constexpr bool operator <= (string_list_iterator<T> const& lhObj, string_list_iterator<T> const& other)
-{ return lhObj.pos () <= other.pos (); }
+constexpr bool operator <= (consteval_array_iterator<T> const& lhObj, consteval_array_iterator<T> const& rhObj)
+{ return lhObj.pos () <= rhObj.pos (); }
 
 // =========================================================
 
 template <typename T>
-inline string_list_iterator<T> operator + (string_list_iterator<T> const& lhObj,
-                                           typename string_list_iterator<T>::difference_type n)
+inline consteval_array_iterator<T> operator + (consteval_array_iterator<T> const& lhObj,
+                                           typename consteval_array_iterator<T>::difference_type n)
 {
-    string_list_iterator<T> ret_obj (lhObj);
-    ret_obj._M_pos += static_cast<string_list_iterator<T>::size_type> (n);
+    consteval_array_iterator<T> ret_obj (lhObj);
+    ret_obj._M_pos += static_cast<consteval_array_iterator<T>::size_type> (n);
     return ret_obj;
 }
 
 template <typename T>
-inline string_list_iterator<T> operator - (string_list_iterator<T> const& lhObj,
-                                           typename string_list_iterator<T>::difference_type n)
+inline consteval_array_iterator<T> operator - (consteval_array_iterator<T> const& lhObj,
+                                           typename consteval_array_iterator<T>::difference_type n)
 {
-    string_list_iterator<T> ret_obj (lhObj);
-    ret_obj._M_pos -= static_cast<string_list_iterator<T>::size_type> (n);
+    consteval_array_iterator<T> ret_obj (lhObj);
+    ret_obj._M_pos -= static_cast<consteval_array_iterator<T>::size_type> (n);
     return ret_obj;
 }
 
 template <typename T>
 constexpr
-string_list_iterator<T>::difference_type
-operator + (string_list_iterator<T> const& a, string_list_iterator<T> const& b)
-{ return static_cast<string_list_iterator<T>::difference_type> (a.pos () + b.pos ()); }
+consteval_array_iterator<T>::difference_type
+operator + (consteval_array_iterator<T> const& a, consteval_array_iterator<T> const& b)
+{ return static_cast<consteval_array_iterator<T>::difference_type> (a.pos () + b.pos ()); }
 
 template <typename T>
 constexpr
-string_list_iterator<T>::difference_type
-operator - (string_list_iterator<T> const& a, string_list_iterator<T> const& b)
-{ return static_cast<string_list_iterator<T>::difference_type> (a.pos () - b.pos ()); }
+consteval_array_iterator<T>::difference_type
+operator - (consteval_array_iterator<T> const& a, consteval_array_iterator<T> const& b)
+{ return static_cast<consteval_array_iterator<T>::difference_type> (a.pos () - b.pos ()); }
 
 //======================================================
 
-template <std::size_t N, char_t T = char>
-class string_list
+template <non_void_t T, std::size_t N>
+class consteval_array
 {
 public:
-    typedef string_list<N, T>                     self_type             ;
-    typedef T                                     value_type            ;
-    typedef value_type const                      const_value           ;
-    typedef value_type const*                     pointer               ;
-    typedef value_type const*                     const_pointer         ;
-    typedef value_type const&                     reference             ;
-    typedef value_type const&                     const_reference       ;
-    typedef std::basic_string_view<T>             string_type           ;
-    typedef string_type&                          str_reference         ;
-    typedef string_type const&                    str_const_reference   ;
-    typedef std::size_t                           size_type             ;
-    typedef size_type                             const_size            ;
-    typedef std::ptrdiff_t                        difference_type       ;
-    typedef string_list_iterator<self_type>       iterator              ;
-    typedef string_list_iterator<self_type const> const_iterator        ;
-    typedef std::reverse_iterator<iterator>       reverse_iterator      ;
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef consteval_array<T, N>                     self_type             ;
+    typedef T                                         value_type            ;
+    typedef value_type const                          const_value           ;
+    typedef value_type const*                         pointer               ;
+    typedef value_type const*                         const_pointer         ;
+    typedef value_type const&                         reference             ;
+    typedef value_type const&                         const_reference       ;
+    typedef std::basic_string_view<T>                 string_type           ;
+    typedef std::size_t                               size_type             ;
+    typedef size_type const                           const_size            ;
+    typedef std::ptrdiff_t                            difference_type       ;
+    typedef consteval_array_iterator<self_type>       iterator              ;
+    typedef consteval_array_iterator<self_type const> const_iterator        ;
+    typedef std::reverse_iterator<iterator>           reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator>     const_reverse_iterator;
 
     static_assert (N > 0, "string_list is empty!");
 
-    inline constexpr static const_size npos = static_cast<size_type> (-1);
+    inline constexpr static const_size npos = static_cast<const_size> (-1);
 
-    string_list () = delete;
+    typedef std::conditional_t<is_char_v<T>, const_pointer, value_type> elem_type;
+    typedef std::conditional_t<is_char_v<T>, string_type&, const_reference> elem_reference;
+    typedef std::conditional_t<is_char_v<T>, string_type const&, const_reference> elem_const_reference;
+    typedef std::conditional_t<is_char_v<T>, string_type, value_type> array_type;
 
-    template <c_str_const_t... Ts>
-    consteval string_list (Ts... array) noexcept
-    : _M_array { array... }
+    consteval_array () = delete;
+
+    template <non_void_t... Ts>
+    requires (sizeof... (Ts) == N)
+    consteval consteval_array (Ts&&... array) noexcept
+    : _M_array { std::forward<Ts> (array)... }
     {
-        static_assert (are_of_same_type_v<const_pointer, Ts...>, "some of the args are NOT C strings!");
+        static_assert (are_of_same_type_v<elem_type, Ts...>,
+                       "some of the args are NOT of the same type!");
     }
 
-    constexpr str_const_reference operator [] (size_type i) const noexcept
+    constexpr elem_const_reference operator [] (const_size i) const noexcept
     {
         assert (i < N && "index out of range!");
         return _M_array[i];
     }
 
-    constexpr size_type hash (size_type i) const noexcept
+    consteval size_type hash (const_size i) const noexcept
     {
         assert (i < N && "index out of range!");
         return constexpr_char_hash ((*this)[i]);
     }
 
-    constexpr str_const_reference front  () const noexcept { return _M_array[0]; }
-    constexpr str_const_reference back   () const noexcept { return _M_array[size () - 1]; }
-    constexpr const_iterator      begin  () const noexcept { return const_iterator (*this, 0); }
-    constexpr const_iterator      cbegin () const noexcept { return const_iterator (*this, 0); }
-    constexpr const_iterator      end    () const noexcept { return const_iterator (*this, size ()); }
-    constexpr const_iterator      cend   () const noexcept { return const_iterator (*this, size ()); }
+    consteval elem_const_reference front  () const noexcept { return _M_array[0]; }
+    consteval elem_const_reference back   () const noexcept { return _M_array[size () - 1]; }
+    consteval const_iterator       begin  () const noexcept { return const_iterator (*this, 0); }
+    consteval const_iterator       cbegin () const noexcept { return const_iterator (*this, 0); }
+    consteval const_iterator       end    () const noexcept { return const_iterator (*this, size ()); }
+    consteval const_iterator       cend   () const noexcept { return const_iterator (*this, size ()); }
 
-    constexpr const_reverse_iterator rbegin () const noexcept
+    consteval const_reverse_iterator rbegin () const noexcept
     {  return const_reverse_iterator (const_iterator (*this, size () - 1)); }
 
-    constexpr const_reverse_iterator rend () const noexcept
+    consteval const_reverse_iterator rend () const noexcept
     {  return const_reverse_iterator (const_iterator (*this, npos)); }
 
-    constexpr const_reverse_iterator crbegin () const noexcept
+    consteval const_reverse_iterator crbegin () const noexcept
     {  return const_reverse_iterator (const_iterator (*this, size () - 1)); }
 
-    constexpr const_reverse_iterator crend () const noexcept
+    consteval const_reverse_iterator crend () const noexcept
     {  return const_reverse_iterator (const_iterator (*this, npos)); }
 
     consteval static size_type size () noexcept { return N; }
 
 private:
-    string_type _M_array[N];
+    array_type _M_array[N];
 };
 
 //======================================================
 
-template <char_t T = char, c_str_const_t... Ts>
-consteval auto make_string_list (Ts... ts) -> string_list<sizeof... (Ts), T>
+template <non_void_t T = char, non_void_t... Ts>
+consteval auto make_consteval_array (Ts... ts) -> consteval_array<T, sizeof... (Ts)>
 {
     return { std::forward<Ts> (ts)... };
 }
