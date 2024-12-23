@@ -23,6 +23,8 @@
 #define CPPUAL_ITERATOR_H_
 #ifdef __cplusplus
 
+#include <cppual/concept/concepts.h>
+
 #include <iterator>
 
 // ====================================================
@@ -173,7 +175,9 @@ class bidirectional_iterator
 public:
     typedef bidirectional_iterator<T>       self_type        ;
     typedef std::remove_reference_t<T>      buf_type         ;
-    typedef std::remove_cvref_t<buf_type>   buf_clean_type   ;
+    typedef std::remove_const_t<buf_type>   buf_clean_type   ;
+    typedef typename T::value_type          value_type       ;
+    typedef value_type const                const_value      ;
     typedef typename T::pointer             pointer          ;
     typedef typename T::const_pointer       const_pointer    ;
     typedef typename T::reference           reference        ;
@@ -181,8 +185,6 @@ public:
     typedef typename T::difference_type     difference_type  ;
     typedef typename T::size_type           size_type        ;
     typedef size_type const                 const_size       ;
-    typedef typename T::value_type          value_type       ;
-    typedef value_type const                const_value      ;
     typedef std::bidirectional_iterator_tag iterator_category;
 
     template <typename U>
@@ -205,8 +207,7 @@ public:
     { }
 
     //! converting a const iterator to a non-const iterator
-    constexpr
-    bidirectional_iterator (self_type_t<buf_type const> const& other) noexcept
+    constexpr bidirectional_iterator (self_type_t<buf_type const> const& other) noexcept
     : _M_pBuf (const_cast<buf_type*> (other._M_pBuf)), _M_uPos (other._M_uPos)
     { }
 
@@ -217,7 +218,7 @@ public:
     { }
 
     //! converting a non-const iterator to a const iterator
-    inline
+    constexpr
     self_type& operator = (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
     {
         if (this == &other) return *this;
@@ -228,52 +229,63 @@ public:
         return *this;
     }
 
-    inline self_type& operator ++ ()
+    //! converting a const iterator to a non-const iterator
+    constexpr self_type& operator = (self_type_t<buf_type const> const& other) noexcept
+    {
+        if (this == &other) return *this;
+
+        _M_pBuf = const_cast<buf_type*> (other._M_pBuf);
+        _M_uPos = other._M_uPos;
+
+        return *this;
+    }
+
+    constexpr self_type& operator ++ ()
     {
         ++_M_uPos;
         return *this;
     }
 
-    inline self_type operator ++ (int)
+    constexpr self_type operator ++ (int)
     {
         self_type tmp (*this);
          ++_M_uPos;
         return tmp;
     }
 
-    inline self_type& operator -- ()
+    constexpr self_type& operator -- ()
     {
         --_M_uPos;
         return *this;
     }
-    inline self_type operator -- (int)
+    constexpr self_type operator -- (int)
     {
         self_type tmp (*this);
         --_M_uPos;
         return tmp;
     }
 
-    inline self_type operator + (difference_type n) const
+    constexpr self_type operator + (difference_type n) const
     {
         self_type tmp (*this);
         tmp._M_uPos += static_cast<size_type> (n);
         return tmp;
     }
 
-    inline self_type& operator += (difference_type n)
+    constexpr self_type& operator += (difference_type n)
     {
         _M_uPos += static_cast<size_type> (n);
         return *this;
     }
 
-    inline self_type operator - (difference_type n) const
+    constexpr self_type operator - (difference_type n) const
     {
         self_type tmp (*this);
         tmp._M_uPos -= static_cast<size_type> (n);
         return tmp;
     }
 
-    inline self_type& operator -= (difference_type n)
+    constexpr self_type& operator -= (difference_type n)
     {
         _M_uPos -= static_cast<size_type> (n);
         return *this;

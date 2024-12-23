@@ -25,8 +25,8 @@
 
 #include <cppual/types.h>
 #include <cppual/str_meta.h>
-#include <cppual/memory/allocator.h>
 #include <cppual/concept/concepts.h>
+#include <cppual/memory/allocator.h>
 #include <cppual/iterators/bi_iterator.h>
 
 #include <type_traits>

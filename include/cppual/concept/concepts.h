@@ -156,6 +156,9 @@ inline constexpr cbool is_pod_v = std::is_trivial_v<T> && std::is_standard_layou
 // ====================================================
 
 template <typename T>
+using remove_cref_t = std::remove_const_t<std::remove_reference_t<T>>;
+
+template <typename T>
 using remove_cptr_t = std::remove_const_t<std::remove_pointer_t<T>>;
 
 template <typename T>
@@ -514,6 +517,9 @@ concept container_t = requires (T a, const T b)
 template <typename T>
 concept reversible_container_t = container_t<T> && requires (T a, T const b)
 {
+    typename T::reverse_iterator;
+    typename T::const_reverse_iterator;
+
     { a.rbegin() } -> std::same_as<typename T::reverse_iterator>;
     { a.rend() } -> std::same_as<typename T::reverse_iterator>;
     { b.rbegin() } -> std::same_as<typename T::const_reverse_iterator>;

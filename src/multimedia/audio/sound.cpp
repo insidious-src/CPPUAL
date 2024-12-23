@@ -97,7 +97,7 @@ int sound::open_read_only (cvoid*, size_type) noexcept
 int sound::open_writable (string_type const&, int, int) noexcept
 {
     close ();
-    _M_gFlags = flags::value_type(flag::read) | flags::value_type(flag::write);
+    _M_gFlags = flags::int_type(flag::read) | flags::int_type(flag::write);
 
     on_open ();
     return false;

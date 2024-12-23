@@ -67,12 +67,23 @@ public:
 
     // ====================================================
 
+    struct uint_hash
+    {
+        constexpr uint operator () (cuint key) const noexcept
+        {
+            return key;
+        }
+    };
+
+    // ====================================================
+
     typedef unbound_interface                               self_type             ;
     typedef self_type                                       base_type             ;
-    typedef cchar*                                          key_type              ;
+    typedef cchar*                                          char_ptr          ;
+    typedef uint                                            key_type              ;
     typedef function_rtti                                   mapped_type           ;
     typedef std::pair<key_type const, mapped_type>          value_type            ;
-    typedef char_hash                                       hash_type             ;
+    typedef uint_hash                                       hash_type             ;
     typedef unordered_map<key_type, mapped_type, hash_type> map_type              ;
     typedef std::allocator_traits<map_type::allocator_type> alloc_traits          ;
     typedef alloc_traits::size_type                         size_type             ;
@@ -214,13 +225,13 @@ public:
 
     private:
         constexpr function_proxy (base_type const& interface, string_view const& fn_name)
-        : _M_iface   (&interface     ),
-          _M_fn_name (fn_name.data ())
+        : _M_iface   (&interface),
+          _M_fn_name (fn_name   )
         { }
 
     private:
         base_type const* _M_iface  ;
-        key_type         _M_fn_name;
+        string_view      _M_fn_name;
     };
 
     // ====================================================
@@ -231,7 +242,7 @@ public:
     template <typename R, typename... Args>
     inline R call (string_view const& fn_name, Args... args) const
     {
-        auto it = _M_fn_map.find (fn_name.data ());
+        auto it = _M_fn_map.find (constexpr_char_hash (fn_name.data ()));
 
         if (!check_return_type<R> (rtti (it).return_typeid ()))
         {
@@ -265,14 +276,14 @@ public:
 
     inline mapped_type const& rtti (string_view const& fn_name) const
     {
-        auto   it  = _M_fn_map.find (fn_name.data ());
+        auto   it  = _M_fn_map.find (constexpr_char_hash (fn_name.data ()));
         if    (it == _M_fn_map.end  ()) throw std::runtime_error ("function NOT found!");
         return it->second;
     }
 
     inline mapped_type& rtti (string_view const& fn_name)
     {
-        auto   it  = _M_fn_map.find (fn_name.data ());
+        auto   it  = _M_fn_map.find (constexpr_char_hash (fn_name.data ()));
         if    (it == _M_fn_map.end  ()) throw std::runtime_error ("function NOT found!");
         return it->second;
     }
@@ -286,26 +297,26 @@ protected:
     /// a pair of Ts... consists of const char* and
     /// member function pointer (ex. void(object::*)())
     template <typename... Ps>
-    requires (member_fn_pair_t<Ps, key_type, typename Ps::second_type> && ...)
+    requires (member_fn_pair_t<Ps, char_ptr, typename Ps::second_type> && ...)
     inline unbound_interface (Ps... pairs)
     : _M_rc (sizeof... (Ps) *  sizeof (map_type::value_type) +
-            (sizeof... (Ps) * (sizeof (typeid_type) *  10U))),
+            (sizeof... (Ps) * (sizeof (typeid_type) * 10U))),
       _M_fn_map (map_type::allocator_type (_M_rc))
     {
         check_pairs_types<std::tuple<Ps...>> ();
+
+        _M_fn_map.reserve (sizeof... (Ps));
+
+        add_all_member_functions (std::make_tuple (pairs...));
 
 #       ifdef DEBUG_MODE
         std::cout << "unbound_interface size: " << sizeof... (Ps) * sizeof (map_type::value_type)
                   << " bytes\nstacked_resource max size: " << _M_rc.max_size () << " bytes" << std::endl;
 #       endif
-
-        _M_fn_map.reserve (sizeof... (Ps));
-
-        add_all_member_functions (std::make_tuple (pairs...));
     }
 
 private:
-    template <typename Tuple, size_type I = 0>
+    template <tuple_t Tuple, size_type I = 0>
     inline void add_all_member_functions (Tuple const& fn_pairs)
     {
         if constexpr (I < std::tuple_size_v<Tuple>)
@@ -325,7 +336,7 @@ private:
     {
         if constexpr (I < std::tuple_size_v<Tuple>)
         {
-            static_assert (std::is_same_v<typename selected_tuple_type<Tuple, I>::first_type, key_type> &&
+            static_assert (std::is_same_v<typename selected_tuple_type<Tuple, I>::first_type, char_ptr> &&
                            std::is_member_function_pointer_v<typename selected_tuple_type<Tuple, I>::second_type>,
                            "tuple element is NOT a pair of function name (const char*) and "
                            "member function pointer!");
@@ -352,7 +363,7 @@ private:
     template <class_t C, member_function_t FN>
     inline void add_member_function_base (string_view const& fn_name, FN fn)
     {
-        iterator_pair pair = _M_fn_map.try_emplace (fn_name.data (),
+        iterator_pair pair = _M_fn_map.try_emplace (constexpr_char_hash (fn_name.data ()),
                                                     mapped_type (class_cast<C> (*this), fn));
 
         if (!pair.second)
@@ -362,7 +373,7 @@ private:
             error_text.reserve (39U + fn_name.size ());
 
             error_text.append ("insertion of member function '")
-                      .append (fn_name.data ())
+                      .append (fn_name.data (), fn_name.size ())
                       .append ("' failed!");
 
             throw std::runtime_error (error_text.c_str ());

@@ -47,7 +47,12 @@ class vtable_base;
 // ====================================================
 
 template <typename P, typename T, typename U>
-concept switch_map_pair_t = switch_value_t<T> && functional_t<U> && std::same_as<P, std::pair<T, U>>;
+concept switch_map_pair_t = switch_value_t<T> && void_functional_t<U> && std::same_as<P, std::pair<T, U>>;
+
+// =========================================================
+
+template <non_void_t P, std::size_t N>
+struct consteval_bimap;
 
 // =========================================================
 
@@ -98,17 +103,17 @@ using tuple_repeat_t = typename tuple_repeat_helper<T, N>::type;
 
 // ====================================================
 
-template <switch_value_t T, functional_t U, std::size_t N>
-struct switch_map
+template <switch_value_t K, void_functional_t V, std::size_t N>
+struct consteval_bimap <std::pair<K, V>, N>
 {
-    typedef switch_map<T, U, N>           self_type  ;
-    typedef std::pair<T, U>               pair_type  ;
-    typedef tuple_repeat_t<pair_type, N>  base_type  ;
+    typedef std::pair<K, V>               pair_type  ;
+    typedef consteval_bimap<pair_type, N> self_type  ;
     typedef std::size_t                   size_type  ;
     typedef size_type const               const_size ;
-    typedef std::remove_cvref_t<T>        key_type   ;
+    typedef std::remove_cvref_t<K>        key_type   ;
     typedef key_type const                const_key  ;
-    typedef std::remove_cvref_t<U>        value_type ;
+    typedef std::remove_cvref_t<V>        value_type ;
+    typedef value_type const              const_value;
 
     consteval static size_type size () noexcept { return N; }
 
@@ -116,96 +121,122 @@ struct switch_map
 
     inline constexpr static const_size npos = const_size (-1);
 
-    template <enum_t E>
-    constexpr void operator () (E const   k) noexcept { get_value (k)(); }
-    constexpr void operator () (const_key k) noexcept { get_value (k)(); }
+    constexpr void operator () (const_key k) const noexcept
+    { get_value (k)(); }
 
 private:
-    constexpr switch_map (std::array<pair_type, size ()> const& pairs) noexcept
+    constexpr consteval_bimap (std::array<pair_type, size ()> const& pairs) noexcept
+    : _M_pairs (pairs)
+    { }
+
+    constexpr consteval_bimap (std::initializer_list<pair_type> pairs) noexcept
     : _M_pairs (pairs)
     { }
 
     //! runtime to_index function
-    constexpr size_type to_index (const_key k) const noexcept
+    constexpr size_type key_to_index (const_key k) const noexcept
     {
         for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].first == k) return i;
         return npos;
     }
 
-    template <enum_t E>
-    constexpr size_type to_index (E const k) const noexcept
+    constexpr size_type value_to_index (const_value v) const noexcept
     {
-        for (size_type i = 0; i < size (); ++i)
-        {
-            if (_M_pairs[i].first == static_cast<const_key> (k)) return i;
-        }
-
+        for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].second == v) return i;
         return npos;
     }
 
     //! compile-time to_index function
-    template <const_key K>
-    consteval size_type to_index () const noexcept
+    template <const_key K_>
+    consteval size_type key_to_index () const noexcept
     {
-        for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].first == K) return i;
+        for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].first == K_) return i;
         return npos;
     }
 
-    template <enum_t E, E K>
-    consteval size_type to_index () const noexcept
+    template <const_value V_>
+    consteval size_type value_to_index () const noexcept
     {
-        for (size_type i = 0; i < size (); ++i)
-        {
-            if (_M_pairs[i].first == static_cast<const_key> (K)) return i;
-        }
-
+        for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].second == V_) return i;
         return npos;
     }
 
     constexpr value_type get_value (const_key k) const noexcept
     {
-        auto i = to_index (k);
+        auto i = key_to_index (k);
         if (i != npos) return _M_pairs[i].second;
-        return value_type (); // Return a default-constructed value if key not found
+        return value_type ();
     }
 
-    template <enum_t E>
-    constexpr value_type get_value (E const k) const noexcept
-    {
-        auto i = to_index (static_cast<const_key> (k));
-        if (i != npos) return _M_pairs[i].second;
-        return value_type (); // Return a default-constructed value if key not found
-    }
-
-    template <const_key K>
+    template <const_key K_>
     consteval value_type get_value () const noexcept
     {
-        constexpr const_size I = to_index<K> ();
-        static_assert (I != npos, "Key not found in switch_map");
+        constexpr const_size I = key_to_index<K_> ();
+        static_assert (I != npos, "key not found in switch_map");
         return _M_pairs[I].second;
     }
 
-    template <enum_t E, E K>
-    consteval value_type get_value () const noexcept
+    constexpr key_type get_key (const_value v) const noexcept
     {
-        constexpr const_size I = to_index<E, K> ();
-        static_assert (I != npos, "Key not found in switch_map");
-        return _M_pairs[I].second;
+        auto i = value_to_index (v);
+        if (i != npos) return _M_pairs[i].first;
+        return key_type ();
     }
 
-    template <switch_value_t V, functional_t F, std::size_t SZ>
-    friend constexpr auto make_switch_map (std::array<std::pair<V, F>, SZ> const&) noexcept;
+    template <const_value V_>
+    consteval key_type get_key () const noexcept
+    {
+        constexpr const_size I = value_to_index<V_> ();
+        static_assert (I != npos, "value not found in switch_map");
+        return _M_pairs[I].first;
+    }
+
+    template <switch_value_t T, void_functional_t U, std::size_t SZ>
+    friend constexpr auto make_switch_map (std::array<std::pair<T, U>, SZ> const&) noexcept;
+
+    template <switch_value_t T, void_functional_t U, std::size_t SZ>
+    friend constexpr auto make_switch_map (std::initializer_list<pair_type>) noexcept;
+
+    template <non_void_t T, non_void_t U, std::size_t SZ>
+    friend constexpr auto make_consteval_bimap (std::array<std::pair<T, U>, SZ> const&) noexcept;
+
+    template <non_void_t T, non_void_t U, std::size_t SZ>
+    friend constexpr auto make_consteval_bimap (std::initializer_list<pair_type>) noexcept;
 
 private:
-    std::array<pair_type, N> _M_pairs;
+    std::array<pair_type, size ()> const _M_pairs;
 };
 
 // ====================================================
 
-template <switch_value_t T, functional_t U = function<void()>, std::size_t N>
-constexpr auto make_switch_map (std::array<std::pair<T, U>, N> const& case_pairs) noexcept
+template <switch_value_t K, void_functional_t V = function<void()>, std::size_t N>
+constexpr auto make_switch_map (std::array<std::pair<K, V>, N> const& case_pairs) noexcept
 {
-    return switch_map<T, U, N> (case_pairs);
+    return consteval_bimap<std::pair<K, V>, N> (case_pairs);
+}
+
+// ====================================================
+
+template <switch_value_t K, void_functional_t V = function<void()>, std::size_t N>
+constexpr auto make_switch_map (std::initializer_list<std::pair<K, V>> case_pairs) noexcept
+{
+    return consteval_bimap<std::pair<K, V>, N> (case_pairs);
+}
+
+// ====================================================
+
+template <non_void_t K, non_void_t V, std::size_t N>
+constexpr auto make_consteval_bimap (std::array<std::pair<K, V>, N> const& pairs) noexcept
+{
+    return consteval_bimap<std::pair<K, V>, N> (pairs);
+}
+
+// ====================================================
+
+template <non_void_t K, non_void_t V, std::size_t N>
+constexpr auto make_consteval_bimap (std::initializer_list<std::pair<K, V>> pairs) noexcept
+{
+    return consteval_bimap<std::pair<K, V>, N> (pairs);
 }
 
 // ====================================================

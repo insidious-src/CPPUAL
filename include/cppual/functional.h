@@ -186,6 +186,9 @@ using FunctionalType = std::enable_if_t<is_functional_v<F>, F>;
 template <typename F>
 concept functional_t = is_functional_v<F>;
 
+template <typename F>
+concept void_functional_t = functional_t<F> && void_callable_t<F>;
+
 // ====================================================
 
 namespace {
@@ -378,17 +381,17 @@ template <std::size_t BYTES, typename R, typename... Args>
 class SHARED_API function <R(Args...), BYTES> : public function_traits<R(Args...), BYTES>
 {
 public:
-    typedef function <R(Args...), BYTES>       self_type     ;
-    typedef function_traits<R(Args...), BYTES> base_type     ;
-    typedef member_fn<R, Args...>              member_fn_type;
-    typedef static_fn<R, Args...>              static_fn_type;
-    typedef closure  <R, Args...>              closure_type  ;
-    typedef std::array<uchar, BYTES>           storage_type  ;
-    typedef std::size_t                        size_type     ;
-    typedef size_type const                    const_size    ;
-    typedef closure_type::pointer              pointer       ;
-    typedef closure_type::value_type           value_type    ;
-    typedef closure_type* self_type::*         safe_bool     ;
+    typedef function <R(Args...), BYTES>       self_type      ;
+    typedef function_traits<R(Args...), BYTES> base_type      ;
+    typedef member_fn<R, Args...>              any_mem_fn_type;
+    typedef static_fn<R, Args...>              static_fn_type ;
+    typedef closure  <R, Args...>              closure_type   ;
+    typedef std::array<uchar, BYTES>           storage_type   ;
+    typedef std::size_t                        size_type      ;
+    typedef size_type const                    const_size     ;
+    typedef closure_type::pointer              pointer        ;
+    typedef closure_type::value_type           value_type     ;
+    typedef closure_type* self_type::*         safe_bool      ;
 
     template <size_type N>
     using self_type_t = function<R(Args...), N>;
@@ -439,24 +442,24 @@ public:
         std::move (rh_obj._M_storage.begin (), rh_obj._M_storage.end (), _M_storage.begin ());
     }
 
-    /// static function constructor
+    //! static function constructor
     constexpr function (static_fn_ref fn)
     : _M_closure (closure_type::make_static_fn (&fn, &self_type::call_static_fn))
     { }
 
-    /// member function constructor
+    //! member function constructor
     template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr function (C& obj, mem_fn_type<C> mem_fn)
     : _M_closure (closure_type::make_mem_fn (&obj, mem_fn))
     { }
 
-    /// const member function constructor
+    //! const member function constructor
     template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr function (C& obj, const_mem_fn_type<C> mem_fn)
     : _M_closure (closure_type::make_mem_fn (&obj, mem_fn))
     { }
 
-    /// capture lambda constructor
+    //! capture lambda constructor
     template <lambda_capture_t Callable,
               typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
               typename   = LambdaCaptureType<Callable>
@@ -481,7 +484,7 @@ public:
         }
     }
 
-    /// non-capture lambda constructor
+    //! non-capture lambda constructor
     template <lambda_non_capture_t Callable,
               typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
               typename   = LambdaNonCaptureType<Callable>
@@ -500,7 +503,7 @@ public:
     }
 
     //! TODO: non-capture lambda + callable class constructor
-    /// non-capture lambda constructor
+    //! callable class constructor
     template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr function (C& obj)
     {
@@ -514,6 +517,15 @@ public:
             bind (obj, callable_operator_v<C>);
         }
     }
+
+    //! TODO: this constructor should cease to exist
+    //! redirect functional constructor
+    template <lambda_capture_t Callable,
+             typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>
+             >
+    constexpr function (C&& lambda)
+    : function (is_functional_v<C> ? static_cast<self_type&&> (std::move (lambda)) : lambda)
+    { }
 
     template <size_type SZ>
     constexpr self_type& operator = (self_type_t<SZ> const& rh_obj) noexcept
@@ -549,7 +561,7 @@ public:
         return *this;
     }
 
-    /// static function assignment operator
+    //! static function assignment operator
     constexpr self_type& operator = (static_fn_ref fn) noexcept
     {
         _M_storage = { };
@@ -558,7 +570,7 @@ public:
         return *this;
     }
 
-    /// member function assignment operator
+    //! member function assignment operator
     template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator = (mem_fn_pair<C> const& pair)
     {
@@ -568,7 +580,7 @@ public:
         return *this;
     }
 
-    /// const member function assignment operator
+    //! const member function assignment operator
     template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator = (const_mem_fn_pair<C> const& pair)
     {
@@ -578,7 +590,7 @@ public:
         return *this;
     }
 
-    /// capture lambda assignment operator
+    //! capture lambda assignment operator
     template <lambda_capture_t Callable,
               typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
               typename   = LambdaCaptureType<Callable>
@@ -605,7 +617,7 @@ public:
         return *this;
     }
 
-    /// non-capture lambda assignment operator
+    //! non-capture lambda assignment operator
     template <lambda_non_capture_t Callable,
               typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
               typename   = LambdaNonCaptureType<Callable>
@@ -628,7 +640,7 @@ public:
     }
 
     //! TODO: non-capture lambda + callable class assignment operator
-    /// callable object assignment operator
+    //! callable object assignment operator
     template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator = (C& obj)
     {
@@ -652,8 +664,7 @@ public:
 #       ifdef DEBUG_MODE
         if (_M_closure == nullptr) throw bad_function_call ();
 #       endif
-        return (object ()->*_M_closure.function_ptr ())
-               (std::forward<Args> (args)...);
+        return (object ()->*function_ptr ())(std::forward<Args> (args)...);
     }
 
     constexpr explicit operator safe_bool () const noexcept
@@ -721,7 +732,7 @@ private:
     template <class_t C>
     constexpr auto function_ptr () const noexcept
     {
-        return direct_cast<R(C::*)(Args...)> (_M_closure.function_ptr ());
+        return direct_cast<mem_fn_type<C>> (_M_closure.function_ptr ());
     }
 
     constexpr void bind (static_fn_ref fn) noexcept
@@ -766,28 +777,28 @@ public:
 
 // ====================================================
 
-/// static function make_fn
+//! static function make_fn
 template <typename R, typename... Args>
 constexpr auto make_fn (R (& static_fn)(Args...))
 {
     return function<R(Args...)> (static_fn);
 }
 
-/// member function make_fn
+//! member function make_fn
 template <class_t C, typename R, typename... Args, typename = std::enable_if_t<!is_functional_v<C>>>
 constexpr auto make_fn (C& obj, R (C::* mem_fn)(Args...))
 {
     return function<R(Args...)> (obj, mem_fn);
 }
 
-/// const member function make_fn
+//! const member function make_fn
 template <class_t C, typename R, typename... Args, typename = std::enable_if_t<!is_functional_v<C>>>
 constexpr auto make_fn (C& obj, R (C::* const_mem_fn)(Args...) const)
 {
     return function<R(Args...)> (obj, const_mem_fn);
 }
 
-/// capture lambda make_fn
+//! capture lambda make_fn
 template <lambda_capture_t Callable,
           typename... Args         ,
           typename    R = callable_return_t<Callable, Args...>,
@@ -799,19 +810,19 @@ constexpr auto make_fn (Callable&& callable, LambdaCaptureType<Callable>* ptr = 
     return function<R(Args...), N> (std::forward<C> (callable), ptr);
 }
 
-/// non-capture lambda make_fn
+//! non-capture lambda make_fn
 template <lambda_non_capture_t C,
           typename... Args      ,
           typename    R = callable_return_t<C, Args...>,
           typename      = std::enable_if_t<!is_functional_v<C>>,
           typename      = LambdaNonCaptureType<C>
           >
-constexpr auto make_fn (C&& fn, LambdaNonCaptureType<C>* ptr = nullptr)
+constexpr auto make_fn (C&& callable, LambdaNonCaptureType<C>* ptr = nullptr)
 {
-    return function<R(Args...)> (std::forward<C> (fn), ptr);
+    return function<R(Args...)> (std::forward<C> (callable), ptr);
 }
 
-/// callable object make_fn
+//! callable object make_fn
 template <callable_class_t C,
           typename... Args  ,
           typename    R = callable_return_t<C, Args...>,

@@ -45,45 +45,46 @@ class set_bit_iterator
 public:
     typedef set_bit_iterator<T>             self_type        ;
     typedef bitset<T>                       buf_type         ;
-    typedef std::remove_reference_t<T>      enum_type        ;
-    typedef std::underlying_type_t<T>       value_type       ;
+    typedef std::remove_reference_t<T>      value_type       ;
+    typedef std::underlying_type_t<T>       int_type         ;
     typedef value_type const                const_value      ;
-    typedef enum_type  const*               pointer          ;
-    typedef enum_type  const&               reference        ;
+    typedef int_type   const                const_int        ;
+    typedef value_type const*               pointer          ;
+    typedef value_type const&               reference        ;
     typedef std::size_t                     size_type        ;
     typedef std::ptrdiff_t                  difference_type  ;
     typedef std::bidirectional_iterator_tag iterator_category;
 
     template <enum_t U> using self_type_t = set_bit_iterator<U>;
 
-    typedef std::conditional_t<std::is_const_v<enum_type>, const_value, value_type> elem_type;
+    typedef std::conditional_t<std::is_const_v<value_type>, const_value, int_type> elem_type;
 
     inline constexpr static size_type const npos = size_type (-1);
 
-    friend class set_bit_iterator<enum_type const>;
-    friend class set_bit_iterator<std::remove_const_t<enum_type>>;
+    friend class set_bit_iterator<value_type const>;
+    friend class set_bit_iterator<std::remove_const_t<value_type>>;
 
-    consteval enum_type operator * () const noexcept
-    { return static_cast<enum_type> (1 << _M_bit_pos); }
+    consteval elem_type operator * () const noexcept
+    { return static_cast<elem_type> (1 << _M_bit_pos); }
 
-    consteval set_bit_iterator () noexcept = default;
+    set_bit_iterator () = delete;
 
-    consteval explicit set_bit_iterator (buf_type const& bitset, value_type pos = value_type ()) noexcept
+    consteval explicit set_bit_iterator (buf_type& bitset, const_int pos = int_type ()) noexcept
     : _M_bs (&bitset), _M_bit_pos (pos)
     { }
 
     //! converting a const iterator to a non-const iterator
-    consteval set_bit_iterator (self_type_t<enum_type const> const& other) noexcept
+    consteval set_bit_iterator (self_type_t<const_value> const& other) noexcept
+    : _M_bs (const_cast<buf_type*> (other._M_bs)), _M_bit_pos (other._M_bit_pos)
+    { }
+
+    //! converting a non-const iterator to a const iterator
+    consteval set_bit_iterator (self_type_t<std::remove_const_t<value_type>> const& other) noexcept
     : _M_bs (other._M_bs), _M_bit_pos (other._M_bit_pos)
     { }
 
     //! converting a non-const iterator to a const iterator
-    consteval set_bit_iterator (self_type_t<std::remove_const_t<enum_type>> const& other) noexcept
-    : _M_bs (other._M_bs), _M_bit_pos (other._M_bit_pos)
-    { }
-
-    //! converting a non-const iterator to a const iterator
-    inline self_type& operator = (self_type_t<std::remove_const_t<enum_type>> const& other) noexcept
+    constexpr self_type& operator = (self_type_t<std::remove_const_t<value_type>> const& other) noexcept
     {
         if (this == &other) return *this;
 
@@ -93,9 +94,20 @@ public:
         return *this;
     }
 
-    inline self_type& operator ++ () noexcept
+    //! converting a non-const iterator to a const iterator
+    constexpr self_type& operator = (self_type_t<const_value> const& other) noexcept
     {
-        if (_M_bs && _M_bit_pos < (sizeof (value_type) * 8))
+        if (this == &other) return *this;
+
+        _M_bs      = const_cast<buf_type*> (other._M_bs);
+        _M_bit_pos = other._M_bit_pos;
+
+        return *this;
+    }
+
+    constexpr self_type& operator ++ () noexcept
+    {
+        if (_M_bs && _M_bit_pos < (sizeof (int_type) * 8))
         {
             ++_M_bit_pos;
             find_next_set_bit ();
@@ -104,11 +116,11 @@ public:
         return *this;
     }
 
-    inline self_type operator ++ (int) noexcept
+    constexpr self_type operator ++ (int) noexcept
     {
         self_type tmp (*this);
 
-        if (_M_bs && _M_bit_pos < (sizeof (value_type) * 8))
+        if (_M_bs && _M_bit_pos < (sizeof (int_type) * 8))
         {
             ++_M_bit_pos;
             find_next_set_bit ();
@@ -117,9 +129,9 @@ public:
         return tmp;
     }
 
-    inline self_type& operator -- () noexcept
+    constexpr self_type& operator -- () noexcept
     {
-        if (_M_bs && value_type () <= _M_bit_pos)
+        if (_M_bs && int_type () <= _M_bit_pos)
         {
             --_M_bit_pos;
             find_prev_set_bit ();
@@ -128,11 +140,11 @@ public:
         return *this;
     }
 
-    inline self_type operator -- (int) noexcept
+    constexpr self_type operator -- (int) noexcept
     {
         self_type tmp (*this);
 
-        if (_M_bs && value_type () <= _M_bit_pos)
+        if (_M_bs && int_type () <= _M_bit_pos)
         {
             --_M_bit_pos;
             find_prev_set_bit ();
@@ -147,8 +159,8 @@ public:
 private:
     constexpr void find_next_set_bit ()
     {
-        while (_M_bit_pos < (sizeof (value_type) * 8) &&
-              !_M_bs->test (static_cast<enum_type> (1 << _M_bit_pos)))
+        while (_M_bit_pos < (sizeof (int_type) * 8) &&
+              !_M_bs->test (static_cast<value_type> (1 << _M_bit_pos)))
         {
             ++_M_bit_pos;
         }
@@ -156,15 +168,15 @@ private:
 
     constexpr void find_prev_set_bit ()
     {
-        while (value_type () <= _M_bit_pos && !_M_bs->test (static_cast<enum_type> (1 >> _M_bit_pos)))
+        while (int_type () <= _M_bit_pos && !_M_bs->test (static_cast<value_type> (1 >> _M_bit_pos)))
         {
             --_M_bit_pos;
         }
     }
 
 private:
-    buf_type const* _M_bs      { };
-    value_type      _M_bit_pos { };
+    buf_type* _M_bs      { };
+    int_type  _M_bit_pos { };
 };
 
 // =========================================================

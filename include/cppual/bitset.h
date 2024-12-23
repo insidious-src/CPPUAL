@@ -51,23 +51,30 @@ template <enum_t T>
 class reference_proxy
 {
 public:
-    typedef reference_proxy           self_type  ;
-    typedef bitset<T>                 bitset_type;
-    typedef std::underlying_type_t<T> value_type ;
+    typedef reference_proxy<T>        self_type;
+    typedef bitset<T>                 buf_type ;
+    typedef std::underlying_type_t<T> int_type ;
+    typedef int_type                  const_int;
 
-    constexpr reference_proxy (bitset_type& bitset, value_type const mask)
+    reference_proxy () = delete;
+    constexpr reference_proxy (self_type&&) noexcept = default;
+    consteval reference_proxy (self_type const&) noexcept = default;
+    constexpr self_type& operator = (self_type&&) noexcept = default;
+    constexpr self_type& operator = (self_type const&) noexcept = default;
+
+    consteval reference_proxy (buf_type& bitset, const_int mask) noexcept
     : _M_bs (&bitset), _M_mask (mask)
     { }
 
-    constexpr self_type& operator = (bool const x) noexcept
-    { (x) ? _M_bs->_M_flags |= _M_mask : _M_bs->_M_flags &= ~_M_mask; return *this; }
+    constexpr self_type& operator = (cbool x) noexcept
+    { x ? _M_bs->_M_flags |= _M_mask : _M_bs->_M_flags &= ~_M_mask; return *this; }
 
-    constexpr operator bool () const noexcept
+    consteval operator bool () const noexcept
     { return (_M_bs->_M_flags & _M_mask) != 0; }
 
 private:
-    bitset_type* _M_bs  ;
-    value_type   _M_mask;
+    buf_type* _M_bs   { };
+    int_type  _M_mask { };
 };
 
 // =========================================================
@@ -76,137 +83,122 @@ template <enum_t T>
 class bitset
 {
 public:
-    typedef bitset<T>                                       self_type             ;
-    typedef std::remove_cvref_t<T>                          enum_type             ;
-    typedef std::underlying_type_t<enum_type>               value_type            ;
-    typedef std::string_view                                string_view           ;
-    typedef string                                          string_type           ;
-    typedef std::size_t                                     size_type             ;
-    typedef size_type                                       const_size            ;
-    typedef reference_proxy<T>                              ref_proxy_type        ;
-    typedef set_bit_iterator<T>                             iterator              ;
-    typedef set_bit_iterator<T const>                       const_iterator        ;
-    typedef std::reverse_iterator<iterator>                 reverse_iterator      ;
-    typedef std::reverse_iterator<const_iterator>           reverse_const_iterator;
-    typedef std::array<char, (sizeof (value_type) * 8) + 1> str_vector_type       ;
+    typedef bitset<T>                                     self_type             ;
+    typedef std::remove_cvref_t<T>                        value_type            ;
+    typedef value_type const                              const_value           ;
+    typedef std::underlying_type_t<value_type>            int_type              ;
+    typedef int_type const                                const_int             ;
+    typedef std::string_view                              string_view           ;
+    typedef string                                        string_type           ;
+    typedef std::size_t                                   size_type             ;
+    typedef size_type                                     const_size            ;
+    typedef reference_proxy<T>                            ref_proxy_type        ;
+    typedef set_bit_iterator<T>                           iterator              ;
+    typedef set_bit_iterator<T const>                     const_iterator        ;
+    typedef std::reverse_iterator<iterator>               reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator>         reverse_const_iterator;
+    typedef std::array<char, (sizeof (int_type) * 8) + 1> str_vector_type       ;
 
-    inline constexpr static size_type npos = static_cast<size_type> (-1);
+    inline constexpr static const_size npos = static_cast<const_size> (-1);
 
     consteval bitset () noexcept = default;
+    constexpr bitset (self_type&&) noexcept = default;
+    constexpr bitset (self_type const&) noexcept = default;
+    constexpr self_type& operator = (self_type&&) noexcept = default;
+    constexpr self_type& operator = (self_type const&) noexcept = default;
 
-    constexpr bitset (enum_type const eFlag) noexcept
-    : _M_flags (static_cast<value_type> (eFlag))
+    constexpr bitset (const_value eFlag) noexcept
+    : _M_flags (static_cast<int_type> (eFlag))
     { }
 
-    constexpr bitset (value_type const flags) noexcept
+    constexpr bitset (const_int flags) noexcept
     : _M_flags (flags)
     { }
 
     template <integer_t U,
-              typename = std::enable_if_t<!std::is_same_v<U, value_type> &&
-                                          !std::is_same_v<U, int>>
+              typename = std::enable_if_t<!std::is_same_v<U, int_type>>
               >
     constexpr bitset (U const eFlag) noexcept
-    : _M_flags (static_cast<value_type> (eFlag))
+    : _M_flags (static_cast<int_type> (eFlag))
     {
-        static_assert (sizeof (U) <= sizeof (value_type),
-                       "size of U is bigger than the size of value_type!");
+        static_assert (sizeof (U) <= sizeof (int_type),
+                       "size of U is bigger than the size of int_type!");
     }
-
-    constexpr bitset (self_type const& obj) noexcept
-    : _M_flags (obj._M_flags)
-    { }
-
-    constexpr bitset (self_type&& obj) noexcept
-    : _M_flags (std::move (obj._M_flags))
-    { assert (obj._M_flags == value_type ()); }
 
     //! constexpr constructor from string_view
     constexpr bitset (string_view const& sv) noexcept
     : _M_flags ()
     {
-        for (auto i = 0UL; i < sv.size () && i < size (); ++i)
+        for (auto i = 0U; i < sv.size () && i < size (); ++i)
         {
-            if (sv[i] == '1') _M_flags |= static_cast<value_type> (1 << i);
+            if (sv[i] == '1') _M_flags |= static_cast<int_type> (1 << i);
         }
     }
 
-    constexpr self_type& operator = (self_type const& obj) noexcept
-    {
-        if (this != &obj) _M_flags = obj._M_flags;
-        return *this;
-    }
+    constexpr self_type& operator = (const_value eFlag) noexcept
+    { _M_flags = static_cast<int_type> (eFlag); return *this; }
 
-    constexpr self_type& operator = (self_type&& obj) noexcept
-    {
-        if (this != &obj) _M_flags = std::move (obj._M_flags);
-        return *this;
-    }
-
-    constexpr self_type& operator = (enum_type const eFlag) noexcept
-    { _M_flags = static_cast<value_type> (eFlag); return *this; }
-
-    constexpr self_type& operator = (value_type const nFlags) noexcept
+    constexpr self_type& operator = (const_int nFlags) noexcept
     { _M_flags = nFlags; return *this; }
 
     template <integer_t U,
-              typename = std::enable_if_t<!std::is_same_v<U, value_type> &&
+              typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
                                           !std::is_same_v<U, int>>
               >
     constexpr self_type& operator = (U const nFlags) noexcept
     {
-        static_assert (sizeof (U) <= sizeof (value_type), "size of U is bigger than the size of value_type!");
-        _M_flags = static_cast<value_type> (nFlags); return *this;
+        static_assert (sizeof (U) <= sizeof (int_type), "size of U is bigger than the size of int_type!");
+        _M_flags = static_cast<int_type> (nFlags); return *this;
     }
 
-    constexpr void flip  (enum_type const eFlag) noexcept { _M_flags ^= static_cast<value_type> (eFlag); }
+    constexpr void flip  (const_value eFlag) noexcept { _M_flags ^= static_cast<int_type> (eFlag); }
     constexpr void flip  () noexcept { _M_flags = _M_flags ^ _M_flags; }
-    constexpr void reset () noexcept { _M_flags = value_type (); }
+    constexpr void reset () noexcept { _M_flags = int_type (); }
 
-    constexpr operator value_type () const noexcept
+    constexpr operator int_type () const noexcept
     { return _M_flags; }
 
-    constexpr value_type value () const noexcept
+    constexpr int_type value () const noexcept
     { return _M_flags; }
 
-    constexpr enum_type enum_value () const noexcept
-    { return static_cast<enum_type> (_M_flags); }
+    constexpr value_type enum_value () const noexcept
+    { return static_cast<value_type> (_M_flags); }
 
     //! bitset size in bits
     consteval static size_type size () noexcept
-    { return sizeof (value_type) * 8; }
+    { return sizeof (int_type) * 8; }
 
     //! use std::popcount for counting set bits
     constexpr size_type set_count () const noexcept
     { return static_cast<size_type> (std::popcount (_M_flags)); }
 
-    constexpr bool test (enum_type const eFlag) const noexcept
-    { return (_M_flags & static_cast<value_type> (eFlag)) == static_cast<value_type> (eFlag); }
+    constexpr bool test (const_value eFlag) const noexcept
+    { return (_M_flags & static_cast<int_type> (eFlag)) == static_cast<int_type> (eFlag); }
 
-    constexpr bool test (value_type const flags) const noexcept
+    constexpr bool test (const_int flags) const noexcept
     { return (_M_flags & flags) == flags; }
 
     template <integer_t U,
-              typename = std::enable_if_t<!std::is_same_v<U, value_type> &&
+              typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
                                           !std::is_same_v<U, int>>
               >
     constexpr bool test (U const flags) const noexcept
     {
-        static_assert (sizeof (U) <= sizeof (value_type), "size of U is bigger than the size of value_type!");
-        return (_M_flags & static_cast<value_type> (flags)) == static_cast<value_type> (flags);
+        static_assert (sizeof (U) <= sizeof (int_type), "size of U is bigger than the size of int_type!");
+        return (_M_flags & static_cast<int_type> (flags)) == static_cast<int_type> (flags);
     }
 
     constexpr bool test (self_type const& gObj) const noexcept
     { return (_M_flags & gObj._M_flags) == gObj._M_flags; }
 
     consteval bool all () const noexcept
-    { return _M_flags == ~static_cast<value_type> (0); }
+    { return _M_flags == ~static_cast<int_type> (0); }
 
     consteval bool any () const noexcept
-    { return _M_flags != value_type (); }
+    { return _M_flags != int_type (); }
 
     consteval bool none () const noexcept
-    { return _M_flags == value_type (); }
+    { return _M_flags == int_type (); }
 
     constexpr size_type count_trailing_zeros () const noexcept
     { return std::countr_zero (_M_flags); }
@@ -220,96 +212,100 @@ public:
     constexpr size_type find_last_set () const noexcept
     { return size () - 1 - std::countl_zero (_M_flags); }
 
-    constexpr self_type& operator += (enum_type const eFlag) noexcept
-    { _M_flags |= static_cast<value_type> (eFlag); return *this; }
+    constexpr self_type& operator += (const_value eFlag) noexcept
+    { _M_flags |= static_cast<int_type> (eFlag); return *this; }
 
-    constexpr self_type& operator += (value_type const flags) noexcept
+    constexpr self_type& operator += (const_int flags) noexcept
     { _M_flags |= flags; return *this; }
 
     template <integer_t U,
-              typename = std::enable_if_t<!std::is_same_v<U, value_type> &&
+              typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
                                           !std::is_same_v<U, int>>
               >
     constexpr self_type& operator += (U const flags) noexcept
     {
-        static_assert (sizeof (U) <= sizeof (value_type), "size of U is bigger than the size of value_type!");
-        _M_flags |= static_cast<value_type> (flags); return *this;
+        static_assert (sizeof (U) <= sizeof (int_type),
+                      "size of U is bigger than the size of int_type!");
+
+        _M_flags |= static_cast<int_type> (flags); return *this;
     }
 
-    constexpr self_type& operator -= (enum_type const eFlag) noexcept
-    { _M_flags &= ~static_cast<value_type> (eFlag); return *this; }
+    constexpr self_type& operator -= (const_value eFlag) noexcept
+    { _M_flags &= ~static_cast<int_type> (eFlag); return *this; }
 
-    constexpr self_type& operator -= (value_type const flags) noexcept
+    constexpr self_type& operator -= (const_int flags) noexcept
     { _M_flags &= ~flags; return *this; }
 
     template <integer_t U,
-              typename = std::enable_if_t<!std::is_same_v<U, value_type> &&
+              typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
                                           !std::is_same_v<U, int>>
               >
     constexpr self_type& operator -= (U const flags) noexcept
     {
-        static_assert (sizeof (U) <= sizeof (value_type), "size of U is bigger than the size of value_type!");
-        _M_flags &= ~static_cast<value_type> (flags); return *this;
+        static_assert (sizeof (U) <= sizeof (int_type),
+                      "size of U is bigger than the size of int_type!");
+
+        _M_flags &= ~static_cast<int_type> (flags); return *this;
     }
 
     //! bitwise operations
-    constexpr self_type operator  & (self_type const& other) const noexcept
+    consteval self_type operator  & (self_type const& other) const noexcept
     { return  self_type (_M_flags & other._M_flags); }
 
-    constexpr self_type operator  | (self_type const& other) const noexcept
+    consteval self_type operator  | (self_type const& other) const noexcept
     { return  self_type (_M_flags | other._M_flags); }
 
-    constexpr self_type operator  ^ (self_type const& other) const noexcept
+    consteval self_type operator  ^ (self_type const& other) const noexcept
     { return  self_type (_M_flags ^ other._M_flags); }
 
-    constexpr self_type operator  ~ () const noexcept
+    consteval self_type operator  ~ () const noexcept
     { return  self_type (~_M_flags); }
 
     // =========================================================
 
-    constexpr iterator        begin ()       noexcept { return iterator       (*this); }
-    constexpr iterator        begin () const noexcept { return iterator       (*this); }
-    constexpr const_iterator cbegin () const noexcept { return const_iterator (*this); }
-    constexpr const_iterator cbegin ()       noexcept { return const_iterator (*this); }
+    consteval iterator        begin ()       noexcept { return iterator       (*this); }
+    consteval iterator        begin () const noexcept { return iterator       (*this); }
+    consteval const_iterator cbegin () const noexcept { return const_iterator (*this); }
+    consteval const_iterator cbegin ()       noexcept { return const_iterator (*this); }
 
-    constexpr reverse_iterator  rbegin () noexcept
+    consteval reverse_iterator  rbegin () noexcept
     { return reverse_iterator (*this, size () - 1); }
 
-    constexpr reverse_iterator  rbegin () const noexcept
+    consteval reverse_iterator  rbegin () const noexcept
     { return reverse_iterator (*this, size () - 1); }
 
-    constexpr reverse_const_iterator crbegin () const noexcept
+    consteval reverse_const_iterator crbegin () const noexcept
     { return reverse_const_iterator (*this, size () - 1); }
 
-    constexpr reverse_const_iterator crbegin () noexcept
+    consteval reverse_const_iterator crbegin () noexcept
     { return reverse_const_iterator (*this, size () - 1); }
 
-    constexpr iterator        end   ()       noexcept { return iterator (*this, size ()); }
-    constexpr iterator        end   () const noexcept { return iterator (*this, size ()); }
-    constexpr const_iterator cend   () const noexcept { return const_iterator (*this, size ()); }
-    constexpr const_iterator cend   ()       noexcept { return const_iterator (*this, size ()); }
+    consteval iterator        end   ()       noexcept { return iterator (*this, size ()); }
+    consteval iterator        end   () const noexcept { return iterator (*this, size ()); }
+    consteval const_iterator cend   () const noexcept { return const_iterator (*this, size ()); }
+    consteval const_iterator cend   ()       noexcept { return const_iterator (*this, size ()); }
 
-    constexpr reverse_iterator rend () noexcept
+    consteval reverse_iterator rend () noexcept
     { return reverse_iterator (*this, npos); }
 
-    constexpr reverse_iterator rend () const noexcept
+    consteval reverse_iterator rend () const noexcept
     { return reverse_iterator (*this, npos); }
 
-    constexpr reverse_const_iterator crend () const noexcept
+    consteval reverse_const_iterator crend () const noexcept
     { return reverse_const_iterator (*this, npos); }
 
-    constexpr reverse_const_iterator crend () noexcept
+    consteval reverse_const_iterator crend () noexcept
     { return reverse_const_iterator (*this, npos); }
 
     // =========================================================
 
-    constexpr ref_proxy_type operator [] (enum_type const flag) const noexcept
-    { return  ref_proxy_type (*this, static_cast<value_type> (flag)); }
+    constexpr ref_proxy_type operator [] (const_value flag) const noexcept
+    { return  ref_proxy_type (*this, static_cast<int_type> (flag)); }
 
     // =========================================================
 
     //! string conversion
-    inline string_type to_string () const noexcept
+    constexpr string_type to_string () const noexcept
     {
         string_type result;
 
@@ -317,19 +313,19 @@ public:
 
         for (auto i = 0UL; i < size (); ++i)
         {
-            result[(size () - 1) - i] = test (static_cast<value_type> (1) << i) ? '1' : '0';
+            result[(size () - 1) - i] = test (static_cast<int_type> (1) << i) ? '1' : '0';
         }
 
         return result;
     }
 
-    inline static self_type from_string (string_view const& str)
+    constexpr static self_type from_string (string_view const& str)
     {
         self_type result;
 
         for (size_type i = 0; i < str.size () && i < size (); ++i)
         {
-            if (str[i] == '1') result += static_cast<enum_type> (static_cast<value_type> (1) << i);
+            if (str[i] == '1') result += static_cast<value_type> (static_cast<int_type> (1) << i);
         }
 
         return result;
@@ -342,105 +338,105 @@ public:
         static_assert (N <= size (), "N must NOT exceed bitset size!");
 
         if constexpr (N == size ())
-            return self_type { static_cast<value_type> (~static_cast<value_type> (0)) };
+            return self_type { static_cast<int_type> (~static_cast<int_type> (0)) };
         else
-            return self_type { (static_cast<value_type> (1) << N) - 1 };
+            return self_type { (static_cast<int_type> (1) << N) - 1 };
     }
 
     //! friend functions
-    template <typename U>
+    template <enum_t U>
     friend
     constexpr bool operator == (bitset<U> const&, U const) noexcept;
 
-    template <typename U>
+    template <enum_t U>
     friend
-    constexpr bool operator == (bitset<U> const&, typename bitset<U>::value_type const) noexcept;
+    constexpr bool operator == (bitset<U> const&, typename bitset<U>::const_int) noexcept;
 
-    template <typename U>
+    template <enum_t U>
     friend
-    constexpr bool operator == (typename bitset<U>::value_type const, bitset<U> const&) noexcept;
+    constexpr bool operator == (typename bitset<U>::const_int, bitset<U> const&) noexcept;
 
-    template <typename U>
+    template <enum_t U>
     friend
     constexpr bool operator == (bitset<U> const&, bitset<U> const&) noexcept;
 
-    template <typename U>
+    template <enum_t U>
     friend
     constexpr bitset<U> operator + (bitset<U> const&,
-                                    typename bitset<U>::enum_type const) noexcept;
+                                    typename bitset<U>::const_value) noexcept;
 
-    template <typename U>
+    template <enum_t U>
     friend
     constexpr bitset<U> operator + (bitset<U> const&,
-                                    typename bitset<U>::value_type const) noexcept;
+                                    typename bitset<U>::const_int) noexcept;
 
-    template <typename U>
+    template <enum_t U>
     friend
     constexpr bitset<U> operator - (bitset<U> const&,
-                                    typename bitset<U>::enum_type const) noexcept;
+                                    typename bitset<U>::const_value) noexcept;
 
-    template <typename U>
+    template <enum_t U>
     friend
     constexpr bitset<U> operator - (bitset<U> const&,
-                                    typename bitset<U>::value_type const) noexcept;
+                                    typename bitset<U>::const_int) noexcept;
 
 private:
-    value_type _M_flags { };
+    int_type _M_flags { };
 };
 
 // =========================================================
 
-template <typename T>
+template <enum_t T>
 constexpr bitset<T> operator + (bitset<T> const& lh,
-                                typename bitset<T>::enum_type const eFlag) noexcept
-{ return lh._M_flags | static_cast<typename bitset<T>::value_type> (eFlag); }
+                                typename bitset<T>::const_value eFlag) noexcept
+{ return lh._M_flags | static_cast<typename bitset<T>::int_type> (eFlag); }
 
-template <typename T>
+template <enum_t T>
 constexpr bitset<T> operator + (bitset<T> const& lh,
-                                typename bitset<T>::value_type const flags) noexcept
+                                typename bitset<T>::const_int flags) noexcept
 { return lh._M_flags | flags; }
 
-template <typename T>
+template <enum_t T>
 constexpr bitset<T> operator - (bitset<T> const& lh,
-                                typename bitset<T>::enum_type const eFlag) noexcept
-{ return lh._M_flags & ~static_cast<typename bitset<T>::value_type> (eFlag); }
+                                typename bitset<T>::const_value eFlag) noexcept
+{ return lh._M_flags & ~static_cast<typename bitset<T>::int_type> (eFlag); }
 
-template <typename T>
+template <enum_t T>
 constexpr bitset<T> operator - (bitset<T> const& lh,
-                                typename bitset<T>::value_type const flags) noexcept
+                                typename bitset<T>::const_int flags) noexcept
 { return lh._M_flags & ~flags; }
 
 // =========================================================
 
-template <typename T>
+template <enum_t T>
 constexpr bool operator == (bitset<T> const& lh, T const eFlag) noexcept
 { return lh._M_flags == eFlag; }
 
-template <typename T>
-constexpr bool operator == (bitset<T> const& lh, typename bitset<T>::value_type const flags) noexcept
+template <enum_t T>
+constexpr bool operator == (bitset<T> const& lh, typename bitset<T>::const_int flags) noexcept
 { return lh._M_flags == flags; }
 
-template <typename T>
-constexpr bool operator == (typename bitset<T>::value_type const flags, bitset<T> const& rh) noexcept
+template <enum_t T>
+constexpr bool operator == (typename bitset<T>::const_int flags, bitset<T> const& rh) noexcept
 { return flags == rh._M_flags; }
 
-template <typename T>
+template <enum_t T>
 constexpr bool operator == (bitset<T> const& lh, bitset<T> const& rh) noexcept
 { return lh._M_flags == rh._M_flags; }
 
-template <typename T>
+template <enum_t T>
 constexpr bool operator != (bitset<T> const& lh, T const eFlag) noexcept
 { return !(lh == eFlag); }
 
-template <typename T>
-constexpr bool operator != (bitset<T> const& lh, typename bitset<T>::value_type const flags) noexcept
+template <enum_t T>
+constexpr bool operator != (bitset<T> const& lh, typename bitset<T>::const_int flags) noexcept
 { return !(lh == flags); }
 
-template <typename T>
-constexpr bool operator != (typename bitset<T>::value_type const flags, bitset<T> const& rh) noexcept
+template <enum_t T>
+constexpr bool operator != (typename bitset<T>::const_int flags, bitset<T> const& rh) noexcept
 { return !(flags == rh); }
 
-template <typename T>
+template <enum_t T>
 constexpr bool operator != (bitset<T> const& lh, bitset<T> const& rh) noexcept
 { return !(lh == rh); }
 
@@ -450,7 +446,7 @@ constexpr bool operator != (bitset<T> const& lh, bitset<T> const& rh) noexcept
 template <enum_t T, std::remove_cvref_t<T>... Flags>
 consteval bitset<T> make_bitset () noexcept
 {
-    return bitset<T> ((... | static_cast<bitset<T>::value_type> (Flags)));
+    return bitset<T> ((... | static_cast<bitset<T>::int_type> (Flags)));
 }
 
 // =========================================================
@@ -466,8 +462,10 @@ using cppual::enum_t;
 template <enum_t T>
 struct hash <cppual::bitset<T>>
 {
-    size_t operator () (cppual::bitset<T> const& bs) const noexcept
-    { return std::hash<typename cppual::bitset<T>::value_type> { } (bs.value ()); }
+    typedef size_t size_type;
+
+    constexpr size_type operator () (cppual::bitset<T> const& bs) const noexcept
+    { return std::hash<typename cppual::bitset<T>::int_type> { } (bs.value ()); }
 };
 
 } // namespace std

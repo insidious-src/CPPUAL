@@ -65,6 +65,7 @@ public:
     typedef T::string_type                  string_type      ;
     typedef T::difference_type              difference_type  ;
     typedef T::size_type                    size_type        ;
+    typedef size_type const                 const_size       ;
     typedef std::bidirectional_iterator_tag iterator_category;
 
     template <typename U>
@@ -78,9 +79,9 @@ public:
     constexpr string_type  operator  * () const { return  (*_M_buf)[_M_pos]; }
     constexpr string_type* operator -> () const { return &(*_M_buf)[_M_pos]; }
 
-    consteval consteval_array_iterator () noexcept = default;
+    consteval_array_iterator () = delete;
 
-    constexpr consteval_array_iterator (buf_type& b, size_type p) noexcept
+    constexpr consteval_array_iterator (buf_type const& b, const_size p) noexcept
     : _M_buf (&b), _M_pos (p)
     { }
 
@@ -100,7 +101,20 @@ public:
     constexpr
     self_type& operator = (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
     {
+        if (this == &other) return *this;
+
         _M_buf = other._M_buf;
+        _M_pos = other._M_pos;
+
+        return *this;
+    }
+
+    /// converting a const iterator to a non-const iterator
+    constexpr self_type& operator = (self_type_t<buf_type const> const& other) noexcept
+    {
+        if (this == &other) return *this;
+
+        _M_buf = const_cast<buf_type*> (other._M_buf);
         _M_pos = other._M_pos;
 
         return *this;
@@ -143,7 +157,7 @@ public:
         return *this;
     }
 
-    constexpr buf_type& get () const noexcept
+    constexpr buf_type const& get () const noexcept
     { return *_M_buf; }
 
     constexpr size_type pos () const noexcept
@@ -151,11 +165,11 @@ public:
 
     template <typename U>
     friend
-    inline self_type_t<U> operator + (self_type_t<U> const&, typename self_type_t<U>::difference_type);
+    constexpr self_type_t<U> operator + (self_type_t<U> const&, typename self_type_t<U>::difference_type);
 
     template <typename U>
     friend
-    inline self_type_t<U> operator - (self_type_t<U> const&, typename self_type_t<U>::difference_type);
+    constexpr self_type_t<U> operator - (self_type_t<U> const&, typename self_type_t<U>::difference_type);
 
 private:
     buf_type* _M_buf { };
@@ -191,8 +205,8 @@ constexpr bool operator <= (consteval_array_iterator<T> const& lhObj, consteval_
 // =========================================================
 
 template <typename T>
-inline consteval_array_iterator<T> operator + (consteval_array_iterator<T> const& lhObj,
-                                           typename consteval_array_iterator<T>::difference_type n)
+constexpr consteval_array_iterator<T> operator + (consteval_array_iterator<T> const& lhObj,
+                                                  typename consteval_array_iterator<T>::difference_type n)
 {
     consteval_array_iterator<T> ret_obj (lhObj);
     ret_obj._M_pos += static_cast<consteval_array_iterator<T>::size_type> (n);
@@ -200,8 +214,8 @@ inline consteval_array_iterator<T> operator + (consteval_array_iterator<T> const
 }
 
 template <typename T>
-inline consteval_array_iterator<T> operator - (consteval_array_iterator<T> const& lhObj,
-                                           typename consteval_array_iterator<T>::difference_type n)
+constexpr consteval_array_iterator<T> operator - (consteval_array_iterator<T> const& lhObj,
+                                                  typename consteval_array_iterator<T>::difference_type n)
 {
     consteval_array_iterator<T> ret_obj (lhObj);
     ret_obj._M_pos -= static_cast<consteval_array_iterator<T>::size_type> (n);
@@ -242,7 +256,9 @@ public:
     typedef std::reverse_iterator<iterator>           reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator>     const_reverse_iterator;
 
-    static_assert (N > 0, "string_list is empty!");
+    consteval static size_type size () noexcept { return N; }
+
+    static_assert (size () > 0, "consteval_array is empty!");
 
     inline constexpr static const_size npos = static_cast<const_size> (-1);
 
@@ -254,8 +270,8 @@ public:
     consteval_array () = delete;
 
     template <non_void_t... Ts>
-    requires (sizeof... (Ts) == N)
-    consteval consteval_array (Ts&&... array) noexcept
+    requires (sizeof... (Ts) == size ())
+    constexpr consteval_array (Ts&&... array) noexcept
     : _M_array { std::forward<Ts> (array)... }
     {
         static_assert (are_of_same_type_v<elem_type, Ts...>,
@@ -264,13 +280,15 @@ public:
 
     constexpr elem_const_reference operator [] (const_size i) const noexcept
     {
-        assert (i < N && "index out of range!");
+        assert (i < size () && "index out of range!");
         return _M_array[i];
     }
 
     consteval size_type hash (const_size i) const noexcept
     {
-        assert (i < N && "index out of range!");
+        static_assert (is_char_v<T>, "hash is only available for C string types!");
+
+        assert (i < size () && "index out of range!");
         return constexpr_char_hash ((*this)[i]);
     }
 
@@ -293,10 +311,8 @@ public:
     consteval const_reverse_iterator crend () const noexcept
     {  return const_reverse_iterator (const_iterator (*this, npos)); }
 
-    consteval static size_type size () noexcept { return N; }
-
 private:
-    array_type _M_array[N];
+    array_type _M_array[size ()];
 };
 
 //======================================================
