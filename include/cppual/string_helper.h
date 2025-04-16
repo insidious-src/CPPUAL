@@ -289,7 +289,7 @@ public:
         static_assert (is_char_v<T>, "hash is only available for C string types!");
 
         assert (i < size () && "index out of range!");
-        return constexpr_char_hash ((*this)[i]);
+        return consteval_char_hash<(*this)[i]> ();
     }
 
     consteval elem_const_reference front  () const noexcept { return _M_array[0]; }

@@ -29,7 +29,7 @@
 
 namespace cppual {
 
-template <std::size_t LastBit>
+template <std::size_t LastBit = 32>
 struct minimum_type_helper
 {
     typedef std::conditional_t<LastBit ==  0, void,
@@ -40,7 +40,7 @@ struct minimum_type_helper
             void>>>>> type;
 };
 
-template <std::size_t LastBit>
+template <std::size_t LastBit = 32>
 using minimum_type_t = minimum_type_helper<LastBit>::type;
 
 // =========================================================
@@ -49,7 +49,7 @@ template <std::size_t Index, std::size_t Bits = 1>
 class bitfield
 {
 private:
-    enum { Mask = (1u << Bits) - 1u };
+    enum { Mask = (1U << Bits) - 1U };
 
     typedef bitfield<Index, Bits>        self_type ;
     typedef minimum_type_t<Index + Bits> value_type;
@@ -62,12 +62,12 @@ public:
         return *this;
     }
 
-    operator      value_type () const { return (_M_value >> Index) & Mask;          }
-    explicit   operator bool () const { return  _M_value & (Mask << Index);         }
-    self_type& operator ++   ()       { return *this = *this + 1;                   }
-    value_type operator ++   (int)    { value_type r = *this; ++*this; return r;    }
-    self_type& operator --   ()       { return *this = *this - 1;                   }
-    value_type operator --   (int)    { value_type r = *this; --*this; return r;    }
+    operator      value_type () const { return (_M_value >> Index) & Mask      ; }
+    explicit   operator bool () const { return  _M_value & (Mask << Index)     ; }
+    self_type& operator ++   ()       { return *this = *this + 1               ; }
+    value_type operator ++   (int)    { value_type r = *this; ++*this; return r; }
+    self_type& operator --   ()       { return *this = *this - 1               ; }
+    value_type operator --   (int)    { value_type r = *this; --*this; return r; }
 
 private:
     value_type _M_value;

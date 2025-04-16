@@ -94,7 +94,7 @@ private:
         menu_item_type type;
     };
 
-    typedef vector<menu_item*> vector_type;
+    typedef dyn_array<menu_item*> vector_type;
 
 private:
     void paint_event (rect const&);

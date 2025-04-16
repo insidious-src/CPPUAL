@@ -123,10 +123,10 @@ private:
 class Listing final : public Response
 {
 public:
-    vector<string> const& list () noexcept;
+    dyn_array<string> const& list () noexcept;
 
 private:
-    vector<string> _M_gList;
+    dyn_array<string> _M_gList;
 };
 
 // =========================================================

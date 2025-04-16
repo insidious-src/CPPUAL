@@ -19,11 +19,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cppual/fn_meta.h>
 #include <cppual/ui/view.h>
 #include <cppual/ui/manager.h>
 #include <cppual/ui/vsurface.h>
 
-//#include <iostream>
+#include <iostream>
 //#include <exception>
 //#include <algorithm>
 #include <unordered_map>
@@ -61,7 +62,7 @@ namespace { namespace internal {
 typedef event_queue::handle_type                               handle_type         ;
 typedef memory::allocator<std::pair<handle_type const, view*>> view_allocator      ;
 typedef memory::allocator<proxy_renderable>                    renderable_allocator;
-typedef vector<std::pair<handle_type, view*>>                  vec_type            ;
+typedef dyn_array<std::pair<handle_type, view*>>               vec_type            ;
 
 typedef std::unordered_map<handle_type,
                            view*,
@@ -71,9 +72,11 @@ typedef std::unordered_map<handle_type,
                            >
                            map_type;
 
-inline map_type& map ()
+typedef consteval_bimap<std::pair<uptr, view*>, 1> bimap_type;
+
+inline bimap_type& map ()
 {
-    static map_type views_map;
+    static auto views_map = make_consteval_bimap<uptr, view*> (bimap_type::pair_type ());
     return views_map;
 }
 
@@ -147,9 +150,9 @@ view::view (self_type* pParentObj, rect const& gRect, u32 nScreen, resource_type
         {
             using internal::vec_type;
 
-            internal::map_type::key_type const key = _M_pRenderable->handle ();
+            uptr const key = _M_pRenderable->handle ();
 
-            if (internal::map ().contains (key))
+            if (internal::map ().get_index (key) != internal::bimap_type::npos)
             {
                 internal::map ()[key] = this;
 
@@ -490,8 +493,6 @@ void view::destroy_children ()
 
 void view::destroy_resources ()
 {
-    auto uId = _M_pRenderable->handle ();
-
     //! destroy all child virtual surfaces
     destroy_children ();
 
@@ -502,7 +503,7 @@ void view::destroy_resources ()
     //! if the surface is unique it gets deleted
     _M_pRenderable.reset ();
 
-    if (!_M_pParentObj) internal::map ().erase (uId);
+    if (!_M_pParentObj) internal::map ().erase (_M_pRenderable->handle ());
 }
 
 void view::invalidate () noexcept

@@ -38,7 +38,7 @@ class sound_source;
 class SHARED_API sound_buffer : public object, public sound
 {
 public:
-    typedef vector<sound_source*>       vector_type   ;
+    typedef dyn_array<sound_source*>    vector_type   ;
     typedef vector_type::const_iterator const_iterator;
     typedef std::size_t                 size_type     ;
     friend  class                       sound_source  ;

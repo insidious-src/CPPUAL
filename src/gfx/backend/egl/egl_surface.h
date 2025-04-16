@@ -143,6 +143,10 @@ public:
     surface& operator = (surface&&) noexcept;
     virtual ~surface ();
 
+    void           set_parent (shared_surface /*parent*/) noexcept { }
+    shared_surface parent     () const noexcept { return shared_surface (); }
+    point2i        position   () const noexcept { return { }; }
+
     void    paint_background (color clr);
     point2u size  () const noexcept;
     void    scale (point2u size);
@@ -191,7 +195,7 @@ public:
     static version_type platform_version () noexcept;
 
     bool use     (shared_surface, shared_surface) noexcept;
-    bool assign  (shared_context const& cntxt) noexcept;
+    bool assign  (shared_context cntxt) noexcept;
     void flush   () noexcept;
     void finish  () noexcept;
     void release () noexcept;

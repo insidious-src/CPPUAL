@@ -23,20 +23,20 @@
 #define CPPUAL_PROCESS_PLUGIN_H_
 #ifdef __cplusplus
 
-
-#include <cppual/types.h>
-#include <cppual/string.h>
-#include <cppual/resource.h>
-#include <cppual/type_meta.h>
-#include <cppual/containers.h>
-#include <cppual/noncopyable.h>
 #include <cppual/memory/allocator.h>
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
+#include <cppual/types.h>
+#include <cppual/string>
+#include <cppual/resource>
+#include <cppual/type_meta.h>
+#include <cppual/containers>
+#include <cppual/noncopyable.h>
 
 #include <memory>
 #include <cstring>
-#include <string_view>
+#include <version>
 #include <functional>
+#include <string_view>
 
 namespace cppual { namespace process {
 
@@ -54,11 +54,11 @@ public:
 
     enum class resolve_policy : u8
     {
-        /// use as data file or load as a static library
+        //! use as data file or load as a static library
         statically,
-        /// resolve everything on load
+        //! resolve everything on load
         immediate,
-        /// don't resolve any object or function references
+        //! don't resolve any object or function references
         lazy
     };
 
@@ -74,7 +74,7 @@ public:
 
     static string_type extension () noexcept;
 
-    inline    string_type    path        () const noexcept { return _M_gLibPath; }
+    inline    string_view    path        () const noexcept { return _M_gLibPath; }
     constexpr void*          handle      () const noexcept { return _M_pHandle;  }
     constexpr resolve_policy policy      () const noexcept { return _M_eResolve; }
     constexpr bool           is_attached () const noexcept { return _M_pHandle;  }
@@ -125,33 +125,33 @@ struct SHARED_API plugin_vars
     uint                  verMinor { };
     u64                   priority { };
     std::shared_ptr<void> iface    { };
-    vector<cchar*>        required { };
+    dyn_array<cchar*>     required { };
 
     inline plugin_vars (plugin_vars const&) = default;
     inline plugin_vars& operator = (plugin_vars const&) = default;
 
-    inline plugin_vars (memory::memory_resource* res = nullptr)
-    : name(),
-      provides(),
-      desc(),
-      verMajor(),
-      verMinor(),
-      iface(),
-      required(res == nullptr ? vector<cchar*>::allocator_type() :
-                                vector<cchar*>::allocator_type(*res))
+    constexpr plugin_vars (memory::memory_resource* res = nullptr)
+    : name     (),
+      provides (),
+      desc     (),
+      verMajor (),
+      verMinor (),
+      iface    (),
+      required (res == nullptr ? dyn_array<cchar*>::allocator_type () :
+                                 dyn_array<cchar*>::allocator_type (*res))
     { }
 
     inline plugin_vars (plugin_vars&& obj)
-    : name(obj.name),
-      provides(obj.provides),
-      desc(obj.desc),
-      verMajor(obj.verMajor),
-      verMinor(obj.verMinor),
-      iface(std::move(obj.iface)),
-      required(std::move(obj.required))
+    : name     (obj.name),
+      provides (obj.provides),
+      desc     (obj.desc),
+      verMajor (obj.verMajor),
+      verMinor (obj.verMinor),
+      iface    (std::move (obj.iface   )),
+      required (std::move (obj.required))
     { }
 
-    inline plugin_vars& operator = (plugin_vars&& obj)
+    constexpr plugin_vars& operator = (plugin_vars&& obj)
     {
         if (this == &obj) return *this;
 
@@ -160,8 +160,8 @@ struct SHARED_API plugin_vars
         desc     = obj.desc;
         verMajor = obj.verMajor;
         verMinor = obj.verMinor;
-        iface    = std::move(obj.iface);
-        required = std::move(obj.required);
+        iface    = std::move (obj.iface   );
+        required = std::move (obj.required);
 
         return *this;
     }
@@ -215,8 +215,6 @@ public:
     public:
         typedef plugin_vars const* const_plugin_pointer;
 
-        plugin_pointer() = delete;
-
         constexpr const_plugin_pointer operator -> () const noexcept
         { return &_M_ref->second; }
 
@@ -227,6 +225,8 @@ public:
         constexpr plugin_pointer (const_reference ref) noexcept
         : _M_ref(&ref)
         { }
+
+        plugin_pointer () = delete;
 
         template <typename, typename, typename>
         friend class plugin_manager;

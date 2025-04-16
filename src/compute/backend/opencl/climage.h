@@ -48,7 +48,7 @@ private:
     template <typename T>
     T get_info (image_info_type info) const
     {
-        return get_object_info< vector<T> > (::clGetImageInfo, handle(), info);
+        return get_object_info< dyn_array<T> > (::clGetImageInfo, handle(), info);
     }
 };
 

@@ -46,7 +46,7 @@ struct align
 class SHARED_API layout
 {
 public:
-    typedef vector<view*> vector_type;
+    typedef dyn_array<view*> vector_type;
 
     layout ();
     layout (layout&&);

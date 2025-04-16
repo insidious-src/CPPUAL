@@ -36,7 +36,7 @@ using memory::memory_resource;
 
 // =========================================================
 
-class image_interface : public drawable2d_interface, public transformable2d_interface
+class image_interface : public drawable2d_interface, public transformable_interface
 {
 public:
     typedef string string_type;
@@ -57,7 +57,7 @@ class raster_image final : public image_interface, private memory::allocator<ras
 public:
     inline raster_image () noexcept = default;
 
-    void draw (transform2d const& info);
+    void draw (transform const& info);
 
     inline raster_image (string_type  const& gPath,
                          pixel_format const& gFomat = pixel_format (),
@@ -102,7 +102,7 @@ public:
     vector_image  () = delete;
     ~vector_image ();
 
-    void draw (transform2d const& info);
+    void draw (transform const& info);
 
     inline device_backend type () const noexcept
     { return device_backend::gl; }

@@ -38,7 +38,7 @@ class polygon : public drawable2d_interface
 public:
     typedef std::array<point2i, 3> polygon_array;
 
-    void draw (transform2d const& transform_info);
+    void draw (transform const& transform_info);
 
     color      get_fill_color  ()              const noexcept { return _M_gFillColor;    }
     color      get_outer_color ()              const noexcept { return _M_gOuterColor;   }

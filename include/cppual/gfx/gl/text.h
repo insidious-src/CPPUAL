@@ -28,7 +28,7 @@
 
 namespace cppual { namespace gfx { namespace gl {
 
-class label2d final : public drawable2d_interface, public transformable2d_interface
+class label2d final : public drawable2d_interface, public transformable_interface
 {
 public:
     typedef font::styles styles     ;
@@ -40,7 +40,7 @@ public:
     label2d (label2d&&) noexcept;
     label2d& operator = (label2d const&);
     label2d& operator = (label2d&&) noexcept;
-    void draw (transform2d const&);
+    void draw (transform const&);
 
     device_backend type     ()                    const noexcept { return device_backend::gl; }
     string_type    text     ()                    const noexcept { return _M_gText;           }
@@ -56,7 +56,7 @@ private:
 
 // =========================================================
 
-class label3d final : public drawable3d_interface, public transformable3d_interface
+class label3d final : public drawable3d_interface, public transformable_interface
 {
 public:
     typedef font::styles styles     ;
@@ -69,7 +69,7 @@ public:
     label3d (label3d&&) noexcept;
     label3d& operator = (label3d const&);
     label3d& operator = (label3d&&) noexcept;
-    void draw (transform3d const&);
+    void draw (transform const&);
 
     device_backend type      ()                   const noexcept { return device_backend::gl; }
     string_type    text      ()                   const noexcept { return _M_gText;           }

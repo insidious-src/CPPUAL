@@ -27,7 +27,7 @@ namespace cppual { namespace compute {
 namespace {
 
 //inline Program::handle_type createProgramFromSource (Behaviour const& context,
-//                                                     std::vector<string> const& source)
+//                                                     std::dyn_array<string> const& source)
 //{
 //    if (!source.empty ())
 //    {
@@ -58,7 +58,7 @@ namespace {
 //{
 //}
 
-//Program::Program (Behaviour const& context, vector<string> const& source)
+//Program::Program (Behaviour const& context, dyn_array<string> const& source)
 //: Object (createProgramFromSource (context, source))
 //{
 //}

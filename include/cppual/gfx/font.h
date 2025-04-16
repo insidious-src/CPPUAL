@@ -57,7 +57,7 @@ public:
     typedef std::size_t                               size_type     ;
     typedef string                                    string_type   ;
     typedef memory::allocator<uint>                   allocator_type;
-    typedef vector<uint>                              vector_type   ;
+    typedef dyn_array<uint>                           vector_type   ;
     typedef bitset<font::style>                       styles        ;
     typedef struct { u8 spacing, size, line_height; } format_type   ;
 

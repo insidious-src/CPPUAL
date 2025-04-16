@@ -772,7 +772,7 @@ bool context::use (shared_surface pDraw, shared_surface pRead) noexcept
     return true;
 }
 
-bool context::assign (shared_context const& cntxt) noexcept
+bool context::assign (shared_context cntxt) noexcept
 {
     if (cntxt == nullptr) return false;
 

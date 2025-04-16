@@ -62,7 +62,7 @@ public:
     typedef std::deque <value_type, allocator_type>    array_type     ;
     typedef signal<void()>                             signal_type    ;
     typedef function<void(reference)>                  fn_type        ;
-    typedef vector<fn_type>                            fn_vector      ;
+    typedef dyn_array<fn_type>                         fn_vector      ;
     typedef circular_queue<value_type, allocator_type> queue_type     ;
     typedef allocator_type::size_type                  size_type      ;
 

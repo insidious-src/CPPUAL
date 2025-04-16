@@ -96,7 +96,7 @@ painter::~painter ()
     std::cout << "drawable count: " << _M_gDrawables.size () << std::endl;
 
     for (auto i = 0U; i < _M_gDrawables.size (); ++i)
-        _M_gDrawables[i].first->draw (transform2d (_M_gDrawables[i].second, _M_pSurface));
+        _M_gDrawables[i].first->draw (transform (_M_gDrawables[i].second, .0f, _M_pSurface));
 }
 
 void painter::create_line (rect  const& rct,
@@ -107,7 +107,7 @@ void painter::create_line (rect  const& rct,
     _M_gDrawables.push_back ({ _M_pPainter->create_line (color_fill, line_size, style), rct });
 }
 
-void painter::create_path (vector<point2i> const& coord,
+void painter::create_path (dyn_array<point2i> const& coord,
                            color           const& clr,
                            uint                   line_size,
                            line_style             style)
@@ -177,7 +177,7 @@ context_interface* context_interface::current () noexcept
     return internal::current ();
 }
 
-void context_interface::acquire (shared_context const& pContext) noexcept
+void context_interface::acquire (shared_context pContext) noexcept
 {
     auto current_cntxt = internal::current ();
 
@@ -185,6 +185,48 @@ void context_interface::acquire (shared_context const& pContext) noexcept
 
     internal::current () = pContext.get ();
     internal::current ()->assign (pContext);
+}
+
+// ====================================================
+
+void proxy_surface::set_parent (shared_surface parent) noexcept
+{
+    _M_parent = parent;
+}
+
+shared_surface proxy_surface::parent () const noexcept
+{
+    return _M_parent;
+}
+
+point2i proxy_surface::position () const noexcept
+{
+    return { };
+}
+
+point2u proxy_surface::size () const noexcept
+{
+    return { };
+}
+
+surface_type proxy_surface::type () const noexcept
+{
+    return _M_parent->type ();
+}
+
+void proxy_surface::scale (point2u /*size*/)
+{
+
+}
+
+void proxy_surface::paint_background (color /*clr*/)
+{
+
+}
+
+shared_context proxy_surface::context () const noexcept
+{
+    return _M_parent->context ();
 }
 
 // ====================================================

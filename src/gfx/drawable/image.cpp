@@ -24,7 +24,7 @@
 
 namespace cppual { namespace gfx {
 
-void raster_image::draw (transform2d const& /*transform_info*/)
+void raster_image::draw (transform const& /*transform_info*/)
 {
 
 }

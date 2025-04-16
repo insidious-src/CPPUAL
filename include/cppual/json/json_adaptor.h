@@ -57,7 +57,7 @@ struct is_json_int<i64> : std::true_type
 { };
 
 template <typename T>
-inline constexpr auto const is_json_int_v = is_json_int<T>::value;
+inline constexpr cbool is_json_int_v = is_json_int<T>::value;
 
 template <typename T>
 concept json_int_t = is_json_int_v<T>;

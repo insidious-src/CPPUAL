@@ -70,12 +70,12 @@ typedef bitset<gl_map_flag::type> gl_map_flags;
 class vertex_buffer : public buffer
 {
 public:
-    typedef vertex_buffer      self_type    ;
-    typedef buffer             base_type    ;
-    typedef u8                 value_type   ;
-    typedef value_type*        pointer      ;
-    typedef value_type const*  const_pointer;
-    typedef vector<value_type> vector_type  ;
+    typedef vertex_buffer         self_type    ;
+    typedef buffer                base_type    ;
+    typedef u8                    value_type   ;
+    typedef value_type*           pointer      ;
+    typedef value_type const*     const_pointer;
+    typedef dyn_array<value_type> vector_type  ;
 
     vertex_buffer () noexcept;
     vertex_buffer (size_type size) noexcept;

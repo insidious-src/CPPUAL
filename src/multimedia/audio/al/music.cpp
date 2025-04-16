@@ -28,7 +28,7 @@ namespace cppual { namespace audio { namespace al {
 
 inline void make_player (uint uId) noexcept
 {
-    point3f gValue { 0, 0, 0 };
+    point3f gValue (.0f, .0f, .0f);
 
     ::alSourcei  (uId, al::is_relative_to_listener, true);
     ::alSourcefv (uId, al::position, &gValue.x);

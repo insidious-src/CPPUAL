@@ -32,7 +32,7 @@ void    SHARED_API set_position (point3f const& position) noexcept;
 point3f SHARED_API position () noexcept;
 void    SHARED_API set_velocity (point3f const& velocity) noexcept;
 point3f SHARED_API velocity () noexcept;
-void    SHARED_API set_orientation (point3f const& at, point3f const& up = { 0, 1.f, 0 }) noexcept;
+void    SHARED_API set_orientation (point3f const& at, point3f const& up = point3f (0, 1.f, 0)) noexcept;
 point3f SHARED_API orientation_at () noexcept;
 point3f SHARED_API orientation_up () noexcept;
 void    SHARED_API set_volume (float value) noexcept;

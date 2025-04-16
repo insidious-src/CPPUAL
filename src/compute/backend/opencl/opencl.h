@@ -451,9 +451,9 @@ struct get_object_info_impl<string_type>
 
 //! specialization for vector<T>
 template <class T>
-struct get_object_info_impl< vector<T> >
+struct get_object_info_impl< dyn_array<T> >
 {
-    typedef vector<T> value_type;
+    typedef dyn_array<T> value_type;
 
     template <class Function>
     value_type operator()(Function function) const
@@ -510,9 +510,9 @@ struct get_object_info_impl< vector<T> >
 };
 
 template <>
-struct get_object_info_impl< vector<platform_id_type*> >
+struct get_object_info_impl< dyn_array<platform_id_type*> >
 {
-    typedef vector<platform_id_type*> value_type;
+    typedef dyn_array<platform_id_type*> value_type;
 
     template <class Function>
     value_type operator()(Function function) const
@@ -534,9 +534,9 @@ struct get_object_info_impl< vector<platform_id_type*> >
 };
 
 template <>
-struct get_object_info_impl< vector<device_type*> >
+struct get_object_info_impl< dyn_array<device_type*> >
 {
-    typedef vector<device_type*> value_type;
+    typedef dyn_array<device_type*> value_type;
 
     template <class Function, class Info>
     value_type operator()(Function function, Info info) const

@@ -23,9 +23,8 @@
 #define CPPUAL_STRING_META_H_
 #ifdef __cplusplus
 
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
 
-#include <type_traits>
 #include <string>
 
 namespace cppual {
@@ -40,7 +39,7 @@ constexpr std::size_t constexpr_str_size (T const* str)
 
 // ====================================================
 
-/// char string constexpr performance hash (ex. usage as a map hash)
+//! char string constexpr performance hash (ex. usage as a map hash)
 template <char_t T = char>
 constexpr std::size_t constexpr_char_fast_hash (T const* str) noexcept
 {
@@ -50,20 +49,43 @@ constexpr std::size_t constexpr_char_fast_hash (T const* str) noexcept
     auto const size     = constexpr_str_size (str);
 
     return size >= 3 ? ((size ^
-                         static_cast<size_type> (str[0]                 ) ^
-                        (static_cast<size_type> (str[1]           ) << 1) ^
-                        (static_cast<size_type> (str[last_pos - 1]) << 1) ^
-                         static_cast<size_type> (str[last_pos]    ) << 1) >> 1) :
+                          static_cast<size_type> (str[0]                 ) ^
+                         (static_cast<size_type> (str[1]           ) << 1) ^
+                         (static_cast<size_type> (str[last_pos - 1]) << 1) ^
+                          static_cast<size_type> (str[last_pos]    ) << 1) >> 1) :
+               5381;
+}
+
+//! char string consteval performance hash (ex. usage as a map hash)
+template <char_t T = char, T const* In>
+consteval std::size_t consteval_char_fast_hash () noexcept
+{
+    typedef std::size_t size_type;
+
+    auto const last_pos = constexpr_str_size (In) - 1;
+    auto const size     = constexpr_str_size (In);
+
+    return size >= 3 ? ((size ^
+                         static_cast<size_type> (In[0]                 ) ^
+                        (static_cast<size_type> (In[1]           ) << 1) ^
+                        (static_cast<size_type> (In[last_pos - 1]) << 1) ^
+                         static_cast<size_type> (In[last_pos]    ) << 1) >> 1) :
                 5381;
 }
 
 // ====================================================
 
-/// char string constexpr complete hash (ex. usage in switch cases or as a hash)
-template <char_t T = char>
-constexpr uint constexpr_char_hash (T const* input) noexcept
+//! char string constexpr complete hash (ex. usage in switch cases or as a hash)
+constexpr uint constexpr_char_hash (cchar* input) noexcept
 {
     return *input ? static_cast<uint> (*input) + 33 * constexpr_char_hash (input + 1) : 5381;
+}
+
+//! char string consteval complete hash (ex. usage in switch cases or as a hash)
+template <cchar* In>
+consteval uint consteval_char_hash () noexcept
+{
+    return *In ? static_cast<uint> (*In) + 33 * consteval_char_hash<In + 1> () : 5381;
 }
 
 // ====================================================

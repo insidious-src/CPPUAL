@@ -53,13 +53,19 @@ typedef angle <double> angled   ;
 template <arithmetic_t T>
 struct point2
 {
-    T x, y;
+    typedef remove_cvrefptr_t<T> value_type;
 
-    constexpr point2 () noexcept = default;
+    value_type x { }, y { };
 
-    template <typename U>
+    consteval point2 () noexcept = default;
+
+    constexpr point2 (value_type x_, value_type y_) noexcept
+    : x (x_),  y (y_)
+    { }
+
+    template <arithmetic_t U>
     constexpr point2 (U x_, U y_) noexcept
-    : x (T (x_)),  y (T (y_))
+    : x (value_type (x_)),  y (value_type (y_))
     { }
 };
 
@@ -78,7 +84,20 @@ constexpr bool operator != (point2<T> const& gObj1,
 template <arithmetic_t T>
 struct point3
 {
-    T x, y, z;
+    typedef remove_cvrefptr_t<T> value_type;
+
+    value_type x { }, y { }, z { };
+
+    consteval point3 () noexcept = default;
+
+    constexpr point3 (value_type x_, value_type y_, value_type z_) noexcept
+    : x (x_),  y (y_), z (z_)
+    { }
+
+    template <arithmetic_t U>
+    constexpr point3 (U x_, U y_, U z_) noexcept
+    : x (value_type (x_)),  y (value_type (y_), z (value_type (z_)))
+    { }
 };
 
 template <arithmetic_t T>
@@ -96,7 +115,11 @@ constexpr bool operator != (point3<T> const& gObj1,
 template <arithmetic_t T>
 struct point4
 {
-    T x, y, z, w;
+    typedef remove_cvrefptr_t<T> value_type;
+
+    value_type x { }, y { }, z { }, w { };
+
+    consteval point4 () noexcept = default;
 };
 
 template <arithmetic_t T>
@@ -122,7 +145,7 @@ struct rect
 
     value_type left { }, top { }, right { }, bottom { };
 
-    constexpr rect () noexcept = default;
+    consteval rect () noexcept = default;
 
     constexpr rect (value_type x, value_type y, u16 width, u16 height) noexcept
     : left   (x),
@@ -139,13 +162,16 @@ struct rect
     { }
 
     constexpr u16 width () const noexcept
-    { return static_cast<u16> (right - left); }
+    {  return static_cast<u16> (right - left); }
 
     constexpr u16 height () const noexcept
-    { return static_cast<u16> (bottom - top); }
+    {  return static_cast<u16> (bottom - top); }
+
+    constexpr point2i position () const noexcept
+    {  return point2i (left, top) ; }
 
     constexpr point2u size () const noexcept
-    { return { width (), height () }; }
+    {  return { width (), height () }; }
 
     inline void set_width  (u16 uWidth ) noexcept
     { right  = static_cast<value_type> (left + uWidth); }
@@ -157,7 +183,7 @@ struct rect
     { left = top = right = bottom = value_type (); }
 
     constexpr bool is_point () const noexcept
-    { return (left == right && top == bottom); }
+    {  return (left == right && top == bottom); }
 
     constexpr bool intersects (rect const& gObj) const noexcept
     {
@@ -213,13 +239,15 @@ inline rect& operator -= (rect& gObj, point2i gPoint) noexcept
 template <arithmetic_t T>
 struct angle final
 {
-    T radians { };
+    typedef remove_cvrefptr_t<T> value_type;
+
+    value_type radians { };
 
     constexpr angle () noexcept = default;
 
     template <arithmetic_t U>
     constexpr angle (angle<U> const& gObj) noexcept
-    : radians (T (gObj.radians))
+    : radians (value_type (gObj.radians))
     { }
 };
 
@@ -247,7 +275,11 @@ template <arithmetic_t T>
 constexpr bool operator >= (angle<T> const& a, angle<T> const& b) noexcept
 { return a.radians >= b.radians; }
 
+// ====================================================
+
 } // cppual
+
+// ====================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_COORDINATES_H_

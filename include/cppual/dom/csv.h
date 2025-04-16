@@ -31,9 +31,9 @@ namespace cppual {
 class csv_parser
 {
 public:
-    typedef string                           string_type;
-    typedef vector<std::vector<string_type>> vector_type;
-    typedef std::size_t                      size_type  ;
+    typedef string                              string_type;
+    typedef dyn_array<std::vector<string_type>> vector_type;
+    typedef std::size_t                         size_type  ;
 
     bool append (string_type const& file_path);
 

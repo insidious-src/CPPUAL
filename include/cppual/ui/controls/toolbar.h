@@ -61,9 +61,9 @@ public:
         floatable    = 1 << 5
     };
 
-    typedef bitset<tool_flag>   tool_flags      ;
-    typedef vector<view_group*> group_vector    ;
-    typedef orientation         orientation_type;
+    typedef bitset<tool_flag>      tool_flags      ;
+    typedef dyn_array<view_group*> group_vector    ;
+    typedef orientation            orientation_type;
 
     point2u icon_size () const;
     u8      row_count ();

@@ -23,36 +23,40 @@
 #define CPPUAL_FUNCTIONAL_META_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
+#include <cppual/decl>
 #include <cppual/cast.h>
 #include <cppual/types.h>
-#include <cppual/functional.h>
-#include <cppual/containers.h>
-#include <cppual/string_helper.h>
-#include <cppual/concept/concepts.h>
+#include <cppual/containers>
+#include <cppual/functional>
+#include <cppual/string>
+#include <cppual/concepts>
 
-#include <span>
-#include <array>
+//#include <span>
+//#include <array>
 #include <tuple>
 #include <utility>
+#include <algorithm>
 #include <type_traits>
+
+#include <cassert>
+
+// ====================================================
 
 namespace cppual {
 
 // ====================================================
 
 //! forward declarations
-class vtable_base;
+template <pair_t P, std::size_t N>
+struct consteval_bimap;
 
 // ====================================================
 
 template <typename P, typename T, typename U>
+concept bimap_pair_t = non_void_t<T> && non_void_t<U> && std::same_as<P, std::pair<T, U>>;
+
+template <typename P, typename T, typename U>
 concept switch_map_pair_t = switch_value_t<T> && void_functional_t<U> && std::same_as<P, std::pair<T, U>>;
-
-// =========================================================
-
-template <non_void_t P, std::size_t N>
-struct consteval_bimap;
 
 // =========================================================
 
@@ -92,10 +96,10 @@ struct tuple_repeat_helper
     template <std::size_t... I>
     static auto make_tuple (std::index_sequence<I...>)
     {
-        return std::tuple<std::conditional_t<(I>=0), T, T>...>{};
+        return std::tuple<std::conditional_t<I >= 0, T, T>...> { };
     }
 
-    using type = decltype (make_tuple (std::make_index_sequence<N>{}));
+    using type = decltype (make_tuple (std::make_index_sequence<N> { }));
 };
 
 template <typename T, std::size_t N>
@@ -103,140 +107,302 @@ using tuple_repeat_t = typename tuple_repeat_helper<T, N>::type;
 
 // ====================================================
 
-template <switch_value_t K, void_functional_t V, std::size_t N>
+template <switch_value_t K, non_void_t V, std::size_t N>
 struct consteval_bimap <std::pair<K, V>, N>
 {
-    typedef std::pair<K, V>               pair_type  ;
-    typedef consteval_bimap<pair_type, N> self_type  ;
-    typedef std::size_t                   size_type  ;
-    typedef size_type const               const_size ;
-    typedef std::remove_cvref_t<K>        key_type   ;
-    typedef key_type const                const_key  ;
-    typedef std::remove_cvref_t<V>        value_type ;
-    typedef value_type const              const_value;
+public:
+    typedef std::pair<K, V>                       pair_type             ;
+    typedef pair_type const                       const_pair            ;
+    typedef consteval_bimap<pair_type, N>         self_type             ;
+    typedef std::size_t                           size_type             ;
+    typedef size_type const                       const_size            ;
+    typedef std::remove_cvref_t<K>                key_type              ;
+    typedef key_type const                        const_key             ;
+    typedef std::remove_cvref_t<V>                value_type            ;
+    typedef value_type const                      const_value           ;
+    typedef pair_type                             array_type[N]         ;
+    typedef key_type&                             key_reference         ;
+    typedef value_type&                           value_reference       ;
+    typedef const_key&                            key_const_reference   ;
+    typedef const_value&                          value_const_reference ;
+    typedef pair_type*                            iterator              ;
+    typedef pair_type const*                      const_iterator        ;
+    typedef std::reverse_iterator<iterator>       reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
+    typedef std::pair<iterator, bool>             iterator_pair         ;
 
     consteval static size_type size () noexcept { return N; }
 
     static_assert (size () > 0, "switch_map is empty!");
+    static_assert (non_convertible_t<key_type, value_type>, "key and value must NOT be of the same type!");
+    static_assert (copyable_movable_t<key_type> &&
+                   copyable_movable_t<value_type>, "key or/and value are NOT copyable and movable!");
 
     inline constexpr static const_size npos = const_size (-1);
 
-    constexpr void operator () (const_key k) const noexcept
-    { get_value (k)(); }
-
-private:
-    constexpr consteval_bimap (std::array<pair_type, size ()> const& pairs) noexcept
-    : _M_pairs (pairs)
-    { }
+    //! make class trivially copyable & movable
+    constexpr consteval_bimap (self_type&&) noexcept = default;
+    constexpr consteval_bimap (self_type const&) noexcept = default;
+    constexpr self_type& operator = (self_type&&) noexcept = default;
+    constexpr self_type& operator = (self_type const&) noexcept = default;
 
     constexpr consteval_bimap (std::initializer_list<pair_type> pairs) noexcept
-    : _M_pairs (pairs)
-    { }
+    {
+        assert (pairs.size () <= size () && "bimap capacity NOT sufficient!");
 
-    //! runtime to_index function
-    constexpr size_type key_to_index (const_key k) const noexcept
+        std::copy (pairs.begin (), pairs.end (), _M_pairs);
+        std::fill (begin () + pairs.size (), end (), pair_type (const_key (), const_value ()));
+    }
+
+    constexpr auto operator () (const_key k) const noexcept
+    {
+        static_assert (functional_t<value_type>, "value_type is NOT callable!");
+        return get (k)();
+    }
+
+    consteval size_type count (const_key k) const noexcept { return get_index<k> () != npos ? 1 : 0; }
+
+    constexpr value_reference       operator [] (const_key   k)       { return get (k); }
+    constexpr value_const_reference operator [] (const_key   k) const { return get (k); }
+    constexpr key_reference         operator [] (const_value v)       { return get (v); }
+    constexpr key_const_reference   operator [] (const_value v) const { return get (v); }
+
+    constexpr value_reference       at (const_key   k)       { return get (k); }
+    constexpr value_const_reference at (const_key   k) const { return get (k); }
+    constexpr key_reference         at (const_value v)       { return get (v); }
+    constexpr key_const_reference   at (const_value v) const { return get (v); }
+
+    template <const_key K_>
+    consteval value_reference at () noexcept { return get<K_> (); }
+
+    template <const_key K_>
+    consteval value_const_reference at () const noexcept { return get<K_> (); }
+
+    template <const_value V_>
+    consteval key_reference at () noexcept { return get<V_> (); }
+
+    template <const_value V_>
+    consteval key_const_reference at () const noexcept { return get<V_> (); }
+
+    template <const_key K_>
+    consteval bool contains () const noexcept
+    {
+        return get_index<K_> () != npos;
+    }
+
+    constexpr bool contains (const_key k) const noexcept
+    {
+        return get_index (k) != npos;
+    }
+
+    template <const_value V_>
+    consteval bool contains () const noexcept
+    {
+        return get_index<V_> () != npos;
+    }
+
+    constexpr bool contains (const_value v) const noexcept
+    {
+        return get_index (v) != npos;
+    }
+
+    constexpr iterator       begin   ()       noexcept { return &_M_pairs[0]     ; }
+    constexpr const_iterator begin   () const noexcept { return &_M_pairs[0]     ; }
+    constexpr const_iterator cbegin  () const noexcept { return &_M_pairs[0]     ; }
+    constexpr iterator       end     ()       noexcept { return &_M_pairs[N]     ; }
+    constexpr const_iterator end     () const noexcept { return &_M_pairs[N]     ; }
+    constexpr const_iterator cend    () const noexcept { return &_M_pairs[N]     ; }
+    constexpr iterator       rbegin  ()       noexcept { return &_M_pairs[N  - 1]; }
+    constexpr const_iterator rbegin  () const noexcept { return &_M_pairs[N  - 1]; }
+    constexpr const_iterator crbegin () const noexcept { return &_M_pairs[N  - 1]; }
+    constexpr iterator       rend    ()       noexcept { return &_M_pairs[0] - 1 ; }
+    constexpr const_iterator rend    () const noexcept { return &_M_pairs[0] - 1 ; }
+    constexpr const_iterator crend   () const noexcept { return &_M_pairs[0] - 1 ; }
+
+    constexpr iterator find (const_key k) noexcept
+    {
+        auto const i = get_index (k); return i != npos ? &_M_pairs[i] : end ();
+    }
+
+    constexpr const_iterator find (const_key k) const noexcept
+    {
+        auto const i = get_index (k); return i != npos ? &_M_pairs[i] : end ();
+    }
+
+    template <const_key K_>
+    consteval const_iterator find () const noexcept
+    {
+        return contains<K_> () ? &_M_pairs[get_index<K_> ()] : end ();
+    }
+
+    constexpr iterator find (const_value v) noexcept
+    {
+        auto const i = get_index (v); return i != npos ? &_M_pairs[i] : end ();
+    }
+
+    constexpr const_iterator find (const_value v) const noexcept
+    {
+        auto const i = get_index (v); return i != npos ? &_M_pairs[i] : end ();
+    }
+
+    template <const_value V_>
+    consteval const_iterator find () const noexcept
+    {
+        return contains<V_> () ? &_M_pairs[get_index<V_> ()] : end ();
+    }
+
+    constexpr iterator_pair emplace (const_key k, const_value v) noexcept
+    {
+        return (get_index (k) == npos && _M_pairs[N - 1].first == key_type ()) ?
+                   iterator_pair (&(_M_pairs[N - 1] = pair_type (k, v)), true) :
+                   iterator_pair (end (), false);
+    }
+
+    template <const_key K_, const_value V_>
+    consteval iterator_pair emplace () noexcept
+    {
+        return (get_index<K_> () == npos && _M_pairs[N - 1].first == key_type ()) ?
+                iterator_pair (&(_M_pairs[N - 1] = pair_type (K_, V_)), true) :
+                iterator_pair (end (), false);
+    }
+
+    constexpr void erase (const_key k) noexcept
+    {
+        auto const i = get_index (k);
+
+        if (i != npos) _M_pairs[i] = pair_type ();
+    }
+
+    template <const_key K_>
+    consteval void erase () noexcept
+    {
+        constexpr auto const i = get_index<K_> ();
+
+        if (i != npos) _M_pairs[i] = pair_type ();
+    }
+
+    constexpr void clear () noexcept
+    {
+        for (auto i = 0; i < size (); ++i) _M_pairs[i] = pair_type ();
+    }
+
+protected:
+    //! run-time get_index function
+    constexpr size_type get_index (const_key k) const noexcept
     {
         for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].first == k) return i;
         return npos;
     }
 
-    constexpr size_type value_to_index (const_value v) const noexcept
+    //! run-time get_index function
+    constexpr size_type get_index (const_value v) const noexcept
     {
         for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].second == v) return i;
         return npos;
     }
 
-    //! compile-time to_index function
+    //! compile-time get_index function
     template <const_key K_>
-    consteval size_type key_to_index () const noexcept
+    consteval size_type get_index () const noexcept
     {
         for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].first == K_) return i;
         return npos;
     }
 
+    //! compile-time get_index function
     template <const_value V_>
-    consteval size_type value_to_index () const noexcept
+    consteval size_type get_index () const noexcept
     {
         for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].second == V_) return i;
         return npos;
     }
 
-    constexpr value_type get_value (const_key k) const noexcept
+    constexpr value_reference get (const_key k)
     {
-        auto i = key_to_index (k);
-        if (i != npos) return _M_pairs[i].second;
-        return value_type ();
+        const_size i = get_index (k);
+        if (i == npos) throw std::runtime_error ("key not found in consteval_bimap");
+        return _M_pairs[i].second;
     }
 
     template <const_key K_>
-    consteval value_type get_value () const noexcept
+    consteval value_reference get () noexcept
     {
-        constexpr const_size I = key_to_index<K_> ();
-        static_assert (I != npos, "key not found in switch_map");
+        constexpr const_size I = get_index<K_> ();
+        static_assert (I != npos, "key not found in consteval_bimap");
         return _M_pairs[I].second;
     }
 
-    constexpr key_type get_key (const_value v) const noexcept
+    constexpr value_const_reference get (const_key k) const
     {
-        auto i = value_to_index (v);
-        if (i != npos) return _M_pairs[i].first;
-        return key_type ();
+        const_size i = get_index (k);
+        if (i == npos) throw std::runtime_error ("key not found in consteval_bimap");
+        return _M_pairs[i].second;
+    }
+
+    template <const_key K_>
+    consteval value_const_reference get () const noexcept
+    {
+        constexpr const_size I = get_index<K_> ();
+        static_assert (I != npos, "key not found in consteval_bimap");
+        return _M_pairs[I].second;
+    }
+
+    constexpr key_reference get (const_value v)
+    {
+        const_size i = get_index (v);
+        if (i == npos) throw std::runtime_error ("value not found in consteval_bimap");
+        return _M_pairs[i].first;
     }
 
     template <const_value V_>
-    consteval key_type get_key () const noexcept
+    consteval key_reference get () noexcept
     {
-        constexpr const_size I = value_to_index<V_> ();
-        static_assert (I != npos, "value not found in switch_map");
+        constexpr const_size I = get_index<V_> ();
+        static_assert (I != npos, "value not found in consteval_bimap");
         return _M_pairs[I].first;
     }
 
-    template <switch_value_t T, void_functional_t U, std::size_t SZ>
-    friend constexpr auto make_switch_map (std::array<std::pair<T, U>, SZ> const&) noexcept;
+    constexpr key_const_reference get (const_value v) const
+    {
+        const_size i = get_index (v);
+        if (i == npos) throw std::runtime_error ("value not found in consteval_bimap");
+        return _M_pairs[i].first;
+    }
 
-    template <switch_value_t T, void_functional_t U, std::size_t SZ>
-    friend constexpr auto make_switch_map (std::initializer_list<pair_type>) noexcept;
-
-    template <non_void_t T, non_void_t U, std::size_t SZ>
-    friend constexpr auto make_consteval_bimap (std::array<std::pair<T, U>, SZ> const&) noexcept;
-
-    template <non_void_t T, non_void_t U, std::size_t SZ>
-    friend constexpr auto make_consteval_bimap (std::initializer_list<pair_type>) noexcept;
+    template <const_value V_>
+    consteval key_const_reference get () const noexcept
+    {
+        constexpr const_size I = get_index<V_> ();
+        static_assert (I != npos, "value not found in consteval_bimap");
+        return _M_pairs[I].first;
+    }
 
 private:
-    std::array<pair_type, size ()> const _M_pairs;
+    array_type _M_pairs;
 };
 
 // ====================================================
 
-template <switch_value_t K, void_functional_t V = function<void()>, std::size_t N>
-constexpr auto make_switch_map (std::array<std::pair<K, V>, N> const& case_pairs) noexcept
+template <switch_value_t K = int, functional_t V = function<void()>, std::size_t N = 0, pair_t... Ps>
+requires (std::convertible_to<Ps, std::pair<K, V>> && ...)
+constexpr auto make_switch_map (Ps&&... case_pairs) noexcept
 {
-    return consteval_bimap<std::pair<K, V>, N> (case_pairs);
+    enum COUNT { SZ = N == 0 ? sizeof... (Ps) : N };
+
+    static_assert (sizeof... (Ps) <= SZ, "bimap has insufficient capacity!");
+    return consteval_bimap<std::pair<K, V>, sizeof... (Ps)> { std::forward<Ps> (case_pairs)... };
 }
 
 // ====================================================
 
-template <switch_value_t K, void_functional_t V = function<void()>, std::size_t N>
-constexpr auto make_switch_map (std::initializer_list<std::pair<K, V>> case_pairs) noexcept
+template <non_void_t K, non_void_t V, std::size_t N = 0, pair_t... Ps>
+requires (std::convertible_to<Ps, std::pair<K, V>> && ...)
+constexpr auto make_consteval_bimap (Ps&&... pairs) noexcept
 {
-    return consteval_bimap<std::pair<K, V>, N> (case_pairs);
-}
+    enum COUNT { SZ = N == 0 ? sizeof... (Ps) : N };
 
-// ====================================================
-
-template <non_void_t K, non_void_t V, std::size_t N>
-constexpr auto make_consteval_bimap (std::array<std::pair<K, V>, N> const& pairs) noexcept
-{
-    return consteval_bimap<std::pair<K, V>, N> (pairs);
-}
-
-// ====================================================
-
-template <non_void_t K, non_void_t V, std::size_t N>
-constexpr auto make_consteval_bimap (std::initializer_list<std::pair<K, V>> pairs) noexcept
-{
-    return consteval_bimap<std::pair<K, V>, N> (pairs);
+    static_assert (sizeof... (Ps) <= SZ, "bimap has insufficient capacity!");
+    return consteval_bimap<std::pair<K, V>, sizeof... (Ps)> { std::forward<Ps> (pairs)... };
 }
 
 // ====================================================
@@ -533,279 +699,6 @@ struct meta_list
 
 // ====================================================
 
-// class vtable_entry_base {
-// public:
-//     virtual ~vtable_entry_base() = default;
-//     virtual void invoke(void* obj, void* args, void* ret) const = 0;
-//     virtual std::size_t get_type_id() const = 0;
-// };
-
-// template <typename R, typename... Args>
-// class vtable_entry final : public vtable_entry_base {
-//     using member_fn_type = R(*)(void*, void*, std::tuple<Args...>&);
-
-// public:
-//     explicit vtable_entry(member_fn_type fn_ptr) : fn(fn_ptr) {}
-
-//     void invoke(void* obj, void* args, void* ret) const override {
-//         auto& tuple_args = *static_cast<std::tuple<Args...>*>(args);
-//         if constexpr (std::is_void_v<R>) {
-//             fn(obj, nullptr, tuple_args);
-//         } else {
-//             *static_cast<R*>(ret) = fn(obj, nullptr, tuple_args);
-//         }
-//     }
-
-//     std::size_t get_type_id() const override {
-//         return typeid(R(Args...)).hash_code();
-//     }
-
-// private:
-//     member_fn_type fn;
-// };
-
-// template <typename T, typename R, typename... Args>
-// struct vtable_function {
-//     template <R(T::*Fn)(Args...)>
-//     static R invoke(void* obj, void*, std::tuple<Args...>& args) {
-//         T* typed_obj = static_cast<T*>(obj);
-//         if constexpr (std::is_void_v<R>) {
-//             std::apply([typed_obj](Args... params) {
-//                 (typed_obj->*Fn)(std::forward<Args>(params)...);
-//             }, args);
-//         } else {
-//             return std::apply([typed_obj](Args... params) {
-//                 return (typed_obj->*Fn)(std::forward<Args>(params)...);
-//             }, args);
-//         }
-//     }
-// };
-
-// class vtable_base {
-// protected:
-//     std::vector<std::unique_ptr<vtable_entry_base>> _vtable;
-
-//     template <typename Derived, typename R, typename... Args>
-//     void register_function(R(Derived::* fn)(Args...)) {
-//         using entry_type = vtable_entry<R, Args...>;
-//         using fn_type = R(*)(void*, void*, std::tuple<Args...>&);
-
-//         fn_type fn_ptr = &vtable_function<Derived, R, Args...>::template invoke<fn>;
-//         _vtable.push_back(std::make_unique<entry_type>(fn_ptr));
-//     }
-
-//     template <typename R, typename... Args>
-//     R dispatch(std::size_t index, Args&&... args) {
-//         if (index >= _vtable.size()) {
-//             throw std::out_of_range("Invalid vtable index");
-//         }
-
-//         auto args_tuple = std::make_tuple(std::forward<Args>(args)...);
-
-//         if constexpr (std::is_void_v<R>) {
-//             _vtable[index]->invoke(this, &args_tuple, nullptr);
-//         } else {
-//             R result;
-//             _vtable[index]->invoke(this, &args_tuple, &result);
-//             return result;
-//         }
-//     }
-// };
-
-// class vtable_base_impl : public vtable_base {
-// public:
-//     vtable_base_impl() {
-//         // Register member functions directly
-//         register_function(&vtable_base_impl::print_impl<int>);
-//         register_function(&vtable_base_impl::print_to_string_impl<std::string>);
-//     }
-
-//     // Clean templated virtual function interfaces
-//     template <typename... Args>
-//     void print(Args&&... args) {
-//         dispatch<void>(0, std::forward<Args>(args)...);
-//     }
-
-//     template <typename... Args>
-//     std::string print_to_string(Args&&... args) {
-//         return dispatch<std::string>(1, std::forward<Args>(args)...);
-//     }
-
-// private:
-//     // Actual implementations as regular member functions
-//     template <typename T>
-//     void print_impl(T arg) {
-//         std::cout << arg << std::endl;
-//     }
-
-//     template <typename T>
-//     std::string print_to_string_impl(T arg) {
-//         return std::to_string(arg) + "\n";
-//     }
-// };
-
-// ====================================================
-
-class vtable_base
-{
-protected:
-    template <typename> struct virtual_function;
-
-    typedef std::size_t                                             size_type       ;
-    typedef std::aligned_storage_t<sizeof (void*), alignof (void*)> storage_type    ;
-    typedef std::span<storage_type>                                 fn_ptrs_vec_type;
-    typedef std::span<void(*)(vtable_base&, void*, void*, void*)>   vtable_vec_type ;
-    typedef unordered_map<size_type, function<void(void*)>>         vtable_map_type ;
-
-    // ====================================================
-
-    template <class_t D>
-    constexpr vtable_base (D* /* derived_class */)
-        : _M_vtable  (create_vtable<D> (stateful_type_list::get<D> ())),
-        _M_fn_ptrs (create_fn_ptrs   (stateful_type_list::get<D> ()))
-    { }
-
-    // ====================================================
-
-    inline virtual ~vtable_base () = default;
-
-    // ====================================================
-
-    template <class_t D, typename R, typename... Args>
-    constexpr void register_function (R(D::* fn)(Args...))
-    {
-        using fn_type = R(Args...);
-        typedef decltype (fn) fn_pointer;
-
-        size_type idx = stateful_type_list::try_push<virtual_function<fn_type>> ();
-        ::new (&_M_fn_ptrs[idx]) fn_pointer (fn);
-
-        _M_invoke[typeid (fn_type).hash_code ()] = [this, idx](void* args)
-        {
-            auto* tuple = static_cast<std::tuple<Args...>*> (args);
-
-            std::apply ([this, idx](Args&&... args)
-                       {
-                           invoke_dispatch<R> (idx, std::forward<Args> (args)...);
-                       },
-                       std::move (*tuple));
-        };
-    }
-
-    template <class_t D, typename R, typename... Args>
-    constexpr void register_function (R(D::* fn)(Args...) const)
-    {
-        using fn_type = R(Args...);
-        typedef decltype (fn) fn_pointer;
-
-        size_type idx = stateful_type_list::try_push<virtual_function<fn_type>> ();
-        ::new (&_M_fn_ptrs[idx]) fn_pointer (fn);
-
-        _M_invoke[typeid (fn_type).hash_code ()] = [this, idx](void* args)
-        {
-            auto* tuple = static_cast<std::tuple<Args...>*> (args);
-
-            std::apply ([this, idx](Args&&... args)
-                       {
-                           invoke_dispatch<R> (idx, std::forward<Args> (args)...);
-                       },
-                       std::move (*tuple));
-        };
-    }
-
-    // ====================================================
-
-    /// function to invoke stored member function pointer
-    template <typename R, typename... Args>
-    constexpr R invoke_dispatch (size_type idx, Args&&... args) const
-    {
-        auto args_tuple = std::forward_as_tuple (std::forward<Args> (args)...);
-
-        if constexpr (std::is_void_v<R>)
-        {
-            _M_vtable[idx](*this, &_M_fn_ptrs[idx], &args_tuple, nullptr);
-        }
-        else
-        {
-            R result;
-
-            _M_vtable[idx](*this, &_M_fn_ptrs[idx], &args_tuple, &result);
-            return result;
-        }
-    }
-
-    template <typename... Args>
-    void invoke_fn (Args&&... args)
-    {
-        auto fn_hash = typeid (void(Args...)).hash_code ();
-
-        if (auto it = _M_invoke.find (fn_hash); it != _M_invoke.end ())
-        {
-            auto args_tuple = std::make_tuple (std::forward<Args>(args)...);
-            it->second (&args_tuple);
-        }
-    }
-
-    //! specialization for member function signatures
-    template <typename R, typename... Args>
-    struct virtual_function <R(Args...)>
-    {
-        template <class_t D>
-        inline static void invoke (vtable_base& base, void* fn_ptr, void* args_ptr, void* ret)
-        {
-            if (!args_ptr && sizeof... (Args) > 0)
-            {
-                throw std::invalid_argument ("arguments > 0 but args_ptr is NULLPTR!");
-            }
-
-            auto  fn         =  static_cast<R(D::*)(Args...)> (fn_ptr);
-            auto& tuple_args = *static_cast<std::tuple<Args...>*> (args_ptr);
-            auto& derived    =  class_cast<D> (base);
-
-            if constexpr (std::is_void_v<R>)
-            {
-                std::apply ([&derived, fn](Args&&... args)
-                {
-                    (derived.*fn)(std::forward<Args> (args)...);
-                },
-                std::move (tuple_args));
-            }
-            else
-            {
-                if (!ret) throw std::logic_error ("return pointer is NULLPTR!");
-
-                *static_cast<R*> (ret) = std::apply ([&derived, fn](Args&&... args) -> R
-                {
-                    return (derived.*fn)(std::forward<Args> (args)...);
-                },
-                std::move (tuple_args));
-            }
-        }
-    };
-
-private:
-    template <class_t D, typename... Funcs>
-    inline static auto create_vtable (type_list<Funcs...>)
-    {
-        constinit static std::array<void(*)(vtable_base&, void*, void*, void*), sizeof...(Funcs)>
-            vtable { &Funcs::template invoke<D>... };
-        return std::span { vtable };
-    }
-    template <typename... Funcs>
-    inline static auto create_fn_ptrs (type_list<Funcs...>)
-    {
-        constinit static std::array<storage_type, sizeof... (Funcs)> storage;
-        return std::span { storage };
-    }
-
-private:
-    vtable_vec_type  const _M_vtable ;
-    fn_ptrs_vec_type const _M_fn_ptrs;
-    vtable_map_type        _M_invoke ;
-};
-
-// ====================================================
-
 } // cppual
 
 // ====================================================
@@ -814,14 +707,14 @@ namespace std {
 
 // ====================================================
 
-using cppual::LAMBDA_DEFAULT_MAX_SIZE;
+using cppual::lambda_calc_size;
 
-template <std::size_t N = LAMBDA_DEFAULT_MAX_SIZE>
+template <std::size_t N = lambda_calc_size ()>
 using delegate = cppual::function<void(), N>;
 
 // ====================================================
 
-template <size_t N = LAMBDA_DEFAULT_MAX_SIZE, cppual::switch_value_t T, typename... Args>
+template <size_t N = lambda_calc_size (), cppual::switch_value_t T, typename... Args>
 constexpr auto make_pair (T const _case, Args&&... fn_args) noexcept
 {
     using fn_type = delegate<N>;

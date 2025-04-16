@@ -111,8 +111,8 @@ private:
 class SHARED_API instance final : public non_copyable
 {
 public:
-    typedef string              string_type;
-    typedef vector<string_type> ext_list   ;
+    typedef string                 string_type;
+    typedef dyn_array<string_type> ext_list   ;
 
     instance () = delete;
     instance (playback_device& device, bool current = false) noexcept;

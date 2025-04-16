@@ -35,11 +35,11 @@ namespace cppual { namespace network {
 class packet : public non_copyable_virtual
 {
 public:
-    typedef char               value_type ;
-    typedef value_type const   const_value;
-    typedef std::size_t        size_type  ;
-    typedef u32                stream_size;
-    typedef vector<value_type> stream_type;
+    typedef char                  value_type ;
+    typedef value_type const      const_value;
+    typedef std::size_t           size_type  ;
+    typedef u32                   stream_size;
+    typedef dyn_array<value_type> stream_type;
 
     typedef bool (packet::* safe_bool)(size_type);
 

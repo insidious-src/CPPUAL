@@ -26,7 +26,7 @@
 
 namespace cppual { namespace gfx { namespace gl {
 
-void line::draw (transform2d const& transform_info)
+void line::draw (transform const& transform_info)
 {
     ::GLfloat x = transform_info.geometry ().left  ;
     ::GLfloat y = transform_info.geometry ().top   ;
@@ -59,7 +59,7 @@ void line::draw (transform2d const& transform_info)
     if (_M_eStyle != line_style::solid) ::glDisable (GL_LINE_STIPPLE);
 }
 
-void path::draw (transform2d const& /*transform_info*/)
+void path::draw (transform const& /*transform_info*/)
 {
     if (_M_eStyle != line_style::solid)
     {

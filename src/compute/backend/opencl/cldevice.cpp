@@ -86,7 +86,7 @@ public:
     typedef CLObject<platform_id_type>      value_type         ;
     typedef value_type*                     pointer            ;
     typedef resource_handle                 handle_type        ;
-    typedef vector<platform_id_type*>       platform_ids_vector;
+    typedef dyn_array<platform_id_type*>       platform_ids_vector;
     typedef device::device_ids_vector       device_ids_vector  ;
 
     enum class platform_info : platform_info_type
@@ -256,11 +256,11 @@ u64 device::max_memory_alloc_size () const
     return get_info<u64> (device_info_max_mem_alloc_size);
 }
 
-vector<string_type> device::extensions () const
+dyn_array<string_type> device::extensions () const
 {
     string_type         extension;
     string_type         extensions = get_info<string_type> (device_info_extensions);
-    vector<string_type> extensions_vector;
+    dyn_array<string_type> extensions_vector;
 
     if (extensions.empty ()) return extensions_vector;
 

@@ -24,9 +24,8 @@
 #ifdef __cplusplus
 
 #include <cppual/cast.h>
-#include <cppual/bitset.h>
-#include <cppual/functional.h>
-#include <cppual/containers.h>
+#include <cppual/bitflags>
+#include <cppual/concepts>
 
 //#include <span>
 //#include <array>
@@ -94,7 +93,7 @@ public:
 
 private:
     template <typename T>
-    constexpr static bool is_type (type type_bits) noexcept
+    consteval static bool is_type (type type_bits) noexcept
     {
         switch (type_bits)
         {

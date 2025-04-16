@@ -23,11 +23,12 @@
 #define CPPUAL_MEMORY_ALLOCATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
+#include <cppual/decl>
 #include <cppual/types.h>
+#include <cppual/concepts>
 #include <cppual/noncopyable.h>
-#include <cppual/concept/concepts.h>
 
+#include <scoped_allocator>
 #include <memory_resource>
 #include <algorithm>
 #include <thread>
@@ -70,8 +71,6 @@ public:
 
     /// maximum align ajustment for memory allocation
     inline static constexpr const align_type max_adjust = alignof (std::max_align_t) * 2;
-
-    inline virtual ~memory_resource () = default;
 
     constexpr memory_resource (device_reference dev = host_device ()) noexcept
     : _M_pDevice (&dev)
@@ -194,7 +193,7 @@ std::thread::id SHARED_API main_thread_id () noexcept;
 
 
 /// =========================================================
-/// memory_resource Concept
+/// memory_resource concept
 /// =========================================================
 
 template <class_t T>
@@ -216,7 +215,7 @@ struct is_memory_resource <std::pmr::memory_resource> : public std::true_type
 
 /// is_memory_resource -> value
 template <class_t T>
-inline constexpr bool const is_memory_resource_v = is_memory_resource<T>::value;
+inline constexpr cbool is_memory_resource_v = is_memory_resource<T>::value;
 
 /// memory_resource concept type
 template <class_t T>
@@ -228,8 +227,12 @@ concept memory_resource_t = is_memory_resource_v<T>;
 
 // =========================================================
 
+using std::scoped_allocator_adaptor;
+
+// =========================================================
+
 //! redefined polymorphic memory allocator
-template <non_void_t T>
+template <typename T = void>
 class SHARED_API allocator
 {
 public:
@@ -336,7 +339,7 @@ public:
     { resource ()->deallocate (p, n * sizeof (U), alignof (U)); }
 
     template <non_void_t U, typename... Args>
-    constexpr U* new_object (Args&&... args)
+    constexpr U* new_object (Args... args)
     {
         U* p = allocate_object<U> ();
 
@@ -377,9 +380,7 @@ public:
     template <non_void_t U>
     constexpr explicit allocator (self_type_t<U>&& ator) noexcept
     : _M_pRc (ator._M_pRc)
-    {
-        ator._M_pRc = &get_default_resource ();
-    }
+    { ator._M_pRc = &get_default_resource (); }
 
     template <non_void_t U>
     constexpr self_type& operator = (self_type_t<U> const& ator) noexcept
@@ -419,7 +420,7 @@ public:
         return *this;
     }
 
-    template <non_void_t>
+    template <typename>
     friend class allocator;
 
     template <non_void_t U>
@@ -434,22 +435,22 @@ private:
 
 
 /// =========================================================
-/// Allocator Comparisons
+/// allocator comparisons
 /// =========================================================
 
 template <non_void_t T>
-inline bool operator == (allocator<T> const& lhs, allocator<T> const& rhs) noexcept
+constexpr bool operator == (allocator<T> const& lhs, allocator<T> const& rhs) noexcept
 {
     return lhs.resource () == rhs.resource () ||
           (lhs.resource () && rhs.resource () && lhs.resource ()->is_equal (*rhs.resource ()));
 }
 
 template <non_void_t T>
-inline bool operator != (allocator<T> const& lhs, allocator<T> const& rhs) noexcept
+constexpr bool operator != (allocator<T> const& lhs, allocator<T> const& rhs) noexcept
 { return !(lhs == rhs); }
 
 template <non_void_t T1, non_void_t T2>
-inline bool operator == (allocator<T1> const& lhs, allocator<T2> const& rhs) noexcept
+constexpr bool operator == (allocator<T1> const& lhs, allocator<T2> const& rhs) noexcept
 {
     return lhs.resource () == rhs.resource () ||
           (lhs.resource () && rhs.resource () && lhs.resource ()->is_equal (*rhs.resource ()));
@@ -461,9 +462,7 @@ inline bool operator != (allocator<T1> const& lhs, allocator<T2> const& rhs) noe
 
 template <non_void_t T>
 constexpr bool operator == (allocator<T> const& lhs, std::allocator<T> const&) noexcept
-{
-    return lhs.resource () == new_delete_resource ();
-}
+{ return lhs.resource () == new_delete_resource (); }
 
 template <non_void_t T>
 constexpr bool operator != (allocator<T> const& lhs, std::allocator<T> const& rhs) noexcept
@@ -471,9 +470,7 @@ constexpr bool operator != (allocator<T> const& lhs, std::allocator<T> const& rh
 
 template <non_void_t T>
 constexpr bool operator == (std::allocator<T> const&, allocator<T> const& rhs) noexcept
-{
-    return rhs.resource () == new_delete_resource ();
-}
+{ return rhs.resource () == new_delete_resource (); }
 
 template <non_void_t T>
 constexpr bool operator != (std::allocator<T> const& lhs, allocator<T> const& rhs) noexcept
@@ -481,9 +478,7 @@ constexpr bool operator != (std::allocator<T> const& lhs, allocator<T> const& rh
 
 template <non_void_t T1, non_void_t T2>
 constexpr bool operator == (allocator<T1> const& lhs, std::allocator<T2> const&) noexcept
-{
-    return lhs.resource () == new_delete_resource ();
-}
+{ return lhs.resource () == new_delete_resource (); }
 
 template <non_void_t T1, non_void_t T2>
 constexpr bool operator != (allocator<T1> const& lhs, std::allocator<T2> const& rhs) noexcept
@@ -491,40 +486,32 @@ constexpr bool operator != (allocator<T1> const& lhs, std::allocator<T2> const& 
 
 template <non_void_t T1, non_void_t T2>
 constexpr bool operator == (std::allocator<T1> const&, allocator<T2> const& rhs) noexcept
-{
-    return rhs.resource () == new_delete_resource ();
-}
+{ return rhs.resource () == new_delete_resource (); }
 
 template <non_void_t T1, non_void_t T2>
 constexpr bool operator != (std::allocator<T1> const& lhs, allocator<T2> const& rhs) noexcept
 { return !(lhs == rhs); }
 
 /// =========================================================
-/// Allocator swap
+/// allocator swap
 /// =========================================================
 
 template <non_void_t U>
 constexpr void swap (allocator<U>& lhs, allocator<U>& rhs) noexcept
-{
-    std::swap (lhs._M_pRc, rhs._M_pRc);
-}
+{ std::swap (lhs._M_pRc, rhs._M_pRc); }
 
 template <non_void_t U1, non_void_t U2>
 constexpr void swap (allocator<U1>& lhs, allocator<U2>& rhs) noexcept
-{
-    std::swap (lhs._M_pRc, rhs._M_pRc);
-}
+{ std::swap (lhs._M_pRc, rhs._M_pRc); }
 
 /// =========================================================
-/// Allocator Concept
+/// allocator concept
 /// =========================================================
 
 /// is allocator primary template declaration
 template <class_t A>
 struct is_allocator_helper : public std::false_type
-{
-    typedef A type;
-};
+{ typedef A type; };
 
 template <non_void_t T>
 struct is_allocator_helper <allocator<T>> : public std::true_type
@@ -540,14 +527,14 @@ struct is_allocator_helper <std::pmr::polymorphic_allocator<T>> : public std::tr
 
 template <class_t A>
 struct is_allocator : public is_allocator_helper<A>
-{ /* static_assert (is_allocator<A>::value, "A is NOT an allocator!"); */ };
+{ static_assert (is_allocator_helper<A>::value, "A is NOT an allocator!"); };
 
 template <class_t A>
 using is_allocator_t = is_allocator<A>::type;
 
 /// is allocator -> value
 template <class_t A>
-inline constexpr bool const is_allocator_v = is_allocator<A>::value;
+inline constexpr cbool is_allocator_v = is_allocator<A>::value;
 
 /// polymorphic allocator concept type
 template <typename A>
@@ -576,7 +563,7 @@ concept allocator_t = is_allocator_v<A> || requires (A& ator)
 template <typename T, typename... Args,
           typename =  std::enable_if_t<!std::is_void_v<T>>
           >
-inline std::shared_ptr<T> make_shared (Args&&... args)
+constexpr std::shared_ptr<T> make_shared (Args&&... args)
 {
     return std::allocate_shared<T> (allocator<T> (), std::forward<Args> (args)...);
 }
@@ -584,7 +571,7 @@ inline std::shared_ptr<T> make_shared (Args&&... args)
 template <typename T, typename... Args,
           typename =  std::enable_if_t<!std::is_void_v<T>>
           >
-inline std::shared_ptr<T> allocate_shared (memory_resource* rc, Args&&... args)
+constexpr std::shared_ptr<T> allocate_shared (memory_resource* rc, Args&&... args)
 {
     return std::allocate_shared<T> (rc == nullptr ? allocator<T> () : allocator<T> (*rc),
                                     std::forward<Args> (args)...);
@@ -593,7 +580,7 @@ inline std::shared_ptr<T> allocate_shared (memory_resource* rc, Args&&... args)
 template <typename U, typename T, typename... Args,
           typename =  std::enable_if_t<!std::is_void_v<T> && !std::is_same_v<U, T>>
           >
-inline std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
+constexpr std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
 {
     return std::static_pointer_cast<U>
             (std::allocate_shared<T> (rc == nullptr ? allocator<T> () : allocator<T> (*rc),
@@ -603,7 +590,7 @@ inline std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
 template <typename T, typename... Args,
           typename =  std::enable_if_t<!std::is_void_v<T>>
           >
-inline std::shared_ptr<T> allocate_shared (allocator<T> const& ator, Args&&... args)
+constexpr std::shared_ptr<T> allocate_shared (allocator<T> const& ator, Args&&... args)
 {
     return std::allocate_shared<T> (ator, std::forward<Args> (args)...);
 }
@@ -611,7 +598,7 @@ inline std::shared_ptr<T> allocate_shared (allocator<T> const& ator, Args&&... a
 template <typename U, typename T, typename... Args,
           typename =  std::enable_if_t<!std::is_void_v<T> && !std::is_same_v<U, T>>
           >
-inline std::shared_ptr<U> allocate_shared (allocator<T> const& ator, Args&&... args)
+constexpr std::shared_ptr<U> allocate_shared (allocator<T> const& ator, Args&&... args)
 {
     return std::static_pointer_cast<U>
             (std::allocate_shared<T> (ator, std::forward<Args> (args)...));

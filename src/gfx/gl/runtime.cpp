@@ -25,10 +25,10 @@
 #include <cppual/gfx/draw.h>
 
 
-#include <unordered_map>
+//#include <unordered_map>
 #include <algorithm>
 #include <stdexcept>
-#include <vector>
+//#include <vector>
 //#include <cmath>
 
 namespace cppual::gfx::gl {
@@ -36,7 +36,7 @@ namespace cppual::gfx::gl {
 namespace { /// optimize for internal usage
 
 typedef unordered_map<resource_version, resource_version> version_map  ;
-typedef vector<string>                                    string_vector;
+typedef dyn_array<string>                                    string_vector;
 typedef std::size_t                                       size_type    ;
 
 constexpr GLenum query_to_gl_enum (string_query query) noexcept

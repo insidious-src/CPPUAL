@@ -22,7 +22,7 @@
 #ifndef CPPUAL_UI_TREE_H_
 #define CPPUAL_UI_TREE_H_
 
-#include <vector>
+//#include <vector>
 #include <cppual/ui/skin.h>
 
 namespace cppual { namespace ui {
@@ -49,16 +49,16 @@ public:
 protected:
     struct node_list
     {
-        string_type       name    ;
-        vector<node_list> children;
+        string_type          name    ;
+        dyn_array<node_list> children;
     };
 
     virtual void paint_event (rect const&);
     virtual void on_node_click ();
 
 private:
-    byte              _M_nTreeType;
-    vector<node_list> _M_gNodeList;
+    byte                 _M_nTreeType;
+    dyn_array<node_list> _M_gNodeList;
 };
 
 // =========================================================

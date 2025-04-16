@@ -75,7 +75,7 @@ shared_drawable2d painter::create_line (color const& color_fill,
     return shared_drawable2d (new line (color_fill, line_size, style));
 }
 
-shared_drawable2d painter::create_path (vector<point2i> const& coord,
+shared_drawable2d painter::create_path (dyn_array<point2i> const& coord,
                                            color           const& clr,
                                            uint                   line_size,
                                            line_style             style)

@@ -89,7 +89,7 @@ public:
         value_type value { };
         pointer    ptr      ;
 
-        constexpr handle_union () noexcept = default;
+        consteval handle_union () noexcept = default;
         constexpr handle_union (value_type _handle) noexcept : value (_handle) { }
         constexpr handle_union (pointer    _handle) noexcept : ptr   (_handle) { }
         constexpr handle_union (std::nullptr_t    ) noexcept : ptr   ()        { }
@@ -97,15 +97,15 @@ public:
 
     typedef handle_union self_type::* safe_bool;
 
-    constexpr resource_handle () noexcept = default;
+    consteval resource_handle () noexcept = default;
     constexpr resource_handle (value_type _handle) noexcept : _M_handle (_handle) { }
     constexpr resource_handle (pointer    _handle) noexcept : _M_handle (_handle) { }
     constexpr resource_handle (std::nullptr_t    ) noexcept : _M_handle ()        { }
 
-    inline    resource_handle (self_type &&)           noexcept = default;
+    constexpr resource_handle (self_type &&)           noexcept = default;
     constexpr resource_handle (self_type const&)       noexcept = default;
-    inline    self_type& operator = (self_type &&)     noexcept = default;
-    inline    self_type& operator = (self_type const&) noexcept = default;
+    constexpr self_type& operator = (self_type &&)     noexcept = default;
+    constexpr self_type& operator = (self_type const&) noexcept = default;
 
     template <integer_t T>
     constexpr explicit resource_handle (T const _handle) noexcept
@@ -146,13 +146,13 @@ public:
         return *this;
     }
 
-    constexpr explicit operator safe_bool () const noexcept
+    consteval explicit operator safe_bool () const noexcept
     {
         return valid () ? &self_type::_M_handle : nullptr;
     }
 
     template <integer_t T>
-    inline self_type& operator = (T const val) noexcept
+    constexpr self_type& operator = (T const val) noexcept
     {
         static_assert (sizeof (T) <= sizeof (value_type), "T is bigger than the size of uptr!");
 
@@ -160,13 +160,13 @@ public:
         return *this;
     }
 
-    inline self_type& operator = (value_type const val) noexcept
+    constexpr self_type& operator = (value_type const val) noexcept
     {
         _M_handle.value = val;
         return *this;
     }
 
-    inline self_type& operator = (pointer const ptr) noexcept
+    constexpr self_type& operator = (pointer const ptr) noexcept
     {
         _M_handle.ptr = ptr;
         return *this;

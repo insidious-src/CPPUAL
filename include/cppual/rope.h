@@ -24,10 +24,10 @@
 #ifdef __cplusplus
 
 #include <cppual/cast.h>
-#include <cppual/string.h>
-#include <cppual/containers.h>
+#include <cppual/string>
+#include <cppual/containers>
 #include <cppual/memory/allocator.h>
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
 #include <cppual/iterators/rope_iterator.h>
 
 #include <string_view>
@@ -1460,7 +1460,7 @@ private:
 
         // Perform inorder traversal to build list
         tree_node* curr = root;
-        std::stack<tree_node*> stack;
+        dyn_array<tree_node*> stack;
 
         while (curr || !stack.empty ())
         {
@@ -1507,7 +1507,7 @@ private:
         _M_gBuffer.tree = { nullptr };
 
         // Create balanced tree from list nodes
-        vector<tree_node*> nodes;
+        dyn_array<tree_node*> nodes;
         nodes.reserve (_M_uLength / (list_threshold / 16));  // Estimate node count
 
         list_node* curr = head;
@@ -2091,7 +2091,7 @@ constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 
 // template <char_t T, allocator_t A>
 // inline frope<T, A>& operator += (frope<T>& gObj, T const* pText) noexcept
-// { return add_to_string (gObj, pText, std::char_traits<T>::length (pText)); }
+// { return add_to_string (gObj, pText, constexpr_str_size (pText)); }
 
 // ====================================================
 
@@ -2108,7 +2108,7 @@ constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 // inline frope<T, A> operator + (frope<T, A> const& gObj, T const* pText) noexcept
 // {
 //     frope<T, A> gStr (gObj);
-//     return std::move (add_to_string (gStr, pText, std::char_traits<T>::length (pText)));
+//     return std::move (add_to_string (gStr, pText, constexpr_str_size (pText)));
 // }
 
 // ====================================================

@@ -23,11 +23,11 @@
 #define CPPUAL_REACTIVE_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
-#include <cppual/signal.h>
+#include <cppual/decl>
+#include <cppual/signal>
 #include <cppual/fn_meta.h>
 #include <cppual/memory/allocator.h>
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
 
 // =========================================================
 
@@ -86,6 +86,12 @@ public:
     typedef value_type *                pointer        ;
     typedef value_type const*           const_pointer  ;
     typedef base_type::value_type       fn_type        ;
+
+    template <class_t C>
+    using mem_fn_type = void(C::*)(arg_type);
+
+    template <class_t C>
+    using const_mem_fn_type = void(C::*)(arg_type) const;
 
     constexpr reactive () noexcept        = default;
     inline    reactive (self_type&&)      = default;
@@ -153,6 +159,22 @@ public:
     inline self_type& operator << (fn_type const& fn) const
     {
         connect (*this, fn);
+        return   *this;
+    }
+
+    /// reactive (signal/slot) connect
+    template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    inline self_type& operator << (std::pair<C&, mem_fn_type<C>> pair) const
+    {
+        connect (*this, pair.first, pair.second);
+        return   *this;
+    }
+
+    /// reactive (signal/slot) connect
+    template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    inline self_type& operator << (std::pair<C&, const_mem_fn_type<C>> pair) const
+    {
+        connect (*this, pair.first, pair.second);
         return   *this;
     }
 

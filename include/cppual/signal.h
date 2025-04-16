@@ -23,6 +23,7 @@
 #define CPPUAL_SIGNAL_H_
 #ifdef __cplusplus
 
+#include <cppual/type_meta.h>
 #include <cppual/functional.h>
 #include <cppual/circular_queue.h>
 #include <cppual/memory/allocator.h>
@@ -59,7 +60,7 @@ class scoped_connection;
 // =========================================================
 
 /// how many slots to be reserved at construction
-inline constexpr std::size_t const reserve_count_v = 5;
+inline constexpr std::size_t const reserve_slot_count_v = 5;
 
 // =========================================================
 
@@ -153,7 +154,7 @@ public:
     { return _M_slots.crend (); }
 
     constexpr signal (allocator_type const& ator      = allocator_type (),
-                      size_type             reserve_n = reserve_count_v ) noexcept
+                      size_type             reserve_n = reserve_slot_count_v) noexcept
     : _M_slots (ator)
     {
         if (reserve_n) _M_slots.reserve (reserve_n);
@@ -172,29 +173,28 @@ public:
         for (size_type i = 0U; i < size; ++i)
         {
             if (_M_slots[i] != nullptr)
-                collection.emplace_back
-                        (std::move (_M_slots[i] (std::forward<Args> (args)...)));
+                collection.emplace_back (std::move (_M_slots[i] (std::forward<Args> (args)...)));
         }
 
         return std::move (collection);
     }
 
     /// (signal/slot) connect
-    inline self_type& operator << (value_type&& fn)
+    constexpr self_type& operator << (value_type&& fn)
     {
         connect (*this, std::move (fn));
         return   *this;
     }
 
     /// (signal/slot) connect
-    inline self_type& operator << (const_reference fn)
+    constexpr self_type& operator << (const_reference fn)
     {
         connect (*this, fn);
         return   *this;
     }
 
     /// (signal/slot) connect
-    inline self_type& operator << (R(& fn)(Args...))
+    constexpr self_type& operator << (R(& fn)(Args...))
     {
         connect (*this, fn);
         return   *this;
@@ -202,7 +202,7 @@ public:
 
     /// callable object (signal/slot) connect
     template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
-    inline self_type& operator << (C& obj) const
+    constexpr self_type& operator << (C& obj) const
     {
         if (this == &obj) return *this;
 
@@ -310,17 +310,161 @@ public:
     { return _M_slots.crend (); }
 
     constexpr signal (allocator_type const& ator      = allocator_type (),
-                      size_type             reserve_n = reserve_count_v ) noexcept
+                      size_type             reserve_n = reserve_slot_count_v) noexcept
     : _M_slots (ator)
     {
         if (reserve_n) _M_slots.reserve (reserve_n);
     }
 
     //! emit signal to connected slots
-    inline void operator () (Args... args) const
+    constexpr void operator () (Args... args) const
     {
         for (size_type i = 0U; i < _M_slots.size(); ++i)
             if (_M_slots[i] != nullptr) _M_slots[i] (std::forward<Args> (args)...);
+    }
+
+    /// (signal/slot) connect
+    constexpr self_type& operator << (value_type&& fn) const
+    {
+        connect (*this, std::move (fn));
+        return   *this;
+    }
+
+    /// (signal/slot) connect
+    constexpr self_type& operator << (const_reference fn) const
+    {
+        connect (*this, fn);
+        return   *this;
+    }
+
+    /// (signal/slot) connect
+    constexpr self_type& operator << (void(& fn)(Args...)) const
+    {
+        connect (*this, fn);
+        return   *this;
+    }
+
+    /// callable object (signal/slot) connect
+    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    constexpr self_type& operator << (C& obj) const
+    {
+        if (this == &obj) return *this;
+
+        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
+                      "C::operator () return type is NOT void!");
+
+        connect (*this, obj);
+        return   *this;
+    }
+
+    template <typename, allocator_t>
+    friend class signal;
+
+private:
+    container_type _M_slots;
+};
+
+// =========================================================
+
+template <typename... Args, allocator_t A>
+class SHARED_API signal <bool(Args...), A>
+{
+public:
+    typedef signal<void(Args...), A>                 self_type             ;
+    typedef std::allocator_traits<A>                 traits_type           ;
+    typedef traits_type::allocator_type              allocator_type        ;
+    typedef traits_type::size_type                   size_type             ;
+    typedef size_type const                          const_size            ;
+    typedef FunctionalType<fn_type<void(Args...)>>   value_type            ;
+    typedef value_type &                             reference             ;
+    typedef value_type const&                        const_reference       ;
+    typedef signal_queue<value_type, allocator_type> container_type        ;
+    typedef container_type&                          container_ref         ;
+    typedef container_type const&                    container_const_ref   ;
+    typedef container_type::iterator                 iterator              ;
+    typedef container_type::const_iterator           const_iterator        ;
+    typedef std::reverse_iterator<iterator>          reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
+    typedef container_type::const_iterator           slot_type             ;
+    typedef void                                     return_type           ;
+
+    using scoped_connection_type = scoped_connection<void(Args...), allocator_type>;
+
+    constexpr container_ref get_slots () noexcept
+    { return _M_slots; }
+
+    constexpr container_const_ref get_slots () const noexcept
+    { return _M_slots; }
+
+    inline void clear () noexcept
+    {  _M_slots.clear (); }
+
+    constexpr bool empty () const noexcept
+    { return _M_slots.empty (); }
+
+    constexpr size_type size () const noexcept
+    { return _M_slots.size (); }
+
+    constexpr iterator begin () noexcept
+    { return _M_slots.begin (); }
+
+    constexpr const_iterator begin () const noexcept
+    { return _M_slots.begin (); }
+
+    constexpr const_iterator cbegin () noexcept
+    { return _M_slots.cbegin (); }
+
+    constexpr const_iterator cbegin () const noexcept
+    { return _M_slots.cbegin (); }
+
+    constexpr reverse_iterator rbegin () noexcept
+    { return _M_slots.rbegin (); }
+
+    constexpr const_reverse_iterator rbegin () const noexcept
+    { return _M_slots.rbegin (); }
+
+    constexpr const_reverse_iterator crbegin () noexcept
+    { return _M_slots.crbegin (); }
+
+    constexpr const_reverse_iterator crbegin () const noexcept
+    { return _M_slots.crbegin (); }
+
+    constexpr iterator end () noexcept
+    { return _M_slots.end (); }
+
+    constexpr const_iterator end () const noexcept
+    { return _M_slots.end (); }
+
+    constexpr const_iterator cend () noexcept
+    { return _M_slots.cend (); }
+
+    constexpr const_iterator cend () const noexcept
+    { return _M_slots.cend (); }
+
+    constexpr reverse_iterator rend () noexcept
+    { return _M_slots.rend (); }
+
+    constexpr const_reverse_iterator rend () const noexcept
+    { return _M_slots.rend (); }
+
+    constexpr const_reverse_iterator crend () noexcept
+    { return _M_slots.crend (); }
+
+    constexpr const_reverse_iterator crend () const noexcept
+    { return _M_slots.crend (); }
+
+    constexpr signal (allocator_type const& ator      = allocator_type (),
+                      size_type             reserve_n = reserve_slot_count_v) noexcept
+    : _M_slots (ator)
+    {
+        if (reserve_n) _M_slots.reserve (reserve_n);
+    }
+
+    //! emit signal to connected slots
+    constexpr void operator () (Args... args) const
+    {
+        for (size_type i = 0U; i < _M_slots.size(); ++i)
+            if (_M_slots[i] != nullptr && !(_M_slots[i] (std::forward<Args> (args)...))) return;
     }
 
     /// (signal/slot) connect
@@ -351,7 +495,7 @@ public:
         if (this == &obj) return *this;
 
         static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
-                      "C::operator () return type is NOT void!");
+                      "C::operator () return type is NOT bool!");
 
         connect (*this, obj);
         return   *this;
@@ -434,11 +578,11 @@ connect (signal<R(Args...), A>& gSignal,
 
     if (bTop)
     {
-        gSignal.get_slots ().emplace_front (std::forward<Call> (gFunc));
+        gSignal.get_slots ().emplace_front (std::move (gFunc));
         return gSignal.get_slots ().begin ();
     }
 
-    gSignal.get_slots ().emplace_back (std::forward<Call> (gFunc));
+    gSignal.get_slots ().emplace_back (std::move (gFunc));
     return --gSignal.get_slots ().end ();
 }
 
@@ -478,7 +622,7 @@ template <class_t     C,
 inline
 typename signal<R(Args...), A>::slot_type
 connect (signal<R(Args...), A>& gSignal,
-         ClassType<C>& pObj,
+         std::decay_t<C>& pObj,
          R(C::* fn)(Args...),
          bool bTop = false)
 {
@@ -506,7 +650,7 @@ template <class_t     C,
 inline
 typename signal<R(Args...), A>::slot_type
 connect (signal<R(Args...), A>& gSignal,
-         ClassType<C>& pObj,
+         std::decay_t<C>& pObj,
          R(C::* fn)(Args...) const,
          bool bTop = false)
 {
@@ -526,14 +670,14 @@ connect (signal<R(Args...), A>& gSignal,
     return --gSignal.get_slots ().end ();
 }
 
-template <class_t     C,
-          typename    R,
-          typename... Args,
-          allocator_t A
+template <callable_class_t C,
+          typename         R,
+          typename...      Args,
+          allocator_t      A
           >
 inline
 typename signal<R(Args...), A>::slot_type
-connect (signal<R(Args...), A>& gSignal, ClassType<C>& pObj, bool bTop = false)
+connect (signal<R(Args...), A>& gSignal, C& pObj, bool bTop = false)
 {
     auto it = std::find (gSignal.begin (),
                          gSignal.end   (),
@@ -609,7 +753,7 @@ template <class_t     C,
           allocator_t A
           >
 inline
-void disconnect (signal<R(Args...), A>& gSignal, ClassType<C>& pObj, R(C::* fn)(Args...))
+void disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R(C::* fn)(Args...))
 {
     using value_type = typename signal<R(Args...), A>::value_type;
 
@@ -626,7 +770,7 @@ template <class_t     C,
           allocator_t A
           >
 inline
-void disconnect (signal<R(Args...), A>& gSignal, ClassType<C>& pObj, R(C::* fn)(Args...) const)
+void disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R(C::* fn)(Args...) const)
 {
     using value_type = typename signal<R(Args...), A>::value_type;
 
@@ -635,14 +779,14 @@ void disconnect (signal<R(Args...), A>& gSignal, ClassType<C>& pObj, R(C::* fn)(
     if (it != gSignal.end ()) gSignal.get_slots ().erase (it);
 }
 
-template <class_t     C,
-          typename    R,
-          typename... Args,
-          allocator_t A
+template <callable_class_t C,
+          typename         R,
+          typename...      Args,
+          allocator_t      A
           >
 inline
 void
-disconnect (signal<R(Args...), A>& gSignal, ClassType<C>& pObj)
+disconnect (signal<R(Args...), A>& gSignal, C& pObj)
 {
     using value_type = typename signal<R(Args...), A>::value_type;
 

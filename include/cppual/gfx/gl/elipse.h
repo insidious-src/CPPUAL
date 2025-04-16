@@ -36,7 +36,7 @@ namespace cppual { namespace gfx { namespace gl {
 class ellipse : public drawable2d_interface
 {
 public:
-    void draw (transform2d const& transform_info);
+    void draw (transform const& transform_info);
 
     color      get_fill_color  ()              const noexcept { return _M_gFillColor;    }
     color      get_outer_color ()              const noexcept { return _M_gOuterColor;   }

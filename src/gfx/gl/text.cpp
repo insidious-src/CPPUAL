@@ -59,7 +59,7 @@ label2d& label2d::operator = (label2d&&) noexcept
     return *this;
 }
 
-void label2d::draw (transform2d const& /*transform*/)
+void label2d::draw (transform const& /*transform*/)
 {
     if (_M_gText.empty ()) return;
 

@@ -23,6 +23,7 @@
 #define CPPUAL_CIRCULAR_QUEUE_H_
 #ifdef __cplusplus
 
+#include <cppual/type_meta.h>
 #include <cppual/noncopyable.h>
 #include <cppual/memory/allocator.h>
 #include <cppual/concept/concepts.h>

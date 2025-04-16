@@ -544,8 +544,8 @@ public:
     }
 
     static
-    circular_queue<std::pair<x::atom_type, bool>> handle_wm_state (display_const_reference     conn,
-                                                                   vector<x::atom_type> const& atoms)
+    circular_queue<std::pair<x::atom_type, bool>> handle_wm_state (display_const_reference        conn,
+                                                                   dyn_array<x::atom_type> const& atoms)
     {
         circular_queue<std::pair<x::atom_type, bool>> ret_atoms;
         auto&                                         prev_atom_vector = prev_atoms (conn);
@@ -790,7 +790,7 @@ public:
                 auto const states     = static_cast<x::atom_type*> (::xcb_get_property_value (&(*prop)));
                 auto const states_end = states + prop->length;
 
-                vector<x::atom_type> const atoms (states, states_end);
+                dyn_array<x::atom_type> const atoms (states, states_end);
 
                 std::cout << "prev_atoms";
 

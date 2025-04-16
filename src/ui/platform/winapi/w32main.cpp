@@ -65,7 +65,7 @@ using cppual::memory::allocate_shared   ;
 
 extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {
-    static char buffer[sizeof (Win32Factory) + memory_resource::max_adjust];
+    static unsigned char buffer[sizeof (Win32Factory) + memory_resource::max_adjust];
     static stacked_resource static_resource (buffer, sizeof (buffer));
     static plugin_vars plugin;
 

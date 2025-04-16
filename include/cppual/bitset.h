@@ -25,8 +25,8 @@
 
 
 #include <cppual/iterators/bitset_iterator.h>
-#include <cppual/concept/concepts.h>
-#include <cppual/containers.h>
+#include <cppual/containers>
+#include <cppual/concepts>
 
 #include <string_view>
 #include <type_traits>
@@ -56,10 +56,9 @@ public:
     typedef std::underlying_type_t<T> int_type ;
     typedef int_type                  const_int;
 
-    reference_proxy () = delete;
-    constexpr reference_proxy (self_type&&) noexcept = default;
+    constexpr reference_proxy (self_type &&) noexcept = default;
     consteval reference_proxy (self_type const&) noexcept = default;
-    constexpr self_type& operator = (self_type&&) noexcept = default;
+    constexpr self_type& operator = (self_type &&) noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
     consteval reference_proxy (buf_type& bitset, const_int mask) noexcept
@@ -71,6 +70,9 @@ public:
 
     consteval operator bool () const noexcept
     { return (_M_bs->_M_flags & _M_mask) != 0; }
+
+private:
+    reference_proxy () = delete;
 
 private:
     buf_type* _M_bs   { };
@@ -91,7 +93,7 @@ public:
     typedef std::string_view                              string_view           ;
     typedef string                                        string_type           ;
     typedef std::size_t                                   size_type             ;
-    typedef size_type                                     const_size            ;
+    typedef size_type const                               const_size            ;
     typedef reference_proxy<T>                            ref_proxy_type        ;
     typedef set_bit_iterator<T>                           iterator              ;
     typedef set_bit_iterator<T const>                     const_iterator        ;
@@ -443,10 +445,13 @@ constexpr bool operator != (bitset<T> const& lh, bitset<T> const& rh) noexcept
 // =========================================================
 
 //! compile-time bit manipulation
-template <enum_t T, std::remove_cvref_t<T>... Flags>
-consteval bitset<T> make_bitset () noexcept
+template <auto... Flags,
+          typename E = std::common_type_t<decltype (Flags)...>,
+          typename   = std::enable_if_t<std::is_enum_v<E>>
+          >
+consteval bitset<E> make_bitset () noexcept
 {
-    return bitset<T> ((... | static_cast<bitset<T>::int_type> (Flags)));
+    return bitset<E> ((static_cast<E> (Flags) | ...));
 }
 
 // =========================================================

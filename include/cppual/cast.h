@@ -23,10 +23,10 @@
 #define CPPUAL_CAST_H_
 #ifdef __cplusplus
 
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
 
 #include <type_traits>
-//#include <bit>
+#include <bit>
 
 namespace cppual {
 
@@ -110,27 +110,35 @@ constexpr Out& object_cast (In& obj) noexcept
 // ====================================================
 
 template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept
+constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept -> R(D::*)(Args...)
 {
-    return std::bit_cast<R(D::*)(Args...)> (mem_fn);
+    typedef R(D::* out_fn)(Args...);
+
+    return std::bit_cast<out_fn> (mem_fn);
 }
 
 template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept
+constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...) const
 {
-    return std::bit_cast<R(D::*)(Args...) const> (mem_fn);
+    typedef R(D::* const_out_fn)(Args...) const;
+
+    return std::bit_cast<const_out_fn> (mem_fn);
 }
 
 template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept
+constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...)
 {
-    return std::bit_cast<R(D::*)(Args...)> (mem_fn);
+    typedef R(D::* out_fn)(Args...);
+
+    return std::bit_cast<out_fn> (mem_fn);
 }
 
 template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept
+constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept -> R(D::*)(Args...) const
 {
-    return std::bit_cast<R(D::*)(Args...) const> (mem_fn);
+    typedef R(D::* const_out_fn)(Args...) const;
+
+    return std::bit_cast<const_out_fn> (mem_fn);
 }
 
 // =========================================================

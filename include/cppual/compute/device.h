@@ -29,7 +29,7 @@
 #include <cppual/noncopyable.h>
 #include <cppual/compute/backend_iface.h>
 
-#include <memory>
+//#include <memory>
 
 // =========================================================
 

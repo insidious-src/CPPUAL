@@ -70,7 +70,7 @@ set(EXECUTABLE_OUTPUT_PATH "${LIBRARY_OUTPUT_PATH}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 #include(CompilerConfig REQUIRED)
-include(CTest)
+#include(CTest)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll" ".DLL" ".a")
@@ -166,6 +166,7 @@ set(CPPUAL_HOST_HEADERS
     "include/cppual/bigint.h"
     "include/cppual/byte.h"
     "include/cppual/unbound_interface.h"
+    "include/cppual/forward.h"
     )
 
 # process, modules
@@ -184,6 +185,7 @@ add_library(cppual-host SHARED
     "include/cppual/bigint"
     "include/cppual/circular_queue"
     "include/cppual/concepts"
+    "include/cppual/forward"
     "include/cppual/iterator"
     "include/cppual/containers"
     "include/cppual/string"

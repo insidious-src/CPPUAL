@@ -32,6 +32,7 @@
 #include <cppual/gfx/coord.h>
 
 #include <memory>
+#include <mutex>
 
 namespace cppual::gfx {
 
@@ -120,30 +121,24 @@ struct not_initialized : public std::logic_error { using std::logic_error::logic
 class pixel_format
 {
 public:
-    pixel_flags flags;
-    u8          red, green, blue, alpha;
-    u8          depth, stencil;
-    color_type  type;
+    typedef pixel_format self_type;
+
+    pixel_flags flags { pixel_flag::drawable /*| pixel_flag::bitmap*/ };
+    u8          red   { 8 }, green { 8 }, blue { 8 }, alpha { };
+    u8          depth {   }, stencil { };
+    color_type  type  { color_type::true_type };
 
     constexpr u8 bits () const noexcept
     { return u8 (red + green + blue + alpha); }
 
-    constexpr static pixel_format default2d () noexcept
+    //! default values for 2D
+    constexpr static self_type default2d () noexcept
     {
-        return
-        {
-            pixel_flag::drawable /*| pixel_flag::bitmap*/,
-            8,
-            8,
-            8,
-            0,
-            0,
-            0,
-            color_type::true_type
-        };
+        return self_type ();
     }
 
-    constexpr static pixel_format default3d () noexcept
+    //! default values for 3D
+    constexpr static self_type default3d () noexcept
     {
         return
         {
@@ -182,10 +177,10 @@ constexpr bool operator != (pixel_format const& lh, pixel_format const& rh) noex
 class virtual_buffer
 {
 public:
-    typedef vector<color> vector_type;
-    typedef pixel_format  format_type;
-    typedef std::size_t   size_type  ;
-    typedef color         value_type ;
+    typedef dyn_array<color> vector_type;
+    typedef pixel_format     format_type;
+    typedef std::size_t      size_type  ;
+    typedef color            value_type ;
 
     constexpr format_type  format () const noexcept { return _M_gFormat; }
     constexpr vector_type& data   ()       noexcept { return _M_gPixels; }
@@ -225,11 +220,14 @@ struct SHARED_API surface_interface : public resource_interface
 {
     typedef surface_interface self_type;
 
-    virtual point2u        size  () const = 0;
-    virtual surface_type   type  () const = 0;
+    virtual void           set_parent (shared_surface parent) = 0;
+    virtual shared_surface parent   () const = 0;
+    virtual point2i        position () const = 0;
+    virtual point2u        size     () const = 0;
+    virtual surface_type   type     () const = 0;
     virtual void           scale (point2u size) = 0;
     virtual void           paint_background (color clr) = 0;
-    virtual shared_context context () const = 0;
+    virtual shared_context context  () const = 0;
 };
 
 // =========================================================
@@ -242,13 +240,13 @@ struct SHARED_API context_interface : public resource_interface
     virtual shared_surface drawable () const = 0;
     virtual shared_surface readable () const = 0;
     virtual version_type   version  () const = 0;
-    virtual bool           assign   (shared_context const& cntxt) = 0;
+    virtual bool           assign   (shared_context cntxt) = 0;
     virtual bool           use      (shared_surface, shared_surface) = 0;
     virtual void           finish   () = 0;
     virtual void           release  () = 0;
 
     static context_interface* current () noexcept;
-    static void               acquire (shared_context const& cntxt) noexcept;
+    static void               acquire (shared_context cntxt) noexcept;
 
     inline bool active () const noexcept
     { return this == current (); }
@@ -256,47 +254,57 @@ struct SHARED_API context_interface : public resource_interface
 
 // =========================================================
 
-class SHARED_API transform2d
+struct SHARED_API proxy_surface : public surface_interface
 {
 public:
-    typedef transform2d self_type;
+    typedef proxy_surface self_type;
 
-    inline transform2d (rect const& gRect, shared_surface const& surface, float rotate = .0f) noexcept
+    void           set_parent (shared_surface parent) noexcept;
+    shared_surface parent   () const noexcept;
+    point2i        position () const noexcept;
+    point2u        size     () const noexcept;
+    surface_type   type     () const noexcept;
+    void           scale (point2u size);
+    void           paint_background (color clr);
+    shared_context context  () const noexcept;
+
+private:
+    shared_surface _M_parent;
+    rect           _M_rect  ;
+};
+
+// =========================================================
+
+class SHARED_API transform
+{
+public:
+    typedef transform self_type;
+
+    inline transform (rect const& gRect, float z, shared_surface const& surface, float rotate = .0f) noexcept
     : _M_rect    (gRect  ),
       _M_surface (surface),
+      _M_z_depth (z      ),
       _M_rotate  (rotate )
     { }
 
-    constexpr transform2d () noexcept = default;
+    constexpr transform () noexcept = default;
 
-    inline transform2d (self_type&&)                noexcept = default;
-    inline transform2d (self_type const&)           noexcept = default;
+    inline transform (self_type&&)                noexcept = default;
+    inline transform (self_type const&)           noexcept = default;
     inline self_type& operator = (self_type&&)      noexcept = default;
     inline self_type& operator = (self_type const&) noexcept = default;
 
     constexpr rect           geometry () const noexcept { return _M_rect              ; }
+    constexpr float          z_depth  () const noexcept { return _M_z_depth           ; }
     inline    shared_surface surface  () const noexcept { return _M_surface           ; }
     inline    shared_context context  () const noexcept { return _M_surface->context(); }
     constexpr float          rotation () const noexcept { return _M_rotate            ; }
 
 private:
-    rect           _M_rect      ;
-    shared_surface _M_surface   ;
-    float          _M_rotate { };
-};
-
-// =========================================================
-
-class SHARED_API transform3d
-{
-    typedef transform3d self_type;
-
-    constexpr transform3d () noexcept = default;
-
-    inline transform3d (self_type&&)                noexcept = default;
-    inline transform3d (self_type const&)           noexcept = default;
-    inline self_type& operator = (self_type&&)      noexcept = default;
-    inline self_type& operator = (self_type const&) noexcept = default;
+    rect           _M_rect       ;
+    shared_surface _M_surface    ;
+    float          _M_z_depth { };
+    float          _M_rotate  { };
 };
 
 // =========================================================
@@ -315,8 +323,8 @@ struct SHARED_API drawable2d_interface : public non_copyable_virtual
 
     constexpr drawable2d_interface () noexcept = default;
 
-    virtual device_backend type () const noexcept    = 0;
-    virtual void           draw (transform2d const&) = 0;
+    virtual device_backend type () const noexcept  = 0;
+    virtual void           draw (transform const&) = 0;
 };
 
 // =========================================================
@@ -327,26 +335,17 @@ struct SHARED_API drawable3d_interface : public non_copyable_virtual
 
     constexpr drawable3d_interface () noexcept = default;
 
-    virtual device_backend type () const noexcept    = 0;
-    virtual void           draw (transform3d const&) = 0;
+    virtual device_backend type () const noexcept  = 0;
+    virtual void           draw (transform const&) = 0;
 };
 
 // =========================================================
 
-struct SHARED_API transformable2d_interface : public non_copyable_virtual
+struct SHARED_API transformable_interface : public non_copyable_virtual
 {
-    typedef transformable2d_interface self_type;
+    typedef transformable_interface self_type;
 
-    constexpr transformable2d_interface () noexcept = default;
-};
-
-// =========================================================
-
-struct SHARED_API transformable3d_interface : public non_copyable_virtual
-{
-    typedef transformable3d_interface self_type;
-
-    constexpr transformable3d_interface () noexcept = default;
+    constexpr transformable_interface () noexcept = default;
 };
 
 // =========================================================
@@ -365,10 +364,10 @@ struct SHARED_API painter_interface : public non_copyable_virtual
                                            uint         line_width = 1U,
                                            line_style   style      = line_style::solid) = 0;
 
-    virtual shared_drawable2d create_path (vector<point2i> const& coord,
-                                           color           const& clr,
-                                           uint                   line_width = 1U,
-                                           line_style             style      = line_style::solid) = 0;
+    virtual shared_drawable2d create_path (dyn_array<point2i> const& coord,
+                                           color              const& clr,
+                                           uint                      line_width = 1U,
+                                           line_style                style      = line_style::solid) = 0;
 
     virtual shared_drawable2d create_ellipse (color fill, color outline, uint outline_width = 1U) = 0;
     virtual shared_drawable2d create_rectangle (color fill, color outline, uint outline_width = 1U) = 0;
@@ -388,11 +387,11 @@ struct SHARED_API painter_interface : public non_copyable_virtual
 class SHARED_API painter : public non_copyable
 {
 public:
-    typedef painter                                    self_type         ;
-    typedef string                                     string_type       ;
-    typedef vector<std::pair<shared_drawable2d, rect>> drawable_container;
-    typedef drawable2d_interface::line_style           line_style        ;
-    typedef std::array<point2i, 3>                     polygon_array     ;
+    typedef painter                                       self_type         ;
+    typedef string                                        string_type       ;
+    typedef dyn_array<std::pair<shared_drawable2d, rect>> drawable_container;
+    typedef drawable2d_interface::line_style              line_style        ;
+    typedef std::array<point2i, 3>                        polygon_array     ;
 
     painter  (shared_surface const& surface);
     ~painter ();
@@ -402,10 +401,10 @@ public:
                       uint         line_size = 1U,
                       line_style   style     = line_style::solid);
 
-    void create_path (vector<point2i> const& coord,
-                      color           const& clr,
-                      uint                   line_size = 1U,
-                      line_style             style     = line_style::solid);
+    void create_path (dyn_array<point2i> const& coord,
+                      color              const& clr,
+                      uint                      line_size = 1U,
+                      line_style                style     = line_style::solid);
 
     void create_ellipse (rect const& rct, color fill, color outline, uint outline_size = 1U);
     void create_rectangle (rect const& rct, color fill, color outline, uint outline_size = 1U);

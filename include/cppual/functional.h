@@ -25,16 +25,15 @@
 
 #include <cppual/cast.h>
 #include <cppual/types.h>
-#include <cppual/concept/concepts.h>
+#include <cppual/forward>
+#include <cppual/concepts>
 #include <cppual/memory/allocator.h>
 #include <cppual/exceptions/functional_exception.h>
 
-#include <functional>
 #include <cstring>
 #include <utility>
 #include <tuple>
 #include <array>
-#include <bit>
 
 #include <cassert>
 
@@ -45,12 +44,16 @@ namespace cppual {
 //! import needed concepts
 using memory::allocator_t;
 
-//! default max array size for function's capture lambda storage
-inline constexpr std::size_t const LAMBDA_DEFAULT_MAX_SIZE =  64;
-inline constexpr std::size_t const LAMBDA_80_MAX_SIZE      =  80;
-inline constexpr std::size_t const LAMBDA_96_MAX_SIZE      =  96;
-inline constexpr std::size_t const LAMBDA_112_MAX_SIZE     = 112;
-inline constexpr std::size_t const LAMBDA_128_MAX_SIZE     = 128;
+//! max array size for function's capture lambda storage
+inline constexpr std::size_t const LAMBDA_DEFAULT_SIZE =  64;
+
+consteval std::size_t lambda_calc_size (std::size_t const SZ = LAMBDA_DEFAULT_SIZE) noexcept
+{
+    return SZ <=  64 ?  64 :
+           SZ <=  96 ?  96 :
+           SZ <= 128 ? 128 :
+                        SZ ;
+}
 
 // ====================================================
 
@@ -64,39 +67,29 @@ inline constexpr auto callable_operator_v = &std::decay_t<C>::operator ();
 
 class any_object;
 
-template <typename... Args>
-using any_static_fn = void(*)(Args...);
-
-template <typename... Args>
-using any_member_fn = void(any_object::*)(Args...);
-
-template <typename... Args>
-using any_const_member_fn = void(any_object::*)(Args...) const;
-
-template <typename, std::size_t = LAMBDA_DEFAULT_MAX_SIZE>
+template <typename>
 struct function_traits;
 
-template <typename, std::size_t = LAMBDA_DEFAULT_MAX_SIZE>
+template <typename, std::size_t = lambda_calc_size ()>
 class function;
 
 template <typename R, typename... Args>
-using static_fn = R(*)(Args...);
+using any_static_fn = R(*)(Args...);
 
 template <typename R, typename... Args>
-using member_fn = R(any_object::*)(Args...);
+using any_member_fn = R(any_object::*)(Args...);
 
 template <typename R, typename... Args>
-using const_member_fn = R(any_object::*)(Args...) const;
+using any_const_member_fn = R(any_object::*)(Args...) const;
 
 // ====================================================
 
-template <std::size_t BYTES, typename R, typename... Args>
-struct function_traits <R(Args...), BYTES>
+template <typename R, typename... Args>
+struct function_traits <R(Args...)>
 {
-    typedef std::size_t                 size_type    ;
-    typedef size_type const             const_size   ;
-    typedef R                           result_type  ;
-    typedef function<R(Args...), BYTES> function_type;
+    typedef std::size_t                 size_type  ;
+    typedef size_type const             const_size ;
+    typedef R                           result_type;
 
     using type = R(Args...);
 
@@ -198,24 +191,19 @@ namespace {
 //! helper for constructing member function pointers
 struct mem_fn_helper
 {
+    template <class_t C, typename R, typename... Args>
+    using member_pair_t = std::pair<C*, R(C::*)(Args...)>;
+
     template <class_t D, class_t C, typename R, typename... Args>
-    constexpr static auto make (C* obj, R(C::* fn)(Args...)) noexcept
+    constexpr static member_pair_t<D, R, Args...> make (C* obj, R(C::* fn)(Args...)) noexcept
     {
-        return std::pair
-        {
-            object_cast<D> (obj),
-            mem_fn_cast<D> (fn )
-        };
+        return member_pair_t<D, R, Args...> (object_cast<D> (obj), mem_fn_cast<D> (fn));
     }
 
     template <class_t D, class_t C, typename R, typename... Args>
-    constexpr static auto make (C* obj, R(C::* fn)(Args...) const) noexcept
+    constexpr static member_pair_t<D, R, Args...> make (C* obj, R(C::* fn)(Args...) const) noexcept
     {
-        return std::pair
-        {
-            object_cast<D> (obj),
-            mem_fn_cast<D> (fn)
-        };
+        return member_pair_t<D, R, Args...> (object_cast<D> (obj), mem_fn_cast<D> (fn));
     }
 };
 
@@ -226,13 +214,16 @@ template <typename R, typename... Args>
 class closure
 {
 public:
-    typedef closure<R, Args...>   self_type ;
-    typedef std::size_t           size_type ;
-    typedef any_object*           pointer   ;
-    typedef member_fn<R, Args...> value_type;
+    typedef closure<R, Args...>       self_type     ;
+    typedef std::size_t               size_type     ;
+    typedef size_type const           const_size    ;
+    typedef any_object*               pointer       ;
+    typedef any_member_fn<R, Args...> value_type    ;
+    typedef any_static_fn<R, Args...> static_fn_type;
+    typedef value_type                member_fn_type;
 
-    typedef R(*          static_fn_type)(Args...);
-    typedef R(any_object::* mem_fn_type)(Args...);
+    template <class_t C>
+    using member_pair_t = std::pair<C*, R(C::*)(Args...)>;
 
 private:
     constexpr closure () noexcept = default;
@@ -267,33 +258,35 @@ private:
 
     //! static helper for member function binding
     template <class_t C>
-    constexpr static auto make_mem_fn (C* obj, R(C::* fn)(Args...)) noexcept
+    constexpr
+    static
+    member_pair_t<any_object> make_member_fn (C* obj, R(C::* fn)(Args...)) noexcept
     {
         return mem_fn_helper::make<any_object> (obj, fn);
     }
 
     template <class_t C>
-    constexpr static auto make_mem_fn (C* obj, R(C::* fn)(Args...) const) noexcept
+    constexpr
+    static
+    member_pair_t<any_object> make_member_fn (C* obj, R(C::* fn)(Args...) const) noexcept
     {
         return mem_fn_helper::make<any_object> (obj, fn);
     }
 
     //! static helper for static function binding
     template <class_t C>
-    constexpr static auto make_static_fn (R(* fn)(Args...), R(C::* invoker)(Args...)) noexcept
+    constexpr
+    static
+    member_pair_t<any_object> make_static_fn (R(* fn)(Args...), R(C::* invoker)(Args...)) noexcept
     {
-        return std::pair
-        {
-            std::bit_cast<pointer>    (fn     ),
-            std::bit_cast<value_type> (invoker)
-        };
+        return member_pair_t<any_object> (direct_cast<pointer> (fn), direct_cast<value_type> (invoker));
     }
 
     //! non-constexpr functions for actual binding
     template <class_t C>
     constexpr void bind_mem_func (C* obj, R(C::* fn)(Args...)) noexcept
     {
-        auto [bound_obj, bound_fn] = make_mem_fn (obj, fn);
+        auto [bound_obj, bound_fn] = make_member_fn (obj, fn);
 
         _M_pObj = bound_obj;
         _M_fn   = bound_fn ;
@@ -302,7 +295,7 @@ private:
     template <class_t C>
     constexpr void bind_mem_func (C* obj, R(C::* fn)(Args...) const) noexcept
     {
-        auto [bound_obj, bound_fn] = make_mem_fn (obj, fn);
+        auto [bound_obj, bound_fn] = make_member_fn (obj, fn);
 
         _M_pObj = bound_obj;
         _M_fn   = bound_fn ;
@@ -350,7 +343,7 @@ private:
     { return  *this > mRhs; }
 
     constexpr static_fn_type static_func () const noexcept
-    { return std::bit_cast<static_fn_type> (_M_pObj); }
+    { return direct_cast<static_fn_type> (_M_pObj); }
 
 public:
     constexpr pointer object () const noexcept
@@ -378,23 +371,25 @@ public:
 
 //! reimplementation of impossibly fast delegates
 template <std::size_t BYTES, typename R, typename... Args>
-class SHARED_API function <R(Args...), BYTES> : public function_traits<R(Args...), BYTES>
+class SHARED_API function <R(Args...), BYTES> : public function_traits<R(Args...)>
 {
 public:
-    typedef function <R(Args...), BYTES>       self_type      ;
-    typedef function_traits<R(Args...), BYTES> base_type      ;
-    typedef member_fn<R, Args...>              any_mem_fn_type;
-    typedef static_fn<R, Args...>              static_fn_type ;
-    typedef closure  <R, Args...>              closure_type   ;
-    typedef std::array<uchar, BYTES>           storage_type   ;
-    typedef std::size_t                        size_type      ;
-    typedef size_type const                    const_size     ;
-    typedef closure_type::pointer              pointer        ;
-    typedef closure_type::value_type           value_type     ;
-    typedef closure_type* self_type::*         safe_bool      ;
+    typedef function<R(Args...), BYTES> self_type      ;
+    typedef function_traits<R(Args...)> base_type      ;
+    typedef any_member_fn  <R, Args...> any_mem_fn_type;
+    typedef any_static_fn  <R, Args...> static_fn_type ;
+    typedef closure        <R, Args...> closure_type   ;
+    typedef std::array<uchar, BYTES>    storage_type   ;
+    typedef std::size_t                 size_type      ;
+    typedef size_type const             const_size     ;
+    typedef closure_type::pointer       pointer        ;
+    typedef closure_type::value_type    value_type     ;
+    typedef closure_type* self_type::*  safe_bool      ;
 
-    template <size_type N>
-    using self_type_t = function<R(Args...), N>;
+    typedef R(& static_fn_ref)(Args...);
+
+    template <size_type SZ>
+    using self_type_t = function<R(Args...), lambda_calc_size (SZ)>;
 
     template <class_t C>
     using mem_fn_type = R(C::*)(Args...);
@@ -408,9 +403,7 @@ public:
     template <class_t C>
     using const_mem_fn_pair = std::pair<C&, const_mem_fn_type<C>>;
 
-    typedef R(& static_fn_ref)(Args...);
-
-    inline constexpr static const_size storage_size = BYTES;
+    inline constexpr static const_size lambda_size = lambda_calc_size (BYTES);
 
     constexpr function () noexcept = default;
 
@@ -428,7 +421,7 @@ public:
     constexpr function (self_type_t<SZ> const& rh_obj) noexcept
     : _M_closure (rh_obj._M_closure)
     {
-        static_assert (storage_size >= SZ, "function storage size mismatch!");
+        static_assert (lambda_size >= lambda_calc_size (SZ), "function storage size mismatch!");
 
         std::copy (rh_obj._M_storage.begin (), rh_obj._M_storage.end (), _M_storage.begin ());
     }
@@ -437,7 +430,7 @@ public:
     constexpr function (self_type_t<SZ>&& rh_obj) noexcept
     : _M_closure (std::move (rh_obj._M_closure))
     {
-        static_assert (storage_size >= SZ, "function storage size mismatch!");
+        static_assert (lambda_size >= lambda_calc_size (SZ), "function storage size mismatch!");
 
         std::move (rh_obj._M_storage.begin (), rh_obj._M_storage.end (), _M_storage.begin ());
     }
@@ -448,37 +441,37 @@ public:
     { }
 
     //! member function constructor
-    template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr function (C& obj, mem_fn_type<C> mem_fn)
-    : _M_closure (closure_type::make_mem_fn (&obj, mem_fn))
+    : _M_closure (closure_type::make_member_fn (&obj, mem_fn))
     { }
 
     //! const member function constructor
-    template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr function (C& obj, const_mem_fn_type<C> mem_fn)
-    : _M_closure (closure_type::make_mem_fn (&obj, mem_fn))
+    : _M_closure (closure_type::make_member_fn (&obj, mem_fn))
     { }
 
     //! capture lambda constructor
     template <lambda_capture_t Callable,
-              typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
+              typename C = std::enable_if_t<!is_functional_v<std::decay_t<Callable>>, std::decay_t<Callable>>,
               typename   = LambdaCaptureType<Callable>
               >
     constexpr function (Callable&& lambda, LambdaCaptureType<Callable>* = nullptr)
     {
-        // Block function types for lambda capture constructor
+        // block function types for lambda capture constructor
         if constexpr (is_functional_v<C>)
         {
             throw std::runtime_error ("lambda capture constructor cannot be used with function types!");
         }
         else
         {
-            static_assert (sizeof (C) <= storage_size,
+            static_assert (sizeof (C) <= lambda_size,
                            "Capture lambda too large for static storage! "
                            "DON'T value copy captured objects bigger than 16 bytes! "
                            "Use references instead!");
 
-            new (&get_storage<C> ()) C (std::move (lambda));
+            ::new (&get_storage<C> ()) C (std::move (lambda));
 
             bind (get_storage<C> (), callable_operator_v<Callable>);
         }
@@ -486,12 +479,12 @@ public:
 
     //! non-capture lambda constructor
     template <lambda_non_capture_t Callable,
-              typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
+              typename C = std::enable_if_t<!is_functional_v<std::decay_t<Callable>>, std::decay_t<Callable>>,
               typename   = LambdaNonCaptureType<Callable>
               >
     constexpr function (Callable&& callable, LambdaNonCaptureType<Callable>* = nullptr)
     {
-        // Block function types for callable class constructor
+        // block function types for callable class constructor
         if constexpr (is_functional_v<C>)
         {
             throw std::runtime_error ("callable class constructor cannot be used with function types!");
@@ -504,10 +497,10 @@ public:
 
     //! TODO: non-capture lambda + callable class constructor
     //! callable class constructor
-    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr function (C& obj)
     {
-        // Block function types for callable class constructor
+        // block function types for callable class constructor
         if constexpr (is_functional_v<C>)
         {
             throw std::runtime_error ("callable class constructor cannot be used with function types!");
@@ -518,19 +511,10 @@ public:
         }
     }
 
-    //! TODO: this constructor should cease to exist
-    //! redirect functional constructor
-    template <lambda_capture_t Callable,
-             typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>
-             >
-    constexpr function (C&& lambda)
-    : function (is_functional_v<C> ? static_cast<self_type&&> (std::move (lambda)) : lambda)
-    { }
-
     template <size_type SZ>
     constexpr self_type& operator = (self_type_t<SZ> const& rh_obj) noexcept
     {
-        static_assert (storage_size >= SZ, "function storage size mismatch!");
+        static_assert (lambda_size >= lambda_calc_size (SZ), "function storage size mismatch!");
 
         if (this == &rh_obj) return *this;
 
@@ -543,7 +527,7 @@ public:
     template <size_type SZ>
     constexpr self_type& operator = (self_type_t<SZ>&& rh_obj) noexcept
     {
-        static_assert (storage_size >= SZ, "function storage size mismatch!");
+        static_assert (lambda_size >= lambda_calc_size (SZ), "function storage size mismatch!");
 
         if (this == &rh_obj) return *this;
 
@@ -556,55 +540,47 @@ public:
     constexpr self_type& operator = (std::nullptr_t) noexcept
     {
         _M_closure = nullptr;
-        _M_storage = { };
-
         return *this;
     }
 
     //! static function assignment operator
     constexpr self_type& operator = (static_fn_ref fn) noexcept
     {
-        _M_storage = { };
-
         bind (fn);
         return *this;
     }
 
     //! member function assignment operator
-    template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr self_type& operator = (mem_fn_pair<C> const& pair)
     {
-        _M_storage = { };
-
         bind (pair.first, pair.second);
         return *this;
     }
 
     //! const member function assignment operator
-    template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr self_type& operator = (const_mem_fn_pair<C> const& pair)
     {
-        _M_storage = { };
-
         bind (pair.first, pair.second);
         return *this;
     }
 
     //! capture lambda assignment operator
     template <lambda_capture_t Callable,
-              typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
+              typename C = std::enable_if_t<!is_functional_v<std::decay_t<Callable>>, std::decay_t<Callable>>,
               typename   = LambdaCaptureType<Callable>
               >
     constexpr self_type& operator = (Callable&& callable)
     {
-        // Block function types for lambda capture constructor
+        // block function types for lambda capture constructor
         if constexpr (is_functional_v<C>)
         {
             throw std::runtime_error ("lambda capture constructor cannot be used with function types!");
         }
         else
         {
-            static_assert (sizeof (C) <= storage_size,
+            static_assert (sizeof (C) <= lambda_size,
                           "Capture lambda too large for static storage! "
                           "DON'T value copy captured objects bigger than 16 bytes! "
                           "Use references instead!");
@@ -619,20 +595,18 @@ public:
 
     //! non-capture lambda assignment operator
     template <lambda_non_capture_t Callable,
-              typename C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
+              typename C = std::enable_if_t<!is_functional_v<std::decay_t<Callable>>, std::decay_t<Callable>>,
               typename   = LambdaNonCaptureType<Callable>
               >
     constexpr self_type& operator = (Callable&& callable)
     {
-        // Block function types for callable class constructor
+        // block function types for callable class constructor
         if constexpr (is_functional_v<C>)
         {
             throw std::runtime_error ("callable class assignment cannot be used with function types!");
         }
         else
         {
-            _M_storage = { };
-
             bind (callable, callable_operator_v<Callable>);
         }
 
@@ -641,18 +615,16 @@ public:
 
     //! TODO: non-capture lambda + callable class assignment operator
     //! callable object assignment operator
-    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr self_type& operator = (C& obj)
     {
-        // Block function types for callable class constructor
+        // block function types for callable class constructor
         if constexpr (is_functional_v<C>)
         {
             throw std::runtime_error ("callable class assignment cannot be used with function types!");
         }
         else
         {
-            _M_storage = { };
-
             bind (obj, callable_operator_v<C>);
         }
 
@@ -661,9 +633,6 @@ public:
 
     constexpr R operator () (Args... args) const
     {
-#       ifdef DEBUG_MODE
-        if (_M_closure == nullptr) throw bad_function_call ();
-#       endif
         return (object ()->*function_ptr ())(std::forward<Args> (args)...);
     }
 
@@ -701,7 +670,7 @@ public:
     { return _M_closure > rhObj._M_closure; }
 
 private:
-    template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr C& get_storage () const
     {
         return *direct_cast<C*> (&_M_storage[0]);
@@ -714,8 +683,8 @@ private:
 
     constexpr pointer object () const noexcept
     {
-        if (function_ptr<self_type> () == &self_type::call_static_fn) return object<any_object> ();
-        return _M_closure.object ();
+        return (function_ptr<self_type> () == &self_type::call_static_fn) ?
+                object<any_object> () : _M_closure.object ();
     }
 
     template <class_t C>
@@ -740,13 +709,13 @@ private:
         _M_closure.bind_static_func (&fn, &self_type::call_static_fn);
     }
 
-    template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr void bind (C& obj, mem_fn_type<C> fn)
     {
         _M_closure.bind_mem_func (&obj, fn);
     }
 
-    template <class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <class_t C, typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
     constexpr void bind (C& obj, const_mem_fn_type<C> fn)
     {
         _M_closure.bind_mem_func (&obj, fn);
@@ -762,14 +731,14 @@ private:
     template <typename, size_type>
     friend class function;
 
-    template <typename S1, typename S2, std::size_t N, std::size_t SZ>
-    friend constexpr function<S1, SZ> fn_cast (function<S2, SZ> const& fn) noexcept;
+    template <typename S1, std::size_t N, typename S2, std::size_t M>
+    friend constexpr function<S1, lambda_calc_size (N)> fn_cast (function<S2, M> const& fn) noexcept;
 
     template <typename>
     friend struct ::std::hash;
 
 public:
-    closure_type _M_closure { };
+    closure_type _M_closure;
 
     //! bytes for storage of capture lambda
     alignas (std::max_align_t) storage_type _M_storage;
@@ -779,21 +748,27 @@ public:
 
 //! static function make_fn
 template <typename R, typename... Args>
-constexpr auto make_fn (R (& static_fn)(Args...))
+constexpr function<R(Args...)> make_fn (R (& static_fn)(Args...))
 {
     return function<R(Args...)> (static_fn);
 }
 
 //! member function make_fn
-template <class_t C, typename R, typename... Args, typename = std::enable_if_t<!is_functional_v<C>>>
-constexpr auto make_fn (C& obj, R (C::* mem_fn)(Args...))
+template <class_t  C      ,
+          typename R      ,
+          typename... Args,
+          typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
+constexpr function<R(Args...)> make_fn (C& obj, R (C::* mem_fn)(Args...))
 {
     return function<R(Args...)> (obj, mem_fn);
 }
 
 //! const member function make_fn
-template <class_t C, typename R, typename... Args, typename = std::enable_if_t<!is_functional_v<C>>>
-constexpr auto make_fn (C& obj, R (C::* const_mem_fn)(Args...) const)
+template <class_t  C      ,
+          typename R      ,
+          typename... Args,
+          typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
+constexpr function<R(Args...)> make_fn (C& obj, R (C::* const_mem_fn)(Args...) const)
 {
     return function<R(Args...)> (obj, const_mem_fn);
 }
@@ -802,33 +777,34 @@ constexpr auto make_fn (C& obj, R (C::* const_mem_fn)(Args...) const)
 template <lambda_capture_t Callable,
           typename... Args         ,
           typename    R = callable_return_t<Callable, Args...>,
-          typename    C = std::enable_if_t<!is_functional_v<Callable>, std::decay_t<Callable>>,
-          std::size_t N = std::max (sizeof (C), LAMBDA_DEFAULT_MAX_SIZE)
+          typename    C = std::enable_if_t<!is_functional_v<std::decay_t<Callable>>, std::decay_t<Callable>>,
+          std::size_t N = lambda_calc_size (sizeof (C)),
+          typename      = LambdaCaptureType<Callable>
           >
-constexpr auto make_fn (Callable&& callable, LambdaCaptureType<Callable>* ptr = nullptr)
+constexpr function<R(Args...), N> make_fn (Callable&& callable, LambdaCaptureType<Callable>* ptr = nullptr)
 {
-    return function<R(Args...), N> (std::forward<C> (callable), ptr);
+    return function<R(Args...), N> (std::move (callable), ptr);
 }
 
 //! non-capture lambda make_fn
-template <lambda_non_capture_t C,
+template <lambda_non_capture_t Callable,
           typename... Args      ,
-          typename    R = callable_return_t<C, Args...>,
-          typename      = std::enable_if_t<!is_functional_v<C>>,
-          typename      = LambdaNonCaptureType<C>
+          typename    R = callable_return_t<Callable, Args...>,
+          typename    C = std::enable_if_t<!is_functional_v<std::decay_t<Callable>>, std::decay_t<Callable>>,
+          typename      = LambdaNonCaptureType<Callable>
           >
-constexpr auto make_fn (C&& callable, LambdaNonCaptureType<C>* ptr = nullptr)
+constexpr function<R(Args...)> make_fn (Callable&& callable, LambdaNonCaptureType<Callable>* ptr = nullptr)
 {
-    return function<R(Args...)> (std::forward<C> (callable), ptr);
+    return function<R(Args...)> (std::move (callable), ptr);
 }
 
 //! callable object make_fn
 template <callable_class_t C,
           typename... Args  ,
           typename    R = callable_return_t<C, Args...>,
-          typename      = std::enable_if_t<!is_functional_v<C>>
+          typename      = std::enable_if_t<!is_functional_v<std::decay_t<C>>>
           >
-constexpr auto make_fn (C& obj)
+constexpr function<R(Args...)> make_fn (C& obj)
 {
     return function<R(Args...)> (obj);
 }
@@ -836,13 +812,14 @@ constexpr auto make_fn (C& obj)
 // ====================================================
 
 template <typename S1,
+          std::size_t N = lambda_calc_size (),
           typename S2,
-          std::size_t  N = LAMBDA_DEFAULT_MAX_SIZE,
-          std::size_t SZ = std::max (N, LAMBDA_DEFAULT_MAX_SIZE)
+          std::size_t M
           >
-constexpr function<S1, SZ> fn_cast (function<S2, SZ> const& fn_in) noexcept
+constexpr function <S1, lambda_calc_size (N)> fn_cast (function<S2, M> const& fn_in) noexcept
 {
-    static_assert (SZ == std::max (N, LAMBDA_DEFAULT_MAX_SIZE), "don't touch SZ!");
+    static_assert (N >= M, "function storage size mismatch!");
+    constexpr const std::size_t SZ = lambda_calc_size (N);
 
     return function <S1, SZ> (fn_in._M_closure.object (),
                               direct_cast<typename function<S1, SZ>::value_type>

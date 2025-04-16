@@ -36,7 +36,7 @@ namespace cppual { namespace gfx { namespace gl {
 class line : public drawable2d_interface
 {
 public:
-    void draw (transform2d const& transform_info);
+    void draw (transform const& transform_info);
 
     color      get_color ()              const noexcept { return _M_gColor;   }
     uint       size      ()              const noexcept { return _M_uSize;    }
@@ -87,7 +87,7 @@ private:
 class path : public drawable2d_interface
 {
 public:
-    void draw (transform2d const& transform_info);
+    void draw (transform const& transform_info);
 
     color      get_color ()              const noexcept { return _M_gColor;   }
     uint       size      ()              const noexcept { return _M_uSize;    }
@@ -98,7 +98,7 @@ public:
 
     inline path () noexcept = default;
 
-    path (vector<point2i> const& coord,
+    path (dyn_array<point2i> const& coord,
              color           const& gFillColor,
              uint                   uLineSize = 1U,
              line_style             eStyle    = line_style::solid) noexcept
@@ -129,10 +129,10 @@ public:
     }
 
 private:
-    vector<point2i> _M_coord     ;
-    color           _M_gColor { };
-    uint            _M_uSize  { };
-    line_style      _M_eStyle { };
+    dyn_array<point2i> _M_coord     ;
+    color              _M_gColor { };
+    uint               _M_uSize  { };
+    line_style         _M_eStyle { };
 };
 
 } } } // namespace OpenGL

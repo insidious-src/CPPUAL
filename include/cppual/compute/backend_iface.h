@@ -124,7 +124,7 @@ class SHARED_API factory : public non_copyable_virtual
 {
 public:
     typedef std::size_t                      size_type    ;
-    typedef vector<shared_device>            device_vector;
+    typedef dyn_array<shared_device>         device_vector;
     typedef process::plugin_manager<factory> manager_type ;
 
     virtual device_vector          get_devices (device_types type = device_type::any) = 0;
@@ -154,7 +154,7 @@ class SHARED_API factories : public non_copyable_virtual
 {
 public:
     typedef shared_factory        value_type                ;
-    typedef vector<value_type>    vector_type               ;
+    typedef dyn_array<value_type> vector_type               ;
     typedef vector_type&          vector_reference          ;
     typedef vector_type const&    vector_const_reference    ;
     typedef std::array<cchar*, 2> lib_vector                ;

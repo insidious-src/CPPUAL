@@ -36,7 +36,7 @@ namespace cppual { namespace gfx { namespace gl {
 class rectangle : public drawable2d_interface
 {
 public:
-    void draw (transform2d const& transform_info);
+    void draw (transform const& transform_info);
 
     color get_fill_color  ()              const noexcept { return _M_gFillColor;    }
     color get_outer_color ()              const noexcept { return _M_gOuterColor;   }
@@ -48,8 +48,8 @@ public:
     constexpr rectangle () noexcept = default;
 
     rectangle (color const& gFillColor,
-                  color const& gOutColor ,
-                  uint         uLineSize = 1U) noexcept
+               color const& gOutColor ,
+               uint         uLineSize = 1U) noexcept
         : _M_gFillColor (gFillColor), _M_gOuterColor (gOutColor), _M_uSize (uLineSize)
     { }
 

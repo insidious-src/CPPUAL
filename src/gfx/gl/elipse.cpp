@@ -28,7 +28,7 @@
 
 namespace cppual { namespace gfx { namespace gl {
 
-void ellipse::draw (transform2d const& transform_info)
+void ellipse::draw (transform const& transform_info)
 {
     static constexpr ::GLfloat PI = 3.1415926f;
 

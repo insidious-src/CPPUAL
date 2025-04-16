@@ -29,7 +29,7 @@
 
 namespace cppual { namespace gfx { namespace gl {
 
-class texture : public object, transformable2d_interface
+class texture : public object, transformable_interface
 {
 public:
     enum class MinFilter : u8

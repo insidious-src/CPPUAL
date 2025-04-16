@@ -1229,7 +1229,7 @@ public:
             // return NullValue;
 
             // Use static buffer and placement-new to prevent destruction
-            static char buffer[sizeof(GenericValue)];
+            static unsigned char buffer[sizeof(GenericValue)];
             return *new (buffer) GenericValue();
         }
     }

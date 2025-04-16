@@ -26,7 +26,7 @@
 
 namespace cppual { namespace gfx { namespace gl {
 
-void rectangle::draw (transform2d const& transform_info)
+void rectangle::draw (transform const& transform_info)
 {
     ::GLfloat const x = transform_info.geometry ().left;
     ::GLfloat const y = transform_info.geometry ().top;

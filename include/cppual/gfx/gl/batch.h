@@ -80,8 +80,8 @@ public:
     bool   is_batch_config (batch_config const&) const;
     bool   is_enough_room (uint uNumVertices) const;
 
-    void add (vector<gui_vertex> const& vertices, batch_config const&);
-    void add (vector<gui_vertex> const& vertices);
+    void add (dyn_array<gui_vertex> const& vertices, batch_config const&);
+    void add (dyn_array<gui_vertex> const& vertices);
     void render ();
 
 private:

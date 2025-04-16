@@ -38,7 +38,7 @@ public:
     typedef device_interface         base_type        ;
     typedef CLObject<device_id_type> value_type       ;
     typedef value_type*              pointer          ;
-    typedef vector<pointer>          device_ids_vector;
+    typedef dyn_array<pointer>       device_ids_vector;
     typedef factory::device_vector   device_vector    ;
     typedef std::size_t              size_type        ;
     typedef resource_handle          handle_type      ;
@@ -70,7 +70,7 @@ public:
     u32             compute_units_count   () const;
 
 private:
-    vector<string_type> extensions () const;
+    dyn_array<string_type> extensions () const;
     bool supports_extension (string_type const& name) const;
 
     static device_ids_vector get_device_ids ();

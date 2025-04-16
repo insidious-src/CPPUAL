@@ -32,16 +32,22 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <array>
 #include <list>
 #include <set>
 #include <map>
+
+// ====================================================
 
 namespace cppual {
 
 // ====================================================
 
+template <typename T, std::size_t N>
+using array = std::array<T, N>;
+
 template <typename T>
-using vector = std::vector<T, memory::allocator<T>>;
+using dyn_array = std::vector<T, memory::allocator<T>>;
 
 template <typename T>
 using deque = std::deque<T, memory::allocator<T>>;
@@ -52,13 +58,13 @@ using list = std::list<T, memory::allocator<T>>;
 template <typename T>
 using forward_list = std::forward_list<T, memory::allocator<T>>;
 
-template <class Key, class Tp, class Hash = std::hash<Key>, class Pred = std::equal_to<Key>>
+template <class K, class V, class Hash = std::hash<K>, class Pred = std::equal_to<K>>
 using unordered_map =
-std::unordered_map<Key, Tp, Hash, Pred, memory::allocator<std::pair<const Key, Tp>>>;
+std::unordered_map<K, V, Hash, Pred, memory::allocator<std::pair<K const, V>>>;
 
-template <class Key, class Tp, class Hash = std::hash<Key>, class Pred = std::equal_to<Key>>
+template <class K, class V, class Hash = std::hash<K>, class Pred = std::equal_to<K>>
 using unordered_multimap =
-std::unordered_multimap<Key, Tp, Hash, Pred, memory::allocator<std::pair<const Key, Tp>>>;
+std::unordered_multimap<K, V, Hash, Pred, memory::allocator<std::pair<K const, V>>>;
 
 template <class T, class Hash = std::hash<T>, class Pred = std::equal_to<T>>
 using unordered_set =
@@ -70,11 +76,11 @@ std::unordered_multiset<T, Hash, Pred, memory::allocator<T>>;
 
 template <class Key, class Tp, class Compare = std::less<Key>>
 using map =
-std::map<Key, Compare, memory::allocator<std::pair<const Key, Tp>>>;
+std::map<Key, Compare, memory::allocator<std::pair<Key const, Tp>>>;
 
 template <class Key, class Tp, class Compare = std::less<Key>>
 using multimap =
-std::multimap<Key, Compare, memory::allocator<std::pair<const Key, Tp>>>;
+std::multimap<Key, Compare, memory::allocator<std::pair<Key const, Tp>>>;
 
 template <class Key, class Compare = std::less<Key>>
 using set = std::set<Key, Compare, memory::allocator<Key>>;

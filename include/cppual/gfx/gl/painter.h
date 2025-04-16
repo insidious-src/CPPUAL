@@ -39,10 +39,10 @@ public:
                                    uint         line_width,
                                    line_style   style);
 
-    shared_drawable2d create_path (vector<point2i> const& coord,
-                                   color           const& clr,
-                                   uint                   line_width,
-                                   line_style             style);
+    shared_drawable2d create_path (dyn_array<point2i> const& coord,
+                                   color              const& clr,
+                                   uint                      line_width,
+                                   line_style                style);
 
     shared_drawable2d create_ellipse (color fill, color outline, uint outline_size);
     shared_drawable2d create_rectangle (color fill, color outline, uint outline_width);

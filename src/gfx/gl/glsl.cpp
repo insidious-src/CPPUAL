@@ -38,7 +38,7 @@ string_type sync_read_file (string_type const& gFilePath, std::ios_base::openmod
 {
     typedef string_type::size_type size_type;
 
-    std::ifstream gFile (gFilePath, eMode);
+    std::ifstream gFile (gFilePath.c_str (), eMode);
     string_type   gContent;
 
     if (gFile.is_open ())

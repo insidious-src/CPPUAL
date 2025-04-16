@@ -26,7 +26,7 @@
 
 namespace cppual { namespace gfx { namespace gl {
 
-void polygon::draw (transform2d const& /*transform_info*/)
+void polygon::draw (transform const& /*transform_info*/)
 {
     ::glBegin (GL_TRIANGLES);
 

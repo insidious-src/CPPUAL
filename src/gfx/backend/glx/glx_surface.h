@@ -101,7 +101,7 @@ public:
     { return _M_pCfg ? &config::_M_pCfg : nullptr; }
 
     friend
-    constexpr bool operator == (config const& lh, config const& rh) noexcept;
+    consteval bool operator == (config const& lh, config const& rh) noexcept;
 
 private:
     format_type to_format (handle_type fb_cfg) const;
@@ -116,7 +116,7 @@ private:
 
 // ====================================================
 
-constexpr bool operator == (config const& lh, config const& rh) noexcept
+consteval bool operator == (config const& lh, config const& rh) noexcept
 {
     return lh._M_pNative   == rh._M_pNative &&
            lh._M_pLegacy   == rh._M_pLegacy &&
@@ -125,7 +125,7 @@ constexpr bool operator == (config const& lh, config const& rh) noexcept
            lh._M_eFeatures == rh._M_eFeatures;
 }
 
-constexpr bool operator != (config const& lh, config const& rh) noexcept
+consteval bool operator != (config const& lh, config const& rh) noexcept
 { return !(lh == rh); }
 
 // ====================================================
@@ -146,6 +146,10 @@ public:
              point2u size,
              handle_type wnd,
              surface_type type = surface_type::double_buffer);
+
+    void           set_parent (shared_surface /*parent*/) noexcept { }
+    shared_surface parent     () const noexcept { return shared_surface (); }
+    point2i        position   () const noexcept { return { }; }
 
     void    paint_background (color clr);
     point2u size  () const noexcept;
@@ -190,7 +194,7 @@ public:
     static version_type platform_version () noexcept;
 
     bool use     (shared_surface, shared_surface) noexcept;
-    bool assign  (shared_context const& cntxt) noexcept;
+    bool assign  (shared_context cntxt) noexcept;
     void flush   () noexcept;
     void finish  () noexcept;
     void release () noexcept;

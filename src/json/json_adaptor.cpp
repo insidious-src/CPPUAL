@@ -427,14 +427,14 @@ void template_object::connections()
     {
         connect(_M_owner.object()->changed, *this, &template_object::on_object_changed);
         connect(_M_owner.object()->about_to_save, *this, &template_object::on_about_to_save);
-        connect(_M_owner.object()->destroyed, *this, &template_object::invalidate);
+        connect(_M_owner.object()->destroyed, *this, &template_base::invalidate);
     }
     else if (_M_owner.type() == doc_type::array)
     {
         connect(_M_owner.array()->changed, *this, &template_object::on_array_changed);
         connect(_M_owner.array()->removed, *this, &template_object::on_removed);
         connect(_M_owner.array()->about_to_save, *this, &template_object::on_about_to_save);
-        connect(_M_owner.array()->destroyed, *this, &template_object::invalidate);
+        connect(_M_owner.array()->destroyed, *this, &template_base::invalidate);
     }
 }
 
@@ -451,14 +451,14 @@ void template_object::disconnections()
     {
         disconnect(_M_owner.object()->changed, *this, &template_object::on_object_changed);
         disconnect(_M_owner.object()->about_to_save, *this, &template_object::on_about_to_save);
-        disconnect(_M_owner.object()->destroyed, *this, &template_object::invalidate);
+        disconnect(_M_owner.object()->destroyed, *this, &template_base::invalidate);
     }
     else if (_M_owner.type() == doc_type::array)
     {
         disconnect(_M_owner.array()->changed, *this, &template_object::on_array_changed);
         disconnect(_M_owner.array()->removed, *this, &template_object::on_removed);
         disconnect(_M_owner.array()->about_to_save, *this, &template_object::on_about_to_save);
-        disconnect(_M_owner.array()->destroyed, *this, &template_object::invalidate);
+        disconnect(_M_owner.array()->destroyed, *this, &template_base::invalidate);
     }
 }
 
@@ -985,7 +985,7 @@ value_reference_template<doc_parser::string_type>::value_reference_template (tem
                                                                              value_type  const& default_val)
 : base_type (owner)
 {
-    _M_fn = func_type([def_key = key, def = default_val](base_type* ptr)
+    _M_fn = func_type ([def_key = key, def = default_val](base_type* ptr)
     {
         if(def_key.empty()) return;
 
@@ -1021,7 +1021,7 @@ value_reference_template<doc_parser::string_type>::value_reference_template (tem
                                                                              value_type const& default_val)
 : base_type (owner)
 {
-    _M_fn = func_type([idx, def = default_val](base_type* ptr)
+    _M_fn = func_type ([idx, def = default_val](base_type* ptr)
     {
         auto new_idx = idx;
 

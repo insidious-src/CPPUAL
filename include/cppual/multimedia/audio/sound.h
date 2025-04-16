@@ -73,12 +73,12 @@ enum class sound_quality : u8
 class SHARED_API sound
 {
 public:
-    typedef vector<uchar> buffer_type  ;
-    typedef uchar         value_type   ;
-    typedef uchar*        pointer      ;
-    typedef cuchar*       const_pointer;
-    typedef i64           size_type    ;
-    typedef string        string_type  ;
+    typedef dyn_array<uchar> buffer_type  ;
+    typedef uchar            value_type   ;
+    typedef uchar*           pointer      ;
+    typedef cuchar*          const_pointer;
+    typedef i64              size_type    ;
+    typedef string           string_type  ;
 
     enum attribute_type
     {

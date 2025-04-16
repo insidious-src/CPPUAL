@@ -8,16 +8,16 @@
 ## Framework Goals ##
 
 #### Why reinvent the wheel and replace parts of the standard library and Qt? ####
-- the whole idea is to implement everything as a host and compute devices for parallelism, 
+- the whole idea is to implement everything as a host and compute devices for parallelism,
   deprecating OpenGL, DirectX, VA, VDPAU, OVD, XVideo, TrueAudio and OpenAL completely.
 - behaviour-based device processing and explicit events
 
-**So the real question is:** Why would you want to have all these libraries 
+**So the real question is:** Why would you want to have all these libraries
 **when OpenCL is pushing hard and you can program it pretty much like a regular CPU?
 **It's just a matter of time until OpenCL evolves and turns into an all-in-one standard.
 
-**March 6th 2015:** Well,... it evolved into Vulkan (GLNext), 
-**however OpenCL still remains as a new version was released (3.0). 
+**March 6th 2015:** Well,... it evolved into Vulkan (GLNext),
+**however OpenCL still remains as a new version was released (3.0).
 **Both are using a common IL - SPIR-V.
 
 

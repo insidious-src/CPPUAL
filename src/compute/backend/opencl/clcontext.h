@@ -57,7 +57,7 @@ private:
     template<typename T>
     T get_info (context_info_type info) const
     {
-        return get_object_info< vector<T> > (::clGetContextInfo, handle(), info);
+        return get_object_info< dyn_array<T> > (::clGetContextInfo, handle(), info);
     }
 
 private:
