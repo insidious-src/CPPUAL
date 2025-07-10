@@ -174,7 +174,7 @@ class template_object;
 class template_array ;
 
 template <json_value_t T,
-          allocator_t  A = memory::allocator<value_reference<std::remove_cvref_t<T>>>
+          allocator_t  A = memory::allocator<value_reference<remove_cref_t<T>>>
           >
 class values_array;
 
@@ -620,12 +620,12 @@ private:
 class SHARED_API value_reference_base
 {
 public:
-    typedef value_reference_base       self_type  ;
-    typedef function<void(self_type*)> func_type  ;
-    typedef doc_parser::pointer        pointer    ;
-    typedef doc_parser::size_type      size_type  ;
-    typedef doc_parser::value_type     json_type  ;
-    typedef doc_parser::string_type    string_type;
+    typedef value_reference_base           self_type  ;
+    typedef function<void(self_type*), 80> func_type  ;
+    typedef doc_parser::pointer            pointer    ;
+    typedef doc_parser::size_type          size_type  ;
+    typedef doc_parser::value_type         json_type  ;
+    typedef doc_parser::string_type        string_type;
 
     static constexpr auto npos = static_cast<size_type> (-1);
 
@@ -706,7 +706,7 @@ class value_reference_template : public value_reference_base
 public:
     typedef value_reference_template<T> self_type ;
     typedef value_reference_base        base_type ;
-    typedef std::remove_cvref_t<T>      value_type;
+    typedef remove_cref_t<T>      value_type;
 
     typedef typename std::conditional<std::is_same_v<i16, T> || std::is_enum_v<T>,
             typename std::conditional<sizeof (T) <= sizeof (i32), i32, i64>::type,
@@ -1326,6 +1326,8 @@ public:
                      size_type         idx  ,
                      value_type const& default_val = value_type());
 
+    ~value_reference () = default;
+
     template <typename R,
               typename = std::enable_if_t<std::is_same_v<R, value_type>>
               >
@@ -1660,7 +1662,7 @@ class objects_array<T, A> : public template_array, public A
 public:
     typedef objects_array<T, A>                    self_type             ;
     typedef template_array                         base_type             ;
-    typedef std::remove_cvref_t<T>                 value_type            ;
+    typedef remove_cref_t<T>                 value_type            ;
     typedef std::allocator_traits<A>               traits_type           ;
     typedef traits_type::allocator_type            allocator_type        ;
     typedef std::deque<value_type, allocator_type> array_type            ;
@@ -1882,7 +1884,7 @@ class values_array : public template_array, public A
 public:
     typedef values_array<T, A>                          self_type             ;
     typedef template_array                              base_type             ;
-    typedef value_reference<std::remove_cvref_t<T>>     value_type            ;
+    typedef value_reference<remove_cref_t<T>>     value_type            ;
     typedef std::allocator_traits<A>                    traits_type           ;
     typedef traits_type::allocator_type                 allocator_type        ;
     typedef std::deque<value_type, allocator_type>      array_type            ;

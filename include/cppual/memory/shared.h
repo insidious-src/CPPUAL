@@ -96,16 +96,16 @@ public:
     shared_memory  (object_type& obj, size_type size, bool writable = true);
     ~shared_memory () noexcept;
 
-    constexpr bool writable () const noexcept
+    consteval bool writable () const noexcept
     { return _M_bWritable; }
 
-    constexpr bool valid () const noexcept
+    consteval bool valid () const noexcept
     { return _M_pRegion; }
 
     constexpr pointer address () const noexcept
     { return _M_pRegion.get<pointer> (); }
 
-    constexpr size_type size () const noexcept
+    consteval size_type size () const noexcept
     { return _M_uSize; }
 
     constexpr object_type const& object () const noexcept
@@ -119,10 +119,13 @@ public:
     { return _M_pRegion.get<T*> () + pOffset; }
 
 private:
-    object_type* _M_gObject  ;
-    handle_type  _M_pRegion  ;
-    size_type    _M_uSize    ;
-    bool         _M_bWritable;
+    shared_memory () = delete;
+
+private:
+    object_type* _M_gObject   { };
+    handle_type  _M_pRegion   { };
+    size_type    _M_uSize     { };
+    bool         _M_bWritable { };
 };
 
 } // namespace Memory

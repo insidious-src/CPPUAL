@@ -80,7 +80,7 @@ inline bimap_type& map ()
     return views_map;
 }
 
-inline vec_type& vec ()
+vec_type& vec ()
 {
     static vec_type views_vec;
 
@@ -150,9 +150,9 @@ view::view (self_type* pParentObj, rect const& gRect, u32 nScreen, resource_type
         {
             using internal::vec_type;
 
-            uptr const key = _M_pRenderable->handle ();
+            cuptr key = _M_pRenderable->handle ();
 
-            if (internal::map ().get_index (key) != internal::bimap_type::npos)
+            if (internal::map ().contains (key))
             {
                 internal::map ()[key] = this;
 

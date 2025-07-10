@@ -165,17 +165,17 @@ void dyn_loader::detach () noexcept
     _M_pHandle = nullptr;
 }
 
-void* dyn_loader::get_address (string_type::const_pointer pName) const noexcept
+void* dyn_loader::get_address (string_view pName) const noexcept
 {
 #   ifdef OS_STD_POSIX
 
-    void* pAddr = ::dlsym (_M_pHandle, pName);
+    void* pAddr = ::dlsym (_M_pHandle, pName.data ());
     if (!pAddr) std::cerr << ::dlerror () << std::endl;
     return pAddr;
 
 #   elif defined (OS_WINDOWS)
 
-    auto const convert = direct_cast<void*> (::GetProcAddress (_M_pHandle.get<HMODULE> (), pName));
+    auto const convert = direct_cast<void*> (::GetProcAddress (_M_pHandle.get<HMODULE> (), pName.data ()));
 
     if (!convert)
         std::cerr << "error: " << ::GetLastError () << "\naddress not found!" << std::endl;
@@ -184,19 +184,18 @@ void* dyn_loader::get_address (string_type::const_pointer pName) const noexcept
 #   endif
 }
 
-dyn_loader::function_type
-dyn_loader::get_function (string_type::const_pointer pName) const noexcept
+dyn_loader::function_type dyn_loader::get_function (string_view pName) const noexcept
 {
 #   ifdef OS_STD_POSIX
 
-    auto const convert = direct_cast<function_type> (::dlsym (_M_pHandle, pName));
+    auto const convert = direct_cast<function_type> (::dlsym (_M_pHandle, pName.data ()));
 
     if (!convert) std::cerr << ::dlerror () << std::endl;
     return convert;
 
 #   elif defined (OS_WINDOWS)
 
-    function_type func = ::GetProcAddress (_M_pHandle.get<HMODULE> (), pName);
+    function_type const func = ::GetProcAddress (_M_pHandle.get<HMODULE> (), pName.data ());
     if (!func)
         std::cerr << "error: " << ::GetLastError () << " :: function not found!" << std::endl;
     return func;

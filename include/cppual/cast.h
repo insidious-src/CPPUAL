@@ -90,7 +90,7 @@ constexpr Out& class_cast (In& obj) noexcept
 }
 
 template <class_t Out, class_t In>
-constexpr Out* object_cast (In* obj) noexcept
+constexpr Out* obj_ptr_cast (In* obj) noexcept
 {
     return static_cast<Out*> (static_cast<void*> (obj));
 }
@@ -98,7 +98,7 @@ constexpr Out* object_cast (In* obj) noexcept
 // =========================================================
 
 template <class_t Out, class_t In>
-constexpr Out& object_cast (In& obj) noexcept
+constexpr Out& dyn_obj_cast (In& obj) noexcept
 {
 #   ifdef DEBUG_MODE
     return *dynamic_cast<Out*> (&obj);

@@ -24,17 +24,13 @@
 #ifdef __cplusplus
 
 #include <cppual/decl>
-#include <cppual/cast.h>
-#include <cppual/types.h>
-#include <cppual/containers>
-#include <cppual/functional>
-#include <cppual/string>
+#include <cppual/casts>
+#include <cppual/types>
 #include <cppual/concepts>
 
-//#include <span>
-//#include <array>
 #include <tuple>
 #include <utility>
+#include <optional>
 #include <algorithm>
 #include <type_traits>
 
@@ -52,24 +48,16 @@ struct consteval_bimap;
 
 // ====================================================
 
+//template <typename, std::size_t>
+//class function;
+
+// ====================================================
+
 template <typename P, typename T, typename U>
 concept bimap_pair_t = non_void_t<T> && non_void_t<U> && std::same_as<P, std::pair<T, U>>;
 
 template <typename P, typename T, typename U>
 concept switch_map_pair_t = switch_value_t<T> && void_functional_t<U> && std::same_as<P, std::pair<T, U>>;
-
-// =========================================================
-
-/**
- ** @arg_t is a single function argument that is memory compact.
- ** if the argument type is smaller than or equal to 4 bytes then it's passed as const value,
- ** however if it's bigger than 4 bytes or is a class then it's passed as const reference
- **
- ** T and U are the same type except U has const, volatile and reference removed.
- **/
-template <typename T, typename U = std::remove_cvref_t<T>>
-using arg_t = std::conditional_t<sizeof (U) <= arch_32_bits_v &&
-                                !std::is_class_v<U>, U const, U const&>;
 
 // =========================================================
 
@@ -87,6 +75,61 @@ consteval auto overload (R (C::* fn)(Args...) const) noexcept -> decltype (fn)
 template <typename... Args, typename R>
 consteval auto overload (R (* fn)(Args...)) noexcept -> decltype (fn)
 { return fn; }
+
+// ====================================================
+
+template <void_or_class_t C, typename S>
+struct any_fn_type;
+
+template <class_t C, typename R, non_void_t... Args>
+struct any_fn_type <C, R(Args...)>
+{
+    using type = R(C::*)(Args...);
+};
+
+template <class_t C, typename R, non_void_t... Args>
+struct any_fn_type <C, R(Args...) const>
+{
+    using type = R(C::*)(Args...) const;
+};
+
+template <typename R, non_void_t... Args>
+struct any_fn_type <void, R(Args...)>
+{
+    using type = R(*)(Args...);
+};
+
+// =========================================================
+
+/**
+ ** @arg_t is a single function argument that is memory compact.
+ ** if the argument type is smaller than or equal to 4 bytes then it's passed as const value,
+ ** however if it's bigger than 4 bytes or is a class then it's passed as const reference
+ **
+ ** T and U are the same type except U has reference and const removed.
+ **/
+template <typename T, typename U = remove_cref_t<T>>
+using arg_t = std::conditional_t<sizeof (U) <= arch_32_bits_v && !std::is_class_v<U>, U const, U const&>;
+
+// =========================================================
+
+template <non_void_t T>
+struct var_type
+{
+    typedef T        value_type     ;
+    typedef T&       reference      ;
+    typedef T const& const_reference;
+
+    inline constexpr static const_reference value = value_type ();
+};
+
+template <non_void_t T>
+using var_type_ref = var_type<T>::const_reference;
+
+template <non_void_t T>
+inline constexpr static var_type_ref<T> type = var_type<T>::value;
+
+inline constexpr static var_type_ref<byte> default_type = var_type<byte>::value;
 
 // ====================================================
 
@@ -116,14 +159,16 @@ public:
     typedef consteval_bimap<pair_type, N>         self_type             ;
     typedef std::size_t                           size_type             ;
     typedef size_type const                       const_size            ;
-    typedef std::remove_cvref_t<K>                key_type              ;
+    typedef remove_cref_t<K>                      key_type              ;
     typedef key_type const                        const_key             ;
-    typedef std::remove_cvref_t<V>                value_type            ;
+    typedef remove_cref_t<V>                      value_type            ;
     typedef value_type const                      const_value           ;
+    typedef std::optional<key_type>               optional_key          ;
+    typedef std::optional<value_type>             optional_value        ;
     typedef pair_type                             array_type[N]         ;
-    typedef key_type&                             key_reference         ;
-    typedef value_type&                           value_reference       ;
-    typedef const_key&                            key_const_reference   ;
+    typedef key_type   &                          key_reference         ;
+    typedef value_type &                          value_reference       ;
+    typedef const_key  &                          key_const_reference   ;
     typedef const_value&                          value_const_reference ;
     typedef pair_type*                            iterator              ;
     typedef pair_type const*                      const_iterator        ;
@@ -141,9 +186,9 @@ public:
     inline constexpr static const_size npos = const_size (-1);
 
     //! make class trivially copyable & movable
-    constexpr consteval_bimap (self_type&&) noexcept = default;
+    constexpr consteval_bimap (self_type &&) noexcept = default;
     constexpr consteval_bimap (self_type const&) noexcept = default;
-    constexpr self_type& operator = (self_type&&) noexcept = default;
+    constexpr self_type& operator = (self_type &&) noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
     constexpr consteval_bimap (std::initializer_list<pair_type> pairs) noexcept
@@ -218,6 +263,31 @@ public:
     constexpr iterator       rend    ()       noexcept { return &_M_pairs[0] - 1 ; }
     constexpr const_iterator rend    () const noexcept { return &_M_pairs[0] - 1 ; }
     constexpr const_iterator crend   () const noexcept { return &_M_pairs[0] - 1 ; }
+
+    //! empty () method to check if map is empty
+    consteval bool empty () const noexcept
+    {
+        for (size_type i = 0; i < size (); ++i)
+            if (_M_pairs[i] != pair_type ()) return false;
+
+        return true;
+    }
+
+    //! size_used () method to return number of used slots
+    consteval size_type size_used () const noexcept
+    {
+        size_type count = 0;
+
+        for (size_type i = 0; i < size (); ++i) if (_M_pairs[i].first != key_type ()) ++count;
+
+        return count;
+    }
+
+    //! full () method to check if map is full
+    consteval bool full () const noexcept
+    {
+        return size_used () == size ();
+    }
 
     constexpr iterator find (const_key k) noexcept
     {
@@ -375,6 +445,33 @@ protected:
         constexpr const_size I = get_index<V_> ();
         static_assert (I != npos, "value not found in consteval_bimap");
         return _M_pairs[I].first;
+    }
+
+    //! safe access with optional return types
+    template <const_key K_>
+    consteval optional_value get_optional () const noexcept
+    {
+        const_size i = get_index<K_> ();
+        return (i != npos) ? optional_value { _M_pairs[i].second } : std::nullopt;
+    }
+
+    template <const_value V_>
+    consteval optional_key get_optional () const noexcept
+    {
+        const_size i = get_index<V_> ();
+        return (i != npos) ? optional_key { _M_pairs[i].first } : std::nullopt;
+    }
+
+    constexpr optional_value get_optional (const_key k) const noexcept
+    {
+        const_size i = get_index (k);
+        return (i != npos) ? optional_value { _M_pairs[i].second } : std::nullopt;
+    }
+
+    constexpr optional_key get_optional (const_value v) const noexcept
+    {
+        const_size i = get_index (v);
+        return (i != npos) ? optional_key { _M_pairs[i].first } : std::nullopt;
     }
 
 private:
@@ -702,29 +799,6 @@ struct meta_list
 } // cppual
 
 // ====================================================
-
-namespace std {
-
-// ====================================================
-
-using cppual::lambda_calc_size;
-
-template <std::size_t N = lambda_calc_size ()>
-using delegate = cppual::function<void(), N>;
-
-// ====================================================
-
-template <size_t N = lambda_calc_size (), cppual::switch_value_t T, typename... Args>
-constexpr auto make_pair (T const _case, Args&&... fn_args) noexcept
-{
-    using fn_type = delegate<N>;
-
-    return pair<T, fn_type> (_case, cppual::make_fn (forward<Args> (fn_args)...));
-}
-
-// ====================================================
-
-} // std
 
 #endif // __cplusplus
 #endif // CPPUAL_FUNCTIONAL_META_H_

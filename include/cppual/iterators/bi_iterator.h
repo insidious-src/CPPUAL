@@ -23,7 +23,7 @@
 #define CPPUAL_ITERATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
 
 #include <iterator>
 
@@ -35,13 +35,13 @@ namespace cppual {
 
 template <typename T>
 class is_input_iterator : public
-        std::conditional<std::is_convertible<typename
+        std::conditional_t<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
-        std::input_iterator_tag>::value, std::true_type, std::false_type>::type
+        std::input_iterator_tag>::value, std::true_type, std::false_type>
 { };
 
 template <typename T>
-inline constexpr auto const is_input_iterator_v = is_input_iterator<T>::value;
+inline constexpr cbool is_input_iterator_v = is_input_iterator<T>::value;
 
 template <typename T>
 concept input_iterator_t = is_input_iterator_v<T>;
@@ -50,13 +50,13 @@ concept input_iterator_t = is_input_iterator_v<T>;
 
 template <typename T>
 class is_output_iterator : public
-        std::conditional<std::is_convertible<typename
+        std::conditional_t<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
-        std::output_iterator_tag>::value, std::true_type, std::false_type>::type
+        std::output_iterator_tag>::value, std::true_type, std::false_type>
 { };
 
 template <typename T>
-inline constexpr auto const is_output_iterator_v = is_output_iterator<T>::value;
+inline constexpr cbool is_output_iterator_v = is_output_iterator<T>::value;
 
 template <typename T>
 concept output_iterator_t = is_output_iterator_v<T>;
@@ -65,13 +65,13 @@ concept output_iterator_t = is_output_iterator_v<T>;
 
 template <typename T>
 class is_forward_iterator : public
-        std::conditional<std::is_convertible<typename
+        std::conditional_t<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
-        std::forward_iterator_tag>::value, std::true_type, std::false_type>::type
+        std::forward_iterator_tag>::value, std::true_type, std::false_type>
 { };
 
 template <typename T>
-inline constexpr auto const is_forward_iterator_v = is_forward_iterator<T>::value;
+inline constexpr cbool is_forward_iterator_v = is_forward_iterator<T>::value;
 
 template <typename T>
 concept forward_iterator_t = is_forward_iterator_v<T>;
@@ -80,13 +80,13 @@ concept forward_iterator_t = is_forward_iterator_v<T>;
 
 template <typename T>
 class is_bidirectional_iterator : public
-        std::conditional<std::is_convertible<typename
+        std::conditional_t<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
-        std::bidirectional_iterator_tag>::value, std::true_type, std::false_type>::type
+        std::bidirectional_iterator_tag>::value, std::true_type, std::false_type>
 { };
 
 template <typename T>
-inline constexpr auto const is_bidirectional_iterator_v = is_bidirectional_iterator<T>::value;
+inline constexpr cbool is_bidirectional_iterator_v = is_bidirectional_iterator<T>::value;
 
 template <typename T>
 concept bidirectional_iterator_t = is_bidirectional_iterator_v<T>;
@@ -95,13 +95,13 @@ concept bidirectional_iterator_t = is_bidirectional_iterator_v<T>;
 
 template <typename T>
 class is_random_access_iterator : public
-        std::conditional<std::is_convertible<typename
+        std::conditional_t<std::is_convertible<typename
         std::iterator_traits<T>::iterator_category,
-        std::random_access_iterator_tag>::value, std::true_type, std::false_type>::type
+        std::random_access_iterator_tag>::value, std::true_type, std::false_type>
 { };
 
 template <typename T>
-inline constexpr auto const is_random_access_iterator_v = is_random_access_iterator<T>::value;
+inline constexpr cbool is_random_access_iterator_v = is_random_access_iterator<T>::value;
 
 template <typename T>
 concept random_access_iterator_t = is_random_access_iterator_v<T>;
@@ -110,15 +110,15 @@ concept random_access_iterator_t = is_random_access_iterator_v<T>;
 
 template <typename T>
 class is_iterator : public
-        std::conditional<is_input_iterator<T>::value ||
+        std::conditional_t<is_input_iterator<T>::value ||
         is_output_iterator<T>::value                 ||
         is_forward_iterator<T>::value                ||
         is_bidirectional_iterator<T>::value          ||
-        is_random_access_iterator<T>::value, std::true_type, std::false_type>::type
+        is_random_access_iterator<T>::value, std::true_type, std::false_type>
 { };
 
 template <typename T>
-inline constexpr auto const is_iterator_v = is_iterator<T>::value;
+inline constexpr cbool is_iterator_v = is_iterator<T>::value;
 
 template <typename T>
 concept iterator_t = is_iterator_v<T>;
@@ -127,7 +127,7 @@ concept iterator_t = is_iterator_v<T>;
 
 template <typename T>
 using IteratorType = typename
-std::enable_if<std::is_convertible<typename
+std::enable_if_t<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
 std::input_iterator_tag>::value or
 std::is_convertible<typename
@@ -135,37 +135,37 @@ std::iterator_traits<T>::iterator_category,
 std::output_iterator_tag>::value or
 std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
-std::bidirectional_iterator_tag>::value, T>::type;
+std::bidirectional_iterator_tag>::value, T>;
 
 template <typename T>
 using OutputIteratorType = typename
-std::enable_if<std::is_convertible<typename
+std::enable_if_t<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
-std::output_iterator_tag>::value, T>::type;
+std::output_iterator_tag>::value, T>;
 
 template <typename T>
 using InputIteratorType = typename
-std::enable_if<std::is_convertible<typename
+std::enable_if_t<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
-std::input_iterator_tag>::value, T>::type;
+std::input_iterator_tag>::value, T>;
 
 template <typename T>
 using ForwardIteratorType = typename
-std::enable_if<std::is_convertible<typename
+std::enable_if_t<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
-std::forward_iterator_tag>::value>::type;
+std::forward_iterator_tag>::value>;
 
 template <typename T>
 using BidirectionalIteratorType = typename
-std::enable_if<std::is_convertible<typename
+std::enable_if_t<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
-std::bidirectional_iterator_tag>::value>::type;
+std::bidirectional_iterator_tag>::value>;
 
 template <typename T>
 using RandomAccessIteratorType = typename
-std::enable_if<std::is_convertible<typename
+std::enable_if_t<std::is_convertible<typename
 std::iterator_traits<T>::iterator_category,
-std::random_access_iterator_tag>::value>::type;
+std::random_access_iterator_tag>::value>;
 
 // ====================================================
 
@@ -187,14 +187,14 @@ public:
     typedef size_type const                 const_size       ;
     typedef std::bidirectional_iterator_tag iterator_category;
 
+    typedef std::conditional_t<std::is_const_v<buf_type>, const_value, value_type> elem_type;
+
     template <typename U>
     using self_type_t = bidirectional_iterator<U>;
 
-    typedef std::conditional_t<std::is_const_v<buf_type>, const_value, value_type> elem_type;
+    inline constexpr static const_size npos = const_size (-1);
 
-    inline constexpr static size_type const npos = size_type (-1);
-
-    friend class bidirectional_iterator<buf_type const>;
+    friend class bidirectional_iterator<std::remove_const_t<buf_type> const>;
     friend class bidirectional_iterator<std::remove_const_t<buf_type>>;
 
     constexpr elem_type& operator *  () const { return  (get ()[_M_uPos]); }
@@ -202,12 +202,15 @@ public:
 
     constexpr bidirectional_iterator () noexcept = default;
 
-    constexpr explicit bidirectional_iterator (buf_type& b, const_size p = size_type ()) noexcept
+    constexpr
+    explicit
+    bidirectional_iterator (buf_type& b, const_size p = const_size ()) noexcept
     : _M_pBuf (&b), _M_uPos (p)
     { }
 
     //! converting a const iterator to a non-const iterator
-    constexpr bidirectional_iterator (self_type_t<buf_type const> const& other) noexcept
+    constexpr
+    bidirectional_iterator (self_type_t<buf_type const> const& other) noexcept
     : _M_pBuf (const_cast<buf_type*> (other._M_pBuf)), _M_uPos (other._M_uPos)
     { }
 
@@ -230,7 +233,8 @@ public:
     }
 
     //! converting a const iterator to a non-const iterator
-    constexpr self_type& operator = (self_type_t<buf_type const> const& other) noexcept
+    constexpr
+    self_type& operator = (self_type_t<buf_type const> const& other) noexcept
     {
         if (this == &other) return *this;
 
@@ -316,7 +320,7 @@ public:
     { return _M_uPos == npos ? true : _M_uPos <= other._M_uPos; }
 
     constexpr buf_type& get () const noexcept { return *_M_pBuf; }
-    constexpr size_type pos () const noexcept { return  _M_uPos; }
+    consteval size_type pos () const noexcept { return  _M_uPos; }
 
 private:
     buf_type* _M_pBuf { };
@@ -326,6 +330,8 @@ private:
 // =========================================================
 
 } // cppual
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_ITERATOR_H_

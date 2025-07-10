@@ -23,7 +23,7 @@
 #define CPPUAL_TYPE_META_H_
 #ifdef __cplusplus
 
-#include <cppual/cast.h>
+#include <cppual/casts>
 #include <cppual/bitflags>
 #include <cppual/concepts>
 
@@ -147,7 +147,7 @@ template <integer_t T>
 struct traits_type
 {
     typedef T                      type      ;
-    typedef std::remove_cvref_t<T> value_type;
+    typedef remove_cref_t<T> value_type;
 
     inline constexpr static auto const min_value = std::numeric_limits<value_type>::min ();
     inline constexpr static auto const max_value = std::numeric_limits<value_type>::max ();

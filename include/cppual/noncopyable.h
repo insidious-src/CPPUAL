@@ -25,11 +25,25 @@
 
 namespace cppual {
 
+// ====================================================
+
 struct non_constructible
 {
 private:
     non_constructible () = delete;
     non_constructible (non_constructible const&) = delete;
+};
+
+// ====================================================
+
+struct non_constructible_virtual
+{
+public:
+    constexpr virtual ~non_constructible_virtual () = default;
+
+private:
+    non_constructible_virtual () = delete;
+    non_constructible_virtual (non_constructible_virtual const&) = delete;
 };
 
 // ====================================================
@@ -44,7 +58,7 @@ private:
 
 struct non_default_constructible_virtual
 {
-    inline virtual ~non_default_constructible_virtual () { }
+    constexpr virtual ~non_default_constructible_virtual () { }
 
 private:
     non_default_constructible_virtual () = delete;
@@ -55,7 +69,7 @@ private:
 struct non_copyable
 {
 public:
-    constexpr non_copyable () = default;
+    consteval non_copyable () = default;
 
 private:
     non_copyable (non_copyable const&) = delete;
@@ -67,8 +81,8 @@ private:
 struct non_copyable_virtual
 {
 public:
-    constexpr non_copyable_virtual () = default;
-    virtual  ~non_copyable_virtual () { }
+    constexpr          non_copyable_virtual () = default;
+    constexpr virtual ~non_copyable_virtual () { }
 
 private:
     non_copyable_virtual (non_copyable_virtual const&) = delete;
@@ -80,12 +94,12 @@ private:
 struct non_copyable_movable
 {
 public:
-    constexpr non_copyable_movable () = default;
+    consteval non_copyable_movable () = default;
 
 private:
-    non_copyable_movable (non_copyable_movable&&) = delete;
+    non_copyable_movable (non_copyable_movable &&) = delete;
     non_copyable_movable (non_copyable_movable const&) = delete;
-    non_copyable_movable& operator = (non_copyable_movable&&) = delete;
+    non_copyable_movable& operator = (non_copyable_movable &&) = delete;
     non_copyable_movable& operator = (non_copyable_movable const&) = delete;
 };
 
@@ -94,13 +108,13 @@ private:
 struct non_copyable_movable_virtual
 {
 public:
-    constexpr non_copyable_movable_virtual () = default;
-    virtual  ~non_copyable_movable_virtual () { }
+    constexpr          non_copyable_movable_virtual () = default;
+    constexpr virtual ~non_copyable_movable_virtual () { }
 
 private:
-    non_copyable_movable_virtual (non_copyable_movable_virtual&&) = delete;
+    non_copyable_movable_virtual (non_copyable_movable_virtual &&) = delete;
     non_copyable_movable_virtual (non_copyable_movable_virtual const&) = delete;
-    non_copyable_movable_virtual& operator = (non_copyable_movable_virtual&&) = delete;
+    non_copyable_movable_virtual& operator = (non_copyable_movable_virtual &&) = delete;
     non_copyable_movable_virtual& operator = (non_copyable_movable_virtual const&) = delete;
 };
 
@@ -109,7 +123,7 @@ private:
 struct non_copy_constructible
 {
 public:
-    constexpr non_copy_constructible () = default;
+    consteval non_copy_constructible () = default;
 
 private:
     non_copy_constructible (non_copy_constructible const&) = delete;
@@ -120,8 +134,8 @@ private:
 struct non_copy_constructible_virtual
 {
 public:
-    constexpr non_copy_constructible_virtual () = default;
-    virtual  ~non_copy_constructible_virtual () { }
+    constexpr          non_copy_constructible_virtual () = default;
+    constexpr virtual ~non_copy_constructible_virtual () { }
 
 private:
     non_copy_constructible_virtual (non_copy_constructible_virtual const&) = delete;
@@ -132,7 +146,7 @@ private:
 struct non_copy_assignable
 {
 public:
-    constexpr non_copy_assignable () = default;
+    consteval non_copy_assignable () = default;
 
 private:
     non_copy_assignable& operator = (non_copy_assignable const&) = delete;
@@ -143,11 +157,57 @@ private:
 struct non_copy_assignable_virtual
 {
 public:
-    constexpr non_copy_assignable_virtual () = default;
-    virtual  ~non_copy_assignable_virtual () { }
+    constexpr          non_copy_assignable_virtual () = default;
+    constexpr virtual ~non_copy_assignable_virtual () { }
 
 private:
     non_copy_assignable_virtual& operator = (non_copy_assignable_virtual const&) = delete;
+};
+
+// ====================================================
+
+struct non_move_constructible
+{
+public:
+    consteval non_move_constructible () = default;
+
+private:
+    non_move_constructible (non_move_constructible&&) = delete;
+};
+
+// ====================================================
+
+struct non_move_constructible_virtual
+{
+public:
+    constexpr          non_move_constructible_virtual () = default;
+    constexpr virtual ~non_move_constructible_virtual () { }
+
+private:
+    non_move_constructible_virtual (non_move_constructible_virtual&&) = delete;
+};
+
+// ====================================================
+
+struct non_move_assignable
+{
+public:
+    consteval non_move_assignable () = default;
+
+private:
+    non_move_assignable& operator = (non_move_assignable&&) = delete;
+};
+
+// ====================================================
+
+struct non_move_assignable_virtual
+{
+public:
+    constexpr          non_move_assignable_virtual () = default;
+    constexpr virtual ~non_move_assignable_virtual () { }
+
+private:
+    non_move_assignable_virtual& operator = (non_move_assignable_virtual&&) = delete;
 };
 
 } // cppual

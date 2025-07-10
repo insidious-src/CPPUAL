@@ -22,8 +22,6 @@
 #ifndef CPPUAL_DECL_H_
 #define CPPUAL_DECL_H_
 
-#include <cstddef>
-
 #undef OS_CURRENT
 #undef OS_STD_UNIX
 #undef OS_STD_POSIX
@@ -45,12 +43,15 @@
 #undef OS_WIN32
 #undef OS_WIN64
 #undef OS_WINDOWS
+#undef OS_PS2         // undefined
 #undef OS_PS3         // undefined
 #undef OS_PS4
 #undef OS_PS5         // undefined
+#undef OS_XBOX        // undefined
 #undef OS_XBOX360     // undefined
 #undef OS_XBOXONE     // undefined
 #undef OS_XBOX_SERIES // undefined
+#undef OS_WII         // undefined
 #undef OS_WII_U       // undefined
 #undef OS_FREERT      // undefined
 #undef ARCH_64BITS
@@ -227,14 +228,27 @@
 #       define DECL_EXPORT __declspec(dllexport)
 #       define DECL_IMPORT __declspec(dllimport)
 #       define DECL_HIDDEN
+#       define DECL_FN_IMPORT __declspec(dllexport)
+#       define DECL_FN_EXPORT __declspec(dllimport)
+#define
 #   elif (defined (__GNUC__))
 #       define DECL_EXPORT __attribute__((visibility("default")))
 #       define DECL_IMPORT __attribute__((visibility("default")))
 #       define DECL_HIDDEN __attribute__((visibility("hidden")))
+#       define DECL_FN_IMPORT
+#       define DECL_FN_EXPORT
+#   elif (defined (__clang__))
+#       define DECL_EXPORT __attribute__((visibility("default")))
+#       define DECL_IMPORT __attribute__((visibility("default")))
+#       define DECL_HIDDEN __attribute__((visibility("hidden")))
+#       define DECL_FN_IMPORT __attribute__((visibility("default")))
+#       define DECL_FN_EXPORT __attribute__((visibility("default")))
 #   else
 #       define DECL_IMPORT
 #       define DECL_EXPORT
 #       define DECL_HIDDEN
+#       define DECL_FN_IMPORT
+#       define DECL_FN_EXPORT
 #   endif
 #
 #endif // DECL_EXPORT, DECL_IMPORT and DECL_HIDDEN
@@ -257,8 +271,10 @@
 
 #ifdef API_EXPORT
 #   define SHARED_API DECL_EXPORT
+#   define SHARED_FN_API DECL_FN_EXPORT
 #else
 #   define SHARED_API DECL_IMPORT
+#   define SHARED_FN_API DECL_FN_IMPORT
 #endif
 
 #if !defined (NDEBUG) or defined (__DEBUG) or defined (_DEBUG) or defined (__DEBUG__)
@@ -318,14 +334,16 @@
 namespace cppual {
 
 /// void typedefs
-typedef const void cvoid;
+typedef  void const cvoid    ;
+typedef  void *      void_ptr;
+typedef cvoid *     cvoid_ptr;
 
 /// bool typedefs
 typedef const bool cbool;
 
 /// 1 byte size typedefs
-typedef std::byte        byte;
-typedef std::byte const cbyte;
+typedef unsigned char        byte;
+typedef unsigned char const cbyte;
 
 /// ASCII typedefs
 typedef char const cchar;

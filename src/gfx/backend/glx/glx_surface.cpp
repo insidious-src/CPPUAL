@@ -181,7 +181,9 @@ inline config::feature_types convert_extensions (display_pointer dsp)
         {
         case constexpr_char_hash ("GLX_EXT_swap_control"):
             eFeatures += config::feature::sync_control;
+            break;
         case constexpr_char_hash ("GLX_MESA_swap_control"):
+            eFeatures += config::feature::sync_control;
             eFeatures += config::feature::mesa_sync_control;
             break;
         }

@@ -56,6 +56,7 @@ class raster_image final : public image_interface, private memory::allocator<ras
 {
 public:
     inline raster_image () noexcept = default;
+    ~raster_image () { }
 
     void draw (transform const& info);
 

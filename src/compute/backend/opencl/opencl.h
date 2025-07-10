@@ -23,14 +23,14 @@
 #define CPPUAL_COMPUTE_BACKEND_OPENCL_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/string.h>
-#include <cppual/resource.h>
-#include <cppual/containers.h>
-#include <cppual/noncopyable.h>
+#include <cppual/types>
+#include <cppual/string>
+#include <cppual/concepts>
+#include <cppual/resource>
+#include <cppual/containers>
+#include <cppual/noncopyable>
 #include <cppual/compute/object.h>
 #include <cppual/compute/device.h>
-#include <cppual/concept/concepts.h>
 #include <cppual/compute/backend_iface.h>
 
 #define CL_TARGET_OPENCL_VERSION 200
@@ -160,7 +160,7 @@ template <> struct is_cl_object_helper<queue_type      > : public std::true_type
 template <> struct is_cl_object_helper<sampler_type    > : public std::true_type  { };
 
 template <typename T>
-struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<std::remove_cvref_t<T>>::value)>
+struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<remove_cref_t<T>>::value)>
 { static_assert (is_cl_object<T>::value, "T is NOT an opencl object type!"); };
 
 template <typename T>
@@ -463,7 +463,7 @@ struct get_object_info_impl< dyn_array<T> >
         i32 ret = function(0, 0, &size);
         if (ret != success) throw opencl_error(ret);
 
-        if(size == 0) return vector<T>();
+        if(size == 0) return value_type ();
 
         value_type vector (size / sizeof(T));
 

@@ -23,22 +23,22 @@
 #define CPPUAL_PROCESS_TASK
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/reactive.h>
-#include <cppual/functional.h>
-#include <cppual/containers.h>
-#include <cppual/circular_queue.h>
+#include <cppual/types>
+#include <cppual/reactive>
+#include <cppual/functional>
+#include <cppual/containers>
+#include <cppual/circular_queue>
 #include <cppual/unbound_matrix.h>
 #include <cppual/memory/allocator.h>
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
 
-//#include <atomic>
 
 #ifdef DEBUG_MODE
 #   include <iostream>
 #endif
 
 #include <tuple>
+//#include <atomic>
 #include <future>
 #include <optional>
 #include <shared_mutex>
@@ -184,7 +184,7 @@ private:
     void schedule_notify ();
 
     template <typename F,
-              typename = std::enable_if_t<std::is_same_v<std::remove_cvref_t<F>, fn_type>>
+              typename = std::enable_if_t<std::is_same_v<remove_cref_t<F>, fn_type>>
               >
     FORCEINLINE bool schedule_push (F&& fn)
     {
@@ -260,7 +260,7 @@ class host_task : private host_queue
 public:
     typedef host_task<T>              self_type      ;
     typedef host_queue                base_type      ;
-    typedef std::remove_cvref_t<T>    value_type     ;
+    typedef remove_cref_t<T>    value_type     ;
     typedef value_type const          const_value    ;
     typedef value_type&               reference      ;
     typedef value_type const&         const_reference;
@@ -516,7 +516,7 @@ class unbound_task : private host_queue
 public:
     typedef unbound_task<T>           self_type      ;
     typedef host_queue                base_type      ;
-    typedef std::remove_cvref_t<T>    value_type     ;
+    typedef remove_cref_t<T>    value_type     ;
     typedef value_type const          const_value    ;
     typedef value_type&               reference      ;
     typedef value_type const&         const_reference;

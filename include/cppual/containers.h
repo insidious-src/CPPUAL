@@ -76,11 +76,11 @@ std::unordered_multiset<T, Hash, Pred, memory::allocator<T>>;
 
 template <class Key, class Tp, class Compare = std::less<Key>>
 using map =
-std::map<Key, Compare, memory::allocator<std::pair<Key const, Tp>>>;
+std::map<Key, Tp, Compare, memory::allocator<std::pair<Key const, Tp>>>;
 
 template <class Key, class Tp, class Compare = std::less<Key>>
 using multimap =
-std::multimap<Key, Compare, memory::allocator<std::pair<Key const, Tp>>>;
+std::multimap<Key, Tp, Compare, memory::allocator<std::pair<Key const, Tp>>>;
 
 template <class Key, class Compare = std::less<Key>>
 using set = std::set<Key, Compare, memory::allocator<Key>>;
@@ -134,6 +134,46 @@ typedef std::basic_stringstream<char32, std::char_traits<char32>, memory::alloca
     u32stringstream;
 typedef std::basic_stringstream<wchar , std::char_traits<wchar> , memory::allocator<wchar>>
     wstringstream;
+
+// ====================================================
+
+template <non_void_t T, std::size_t SZ>
+constexpr bool operator == (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
+{
+    if  (lh.size ()  !=  rh.size ()) return false;
+    for (auto i = 0U; i < rh.size (); ++i) if (lh[i] != rh[i]) return false;
+
+    return true;
+}
+
+template <non_void_t T, std::size_t SZ>
+constexpr bool operator == (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
+{
+    if  (lh.size ()  !=  rh.size ()) return false;
+    for (auto i = 0U; i < lh.size (); ++i) if (lh[i] != rh[i]) return false;
+
+    return true;
+}
+
+// ====================================================
+
+template <non_void_t T, std::size_t SZ>
+constexpr bool operator != (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
+{
+    if  (lh.size ()  !=  rh.size ()) return true;
+    for (auto i = 0U; i < lh.size (); ++i) if (lh[i] != rh[i]) return true;
+
+    return false;
+}
+
+template <non_void_t T, std::size_t SZ>
+constexpr bool operator != (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
+{
+    if  (lh.size ()  !=  rh.size ()) return true;
+    for (auto i = 0U; i < lh.size (); ++i) if (lh[i] != rh[i]) return true;
+
+    return false;
+}
 
 // ====================================================
 

@@ -23,9 +23,10 @@
 #define CPPUAL_GFX_DISPLAY_H_
 #ifdef __cplusplus
 
-#include <cppual/noncopyable.h>
-#include <cppual/resource.h>
 #include <cppual/string.h>
+#include <cppual/resource.h>
+#include <cppual/noncopyable.h>
+#include <cppual/unbound_interface.h>
 
 #include <memory>
 
@@ -37,7 +38,7 @@ typedef std::weak_ptr  <display_interface> weak_display  ;
 
 // ====================================================
 
-class SHARED_API display_interface : public non_copyable_virtual
+class SHARED_API display_interface : public dyn_unbound_interface
 {
 public:
     typedef resource_connection handle_type;
@@ -68,7 +69,9 @@ public:
 
 protected:
     constexpr display_interface (handle_type native, handle_type legacy) noexcept
-    : _M_native (native), _M_legacy (legacy)
+    : base_type ()
+    , _M_native (native)
+    , _M_legacy (legacy)
     { }
 
 private:

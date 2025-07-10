@@ -57,7 +57,7 @@ struct point2
 
     value_type x { }, y { };
 
-    consteval point2 () noexcept = default;
+    constexpr point2 () noexcept = default;
 
     constexpr point2 (value_type x_, value_type y_) noexcept
     : x (x_),  y (y_)
@@ -88,7 +88,7 @@ struct point3
 
     value_type x { }, y { }, z { };
 
-    consteval point3 () noexcept = default;
+    constexpr point3 () noexcept = default;
 
     constexpr point3 (value_type x_, value_type y_, value_type z_) noexcept
     : x (x_),  y (y_), z (z_)
@@ -119,7 +119,7 @@ struct point4
 
     value_type x { }, y { }, z { }, w { };
 
-    consteval point4 () noexcept = default;
+    constexpr point4 () noexcept = default;
 };
 
 template <arithmetic_t T>
@@ -145,7 +145,7 @@ struct rect
 
     value_type left { }, top { }, right { }, bottom { };
 
-    consteval rect () noexcept = default;
+    constexpr rect () noexcept = default;
 
     constexpr rect (value_type x, value_type y, u16 width, u16 height) noexcept
     : left   (x),

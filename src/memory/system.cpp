@@ -188,10 +188,10 @@ namespace cppual { namespace memory {
 
 // =========================================================
 
-memory_resource* system_resource ()
+memory_resource& system_resource ()
 {
     static system_memory_resource rc;
-    return &rc;
+    return rc;
 }
 
 // =========================================================

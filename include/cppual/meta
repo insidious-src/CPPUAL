@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/cast.h>
 #include <cppual/fn_meta.h>
 #include <cppual/str_meta.h>
 #include <cppual/type_meta.h>

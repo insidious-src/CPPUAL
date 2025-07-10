@@ -20,7 +20,7 @@
  */
 
 #include <cppual/memory/pool.h>
-#include <cppual/cast.h>
+#include <cppual/casts>
 
 #include <cassert>
 #include <iostream>

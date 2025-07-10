@@ -54,7 +54,7 @@ std::size_t SHARED_API working_size ();
 
 // =========================================================
 
-memory_resource* SHARED_API system_resource ();
+memory_resource& SHARED_API system_resource ();
 
 // =========================================================
 

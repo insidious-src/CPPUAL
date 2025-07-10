@@ -23,7 +23,7 @@
 #define CPPUAL_TEXT_ROPE_H_
 #ifdef __cplusplus
 
-#include <cppual/cast.h>
+#include <cppual/casts>
 #include <cppual/string>
 #include <cppual/containers>
 #include <cppual/memory/allocator.h>
@@ -44,13 +44,13 @@ namespace cppual {
 template <char_t T = char, allocator_t A = memory::allocator<T>>
 struct default_node_policy
 {
-    typedef default_node_policy<T, A>                self_type     ;
-    typedef std::remove_cvref_t<T>                   value_type    ;
-    typedef std::size_t                              size_type     ;
-    typedef size_type const                          const_size    ;
-    typedef std::allocator_traits<A>::allocator_type allocator_type;
-    typedef fstring<value_type, allocator_type>      string_type   ;
-    typedef std::basic_string_view<value_type>       string_view   ;
+    typedef default_node_policy<T, A>                   self_type     ;
+    typedef remove_cref_t<T>                            value_type    ;
+    typedef std::size_t                                 size_type     ;
+    typedef size_type const                             const_size    ;
+    typedef memory::allocator<T> allocator_type;
+    typedef fstring<value_type, allocator_type>         string_type   ;
+    typedef std::basic_string_view<value_type>          string_view   ;
 
     //! Optimal chunk size for cache line alignment (typically 64 bytes)
     inline constexpr static const_size cache_line_size   =      64;

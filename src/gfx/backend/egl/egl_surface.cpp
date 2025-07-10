@@ -118,7 +118,7 @@ inline void error <error_type::initialize> ()
 }
 
 template <>
-inline void error <error_type::make_current> ()
+void error <error_type::make_current> ()
 {
     switch (::eglGetError ())
     {
@@ -147,7 +147,7 @@ inline void error <error_type::make_current> ()
 }
 
 template <>
-inline void error <error_type::create> ()
+void error <error_type::create> ()
 {
     switch (::eglGetError ())
     {
@@ -188,7 +188,7 @@ inline void error <error_type::destroy> ()
 }
 
 template <>
-inline void error <error_type::query_surface> ()
+void error <error_type::query_surface> ()
 {
     switch (::eglGetError ())
     {

@@ -26,10 +26,11 @@
 #include <cppual/bitset.h>
 #include <cppual/string.h>
 #include <cppual/resource.h>
+#include <cppual/gfx/coord.h>
+#include <cppual/gfx/color.h>
 #include <cppual/containers.h>
 #include <cppual/noncopyable.h>
-#include <cppual/gfx/color.h>
-#include <cppual/gfx/coord.h>
+#include <cppual/memory/allocator.h>
 
 #include <memory>
 #include <mutex>
@@ -177,10 +178,12 @@ constexpr bool operator != (pixel_format const& lh, pixel_format const& rh) noex
 class virtual_buffer
 {
 public:
-    typedef dyn_array<color> vector_type;
-    typedef pixel_format     format_type;
-    typedef std::size_t      size_type  ;
-    typedef color            value_type ;
+    typedef pixel_format                  format_type   ;
+    typedef std::size_t                   size_type     ;
+    typedef size_type const               const_size    ;
+    typedef color                         value_type    ;
+    typedef dyn_array<value_type>         vector_type   ;
+    typedef memory::allocator<value_type> allocator_type;
 
     constexpr format_type  format () const noexcept { return _M_gFormat; }
     constexpr vector_type& data   ()       noexcept { return _M_gPixels; }
@@ -190,9 +193,11 @@ public:
       _M_gPixels ()
     { }
 
-    constexpr virtual_buffer (point2i gSize, pixel_format const& gFormat = pixel_format::default2d ())
+    constexpr virtual_buffer (point2i gSize,
+                              pixel_format   const& gFormat = pixel_format::default2d (),
+                              allocator_type const& ator    = allocator_type ())
     : _M_gFormat (gFormat),
-      _M_gPixels (size_type (gSize.x * gSize.y))
+      _M_gPixels (size_type (gSize.x * gSize.y), ator)
     { }
 
 private:

@@ -20,7 +20,7 @@
  */
 
 #include <cppual/gfx/draw.h>
-#include <cppual/process/plugin.h>
+#include <cppual/plugin>
 
 #include <algorithm>
 #include <iostream>
@@ -54,7 +54,7 @@ private:
     }
 
 public:
-    inline initializer ()
+    initializer ()
     {
         if (mgr.load_plugin (plugin_name ())) factory = mgr.plugin (plugin_name ()).iface ();
     }

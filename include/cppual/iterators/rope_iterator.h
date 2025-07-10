@@ -40,19 +40,26 @@ class frope_iterator
 {
 public:
     // Standard iterator type definitions
-    typedef frope_iterator<Rope>            self_type        ;
-    typedef std::remove_reference_t<Rope>   buf_type         ;
-    typedef std::remove_cvref_t<buf_type>   buf_clean_type   ;
-    typedef typename Rope::pointer          pointer          ;
-    typedef typename Rope::const_pointer    const_pointer    ;
-    typedef typename Rope::reference        reference        ;
-    typedef typename Rope::const_reference  const_reference  ;
-    typedef typename Rope::difference_type  difference_type  ;
-    typedef typename Rope::size_type        size_type        ;
-    typedef size_type const                 const_size       ;
-    typedef typename Rope::value_type       value_type       ;
-    typedef value_type const                const_value      ;
-    typedef std::bidirectional_iterator_tag iterator_category;
+    typedef frope_iterator<Rope>            self_type          ;
+    typedef std::remove_reference_t<Rope>   buf_type           ;
+    typedef std::add_const_t<buf_type>      const_buf          ;
+    typedef buf_type *                      buf_pointer        ;
+    typedef buf_type const*                 buf_const_pointer  ;
+    typedef buf_type &                      buf_reference      ;
+    typedef buf_type const&                 buf_const_reference;
+    typedef remove_cref_t<buf_type>         buf_clean_type     ;
+    typedef typename Rope::pointer          pointer            ;
+    typedef typename Rope::const_pointer    const_pointer      ;
+    typedef typename Rope::reference        reference          ;
+    typedef typename Rope::const_reference  const_reference    ;
+    typedef typename Rope::difference_type  difference_type    ;
+    typedef typename Rope::size_type        size_type          ;
+    typedef size_type const                 const_size         ;
+    typedef typename Rope::value_type       value_type         ;
+    typedef value_type const                const_value        ;
+    typedef std::bidirectional_iterator_tag iterator_category  ;
+    typedef buf_clean_type::list_node       list_node          ;
+    typedef buf_clean_type::tree_node       tree_node          ;
 
     template <typename U>
     using self_type_t = frope_iterator<U>;
@@ -60,29 +67,27 @@ public:
     typedef std::conditional_t<std::is_const_v<buf_type>, const_reference, reference> elem_ref;
     typedef std::conditional_t<std::is_const_v<buf_type>, const_pointer  , pointer  > elem_ptr;
 
-    friend class frope_iterator<buf_type const>;
-    friend class frope_iterator<std::remove_const_t<buf_type>>;
-
-private:
-    using list_node = typename buf_clean_type::list_node;
-    using tree_node = typename buf_clean_type::tree_node;
-
-    buf_type* _M_pBuf { };         // Parent rope
-    size_type _M_uPos { };         // Position in entire rope
-
     union node_union
     {
-        struct { list_node* node; } list;
-        struct { tree_node* node; } tree;
-    }
-    _M_current { };
-    size_type _M_node_pos { };     // Position within current node
+        struct { list_node* node { }; } list;
+        struct { tree_node* node { }; } tree;
+    };
+
+    friend class frope_iterator<buf_type const>;
+    friend class frope_iterator<buf_clean_type>;
+
+private:
+
+    buf_pointer _M_pBuf     { };    // Parent rope
+    size_type   _M_uPos     { };    // Position in entire rope
+    node_union  _M_current  { };
+    size_type   _M_node_pos { };    // Position within current node
 
 public:
     /**
      * @brief Construct iterator at specific position
      */
-    frope_iterator (buf_type& rope, const_size pos = size_type ())
+    constexpr frope_iterator (buf_reference rope, const_size pos = size_type ())
     : _M_pBuf (&rope)
     , _M_uPos ( pos )
     {
@@ -94,21 +99,23 @@ public:
     }
 
     //! converting a const iterator to a non-const iterator
-    constexpr frope_iterator (self_type_t<buf_type const> const& other) noexcept
-    : self_type   (const_cast<buf_type*> (other._M_pBuf), other._M_uPos)
+    constexpr frope_iterator (self_type_t<const_buf> const& other) noexcept
+    : _M_pBuf     (const_cast<buf_pointer> (other._M_pBuf))
+    , _M_uPos     (other._M_uPos    )
     , _M_current  (other._M_current )
     , _M_node_pos (other._M_node_pos)
     { }
 
     //! converting a non-const iterator to a const iterator
-    constexpr frope_iterator (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
-    : self_type   (other._M_pBuf, other._M_uPos)
+    constexpr frope_iterator (self_type_t<buf_clean_type> const& other) noexcept
+    : _M_pBuf     (const_cast<buf_pointer> (other._M_pBuf))
+    , _M_uPos     (other._M_uPos    )
     , _M_current  (other._M_current )
     , _M_node_pos (other._M_node_pos)
     { }
 
     //! converting a non-const iterator to a const iterator
-    inline self_type& operator = (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
+    constexpr self_type& operator = (self_type_t<buf_clean_type> const& other) noexcept
     {
         if (this == &other) return *this;
 
@@ -125,8 +132,8 @@ public:
      */
     constexpr elem_ref operator * () const
     {
-        if (_M_pBuf->is_tree ()) return _M_current.tree.node->data[_M_node_pos];
-        else return _M_current.list.node->data[_M_node_pos];
+        return _M_pBuf->is_tree () ? _M_current.tree.node->data[_M_node_pos]
+                                   : _M_current.list.node->data[_M_node_pos];
     }
 
     /**
@@ -140,7 +147,7 @@ public:
     /**
      * @brief Pre-increment
      */
-    inline self_type& operator ++ ()
+    constexpr self_type& operator ++ ()
     {
         if (!_M_pBuf || _M_uPos >= _M_pBuf->size()) return *this;
 
@@ -159,7 +166,7 @@ public:
             if (_M_node_pos >= _M_current.list.node->data.size ())
             {
                 _M_current.list.node = _M_current.list.node->next;
-                _M_node_pos = 0;
+                _M_node_pos          = 0;
             }
         }
 
@@ -169,7 +176,7 @@ public:
     /**
      * @brief Post-increment
      */
-    inline self_type operator ++ (int)
+    constexpr self_type operator ++ (int)
     {
         frope_iterator temp (*this);
 
@@ -180,7 +187,7 @@ public:
     /**
      * @brief Pre-decrement
      */
-    inline self_type& operator -- ()
+    constexpr self_type& operator -- ()
     {
         if (!_M_pBuf || _M_uPos <= 0) return *this;
 
@@ -209,7 +216,7 @@ public:
     /**
      * @brief Post-decrement
      */
-    constexpr frope_iterator operator -- (int)
+    constexpr self_type operator -- (int)
     {
         frope_iterator temp (*this);
 
@@ -233,14 +240,16 @@ public:
         return !(*this == other);
     }
 
-private:private:
+private:
+    consteval frope_iterator () = default;
+
     /**
      * @brief Find node containing position in list mode
      */
-    inline void find_list_position (const_size target_pos)
+    constexpr void find_list_position (const_size target_pos)
     {
         _M_current.list.node = _M_pBuf->_M_gBuffer.list.head;
-        size_type curr_pos = 0;
+        size_type curr_pos   = size_type ();
 
         while (_M_current.list.node)
         {
@@ -260,10 +269,10 @@ private:private:
     /**
      * @brief Find node containing position in tree mode
      */
-    inline void find_tree_position (const_size target_pos)
+    constexpr void find_tree_position (const_size target_pos)
     {
         _M_current.tree.node = _M_pBuf->_M_gBuffer.tree.root;
-        size_type curr_pos = 0;
+        size_type curr_pos   = size_type ();
 
         while (_M_current.tree.node)
         {
@@ -289,7 +298,7 @@ private:private:
     /**
      * @brief Move to next node in tree mode
      */
-    inline void advance_tree_node ()
+    constexpr void advance_tree_node ()
     {
         if (!_M_current.tree.node->right)
         {
@@ -320,7 +329,7 @@ private:private:
     /**
      * @brief Move to previous node in tree mode
      */
-    inline void retreat_tree_node ()
+    constexpr void retreat_tree_node ()
     {
         if (!_M_current.tree.node->left)
         {
@@ -352,7 +361,7 @@ private:private:
      */
     constexpr size_type get_subtree_size (tree_node* node) const
     {
-        if (!node) return 0;
+        if (!node) return size_type ();
 
         return get_subtree_size (node->left) + node->data.size () +
                get_subtree_size (node->right);

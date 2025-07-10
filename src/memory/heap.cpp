@@ -21,7 +21,7 @@
 
 #include <cppual/memory/heap.h>
 #include <cppual/memory/mop.h>
-#include <cppual/cast.h>
+#include <cppual/casts>
 
 #include <iostream>
 

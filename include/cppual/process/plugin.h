@@ -23,14 +23,17 @@
 #define CPPUAL_PROCESS_PLUGIN_H_
 #ifdef __cplusplus
 
-#include <cppual/memory/allocator.h>
-#include <cppual/concepts>
-#include <cppual/types.h>
+
+#include <cppual/abi>
+#include <cppual/decl>
+#include <cppual/types>
 #include <cppual/string>
+#include <cppual/concepts>
 #include <cppual/resource>
-#include <cppual/type_meta.h>
 #include <cppual/containers>
-#include <cppual/noncopyable.h>
+#include <cppual/noncopyable>
+#include <cppual/memory/allocator.h>
+#include <cppual/unbound_interface.h>
 
 #include <memory>
 #include <cstring>
@@ -74,39 +77,42 @@ public:
 
     static string_type extension () noexcept;
 
-    inline    string_view    path        () const noexcept { return _M_gLibPath; }
-    constexpr void*          handle      () const noexcept { return _M_pHandle;  }
+    constexpr string_view    path        () const noexcept { return _M_gLibPath; }
+    constexpr void_ptr       handle      () const noexcept { return _M_pHandle ; }
     constexpr resolve_policy policy      () const noexcept { return _M_eResolve; }
-    constexpr bool           is_attached () const noexcept { return _M_pHandle;  }
+    constexpr bool           is_attached () const noexcept { return _M_pHandle ; }
 
-    inline ~dyn_loader ()
+    ~dyn_loader ()
     { if (_M_eResolve != resolve_policy::statically) detach (); }
 
     inline bool contains (string_view const& gName) const noexcept
-    { return get_address (gName.data ()); }
+    { return get_address (gName.data ()) != nullptr; }
 
-    template <typename T>
-    inline T* import (string_view const& pName) const noexcept
+    constexpr function_proxy<self_type> operator [] (string_view name) const noexcept
+    {  return function_proxy<self_type> (*this, name); }
+
+    template <typename T = void>
+    constexpr T* import (string_view const& pName) const noexcept
     { return static_cast<T*> (get_address (pName.data ())); }
 
-    template <typename R, typename... Args>
-    inline auto import (string_view const& pName) const -> R(*)(Args...)
+    template <typename R = void, typename... Args>
+    constexpr auto import (string_view pName) const noexcept
     {
         return direct_cast<R(*)(Args...)> (get_function (pName.data ()));
     }
 
     template <typename R = void, typename... Args>
-    inline R call (string_view const& pName, Args... args) const
+    constexpr R invoke (string_view pName, Args... args) const
     {
         auto fn = direct_cast<R(*)(Args...)> (get_function (pName.data ()));
 
         if (!fn) throw std::bad_function_call ();
-        return fn (std::forward<Args> (args)...);
+        return (*fn)(std::forward<Args> (args)...);
     }
 
 private:
-    void*         get_address  (string_type::const_pointer name) const noexcept;
-    function_type get_function (string_type::const_pointer name) const noexcept;
+    void_ptr      get_address  (string_view name) const noexcept;
+    function_type get_function (string_view name) const noexcept;
 
 private:
     handle_type    _M_pHandle ;
@@ -151,6 +157,8 @@ struct SHARED_API plugin_vars
       required (std::move (obj.required))
     { }
 
+    ~plugin_vars () { }
+
     constexpr plugin_vars& operator = (plugin_vars&& obj)
     {
         if (this == &obj) return *this;
@@ -167,7 +175,8 @@ struct SHARED_API plugin_vars
     }
 };
 
-typedef std::pair<dyn_loader const, plugin_vars> plugin_pair;
+typedef is_movable_t<dyn_loader>                  loader_type;
+typedef std::pair<loader_type const, plugin_vars> plugin_pair;
 
 // =========================================================
 
@@ -192,7 +201,6 @@ public:
     typedef string const                      const_key       ;
     typedef std::hash<key_type>               hash_type       ;
     typedef std::equal_to<key_type>           equal_type      ;
-    typedef MovableType<dyn_loader>           loader_type     ;
     typedef plugin_pair                       mapped_type     ;
     typedef std::pair<const_key, plugin_pair> value_type      ;
     typedef Interface                         iface_type      ;
@@ -216,14 +224,14 @@ public:
         typedef plugin_vars const* const_plugin_pointer;
 
         constexpr const_plugin_pointer operator -> () const noexcept
-        { return &_M_ref->second; }
+        { return &_M_ptr->second; }
 
         constexpr shared_iface iface () const
-        { return std::static_pointer_cast<iface_type> (_M_ref->second.iface); }
+        { return std::static_pointer_cast<iface_type> (_M_ptr->second.iface); }
 
     private:
         constexpr plugin_pointer (const_reference ref) noexcept
-        : _M_ref(&ref)
+        : _M_ptr (&ref)
         { }
 
         plugin_pointer () = delete;
@@ -232,34 +240,34 @@ public:
         friend class plugin_manager;
 
     private:
-        const_pointer _M_ref;
+        const_pointer _M_ptr;
     };
 
-    inline constexpr static const auto plugin_main = "plugin_main";
+    inline constexpr static auto const plugin_main = "plugin_main";
 
     plugin_manager (plugin_manager&&) = default;
     plugin_manager& operator = (plugin_manager&&) = default;
 
     void release_all ()
-    { _M_gPluginMap.clear(); }
+    { _M_gPluginMap.clear (); }
 
-    constexpr bool empty () const noexcept
+    consteval bool empty () const noexcept
     { return _M_gPluginMap.empty (); }
 
     constexpr allocator_type get_allocator () const noexcept
     { return _M_gPluginMap.get_allocator (); }
 
-    loader_type const* loader (const_key& path) const
+    constexpr loader_type const* loader (const_key& path) const
     { return &_M_gPluginMap[path].first; }
 
-    plugin_pointer plugin (const_key& path) const
+    constexpr plugin_pointer plugin (const_key& path) const
     { return _M_gPluginMap[path]; }
 
     plugin_manager (allocator_type const& ator = allocator_type ())
     : _M_gPluginMap(ator)
     { }
 
-    template <typename... Args>
+    template <non_void_t... Args>
     bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args&&... args)
     {
         static_assert (!are_any_of_type_v<traits_enum_t::reference, Args...>,
@@ -271,9 +279,8 @@ public:
 
         if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
 
-        plugin_vars* plugin = loader.call<plugin_vars*> (plugin_main,
-                                               rc == nullptr ? get_allocator().resource() : rc,
-                                               std::forward<Args> (args)...);
+        plugin_vars* plugin = loader[plugin_main](rc == nullptr ? get_allocator ().resource () : rc,
+                                                  std::forward<Args> (args)..., type<plugin_vars*>);
 
         for (auto& pair : _M_gPluginMap)
         {
@@ -284,12 +291,12 @@ public:
         return true;
     }
 
-    bool is_registered (const_key& path) const noexcept
+    constexpr bool is_registered (const_key& path) const noexcept
     {
         return _M_gPluginMap.find (path) != _M_gPluginMap.end ();
     }
 
-    void release_plugin (const_key& path)
+    constexpr void release_plugin (const_key& path)
     {
         auto it = _M_gPluginMap.find (path);
         if  (it != _M_gPluginMap.end ()) _M_gPluginMap.erase (it);

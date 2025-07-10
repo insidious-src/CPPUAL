@@ -86,7 +86,7 @@ class bitset
 {
 public:
     typedef bitset<T>                                     self_type             ;
-    typedef std::remove_cvref_t<T>                        value_type            ;
+    typedef remove_cref_t<T>                        value_type            ;
     typedef value_type const                              const_value           ;
     typedef std::underlying_type_t<value_type>            int_type              ;
     typedef int_type const                                const_int             ;
@@ -103,7 +103,7 @@ public:
 
     inline constexpr static const_size npos = static_cast<const_size> (-1);
 
-    consteval bitset () noexcept = default;
+    constexpr bitset () noexcept = default;
     constexpr bitset (self_type&&) noexcept = default;
     constexpr bitset (self_type const&) noexcept = default;
     constexpr self_type& operator = (self_type&&) noexcept = default;

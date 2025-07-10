@@ -25,7 +25,7 @@
 
 #include <cppual/concept/concepts.h>
 #include <cppual/types.h>
-#include <cppual/cast.h>
+#include <cppual/casts>
 
 #include <type_traits>
 #include <cstddef>

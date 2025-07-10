@@ -23,17 +23,17 @@
 #define CPPUAL_FAST_FUNC_H_
 #ifdef __cplusplus
 
-#include <cppual/cast.h>
+#include <cppual/casts>
 #include <cppual/types.h>
-#include <cppual/forward>
 #include <cppual/concepts>
+#include <cppual/exception>
+#include <cppual/meta_functional>
 #include <cppual/memory/allocator.h>
-#include <cppual/exceptions/functional_exception.h>
 
 #include <cstring>
 #include <utility>
 #include <tuple>
-#include <array>
+//#include <array>
 
 #include <cassert>
 
@@ -44,25 +44,6 @@ namespace cppual {
 //! import needed concepts
 using memory::allocator_t;
 
-//! max array size for function's capture lambda storage
-inline constexpr std::size_t const LAMBDA_DEFAULT_SIZE =  64;
-
-consteval std::size_t lambda_calc_size (std::size_t const SZ = LAMBDA_DEFAULT_SIZE) noexcept
-{
-    return SZ <=  64 ?  64 :
-           SZ <=  96 ?  96 :
-           SZ <= 128 ? 128 :
-                        SZ ;
-}
-
-// ====================================================
-
-template <callable_object_t C, typename... Args>
-using callable_return_t = std::invoke_result_t<decltype (&std::decay_t<C>::operator ()), Args...>;
-
-template <callable_object_t C>
-inline constexpr auto callable_operator_v = &std::decay_t<C>::operator ();
-
 // ====================================================
 
 class any_object;
@@ -70,21 +51,23 @@ class any_object;
 template <typename>
 struct function_traits;
 
-template <typename, std::size_t = lambda_calc_size ()>
+template <typename, std::size_t>
 class function;
-
-template <typename R, typename... Args>
-using any_static_fn = R(*)(Args...);
-
-template <typename R, typename... Args>
-using any_member_fn = R(any_object::*)(Args...);
-
-template <typename R, typename... Args>
-using any_const_member_fn = R(any_object::*)(Args...) const;
 
 // ====================================================
 
-template <typename R, typename... Args>
+template <typename R, non_void_t... Args>
+using any_static_fn = any_fn_type<void, R(Args...)>::type;
+
+template <typename R, non_void_t... Args>
+using any_member_fn = any_fn_type<any_object, R(Args...)>::type;
+
+template <typename R, non_void_t... Args>
+using any_const_member_fn = any_fn_type<any_object, R(Args...) const>::type;
+
+// ====================================================
+
+template <typename R, non_void_t... Args>
 struct function_traits <R(Args...)>
 {
     typedef std::size_t                 size_type  ;
@@ -107,24 +90,24 @@ struct function_traits <R(Args...)>
     using arg_t = arg<I>::type;
 };
 
-template <typename R, typename... Args>
+template <typename R, non_void_t... Args>
 struct function_traits <R(*)(Args...)> : function_traits<R(Args...)>
 {
     using function_ref = R(&)(Args...);
     using function_ptr = R(*)(Args...);
 };
 
-template <class_t C, typename R, typename... Args>
+template <class_t C, typename R, non_void_t... Args>
 struct function_traits <R(C::*)(Args...)> : function_traits<R(Args...)>
 {
-    typedef std::remove_cvref_t<C> object_type;
+    typedef remove_cref_t<C> object_type;
     using   function_ptr = R(C::*)(Args...)   ;
 };
 
-template <class_t C, typename R, typename... Args>
+template <class_t C, typename R, non_void_t... Args>
 struct function_traits <R(C::*)(Args...) const> : function_traits<R(Args...)>
 {
-    typedef std::remove_cvref_t<C> object_type   ;
+    typedef remove_cref_t<C> object_type   ;
     using   function_ptr = R(C::*)(Args...) const;
 };
 
@@ -134,7 +117,7 @@ template <auto F,
           >
 struct function_ptr_traits : function_traits<decltype (F)>
 {
-    inline static constexpr decltype (F) const value = F;
+    inline constexpr static decltype (F) const value = F;
 };
 
 /// deduce callable signature
@@ -144,47 +127,6 @@ using function_traits_t = function_traits<T>::function_type;
 /// callable signature pointer -> value
 template <auto F>
 inline constexpr cbool function_ptr_traits_v = function_ptr_traits<F>::value;
-
-// ====================================================
-// Delegate Concept
-// ====================================================
-
-template <typename F>
-struct is_functional_helper : public std::false_type
-{ typedef F type; };
-
-template <non_void_t T, std::size_t BYTES>
-struct is_functional_helper <function<T, BYTES>> : public std::true_type
-{ typedef function<T, BYTES> type; };
-
-template <non_void_t T>
-struct is_functional_helper <std::function<T>> : public std::true_type
-{ typedef std::function<T> type; };
-
-template <typename F>
-struct is_functional : public is_functional_helper<F>
-{ };
-
-template <typename F>
-using is_functional_t = is_functional<F>::type;
-
-/// is functional -> value
-template <typename F>
-inline constexpr bool const is_functional_v = is_functional<F>::value;
-
-template <typename F>
-using FunctionalType = std::enable_if_t<is_functional_v<F>, F>;
-
-/// delegate concept
-template <typename F>
-concept functional_t = is_functional_v<F>;
-
-template <typename F>
-concept void_functional_t = functional_t<F> && void_callable_t<F>;
-
-// ====================================================
-
-namespace {
 
 // ====================================================
 
@@ -197,20 +139,20 @@ struct mem_fn_helper
     template <class_t D, class_t C, typename R, typename... Args>
     constexpr static member_pair_t<D, R, Args...> make (C* obj, R(C::* fn)(Args...)) noexcept
     {
-        return member_pair_t<D, R, Args...> (object_cast<D> (obj), mem_fn_cast<D> (fn));
+        return member_pair_t<D, R, Args...> (obj_ptr_cast<D> (obj), mem_fn_cast<D> (fn));
     }
 
     template <class_t D, class_t C, typename R, typename... Args>
     constexpr static member_pair_t<D, R, Args...> make (C* obj, R(C::* fn)(Args...) const) noexcept
     {
-        return member_pair_t<D, R, Args...> (object_cast<D> (obj), mem_fn_cast<D> (fn));
+        return member_pair_t<D, R, Args...> (obj_ptr_cast<D> (obj), mem_fn_cast<D> (fn));
     }
 };
 
 // ====================================================
 
 //! closure class handling the function bindings
-template <typename R, typename... Args>
+template <typename R, non_void_t... Args>
 class closure
 {
 public:
@@ -365,37 +307,33 @@ public:
 
 // ====================================================
 
-} // anonymous namespace
-
-// ====================================================
-
 //! reimplementation of impossibly fast delegates
-template <std::size_t BYTES, typename R, typename... Args>
+template <std::size_t BYTES, typename R, non_void_t... Args>
 class SHARED_API function <R(Args...), BYTES> : public function_traits<R(Args...)>
 {
 public:
-    typedef function<R(Args...), BYTES> self_type      ;
-    typedef function_traits<R(Args...)> base_type      ;
-    typedef any_member_fn  <R, Args...> any_mem_fn_type;
-    typedef any_static_fn  <R, Args...> static_fn_type ;
-    typedef closure        <R, Args...> closure_type   ;
-    typedef std::array<uchar, BYTES>    storage_type   ;
-    typedef std::size_t                 size_type      ;
-    typedef size_type const             const_size     ;
-    typedef closure_type::pointer       pointer        ;
-    typedef closure_type::value_type    value_type     ;
-    typedef closure_type* self_type::*  safe_bool      ;
+    typedef function<R(Args...), BYTES> self_type        ;
+    typedef function_traits<R(Args...)> base_type        ;
+    typedef any_member_fn  <R, Args...> mem_fn_pointer   ;
+    typedef any_static_fn  <R, Args...> static_fn_pointer;
+    typedef closure        <R, Args...> closure_type     ;
+    typedef std::array<uchar, BYTES>    storage_type     ;
+    typedef std::size_t                 size_type        ;
+    typedef size_type const             const_size       ;
+    typedef closure_type::pointer       pointer          ;
+    typedef closure_type::value_type    value_type       ;
+    typedef closure_type* self_type::*  safe_bool        ;
 
-    typedef R(& static_fn_ref)(Args...);
+    using static_fn_ref =  R(&)(Args...);
 
     template <size_type SZ>
     using self_type_t = function<R(Args...), lambda_calc_size (SZ)>;
 
     template <class_t C>
-    using mem_fn_type = R(C::*)(Args...);
+    using mem_fn_type = any_fn_type<C, R(Args...)>::type;
 
     template <class_t C>
-    using const_mem_fn_type = R(C::*)(Args...) const;
+    using const_mem_fn_type = any_fn_type<C, R(Args...) const>::type;
 
     template <class_t C>
     using mem_fn_pair = std::pair<C&, mem_fn_type<C>>;
@@ -636,6 +574,11 @@ public:
         return (object ()->*function_ptr ())(std::forward<Args> (args)...);
     }
 
+    consteval static size_type arity () noexcept
+    {
+        return base_type::arity;
+    }
+
     constexpr explicit operator safe_bool () const noexcept
     {
         return _M_closure != nullptr ? &self_type::_M_closure : nullptr;
@@ -747,16 +690,16 @@ public:
 // ====================================================
 
 //! static function make_fn
-template <typename R, typename... Args>
+template <typename R, non_void_t... Args>
 constexpr function<R(Args...)> make_fn (R (& static_fn)(Args...))
 {
     return function<R(Args...)> (static_fn);
 }
 
 //! member function make_fn
-template <class_t  C      ,
-          typename R      ,
-          typename... Args,
+template <class_t  C        ,
+          typename R        ,
+          non_void_t... Args,
           typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
 constexpr function<R(Args...)> make_fn (C& obj, R (C::* mem_fn)(Args...))
 {
@@ -764,9 +707,9 @@ constexpr function<R(Args...)> make_fn (C& obj, R (C::* mem_fn)(Args...))
 }
 
 //! const member function make_fn
-template <class_t  C      ,
-          typename R      ,
-          typename... Args,
+template <class_t  C        ,
+          typename R        ,
+          non_void_t... Args,
           typename = std::enable_if_t<!is_functional_v<std::decay_t<C>>>>
 constexpr function<R(Args...)> make_fn (C& obj, R (C::* const_mem_fn)(Args...) const)
 {
@@ -788,10 +731,10 @@ constexpr function<R(Args...), N> make_fn (Callable&& callable, LambdaCaptureTyp
 
 //! non-capture lambda make_fn
 template <lambda_non_capture_t Callable,
-          typename... Args      ,
-          typename    R = callable_return_t<Callable, Args...>,
-          typename    C = std::enable_if_t<!is_functional_v<std::decay_t<Callable>>, std::decay_t<Callable>>,
-          typename      = LambdaNonCaptureType<Callable>
+          non_void_t... Args,
+          typename      R = callable_return_t<Callable, Args...>,
+          typename      C = std::enable_if_t<!is_functional_v<std::decay_t<Callable>>, std::decay_t<Callable>>,
+          typename        = LambdaNonCaptureType<Callable>
           >
 constexpr function<R(Args...)> make_fn (Callable&& callable, LambdaNonCaptureType<Callable>* ptr = nullptr)
 {
@@ -800,9 +743,9 @@ constexpr function<R(Args...)> make_fn (Callable&& callable, LambdaNonCaptureTyp
 
 //! callable object make_fn
 template <callable_class_t C,
-          typename... Args  ,
-          typename    R = callable_return_t<C, Args...>,
-          typename      = std::enable_if_t<!is_functional_v<std::decay_t<C>>>
+          non_void_t... Args,
+          typename         R = callable_return_t<C, Args...>,
+          typename           = std::enable_if_t<!is_functional_v<std::decay_t<C>>>
           >
 constexpr function<R(Args...)> make_fn (C& obj)
 {
@@ -811,20 +754,20 @@ constexpr function<R(Args...)> make_fn (C& obj)
 
 // ====================================================
 
-template <typename S1,
+template <typename  Out,
           std::size_t N = lambda_calc_size (),
-          typename S2,
+          typename   In,
           std::size_t M
           >
-constexpr function <S1, lambda_calc_size (N)> fn_cast (function<S2, M> const& fn_in) noexcept
+constexpr function <Out, lambda_calc_size (N)> fn_cast (function<In, M> const& fn_in) noexcept
 {
     static_assert (N >= M, "function storage size mismatch!");
     constexpr const std::size_t SZ = lambda_calc_size (N);
 
-    return function <S1, SZ> (fn_in._M_closure.object (),
-                              direct_cast<typename function<S1, SZ>::value_type>
-                             (fn_in._M_closure.function_ptr ()),
-                              fn_in._M_storage);
+    return function <Out, SZ> (fn_in._M_closure.object (),
+                               direct_cast<typename function<Out, SZ>::value_type>
+                              (fn_in._M_closure.function_ptr ()),
+                               fn_in._M_storage);
 }
 
 // ====================================================
@@ -834,6 +777,10 @@ constexpr function <S1, lambda_calc_size (N)> fn_cast (function<S2, M> const& fn
 // ====================================================
 
 namespace std {
+
+// ====================================================
+
+using cppual::lambda_calc_size;
 
 // ====================================================
 
@@ -849,6 +796,22 @@ struct hash <cppual::function<R(Args...), B>>
                cppual::direct_cast<size_type> (fn._M_closure._M_fn  ) ;
     }
 };
+
+// ====================================================
+
+template <size_t N = lambda_calc_size (), cppual::switch_value_t T, typename... Args, typename R>
+constexpr auto make_pair (T const _case, Args... fn_args, R* = cppual::void_ptr ()) noexcept
+{
+    using  fn_type = cppual::function<R(Args...), N>;
+    return pair<T, fn_type> (_case, cppual::make_fn (forward<Args> (fn_args)...));
+}
+
+template <size_t N = lambda_calc_size (), cppual::switch_value_t T, typename... Args>
+constexpr auto make_pair (T const _case, Args... fn_args) noexcept
+{
+    using  fn_type = cppual::function<void(Args...), N>;
+    return pair<T, fn_type> (_case, cppual::make_fn (forward<Args> (fn_args)...));
+}
 
 // ====================================================
 

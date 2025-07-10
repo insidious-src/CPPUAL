@@ -23,7 +23,7 @@
 #define CPPUAL_RESOURCE_H_
 #ifdef __cplusplus
 
-#include <cppual/cast.h>
+#include <cppual/casts>
 #include <cppual/types.h>
 #include <cppual/bitset.h>
 #include <cppual/noncopyable.h>
@@ -97,7 +97,7 @@ public:
 
     typedef handle_union self_type::* safe_bool;
 
-    consteval resource_handle () noexcept = default;
+    constexpr resource_handle () noexcept = default;
     constexpr resource_handle (value_type _handle) noexcept : _M_handle (_handle) { }
     constexpr resource_handle (pointer    _handle) noexcept : _M_handle (_handle) { }
     constexpr resource_handle (std::nullptr_t    ) noexcept : _M_handle ()        { }
@@ -131,7 +131,7 @@ public:
 
     template <typename T,
               typename = std::enable_if_t<(std::is_pointer_v<T> || std::is_class_v<T>) &&
-                                          !std::is_same_v<std::remove_cvref_t<T>, self_type>>
+                                          !std::is_same_v<remove_cref_t<T>, self_type>>
               >
     constexpr typename std::remove_pointer_t<T>* get () const noexcept
     {
@@ -139,7 +139,7 @@ public:
     }
 
     template <class_t T,
-              typename = std::enable_if_t<std::is_same_v<std::remove_cvref_t<T>, self_type>>
+              typename = std::enable_if_t<std::is_same_v<remove_cref_t<T>, self_type>>
               >
     constexpr self_type get () const noexcept
     {
@@ -329,8 +329,8 @@ class resource : public non_copyable_virtual
 {
 public:
     typedef resource<C, H, NULL_VALUE> self_type      ;
-    typedef std::remove_cvref_t<C>     connection_type;
-    typedef std::remove_cvref_t<H>     value_type     ;
+    typedef remove_cref_t<C>     connection_type;
+    typedef remove_cref_t<H>     value_type     ;
     typedef resource_handle            handle_type    ;
     typedef self_type* self_type::*    safe_bool      ;
 
@@ -409,7 +409,7 @@ class resource <void, H, NULL_VALUE> : public non_copyable_virtual
 {
 public:
     typedef resource<void, H, NULL_VALUE> self_type  ;
-    typedef std::remove_cvref_t<H>        value_type ;
+    typedef remove_cref_t<H>        value_type ;
     typedef resource_handle               handle_type;
     typedef self_type* self_type::*       safe_bool  ;
 

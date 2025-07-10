@@ -23,11 +23,11 @@
 #define CPPUAL_SIGNAL_H_
 #ifdef __cplusplus
 
-#include <cppual/type_meta.h>
-#include <cppual/functional.h>
-#include <cppual/circular_queue.h>
+#include <cppual/concepts>
+#include <cppual/meta_type>
+#include <cppual/functional>
+#include <cppual/circular_queue>
 #include <cppual/memory/allocator.h>
-#include <cppual/concept/concepts.h>
 
 #include <iterator>
 #include <vector>
@@ -40,11 +40,11 @@ using memory::allocator_t;
 
 // =========================================================
 
-template <typename T>
-using fn_type = function<T>;
+template <typename S>
+using fn_type = function<S>;
 
 template <typename S>
-using signal_allocator = memory::allocator<fn_type<S>>;
+using signal_allocator = memory::allocator_traits<fn_type<S>>::allocator_type;
 
 template <typename T, allocator_t A = signal_allocator<T>>
 using signal_queue = circular_queue<T, A>;
@@ -619,7 +619,6 @@ template <class_t     C,
           typename... Args,
           allocator_t A
           >
-inline
 typename signal<R(Args...), A>::slot_type
 connect (signal<R(Args...), A>& gSignal,
          std::decay_t<C>& pObj,

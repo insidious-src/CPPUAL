@@ -24,9 +24,9 @@
 #ifdef __cplusplus
 
 #include <cppual/decl>
-#include <cppual/types.h>
+#include <cppual/types>
 #include <cppual/concepts>
-#include <cppual/noncopyable.h>
+#include <cppual/noncopyable>
 
 #include <scoped_allocator>
 #include <memory_resource>
@@ -45,6 +45,22 @@ namespace cppual::memory {
 
 // =========================================================
 
+//! memory_resource_adapter is a merger class for any memory_resource
+//! implementation that combines 2 or more resource instances (objects) into one to
+//! extend the capacity of the allocated memory (allocating more fixed memory).
+class memory_resource_adapter;
+
+template <typename T = void>
+class allocator;
+
+// =========================================================
+
+template <class_t T, class_t A = allocator<T>>
+struct allocator_traits : public std::allocator_traits<A>
+{ typedef A allocator_type; };
+
+// =========================================================
+
 //! std::pmr::memory_resource replacement for compute usage
 class SHARED_API memory_resource : public non_copyable_virtual
 {
@@ -58,19 +74,30 @@ public:
     typedef std::size_t      size_type             ;
     typedef size_type const  const_size            ;
     typedef size_type        align_type            ;
-    typedef u8*              math_pointer          ;
-    typedef void*            pointer               ;
+    typedef const_size       const_align           ;
+    typedef byte *           math_pointer          ;
+    typedef cbyte*           math_const_pointer    ;
+    typedef void *           pointer               ;
     typedef cvoid*           const_pointer         ;
     typedef std::ptrdiff_t   difference_type       ;
     typedef compute::device  device_type           ;
     typedef compute::device* device_pointer        ;
     typedef compute::device& device_reference      ;
 
+    enum class category : u8
+    {
+        custom       ,
+        sequential   ,
+        bisequential ,
+        uniform      ,
+        random_access
+    };
+
     /// maximum alignment depending on memory width
-    inline static constexpr const align_type max_align  = alignof (std::max_align_t);
+    inline constexpr static const align_type max_align  = alignof (std::max_align_t);
 
     /// maximum align ajustment for memory allocation
-    inline static constexpr const align_type max_adjust = alignof (std::max_align_t) * 2;
+    inline constexpr static const align_type max_adjust = alignof (std::max_align_t) * 2;
 
     constexpr memory_resource (device_reference dev = host_device ()) noexcept
     : _M_pDevice (&dev)
@@ -83,20 +110,20 @@ public:
     { return *_M_pDevice; }
 
     /// is thread safe (ex. using mutex or atomic variables)
-    constexpr virtual bool is_thread_safe () const noexcept
+    virtual bool is_thread_safe () const noexcept
     { return false; }
 
     /// is either atomic for true or is using mutex for false.
     /// it can still be lock free if it has NO inter-thread synchronization
-    constexpr virtual bool is_lock_free () const noexcept
+    virtual bool is_lock_free () const noexcept
     { return true; }
 
     /// is inter-process shared memory
-    constexpr virtual bool is_shared () const noexcept
+    virtual bool is_shared () const noexcept
     { return false; }
 
     /// upstream memory_resource owner
-    constexpr virtual base_reference owner () const noexcept
+    virtual base_reference owner () const noexcept
     { return const_cast<base_reference> (*this); }
 
     /// upstream memory_resource owner
@@ -108,12 +135,15 @@ public:
     { return owner (); }
 
     /// maximum bytes that can be allocated from the memory_resource
-    constexpr virtual size_type max_size () const
+    virtual size_type max_size () const
     { return std::numeric_limits<size_type>::max () - max_align; }
 
     /// memory capacity in bytes
-    constexpr virtual size_type capacity () const
+    virtual size_type capacity () const
     { return std::numeric_limits<size_type>::max () - max_align; }
+
+    virtual category type () const
+    { return category::custom; }
 
     constexpr void* allocate (size_type bytes, align_type align = max_align)
     { return do_allocate (bytes, align); }
@@ -167,29 +197,29 @@ constexpr bool operator != (memory_resource const& a, memory_resource const& b) 
 // =========================================================
 
 /// statically constructed memory_resource using new & delete operators
-memory_resource& SHARED_API new_delete_resource () noexcept;
+memory_resource& SHARED_FN_API new_delete_resource () noexcept;
 
 /// statically constructed memory_resource for testing purposes.
 /// on allocation throws std::bad_alloc on deallocation does nothing
-memory_resource& SHARED_API null_resource () noexcept;
+memory_resource& SHARED_FN_API null_resource () noexcept;
 
 /// statically constructed memory_resource using malloc & free functions
-memory_resource& SHARED_API malloc_resource () noexcept;
+memory_resource& SHARED_FN_API malloc_resource () noexcept;
 
 /// get the default memory_resource
-memory_resource& SHARED_API get_default_resource () noexcept;
+memory_resource& SHARED_FN_API get_default_resource () noexcept;
 
 /// get the default memory_resource for the current thread
-memory_resource& SHARED_API get_default_thread_resource () noexcept;
+memory_resource& SHARED_FN_API get_default_thread_resource () noexcept;
 
 /// set the default memory_resource
-void SHARED_API set_default_resource (memory_resource& resource) noexcept;
+void SHARED_FN_API set_default_resource (memory_resource& resource) noexcept;
 
 /// set the default memory_resource for the current thread
-void SHARED_API set_default_thread_resource (memory_resource& resource) noexcept;
+void SHARED_FN_API set_default_thread_resource (memory_resource& resource) noexcept;
 
 /// get main thread id
-std::thread::id SHARED_API main_thread_id () noexcept;
+std::thread::id SHARED_FN_API main_thread_id () noexcept;
 
 
 /// =========================================================
@@ -232,8 +262,8 @@ using std::scoped_allocator_adaptor;
 // =========================================================
 
 //! redefined polymorphic memory allocator
-template <typename T = void>
-class SHARED_API allocator
+template <non_void_t T>
+class SHARED_API allocator<T>
 {
 public:
     typedef allocator<T>                    self_type                             ;
@@ -248,6 +278,8 @@ public:
     typedef resource_type const&            resource_const_reference              ;
     typedef std::size_t                     size_type                             ;
     typedef size_type const                 const_size                            ;
+    typedef size_type                       align_type                            ;
+    typedef const_size                      const_align                           ;
     typedef std::ptrdiff_t                  difference_type                       ;
     typedef std::true_type                  propagate_on_container_copy_assignment;
     typedef std::true_type                  propagate_on_container_move_assignment;
@@ -295,7 +327,7 @@ public:
     { return _M_pRc; }
 
     constexpr pointer allocate (size_type n = 1)
-    { return static_cast<pointer> (resource ()->allocate (sizeof (value_type) * n, alignof(value_type))); }
+    { return static_cast<pointer> (resource ()->allocate (sizeof (value_type) * n, alignof (value_type))); }
 
     constexpr pointer reallocate (pointer p, size_type old_n, size_type n)
     {
@@ -311,23 +343,23 @@ public:
     constexpr size_type max_size () const noexcept
     { return resource ()->max_size () / sizeof (value_type); }
 
-    constexpr static pointer address (reference x) noexcept
-    { return std::addressof (x); }
+    constexpr static pointer address (reference o) noexcept
+    { return std::addressof (o); }
 
-    constexpr static const_pointer address (const_reference x) noexcept
-    { return std::addressof (x); }
+    constexpr static const_pointer address (const_reference o) noexcept
+    { return std::addressof (o); }
 
     template <typename... Args>
-    constexpr static void construct (pointer ptr, Args&&... args)
-    { ::new (ptr) value_type (std::forward<Args> (args)...); }
+    constexpr static void construct (pointer p, Args&&... args)
+    { ::new (p) value_type (std::forward<Args> (args)...); }
 
     constexpr static void destroy (pointer p)
     { p->~value_type (); }
 
-    constexpr void* allocate_bytes (size_type bytes, size_type align = alignof (std::max_align_t))
+    constexpr void* allocate_bytes (size_type bytes, align_type align = alignof (std::max_align_t))
     { return resource ()->allocate (bytes, align); }
 
-    constexpr void deallocate_bytes (void* p, size_type bytes, size_type align = alignof (std::max_align_t))
+    constexpr void deallocate_bytes (void* p, size_type bytes, align_type align = alignof (std::max_align_t))
     { return resource ()->deallocate (p, bytes, align); }
 
     template <non_void_t U>
@@ -339,7 +371,7 @@ public:
     { resource ()->deallocate (p, n * sizeof (U), alignof (U)); }
 
     template <non_void_t U, typename... Args>
-    constexpr U* new_object (Args... args)
+    constexpr U* new_object (Args&&... args)
     {
         U* p = allocate_object<U> ();
 
@@ -544,12 +576,12 @@ using AllocatorType = std::enable_if_t<is_allocator_v<A>, A>;
 template <typename A>
 concept allocator_t = is_allocator_v<A> || requires (A& ator)
 {
-    typename A::value_type;
-    typename A::pointer;
-    typename A::const_pointer;
-    typename A::reference;
+    typename A::value_type     ;
+    typename A::pointer        ;
+    typename A::const_pointer  ;
+    typename A::reference      ;
     typename A::const_reference;
-    typename A::size_type;
+    typename A::size_type      ;
     typename A::difference_type;
 
     { ator.allocate (typename A::size_type {}) } -> std::same_as<typename A::pointer>;
@@ -583,8 +615,8 @@ template <typename U, typename T, typename... Args,
 constexpr std::shared_ptr<U> allocate_shared (memory_resource* rc, Args&&... args)
 {
     return std::static_pointer_cast<U>
-            (std::allocate_shared<T> (rc == nullptr ? allocator<T> () : allocator<T> (*rc),
-                                      std::forward<Args> (args)...));
+          (std::allocate_shared<T> (rc == nullptr ? allocator<T> () : allocator<T> (*rc),
+                                    std::forward<Args> (args)...));
 }
 
 template <typename T, typename... Args,

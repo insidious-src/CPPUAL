@@ -23,8 +23,8 @@
 #define CPPUAL_CONCEPTS_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
-#include <cppual/types.h>
+#include <cppual/decl>
+#include <cppual/types>
 
 #include <tuple>
 #include <utility>
@@ -39,163 +39,181 @@ namespace cppual {
 
 // ====================================================
 
+//! max array size for function's capture lambda storage
+inline constexpr std::size_t const LAMBDA_DEFAULT_SIZE =  64;
+
+consteval std::size_t lambda_calc_size (std::size_t const SZ = LAMBDA_DEFAULT_SIZE) noexcept
+{
+    return SZ <=  64 ?  64 :
+           SZ <=  96 ?  96 :
+           SZ <= 128 ? 128 :
+           SZ ;
+}
+
+// ====================================================
+
+template <typename T>
+concept non_void_t = !std::is_void_v<T>;
+
+// ====================================================
+
 //! is bool type
-template <typename> struct is_bool : std::false_type { };
-template <> struct is_bool<bool>   : std::true_type  { };
+template <non_void_t> struct is_bool : std::false_type { };
+template <> struct is_bool<bool>     : std::true_type  { };
 
 //! is bool value
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_bool_v = is_bool<T>::value;
+
+// ====================================================
+
+template <typename, std::size_t = lambda_calc_size ()>
+class function;
 
 // ===================================================
 
-template <typename> struct is_char_helper  : public std::false_type { };
-template <> struct is_char_helper<char>    : public std::true_type  { };
-template <> struct is_char_helper<cchar>   : public std::true_type  { };
-template <> struct is_char_helper<uchar>   : public std::true_type  { };
-template <> struct is_char_helper<cuchar>  : public std::true_type  { };
-template <> struct is_char_helper<char8>   : public std::true_type  { };
-template <> struct is_char_helper<cchar8>  : public std::true_type  { };
-template <> struct is_char_helper<char16>  : public std::true_type  { };
-template <> struct is_char_helper<cchar16> : public std::true_type  { };
-template <> struct is_char_helper<char32>  : public std::true_type  { };
-template <> struct is_char_helper<cchar32> : public std::true_type  { };
-template <> struct is_char_helper<wchar>   : public std::true_type  { };
-template <> struct is_char_helper<cwchar>  : public std::true_type  { };
+template <non_void_t> struct is_char_helper : public std::false_type { };
+template <> struct is_char_helper<char>     : public std::true_type  { };
+template <> struct is_char_helper<cchar>    : public std::true_type  { };
+template <> struct is_char_helper<uchar>    : public std::true_type  { };
+template <> struct is_char_helper<cuchar>   : public std::true_type  { };
+template <> struct is_char_helper<char8>    : public std::true_type  { };
+template <> struct is_char_helper<cchar8>   : public std::true_type  { };
+template <> struct is_char_helper<char16>   : public std::true_type  { };
+template <> struct is_char_helper<cchar16>  : public std::true_type  { };
+template <> struct is_char_helper<char32>   : public std::true_type  { };
+template <> struct is_char_helper<cchar32>  : public std::true_type  { };
+template <> struct is_char_helper<wchar>    : public std::true_type  { };
+template <> struct is_char_helper<cwchar>   : public std::true_type  { };
 
 //! is char type (char, uchar, char8, char16, char32, wchar)
-template <typename T>
+template <non_void_t T>
 struct is_char : public is_char_helper<T>
 { };
 
 //! is char value
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_char_v = is_char<T>::value;
 
 // ===================================================
 
-template <typename> struct is_stream_helper : public std::false_type { };
-template <> struct is_stream_helper<char>   : public std::true_type  { };
-template <> struct is_stream_helper<cchar>  : public std::true_type  { };
-template <> struct is_stream_helper<uchar>  : public std::true_type  { };
-template <> struct is_stream_helper<cuchar> : public std::true_type  { };
+template <non_void_t> struct is_stream_helper : public std::false_type { };
+template <> struct is_stream_helper<char>     : public std::true_type  { };
+template <> struct is_stream_helper<cchar>    : public std::true_type  { };
+template <> struct is_stream_helper<uchar>    : public std::true_type  { };
+template <> struct is_stream_helper<cuchar>   : public std::true_type  { };
 
 //! is char type (char, uchar)
-template <typename T>
+template <non_void_t T>
 struct is_stream_char : public is_stream_helper<T>
 { };
 
 //! is char value
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_stream_char_v = is_stream_char<T>::value;
 
 // ====================================================
 
 //! is integer type
-template <typename> struct is_integer  : std::false_type { };
-template <> struct is_integer<ushort>  : std::true_type  { };
-template <> struct is_integer<short>   : std::true_type  { };
-template <> struct is_integer<uint>    : std::true_type  { };
-template <> struct is_integer<int>     : std::true_type  { };
-template <> struct is_integer<ulong>   : std::true_type  { };
-template <> struct is_integer<long>    : std::true_type  { };
-template <> struct is_integer<ulong64> : std::true_type  { };
-template <> struct is_integer<long64>  : std::true_type  { };
+template <non_void_t> struct is_integer : std::false_type { };
+template <> struct is_integer<ushort>   : std::true_type  { };
+template <> struct is_integer<short>    : std::true_type  { };
+template <> struct is_integer<uint>     : std::true_type  { };
+template <> struct is_integer<int>      : std::true_type  { };
+template <> struct is_integer<ulong>    : std::true_type  { };
+template <> struct is_integer<long>     : std::true_type  { };
+template <> struct is_integer<ulong64>  : std::true_type  { };
+template <> struct is_integer<long64>   : std::true_type  { };
 
 //! is integer value
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_integer_v = is_integer<T>::value;
 
 // ====================================================
 
 //! is unsigned integer type
-template <typename> struct is_signed_integer  : std::false_type { };
-template <> struct is_signed_integer<short>  : std::true_type  { };
-template <> struct is_signed_integer<int>    : std::true_type  { };
-template <> struct is_signed_integer<long>   : std::true_type  { };
-template <> struct is_signed_integer<long64> : std::true_type  { };
+template <non_void_t> struct is_signed_integer : std::false_type { };
+template <> struct is_signed_integer<short>    : std::true_type  { };
+template <> struct is_signed_integer<int>      : std::true_type  { };
+template <> struct is_signed_integer<long>     : std::true_type  { };
+template <> struct is_signed_integer<long64>   : std::true_type  { };
 
 //! is unsigned integer value
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_signed_integer_v = is_signed_integer<T>::value;
 
 // ====================================================
 
 //! is unsigned integer type
-template <typename> struct is_unsigned_integer  : std::false_type { };
-template <> struct is_unsigned_integer<ushort>  : std::true_type  { };
-template <> struct is_unsigned_integer<uint>    : std::true_type  { };
-template <> struct is_unsigned_integer<ulong>   : std::true_type  { };
-template <> struct is_unsigned_integer<ulong64> : std::true_type  { };
+template <non_void_t> struct is_unsigned_integer : std::false_type { };
+template <> struct is_unsigned_integer<ushort>   : std::true_type  { };
+template <> struct is_unsigned_integer<uint>     : std::true_type  { };
+template <> struct is_unsigned_integer<ulong>    : std::true_type  { };
+template <> struct is_unsigned_integer<ulong64>  : std::true_type  { };
 
 //! is unsigned integer value
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_unsigned_integer_v = is_unsigned_integer<T>::value;
 
 // ====================================================
 
 //! is unsigned  type
-template <typename> struct is_unsigned  : std::false_type { };
-template <> struct is_unsigned<uchar>   : std::true_type  { };
-template <> struct is_unsigned<ushort>  : std::true_type  { };
-template <> struct is_unsigned<uint>    : std::true_type  { };
-template <> struct is_unsigned<ulong>   : std::true_type  { };
-template <> struct is_unsigned<ulong64> : std::true_type  { };
+template <non_void_t> struct is_unsigned : std::false_type { };
+template <> struct is_unsigned<uchar>    : std::true_type  { };
+template <> struct is_unsigned<ushort>   : std::true_type  { };
+template <> struct is_unsigned<uint>     : std::true_type  { };
+template <> struct is_unsigned<ulong>    : std::true_type  { };
+template <> struct is_unsigned<ulong64>  : std::true_type  { };
 
 //! is unsigned value
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_unsigned_v = is_unsigned<T>::value;
 
 // ====================================================
 
 //! is float type
-template <typename> struct is_float  : std::false_type { };
-template <> struct is_float<float>   : std::true_type  { };
-template <> struct is_float<double>  : std::true_type  { };
-template <> struct is_float<ldouble> : std::true_type  { };
+template <non_void_t> struct is_float : std::false_type { };
+template <> struct is_float<float>    : std::true_type  { };
+template <> struct is_float<double>   : std::true_type  { };
+template <> struct is_float<ldouble>  : std::true_type  { };
 
 //! is float value
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_float_v = is_float<T>::value;
 
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_pod_v = std::is_trivial_v<T> && std::is_standard_layout_v<T>;
 
 // ====================================================
 
-template <typename T>
-inline constexpr cbool is_compact_forwarded_v = !std::is_class_v<T> && sizeof (T) <= sizeof (uptr);
-
-// ====================================================
-
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_ref_v = std::is_reference_v<T>;
 
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_cref_v = std::is_const_v<T> && std::is_reference_v<T>;
 
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_cvref_v = std::is_const_v    <T> &&
                                     std::is_volatile_v <T> &&
                                     std::is_reference_v<T>;
 
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_ptr_v = std::is_pointer_v<T>;
 
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_cptr_v = std::is_const_v<T> && std::is_pointer_v<T>;
 
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_cvptr_v = std::is_const_v   <T> &&
                                     std::is_volatile_v<T> &&
                                     std::is_pointer_v <T>;
 
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_crefptr_v = std::is_const_v    <T> &&
                                       std::is_pointer_v  <T> &&
                                       std::is_reference_v<T>;
 
-template <typename T>
+template <non_void_t T>
 inline constexpr cbool is_cvrefptr_v = std::is_const_v    <T> &&
                                        std::is_volatile_v <T> &&
                                        std::is_pointer_v  <T> &&
@@ -203,29 +221,100 @@ inline constexpr cbool is_cvrefptr_v = std::is_const_v    <T> &&
 
 // ====================================================
 
-template <typename T>
+template <non_void_t F>
+struct is_functional_helper : public std::false_type
+{ typedef F type; };
+
+template <non_void_t T, std::size_t BYTES>
+struct is_functional_helper <function<T, BYTES>> : public std::true_type
+{ typedef function<T, BYTES> type; };
+
+template <non_void_t T>
+struct is_functional_helper <std::function<T>> : public std::true_type
+{ typedef std::function<T> type; };
+
+template <non_void_t F>
+struct is_functional : public is_functional_helper<F>
+{ };
+
+template <non_void_t F>
+using is_functional_t = is_functional<F>::type;
+
+/// is functional -> value
+template <non_void_t F>
+inline constexpr cbool is_functional_v = is_functional<F>::value;
+
+// ====================================================
+
+template <non_void_t T>
+struct is_copyable
+{
+    typedef T type;
+    inline constexpr static cbool value = std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T>;
+};
+
+template <non_void_t T>
+using is_copyable_t = is_copyable<T>::type;
+
+template <non_void_t T>
+struct is_movable
+{
+    typedef T type;
+    inline constexpr static cbool value = std::is_move_constructible_v<T> && std::is_move_assignable_v<T>;
+};
+
+template <non_void_t T>
+using is_movable_t = is_movable<T>::type;
+
+// ====================================================
+
+template <non_void_t T>
 using remove_ref_t = std::remove_reference_t<T>;
 
-template <typename T>
+template <non_void_t T>
 using remove_cref_t = std::remove_const_t<std::remove_reference_t<T>>;
 
-template <typename T>
+template <non_void_t T>
 using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
 
-template <typename T>
+template <non_void_t T>
 using remove_ptr_t = std::remove_pointer_t<T>;
 
-template <typename T>
+template <non_void_t T>
 using remove_cptr_t = std::remove_const_t<std::remove_pointer_t<T>>;
 
-template <typename T>
+template <non_void_t T>
 using remove_cvptr_t = std::remove_cv_t<std::remove_pointer_t<T>>;
 
-template <typename T>
+template <non_void_t T>
 using remove_crefptr_t = std::remove_const_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
 
-template <typename T>
+template <non_void_t T>
 using remove_cvrefptr_t = std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
+
+// =========================================================
+
+template <typename T, non_void_t U = remove_cvref_t<T>>
+struct is_compact_forwarded : std::conditional<(std::is_class_v<U> || std::is_union_v<U>) && !std::is_pointer_v<T>,
+std::conditional_t<is_cref_v<T> && std::is_copy_constructible_v<U>,
+                   U const&,
+                   std::conditional_t<
+                   is_ref_v<T> && std::is_move_constructible_v<U>,
+                   U&&,
+                   std::conditional_t<(sizeof (U) < sizeof (uptr)), U, U&>
+                                      >
+                   >,
+                   std::conditional_t<std::is_fundamental_v<U>, U, U&&>
+>
+{ };
+
+template <typename T>
+using is_compact_forwarded_t = is_compact_forwarded<T>::type;
+
+template <non_void_t T>
+inline constexpr cbool is_compact_forwarded_v = !std::is_class_v<T> &&
+                                                !std::is_union_v<T> &&
+                                                sizeof (T) <= sizeof (uptr);
 
 // ====================================================
 
@@ -245,8 +334,8 @@ template <typename F>
 using member_function_to_static_t = member_function_to_static<F>::type;
 
 template <typename F, F MEM_FN>
-inline constexpr auto const member_function_to_static_v =
-    static_cast<member_function_to_static<F>::type> (MEM_FN);
+inline constexpr cbool member_function_to_static_v =
+static_cast<member_function_to_static<F>::type> (MEM_FN);
 
 // ====================================================
 
@@ -333,9 +422,6 @@ template <typename T>
 concept compact_t = !std::is_class_v<T> && sizeof (T) <= sizeof (uptr);
 
 template <typename T>
-concept non_void_t = !std::is_void_v<T>;
-
-template <typename T>
 concept function_t = std::is_function_v<std::remove_pointer_t<T>> ||
                      std::is_member_function_pointer_v<T>;
 
@@ -351,6 +437,17 @@ concept non_function_t = !std::is_function_v<std::remove_pointer_t<T>> &&
 
 template <typename T>
 concept void_callable_t = requires (T& t) { { t () } -> std::same_as<void>; };
+
+// ====================================================
+// Delegate Concept
+// ====================================================
+
+/// delegate concept
+template <typename F>
+concept functional_t = is_functional_v<F>;
+
+template <typename F>
+concept void_functional_t = functional_t<F> && void_callable_t<F>;
 
 // ====================================================
 
@@ -383,6 +480,16 @@ lambda_capture_t <T>                         ||
 member_function_t<T>                         ||
 static_function_t<T>                         ||
 callable_object_t<T>;
+
+// ====================================================
+
+template <callable_object_t C>
+inline constexpr auto callable_operator_v = &std::decay_t<C>::operator ();
+
+template <callable_object_t C, typename... Args>
+using callable_return_t = std::invoke_result_t<decltype (&std::decay_t<C>::operator ()), Args...>;
+
+// ====================================================
 
 //! type category concepts
 template <typename T>
@@ -425,6 +532,9 @@ template <typename T>
 concept class_or_union_t = class_t<T> || union_t<T>;
 
 template <typename T>
+concept void_or_class_t = std::is_void_v<T> || std::is_class_v<T>;
+
+template <typename T>
 concept abstract_t = std::is_abstract_v<T>;
 
 //! pointer concepts
@@ -445,6 +555,9 @@ concept pair_t = requires
 {
     typename T::first_type ;
     typename T::second_type;
+
+    { std::declval<T>().first  } -> std::convertible_to<typename T::first_type >;
+    { std::declval<T>().second } -> std::convertible_to<typename T::second_type>;
 };
 
 template <typename P, typename K, typename FN>
@@ -541,8 +654,8 @@ concept optional_like_t = requires (T t)
 template <typename T>
 concept variant_like_t = requires
 {
-    typename std::variant_size<std::remove_cvref_t<T>>::type;
-    typename std::variant_alternative_t<0, std::remove_cvref_t<T>>;
+    typename std::variant_size<remove_cref_t<T>>::type;
+    typename std::variant_alternative_t<0, remove_cref_t<T>>;
 };
 
 //! Comparison concepts
@@ -673,6 +786,11 @@ member_function_to_static_t<decltype(&std::decay_t<T>::operator())>, T>, T>;
 
 // ====================================================
 
+template <typename F>
+using FunctionalType = std::enable_if_t<is_functional_v<F>, F>;
+
+// ====================================================
+
 template <typename T>
 using ArithmeticType = std::enable_if_t<std::is_arithmetic_v<T>, T>;
 
@@ -701,16 +819,16 @@ template <typename T>
 using ArrayType = std::enable_if_t<std::is_array_v<T>, T>;
 
 template <typename T>
-using UnionType = std::enable_if_t<std::is_union_v<std::remove_cvref_t<T>>, T>;
+using UnionType = std::enable_if_t<std::is_union_v<remove_cref_t<T>>, T>;
 
 template <typename T>
 using NullPointer = std::enable_if_t<std::is_null_pointer_v<T>, T>;
 
 template <typename T>
-using ObjectType = std::enable_if_t<std::is_object_v<std::remove_cvref_t<T>>, T>;
+using ObjectType = std::enable_if_t<std::is_object_v<remove_cref_t<T>>, T>;
 
 template <typename T>
-using ClassType = std::enable_if_t<std::is_class_v<std::remove_cvref_t<T>>, T>;
+using ClassType = std::enable_if_t<std::is_class_v<remove_cref_t<T>>, T>;
 
 template <typename T>
 using AbstractType = std::enable_if_t<std::is_abstract_v<T>, T>;

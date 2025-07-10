@@ -19,6 +19,4 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/exceptions/exception.h>
-#include <cppual/exceptions/memory_exception.h>
-#include <cppual/exceptions/functional_exception.h>
+#include <cppual/types.h>

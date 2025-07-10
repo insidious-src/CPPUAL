@@ -25,9 +25,9 @@
 
 #include <cppual/type_meta.h>
 #include <cppual/noncopyable.h>
-#include <cppual/memory/allocator.h>
-#include <cppual/concept/concepts.h>
-#include <cppual/iterators/bi_iterator.h>
+#include <cppual/memory_resource>
+#include <cppual/concepts>
+#include <cppual/iterator>
 
 #include <atomic>
 #include <memory>
@@ -51,19 +51,19 @@ template <non_void_t  T,
 class SHARED_API circular_queue : private A
 {
 public:
-    static_assert ( std::is_move_constructible_v<T>, "T is not move constructible!");
-    static_assert ( std::is_move_assignable_v<T>   , "T is not move assignable!");
+    static_assert (std::is_move_constructible_v<T>, "T is not move constructible!");
+    static_assert (std::is_move_assignable_v<T>   , "T is not move assignable!"   );
 
     typedef circular_queue<T, A, Atomic>            self_type             ;
     typedef std::allocator_traits<A>                traits_type           ;
     typedef traits_type::allocator_type             allocator_type        ;
-    typedef std::remove_cvref_t<T>                  value_type            ;
-    typedef value_type*                             pointer               ;
+    typedef remove_cref_t<T>                        value_type            ;
+    typedef value_type *                            pointer               ;
     typedef value_type const*                       const_pointer         ;
-    typedef value_type&                             reference             ;
+    typedef value_type &                            reference             ;
     typedef value_type const&                       const_reference       ;
     typedef traits_type::size_type                  size_type             ;
-    typedef traits_type::size_type const            const_size            ;
+    typedef size_type const                         const_size            ;
     typedef traits_type::difference_type            difference_type       ;
     typedef bidirectional_iterator<self_type>       iterator              ;
     typedef bidirectional_iterator<self_type const> const_iterator        ;
@@ -146,8 +146,7 @@ public:
       _M_uCapacity   ()
     { }
 
-    constexpr circular_queue (size_type             uCapacity,
-                              allocator_type const& gAtor = allocator_type ())
+    constexpr circular_queue (size_type uCapacity, allocator_type const& gAtor = allocator_type ())
     : allocator_type (gAtor),
       _M_pArray      (uCapacity ? allocator_type::allocate (uCapacity) : pointer ()),
       _M_beginPos    (),
@@ -217,7 +216,7 @@ public:
         }
     }
 
-    inline ~circular_queue () noexcept
+    ~circular_queue () noexcept
     {
         if (!capacity()) return;
 
@@ -276,7 +275,7 @@ public:
                     const_array_range ();
     }
 
-    constexpr size_type size () const noexcept
+    size_type size () const noexcept
     {
         return !empty () && capacity () ?
                     static_cast<size_type> ((((_M_endPos - _M_beginPos) + _capacity()) % _capacity()) + 1) :
@@ -289,7 +288,7 @@ public:
     constexpr bool empty () const noexcept
     { return _M_beginPos == nullptr || _M_endPos == nullptr; }
 
-    constexpr bool full () const noexcept
+    bool full () const noexcept
     { return _M_beginPos == normalize (_M_endPos + 1); }
 
     inline void reserve (size_type uNewCapacity)
@@ -331,7 +330,7 @@ public:
 
         traits_type::construct (*this, _M_beginPos, std::forward<Args> (args)...);
 
-        return std::move (std::pair (begin (), true));
+        return std::pair (begin (), true);
     }
 
     template <typename... Args>
@@ -349,7 +348,7 @@ public:
 
         traits_type::construct (*this, _M_endPos, std::forward<Args> (args)...);
 
-        return std::move (std::pair (iterator (*this, empty () ? 0 : size () - 1), true));
+        return iterator_pair (iterator (*this, empty () ? 0 : size () - 1), true);
     }
 
     inline void swap (self_type& gObj) noexcept
@@ -523,7 +522,7 @@ void circular_queue<T, A, Atomic>::dispose ()
 //! [UNFINISHED] feature complete lock-free multi-producer/multi-consumer bidirectional queue
 //! ex. game messaging queue
 template <typename T, allocator_t A>
-class SHARED_API circular_queue <T, A, true> : A, non_copyable
+class SHARED_API circular_queue <T, A, true> : private A, public non_copyable
 {
 public:
     static_assert (!std::is_void_v<T>              , "T is void");
@@ -533,7 +532,7 @@ public:
     typedef circular_queue<T, A, true>   self_type      ;
     typedef std::allocator_traits<A>     traits_type    ;
     typedef traits_type::allocator_type  allocator_type ;
-    typedef std::remove_cvref_t<T>       value_type     ;
+    typedef remove_cref_t<T>       value_type     ;
     typedef value_type *                 pointer        ;
     typedef value_type const*            const_pointer  ;
     typedef value_type &                 reference      ;
@@ -636,7 +635,7 @@ public:
     static_assert ( std::is_move_assignable_v<T>   , "T is not move assignable!");
 
     typedef uniform_queue<T, N>    self_type      ;
-    typedef std::remove_cvref_t<T> value_type     ;
+    typedef remove_cref_t<T> value_type     ;
     typedef value_type *           pointer        ;
     typedef value_type const*      const_pointer  ;
     typedef value_type &           reference      ;
@@ -751,6 +750,18 @@ private:
 // ====================================================
 
 } // cppual
+
+// ====================================================
+
+namespace std {
+
+template <typename T, cppual::memory::allocator_t A, bool Atomic>
+struct uses_allocator <cppual::circular_queue<T, A, Atomic>, A> : std::true_type
+{ };
+
+} // namespace std
+
+// ====================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_CIRCULAR_QUEUE_H_

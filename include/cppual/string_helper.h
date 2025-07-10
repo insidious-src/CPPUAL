@@ -260,7 +260,7 @@ public:
 
     static_assert (size () > 0, "consteval_array is empty!");
 
-    inline constexpr static const_size npos = static_cast<const_size> (-1);
+    inline constexpr static const_size npos = static_cast<size_type> (-1);
 
     typedef std::conditional_t<is_char_v<T>, const_pointer, value_type> elem_type;
     typedef std::conditional_t<is_char_v<T>, string_type&, const_reference> elem_reference;
@@ -337,7 +337,7 @@ auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str, T de
         typename std::allocator_traits<A>::template rebind_alloc<string_type>;
 
     std::vector<string_type, allocator_type> out (std::is_same_v<A, memory::allocator<T>> ?
-                                                     allocator_type (str.get_allocator ()) : allocator_type ());
+                                                  allocator_type (str.get_allocator ()) : allocator_type ());
 
     size_type start;
     size_type end = 0U;
@@ -360,15 +360,15 @@ auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str, T de
 
 template <char_t T = char, allocator_t A = memory::allocator<T>>
 auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str,
-                  std::basic_string<T, std::char_traits<T>, A> const& delim)
+                   std::basic_string<T, std::char_traits<T>, A> const& delim)
 {
     typedef std::basic_string<T, std::char_traits<T>, A> string_type;
 
-    using allocator_type =
-        typename std::allocator_traits<A>::template rebind_alloc<string_type>;
+    using allocator_type = std::allocator_traits<A>::template rebind_alloc<string_type>;
 
-    std::vector<string_type, allocator_type> out (std::is_same_v<A, memory::allocator<T>> ?
-                                                     allocator_type (str.get_allocator ()) : allocator_type ());
+    std::vector<string_type, allocator_type> out (std::is_same_v
+                                                 <A, typename memory::allocator<T>> ?
+                                                  allocator_type (str.get_allocator ()) : allocator_type ());
 
     std::size_t start;
     std::size_t end = 0U;

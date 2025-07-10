@@ -62,8 +62,8 @@ consteval std::size_t consteval_char_fast_hash () noexcept
 {
     typedef std::size_t size_type;
 
-    auto const last_pos = constexpr_str_size (In) - 1;
     auto const size     = constexpr_str_size (In);
+    auto const last_pos = size - 1;
 
     return size >= 3 ? ((size ^
                          static_cast<size_type> (In[0]                 ) ^

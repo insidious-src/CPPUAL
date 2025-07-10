@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 
 if(ANDROID)
     #if(NOT DEFINED ANDROID_NDK)
@@ -123,7 +123,7 @@ link_directories(
 
 ### compile libraries
 
-set(CPPUAL_HOST_HEADERS
+set(CPPUAL_ENDOSKELETON_HEADERS
     "include/cppual/functional.h"
     "include/cppual/iterators/tuple_iterator.h"
     "include/cppual/iterators/bi_iterator.h"
@@ -167,20 +167,50 @@ set(CPPUAL_HOST_HEADERS
     "include/cppual/byte.h"
     "include/cppual/unbound_interface.h"
     "include/cppual/forward.h"
+    "include/cppual/memory/allocator.h"
+    "include/cppual/memory/mop.h"
+    "include/cppual/memory/stacked.h"
+    "include/cppual/memory/pool.h"
+    "include/cppual/memory/heap.h"
+    "include/cppual/memory/page.h"
+    "include/cppual/memory/shared.h"
+    "include/cppual/abi.h"
+    "src/memory/os/linux.h"
+    "src/memory/os/win.h"
+    "src/memory/os/mac.h"
+    "src/memory/os/android.h"
+    "src/memory/os/ios.h"
+    "src/memory/os/aix.h"
+    "src/memory/os/solaris.h"
+    "src/memory/os/bsd.h"
     )
 
 # process, modules
-add_library(cppual-host SHARED
+add_library(cppual-endoskeleton SHARED
     "src/process/process_model.cpp"
     "src/process/interprocess.cpp"
     "src/process/plugin.cpp"
     "src/system/sysinfo.cpp"
     "src/unbound_interface.cpp"
+    "src/memory/allocator.cpp"
+    "src/memory/stacked.cpp"
+    "src/memory/pool.cpp"
+    "src/memory/heap.cpp"
+    "src/memory/shared.cpp"
+    "src/memory/page.cpp"
+    "src/memory/shared.cpp"
 
     "include/cppual/decl"
+    "include/cppual/types"
+    "include/cppual/noncopyable"
+    "include/cppual/abi"
+    "include/cppual/casts"
+    "include/cppual/meta_type"
+    "include/cppual/meta_string"
+    "include/cppual/meta_functional"
+    "include/cppual/plugin"
     "include/cppual/resource"
     "include/cppual/timer"
-    "include/cppual/plugin"
     "include/cppual/system_info"
     "include/cppual/bigint"
     "include/cppual/circular_queue"
@@ -198,44 +228,13 @@ add_library(cppual-host SHARED
     "include/cppual/byte"
     "include/cppual/unbound_matrix"
     "include/cppual/unbound_interface"
-    )
-target_compile_definitions(cppual-host PRIVATE -DAPI_EXPORT)
-target_precompile_headers(cppual-host PRIVATE ${CPPUAL_HOST_HEADERS})
-
-# memory management
-set(CPPUAL_MEMORY_HEADERS
-    "include/cppual/memory/allocator.h"
-    "include/cppual/memory/mop.h"
-    "include/cppual/memory/stacked.h"
-    "include/cppual/memory/pool.h"
-    "include/cppual/memory/heap.h"
-    "include/cppual/memory/page.h"
-    "include/cppual/memory/shared.h"
-    "src/memory/os/linux.h"
-    "src/memory/os/win.h"
-    "src/memory/os/mac.h"
-    "src/memory/os/android.h"
-    "src/memory/os/ios.h"
-    "src/memory/os/aix.h"
-    "src/memory/os/solaris.h"
-    "src/memory/os/bsd.h"
-    )
-
-add_library(cppual-memory SHARED
-    "src/memory/allocator.cpp"
-    "src/memory/stacked.cpp"
-    "src/memory/pool.cpp"
-    "src/memory/heap.cpp"
-    "src/memory/shared.cpp"
-    "src/memory/page.cpp"
-    "src/memory/shared.cpp"
-
     "include/cppual/memory_resource"
     "include/cppual/shared_memory"
     )
-target_compile_definitions(cppual-memory PRIVATE -DAPI_EXPORT)
-target_precompile_headers(cppual-memory PRIVATE ${CPPUAL_MEMORY_HEADERS})
+target_compile_definitions(cppual-endoskeleton PRIVATE -DAPI_EXPORT)
+target_precompile_headers(cppual-endoskeleton PRIVATE ${CPPUAL_ENDOSKELETON_HEADERS})
 
+# memory management
 set(CPPUAL_MEMORY_SYSTEM_HEADERS
     "include/cppual/memory/system.h"
     )
@@ -446,7 +445,7 @@ set(CPPUAL_DOM_HEADERS
 #    "include/cppual/dom/detail/xml_parser_writer_settings.h"
     )
 
-add_library(cppual-dom SHARED
+add_library(cppual-dom MODULE
     "src/dom/csv.cpp"
 
     "include/cppual/dom_parser"
@@ -490,7 +489,7 @@ set(CPPUAL_NET_HEADERS
 
 if(SOCKETS_FOUND)
 
-add_library(cppual-network SHARED
+add_library(cppual-network MODULE
     "src/network/address.cpp"
     "src/network/packet.cpp"
     "src/network/uri.cpp"
@@ -535,7 +534,7 @@ set(CPPUAL_INPUT_HEADERS
     "include/cppual/input/joysticks/joy_wheel.h"
     )
 
-add_library(cppual-input SHARED
+add_library(cppual-input MODULE
     "src/input/keyboard.cpp"
     "src/input/pointer.cpp"
     "src/input/joystick.cpp"
@@ -552,7 +551,7 @@ set(CPPUAL_MQTT_HEADERS
     "include/cppual/mqtt/message.h"
     )
 
-add_library(cppual-mqtt SHARED
+add_library(cppual-mqtt MODULE
     "src/mqtt/client.cpp"
     "src/mqtt/message.cpp"
 
@@ -664,7 +663,7 @@ set(CPPUAL_MULTIMEDIA_HEADERS
     "include/cppual/multimedia/media_sync.h"
     )
 
-add_library(cppual-multimedia SHARED
+add_library(cppual-multimedia MODULE
     "src/multimedia/media_mgr.cpp"
     "src/multimedia/media_sync.cpp"
     )
@@ -714,7 +713,7 @@ set(CPPUAL_VIDEO_HEADERS
     "include/cppual/multimedia/video/vequalizer.h"
     )
 
-add_library(cppual-video SHARED
+add_library(cppual-video MODULE
     "src/multimedia/video/vfilter.cpp"
     "src/multimedia/video/vequalizer.cpp"
 
@@ -946,7 +945,7 @@ set(CPPUAL_UI_DLG_HEADERS
     "include/cppual/ui/dialogs/wizarddlg.h"
     )
 
-add_library(cppual-ui-dialogs SHARED
+add_library(cppual-ui-dialogs MODULE
     "src/ui/dialogs/msgdlg.cpp"
 
     "include/cppual/ui_dialogs"
@@ -1076,18 +1075,18 @@ endif()
 
 ### link targets
 if(TARGET cppual-memory-system)
-    target_link_libraries(cppual-memory-system cppual-memory)
+    target_link_libraries(cppual-memory-system cppual-endoskeleton)
 endif()
 
 if(TARGET cppual-gfx)
-    target_link_libraries(cppual-gfx cppual-host cppual-memory)
+    target_link_libraries(cppual-gfx cppual-endoskeleton)
 
     if(FREETYPE_FOUND)
-        target_link_libraries(cppual-gfx-font cppual-gfx cppual-memory Freetype::Library)
+        target_link_libraries(cppual-gfx-font cppual-gfx cppual-endoskeleton Freetype::Library)
     endif()
 
     if(OPENGL_FOUND AND GLEW_FOUND)
-        target_link_libraries(cppual-gl cppual-gfx cppual-memory OpenGL::Library GLEW::Library)
+        target_link_libraries(cppual-gl cppual-gfx cppual-endoskeleton OpenGL::Library GLEW::Library)
     endif()
 
     if(TARGET cppual-gl AND EGL_FOUND)
@@ -1102,35 +1101,34 @@ if(TARGET cppual-gfx)
         target_link_libraries(cppual-gfx-plugin-vulkan cppual-gfx Vulkan::Library)
     endif()
 
-    target_link_libraries(cppual-ui cppual-host cppual-gfx cppual-memory)
-    target_link_libraries(cppual-ui-views cppual-ui cppual-memory)
+    target_link_libraries(cppual-ui cppual-gfx cppual-endoskeleton)
+    target_link_libraries(cppual-ui-views cppual-ui cppual-endoskeleton)
     target_link_libraries(cppual-ui-dialogs cppual-ui-views cppual-ui)
 endif()
 
 if(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     if (XCB_EWMH_FOUND AND XCB_ICCCM_FOUND AND X11_FOUND)
-        target_link_libraries(cppual-ui-plugin-xorg cppual-memory XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
+        target_link_libraries(cppual-ui-plugin-xorg cppual-endoskeleton XCB_EWMH::Library XCB_ICCCM::Library X11::Library)
     elseif (NOT WM_FOUND)
-        target_link_libraries(cppual-ui-plugin-wayland cppual-memory WM::Library)
+        target_link_libraries(cppual-ui-plugin-wayland cppual-endoskeleton WM::Library)
     endif()
 elseif(TARGET cppual-ui AND ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(cppual-ui-plugin-win cppual-memory cppual-ui WM::Library)
+    target_link_libraries(cppual-ui-plugin-win cppual-endoskeleton cppual-ui WM::Library)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
-#    target_link_libraries(cppual-ui-android cppual-memory WM::Library)
+#    target_link_libraries(cppual-ui-android cppual-endoskeleton WM::Library)
 endif()
 
-target_link_libraries(cppual-host DL::Library cppual-memory)
-target_link_libraries(cppual-memory RT::Library)
+target_link_libraries(cppual-endoskeleton DL::Library RT::Library)
 
 if(SOCKETS_FOUND)
-target_link_libraries(cppual-compute cppual-memory cppual-host Sockets::Library)
-target_link_libraries(cppual-network cppual-memory Sockets::Library)
+target_link_libraries(cppual-compute cppual-endoskeleton Sockets::Library)
+target_link_libraries(cppual-network cppual-endoskeleton Sockets::Library)
 
 endif()
 
 
-target_link_libraries(cppual-dom cppual-memory)
-target_link_libraries(cppual-json cppual-memory)
+target_link_libraries(cppual-dom cppual-endoskeleton)
+target_link_libraries(cppual-json cppual-endoskeleton)
 
 if(TARGET cppual-compute)
 
@@ -1139,16 +1137,16 @@ target_link_libraries(cppual-video-plugin-compute cppual-compute)
 endif()
 
 if(TARGET cppual-compute AND OPENCL_FOUND)
-    target_link_libraries(cppual-compute-plugin-opencl cppual-compute cppual-memory OpenCL::Library)
+    target_link_libraries(cppual-compute-plugin-opencl cppual-compute cppual-endoskeleton OpenCL::Library)
 endif()
 
 if(TARGET cppual-compute AND VULKAN_FOUND)
-    target_link_libraries(cppual-compute-plugin-vulkan cppual-compute cppual-memory Vulkan::Library)
+    target_link_libraries(cppual-compute-plugin-vulkan cppual-compute cppual-endoskeleton Vulkan::Library)
 endif()
 
 
 if(SNDFILE_FOUND)
-    target_link_libraries(cppual-audio cppual-memory SndFile::Library)
+    target_link_libraries(cppual-audio cppual-endoskeleton SndFile::Library)
 endif()
 
 #if(TARGET cppual-audio AND OPENAL_FOUND)
@@ -1176,7 +1174,7 @@ endif()
 
 add_executable(cppual-memory-test "tests/memory_test.cpp")
 
-target_link_libraries(cppual-memory-test cppual-memory)
+target_link_libraries(cppual-memory-test cppual-endoskeleton)
 
 #add_test (NAME memory_test COMMAND cppual-memory-test)
 

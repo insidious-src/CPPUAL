@@ -25,9 +25,9 @@
 
 #include <cppual/decl>
 #include <cppual/signal>
-#include <cppual/fn_meta.h>
-#include <cppual/memory/allocator.h>
 #include <cppual/concepts>
+#include <cppual/meta_functional>
+#include <cppual/memory/allocator.h>
 
 // =========================================================
 
@@ -79,7 +79,7 @@ public:
     typedef signal<void(arg_type), A>   base_type      ;
     typedef std::allocator_traits<A>    traits_type    ;
     typedef traits_type::allocator_type allocator_type ;
-    typedef std::remove_cvref_t<T>      value_type     ;
+    typedef remove_cref_t<T>            value_type     ;
     typedef value_type const            const_value    ;
     typedef value_type &                reference      ;
     typedef value_type const&           const_reference;
@@ -88,13 +88,13 @@ public:
     typedef base_type::value_type       fn_type        ;
 
     template <class_t C>
-    using mem_fn_type = void(C::*)(arg_type);
+    using mem_fn_type = any_fn_type<C, void(arg_type)>::type;
 
     template <class_t C>
-    using const_mem_fn_type = void(C::*)(arg_type) const;
+    using const_mem_fn_type = any_fn_type<C, void(arg_type) const>::type;
 
     constexpr reactive () noexcept        = default;
-    inline    reactive (self_type&&)      = default;
+    constexpr reactive (self_type &&)     = default;
     constexpr reactive (self_type const&) = default;
 
     constexpr reactive (value_type&& value, allocator_type const& ator = allocator_type ())
@@ -107,7 +107,7 @@ public:
       _M_value  (value)
     { }
 
-    inline self_type& operator = (self_type const& gObj)
+    constexpr self_type& operator = (self_type const& gObj)
     {
         if (this != &gObj) return *this;
 
@@ -117,7 +117,7 @@ public:
         return *this;
     }
 
-    inline self_type& operator = (self_type&& gObj)
+    constexpr self_type& operator = (self_type&& gObj)
     {
         if (this != &gObj) return *this;
 
@@ -127,13 +127,13 @@ public:
         return *this;
     }
 
-    inline self_type& operator = (value_type&& value)
+    constexpr self_type& operator = (value_type&& value)
     {
         if (&_M_value != &value) (*this)(_M_value = std::move (value));
         return *this;
     }
 
-    inline self_type& operator = (const_reference value)
+    constexpr self_type& operator = (const_reference value)
     {
         if (&_M_value != &value) (*this)(_M_value = value);
         return *this;
@@ -145,18 +145,18 @@ public:
     constexpr const_reference get () const noexcept
     { return _M_value; }
 
-    inline void  clear () noexcept
+    constexpr void  clear () noexcept
     { base_type::clear (); }
 
     /// reactive (signal/slot) connect
-    inline self_type& operator << (fn_type&& fn) const
+    constexpr self_type& operator << (fn_type&& fn) const
     {
         connect (*this, std::move (fn));
         return   *this;
     }
 
     /// reactive (signal/slot) connect
-    inline self_type& operator << (fn_type const& fn) const
+    constexpr self_type& operator << (fn_type const& fn) const
     {
         connect (*this, fn);
         return   *this;
@@ -164,7 +164,7 @@ public:
 
     /// reactive (signal/slot) connect
     template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
-    inline self_type& operator << (std::pair<C&, mem_fn_type<C>> pair) const
+    constexpr self_type& operator << (std::pair<C&, mem_fn_type<C>> pair) const
     {
         connect (*this, pair.first, pair.second);
         return   *this;
@@ -172,14 +172,14 @@ public:
 
     /// reactive (signal/slot) connect
     template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
-    inline self_type& operator << (std::pair<C&, const_mem_fn_type<C>> pair) const
+    constexpr self_type& operator << (std::pair<C&, const_mem_fn_type<C>> pair) const
     {
         connect (*this, pair.first, pair.second);
         return   *this;
     }
 
     /// reactive (signal/slot) connect
-    inline self_type& operator << (void(& fn)(arg_type)) const
+    constexpr self_type& operator << (void(& fn)(arg_type)) const
     {
         connect (*this, fn);
         return   *this;
@@ -187,7 +187,7 @@ public:
 
     /// callable object reactive (signal/slot) connect
     template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
-    inline self_type& operator << (C& obj) const
+    constexpr self_type& operator << (C& obj) const
     {
         static_assert (std::is_same_v<void, callable_return_t<C, arg_type>>,
                        "C::operator () return type is NOT void!");
