@@ -280,24 +280,24 @@ inline config::feature_types convert_extensions (display_pointer dsp)
          extension = extensions; extension++;
          extension = std::strchr (extension , ' '))
     {
-        switch (constexpr_char_hash (extension))
+        switch (char_hash (extension))
         {
-        case constexpr_char_hash ("EGL_KHR_surfaceless_context"):
+        case char_hash ("EGL_KHR_surfaceless_context"):
             eFeatures += config::feature::surfaceless_context;
             break;
-        case constexpr_char_hash ("EGL_MESA_configless_context"):
+        case char_hash ("EGL_MESA_configless_context"):
             eFeatures += config::feature::configless_context;
             break;
-        case constexpr_char_hash ("EGL_CHROMIUM_sync_control"):
+        case char_hash ("EGL_CHROMIUM_sync_control"):
             eFeatures += config::feature::sync_control;
             break;
-        case constexpr_char_hash ("EGL_EXT_create_context_robustness"):
+        case char_hash ("EGL_EXT_create_context_robustness"):
             eFeatures += config::feature::create_robust_context;
             break;
-        case constexpr_char_hash ("EGL_ANGLE_window_fixed_size"):
+        case char_hash ("EGL_ANGLE_window_fixed_size"):
             eFeatures += config::feature::scalable_surface;
             break;
-        case constexpr_char_hash ("EGL_KHR_create_context"):
+        case char_hash ("EGL_KHR_create_context"):
             eFeatures += config::feature::context_attributes_ext;
             break;
         }

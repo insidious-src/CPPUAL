@@ -573,6 +573,9 @@ concept member_fn_pair_t = std::is_same_v<P, std::pair<K, FN>> &&
                            switch_value_t<   remove_cptr_t<K>> &&
                            std::is_member_function_pointer_v<FN>;
 
+template <typename P, typename K, typename FN>
+concept functional_pair_t = pair_t<P> && switch_value_t<remove_cptr_t<K>> && functional_t<FN>;
+
 template <typename Tuple, typename... Args>
 concept tuple_t = std::is_same_v<Tuple, std::tuple<Args...>>;
 
@@ -656,6 +659,20 @@ concept variant_like_t = requires
 {
     typename std::variant_size<remove_cref_t<T>>::type;
     typename std::variant_alternative_t<0, remove_cref_t<T>>;
+};
+
+template <typename T>
+concept str_view_like_t = requires (T t)
+{
+    typename T::value_type ;
+    typename T::traits_type;
+
+    { t          } -> std::convertible_to<std::basic_string_view<typename T::value_type>>;
+    { t.size  () } -> std::convertible_to<std::size_t>;
+    { t.data  () } -> std::convertible_to<typename T::value_type const*>;
+    { t.begin () } -> std::convertible_to<typename T::value_type const*>;
+    { t.end   () } -> std::convertible_to<typename T::value_type const*>;
+    { t[0]       } -> std::convertible_to<typename T::value_type>;
 };
 
 //! Comparison concepts

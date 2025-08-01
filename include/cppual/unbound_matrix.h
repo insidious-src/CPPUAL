@@ -32,7 +32,7 @@
 #include <cppual/memory/allocator.h>
 #include <cppual/concept/concepts.h>
 
-//include <memory>
+//#include <memory>
 //#include <cstdint>
 //#include <cstddef>
 //#include <variant>
@@ -46,6 +46,11 @@ using memory::allocator_t;
 
 // =========================================================
 
+
+/**
+  * @brief The unbound_matrix class
+  * XAXAXaxAxAXAxaxa няма да ти кажа...
+  */
 template <non_void_t T = uchar, allocator_t A = memory::allocator<T>>
 class unbound_matrix
 {

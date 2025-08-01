@@ -118,19 +118,19 @@ constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept -> R(D::*)(Args...
 }
 
 template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...) const
-{
-    typedef R(D::* const_out_fn)(Args...) const;
-
-    return std::bit_cast<const_out_fn> (mem_fn);
-}
-
-template <class_t D, class_t C, typename R, typename... Args>
 constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...)
 {
     typedef R(D::* out_fn)(Args...);
 
     return std::bit_cast<out_fn> (mem_fn);
+}
+
+template <class_t D, class_t C, typename R, typename... Args>
+constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...) const
+{
+    typedef R(D::* const_out_fn)(Args...) const;
+
+    return std::bit_cast<const_out_fn> (mem_fn);
 }
 
 template <class_t D, class_t C, typename R, typename... Args>

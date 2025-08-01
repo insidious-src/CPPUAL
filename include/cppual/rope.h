@@ -2091,7 +2091,7 @@ constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 
 // template <char_t T, allocator_t A>
 // inline frope<T, A>& operator += (frope<T>& gObj, T const* pText) noexcept
-// { return add_to_string (gObj, pText, constexpr_str_size (pText)); }
+// { return add_to_string (gObj, pText, str_size (pText)); }
 
 // ====================================================
 
@@ -2108,7 +2108,7 @@ constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 // inline frope<T, A> operator + (frope<T, A> const& gObj, T const* pText) noexcept
 // {
 //     frope<T, A> gStr (gObj);
-//     return std::move (add_to_string (gStr, pText, constexpr_str_size (pText)));
+//     return std::move (add_to_string (gStr, pText, str_size (pText)));
 // }
 
 // ====================================================

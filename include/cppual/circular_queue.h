@@ -139,60 +139,60 @@ public:
     { return const_reverse_iterator (const_iterator (*this, npos)); }
 
     constexpr circular_queue () noexcept
-    : allocator_type (),
-      _M_pArray      (),
-      _M_beginPos    (),
-      _M_endPos      (),
-      _M_uCapacity   ()
+    : allocator_type ()
+    , _M_pArray      ()
+    , _M_beginPos    ()
+    , _M_endPos      ()
+    , _M_uCapacity   ()
     { }
 
     constexpr circular_queue (size_type uCapacity, allocator_type const& gAtor = allocator_type ())
-    : allocator_type (gAtor),
-      _M_pArray      (uCapacity ? allocator_type::allocate (uCapacity) : pointer ()),
-      _M_beginPos    (),
-      _M_endPos      (),
-      _M_uCapacity   (_M_pArray ? uCapacity : size_type ())
+    : allocator_type (gAtor)
+    , _M_pArray      (uCapacity ? allocator_type::allocate (uCapacity) : pointer ())
+    , _M_beginPos    ()
+    , _M_endPos      ()
+    , _M_uCapacity   (_M_pArray ? uCapacity : size_type ())
     { if (!_M_pArray && uCapacity) throw std::bad_alloc (); }
 
     constexpr circular_queue (allocator_type const& gAtor)
-    : allocator_type (gAtor),
-      _M_pArray      (),
-      _M_beginPos    (),
-      _M_endPos      (),
-      _M_uCapacity   ()
+    : allocator_type (gAtor)
+    , _M_pArray      ()
+    , _M_beginPos    ()
+    , _M_endPos      ()
+    , _M_uCapacity   ()
     { }
 
     inline circular_queue (std::initializer_list<value_type> list)
-    : allocator_type (),
-      _M_pArray      (allocator_type::allocate (list.size ())),
-      _M_beginPos    (),
-      _M_endPos      (),
-      _M_uCapacity   (_M_pArray ? list.size () : size_type ())
+    : allocator_type ()
+    , _M_pArray      (allocator_type::allocate (list.size ()))
+    , _M_beginPos    ()
+    , _M_endPos      ()
+    , _M_uCapacity   (_M_pArray ? list.size () : size_type ())
     {
         if (_M_pArray && list.size ()) for (auto& val : list) push_back (std::move (val));
     }
 
     inline circular_queue (self_type const& gObj)
-    : allocator_type (gObj.allocator_type::select_on_container_copy_construction ()),
-      _M_pArray      (!gObj.empty () ? allocator_type::allocate (gObj.size ()) : pointer ()),
-      _M_beginPos    (_M_pArray && !gObj.empty () ? _M_pArray : pointer ()),
-      _M_endPos      (_M_pArray && !gObj.empty () ? _M_pArray + (gObj.size () - 1) : pointer ()),
-      _M_uCapacity   (_M_pArray && !gObj.empty () ? gObj.size () : size_type ())
+    : allocator_type (gObj.allocator_type::select_on_container_copy_construction ())
+    , _M_pArray      (!gObj.empty () ? allocator_type::allocate (gObj.size ()) : pointer ())
+    , _M_beginPos    (_M_pArray && !gObj.empty () ? _M_pArray : pointer ())
+    , _M_endPos      (_M_pArray && !gObj.empty () ? _M_pArray + (gObj.size () - 1) : pointer ())
+    , _M_uCapacity   (_M_pArray && !gObj.empty () ? gObj.size () : size_type ())
     {
         if (!gObj.empty () && !_M_pArray) throw std::bad_alloc ();
 
-        for (auto it = gObj.cbegin (), dst_it = cbegin (); it != gObj.cend (); ++it, ++dst_it)
+        for (iterator it = gObj.begin (), dst_it = begin (); it != gObj.end (); ++it, ++dst_it)
         {
-            traits_type::construct (*this, &(*dst_it), *it);
+            allocator_type::construct (&(*dst_it), *it);
         }
     }
 
     inline circular_queue (self_type&& gObj) noexcept
-    : allocator_type (gObj),
-      _M_pArray      (gObj._M_pArray   ),
-      _M_beginPos    (gObj._M_beginPos ),
-      _M_endPos      (gObj._M_endPos   ),
-      _M_uCapacity   (gObj._M_uCapacity)
+    : allocator_type (gObj)
+    , _M_pArray      (gObj._M_pArray   )
+    , _M_beginPos    (gObj._M_beginPos )
+    , _M_endPos      (gObj._M_endPos   )
+    , _M_uCapacity   (gObj._M_uCapacity)
     {
         gObj._M_pArray    = gObj._M_beginPos = gObj._M_endPos = nullptr;
         gObj._M_uCapacity = size_type ();

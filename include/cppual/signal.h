@@ -73,7 +73,7 @@ public:
     typedef alloc_traits::allocator_type                   allocator_type        ;
     typedef alloc_traits::size_type                        size_type             ;
     typedef size_type const                                const_size            ;
-    typedef FunctionalType<fn_type<R(Args...)>>            value_type            ;
+    typedef fn_type<R(Args...)>                            value_type            ;
     typedef value_type &                                   reference             ;
     typedef value_type const&                              const_reference       ;
     typedef signal_queue<value_type, allocator_type>       container_type        ;
@@ -231,7 +231,7 @@ public:
     typedef traits_type::allocator_type              allocator_type        ;
     typedef traits_type::size_type                   size_type             ;
     typedef size_type const                          const_size            ;
-    typedef FunctionalType<fn_type<void(Args...)>>   value_type            ;
+    typedef fn_type<void(Args...)>                   value_type            ;
     typedef value_type &                             reference             ;
     typedef value_type const&                        const_reference       ;
     typedef signal_queue<value_type, allocator_type> container_type        ;
@@ -375,7 +375,7 @@ public:
     typedef traits_type::allocator_type              allocator_type        ;
     typedef traits_type::size_type                   size_type             ;
     typedef size_type const                          const_size            ;
-    typedef FunctionalType<fn_type<void(Args...)>>   value_type            ;
+    typedef fn_type<void(Args...)>                   value_type            ;
     typedef value_type &                             reference             ;
     typedef value_type const&                        const_reference       ;
     typedef signal_queue<value_type, allocator_type> container_type        ;
@@ -520,17 +520,21 @@ inline
              typename signal<R(Args...), A>::value_type&& val,
              bool bTop = false)
 {
-    auto it = std::find (gSignal.begin (), gSignal.end (), val);
-
-    if (it != gSignal.end ()) return it;
-
-    if (bTop)
+    for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        gSignal.get_slots ().push_front (std::move (val));
-        return gSignal.get_slots ().begin ();
+        if (*it == val)
+        {
+            if (bTop)
+            {
+                gSignal.get_slots ().push_front (std::move (val));
+                return gSignal.get_slots ().begin ();
+            }
+
+            gSignal.get_slots ().push_back (std::move (val));
+            return --gSignal.get_slots ().end ();
+        }
     }
 
-    gSignal.get_slots ().push_back (std::move (val));
     return --gSignal.get_slots ().end ();
 }
 
@@ -544,17 +548,21 @@ connect (signal<R(Args...), A>& gSignal,
          typename signal<R(Args...), A>::const_reference val,
          bool bTop = false)
 {
-    auto it = std::find (gSignal.begin (), gSignal.end (), val);
-
-    if (it != gSignal.end ()) return it;
-
-    if (bTop)
+    for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        gSignal.get_slots ().push_front (val);
-        return gSignal.get_slots ().begin ();
+        if (*it == val)
+        {
+            if (bTop)
+            {
+                gSignal.get_slots ().push_front (val);
+                return gSignal.get_slots ().begin ();
+            }
+
+            gSignal.get_slots ().push_back (val);
+            return --gSignal.get_slots ().end ();
+        }
     }
 
-    gSignal.get_slots ().push_back (val);
     return --gSignal.get_slots ().end ();
 }
 
@@ -570,19 +578,21 @@ connect (signal<R(Args...), A>& gSignal,
          bool bTop = false,
          LambdaNonCaptureType<Call>* = nullptr)
 {
-    auto it = std::find (gSignal.begin (),
-                         gSignal.end   (),
-                         typename signal<R(Args...), A>::value_type (std::forward<Call> (gFunc)));
-
-    if (it != gSignal.end ()) return it;
-
-    if (bTop)
+    for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        gSignal.get_slots ().emplace_front (std::move (gFunc));
-        return gSignal.get_slots ().begin ();
+        if (*it == typename signal<R(Args...), A>::value_type (gFunc))
+        {
+            if (bTop)
+            {
+                gSignal.get_slots ().emplace_front (std::move (gFunc));
+                return gSignal.get_slots ().begin ();
+            }
+
+            gSignal.get_slots ().emplace_back (std::move (gFunc));
+            return --gSignal.get_slots ().end ();
+        }
     }
 
-    gSignal.get_slots ().emplace_back (std::move (gFunc));
     return --gSignal.get_slots ().end ();
 }
 
@@ -598,19 +608,21 @@ connect (signal<R(Args...), A>& gSignal,
          bool bTop = false,
          LambdaCaptureType<Call>* = nullptr)
 {
-    auto it = std::find (gSignal.begin (),
-                         gSignal.end   (),
-                         typename signal<R(Args...), A>::value_type (std::forward<Call> (gFunc)));
-
-    if (it != gSignal.end ()) return it;
-
-    if (bTop)
+    for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        gSignal.get_slots ().emplace_front (std::forward<Call> (gFunc));
-        return gSignal.get_slots ().begin ();
+        if (*it == typename signal<R(Args...), A>::value_type (gFunc))
+        {
+            if (bTop)
+            {
+                gSignal.get_slots ().emplace_front (std::move (gFunc));
+                return gSignal.get_slots ().begin ();
+            }
+
+            gSignal.get_slots ().emplace_back (std::move (gFunc));
+            return --gSignal.get_slots ().end ();
+        }
     }
 
-    gSignal.get_slots ().emplace_back (std::forward<Call> (gFunc));
     return --gSignal.get_slots ().end ();
 }
 
@@ -625,19 +637,21 @@ connect (signal<R(Args...), A>& gSignal,
          R(C::* fn)(Args...),
          bool bTop = false)
 {
-    auto it = std::find (gSignal.begin (),
-                         gSignal.end   (),
-                         typename signal<R(Args...), A>::value_type (pObj, fn));
-
-    if (it != gSignal.end ()) return it;
-
-    if (bTop)
+    for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        gSignal.get_slots ().emplace_front (pObj, fn);
-        return --gSignal.get_slots ().begin ();
+        if (*it == make_fn (pObj, fn))
+        {
+            if (bTop)
+            {
+                gSignal.get_slots ().emplace_front (pObj, fn);
+                return gSignal.get_slots ().begin ();
+            }
+
+            gSignal.get_slots ().emplace_back (pObj, fn);
+            return --gSignal.get_slots ().end ();
+        }
     }
 
-    gSignal.get_slots ().emplace_back (pObj, fn);
     return --gSignal.get_slots ().end ();
 }
 
@@ -653,19 +667,21 @@ connect (signal<R(Args...), A>& gSignal,
          R(C::* fn)(Args...) const,
          bool bTop = false)
 {
-    auto it = std::find (gSignal.begin (),
-                         gSignal.end   (),
-                         typename signal<R(Args...), A>::value_type (pObj, fn));
-
-    if (it != gSignal.end ()) return it;
-
-    if (bTop)
+    for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        gSignal.get_slots ().emplace_front (pObj, fn);
-        return --gSignal.get_slots ().begin ();
+        if (*it == tmake_fn (pObj, fn))
+        {
+            if (bTop)
+            {
+                gSignal.get_slots ().emplace_front (pObj, fn);
+                return gSignal.get_slots ().begin ();
+            }
+
+            gSignal.get_slots ().emplace_back (pObj, fn);
+            return --gSignal.get_slots ().end ();
+        }
     }
 
-    gSignal.get_slots ().emplace_back (pObj, fn);
     return --gSignal.get_slots ().end ();
 }
 
@@ -678,19 +694,21 @@ inline
 typename signal<R(Args...), A>::slot_type
 connect (signal<R(Args...), A>& gSignal, C& pObj, bool bTop = false)
 {
-    auto it = std::find (gSignal.begin (),
-                         gSignal.end   (),
-                         typename signal<R(Args...), A>::value_type (pObj));
-
-    if (it != gSignal.end ()) return it;
-
-    if (bTop)
+    for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        gSignal.get_slots ().emplace_front (pObj);
-        return --gSignal.get_slots ().begin ();
+        if (*it == make_fn (pObj))
+        {
+            if (bTop)
+            {
+                gSignal.get_slots ().emplace_front (pObj);
+                return gSignal.get_slots ().begin ();
+            }
+
+            gSignal.get_slots ().emplace_back (pObj);
+            return --gSignal.get_slots ().end ();
+        }
     }
 
-    gSignal.get_slots ().emplace_back (pObj);
     return --gSignal.get_slots ().end ();
 }
 
@@ -702,19 +720,21 @@ inline
 typename signal<R(Args...), A>::slot_type
 connect (signal<R(Args...), A>& gSignal, R(& fn)(Args...), bool bTop = false)
 {
-    auto it = std::find (gSignal.begin (),
-                         gSignal.end (),
-                         typename signal<R(Args...), A>::value_type (fn));
-
-    if (it != gSignal.end ()) return it;
-
-    if (bTop)
+    for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        gSignal.get_slots ().emplace_front (fn);
-        return gSignal.get_slots ().begin ();
+        if (*it == fn)
+        {
+            if (bTop)
+            {
+                gSignal.get_slots ().emplace_front (fn);
+                return gSignal.get_slots ().begin ();
+            }
+
+            gSignal.get_slots ().emplace_back (fn);
+            return --gSignal.get_slots ().end ();
+        }
     }
 
-    gSignal.get_slots ().emplace_back (fn);
     return --gSignal.get_slots ().end ();
 }
 

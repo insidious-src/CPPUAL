@@ -113,23 +113,26 @@ using arg_t = std::conditional_t<sizeof (U) <= arch_32_bits_v && !std::is_class_
 
 // =========================================================
 
-template <non_void_t T>
+template <typename T>
 struct var_type
 {
-    typedef T        value_type     ;
-    typedef T&       reference      ;
-    typedef T const& const_reference;
+    typedef std::remove_reference_t<T> value_type   ;
+    typedef value_type      *          pointer      ;
+    typedef value_type const*          const_pointer;
 
-    inline constexpr static const_reference value = value_type ();
+    inline constexpr static pointer value = nullptr;
 };
 
-template <non_void_t T>
-using var_type_ref = var_type<T>::const_reference;
+template <typename T>
+using var_type_t = var_type<T>::pointer;
 
-template <non_void_t T>
-inline constexpr static var_type_ref<T> type = var_type<T>::value;
+template <typename T>
+inline constexpr static var_type_t<T   > type         = var_type<T>::value   ;
+inline constexpr static var_type_t<void> default_type = var_type<void>::value;
 
-inline constexpr static var_type_ref<byte> default_type = var_type<byte>::value;
+template <typename T>
+inline constexpr static var_type_t<T   > ret         = type<T>     ;
+inline constexpr static var_type_t<void> default_ret = default_type;
 
 // ====================================================
 

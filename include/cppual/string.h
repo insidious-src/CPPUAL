@@ -48,22 +48,6 @@ using memory::allocator_t;
 
 // ====================================================
 
-template <typename T>
-concept str_view_like_t = requires (T t)
-{
-    typename T::value_type ;
-    typename T::traits_type;
-
-    { t          } -> std::convertible_to<std::basic_string_view<typename T::value_type>>;
-    { t.size  () } -> std::convertible_to<std::size_t>;
-    { t.data  () } -> std::convertible_to<typename T::value_type const*>;
-    { t.begin () } -> std::convertible_to<typename T::value_type const*>;
-    { t.end   () } -> std::convertible_to<typename T::value_type const*>;
-    { t[0]       } -> std::convertible_to<typename T::value_type>;
-};
-
-// ====================================================
-
 /**
  ** @brief fstring (fast string) is a string implementation with locale traits and
  ** small string optimization (SSO) for better performance with small strings.
@@ -160,7 +144,7 @@ public:
 
     constexpr explicit fstring (const_pointer pText, allocator_type const& ator = allocator_type ())
     : allocator_type (ator)
-    , _M_uLength (constexpr_str_size (pText))
+    , _M_uLength (str_size (pText))
     , _M_gBuffer (is_on_stack () ? buffer () : buffer (size ()))
     {
         if (is_on_stack ())
@@ -273,7 +257,7 @@ public:
     }
 
     constexpr self_type& operator = (const_pointer pText) noexcept
-    { return assign_to_string (*this, pText, constexpr_str_size (pText)); }
+    { return assign_to_string (*this, pText, str_size (pText)); }
 
     constexpr self_type& operator = (self_type const& gObj) noexcept
     {
@@ -703,7 +687,7 @@ inline fstring<T, E, A>& operator += (fstring<T, E, A>& lhObj, fstring<T, E, A> 
 
 template <char_t T, class_t E, allocator_t A>
 inline fstring<T, E, A>& operator += (fstring<T, E, A>& gObj, T const* pText) noexcept
-{ return add_to_string (gObj, pText, constexpr_str_size (pText)); }
+{ return add_to_string (gObj, pText, str_size (pText)); }
 
 // ====================================================
 
@@ -720,7 +704,7 @@ template <char_t T, class_t E, allocator_t A>
 inline fstring<T, E, A> operator + (fstring<T, E, A> const& gObj, T const* pText) noexcept
 {
     fstring<T, E, A> gStr (gObj);
-    return std::move (add_to_string (gStr, pText, constexpr_str_size (pText)));
+    return std::move (add_to_string (gStr, pText, str_size (pText)));
 }
 
 // ====================================================

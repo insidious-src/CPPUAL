@@ -83,7 +83,7 @@ template<typename R, typename... Args>
 struct function_traits<R(Args...)>
 {
     using result_type = R;
-    const static std::size_t arity = sizeof...(Args);
+    inline constexpr static const std::size_t arity = sizeof... (Args);
 
     template <std::size_t I>
     struct argument

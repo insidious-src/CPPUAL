@@ -271,7 +271,7 @@ public:
 
     template <non_void_t... Ts>
     requires (sizeof... (Ts) == size ())
-    constexpr consteval_array (Ts&&... array) noexcept
+    consteval consteval_array (Ts&&... array) noexcept
     : _M_array { std::forward<Ts> (array)... }
     {
         static_assert (are_of_same_type_v<elem_type, Ts...>,

@@ -48,11 +48,6 @@
 
 namespace cppual {
 
-// ====================================================
-
-template <typename P, typename K, typename FN>
-concept functional_pair_t = pair_t<P> && switch_value_t<remove_cptr_t<K>> && is_functional_v<FN>;
-
 // =========================================================
 
 consteval std::size_t min_args_count (std::size_t const count = 10) noexcept
@@ -67,23 +62,30 @@ class function_proxy
 {
 public:
     typedef function_proxy<C> self_type          ;
-    typedef remove_cptr_t<C>  iface_type         ;
+    typedef remove_cptr_t <C> iface_type         ;
     typedef iface_type      * iface_pointer      ;
     typedef iface_type const* iface_const_pointer;
     typedef std::string_view  string_view        ;
 
-    constexpr function_proxy (self_type &&) noexcept = default;
-    constexpr function_proxy (self_type const&) noexcept = default;
-    constexpr self_type& operator = (self_type &&) noexcept = default;
+    constexpr function_proxy (self_type &&)            noexcept = default;
+    constexpr function_proxy (self_type const&)        noexcept = default;
+    constexpr self_type& operator = (self_type &&)     noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
     template <typename R, non_void_t... Args>
-    constexpr R operator () (Args... args, R& = default_type) const
+    inline self_type& operator = (function<R(Args...)> const& fn) noexcept
+    {
+        _M_iface->iface_type::template add_function<R> (_M_fn_name, fn);
+        return *this;
+    };
+
+    template <typename R, non_void_t... Args>
+    constexpr R operator () (R* = void_ptr (), Args... args) const
     { return _M_iface->iface_type::template invoke<R> (_M_fn_name, std::forward<Args> (args)...); }
 
-    template <non_void_t... Args>
-    constexpr void operator () (Args... args) const
-    { _M_iface->iface_type::template invoke<void> (_M_fn_name, std::forward<Args> (args)...); }
+    // template <non_void_t... Args>
+    // constexpr void operator () (Args... args) const
+    // { _M_iface->iface_type::template invoke<void> (_M_fn_name, std::forward<Args> (args)...); }
 
 private:
     constexpr function_proxy (iface_type const& interface, string_view fn_name)
@@ -97,6 +99,138 @@ private:
 private:
     iface_const_pointer _M_iface  ;
     string_view         _M_fn_name;
+};
+
+
+
+// ====================================================
+
+template <std::size_t N = min_args_count ()>
+class function_rtti
+{
+private:
+    inline constexpr static decltype(N) max_arity = min_args_count (N);
+
+public:
+    typedef function_rtti<N>                 self_type  ;
+    typedef decltype(N)                      size_type  ;
+    typedef size_type const                  const_size ;
+    typedef function<void()>                 any_fn_type;
+    typedef abi::rtti                        rtti_type  ;
+    typedef std::array<rtti_type, max_arity> array_type ;
+
+    template <typename S>
+    using fn_type = function<S>;
+
+    template <std::size_t SZ>
+    using self_type_t = function_rtti<SZ>;
+
+    constexpr function_rtti () noexcept = default;
+
+    template <std::size_t SZ,
+              typename = std::enable_if_t<min_args_count (N) >= min_args_count (SZ)>
+              >
+    constexpr function_rtti (self_type_t<SZ>&& rh) noexcept
+    : _M_fn        (rh._M_fn       )
+    , _M_arg_types (rh._M_arg_types)
+    , _M_ret_type  (rh._M_ret_type )
+    {
+        static_assert (min_args_count (N) >= min_args_count (SZ),
+                       "function_rtti<N> can NOT be initialized with function_rtti<SZ> "
+                       "where N < SZ! N must be greater or equal to SZ!");
+
+        rh = self_type_t<SZ> (); // clear the moved object
+    }
+
+    template <std::size_t SZ,
+              typename = std::enable_if_t<min_args_count (N) >= min_args_count (SZ)>
+              >
+    constexpr function_rtti (self_type_t<SZ> const& rh) noexcept
+    : _M_fn        (rh._M_fn       )
+    , _M_arg_types (rh._M_arg_types)
+    , _M_ret_type  (rh._M_ret_type )
+    {
+        static_assert (min_args_count (N) >= min_args_count (SZ),
+                       "function_rtti<N> can NOT be assigned from function_rtti<SZ> "
+                       "where N < SZ! N must be greater or equal to SZ!");
+    }
+
+    template <std::size_t SZ,
+              typename = std::enable_if_t<min_args_count (N) >= min_args_count (SZ)>
+              >
+    constexpr self_type& operator = (self_type_t<SZ>&& rh) noexcept
+    {
+        static_assert (min_args_count (N) >= min_args_count (SZ),
+                       "function_rtti<N> can NOT be assigned from function_rtti<SZ> "
+                       "where N < SZ! N must be greater or equal to SZ!");
+
+        if (this == &rh) return *this; // self-assignment check
+
+        rh = self_type_t<SZ> (); // clear the moved object
+
+        _M_fn        = rh._M_fn       ;
+        _M_arg_types = rh._M_arg_types;
+        _M_ret_type  = rh._M_ret_type ;
+
+        return *this;
+    }
+
+    template <std::size_t SZ,
+              typename = std::enable_if_t<min_args_count (N) >= min_args_count (SZ)>
+              >
+    constexpr self_type& operator = (self_type_t<SZ> const& rh) noexcept
+    {
+        static_assert (min_args_count (N) >= min_args_count (SZ),
+                       "function_rtti<N> can NOT be assigned from function_rtti<SZ> "
+                       "where N < SZ! N must be greater or equal to SZ!");
+
+        if (this == &rh) return *this; // self-assignment check
+
+        _M_fn        = rh._M_fn       ;
+        _M_arg_types = rh._M_arg_types;
+        _M_ret_type  = rh._M_ret_type ;
+
+        return *this;
+    }
+
+    consteval any_fn_type const&    function () const noexcept { return _M_fn       ; }
+    consteval array_type  const&   arg_types () const noexcept { return _M_arg_types; }
+    consteval rtti_type   const& return_type () const noexcept { return _M_ret_type ; }
+
+    consteval rtti_type const& arg_type (const_size index) const
+    {
+        if (index >= min_args_count (N))
+            throw std::out_of_range ("function_rtti::arg_type: index out of range!");
+
+        return _M_arg_types[index];
+    }
+
+    consteval static size_type arity () noexcept
+    { return min_args_count (N); }
+
+    template <typename R, non_void_t... Args>
+    constexpr self_type& operator = (fn_type<R(Args...)> const& fn) noexcept
+    { return *this = self_type (fn); }
+
+private:
+    template <typename R, typename... Args>
+    constexpr function_rtti (fn_type<R(Args...)> const& fn)
+    : _M_fn        ( fn_cast<void()> (fn)      )
+    , _M_arg_types { abi::rtti (type<Args>)... }
+    , _M_ret_type  ( type<R>                   )
+    { }
+
+    template <size_type>
+    friend class function_rtti;
+
+    template <switch_value_t, functional_t...>
+    friend class unbound_interface    ;
+    friend class dyn_unbound_interface;
+
+private:
+    any_fn_type _M_fn        { };
+    array_type  _M_arg_types { };
+    rtti_type   _M_ret_type  { };
 };
 
 //! ====================================================
@@ -122,8 +256,8 @@ public:
     typedef std::reverse_iterator<iterator>       reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
     typedef std::pair<iterator, bool>             iterator_pair         ;
-    typedef abi::rtti                             rtti_type           ;
-    typedef dyn_array<rtti_type>                rtti_array          ;
+    typedef abi::rtti                             rtti_type             ;
+    typedef dyn_array<rtti_type>                  rtti_array            ;
 
     // ====================================================
 
@@ -181,7 +315,7 @@ public:
 
     // ====================================================
 
-    consteval function_proxy<self_type> operator [] (string_view const& fn_name) const
+    consteval function_proxy<self_type> operator [] (string_view fn_name) const
     {  return function_proxy<self_type> (*this, fn_name); }
 
     consteval static size_type size () noexcept
@@ -193,7 +327,7 @@ protected:
     requires (sizeof... (Ts) <= size () &&
              (functional_pair_t<Ts, typename Ts::first_type, typename Ts::second_type> && ...))
     constexpr unbound_interface (Ts... pairs)
-    : _M_fn_map { std::make_pair (consteval_char_hash<pairs.first> (), pairs.second)... }
+    : _M_fn_map { std::make_pair (char_hash<pairs.first> (), pairs.second)... }
     { }
 
     template <key_type K_, size_type I = 0>
@@ -205,10 +339,28 @@ protected:
     }
 
 private:
-    template <class_t D = self_type, typename... Args>
-    constexpr auto invoke (string_view const& fn_name, Args... args) const
+    template <typename R, typename... Args>
+    constexpr void add_function (string_view const& fn_name, fn_type<R(Args...)> const& fn) noexcept
     {
-        constexpr const_size I = get_index<constexpr_char_hash (fn_name.data ())> ();
+        constexpr const_size I = get_index<char_hash (fn_name.data ())> ();
+
+        static_assert (I != npos, "key NOT found!");
+        return std::get<I> (_M_fn_map).second = fn;
+    }
+
+    template <typename R, typename... Args>
+    constexpr void add_function (string_view const& fn_name, fn_type<R(Args...) const> const& fn) noexcept
+    {
+        constexpr const_size I = get_index<char_hash (fn_name.data ())> ();
+
+        static_assert (I != npos, "key NOT found!");
+        return std::get<I> (_M_fn_map).second = fn;
+    }
+
+    template <typename... Args>
+    constexpr auto invoke (string_view const& fn_name, Args... args) const noexcept
+    {
+        constexpr const_size I = get_index<char_hash (fn_name.data ())> ();
 
         static_assert (I != npos, "key NOT found!");
         return std::get<I> (_M_fn_map).second (std::forward<Args> (args)...);
@@ -231,9 +383,6 @@ class dyn_unbound_interface : public non_copyable
 {
 
 public:
-    template <std::size_t = min_args_count ()>
-    class function_rtti;
-
     template <typename S>
     using fn_type = function<S>;
 
@@ -264,7 +413,7 @@ public:
     typedef dyn_unbound_interface                 self_type             ;
     typedef self_type                             base_type             ;
     typedef key_hash                              hash_type             ;
-    typedef function_rtti<>                       mapped_type           ;
+    typedef function_rtti<min_args_count ()>      mapped_type           ;
     typedef mapped_type const                     const_mapped          ;
     typedef std::pair<const_key, mapped_type>     value_type            ;
     typedef map<key_type, mapped_type, compare>   map_type              ;
@@ -338,58 +487,10 @@ public:
 
     // ====================================================
 
-    template <size_type N>
-    class function_rtti
-    {
-    public:
-        typedef function_rtti self_type;
-
-        consteval function_rtti (self_type &&)     = default;
-        consteval function_rtti (self_type const&) = default;
-
-        consteval any_fn_type   const&    function () const noexcept { return _M_fn       ; }
-        consteval rtti_array<N> const&   arg_types () const noexcept { return _M_arg_types; }
-        consteval rtti_type     const& return_type () const noexcept { return _M_ret_type ; }
-
-    private:
-        //! template parameter C is a derived class from unbound_interface
-        template <typename R, typename... Args>
-        constexpr function_rtti (fn_type<R(Args...)> const& fn)
-        : _M_fn        (fn_cast<void()> (fn))
-        , _M_arg_types { type<is_compact_forwarded_t<Args>>... }
-        , _M_ret_type  ( type<R> )
-        { }
-
-        //! template parameter C is a derived class from unbound_interface
-        template <typename R, typename... Args>
-        constexpr function_rtti (fn_type<R(Args...) const> const& fn)
-        : _M_fn        (fn_cast<void() const> (fn))
-        , _M_arg_types { type<is_compact_forwarded_t<Args>>... }
-        , _M_ret_type  ( type<R> )
-        { }
-
-        function_rtti () = delete;
-
-        self_type& operator = (self_type &&)     = delete;
-        self_type& operator = (self_type const&) = delete;
-
-        template <size_type>
-        friend class function_rtti;
-
-        friend class dyn_unbound_interface;
-
-    private:
-        any_fn_type   _M_fn       ;
-        rtti_array<N> _M_arg_types;
-        rtti_type     _M_ret_type ;
-    };
-
-    // ====================================================
-
     //dyn_unbound_interface () = delete;
     inline virtual ~dyn_unbound_interface () = default;
 
-    inline size_type size () const noexcept
+    constexpr size_type size () const noexcept
     {  return _M_fn_map.size (); }
 
     // ====================================================
@@ -398,12 +499,8 @@ public:
     {  return function_proxy<self_type> (*this, fn_name); }
 
     template <typename R, typename... Args>
-    constexpr void add_member_function (string_view const& fn_name, fn_type<R(Args...)> fn)
-    { add_member_function_base (fn_name, fn); }
-
-    template <typename R, typename... Args>
-    constexpr void add_member_function (string_view const& fn_name, fn_type<R(Args...) const> fn)
-    { add_member_function_base (fn_name, fn); }
+    constexpr void add_function (string_view const& fn_name, fn_type<R(Args...)> const& fn)
+    { add_function_base (fn_name, fn); }
 
     // ====================================================
 
@@ -421,14 +518,14 @@ public:
 
     inline const_mapped& rtti (string_view const& fn_name) const
     {
-        auto   it  = _M_fn_map.find (constexpr_char_hash (fn_name.data ()));
+        auto   it  = _M_fn_map.find (char_hash (fn_name.data ()));
         if    (it == _M_fn_map.end  ()) throw std::runtime_error ("function_rtti NOT found!");
         return it->second;
     }
 
     inline mapped_type& rtti (string_view const& fn_name)
     {
-        auto   it  = _M_fn_map.find (constexpr_char_hash (fn_name.data ()));
+        auto   it  = _M_fn_map.find (char_hash (fn_name.data ()));
         if    (it == _M_fn_map.end  ()) throw std::runtime_error ("function_rtti NOT found!");
         return it->second;
     }
@@ -440,7 +537,7 @@ protected:
                                 typename Ps::first_type,
                                 typename Ps::second_type> && ...)
     constexpr dyn_unbound_interface (Ps... pairs)
-    : _M_rc     (sizeof... (Ps) * (sizeof (value_type) + sizeof (rtti_type) * (pairs.second.arity () && ...))),
+    : _M_rc     (sizeof... (Ps) * (sizeof (value_type) + sizeof (rtti_type) * (pairs.second.arity () + ... + 0))),
       _M_fn_map (allocator_type (_M_rc))
     {
         check_pairs_types<std::tuple<Ps...>> ();
@@ -456,12 +553,31 @@ protected:
     }
 
 private:
+    template <functional_t FN>
+    inline void add_function_base (string_view const& fn_name, FN const& fn)
+    {
+        iterator_pair const pair = _M_fn_map.insert_or_assign (char_hash (fn_name.data ()), mapped_type (fn));
+
+        if (!pair.second)
+        {
+            string error_text;
+
+            error_text.reserve (39U + fn_name.size ());
+
+            error_text.append ("insertion of member function '")
+                      .append (fn_name.data (), fn_name.size ())
+                      .append ("' failed!");
+
+            throw std::runtime_error (error_text.c_str ());
+        }
+    }
+
     template <typename Tuple, size_type I = 0>
     constexpr void add_all_member_functions (Tuple const& fn_pairs)
     {
         if constexpr (I < std::tuple_size_v<Tuple>)
         {
-            add_member_function (std::get<I> (fn_pairs).first, std::get<I> (fn_pairs).second);
+            add_function (std::get<I> (fn_pairs).first, std::get<I> (fn_pairs).second);
 
 #           ifdef DEBUG_MODE
             std::cout << "stacked_resource max size: " << _M_rc.max_size () << " bytes" << std::endl;
@@ -485,35 +601,14 @@ private:
         }
     }
 
-    template <typename R, rtti_type Exp>
-    constexpr static bool check_return_type () noexcept
+    template <typename R,
+              non_void_t... Args,
+              rtti_type RetExp,
+              rtti_array<sizeof... (Args)> ArgsExp>
+    consteval static bool check_fn_signature () noexcept
     {
-        return Exp == rtti_type (type<R>);
-    }
-
-    template <typename... Args, rtti_array<sizeof... (Args)> Exp>
-    constexpr static bool check_args_types () noexcept
-    {
-        return Exp == rtti_array<sizeof... (Args)> { typeid (Args)... };
-    }
-
-    template <functional_t FN>
-    inline void add_member_function_base (string_view const& fn_name, FN const& fn)
-    {
-        iterator_pair pair = _M_fn_map.try_emplace (constexpr_char_hash (fn_name.data ()), mapped_type (fn));
-
-        if (!pair.second)
-        {
-            string error_text;
-
-            error_text.reserve (39U + fn_name.size ());
-
-            error_text.append ("insertion of member function '")
-                      .append (fn_name.data (), fn_name.size ())
-                      .append ("' failed!");
-
-            throw std::runtime_error (error_text.c_str ());
-        }
+        return RetExp  == rtti_type (type<R>) &&
+               ArgsExp == rtti_array<sizeof... (Args)> { type<Args>... };
     }
 
     template <typename R = void, typename... Args>
@@ -521,11 +616,8 @@ private:
     {
         auto const fn_rtti = rtti (fn_name);
 
-        if (!check_return_type<R, fn_rtti.return_type ()> ())
-            throw std::runtime_error ("return type mismatch!");
-
-        if (!check_args_types<is_compact_forwarded_t<Args>..., fn_rtti.arg_types ()> ())
-            throw std::runtime_error ("argument type mismatch!");
+        static_assert (check_fn_signature<R, Args..., fn_rtti.return_type (), fn_rtti.arg_types ()> (),
+                       "function signature mismatch!");
 
         return (fn_cast<R(Args...)> (fn_rtti.function ()))(std::forward<Args> (args)...);
     }

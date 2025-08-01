@@ -279,8 +279,9 @@ public:
 
         if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
 
-        plugin_vars* plugin = loader[plugin_main](rc == nullptr ? get_allocator ().resource () : rc,
-                                                  std::forward<Args> (args)..., type<plugin_vars*>);
+        auto plugin = loader[plugin_main](ret<plugin_vars*>,
+                                          rc == nullptr ? get_allocator ().resource () : rc,
+                                          std::forward<Args> (args)...);
 
         for (auto& pair : _M_gPluginMap)
         {

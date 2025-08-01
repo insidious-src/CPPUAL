@@ -32,7 +32,7 @@ namespace cppual {
 // ====================================================
 
 template <char_t T = char>
-constexpr std::size_t constexpr_str_size (T const* str)
+constexpr std::size_t str_size (T const* str)
 {
     return std::char_traits<T>::length (str);
 }
@@ -41,12 +41,12 @@ constexpr std::size_t constexpr_str_size (T const* str)
 
 //! char string constexpr performance hash (ex. usage as a map hash)
 template <char_t T = char>
-constexpr std::size_t constexpr_char_fast_hash (T const* str) noexcept
+constexpr std::size_t char_fast_hash (T const* str) noexcept
 {
     typedef std::size_t size_type;
 
-    auto const last_pos = constexpr_str_size (str) - 1;
-    auto const size     = constexpr_str_size (str);
+    auto const last_pos = str_size (str) - 1;
+    auto const size     = str_size (str);
 
     return size >= 3 ? ((size ^
                           static_cast<size_type> (str[0]                 ) ^
@@ -58,11 +58,11 @@ constexpr std::size_t constexpr_char_fast_hash (T const* str) noexcept
 
 //! char string consteval performance hash (ex. usage as a map hash)
 template <char_t T = char, T const* In>
-consteval std::size_t consteval_char_fast_hash () noexcept
+consteval std::size_t char_fast_hash () noexcept
 {
     typedef std::size_t size_type;
 
-    auto const size     = constexpr_str_size (In);
+    auto const size     = str_size (In);
     auto const last_pos = size - 1;
 
     return size >= 3 ? ((size ^
@@ -76,16 +76,16 @@ consteval std::size_t consteval_char_fast_hash () noexcept
 // ====================================================
 
 //! char string constexpr complete hash (ex. usage in switch cases or as a hash)
-constexpr uint constexpr_char_hash (cchar* input) noexcept
+constexpr uint char_hash (cchar* input) noexcept
 {
-    return *input ? static_cast<uint> (*input) + 33 * constexpr_char_hash (input + 1) : 5381;
+    return *input ? static_cast<uint> (*input) + 33 * char_hash (input + 1) : 5381;
 }
 
 //! char string consteval complete hash (ex. usage in switch cases or as a hash)
 template <cchar* In>
-consteval uint consteval_char_hash () noexcept
+consteval uint char_hash () noexcept
 {
-    return *In ? static_cast<uint> (*In) + 33 * consteval_char_hash<In + 1> () : 5381;
+    return *In ? static_cast<uint> (*In) + 33 * char_hash<In + 1> () : 5381;
 }
 
 // ====================================================
@@ -94,7 +94,7 @@ struct char_hash
 {
     constexpr std::size_t operator () (cchar* key) const noexcept
     {
-        return constexpr_char_fast_hash (key);
+        return char_fast_hash (key);
     }
 };
 
