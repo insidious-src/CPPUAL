@@ -24,13 +24,14 @@
 #ifdef __cplusplus
 
 #include <cppual/types>
+#include <cppual/concepts>
 #include <cppual/reactive>
+#include <cppual/interface>
 #include <cppual/functional>
 #include <cppual/containers>
 #include <cppual/circular_queue>
-#include <cppual/unbound_matrix.h>
-#include <cppual/memory/allocator.h>
-#include <cppual/concepts>
+#include <cppual/unbound_matrix>
+#include <cppual/memory_allocator>
 
 
 #ifdef DEBUG_MODE
@@ -38,7 +39,6 @@
 #endif
 
 #include <tuple>
-//#include <atomic>
 #include <future>
 #include <optional>
 #include <shared_mutex>
@@ -55,13 +55,13 @@ using fn_tpl_type = function<T>;
 
 class host_queue;
 
-template <non_void_t>
+template <non_void>
 class host_task;
 
-template <non_void_t>
+template <non_void>
 class unbound_task;
 
-template <non_void_t, typename...>
+template <non_void, typename...>
 class unbound_task_adaptor;
 
 using memory::allocator_t;
@@ -230,10 +230,10 @@ private:
     cv_type    mutable _M_gSchedCond                     ;
     state_type         _M_eState { state_type::inactive };
 
-    template <non_void_t>
+    template <non_void>
     friend class host_task;
 
-    template <non_void_t>
+    template <non_void>
     friend class unbound_task;
 };
 
@@ -254,7 +254,7 @@ namespace thread_pool
 // =========================================================
 
 /// host continuation task
-template <non_void_t T>
+template <non_void T>
 class host_task : private host_queue
 {
 public:
@@ -499,7 +499,7 @@ public:
         return std::move (_M_promise.get_future ());
     }
 
-    template <non_void_t, typename...>
+    template <non_void, typename...>
     friend class unbound_task_adaptor;
 
 private:
@@ -510,7 +510,7 @@ private:
 // =========================================================
 
 /// host unbound continuation task
-template <non_void_t T>
+template <non_void T>
 class unbound_task : private host_queue
 {
 public:
@@ -768,7 +768,7 @@ public:
         return std::move (_M_promise.get_future ());
     }
 
-    template <non_void_t, typename...>
+    template <non_void, typename...>
     friend class unbound_task_adaptor;
 
 private:
@@ -780,7 +780,7 @@ private:
 
 /// Use a matrix to calculate multiple results in parallel
 /// with only a single thread.
-template <non_void_t M, typename... Ts>
+template <non_void M, typename... Ts>
 class unbound_task_adaptor : private unbound_matrix<M, memory::allocator<M>>
 {
 public:

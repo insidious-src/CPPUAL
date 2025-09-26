@@ -328,7 +328,7 @@ device::device_vector device::get_devices (memory::memory_resource& rc)
     devices.reserve (device_ids.size());
 
     for (auto i = 0U; i < device_ids.size(); ++i)
-        devices.emplace_back(memory::allocate_shared<device_interface, device> (&rc, device_ids[i]));
+        devices.emplace_back(std::allocate_shared<device_interface, device> (rc, device_ids[i]));
 
     return devices;
 }

@@ -2148,8 +2148,8 @@ public:
             if (it_key == _M_objects[type].end())
             {
                 _M_objects[type].emplace(key,
-                                         memory::allocate_shared<template_object, T>
-                                         (nullptr,
+                                         std::allocate_shared<template_object, T>
+                                         (cppual::memory::get_default_resource (),
                                           *json->second.second.get(),
                                           std::forward<Args>(args)...));
             }
@@ -2179,8 +2179,8 @@ public:
             if (it_key == _M_arrays[type].end())
             {
                 _M_arrays[type].emplace(key,
-                                        memory::allocate_shared<template_array, T>
-                                        (nullptr,
+                                        std::allocate_shared<template_array, T>
+                                        (cppual::memory::get_default_resource (),
                                          *json->second.second.get(),
                                          std::forward<Args>(args)...));
             }

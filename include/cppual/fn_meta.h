@@ -54,10 +54,10 @@ struct consteval_bimap;
 // ====================================================
 
 template <typename P, typename T, typename U>
-concept bimap_pair_t = non_void_t<T> && non_void_t<U> && std::same_as<P, std::pair<T, U>>;
+concept bimap_pair_t = non_void<T> && non_void<U> && std::same_as<P, std::pair<T, U>>;
 
 template <typename P, typename T, typename U>
-concept switch_map_pair_t = switch_value_t<T> && void_functional_t<U> && std::same_as<P, std::pair<T, U>>;
+concept switch_map_pair_t = switch_value_t<T> && void_functional<U> && std::same_as<P, std::pair<T, U>>;
 
 // =========================================================
 
@@ -81,23 +81,80 @@ consteval auto overload (R (* fn)(Args...)) noexcept -> decltype (fn)
 template <void_or_class_t C, typename S>
 struct any_fn_type;
 
-template <class_t C, typename R, non_void_t... Args>
+template <class_t C, typename R, non_void... Args>
 struct any_fn_type <C, R(Args...)>
 {
-    using type = R(C::*)(Args...);
+    typedef R(C::* type)(Args...);
 };
 
-template <class_t C, typename R, non_void_t... Args>
+template <class_t C, typename R, non_void... Args>
 struct any_fn_type <C, R(Args...) const>
 {
-    using type = R(C::*)(Args...) const;
+    typedef R(C::* type)(Args...) const;
 };
 
-template <typename R, non_void_t... Args>
+template <typename R, non_void... Args>
 struct any_fn_type <void, R(Args...)>
 {
-    using type = R(*)(Args...);
+    typedef R(* type)(Args...);
 };
+
+template <typename R, non_void... Args>
+struct any_fn_type <void, R(Args...) const>
+{
+    static_assert (false, "CANNOT have const function pointer without class type!");
+};
+
+template <typename S>
+using any_fn_t = any_fn_type<void, S>::type;
+
+template <class_t C, typename S>
+using any_mem_fn_t = any_fn_type<C, S>::type;
+
+// =========================================================
+
+template <typename> struct remove_fn_const   ;
+template <typename> struct remove_fn_volatile;
+template <typename> struct remove_fn_cv      ;
+template <typename> struct add_fn_const      ;
+template <typename> struct add_fn_volatile   ;
+template <typename> struct add_fn_cv         ;
+
+template <typename R, typename... ArgTypes>
+struct remove_fn_const<R(ArgTypes...) const>  { using type = R(ArgTypes...); };
+
+template <typename R, typename... ArgTypes>
+struct add_fn_const<R(ArgTypes...)>  { using type = R(ArgTypes...) const; };
+
+template <typename R, typename... ArgTypes>
+struct remove_fn_volatile<R(ArgTypes...) volatile>  { using type = R(ArgTypes...); };
+
+template <typename R, typename... ArgTypes>
+struct add_fn_volatile<R(ArgTypes...)>  { using type = R(ArgTypes...) volatile; };
+
+template <typename R, typename... ArgTypes>
+struct remove_fn_cv<R(ArgTypes...) const volatile>  { using type = R(ArgTypes...); };
+
+template <typename R, typename... ArgTypes>
+struct add_fn_cv<R(ArgTypes...)>  { using type = R(ArgTypes...) const volatile; };
+
+template <typename S>
+using remove_fn_const_t = typename remove_fn_const<S>::type;
+
+template <typename S>
+using add_fn_const_t = typename add_fn_const<S>::type;
+
+template <typename S>
+using remove_fn_volatile_t = typename remove_fn_volatile<S>::type;
+
+template <typename S>
+using add_fn_volatile_t = typename add_fn_volatile<S>::type;
+
+template <typename S>
+using remove_fn_cv_t = typename remove_fn_cv<S>::type;
+
+template <typename S>
+using add_fn_cv_t = typename add_fn_cv<S>::type;
 
 // =========================================================
 
@@ -124,15 +181,15 @@ struct var_type
 };
 
 template <typename T>
-using var_type_t = var_type<T>::pointer;
+using type_t = var_type<T>::pointer;
 
 template <typename T>
-inline constexpr static var_type_t<T   > type         = var_type<T>::value   ;
-inline constexpr static var_type_t<void> default_type = var_type<void>::value;
+inline constexpr static type_t<T   > type      = var_type<T>::value   ;
+inline constexpr static type_t<void> default_v = var_type<void>::value;
 
 template <typename T>
-inline constexpr static var_type_t<T   > ret         = type<T>     ;
-inline constexpr static var_type_t<void> default_ret = default_type;
+inline constexpr static type_t<T   > ret         = type<T>  ;
+inline constexpr static type_t<void> default_ret = default_v;
 
 // ====================================================
 
@@ -153,14 +210,14 @@ using tuple_repeat_t = typename tuple_repeat_helper<T, N>::type;
 
 // ====================================================
 
-template <switch_value_t K, non_void_t V, std::size_t N>
+template <switch_value_t K, non_void V, std::size_t N>
 struct consteval_bimap <std::pair<K, V>, N>
 {
 public:
     typedef std::pair<K, V>                       pair_type             ;
     typedef pair_type const                       const_pair            ;
     typedef consteval_bimap<pair_type, N>         self_type             ;
-    typedef std::size_t                           size_type             ;
+    typedef decltype (N)                          size_type             ;
     typedef size_type const                       const_size            ;
     typedef remove_cref_t<K>                      key_type              ;
     typedef key_type const                        const_key             ;
@@ -181,16 +238,16 @@ public:
 
     consteval static size_type size () noexcept { return N; }
 
-    static_assert (size () > 0, "switch_map is empty!");
-    static_assert (non_convertible_t<key_type, value_type>, "key and value must NOT be of the same type!");
+    static_assert (size () > 0, "consteval_bimap is empty!");
+    static_assert (non_convertible_t<key_type, value_type>, "key & value must NOT be of the same type!");
     static_assert (copyable_movable_t<key_type> &&
-                   copyable_movable_t<value_type>, "key or/and value are NOT copyable and movable!");
+                   copyable_movable_t<value_type>, "key or/and value are NOT copyable & movable!");
 
-    inline constexpr static const_size npos = const_size (-1);
+    inline constexpr static const_size npos = size_type (-1);
 
     //! make class trivially copyable & movable
     constexpr consteval_bimap (self_type &&) noexcept = default;
-    constexpr consteval_bimap (self_type const&) noexcept = default;
+    consteval consteval_bimap (self_type const&) noexcept = default;
     constexpr self_type& operator = (self_type &&) noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
@@ -202,13 +259,20 @@ public:
         std::fill (begin () + pairs.size (), end (), pair_type (const_key (), const_value ()));
     }
 
-    constexpr auto operator () (const_key k) const noexcept
+    constexpr auto operator () (const_key k) noexcept
     {
-        static_assert (functional_t<value_type>, "value_type is NOT callable!");
+        static_assert (functional<value_type>, "value_type is NOT callable!");
         return get (k)();
     }
 
-    consteval size_type count (const_key k) const noexcept { return get_index<k> () != npos ? 1 : 0; }
+    consteval auto operator () (const_key k) const noexcept
+    {
+        static_assert (functional<value_type>, "value_type is NOT callable!");
+        return get<k> ()();
+    }
+
+    consteval size_type count (const_key k) const noexcept
+    { return get_index<k> () != npos ? 1 : 0; }
 
     constexpr value_reference       operator [] (const_key   k)       { return get (k); }
     constexpr value_const_reference operator [] (const_key   k) const { return get (k); }
@@ -255,24 +319,22 @@ public:
     }
 
     constexpr iterator       begin   ()       noexcept { return &_M_pairs[0]     ; }
-    constexpr const_iterator begin   () const noexcept { return &_M_pairs[0]     ; }
-    constexpr const_iterator cbegin  () const noexcept { return &_M_pairs[0]     ; }
+    consteval const_iterator begin   () const noexcept { return &_M_pairs[0]     ; }
+    consteval const_iterator cbegin  () const noexcept { return &_M_pairs[0]     ; }
     constexpr iterator       end     ()       noexcept { return &_M_pairs[N]     ; }
-    constexpr const_iterator end     () const noexcept { return &_M_pairs[N]     ; }
-    constexpr const_iterator cend    () const noexcept { return &_M_pairs[N]     ; }
+    consteval const_iterator end     () const noexcept { return &_M_pairs[N]     ; }
+    consteval const_iterator cend    () const noexcept { return &_M_pairs[N]     ; }
     constexpr iterator       rbegin  ()       noexcept { return &_M_pairs[N  - 1]; }
-    constexpr const_iterator rbegin  () const noexcept { return &_M_pairs[N  - 1]; }
-    constexpr const_iterator crbegin () const noexcept { return &_M_pairs[N  - 1]; }
+    consteval const_iterator rbegin  () const noexcept { return &_M_pairs[N  - 1]; }
+    consteval const_iterator crbegin () const noexcept { return &_M_pairs[N  - 1]; }
     constexpr iterator       rend    ()       noexcept { return &_M_pairs[0] - 1 ; }
-    constexpr const_iterator rend    () const noexcept { return &_M_pairs[0] - 1 ; }
-    constexpr const_iterator crend   () const noexcept { return &_M_pairs[0] - 1 ; }
+    consteval const_iterator rend    () const noexcept { return &_M_pairs[0] - 1 ; }
+    consteval const_iterator crend   () const noexcept { return &_M_pairs[0] - 1 ; }
 
     //! empty () method to check if map is empty
     consteval bool empty () const noexcept
     {
-        for (size_type i = 0; i < size (); ++i)
-            if (_M_pairs[i] != pair_type ()) return false;
-
+        for (size_type i = 0; i < size (); ++i) if (_M_pairs[i] != pair_type ()) return false;
         return true;
     }
 
@@ -331,14 +393,6 @@ public:
                    iterator_pair (end (), false);
     }
 
-    template <const_key K_, const_value V_>
-    consteval iterator_pair emplace () noexcept
-    {
-        return (get_index<K_> () == npos && _M_pairs[N - 1].first == key_type ()) ?
-                iterator_pair (&(_M_pairs[N - 1] = pair_type (K_, V_)), true) :
-                iterator_pair (end (), false);
-    }
-
     constexpr void erase (const_key k) noexcept
     {
         auto const i = get_index (k);
@@ -393,7 +447,7 @@ protected:
     constexpr value_reference get (const_key k)
     {
         const_size i = get_index (k);
-        if (i == npos) throw std::runtime_error ("key not found in consteval_bimap");
+        if (i == npos) throw std::runtime_error ("key NOT found in consteval_bimap");
         return _M_pairs[i].second;
     }
 
@@ -401,14 +455,14 @@ protected:
     consteval value_reference get () noexcept
     {
         constexpr const_size I = get_index<K_> ();
-        static_assert (I != npos, "key not found in consteval_bimap");
+        static_assert (I != npos, "key NOT found in consteval_bimap");
         return _M_pairs[I].second;
     }
 
     constexpr value_const_reference get (const_key k) const
     {
         const_size i = get_index (k);
-        if (i == npos) throw std::runtime_error ("key not found in consteval_bimap");
+        if (i == npos) throw std::runtime_error ("key NOT found in consteval_bimap");
         return _M_pairs[i].second;
     }
 
@@ -416,14 +470,14 @@ protected:
     consteval value_const_reference get () const noexcept
     {
         constexpr const_size I = get_index<K_> ();
-        static_assert (I != npos, "key not found in consteval_bimap");
+        static_assert (I != npos, "key NOT found in consteval_bimap");
         return _M_pairs[I].second;
     }
 
     constexpr key_reference get (const_value v)
     {
         const_size i = get_index (v);
-        if (i == npos) throw std::runtime_error ("value not found in consteval_bimap");
+        if (i == npos) throw std::runtime_error ("value NOT found in consteval_bimap");
         return _M_pairs[i].first;
     }
 
@@ -431,14 +485,14 @@ protected:
     consteval key_reference get () noexcept
     {
         constexpr const_size I = get_index<V_> ();
-        static_assert (I != npos, "value not found in consteval_bimap");
+        static_assert (I != npos, "value NOT found in consteval_bimap");
         return _M_pairs[I].first;
     }
 
     constexpr key_const_reference get (const_value v) const
     {
         const_size i = get_index (v);
-        if (i == npos) throw std::runtime_error ("value not found in consteval_bimap");
+        if (i == npos) throw std::runtime_error ("value NOT found in consteval_bimap");
         return _M_pairs[i].first;
     }
 
@@ -446,7 +500,7 @@ protected:
     consteval key_const_reference get () const noexcept
     {
         constexpr const_size I = get_index<V_> ();
-        static_assert (I != npos, "value not found in consteval_bimap");
+        static_assert (I != npos, "value NOT found in consteval_bimap");
         return _M_pairs[I].first;
     }
 
@@ -483,11 +537,12 @@ private:
 
 // ====================================================
 
-template <switch_value_t K = int, functional_t V = function<void()>, std::size_t N = 0, pair_t... Ps>
-requires (std::convertible_to<Ps, std::pair<K, V>> && ...)
-constexpr auto make_switch_map (Ps&&... case_pairs) noexcept
+template <switch_value_t K = int, functional V = function<void()>, std::size_t N = 0, pair_t... Ps>
+requires (switch_map_pair_t<Ps, K, V> && ...)
+constexpr consteval_bimap<std::pair<K, V>, sizeof... (Ps)>
+make_switch_map (Ps&&... case_pairs) noexcept
 {
-    enum COUNT { SZ = N == 0 ? sizeof... (Ps) : N };
+    constexpr const decltype (N) SZ = N == 0 ? sizeof... (Ps) : N;
 
     static_assert (sizeof... (Ps) <= SZ, "bimap has insufficient capacity!");
     return consteval_bimap<std::pair<K, V>, sizeof... (Ps)> { std::forward<Ps> (case_pairs)... };
@@ -495,11 +550,12 @@ constexpr auto make_switch_map (Ps&&... case_pairs) noexcept
 
 // ====================================================
 
-template <non_void_t K, non_void_t V, std::size_t N = 0, pair_t... Ps>
-requires (std::convertible_to<Ps, std::pair<K, V>> && ...)
-constexpr auto make_consteval_bimap (Ps&&... pairs) noexcept
+template <non_void K, non_void V, std::size_t N = 0, pair_t... Ps>
+requires (bimap_pair_t<Ps, K, V> && ...)
+constexpr consteval_bimap<std::pair<K, V>, sizeof... (Ps)>
+make_consteval_bimap (Ps&&... pairs) noexcept
 {
-    enum COUNT { SZ = N == 0 ? sizeof... (Ps) : N };
+    constexpr const decltype (N) SZ = N == 0 ? sizeof... (Ps) : N;
 
     static_assert (sizeof... (Ps) <= SZ, "bimap has insufficient capacity!");
     return consteval_bimap<std::pair<K, V>, sizeof... (Ps)> { std::forward<Ps> (pairs)... };
@@ -507,10 +563,9 @@ constexpr auto make_consteval_bimap (Ps&&... pairs) noexcept
 
 // ====================================================
 
-template <non_void_t... Ts>
+template <non_void... Ts>
 struct type_list
 {
-
     typedef type_list<Ts...> self_type;
     typedef std::size_t      size_type;
 

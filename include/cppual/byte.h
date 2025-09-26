@@ -36,7 +36,7 @@ namespace cppual {
 
 // =========================================================
 
-template <non_void_t T, typename Out, typename = std::enable_if_t<is_stream_char_v<Out>>>
+template <non_void T, typename Out, typename = std::enable_if_t<is_stream_char_v<Out>>>
 inline Out* binary_to_bytes (T value, Out* str, bool littleEndian = false) noexcept
 {
     auto p = direct_cast<uchar*> (str);
@@ -63,7 +63,7 @@ inline Out* binary_to_bytes (T value, Out* str, bool littleEndian = false) noexc
 
 // =========================================================
 
-template <non_void_t T, typename In, typename = std::enable_if_t<is_stream_char_v<In>>>
+template <non_void T, typename In, typename = std::enable_if_t<is_stream_char_v<In>>>
 inline T bytes_to_binary (In* str, bool littleEndian = false)
 {
     typedef std::conditional_t<std::is_const_v<In>, cuchar, uchar> byte_type;

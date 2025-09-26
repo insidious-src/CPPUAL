@@ -98,6 +98,7 @@ struct non_copyable_movable
 {
 public:
     consteval non_copyable_movable () = default;
+
 private:
     non_copyable_movable (non_copyable_movable &&) = delete;
     non_copyable_movable (non_copyable_movable const&) = delete;
@@ -110,7 +111,7 @@ private:
 struct non_copyable_movable_virtual
 {
 public:
-    constexpr          non_copyable_movable_virtual () = default;
+    consteval          non_copyable_movable_virtual () = default;
     constexpr virtual ~non_copyable_movable_virtual () = default;
 
 private:

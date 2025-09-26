@@ -23,7 +23,8 @@
 #define CPPUAL_CONTAINERS_H_
 #ifdef __cplusplus
 
-#include <cppual/memory/allocator.h>
+#include <cppual/memory_allocator>
+//#include <cppual/array_map>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -47,7 +48,10 @@ template <typename T, std::size_t N>
 using array = std::array<T, N>;
 
 template <typename T>
-using dyn_array = std::vector<T, memory::allocator<T>>;
+using vector = std::vector<T, memory::allocator<T>>;
+
+template <typename T>
+using dyn_array = vector<T>;
 
 template <typename T>
 using deque = std::deque<T, memory::allocator<T>>;
@@ -137,7 +141,7 @@ typedef std::basic_stringstream<wchar , std::char_traits<wchar> , memory::alloca
 
 // ====================================================
 
-template <non_void_t T, std::size_t SZ>
+template <non_void T, std::size_t SZ>
 constexpr bool operator == (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
 {
     if  (lh.size ()  !=  rh.size ()) return false;
@@ -146,7 +150,7 @@ constexpr bool operator == (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
     return true;
 }
 
-template <non_void_t T, std::size_t SZ>
+template <non_void T, std::size_t SZ>
 constexpr bool operator == (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
 {
     if  (lh.size ()  !=  rh.size ()) return false;
@@ -157,7 +161,7 @@ constexpr bool operator == (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
 
 // ====================================================
 
-template <non_void_t T, std::size_t SZ>
+template <non_void T, std::size_t SZ>
 constexpr bool operator != (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
 {
     if  (lh.size ()  !=  rh.size ()) return true;
@@ -166,7 +170,7 @@ constexpr bool operator != (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
     return false;
 }
 
-template <non_void_t T, std::size_t SZ>
+template <non_void T, std::size_t SZ>
 constexpr bool operator != (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
 {
     if  (lh.size ()  !=  rh.size ()) return true;

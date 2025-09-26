@@ -102,7 +102,7 @@ inline void print_map_values (handle_type wnd)
 
 inline view::window_type create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
 {
-    return pParentObj ? memory::allocate_shared<platform_wnd_interface, proxy_renderable>
+    return pParentObj ? std::allocate_shared<platform_wnd_interface, proxy_renderable>
                                                                (renderable_allocator (),
                                                                 pParentObj->renderable (),
                                                                 gRect) :

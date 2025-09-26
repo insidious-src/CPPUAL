@@ -34,7 +34,6 @@
 //#include <vector>
 //#include <utility>
 //#include <optional>
-//#include <typeindex>
 #include <type_traits>
 
 // ====================================================
@@ -64,6 +63,63 @@ template <typename Derived, typename... Bases>
 using base_from_derived =
     typename std::tuple_element_t<tuple_ref_index<Derived, std::tuple<Bases...>>::value,
                                   std::tuple<Bases...>>;
+
+//! ====================================================
+//! Type pack and unpack. remove nth element in a
+//! variadic template (ex. std::tuple) and return
+//! the rest of the elements as a template class with
+//! variadic arguments
+//! ====================================================
+
+template <non_void... Args> struct pack { };
+
+template <template <typename...> class T, typename Pack>
+struct unpack;
+
+template <template <typename...> class T, typename... Args>
+struct unpack <T, pack<Args...>>
+{
+    typedef T<Args...> type;
+};
+
+template <typename T, typename Pack>
+struct prepend;
+
+template <typename T, typename... Args>
+struct prepend <T, pack<Args...>>
+{
+    typedef pack<T, Args...> type;
+};
+
+template <std::size_t N, typename... Args>
+struct remove_nth_helper;
+
+template <std::size_t N, typename T, typename... Ts>
+struct remove_nth_helper <N, T, Ts...> : prepend<T, typename remove_nth_helper<N-1, Ts...>::type>
+{ };
+
+template <typename T, non_void... Ts>
+struct remove_nth_helper <0, T, Ts...>
+{
+    typedef pack<Ts...> type;
+};
+
+template <typename T, int N>
+struct remove_nth;
+
+template <template <typename...> class T, int N, typename... Args>
+struct remove_nth <T<Args...>, N>
+{
+    typedef typename unpack
+    <
+        T,
+        typename remove_nth_helper<N, Args...>::type
+    >
+    ::type type;
+};
+
+template <typename T, int N>
+using remove_nth_t = typename remove_nth<T, N>::type;
 
 // ====================================================
 
@@ -146,7 +202,7 @@ inline constexpr bool const traits_enum_v = traits_enum::value<E, T>;
 template <integer_t T>
 struct traits_type
 {
-    typedef T                      type      ;
+    typedef T                type      ;
     typedef remove_cref_t<T> value_type;
 
     inline constexpr static auto const min_value = std::numeric_limits<value_type>::min ();

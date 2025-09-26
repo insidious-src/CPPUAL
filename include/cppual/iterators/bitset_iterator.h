@@ -23,7 +23,7 @@
 #define CPPUAL_BITSET_ITERATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
 
 #include <type_traits>
 #include <cstddef>

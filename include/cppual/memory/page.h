@@ -23,8 +23,8 @@
 #define CPPUAL_MEMORY_PAGE_ALLOCATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/memory/allocator.h>
-#include <cppual/string.h>
+#include <cppual/memory_allocator>
+#include <cppual/string>
 
 namespace cppual { namespace memory {
 
@@ -48,7 +48,7 @@ private:
     void* do_allocate   (size_type size, align_type align);
     void  do_deallocate (void* p, size_type size, align_type align);
 
-    constexpr bool do_is_equal (base_type const& gObj) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& gObj) const noexcept
     { return &gObj == this; }
 };
 

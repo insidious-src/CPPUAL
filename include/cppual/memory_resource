@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/memory/allocator.h>
 #include <cppual/memory/stacked.h>
 #include <cppual/memory/heap.h>
 #include <cppual/memory/pool.h>

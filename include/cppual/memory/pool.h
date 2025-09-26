@@ -23,8 +23,9 @@
 #define CPPUAL_MEMORY_POOL_ALLOCATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/memory/allocator.h>
-#include <cppual/memory/shared.h>
+#include <cppual/memory_allocator>
+#include <cppual/shared_memory>
+
 #include <cppual/memory/mop.h>
 
 namespace cppual { namespace memory {
@@ -76,18 +77,16 @@ public:
                                        align_adjust (_M_pBegin, _M_uBlkAlign)));
     }
 
-    constexpr bool is_shared () const noexcept
-    { return false; }
-
-    constexpr memory_resource& owner () const noexcept
-    { return _M_gOwner; }
+    constexpr bool             is_shared () const noexcept { return false    ; }
+    constexpr base_reference       owner ()       noexcept { return _M_gOwner; }
+    constexpr base_const_reference owner () const noexcept { return _M_gOwner; }
 
 private:
     void  initialize    () noexcept;
     void* do_allocate   (size_type size, align_type align);
     void  do_deallocate (void* p, size_type size, align_type align);
 
-    constexpr bool do_is_equal (base_const_reference gObj) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& gObj) const noexcept
     { return this == &gObj; }
 
 private:

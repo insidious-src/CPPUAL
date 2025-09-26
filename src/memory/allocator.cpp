@@ -69,7 +69,7 @@ private:
     inline void do_deallocate (void* /*p*/, size_type /*bytes*/, size_type /*align*/)
     { }
 
-    inline bool do_is_equal (base_const_reference other) const noexcept
+    inline bool do_is_equal (abs_base_type const& other) const noexcept
     { return this == &other; }
 };
 
@@ -95,7 +95,7 @@ private:
         ::operator delete (p, bytes, std::align_val_t (align));
     }
 
-    inline bool do_is_equal (base_const_reference other) const noexcept
+    inline bool do_is_equal (abs_base_type const& other) const noexcept
     {
         return this == &other;
     }
@@ -127,7 +127,7 @@ private:
         return p ? std::realloc (p, new_size) : std::malloc (new_size);
     }
 
-    inline bool do_is_equal (base_const_reference other) const noexcept
+    inline bool do_is_equal (abs_base_type const& other) const noexcept
     {
         return this == &other;
     }

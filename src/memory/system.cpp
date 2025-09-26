@@ -49,14 +49,14 @@
 #include <cstring>
 #include <assert.h>
 
-namespace cppual { namespace memory { namespace { // internal unit optimization
+namespace cppual { namespace memory { namespace { //! internal unit optimization
 
 inline static void initializer ()
 {
     static auto ret = memory::model::initialize ();
+    static thread_local auto thread_ret = memory::model::thread_initialize ();
 
-    UNUSED(ret);
-    memory::model::thread_initialize ();
+    UNUSED (ret); UNUSED (thread_ret);
 }
 
 // =========================================================
@@ -107,7 +107,7 @@ private:
     }
 
     inline
-    bool do_is_equal (base_type const& other) const noexcept
+    bool do_is_equal (abs_base_type const& other) const noexcept
     {
         return this == &other;
     }
@@ -117,70 +117,59 @@ private:
 
 // =========================================================
 
-#ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
+//#ifdef CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 void* operator new (std::size_t size)
 {
-    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
-    return cppual::memory::model::alloc (size);
+    return cppual::memory::model::allocate (size);
 }
 
 void operator delete (void* ptr) noexcept
 {
-    if (cppual::memory::model::is_thread_initialized ())
-        cppual::memory::model::free (ptr);
+    cppual::memory::model::deallocate (ptr);
 }
 
-void*
-operator new [] (std::size_t size)
+void* operator new [] (std::size_t size)
 {
-    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
-    return cppual::memory::model::alloc (size);
+    return cppual::memory::model::allocate (size);
 }
 
 void operator delete [] (void* ptr) noexcept
 {
-    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
-    cppual::memory::model::free (ptr);
+    cppual::memory::model::deallocate (ptr);
 }
 
 void* operator new (std::size_t size, const std::nothrow_t&) noexcept
 {
-    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
-    return cppual::memory::model::alloc (size);
+    return cppual::memory::model::allocate (size);
 }
 
 void* operator new [] (std::size_t size, const std::nothrow_t&) noexcept
 {
-    if (!cppual::memory::model::is_thread_initialized ()) initializer ();
-    return cppual::memory::model::alloc (size);
+    return cppual::memory::model::allocate (size);
 }
 
 void operator delete (void* ptr, const std::nothrow_t&) noexcept
 {
-    if (cppual::memory::model::is_thread_initialized ())
-        cppual::memory::model::free (ptr);
+    cppual::memory::model::deallocate (ptr);
 }
 
 void operator delete [] (void* ptr, const std::nothrow_t&) noexcept
 {
-    if (cppual::memory::model::is_thread_initialized ())
-        cppual::memory::model::free (ptr);
+    cppual::memory::model::deallocate (ptr);
 }
 
 void operator delete (void* ptr, std::size_t) noexcept
 {
-    if (cppual::memory::model::is_thread_initialized ())
-        cppual::memory::model::free (ptr);
+    cppual::memory::model::deallocate (ptr);
 }
 
 void operator delete [] (void* ptr, std::size_t) noexcept
 {
-    if (cppual::memory::model::is_thread_initialized ())
-        cppual::memory::model::free (ptr);
+    cppual::memory::model::deallocate (ptr);
 }
 
-#endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
+//#endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 // =========================================================
 
@@ -1147,7 +1136,7 @@ use_cache:
 
 //! Allocate a new heap
 static Heap*
-_memory_allocate_heap(void) {
+_memory_allocate_heap() {
     Heap* heap;
     //Try getting an orphaned heap
     std::atomic_thread_fence(std::memory_order_acquire);
@@ -1195,7 +1184,7 @@ _memory_list_remove(Span** head, Span* span) {
 static void
 _memory_heap_cache_insert(Heap* heap, Span* span) {
 #if MAX_SPAN_CACHE_DIVISOR == 0
-    (void)sizeof(heap);
+    ()sizeof(heap);
     _memory_global_cache_insert(span, 1);
 #else
     Span** cache = &heap->span_cache;
@@ -1539,7 +1528,7 @@ _memory_adjust_size_class(std::size_t iclass) {
 
 //! Initialize the allocator and setup global data
 int
-initialize(void) {
+initialize() {
     INITIALIZE_THREAD_LOCAL(_memory_thread_heap);
     INITIALIZE_THREAD_LOCAL(_memory_preferred_heap);
     _memory_heap_id = 0;
@@ -1563,13 +1552,13 @@ initialize(void) {
     _segments_rw_lock = 0;
 
     //Initialize this thread
-    thread_initialize();
+    if (!is_thread_initialized ()) thread_initialize ();
     return 0;
 }
 
 //! Finalize the allocator
 void
-finalize(void) {
+finalize() {
     std::atomic_thread_fence(std::memory_order_acquire);
 
     //Free all thread caches
@@ -1685,8 +1674,7 @@ void _release_heaps_lock()
 }
 
 //! Initialize thread, assign heap
-void
-thread_initialize(void) {
+bool thread_initialize () {
     if (!GET_THREAD_LOCAL(Heap*, _memory_thread_heap))
     {
         _acquire_heaps_lock();
@@ -1727,10 +1715,12 @@ thread_initialize(void) {
 #endif
     }
     assert(GET_THREAD_LOCAL(Heap*, _memory_thread_heap));
+
+    return is_thread_initialized ();
 }
 
 void
-thread_reset(void) {
+thread_reset() {
     if (!GET_THREAD_LOCAL(Heap*, _memory_thread_heap))
         return;
 
@@ -1744,7 +1734,7 @@ thread_reset(void) {
 }
 
 int
-is_thread_initialized(void) {
+is_thread_initialized() {
     return (GET_THREAD_LOCAL(Heap*, _memory_thread_heap) != nullptr) ? 1 : 0;
 }
 
@@ -2027,6 +2017,8 @@ thread_yield()
 
 void* allocate (std::size_t bytes)
 {
+    initializer ();
+
 #if ENABLE_VALIDATE_ARGS
     if (size >= MAX_ALLOC_SIZE)
     {
@@ -2040,18 +2032,22 @@ void* allocate (std::size_t bytes)
 
 void deallocate (void* ptr)
 {
+    if (!is_thread_initialized ()) throw std::runtime_error ("thread memory model NOT initialized!");
+
     _memory_deallocate (ptr);
 }
 
 void* reallocate (void* ptr, std::size_t old_size, std::size_t new_size)
 {
+    if (!is_thread_initialized ()) throw std::runtime_error ("thread memory model NOT initialized!");
+
 #if ENABLE_VALIDATE_ARGS
     if (size >= MAX_ALLOC_SIZE) {
         errno = EINVAL;
         return ptr;
     }
 #endif
-    return _memory_reallocate(ptr, new_size, old_size, 0);
+    return _memory_reallocate (ptr, new_size, old_size, 0);
 }
 
 // Extern interface
@@ -2122,7 +2118,7 @@ void*
 aligned_realloc(void* ptr, std::size_t alignment, std::size_t size, std::size_t oldsize,
     unsigned int flags)
 {
-    (void)alignment; // Silence warning
+    ()alignment; // Silence warning
 #if ENABLE_VALIDATE_ARGS
     if (size + alignment < size)
     {
@@ -2131,7 +2127,7 @@ aligned_realloc(void* ptr, std::size_t alignment, std::size_t size, std::size_t 
     }
 #endif
     //TODO: If alignment > 16, we need to copy to new aligned position
-    (void)sizeof(alignment);
+    ()sizeof(alignment);
     return _memory_reallocate(ptr, size, oldsize, flags);
 }
 
@@ -2171,7 +2167,7 @@ alloc_usable_size(void* ptr)
 #endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
 
 void
-thread_collect(void)
+thread_collect()
 {
     _memory_deallocate_deferred(GET_THREAD_LOCAL(Heap*, _memory_thread_heap), 0);
 }

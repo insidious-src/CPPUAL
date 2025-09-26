@@ -40,18 +40,15 @@ using memory::allocator_t;
 
 // =========================================================
 
-template <typename S>
-using fn_type = function<S>;
+template <fn_sig S>
+using signal_allocator = memory::allocator_traits<function<S>>::allocator_type;
 
-template <typename S>
-using signal_allocator = memory::allocator_traits<fn_type<S>>::allocator_type;
-
-template <typename T, allocator_t A = signal_allocator<T>>
+template <non_void T, allocator_t A = signal_allocator<T>>
 using signal_queue = circular_queue<T, A>;
 
 // =========================================================
 
-template <typename T, allocator_t = signal_allocator<T>>
+template <fn_sig S, allocator_t = signal_allocator<S>>
 class signal;
 
 template <typename T, allocator_t = signal_allocator<T>>
@@ -73,7 +70,7 @@ public:
     typedef alloc_traits::allocator_type                   allocator_type        ;
     typedef alloc_traits::size_type                        size_type             ;
     typedef size_type const                                const_size            ;
-    typedef fn_type<R(Args...)>                            value_type            ;
+    typedef function<R(Args...)>                           value_type            ;
     typedef value_type &                                   reference             ;
     typedef value_type const&                              const_reference       ;
     typedef signal_queue<value_type, allocator_type>       container_type        ;
@@ -89,6 +86,7 @@ public:
     typedef std::vector<return_type, return_allocator>     collector_type        ;
 
     using scoped_connection_type = scoped_connection<R(Args...), allocator_type>;
+    using static_fn_ref          = R(&)(Args...);
 
     constexpr container_ref get_slots () noexcept
     { return _M_slots; }
@@ -194,7 +192,7 @@ public:
     }
 
     /// (signal/slot) connect
-    constexpr self_type& operator << (R(& fn)(Args...))
+    constexpr self_type& operator << (static_fn_ref fn)
     {
         connect (*this, fn);
         return   *this;
@@ -213,7 +211,7 @@ public:
         return   *this;
     }
 
-    template <typename, allocator_t>
+    template <fn_sig, allocator_t>
     friend class signal;
 
 private:
@@ -231,7 +229,7 @@ public:
     typedef traits_type::allocator_type              allocator_type        ;
     typedef traits_type::size_type                   size_type             ;
     typedef size_type const                          const_size            ;
-    typedef fn_type<void(Args...)>                   value_type            ;
+    typedef function<void(Args...)>                  value_type            ;
     typedef value_type &                             reference             ;
     typedef value_type const&                        const_reference       ;
     typedef signal_queue<value_type, allocator_type> container_type        ;
@@ -245,6 +243,7 @@ public:
     typedef void                                     return_type           ;
 
     using scoped_connection_type = scoped_connection<void(Args...), allocator_type>;
+    using static_fn_ref          = void(&)(Args...);
 
     constexpr container_ref get_slots () noexcept
     { return _M_slots; }
@@ -338,7 +337,7 @@ public:
     }
 
     /// (signal/slot) connect
-    constexpr self_type& operator << (void(& fn)(Args...)) const
+    constexpr self_type& operator << (static_fn_ref fn) const
     {
         connect (*this, fn);
         return   *this;
@@ -357,7 +356,7 @@ public:
         return   *this;
     }
 
-    template <typename, allocator_t>
+    template <fn_sig, allocator_t>
     friend class signal;
 
 private:
@@ -375,7 +374,7 @@ public:
     typedef traits_type::allocator_type              allocator_type        ;
     typedef traits_type::size_type                   size_type             ;
     typedef size_type const                          const_size            ;
-    typedef fn_type<void(Args...)>                   value_type            ;
+    typedef function<void(Args...)>                  value_type            ;
     typedef value_type &                             reference             ;
     typedef value_type const&                        const_reference       ;
     typedef signal_queue<value_type, allocator_type> container_type        ;
@@ -389,6 +388,7 @@ public:
     typedef void                                     return_type           ;
 
     using scoped_connection_type = scoped_connection<void(Args...), allocator_type>;
+    using static_fn_ref          = bool(&)(Args...);
 
     constexpr container_ref get_slots () noexcept
     { return _M_slots; }
@@ -463,7 +463,7 @@ public:
     //! emit signal to connected slots
     constexpr void operator () (Args... args) const
     {
-        for (size_type i = 0U; i < _M_slots.size(); ++i)
+        for (size_type i = 0U; i < _M_slots.size (); ++i)
             if (_M_slots[i] != nullptr && !(_M_slots[i] (std::forward<Args> (args)...))) return;
     }
 
@@ -482,7 +482,7 @@ public:
     }
 
     /// (signal/slot) connect
-    inline self_type& operator << (void(& fn)(Args...)) const
+    inline self_type& operator << (static_fn_ref fn) const
     {
         connect (*this, fn);
         return   *this;
@@ -501,7 +501,7 @@ public:
         return   *this;
     }
 
-    template <typename, allocator_t>
+    template <fn_sig, allocator_t>
     friend class signal;
 
 private:

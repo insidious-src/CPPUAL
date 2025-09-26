@@ -851,7 +851,8 @@ public:
         \note \c Array is always pass-by-value.
         \note the source array is moved into this value and the sourec array becomes empty.
     */
-    GenericValue(Array a) RAPIDJSON_NOEXCEPT : data_(a.value_.data_) {
+    GenericValue(Array a) RAPIDJSON_NOEXCEPT : data_(a.value_.data_)
+    {
         a.value_.data_ = Data();
         a.value_.data_.f.flags = kArrayFlag;
     }
@@ -862,7 +863,8 @@ public:
         \note \c Object is always pass-by-value.
         \note the source object is moved into this value and the sourec object becomes empty.
     */
-    GenericValue(Object o) RAPIDJSON_NOEXCEPT : data_(o.value_.data_) {
+    GenericValue(Object o) RAPIDJSON_NOEXCEPT : data_(o.value_.data_)
+    {
         o.value_.data_ = Data();
         o.value_.data_.f.flags = kObjectFlag;
     }
@@ -879,11 +881,11 @@ public:
             switch(data_.f.flags) {
             case kArrayFlag:
                 {
-                    GenericValue* e = GetElementsPointer();
+                    GenericValue* e = GetElementsPointer ();
                     for (GenericValue* v = e; v != e + data_.a.size; ++v)
                         v->~GenericValue();
                     //if (Allocator::kNeedFree) { // Shortcut by Allocator's trait
-                    if (ator_ != nullptr) ator_->deallocate(e);
+                    if (ator_ != nullptr) ator_->deallocate (e, data_.a.size);
                     //}
                 }
                 break;
@@ -894,7 +896,9 @@ public:
 
             case kCopyStringFlag:
                 //if (Allocator::kNeedFree) { // Shortcut by Allocator's trait
-                if (ator_ != nullptr) ator_->deallocate(const_cast<Ch*>(GetStringPointer()));
+                if (ator_ != nullptr)
+                    ator_->deallocate (const_cast<Ch*> (GetStringPointer ()),
+                                       data_.s.length * sizeof (*data_.s.str));
                 //}
                 break;
 
@@ -2273,7 +2277,7 @@ private:
     void DoFreeMembers() {
         for (MemberIterator m = MemberBegin(); m != MemberEnd(); ++m)
             m->~Member();
-        if (ator_ != nullptr) ator_->deallocate(GetMembersPointer());
+        if (ator_ != nullptr) ator_->deallocate(GetMembersPointer(), data_.o.size * sizeof (Member));
     }
 
 #endif // !RAPIDJSON_USE_MEMBERSMAP

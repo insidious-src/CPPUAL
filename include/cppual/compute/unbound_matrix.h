@@ -23,14 +23,14 @@
 #define CPPUAL_UNBOUND_MATRIX_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/signal.h>
-#include <cppual/reactive.h>
-#include <cppual/containers.h>
-#include <cppual/functional.h>
-#include <cppual/circular_queue.h>
-#include <cppual/memory/allocator.h>
-#include <cppual/concept/concepts.h>
+#include <cppual/types>
+#include <cppual/signal>
+#include <cppual/reactive>
+#include <cppual/containers>
+#include <cppual/functional>
+#include <cppual/circular_queue>
+#include <cppual/memory_allocator>
+#include <cppual/concepts>
 
 //#include <memory>
 //#include <cstdint>
@@ -51,7 +51,7 @@ using memory::allocator_t;
   * @brief The unbound_matrix class
   * XAXAXaxAxAXAxaxa няма да ти кажа...
   */
-template <non_void_t T = uchar, allocator_t A = memory::allocator<T>>
+template <non_void T = uchar, allocator_t A = memory::allocator<T>>
 class unbound_matrix
 {
 public:

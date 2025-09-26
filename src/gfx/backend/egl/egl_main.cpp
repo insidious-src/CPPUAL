@@ -57,11 +57,11 @@ shared_surface egl_factory::create_surface (connection_type /*native*/,
                                             handle_type     wnd,
                                             surface_type    type)
 {
-    return memory::allocate_shared<surface_interface, gl::surface> (nullptr,
-                                                                    gl::config (legacy, format),
-                                                                    size,
-                                                                    wnd,
-                                                                    type);
+    return std::allocate_shared<surface_interface, gl::surface> (memory::get_default_resource (),
+                                                                 gl::config (legacy, format),
+                                                                 size,
+                                                                 wnd,
+                                                                 type);
 }
 
 shared_context egl_factory::create_context (connection_type /*native*/,
@@ -69,10 +69,10 @@ shared_context egl_factory::create_context (connection_type /*native*/,
                                             pixel_format    format,
                                             shared_context  shared)
 {
-    return memory::allocate_shared<context_interface, gl::context> (nullptr,
-                                                                    gl::config(legacy, format),
-                                                                    gl::context::default_version (),
-                                                                    shared);
+    return std::allocate_shared<context_interface, gl::context> (memory::get_default_resource (),
+                                                                 gl::config(legacy, format),
+                                                                 gl::context::default_version (),
+                                                                 shared);
 }
 
 device_backend egl_factory::backend ()
@@ -93,7 +93,7 @@ using cppual::gfx::egl_factory        ;
 using cppual::process::plugin_vars    ;
 using cppual::memory::memory_resource ;
 using cppual::memory::stacked_resource;
-using cppual::memory::allocate_shared ;
+using std::allocate_shared            ;
 
 extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {
@@ -106,7 +106,7 @@ extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
     plugin.provides = "gfx::draw_factory";
     plugin.verMajor = 1                  ;
     plugin.verMinor = 0                  ;
-    plugin.iface    = allocate_shared<void, egl_factory> (&static_resource);
+    plugin.iface    = allocate_shared<void, egl_factory> (static_resource);
 
     return &plugin;
 }

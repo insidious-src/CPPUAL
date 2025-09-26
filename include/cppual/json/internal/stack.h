@@ -101,7 +101,7 @@ public:
     void ShrinkToFit() {
         if (Empty()) {
             // If the stack is empty, completely deallocate the memory.
-            allocator_->deallocate(stack_); // NOLINT (+clang-analyzer-unix.Malloc)
+            allocator_->deallocate (stack_, GetCapacity ()); // NOLINT (+clang-analyzer-unix.Malloc)
             stack_ = 0;
             stackTop_ = 0;
             stackEnd_ = 0;
@@ -206,7 +206,7 @@ private:
     }
 
     void Destroy() {
-        allocator_->deallocate(stack_);
+        allocator_->deallocate (stack_, GetCapacity ());
         //RAPIDJSON_DELETE(ownAllocator_); // Only delete if it is owned by the stack
     }
 

@@ -23,6 +23,8 @@
 #define CPPUAL_STRING_META_H_
 #ifdef __cplusplus
 
+
+#include <cppual/types>
 #include <cppual/concepts>
 
 #include <string>
@@ -76,16 +78,16 @@ consteval std::size_t char_fast_hash () noexcept
 // ====================================================
 
 //! char string constexpr complete hash (ex. usage in switch cases or as a hash)
-constexpr uint char_hash (cchar* input) noexcept
+constexpr u32 char_hash (cchar* input) noexcept
 {
-    return *input ? static_cast<uint> (*input) + 33 * char_hash (input + 1) : 5381;
+    return *input ? static_cast<u32> (*input) + 33 * char_hash (input + 1) : 5381;
 }
 
 //! char string consteval complete hash (ex. usage in switch cases or as a hash)
 template <cchar* In>
-consteval uint char_hash () noexcept
+consteval u32 char_hash () noexcept
 {
-    return *In ? static_cast<uint> (*In) + 33 * char_hash<In + 1> () : 5381;
+    return *In ? static_cast<u32> (*In) + 33 * char_hash<In + 1> () : 5381;
 }
 
 // ====================================================

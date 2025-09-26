@@ -24,7 +24,8 @@
 #ifdef __cplusplus
 
 #include <cppual/network/packet.h>
-#include <cppual/noncopyable.h>
+#include <cppual/noncopyable>
+#include <cppual/interface>
 
 namespace cppual { namespace network {
 
@@ -34,15 +35,9 @@ class protocol_context;
 
 // =========================================================
 
-class protocol : public non_copyable_virtual
+class protocol : public layer_interface
 {
 public:
-    protocol_context* create_context  ();
-    void              add_upper_layer (protocol*);
-    void              add_lower_layer (protocol*);
-    protocol*         uppest_layer    () const;
-    protocol*         lowest_layer    () const;
-
     virtual uint required_output_size        (uint max_input);
     virtual uint required_recyclable_streams (uint max_connections,
                                               uint max_concurrent_calls);
@@ -54,13 +49,6 @@ public:
     virtual byte encode_content (protocol_context&,
                                  packet&  input_packet,
                                  packet& output_packet) = 0;
-
-    constexpr protocol* upper_layer () const noexcept { return _M_pUpperProt; }
-    constexpr protocol* lower_layer () const noexcept { return _M_pLowerProt; }
-
-private:
-    protocol* _M_pUpperProt;
-    protocol* _M_pLowerProt;
 };
 
 // =========================================================

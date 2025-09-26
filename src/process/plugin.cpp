@@ -22,6 +22,7 @@
 #include <cppual/process/plugin.h>
 #include <cppual/types.h>
 
+#include <functional>
 #include <iostream>
 
 #ifdef OS_STD_POSIX
@@ -165,7 +166,7 @@ void dyn_loader::detach () noexcept
     _M_pHandle = nullptr;
 }
 
-void* dyn_loader::get_address (string_view pName) const noexcept
+void* dyn_loader::get_address (string_view const& pName) const
 {
 #   ifdef OS_STD_POSIX
 
@@ -184,21 +185,31 @@ void* dyn_loader::get_address (string_view pName) const noexcept
 #   endif
 }
 
-dyn_loader::function_type dyn_loader::get_function (string_view pName) const noexcept
+dyn_loader::function_type dyn_loader::get_function (string_view const& pName) const
 {
 #   ifdef OS_STD_POSIX
 
-    auto const convert = direct_cast<function_type> (::dlsym (_M_pHandle, pName.data ()));
+    auto const fn = direct_cast<function_type> (::dlsym (_M_pHandle, pName.data ()));
 
-    if (!convert) std::cerr << ::dlerror () << std::endl;
-    return convert;
+    if (!fn)
+    {
+        std::cerr << ::dlerror () << std::endl;
+        throw std::bad_function_call ();
+    }
+
+    return fn;
 
 #   elif defined (OS_WINDOWS)
 
-    function_type const func = ::GetProcAddress (_M_pHandle.get<HMODULE> (), pName.data ());
-    if (!func)
+    function_type const fn = ::GetProcAddress (_M_pHandle.get<HMODULE> (), pName.data ());
+
+    if (!fn)
+    {
         std::cerr << "error: " << ::GetLastError () << " :: function not found!" << std::endl;
-    return func;
+        throw std::bad_function_call ();
+    }
+
+    return fn;
 
 #   endif
 }

@@ -61,7 +61,7 @@ using cppual::ui::platform::Win32Factory;
 using cppual::process::plugin_vars      ;
 using cppual::memory::memory_resource   ;
 using cppual::memory::stacked_resource  ;
-using cppual::memory::allocate_shared   ;
+using std::allocate_shared   ;
 
 extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {

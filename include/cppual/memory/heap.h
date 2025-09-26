@@ -23,9 +23,9 @@
 #define CPPUAL_MEMORY_HEAP_ALLOCATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/memory/allocator.h>
-#include <cppual/memory/shared.h>
-#include <cppual/string.h>
+#include <cppual/memory_allocator>
+#include <cppual/shared_memory>
+#include <cppual/string>
 
 namespace cppual { namespace memory {
 
@@ -50,7 +50,8 @@ public:
     }
 
     constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
-    constexpr memory_resource& owner     () const noexcept { return _M_gOwner      ; }
+    constexpr base_reference       owner ()       noexcept { return _M_gOwner      ; }
+    constexpr base_const_reference owner () const noexcept { return _M_gOwner      ; }
 
 private:
     struct header     { size_type size, adjust;           };
@@ -61,7 +62,7 @@ private:
     void* do_allocate   (size_type size, align_type align);
     void  do_deallocate (pointer p, size_type size, align_type align);
 
-    constexpr bool do_is_equal (base_const_reference gObj) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& gObj) const noexcept
     { return this == &gObj; }
 
 private:
@@ -97,17 +98,15 @@ public:
         return size > sizeof (header) ? size - sizeof (header) : size_type ();
     }
 
-    constexpr bool is_shared () const noexcept
-    { return _M_bIsMemShared; }
-
-    constexpr memory_resource& owner () const noexcept
-    { return _M_gOwner; }
+    constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
+    constexpr base_reference       owner ()       noexcept { return _M_gOwner      ; }
+    constexpr base_const_reference owner () const noexcept { return _M_gOwner      ; }
 
 private:
     void* do_allocate   (size_type size, align_type align);
     void  do_deallocate (pointer p, size_type size, size_type align);
 
-    constexpr bool do_is_equal (base_const_reference gObj) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& gObj) const noexcept
     { return this == &gObj; }
 
 private:

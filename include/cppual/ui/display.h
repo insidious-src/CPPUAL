@@ -23,10 +23,10 @@
 #define CPPUAL_GFX_DISPLAY_H_
 #ifdef __cplusplus
 
-#include <cppual/string.h>
-#include <cppual/resource.h>
-#include <cppual/noncopyable.h>
-#include <cppual/unbound_interface.h>
+#include <cppual/string>
+#include <cppual/resource>
+#include <cppual/noncopyable>
+#include <cppual/interface>
 
 #include <memory>
 
@@ -41,11 +41,16 @@ typedef std::weak_ptr  <display_interface> weak_display  ;
 class SHARED_API display_interface : public dyn_unbound_interface
 {
 public:
+    typedef display_interface   self_type  ;
     typedef resource_connection handle_type;
     typedef string              string_type;
     typedef shared_display      pointer    ;
 
-    constexpr display_interface () noexcept = default;
+    constexpr display_interface () noexcept
+    : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
+                 std::make_pair ("screen_count", make_fn (*this, &self_type::screen_count)),
+                 std::make_pair ("flush", make_fn (*this, &self_type::flush)))
+    { }
 
     virtual string_type name             () const = 0;
     virtual uint        screen_count     () const = 0;
@@ -69,9 +74,21 @@ public:
 
 protected:
     constexpr display_interface (handle_type native, handle_type legacy) noexcept
-    : base_type ()
+    : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
+                 std::make_pair ("screen_count", make_fn (*this, &self_type::screen_count)),
+                 std::make_pair ("flush", make_fn (*this, &self_type::flush)))
     , _M_native (native)
     , _M_legacy (legacy)
+    { }
+
+    template <pair_t... Ps>
+    constexpr display_interface (handle_type native, handle_type legacy, Ps... pairs) noexcept
+    : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
+                 std::make_pair ("screen_count", make_fn (*this, &self_type::screen_count)),
+                 std::make_pair ("flush", make_fn (*this, &self_type::flush)),
+                 pairs...)
+    , _M_native (native  )
+    , _M_legacy (legacy  )
     { }
 
 private:

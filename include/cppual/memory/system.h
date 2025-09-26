@@ -116,7 +116,7 @@ initialize(void);
 extern void
 finalize(void);
 
-extern void
+extern bool
 thread_initialize(void);
 
 extern void

@@ -25,9 +25,9 @@
 
 #include <cppual/casts>
 #include <cppual/string>
-#include <cppual/containers>
-#include <cppual/memory/allocator.h>
 #include <cppual/concepts>
+#include <cppual/containers>
+#include <cppual/memory_allocator>
 #include <cppual/iterators/rope_iterator.h>
 
 #include <string_view>
@@ -2122,31 +2122,31 @@ constexpr void swap (frope<T, A>& lhs, frope<T, A>& rhs) noexcept
 
 // ====================================================
 
-typedef frope<char8 , memory::allocator<char8>>  fu8rope ;
+typedef frope<char8 , memory::allocator<char8 >> fu8rope ;
 typedef frope<char16, memory::allocator<char16>> fu16rope;
 typedef frope<char32, memory::allocator<char32>> fu32rope;
-typedef frope<wchar , memory::allocator<wchar>>  fwrope  ;
+typedef frope<wchar , memory::allocator<wchar >> fwrope  ;
 
 // ====================================================
 
 template <allocator_t A>
-struct is_string<frope<char, A>> : std::true_type
+struct is_string <frope<char, A>> : std::true_type
 { };
 
 template <allocator_t A>
-struct is_string<frope<char8, A>> : std::true_type
+struct is_string <frope<char8, A>> : std::true_type
 { };
 
 template <allocator_t A>
-struct is_string<frope<char16, A>> : std::true_type
+struct is_string <frope<char16, A>> : std::true_type
 { };
 
 template <allocator_t A>
-struct is_string<frope<char32, A>> : std::true_type
+struct is_string <frope<char32, A>> : std::true_type
 { };
 
 template <allocator_t A>
-struct is_string<frope<wchar, A>> : std::true_type
+struct is_string <frope<wchar, A>> : std::true_type
 { };
 
 } // namespace cppual

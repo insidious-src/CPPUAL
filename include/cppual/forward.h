@@ -38,7 +38,7 @@ using std::forward;
 
 // =========================================================
 
-template <non_void_t T, non_void_t U = remove_cvref_t<T>>
+template <non_void T, non_void U = remove_cvref_t<T>>
 using forward_t = std::conditional_t<(std::is_class_v<U> || std::is_union_v<U>) && !std::is_pointer_v<T>,
                                      std::conditional_t<is_cref_v<T> && std::is_copy_constructible_v<U>,
                                                         U const&,
@@ -53,13 +53,13 @@ using forward_t = std::conditional_t<(std::is_class_v<U> || std::is_union_v<U>) 
 
 // =========================================================
 
-template <non_void_t T>
+template <non_void T>
 constexpr std::conditional_t<is_compact_forwarded_v<T>, T, T&&> forward_compact (T&& val) noexcept
 {
     return is_compact_forwarded_v<T> ? val : std::forward<T> (val);
 }
 
-template <non_void_t T>
+template <non_void T>
 constexpr  std::conditional_t<is_compact_forwarded_v<T>, T, T&&> forward_compact (T& val) noexcept
 {
     return is_compact_forwarded_v<T> ? val : std::forward<T> (val);
@@ -67,19 +67,19 @@ constexpr  std::conditional_t<is_compact_forwarded_v<T>, T, T&&> forward_compact
 
 // =========================================================
 
-// template <non_void_t T>
+// template <non_void T>
 // constexpr forward_t<T> forward_perfect (T var) noexcept
 // {
 //     return var;
 // }
 
-template <non_void_t T>
+template <non_void T>
 constexpr forward_t<T> forward_perfect (std::remove_reference_t<T> var) noexcept
 {
     return var;
 }
 
-template <non_void_t T>
+template <non_void T>
 constexpr forward_t<T> forward_perfect (std::remove_reference_t<T>&& var) noexcept
 {
     return var;

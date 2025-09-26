@@ -24,9 +24,11 @@
 #ifdef __cplusplus
 
 
-#include <cppual/iterators/bitset_iterator.h>
 #include <cppual/containers>
 #include <cppual/concepts>
+#include <cppual/iterator>
+
+#include <cppual/string.h>
 
 #include <string_view>
 #include <type_traits>
@@ -86,7 +88,7 @@ class bitset
 {
 public:
     typedef bitset<T>                                     self_type             ;
-    typedef remove_cref_t<T>                        value_type            ;
+    typedef remove_cref_t<T>                              value_type            ;
     typedef value_type const                              const_value           ;
     typedef std::underlying_type_t<value_type>            int_type              ;
     typedef int_type const                                const_int             ;

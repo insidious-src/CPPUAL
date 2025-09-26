@@ -24,10 +24,11 @@
 #ifdef __cplusplus
 
 #include <cppual/casts>
-#include <cppual/types.h>
-#include <cppual/bitset.h>
-#include <cppual/noncopyable.h>
-#include <cppual/concept/concepts.h>
+#include <cppual/types>
+#include <cppual/concepts>
+#include <cppual/bitflags>
+#include <cppual/interface>
+#include <cppual/noncopyable>
 
 #include <type_traits>
 
@@ -80,22 +81,22 @@ typedef bitset<resource_type> resource_types;
 class resource_handle
 {
 public:
-    typedef resource_handle self_type ;
-    typedef uptr            value_type;
-    typedef void*           pointer   ;
+    union   handle_union                        ;
+    typedef resource_handle           self_type ;
+    typedef uptr                      value_type;
+    typedef void*                     pointer   ;
+    typedef handle_union self_type::* safe_bool ;
 
     union handle_union
     {
         value_type value { };
         pointer    ptr      ;
 
-        consteval handle_union () noexcept = default;
+        constexpr handle_union () noexcept = default;
         constexpr handle_union (value_type _handle) noexcept : value (_handle) { }
         constexpr handle_union (pointer    _handle) noexcept : ptr   (_handle) { }
         constexpr handle_union (std::nullptr_t    ) noexcept : ptr   ()        { }
     };
-
-    typedef handle_union self_type::* safe_bool;
 
     constexpr resource_handle () noexcept = default;
     constexpr resource_handle (value_type _handle) noexcept : _M_handle (_handle) { }
@@ -276,6 +277,7 @@ struct resource_version
         ostringstream stream;
 
         stream << major;
+
         if (parts >= version_parts::to_minor) stream << '.' << minor;
         if (parts >= version_parts::to_patch) stream << '.' << patch;
         if (parts == version_parts::all     ) stream << '-' << revision;
@@ -291,54 +293,54 @@ struct resource_version
 
 // ====================================================
 
-constexpr bool operator < (resource_version const& gObj1, resource_version const& gObj2) noexcept
-{ return gObj1.major < gObj2.major || gObj1.minor < gObj2.minor; }
+constexpr bool operator < (resource_version const& lh, resource_version const& rh) noexcept
+{ return lh.major < rh.major || lh.minor < rh.minor; }
 
-constexpr bool operator < (resource_version const& gObj1, resource_version::value_type const uMajor) noexcept
-{ return gObj1.major < uMajor; }
+constexpr bool operator < (resource_version const& lh, resource_version::value_type const uMajor) noexcept
+{ return lh.major < uMajor; }
 
-constexpr bool operator <= (resource_version const& gObj1, resource_version const& gObj2) noexcept
-{ return (gObj1.major <= gObj2.major && gObj1.minor <= gObj2.minor); }
+constexpr bool operator <= (resource_version const& lh, resource_version const& rh) noexcept
+{ return (lh.major <= rh.major && lh.minor <= rh.minor); }
 
-constexpr bool operator <= (resource_version const& gObj1, resource_version::value_type const uMajor) noexcept
-{ return gObj1.major <= uMajor; }
+constexpr bool operator <= (resource_version const& lh, resource_version::value_type const uMajor) noexcept
+{ return lh.major <= uMajor; }
 
-constexpr bool operator > (resource_version const& gObj1, resource_version const& gObj2) noexcept
-{ return (gObj1.major > gObj2.major || gObj1.minor > gObj2.minor); }
+constexpr bool operator > (resource_version const& lh, resource_version const& rh) noexcept
+{ return (lh.major > rh.major || lh.minor > rh.minor); }
 
-constexpr bool operator > (resource_version const& gObj1, resource_version::value_type const uMajor) noexcept
-{ return gObj1.major > uMajor; }
+constexpr bool operator > (resource_version const& lh, resource_version::value_type const uMajor) noexcept
+{ return lh.major > uMajor; }
 
-constexpr bool operator >= (resource_version const& gObj1, resource_version const& gObj2) noexcept
-{ return (gObj1.major >= gObj2.major && gObj1.minor >= gObj2.minor); }
+constexpr bool operator >= (resource_version const& lh, resource_version const& rh) noexcept
+{ return (lh.major >= rh.major && lh.minor >= rh.minor); }
 
-constexpr bool operator >= (resource_version const& gObj1, resource_version::value_type const uMajor) noexcept
-{ return gObj1.major >= uMajor; }
+constexpr bool operator >= (resource_version const& lh, resource_version::value_type const uMajor) noexcept
+{ return lh.major >= uMajor; }
 
-constexpr bool operator == (resource_version const& gObj1, resource_version const& gObj2) noexcept
-{ return (gObj1.major == gObj2.major && gObj1.minor == gObj2.minor); }
+constexpr bool operator == (resource_version const& lh, resource_version const& rh) noexcept
+{ return (lh.major == rh.major && lh.minor == rh.minor); }
 
-constexpr bool operator != (resource_version const& gObj1, resource_version const& gObj2) noexcept
-{ return !(gObj1 == gObj2); }
+constexpr bool operator != (resource_version const& lh, resource_version const& rh) noexcept
+{ return !(lh == rh); }
 
 // =========================================================
 
-template <typename C, non_void_t H,
+template <typename C, non_void H,
           resource_handle::value_type NULL_VALUE = resource_handle::value_type ()>
 class resource : public non_copyable_virtual
 {
 public:
     typedef resource<C, H, NULL_VALUE> self_type      ;
-    typedef remove_cref_t<C>     connection_type;
-    typedef remove_cref_t<H>     value_type     ;
+    typedef remove_cref_t<C>           connection_type;
+    typedef remove_cref_t<H>           value_type     ;
     typedef resource_handle            handle_type    ;
     typedef self_type* self_type::*    safe_bool      ;
 
-    inline constexpr static handle_type null_value = NULL_VALUE;
+    inline constexpr static const handle_type null_value = NULL_VALUE;
 
     constexpr resource () noexcept = default;
 
-    inline resource (self_type&&   rc) noexcept
+    constexpr resource (self_type&&   rc) noexcept
     : _M_connection (rc._M_connection),
       _M_handle     (rc._M_handle    )
     {
@@ -346,7 +348,7 @@ public:
         rc._M_handle     = null_value;
     }
 
-    inline self_type& operator = (self_type&& rc) noexcept
+    constexpr self_type& operator = (self_type&& rc) noexcept
     {
         if (this != &rc)
         {
@@ -370,14 +372,14 @@ public:
     constexpr T handle () const noexcept
     { return _M_handle.get<T> (); }
 
-    inline void set_connection (connection_type const conn) noexcept
+    constexpr void set_connection (connection_type const conn) noexcept
     { _M_connection = conn; }
 
     template <integer_t T>
-    inline void set_handle (T const handle) noexcept
+    constexpr void set_handle (T const handle) noexcept
     { _M_handle = handle; }
 
-    inline void set_handle (handle_type const handle) noexcept
+    constexpr void set_handle (handle_type const handle) noexcept
     { _M_handle = handle; }
 
     constexpr explicit resource (connection_type const conn, handle_type const handle) noexcept
@@ -404,16 +406,16 @@ private:
 
 // =========================================================
 
-template <non_void_t H, resource_handle::value_type NULL_VALUE>
+template <non_void H, resource_handle::value_type NULL_VALUE>
 class resource <void, H, NULL_VALUE> : public non_copyable_virtual
 {
 public:
     typedef resource<void, H, NULL_VALUE> self_type  ;
-    typedef remove_cref_t<H>        value_type ;
+    typedef remove_cref_t<H>              value_type ;
     typedef resource_handle               handle_type;
     typedef self_type* self_type::*       safe_bool  ;
 
-    inline constexpr static handle_type const null_value = NULL_VALUE;
+    inline constexpr static const handle_type null_value = NULL_VALUE;
 
     constexpr resource () noexcept = default;
 
@@ -423,7 +425,7 @@ public:
         rc._M_handle = null_value;
     }
 
-    inline self_type& operator = (self_type&& rc) noexcept
+    constexpr self_type& operator = (self_type&& rc) noexcept
     {
         if (this != &rc)
         {
@@ -443,11 +445,11 @@ public:
     constexpr T handle () const noexcept
     { return _M_handle.get<T> (); }
 
-    inline void set_handle (handle_type const handle) noexcept
+    constexpr void set_handle (handle_type const handle) noexcept
     { _M_handle = handle; }
 
     template <integer_t T>
-    inline void set_handle (T const handle) noexcept
+    constexpr void set_handle (T const handle) noexcept
     { _M_handle = handle; }
 
     constexpr explicit resource (handle_type const handle) noexcept
@@ -459,7 +461,7 @@ public:
     : _M_handle (handle)
     { }
 
-    constexpr explicit operator safe_bool () const noexcept
+    consteval explicit operator safe_bool () const noexcept
     { return valid () ? this : nullptr; }
 
     template <class ID_>
@@ -472,22 +474,22 @@ private:
 // =========================================================
 
 template <class ID>
-constexpr bool operator == (resource<void, ID> const& gObj1, resource<void, ID> const& gObj2)
-{ return gObj1._M_handle == gObj2._M_handle; }
+constexpr bool operator == (resource<void, ID> const& lh, resource<void, ID> const& rh)
+{ return lh._M_handle == rh._M_handle; }
 
 template <class ID>
-constexpr bool operator != (resource<void, ID> const& gObj1, resource<void, ID> const& gObj2)
-{ return !(gObj1 == gObj2); }
+constexpr bool operator != (resource<void, ID> const& lh, resource<void, ID> const& rh)
+{ return !(lh == rh); }
 
 template <class C, class ID>
-constexpr bool operator == (resource<C, ID> const& gObj1, resource<C, ID> const& gObj2)
+constexpr bool operator == (resource<C, ID> const& lh, resource<C, ID> const& rh)
 {
-    return gObj1._M_connection == gObj2._M_connection && gObj1._M_handle == gObj2._M_handle;
+    return lh._M_connection == rh._M_connection && lh._M_handle == rh._M_handle;
 }
 
 template <class C, class ID>
-constexpr bool operator != (resource<C, ID> const& gObj1, resource<C, ID> const& gObj2)
-{ return !(gObj1 == gObj2); }
+constexpr bool operator != (resource<C, ID> const& lh, resource<C, ID> const& rh)
+{ return !(lh == rh); }
 
 // =========================================================
 
@@ -516,11 +518,12 @@ template <>
 struct hash <resource_version>
 {
     typedef resource_version::value_type value_type;
+    typedef std::size_t                  size_type ;
 
     /// Compute individual hash values for major,
     /// and minor and combine them using XOR
     /// and bit shifting
-    size_t operator () (resource_version const& version) const
+    size_type operator () (resource_version const& version) const
     {
         return ((hash<value_type>()(version.major)          ^
                 (hash<value_type>()(version.minor)    << 1) ^

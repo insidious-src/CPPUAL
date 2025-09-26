@@ -21,7 +21,7 @@
 
 #include <cppual/network/address.h>
 
-#include <sstream>
+//#include <sstream>
 
 namespace cppual { namespace network {
 

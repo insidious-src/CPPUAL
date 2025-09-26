@@ -348,7 +348,7 @@ private:
     void do_deallocate(void* /*ptr*/, size_type /*bytes*/, size_type /*align*/) RAPIDJSON_NOEXCEPT
     { } // Do nothing
 
-    bool do_is_equal(base_type const& other) const noexcept
+    bool do_is_equal(abs_base_type const& other) const noexcept
     { return this == &other; }
 
 public:

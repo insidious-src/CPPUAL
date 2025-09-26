@@ -12,9 +12,11 @@ namespace cppual {
 
 class connection_error : public std::runtime_error
 {
-  public:
-    connection_error(uint8_t code, string const& description)
-      : std::runtime_error(to_std_string(description + '(' + to_string(code, description.get_allocator()) + ')'))
+public:
+    typedef string string_type;
+
+    connection_error(uint8_t code, string_type const& description)
+      : std::runtime_error(to_std_string (description + '(' + to_string(code, description.get_allocator()) + ')'))
       , _M_code(code)
       , _M_description(description)
     {}
@@ -25,15 +27,15 @@ class connection_error : public std::runtime_error
       return _M_code;
     }
 
-    string
+    string_type
     description(void)
     {
       return _M_description;
     }
 
-  protected:
-    uint8_t _M_code;
-    string _M_description;
+protected:
+    uint8_t     _M_code       ;
+    string_type _M_description;
 };
 
 class core
@@ -58,7 +60,7 @@ class core
       }
 
       check_connection();
-      throw std::runtime_error(to_std_string(producer + " failed"));
+      throw std::runtime_error(to_std_string (producer + " failed"));
     }
 
   public:

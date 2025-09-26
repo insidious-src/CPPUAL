@@ -51,7 +51,7 @@ inline x::display_type* get_connection (cchar* pName) noexcept
 
 xcb_display::xcb_display (string_type const& name)
 : display_interface (get_connection (name.c_str()), x11_connection (name.c_str())),
-  _M_gName (native () ? name : nullptr),
+  _M_gName (native () ? name : string_type ()),
   _M_data  (native<x::display_type> ())
 {
     if (!native ()) return;

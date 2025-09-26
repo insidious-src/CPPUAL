@@ -77,15 +77,11 @@ typedef const std::ptrdiff_t cptrdiff;
 // =========================================================
 
 template <std::size_t Bits = 64>
-inline constexpr std::size_t const arch_bits_v = Bits / 8;
-
-inline constexpr std::size_t const arch_16_bits_v = arch_bits_v<16>;
-
-inline constexpr std::size_t const arch_32_bits_v = arch_bits_v<32>;
-
-inline constexpr std::size_t const arch_64_bits_v = arch_bits_v<64>;
-
-inline constexpr std::size_t const arch_128_bits_v = arch_bits_v<128>;
+inline constexpr const std::size_t arch_bits_v     = Bits / 8        ;
+inline constexpr const std::size_t arch_16_bits_v  = arch_bits_v<16> ;
+inline constexpr const std::size_t arch_32_bits_v  = arch_bits_v<32> ;
+inline constexpr const std::size_t arch_64_bits_v  = arch_bits_v<64> ;
+inline constexpr const std::size_t arch_128_bits_v = arch_bits_v<128>;
 
 // =========================================================
 

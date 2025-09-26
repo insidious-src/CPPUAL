@@ -23,9 +23,9 @@
 #define CPPUAL_MEMORY_STACKED_ALLOCATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/string.h>
-#include <cppual/memory/allocator.h>
-#include <cppual/memory/shared.h>
+#include <cppual/memory_allocator>
+#include <cppual/shared_memory>
+#include <cppual/string>
 
 namespace cppual { namespace memory {
 
@@ -53,15 +53,16 @@ public:
                                        static_cast<math_pointer> (_M_pBegin));
     }
 
-    constexpr memory_resource& owner () const noexcept { return _M_gOwner      ; }
-    constexpr bool         is_shared () const noexcept { return _M_bIsMemShared; }
+    constexpr base_reference       owner ()       noexcept { return _M_gOwner      ; }
+    constexpr base_const_reference owner () const noexcept { return _M_gOwner      ; }
+    constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
 
 private:
     void* do_allocate   (size_type capacity, align_type align);
     void* do_reallocate (void* p, size_type old_size, size_type size, align_type align_size);
     void  do_deallocate (void* p, size_type capacity, align_type align);
 
-    constexpr bool do_is_equal (base_const_reference gObj) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& gObj) const noexcept
     { return &gObj == this; }
 
 private:
@@ -88,8 +89,9 @@ public:
     cvoid*    bottom_marker () const noexcept { return _M_pBottomMarker; }
     cvoid*    top_marker () const noexcept { return _M_pTopMarker; }
 
-    constexpr memory_resource& owner () const noexcept { return _M_gOwner      ; }
-    constexpr bool         is_shared () const noexcept { return _M_bIsMemShared; }
+    constexpr base_reference       owner ()       noexcept { return _M_gOwner      ; }
+    constexpr base_const_reference owner () const noexcept { return _M_gOwner      ; }
+    constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
 
     constexpr size_type max_size () const noexcept
     {
@@ -114,7 +116,7 @@ private:
     void* do_reallocate (void* p, size_type old_size, size_type size, align_type align_size);
     void  do_deallocate (void* p, size_type capacity, align_type align);
 
-    constexpr bool do_is_equal (base_const_reference gObj) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& gObj) const noexcept
     { return &gObj == this; }
 
 private:

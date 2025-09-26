@@ -1315,7 +1315,7 @@ value_reference<doc_parser::string_type>::value_reference (template_array*   own
 
 factory::factory(std::initializer_list<file_tuple> json_files)
 {
-    typedef memory::allocator<doc_parser> doc_allocator;
+    //typedef memory::allocator<doc_parser> doc_allocator;
 
     _M_jsonDocs.reserve (json_files.size ());
 
@@ -1330,9 +1330,9 @@ factory::factory(std::initializer_list<file_tuple> json_files)
 
         _M_jsonDocs.emplace(std::get<0>(item),
                             std::make_pair(std::get<1> (item),
-                                           memory::allocate_shared (doc_allocator (),
-                                                                    std::get<1> (item),
-                                                                    std::get<2> (item))));
+                                           std::allocate_shared<doc_parser> (memory::get_default_resource (),
+                                                                             std::get<1> (item),
+                                                                             std::get<2> (item))));
     }
 }
 

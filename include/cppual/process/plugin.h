@@ -30,15 +30,14 @@
 #include <cppual/string>
 #include <cppual/concepts>
 #include <cppual/resource>
+#include <cppual/interface>
 #include <cppual/containers>
 #include <cppual/noncopyable>
-#include <cppual/memory/allocator.h>
-#include <cppual/unbound_interface.h>
+#include <cppual/memory_allocator>
 
 #include <memory>
 #include <cstring>
 #include <version>
-#include <functional>
 #include <string_view>
 
 namespace cppual { namespace process {
@@ -52,17 +51,18 @@ public:
 
     typedef dyn_loader       self_type  ;
     typedef string           string_type;
-    typedef std::string_view string_view;
+    typedef fstring_view     string_view;
     typedef resource_handle  handle_type;
+    typedef cchar*           char_ptr   ;
 
     enum class resolve_policy : u8
     {
+        //! don't resolve any object or function references
+        lazy,
         //! use as data file or load as a static library
         statically,
         //! resolve everything on load
-        immediate,
-        //! don't resolve any object or function references
-        lazy
+        immediate
     };
 
     dyn_loader () = default;
@@ -73,57 +73,59 @@ public:
 
     dyn_loader (string_type    path,
                 bool           attach = true,
-                resolve_policy policy = resolve_policy::lazy) noexcept;
+                resolve_policy policy = resolve_policy ()) noexcept;
 
     static string_type extension () noexcept;
 
-    constexpr string_view    path        () const noexcept { return _M_gLibPath; }
-    constexpr void_ptr       handle      () const noexcept { return _M_pHandle ; }
+    consteval string_view    path        () const noexcept { return _M_gLibPath; }
+    constexpr void*          handle      () const noexcept { return _M_pHandle ; }
     constexpr resolve_policy policy      () const noexcept { return _M_eResolve; }
     constexpr bool           is_attached () const noexcept { return _M_pHandle ; }
 
     ~dyn_loader ()
     { if (_M_eResolve != resolve_policy::statically) detach (); }
 
-    inline bool contains (string_view const& gName) const noexcept
-    { return get_address (gName.data ()) != nullptr; }
+    constexpr bool contains (string_view const& gName) const noexcept
+    { return get_address (gName) != nullptr; }
 
-    constexpr function_proxy<self_type> operator [] (string_view name) const noexcept
+    constexpr function_proxy<self_type> operator [] (string_view const& name) const noexcept
     {  return function_proxy<self_type> (*this, name); }
 
+    constexpr function_proxy<self_type> operator [] (string_view const& fn_name) noexcept
+    {  return function_proxy<self_type> (*this, fn_name); }
+
     template <typename T = void>
-    constexpr T* import (string_view const& pName) const noexcept
-    { return static_cast<T*> (get_address (pName.data ())); }
+    constexpr T* import (string_view const& pName) const
+    { return static_cast<T*> (get_address (pName)); }
 
     template <typename R = void, typename... Args>
-    constexpr auto import (string_view pName) const noexcept
+    constexpr auto import (string_view const& pName) const -> R(*)(Args...)
     {
-        return direct_cast<R(*)(Args...)> (get_function (pName.data ()));
+        return direct_cast<R(*)(Args...)> (get_function (pName));
     }
 
-    template <typename R = void, typename... Args>
-    constexpr R invoke (string_view pName, Args... args) const
+    template <char_ptr Name, typename R = void, typename... Args>
+    constexpr R invoke (Args... args) const
     {
-        auto fn = direct_cast<R(*)(Args...)> (get_function (pName.data ()));
-
-        if (!fn) throw std::bad_function_call ();
-        return (*fn)(std::forward<Args> (args)...);
+        return (*direct_cast<R(*)(Args...)> (get_function (Name)))(std::forward<Args> (args)...);
     }
 
 private:
-    void_ptr      get_address  (string_view name) const noexcept;
-    function_type get_function (string_view name) const noexcept;
+    void*         get_address  (string_view const& name) const;
+    function_type get_function (string_view const& name) const;
 
 private:
-    handle_type    _M_pHandle ;
-    string_type    _M_gLibPath;
-    resolve_policy _M_eResolve { resolve_policy::lazy };
+    handle_type    _M_pHandle  { };
+    string_type    _M_gLibPath { };
+    resolve_policy _M_eResolve { };
 };
 
 // =========================================================
 
 struct SHARED_API plugin_vars
 {
+    typedef plugin_vars self_type;
+
     cchar*                name     { };
     cchar*                provides { };
     cchar*                desc     { };
@@ -133,8 +135,8 @@ struct SHARED_API plugin_vars
     std::shared_ptr<void> iface    { };
     dyn_array<cchar*>     required { };
 
-    inline plugin_vars (plugin_vars const&) = default;
-    inline plugin_vars& operator = (plugin_vars const&) = default;
+    inline plugin_vars (self_type const&) = default;
+    inline self_type& operator = (self_type const&) = default;
 
     constexpr plugin_vars (memory::memory_resource* res = nullptr)
     : name     (),
@@ -147,7 +149,7 @@ struct SHARED_API plugin_vars
                                  dyn_array<cchar*>::allocator_type (*res))
     { }
 
-    inline plugin_vars (plugin_vars&& obj)
+    inline plugin_vars (self_type&& obj)
     : name     (obj.name),
       provides (obj.provides),
       desc     (obj.desc),
@@ -157,9 +159,9 @@ struct SHARED_API plugin_vars
       required (std::move (obj.required))
     { }
 
-    ~plugin_vars () { }
+    inline ~plugin_vars () { }
 
-    constexpr plugin_vars& operator = (plugin_vars&& obj)
+    constexpr self_type& operator = (self_type&& obj)
     {
         if (this == &obj) return *this;
 
@@ -197,6 +199,7 @@ public:
     typedef traits_type::size_type            size_type       ;
     typedef traits_type::value_type           pair_type       ;
     typedef std::string_view                  string_type     ;
+    typedef fstring_view                      string_view     ;
     typedef string                            key_type        ;
     typedef string const                      const_key       ;
     typedef std::hash<key_type>               hash_type       ;
@@ -243,15 +246,15 @@ public:
         const_pointer _M_ptr;
     };
 
-    inline constexpr static auto const plugin_main = "plugin_main";
+    inline constexpr static cchar* plugin_main = "plugin_main";
 
-    plugin_manager (plugin_manager&&) = default;
-    plugin_manager& operator = (plugin_manager&&) = default;
+    constexpr plugin_manager (plugin_manager&&) = default;
+    constexpr plugin_manager& operator = (plugin_manager&&) = default;
 
-    void release_all ()
+    constexpr void release_all ()
     { _M_gPluginMap.clear (); }
 
-    consteval bool empty () const noexcept
+    constexpr bool empty () const noexcept
     { return _M_gPluginMap.empty (); }
 
     constexpr allocator_type get_allocator () const noexcept
@@ -263,17 +266,17 @@ public:
     constexpr plugin_pointer plugin (const_key& path) const
     { return _M_gPluginMap[path]; }
 
-    plugin_manager (allocator_type const& ator = allocator_type ())
-    : _M_gPluginMap(ator)
+    constexpr plugin_manager (allocator_type const& ator = allocator_type ())
+    : _M_gPluginMap (ator)
     { }
 
-    template <non_void_t... Args>
+    template <non_void... Args>
     bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args&&... args)
     {
         static_assert (!are_any_of_type_v<traits_enum_t::reference, Args...>,
-                "References are not a 'C' concept!");
+                "references are not a 'C' concept!");
         static_assert (!are_any_of_type_v<traits_enum_t::class_type, Args...>,
-                "Class instances are not allowed as C function arguments!");
+                "class instances are not allowed as C function arguments!");
 
         loader_type loader (path);
 
@@ -285,10 +288,10 @@ public:
 
         for (auto& pair : _M_gPluginMap)
         {
-            if (std::strcmp(pair.second.second.provides, plugin->provides) == 0) return false;
+            if (std::strcmp (pair.second.second.provides, plugin->provides) == 0) return false;
         }
 
-        _M_gPluginMap.emplace (path, std::make_pair (std::move (loader), std::move(*plugin)));
+        _M_gPluginMap.emplace (path, std::make_pair (std::move (loader), std::move (*plugin)));
         return true;
     }
 

@@ -51,7 +51,7 @@ elseif(WIN64)
 endif()
 
 project("C++ Unified Abstraction Library" VERSION 1.0.5)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_AUTOUIC OFF)
@@ -120,9 +120,10 @@ link_directories(
     ${PHOENIX_LIBRARIES_DIR}
     )
 
+if(SOCKETS_FOUND)
 
 ### compile libraries
-
+### device compute, memory (Vulkan, OpenCL, Serial)
 set(CPPUAL_ENDOSKELETON_HEADERS
     "include/cppual/functional.h"
     "include/cppual/iterators/tuple_iterator.h"
@@ -138,6 +139,7 @@ set(CPPUAL_ENDOSKELETON_HEADERS
     "include/cppual/error.h"
     "include/cppual/common.h"
     "include/cppual/containers.h"
+    "include/cppual/array_map.h"
     "include/cppual/string.h"
     "include/cppual/rope.h"
     "include/cppual/string_helper.h"
@@ -165,7 +167,8 @@ set(CPPUAL_ENDOSKELETON_HEADERS
     "include/cppual/resource.h"
     "include/cppual/bigint.h"
     "include/cppual/byte.h"
-    "include/cppual/unbound_interface.h"
+    "include/cppual/interfaces/unbound_interface.h"
+    "include/cppual/interfaces/layers.h"
     "include/cppual/forward.h"
     "include/cppual/memory/allocator.h"
     "include/cppual/memory/mop.h"
@@ -175,6 +178,19 @@ set(CPPUAL_ENDOSKELETON_HEADERS
     "include/cppual/memory/page.h"
     "include/cppual/memory/shared.h"
     "include/cppual/abi.h"
+    "include/cppual/compute/bridge.h"
+    "include/cppual/compute/behaviour.h"
+    "include/cppual/compute/object.h"
+    "include/cppual/compute/backend_iface.h"
+    #"include/cppual/compute/platform.h"
+    "include/cppual/compute/program.h"
+    "include/cppual/compute/device.h"
+    "include/cppual/compute/devmemory.h"
+    "include/cppual/compute/devtask.h"
+    "include/cppual/compute/pll_ops.h"
+    "include/cppual/compute/task.h"
+    "include/cppual/compute/thread.h"
+
     "src/memory/os/linux.h"
     "src/memory/os/win.h"
     "src/memory/os/mac.h"
@@ -191,7 +207,8 @@ add_library(cppual-endoskeleton SHARED
     "src/process/interprocess.cpp"
     "src/process/plugin.cpp"
     "src/system/sysinfo.cpp"
-    "src/unbound_interface.cpp"
+    "src/interfaces/unbound_interface.cpp"
+    "src/interfaces/layers.cpp"
     "src/memory/allocator.cpp"
     "src/memory/stacked.cpp"
     "src/memory/pool.cpp"
@@ -199,6 +216,17 @@ add_library(cppual-endoskeleton SHARED
     "src/memory/shared.cpp"
     "src/memory/page.cpp"
     "src/memory/shared.cpp"
+    "src/compute/bridge.cpp"
+    "src/compute/behaviour.cpp"
+    "src/compute/object.cpp"
+    "src/compute/backend_iface.cpp"
+    "src/compute/program.cpp"
+    "src/compute/device.cpp"
+    "src/compute/devmemory.cpp"
+    "src/compute/devtask.cpp"
+    "src/compute/task.cpp"
+    "src/compute/thread.cpp"
+    "src/compute/unbound_matrix.cpp"
 
     "include/cppual/decl"
     "include/cppual/types"
@@ -218,6 +246,7 @@ add_library(cppual-endoskeleton SHARED
     "include/cppual/forward"
     "include/cppual/iterator"
     "include/cppual/containers"
+    "include/cppual/array_map"
     "include/cppual/string"
     "include/cppual/bitflags"
     "include/cppual/functional"
@@ -226,13 +255,19 @@ add_library(cppual-endoskeleton SHARED
     "include/cppual/exception"
     "include/cppual/reactive"
     "include/cppual/byte"
+    "include/cppual/interface"
     "include/cppual/unbound_matrix"
-    "include/cppual/unbound_interface"
     "include/cppual/memory_resource"
+    "include/cppual/memory_allocator"
     "include/cppual/shared_memory"
+    "include/cppual/parallelism"
+    "include/cppual/thread"
+    "include/cppual/mutex"
     )
 target_compile_definitions(cppual-endoskeleton PRIVATE -DAPI_EXPORT)
 target_precompile_headers(cppual-endoskeleton PRIVATE ${CPPUAL_ENDOSKELETON_HEADERS})
+
+endif ()
 
 # memory management
 set(CPPUAL_MEMORY_SYSTEM_HEADERS
@@ -250,45 +285,6 @@ target_precompile_headers(cppual-memory-system PRIVATE ${CPPUAL_MEMORY_SYSTEM_HE
 #if (NOT ANDROID)
 #    target_compile_definitions(cppual-memory-system PRIVATE -DCPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY)
 #endif()
-
-# device compute, memory (Vulkan, OpenCL, Serial)
-set(CPPUAL_COMPUTE_HEADERS
-    "include/cppual/compute/bridge.h"
-    "include/cppual/compute/behaviour.h"
-    "include/cppual/compute/object.h"
-    "include/cppual/compute/backend_iface.h"
-    #"include/cppual/compute/platform.h"
-    "include/cppual/compute/program.h"
-    "include/cppual/compute/device.h"
-    "include/cppual/compute/devmemory.h"
-    "include/cppual/compute/devtask.h"
-    "include/cppual/compute/pll_ops.h"
-    "include/cppual/compute/task.h"
-    "include/cppual/compute/thread.h"
-    )
-
-if(SOCKETS_FOUND)
-
-add_library(cppual-compute SHARED
-    "src/compute/bridge.cpp"
-    "src/compute/behaviour.cpp"
-    "src/compute/object.cpp"
-    "src/compute/backend_iface.cpp"
-    "src/compute/program.cpp"
-    "src/compute/device.cpp"
-    "src/compute/devmemory.cpp"
-    "src/compute/devtask.cpp"
-    "src/compute/task.cpp"
-    "src/compute/thread.cpp"
-
-    "include/cppual/parallelism"
-    "include/cppual/thread"
-    "include/cppual/mutex"
-    )
-target_compile_definitions(cppual-compute PRIVATE -DAPI_EXPORT)
-target_precompile_headers(cppual-compute PRIVATE ${CPPUAL_COMPUTE_HEADERS})
-
-endif()
 
 set(CPPUAL_FS_HEADERS
     "include/cppual/filesystem/file.h"
@@ -696,7 +692,7 @@ endif()
 set(CPPUAL_VIDEO_COMPUTE_HEADERS
     )
 
-if(TARGET cppual-compute)
+if(TARGET cppual-endoskeleton)
 
 add_library(cppual-video-plugin-compute MODULE
     "src/multimedia/video/backend/compute_video.cpp"
@@ -1118,10 +1114,9 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 #    target_link_libraries(cppual-ui-android cppual-endoskeleton WM::Library)
 endif()
 
-target_link_libraries(cppual-endoskeleton DL::Library RT::Library)
-
 if(SOCKETS_FOUND)
-target_link_libraries(cppual-compute cppual-endoskeleton Sockets::Library)
+
+target_link_libraries(cppual-endoskeleton DL::Library RT::Library Sockets::Library)
 target_link_libraries(cppual-network cppual-endoskeleton Sockets::Library)
 
 endif()
@@ -1130,18 +1125,16 @@ endif()
 target_link_libraries(cppual-dom cppual-endoskeleton)
 target_link_libraries(cppual-json cppual-endoskeleton)
 
-if(TARGET cppual-compute)
-
-target_link_libraries(cppual-video-plugin-compute cppual-compute)
-
+if(TARGET cppual-endoskeleton)
+    target_link_libraries(cppual-video-plugin-compute cppual-endoskeleton)
 endif()
 
-if(TARGET cppual-compute AND OPENCL_FOUND)
-    target_link_libraries(cppual-compute-plugin-opencl cppual-compute cppual-endoskeleton OpenCL::Library)
+if(TARGET cppual-endoskeleton AND OPENCL_FOUND)
+    target_link_libraries(cppual-compute-plugin-opencl cppual-endoskeleton OpenCL::Library)
 endif()
 
-if(TARGET cppual-compute AND VULKAN_FOUND)
-    target_link_libraries(cppual-compute-plugin-vulkan cppual-compute cppual-endoskeleton Vulkan::Library)
+if(TARGET cppual-endoskeleton AND VULKAN_FOUND)
+    target_link_libraries(cppual-compute-plugin-vulkan cppual-endoskeleton Vulkan::Library)
 endif()
 
 
@@ -1157,12 +1150,12 @@ if(OPENAL_FOUND)
 endif()
 
 
-if(TARGET cppual-audio AND TARGET cppual-compute)
+if(TARGET cppual-audio AND TARGET cppual-endoskeleton)
 
     if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND PulseAudio_FOUND)
-        target_link_libraries(cppual-audio-plugin-compute cppual-audio cppual-compute PulseAudio::Library)
+        target_link_libraries(cppual-audio-plugin-compute cppual-audio cppual-endoskeleton PulseAudio::Library)
     elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-        target_link_libraries(cppual-audio-plugin-compute cppual-audio cppual-compute)
+        target_link_libraries(cppual-audio-plugin-compute cppual-audio cppual-endoskeleton)
     endif()
 
 endif()

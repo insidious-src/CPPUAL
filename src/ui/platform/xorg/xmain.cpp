@@ -63,7 +63,7 @@ using cppual::ui::platform::xcb_factory;
 using cppual::process::plugin_vars     ;
 using cppual::memory::memory_resource  ;
 using cppual::memory::stacked_resource ;
-using cppual::memory::allocate_shared  ;
+using std::allocate_shared  ;
 
 extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
 {
@@ -77,7 +77,7 @@ extern "C" plugin_vars* plugin_main (memory_resource* /*rc*/)
     plugin.verMajor = 1                ;
     plugin.verMinor = 0                ;
 
-    plugin.iface    = allocate_shared<void, xcb_factory> (&static_resource);
+    plugin.iface    = allocate_shared<void, xcb_factory> (static_resource);
 
     return &plugin;
 }

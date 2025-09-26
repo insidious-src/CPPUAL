@@ -23,10 +23,10 @@
 #define CPPUAL_MEMORY_SHARED_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/resource.h>
-#include <cppual/containers.h>
-#include <cppual/noncopyable.h>
+#include <cppual/types>
+#include <cppual/resource>
+#include <cppual/containers>
+#include <cppual/noncopyable>
 
 //#include <memory>
 
@@ -77,10 +77,10 @@ public:
     { }
 
 private:
-    string     _M_gName ;
-    mode_type  _M_eMode ;
-    state_type _M_eState;
-    int        _M_nId   ;
+    string_type _M_gName ;
+    mode_type   _M_eMode ;
+    state_type  _M_eState;
+    int         _M_nId   ;
 };
 
 class SHARED_API shared_memory : public non_copyable

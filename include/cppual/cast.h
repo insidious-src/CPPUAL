@@ -45,7 +45,7 @@ union cast_union
 // =========================================================
 
 //! (non-consteval) non-const safe cast using union for same size types
-template <non_void_t Out, non_void_t In>
+template <non_void Out, non_void In>
 constexpr Out direct_cast (In val) noexcept
 {
     static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are NOT equal!");
@@ -53,7 +53,7 @@ constexpr Out direct_cast (In val) noexcept
 }
 
 //! (non-consteval) const safe cast using union for same size types
-template <non_void_t Out, non_void_t In>
+template <non_void Out, non_void In>
 constexpr Out const const_direct_cast (In const val) noexcept
 {
     static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are NOT equal!");
@@ -61,7 +61,7 @@ constexpr Out const const_direct_cast (In const val) noexcept
 }
 
 //! (non-consteval) non-const safe cast using union without type size check
-template <non_void_t Out, non_void_t In>
+template <non_void Out, non_void In>
 constexpr Out unsafe_direct_cast (In val) noexcept
 {
     return cast_union<Out, In> (val).out;

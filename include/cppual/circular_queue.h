@@ -23,8 +23,8 @@
 #define CPPUAL_CIRCULAR_QUEUE_H_
 #ifdef __cplusplus
 
-#include <cppual/type_meta.h>
-#include <cppual/noncopyable.h>
+#include <cppual/meta_type>
+#include <cppual/noncopyable>
 #include <cppual/memory_resource>
 #include <cppual/concepts>
 #include <cppual/iterator>
@@ -44,7 +44,7 @@ using memory::allocator_t;
 
 // ====================================================
 
-template <non_void_t  T,
+template <non_void  T,
           allocator_t A = memory::allocator<T>,
           bool   Atomic = false
           >
@@ -55,7 +55,7 @@ public:
     static_assert (std::is_move_assignable_v<T>   , "T is not move assignable!"   );
 
     typedef circular_queue<T, A, Atomic>            self_type             ;
-    typedef std::allocator_traits<A>                traits_type           ;
+    typedef memory::allocator_traits<T, A>          traits_type           ;
     typedef traits_type::allocator_type             allocator_type        ;
     typedef remove_cref_t<T>                        value_type            ;
     typedef value_type *                            pointer               ;
@@ -426,7 +426,7 @@ private:
 
 // ====================================================
 
-template <non_void_t T, allocator_t A, bool Atomic>
+template <non_void T, allocator_t A, bool Atomic>
 circular_queue<T, A, Atomic>::self_type&
 circular_queue<T, A, Atomic>::operator = (self_type const& gObj)
 {
@@ -462,7 +462,7 @@ circular_queue<T, A, Atomic>::operator = (self_type const& gObj)
     return *this;
 }
 
-template <non_void_t T, allocator_t A, bool Atomic>
+template <non_void T, allocator_t A, bool Atomic>
 void circular_queue<T, A, Atomic>::resize (size_type uNewCapacity)
 {
     if (capacity () >= uNewCapacity) return;
@@ -474,7 +474,7 @@ void circular_queue<T, A, Atomic>::resize (size_type uNewCapacity)
     swap (gObj);
 }
 
-template <non_void_t T, allocator_t A, bool Atomic>
+template <non_void T, allocator_t A, bool Atomic>
 void circular_queue<T, A, Atomic>::erase (const_iterator gIt)
 {
     if (empty () || gIt < cbegin () || cend () <= gIt)
@@ -505,7 +505,7 @@ void circular_queue<T, A, Atomic>::erase (const_iterator gIt)
     }
 }
 
-template <non_void_t T, allocator_t A, bool Atomic>
+template <non_void T, allocator_t A, bool Atomic>
 void circular_queue<T, A, Atomic>::dispose ()
 {
     if (!capacity ()) return;
