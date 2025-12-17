@@ -33,7 +33,7 @@ namespace cppual { namespace gfx {
  * rect coordinates
  */
 
-class gl_rectangle : public drawable2d_interface
+class gl_rectangle : public drawable_interface
 {
 public:
     void draw (transform2d const& transform_info);

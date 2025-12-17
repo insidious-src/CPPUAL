@@ -177,18 +177,18 @@ bool texture::load_texture_2d (cvoid*             pPixels,
 
 void texture::set_parameter (uint uName, int nParam) noexcept
 {
-    if (!handle ()) return;
+    if (!handle<::GLuint> ()) return;
 
     if (!GLStates::hasDirectAccess)
     {
         uint uBoundTex = 0;
 
         ::glGetIntegerv (GL_TEXTURE_BINDING_2D, reinterpret_cast<int*> (&uBoundTex));
-        ::glBindTexture (gl::Texture2D, handle ());
+        ::glBindTexture (gl::Texture2D, handle<::GLuint> ());
         ::glTexParameteri (gl::Texture2D, uName, nParam);
         ::glBindTexture (gl::Texture2D, uBoundTex);
     }
-    else ::glTextureParameteriEXT (handle (), gl::Texture2D, uName, nParam);
+    else ::glTextureParameteriEXT (handle<::GLuint> (), gl::Texture2D, uName, nParam);
 }
 
 void texture::bind (uint uTexId) noexcept
@@ -196,7 +196,7 @@ void texture::bind (uint uTexId) noexcept
     if (_M_gStates.test (texture::loaded))
     {
         ::glActiveTexture (GL_TEXTURE0 + uTexId);
-        ::glBindTexture   (gl::Texture2D, handle ());
+        ::glBindTexture   (gl::Texture2D, handle<::GLuint> ());
         ::glBindSampler   (uTexId, _M_uSampleId);
     }
 }

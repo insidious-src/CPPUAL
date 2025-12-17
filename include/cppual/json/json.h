@@ -412,7 +412,7 @@ CPPUAL_JSON_NAMESPACE_BEGIN
     instead of using \c size_t. Users may override the SizeType by defining
     \ref CPPUAL_JSON_NO_SIZETYPEDEFINE.
 */
-typedef unsigned SizeType;
+typedef std::size_t SizeType;
 CPPUAL_JSON_NAMESPACE_END
 #endif
 

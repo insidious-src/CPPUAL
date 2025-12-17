@@ -26,7 +26,11 @@
 #include <cppual/types.h>
 #include <cppual/noncopyable.h>
 
+// =========================================================
+
 namespace cppual::input {
+
+// =========================================================
 
 struct keyboard ;
 struct key_event;
@@ -60,7 +64,7 @@ struct keyboard
         scroll_lock
     };
 
-    enum Code
+    enum code
     {
         undefined_code = 0,
 
@@ -474,7 +478,7 @@ struct keyboard
         ScrollLock = (CodeScrollLock | 1 << 30)
     };
 
-    enum class modifier : u16
+    enum class modifier : u8
     {
         none  = 0,
         shift    ,
@@ -485,7 +489,7 @@ struct keyboard
 
     static bool is_key_pressed (int key_code);
     static bool is_lock_active (lock lock_state);
-    static bool is_connected  () noexcept;
+    static bool is_connected   () noexcept;
 };
 
 } // namespace Input

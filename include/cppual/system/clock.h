@@ -23,11 +23,11 @@
 #define CPPUAL_SYSTEM_CLOCK_H_
 #ifdef __cplusplus
 
-#include <cppual/type_meta.h>
+#include <cppual/meta_type>
 
 #include <chrono>
 
-namespace cppual { namespace clock {
+namespace cppual::clock {
 
 template <typename Clock = std::chrono::steady_clock,
           typename       = base_from_derived<Clock,
@@ -39,6 +39,7 @@ template <typename Clock = std::chrono::steady_clock,
 class timer
 {
 public:
+    typedef timer<Clock>               self_type ;
     typedef typename Clock::time_point time_point;
     typedef Clock                      clock_type;
 
@@ -65,6 +66,7 @@ template <typename Clock = std::chrono::steady_clock,
 class pausable_timer
 {
 public:
+    typedef pausable_timer<Clock>      self_type ;
     typedef typename Clock::time_point time_point;
     typedef Clock                      clock_type;
 
@@ -108,7 +110,7 @@ private:
     time_point _M_epoch, _M_pause;
 };
 
-} } // namespace Clock
+} //! namespace Clock
 
 #endif // __cplusplus
 #endif // CPPUAL_SYSTEM_CLOCK_H_

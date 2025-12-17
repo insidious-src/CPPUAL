@@ -152,21 +152,21 @@ sound_buffer::~sound_buffer () noexcept
 int sound_buffer::frequency () const noexcept
 {
     int nFreq = 0;
-    if (valid ()) ::alGetBufferi (handle (), al::frequency, &nFreq);
+    if (valid ()) ::alGetBufferi (handle<::ALuint> (), al::frequency, &nFreq);
     return nFreq;
 }
 
 int sound_buffer::size () const noexcept
 {
     int nSize = 0;
-    if (valid ()) ::alGetBufferi (handle (), al::size, &nSize);
+    if (valid ()) ::alGetBufferi (handle<::ALuint> (), al::size, &nSize);
     return nSize;
 }
 
 int sound_buffer::bits () const noexcept
 {
     int nBits = 0;
-    if (valid ()) ::alGetBufferi (handle (), al::bits, &nBits);
+    if (valid ()) ::alGetBufferi (handle<::ALuint> (), al::bits, &nBits);
     return nBits;
 }
 

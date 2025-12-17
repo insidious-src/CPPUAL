@@ -29,7 +29,7 @@
 
 namespace cppual {
 
-template <number_t T>
+template <number T>
 inline T round (T const& value) noexcept
 {
     return static_cast<T> (std::round (value));

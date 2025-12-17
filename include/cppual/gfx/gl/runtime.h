@@ -23,20 +23,23 @@
 #define CPPUAL_GFX_GL_RUNTIME_H_
 #ifdef __cplusplus
 
-#include <cppual/string.h>
-#include <cppual/resource.h>
-
-namespace cppual { namespace gfx { namespace gl {
+#include <cppual/resource>
+#include <cppual/string>
 
 // ====================================================
 
-enum class string_query : u8
+namespace cppual::gfx::gl {
+
+// ====================================================
+
+typedef enum class string_query : u8
 {
     renderer,
     vendor  ,
     version ,
     sl_version
-};
+}
+const const_string_query;
 
 // ====================================================
 
@@ -54,7 +57,9 @@ struct platform
 
 // ====================================================
 
-} } } // namespace GL
+} // namespace GL
+
+// ====================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_GL_RUNTIME_H_

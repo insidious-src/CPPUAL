@@ -21,6 +21,7 @@
 
 #include "egl_surface.h"
 
+#include <cppual/meta_string>
 #include <cppual/gfx/gl/gldef.h>
 
 #include <cstring>

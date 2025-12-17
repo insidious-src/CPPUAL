@@ -27,6 +27,10 @@ namespace cppual {
 
 // ====================================================
 
+struct empty_constructible { };
+
+// ====================================================
+
 struct non_constructible
 {
 private:
@@ -72,7 +76,7 @@ private:
 struct non_copyable
 {
 public:
-    consteval non_copyable () = default;
+    constexpr non_copyable () = default;
 
 private:
     non_copyable (non_copyable const&) = delete;
@@ -84,7 +88,7 @@ private:
 struct non_copyable_virtual
 {
 public:
-    consteval non_copyable_virtual () = default;
+    constexpr non_copyable_virtual () = default;
     constexpr virtual ~non_copyable_virtual () = default;
 
 private:
@@ -97,7 +101,7 @@ private:
 struct non_copyable_movable
 {
 public:
-    consteval non_copyable_movable () = default;
+    constexpr non_copyable_movable () = default;
 
 private:
     non_copyable_movable (non_copyable_movable &&) = delete;
@@ -111,7 +115,7 @@ private:
 struct non_copyable_movable_virtual
 {
 public:
-    consteval          non_copyable_movable_virtual () = default;
+    constexpr          non_copyable_movable_virtual () = default;
     constexpr virtual ~non_copyable_movable_virtual () = default;
 
 private:
@@ -126,7 +130,7 @@ private:
 struct non_copy_constructible
 {
 public:
-    consteval non_copy_constructible () = default;
+    constexpr non_copy_constructible () = default;
 
 private:
     non_copy_constructible (non_copy_constructible const&) = delete;
@@ -137,7 +141,7 @@ private:
 struct non_copy_constructible_virtual
 {
 public:
-    consteval non_copy_constructible_virtual () = default;
+    constexpr non_copy_constructible_virtual () = default;
     constexpr virtual ~non_copy_constructible_virtual () = default;
 
 private:
@@ -149,7 +153,7 @@ private:
 struct non_copy_assignable
 {
 public:
-    consteval non_copy_assignable () = default;
+    constexpr non_copy_assignable () = default;
 
 private:
     non_copy_assignable& operator = (non_copy_assignable const&) = delete;
@@ -160,7 +164,7 @@ private:
 struct non_copy_assignable_virtual
 {
 public:
-    consteval non_copy_assignable_virtual () = default;
+    constexpr non_copy_assignable_virtual () = default;
     constexpr virtual ~non_copy_assignable_virtual () = default;
 
 private:
@@ -172,7 +176,7 @@ private:
 struct non_move_constructible
 {
 public:
-    consteval non_move_constructible () = default;
+    constexpr non_move_constructible () = default;
 
 private:
     non_move_constructible (non_move_constructible&&) = delete;
@@ -183,7 +187,7 @@ private:
 struct non_move_constructible_virtual
 {
 public:
-    consteval non_move_constructible_virtual () = default;
+    constexpr non_move_constructible_virtual () = default;
     constexpr virtual ~non_move_constructible_virtual () = default;
 
 private:
@@ -195,7 +199,7 @@ private:
 struct non_move_assignable
 {
 public:
-    consteval non_move_assignable () = default;
+    constexpr non_move_assignable () = default;
 
 private:
     non_move_assignable& operator = (non_move_assignable&&) = delete;
@@ -206,7 +210,7 @@ private:
 struct non_move_assignable_virtual
 {
 public:
-    consteval non_move_assignable_virtual () = default;
+    constexpr non_move_assignable_virtual () = default;
     constexpr virtual ~non_move_assignable_virtual () = default;
 
 private:
@@ -218,7 +222,7 @@ private:
 struct non_copy_move_constructible
 {
 public:
-    consteval non_copy_move_constructible () = default;
+    constexpr non_copy_move_constructible () = default;
     constexpr non_copy_move_constructible& operator = (non_copy_move_constructible &&) = default;
     constexpr non_copy_move_constructible& operator = (non_copy_move_constructible const&) = default;
 
@@ -232,7 +236,7 @@ private:
 struct non_copy_move_constructible_virtual
 {
 public:
-    consteval non_copy_move_constructible_virtual () = default;
+    constexpr non_copy_move_constructible_virtual () = default;
     constexpr virtual ~non_copy_move_constructible_virtual () = default;
 
     constexpr non_copy_move_constructible_virtual& operator = (non_copy_move_constructible_virtual &&) = default;
@@ -248,7 +252,7 @@ private:
 struct non_copy_move_assignable
 {
 public:
-    consteval non_copy_move_assignable () = default;
+    constexpr non_copy_move_assignable () = default;
     non_copy_move_assignable (non_copy_move_assignable &&) = default;
     non_copy_move_assignable (non_copy_move_assignable const&) = default;
 
@@ -262,7 +266,7 @@ private:
 struct non_copy_move_assignable_virtual
 {
 public:
-    consteval non_copy_move_assignable_virtual () = default;
+    constexpr non_copy_move_assignable_virtual () = default;
     constexpr virtual ~non_copy_move_assignable_virtual () = default;
 
     constexpr non_copy_move_assignable_virtual (non_copy_move_assignable_virtual &&) = default;

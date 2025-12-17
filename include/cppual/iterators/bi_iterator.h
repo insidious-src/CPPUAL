@@ -34,10 +34,10 @@ namespace cppual {
 // ====================================================
 
 template <typename T>
-class bidirectional_iterator
+class bi_iterator
 {
 public:
-    typedef bidirectional_iterator<T>       self_type        ;
+    typedef bi_iterator<T>                  self_type        ;
     typedef std::remove_reference_t<T>      buf_type         ;
     typedef std::remove_const_t<buf_type>   buf_clean_type   ;
     typedef typename T::value_type          value_type       ;
@@ -54,33 +54,33 @@ public:
     typedef std::conditional_t<std::is_const_v<buf_type>, const_value, value_type> elem_type;
 
     template <typename U>
-    using self_type_t = bidirectional_iterator<U>;
+    using self_type_t = bi_iterator<U>;
 
     inline constexpr static const_size npos = const_size (-1);
 
-    friend class bidirectional_iterator<std::remove_const_t<buf_type> const>;
-    friend class bidirectional_iterator<std::remove_const_t<buf_type>>;
+    friend class bi_iterator<std::remove_const_t<buf_type> const>;
+    friend class bi_iterator<std::remove_const_t<buf_type>>;
 
     constexpr elem_type& operator *  () const { return  (get ()[_M_uPos]); }
     constexpr elem_type* operator -> () const { return &(get ()[_M_uPos]); }
 
-    constexpr bidirectional_iterator () noexcept = default;
+    constexpr bi_iterator () noexcept = default;
 
     constexpr
     explicit
-    bidirectional_iterator (buf_type& b, const_size p = const_size ()) noexcept
+    bi_iterator (buf_type& b, const_size p = const_size ()) noexcept
     : _M_pBuf (&b), _M_uPos (p)
     { }
 
     //! converting a const iterator to a non-const iterator
     constexpr
-    bidirectional_iterator (self_type_t<buf_type const> const& other) noexcept
+    bi_iterator (self_type_t<buf_type const> const& other) noexcept
     : _M_pBuf (const_cast<buf_type*> (other._M_pBuf)), _M_uPos (other._M_uPos)
     { }
 
     //! converting a non-const iterator to a const iterator
     constexpr
-    bidirectional_iterator (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
+    bi_iterator (self_type_t<std::remove_const_t<buf_type>> const& other) noexcept
     : _M_pBuf (other._M_pBuf), _M_uPos (other._M_uPos)
     { }
 

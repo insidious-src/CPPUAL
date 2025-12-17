@@ -23,18 +23,18 @@
 #define CPPUAL_PROCESS_DETAILS
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
+#include <cppual/decl>
 
 #ifdef OS_STD_POSIX
 #   include <pthread.h>
 #   include <unistd.h>
 //#   include <errno.h>
-#   include <signal.h>
+//#   include <signal.h>
 #elif defined (OS_WINDOWS)
 #   include <windows.h>
 #endif
 
-namespace cppual { namespace process {
+namespace cppual::process {
 
 #ifdef OS_STD_POSIX
 typedef pid_t  process_handle;
@@ -42,18 +42,16 @@ typedef pid_t  process_handle;
 typedef HANDLE process_handle;
 #endif
 
-} // Process
+} //! namespace process
 
-namespace compute {
+namespace cppual::compute {
 
 #ifdef OS_STD_POSIX
 typedef pthread_t       thread_handle;
-typedef pthread_mutex_t mutex_object;
-//typedef pid_t           process_handle;
+typedef pthread_mutex_t mutex_object ;
 #elif defined (OS_WINDOWS)
 typedef DWORD  thread_handle;
-typedef HANDLE mutex_object;
-//typedef HANDLE process_handle;
+typedef HANDLE mutex_object ;
 #endif
 
 struct task_traits final
@@ -62,11 +60,11 @@ struct task_traits final
     HANDLE          _M_pEvent;
 #elif defined (OS_STD_POSIX)
     pthread_cond_t  _M_gReady;
-    pthread_mutex_t _M_gLock;
+    pthread_mutex_t _M_gLock ;
 #endif
 };
 
-} } // namespace Compute
+} //! namespace compute
 
 #endif // __cplusplus
 #endif // CPPUAL_PROCESS_DETAILS

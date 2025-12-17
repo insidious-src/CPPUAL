@@ -25,7 +25,11 @@
 #include <cassert>
 #include <iostream>
 
-namespace cppual { namespace memory {
+// =========================================================
+
+namespace cppual::memory {
+
+// =========================================================
 
 uniform_pool_resource::uniform_pool_resource (size_type  uBlkCount,
                                               size_type  uBlkSize,
@@ -70,8 +74,8 @@ uniform_pool_resource::uniform_pool_resource (memory_resource& pOwner,
                                               size_type        uBlkSize,
                                               align_type       uBlkAlign)
 : _M_gOwner (uBlkCount && uBlkSize ?
-                 (uBlkCount * uBlkSize + max_adjust) > pOwner.max_size () ?
-                     (uBlkCount * uBlkSize + max_adjust) > get_default_resource().max_size () ?
+            (uBlkCount * uBlkSize + max_adjust) > pOwner.max_size () ?
+            (uBlkCount * uBlkSize + max_adjust) > get_default_resource().max_size () ?
                          new_delete_resource () : get_default_resource () : pOwner : *this),
   _M_pBegin (uBlkCount && uBlkSize ?
                  _M_gOwner.allocate (uBlkCount * uBlkSize + max_adjust, uBlkAlign) : nullptr),
@@ -106,7 +110,7 @@ void uniform_pool_resource::initialize () noexcept
         auto uAdjust = align_adjust (_M_pBegin, _M_uBlkAlign);
 
         auto p = _M_pFreeList =
-                 reinterpret_cast<pointer*> (static_cast<math_pointer> (_M_pBegin) + uAdjust);
+                 direct_cast<pointer*> (static_cast<math_pointer> (_M_pBegin) + uAdjust);
 
         auto const uSize = static_cast<size_type> (static_cast<math_pointer> (_M_pEnd) -
                                                    static_cast<math_pointer> (_M_pBegin));
@@ -153,8 +157,12 @@ void uniform_pool_resource::do_deallocate (void* p, size_type uSize, align_type 
 
 void uniform_pool_resource::clear () noexcept
 {
-    _M_pFreeList = reinterpret_cast<pointer*> (static_cast<math_pointer> (_M_pBegin) +
-                                               align_adjust (_M_pBegin, _M_uBlkAlign));
+    _M_pFreeList = direct_cast<pointer*> (static_cast<math_pointer> (_M_pBegin) +
+                                          align_adjust (_M_pBegin, _M_uBlkAlign));
 }
 
-} } // namespace Memory
+// =========================================================
+
+} // namespace Memory
+
+// =========================================================

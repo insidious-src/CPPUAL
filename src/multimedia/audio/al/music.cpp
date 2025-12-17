@@ -38,13 +38,13 @@ inline void make_player (uint uId) noexcept
 sound_player::sound_player () noexcept
 : sound_source ()
 {
-    if (valid ()) make_player (handle ());
+    if (valid ()) make_player (handle<::ALuint> ());
 }
 
 sound_player::sound_player (sound_buffer& gBuffer) noexcept
 : sound_source (gBuffer)
 {
-    if (valid ()) make_player (handle ());
+    if (valid ()) make_player (handle<::ALuint> ());
 }
 
 } } } // namespace Audio

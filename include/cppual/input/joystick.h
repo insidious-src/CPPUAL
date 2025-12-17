@@ -28,6 +28,8 @@
 #include <cppual/noncopyable.h>
 #include <cppual/string.h>
 
+// =========================================================
+
 namespace cppual::input {
 
 // =========================================================
@@ -74,7 +76,7 @@ struct joystick : non_copyable_virtual
     {
         track_pad,
         track_ball,
-        touch
+        touch_screen
     };
 
     virtual string    model_name () const = 0;

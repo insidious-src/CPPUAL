@@ -43,7 +43,7 @@ private:
     manager_type   mgr    ;
     shared_factory factory;
 
-    inline static cchar* plugin_name () noexcept
+    consteval static cchar* plugin_name () noexcept
     {
     #   if defined OS_GNU_LINUX || defined OS_BSD || defined OS_ANDROID
         //return "libcppual-gfx-plugin-glx";
@@ -54,12 +54,12 @@ private:
     }
 
 public:
-    initializer ()
+    constexpr initializer ()
     {
         if (mgr.load_plugin (plugin_name ())) factory = mgr.plugin (plugin_name ()).iface ();
     }
 
-    inline operator shared_factory () const
+    constexpr operator shared_factory () const
     {
         return factory;
     }
@@ -67,13 +67,13 @@ public:
 
 // ====================================================
 
-inline static shared_factory plugin_instance ()
+constexpr static shared_factory plugin_instance ()
 {
     static auto inst = initializer ();
     return inst;
 }
 
-inline context_interface*& current () noexcept
+constexpr context_interface*& current () noexcept
 {
     static thread_local context_interface* current_dc = nullptr;
     return current_dc;

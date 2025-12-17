@@ -25,9 +25,12 @@
 
 #include <cppual/memory_allocator>
 #include <cppual/shared_memory>
-#include <cppual/string>
 
-namespace cppual { namespace memory {
+// =========================================================
+
+namespace cppual::memory {
+
+// =========================================================
 
 class SHARED_API heap_resource final : public memory_resource
 {
@@ -119,7 +122,9 @@ private:
 
 // =========================================================
 
-} } // namespace Memory
+} // namespace Memory
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_MEMORY_HEAP_ALLOCATOR_H_

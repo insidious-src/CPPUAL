@@ -20,7 +20,7 @@
  */
 
 #include <cppual/process/plugin.h>
-#include <cppual/types.h>
+#include <cppual/types>
 
 #include <functional>
 #include <iostream>
@@ -38,45 +38,45 @@ namespace cppual { namespace process {
 
 namespace { // optimize for internal unit usage
 
-inline static dyn_loader::string_type ext() noexcept
+inline static dyn_loader::string_view ext () noexcept
 {
 #   if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
     return ".so";
-#   elif defined (OS_STD_MAC)
+#   elif defined (OS_STD_MAC) || defined (OS_IOS)
     return ".dylib";
 #   elif defined (OS_WINDOWS)
     return ".dll";
 #   else
-    return dyn_loader::string_type();
+    return dyn_loader::string_view ();
 #   endif
 }
 
 inline static dyn_loader::string_type format (dyn_loader::string_type const& path) noexcept
 {
-    static const auto _ext = ext();
+    static const auto _ext = ext ();
 
-    const auto pos = path.rfind(_ext);
+    const auto pos = path.rfind (_ext);
 
-    return pos == dyn_loader::string_type::npos ? path + _ext : path;
+    return pos == dyn_loader::string_type::npos ? path + _ext.data () : path;
 }
 
 } // anonymous namespace
 
 // =========================================================
 
-dyn_loader::dyn_loader (string_type   strPath,
-                        bool          bAttach,
-                        resolve_policy eResolve) noexcept
+dyn_loader::dyn_loader (string_view const& strPath,
+                        bool               bAttach,
+                        resolve_policy     eResolve) noexcept
 : _M_pHandle  (),
-  _M_gLibPath (format(strPath)),
+  _M_gLibPath (format (strPath.data ())),
   _M_eResolve (eResolve)
 {
     if (bAttach) attach ();
 }
 
-dyn_loader::string_type dyn_loader::extension () noexcept
+dyn_loader::string_view dyn_loader::extension () noexcept
 {
-    return ext();
+    return ext ();
 }
 
 dyn_loader::dyn_loader (dyn_loader&& obj) noexcept

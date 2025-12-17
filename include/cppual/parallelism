@@ -19,6 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cppual/compute/cv.h>
+#include <cppual/compute/mutex.h>
+#include <cppual/compute/thread.h>
 #include <cppual/compute/object.h>
 #include <cppual/compute/program.h>
 #include <cppual/compute/device.h>

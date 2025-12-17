@@ -97,12 +97,12 @@ void transport_socket::set_blocking (bool bBlock) noexcept
     if (valid ())
     {
 #       ifdef OS_STD_UNIX
-        socket_flags status_flags = ::fcntl (handle (), F_GETFL);
+        socket_flags status_flags = ::fcntl (handle<int> (), F_GETFL);
 
         if (bBlock) status_flags -= socket_flag::non_blocking;
         else        status_flags += socket_flag::non_blocking;
 
-        ::fcntl (handle (), F_SETFL, status_flags.value ());
+        ::fcntl (handle<int> (), F_SETFL, status_flags.value ());
 #       endif
     }
 }
@@ -112,7 +112,7 @@ bool transport_socket::is_blocking () const noexcept
     if (valid ())
     {
 #       ifdef OS_STD_UNIX
-        socket_flags status_flags = ::fcntl (handle (), F_GETFL);
+        socket_flags status_flags = ::fcntl (handle<int> (), F_GETFL);
 
         return !status_flags.test (socket_flag::non_blocking);
 #       endif
@@ -137,12 +137,12 @@ void transport_socket::replace_from_id (socket_id nId) noexcept
 void transport_socket::close () noexcept
 {
 #   ifdef OS_STD_UNIX
-    if (valid ()) ::close (handle ());
+    if (valid ()) ::close (handle<int> ());
 #   elif defined OS_WINDOWS
-    if (valid ()) ::closesocket (handle ());
+    if (valid ()) ::closesocket (handle<int> ());
 #   endif
 
-    set_handle (null_value);
+    set_handle (npos);
 }
 
 void transport_socket::init_socket () noexcept
@@ -155,7 +155,7 @@ void transport_socket::init_socket () noexcept
         {
 #           ifdef OS_STD_UNIX
             /// Disable the Nagle algorithm (ie. removes buffering of TCP packets)
-            if (::setsockopt (handle (),
+            if (::setsockopt (handle<int> (),
                               IPPROTO_TCP,
                               int(socket_flag::no_delay),
                               reinterpret_cast<char*> (&yes),
@@ -166,7 +166,7 @@ void transport_socket::init_socket () noexcept
             }
 #           elif defined OS_MACX
             /// On Mac OS X, disable the SIGPIPE signal on disconnection
-            if (::setsockopt (handle (),
+            if (::setsockopt (handle<int> (),
                               SOL_SOCKET,
                               int(socket_flag::no_sig_pipe),
                               reinterpret_cast<char*>(&yes),
@@ -177,7 +177,7 @@ void transport_socket::init_socket () noexcept
         else
         {
             /// Enable broadcast by default for UDP sockets
-            if (::setsockopt (handle (),
+            if (::setsockopt (handle<int> (),
                               SOL_SOCKET,
                               int(socket_flag::broadcast),
                               reinterpret_cast<char*> (&yes),

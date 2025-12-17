@@ -22,6 +22,7 @@
 #include <cppual/process/process_model.h>
 
 #include <cstdlib>
+#include <csignal>
 #include <stdexcept>
 
 #ifdef OS_STD_POSIX

@@ -23,24 +23,29 @@
 #define CPPUAL_CONCURENCY_MUTEX_H_
 #ifdef __cplusplus
 
+#include <cppual/concepts>
 #include <cppual/compute/cv.h>
 
 #include <atomic>
 
-namespace cppual { namespace compute {
+// ====================================================
+
+namespace cppual::compute {
 
 // ====================================================
 
 struct defer_lock { };
 
-template <class T>
+template <struct_or_class T>
 class unique_lock final
 {
 private:
-    //T& _M_gMutex;
+    T& _M_gMutex;
 };
 
-template <class T>
+// ====================================================
+
+template <struct_or_class T>
 class shared_lock final
 {
 public:
@@ -48,7 +53,7 @@ public:
 
 private:
     atomic_size _M_uLockCount;
-    //T&          _M_mutex;
+    T&          _M_mutex     ;
 };
 
 // ====================================================
@@ -61,18 +66,21 @@ public:
     typedef std::atomic<thread::id> atomic_id;
 
     mutex ();
-    bool tryLock () noexcept;
-    bool tryLockFor (uint millisec);
+    bool try_lock () noexcept;
+    bool try_lock_for (uint millisec);
     void lock ();
     void unlock ();
 
 private:
-    condition_variable _M_gCond;
+    condition_variable _M_gCond ;
     atomic_id          _M_gOwner;
 };
 
+// ====================================================
 
-} } // Concurency
+} // compute
+
+// ====================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_CONCURENCY_MUTEX_H_

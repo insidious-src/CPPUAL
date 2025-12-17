@@ -518,10 +518,10 @@ public:
         return static_cast<ui::xcb_display&> (*conn).prev_atoms ();
     }
 
-    void handle_secret_xlib_event (x::legacy_type* dpy, base_type* ev)
+    void handle_secret_xlib_event (x::legacy_type dpy, base_type* ev)
     {
         auto const response_type = ev->response_type & ~0x80;
-        Bool (* proc)(x::legacy_type*, ::XEvent*, ::xEvent*);
+        Bool (* proc)(x::legacy_type, ::XEvent*, ::xEvent*);
 
         ::XLockDisplay (dpy);
 

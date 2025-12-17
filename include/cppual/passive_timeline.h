@@ -23,7 +23,7 @@
 #define CPPUAL_UTILITY_TIMELINE_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
+#include <cppual/types>
 #include <cppual/system/clock.h>
 
 #include <atomic>
@@ -35,15 +35,12 @@ using namespace std::chrono_literals;
 class pasive_timeline
 {
 public:
-    typedef std::chrono::steady_clock         clock_type  ;
-    typedef clock::pausable_timer<clock_type> timer_type  ;
-    typedef std::chrono::milliseconds::rep    rep         ;
-    typedef std::chrono::milliseconds         duration    ;
-    typedef u16                               count_type  ;
-    typedef float                             ratio_type  ;
-    typedef std::uint_fast8_t                 state_type  ;
-    typedef std::atomic<ratio_type>           atomic_ratio;
-    typedef std::atomic<state_type>           atomic_state;
+    typedef std::chrono::steady_clock         clock_type;
+    typedef clock::pausable_timer<clock_type> timer_type;
+    typedef std::chrono::milliseconds::rep    rep       ;
+    typedef std::chrono::milliseconds         duration  ;
+    typedef u16                               count_type;
+    typedef float                             ratio_type;
 
     constexpr static cfloat instant        = 10.0f;
     constexpr static cfloat very_fast      =  5.0f;
@@ -59,12 +56,16 @@ public:
         infinite = 0,
     };
 
-    enum
+    typedef enum state_type
     {
         inactive,
         active  ,
         paused
-    };
+    }
+    const const_state;
+
+    typedef std::atomic<ratio_type> atomic_ratio;
+    typedef std::atomic<state_type> atomic_state;
 
     pasive_timeline (duration length, ratio_type speed = normal) noexcept
     : _M_length     (length),

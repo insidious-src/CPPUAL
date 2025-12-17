@@ -33,7 +33,7 @@ namespace cppual { namespace gfx { namespace gl {
  * rect coordinates
  */
 
-class line : public drawable2d_interface
+class line : public drawable_interface
 {
 public:
     void draw (transform const& transform_info);
@@ -84,7 +84,7 @@ private:
  * rect coordinates
  */
 
-class path : public drawable2d_interface
+class path : public drawable_interface
 {
 public:
     void draw (transform const& transform_info);

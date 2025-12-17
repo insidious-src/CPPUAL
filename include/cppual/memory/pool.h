@@ -28,7 +28,9 @@
 
 #include <cppual/memory/mop.h>
 
-namespace cppual { namespace memory {
+// =========================================================
+
+namespace cppual::memory {
 
 // =========================================================
 
@@ -38,25 +40,25 @@ public:
     /// local memory
     uniform_pool_resource (size_type  blk_count,
                            size_type  blk_size,
-                           align_type blk_align = alignof (uptr));
+                           align_type blk_align = max_align);
 
     /// local memory from allocated buffer (stack or heap)
     uniform_pool_resource (pointer    buffer,
                            size_type  blk_count,
                            size_type  blk_size,
-                           align_type blk_align = alignof (uptr));
+                           align_type blk_align = max_align);
 
     /// nested allocators
-    uniform_pool_resource (memory_resource& allocator,
+    uniform_pool_resource (memory_resource& rc,
                            size_type        blk_count,
                            size_type        blk_size,
-                           align_type       blk_align = alignof (uptr));
+                           align_type       blk_align = max_align);
 
     /// shared memory
     uniform_pool_resource (shared_memory& shared_obj,
                            size_type      blk_count,
                            size_type      blk_size,
-                           align_type     blk_align = alignof (uptr));
+                           align_type     blk_align = max_align);
 
     ~uniform_pool_resource ();
     void clear () noexcept;
@@ -72,8 +74,8 @@ public:
 
     constexpr size_type capacity () const noexcept
     {
-        return static_cast<size_type> (static_cast<math_pointer> (_M_pEnd  ) -
-                                      (static_cast<math_pointer> (_M_pBegin) +
+        return static_cast<size_type> (static_cast<math_const_pointer> (_M_pEnd  ) -
+                                      (static_cast<math_const_pointer> (_M_pBegin) +
                                        align_adjust (_M_pBegin, _M_uBlkAlign)));
     }
 
@@ -84,7 +86,7 @@ public:
 private:
     void  initialize    () noexcept;
     void* do_allocate   (size_type size, align_type align);
-    void  do_deallocate (void* p, size_type size, align_type align);
+    void  do_deallocate (pointer p, size_type size, align_type align);
 
     constexpr bool do_is_equal (abs_base_type const& gObj) const noexcept
     { return this == &gObj; }
@@ -94,8 +96,8 @@ private:
     pointer const    _M_pBegin        ;
     pointer const    _M_pEnd          ;
     pointer*         _M_pFreeList     ;
-    size_type  const _M_uBlkSize      ;
-    align_type const _M_uBlkAlign     ;
+    const_size       _M_uBlkSize      ;
+    const_align      _M_uBlkAlign     ;
     size_type        _M_uBlkNum       ;
     size_type        _M_usedMemory    ;
     cbool            _M_bIsMemShared  ;
@@ -103,7 +105,9 @@ private:
 
 // =========================================================
 
-} } // namespace Memory
+} // namespace Memory
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_MEMORY_POOL_ALLOCATOR_H_

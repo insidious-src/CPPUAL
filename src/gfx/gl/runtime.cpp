@@ -21,14 +21,12 @@
 
 #include <cppual/gfx/gl/runtime.h>
 #include <cppual/gfx/gl/gldef.h>
-#include <cppual/containers.h>
+#include <cppual/containers>
 #include <cppual/gfx/draw.h>
 
 
-//#include <unordered_map>
 #include <algorithm>
 #include <stdexcept>
-//#include <vector>
 //#include <cmath>
 
 namespace cppual::gfx::gl {
@@ -36,7 +34,7 @@ namespace cppual::gfx::gl {
 namespace { /// optimize for internal usage
 
 typedef unordered_map<resource_version, resource_version> version_map  ;
-typedef dyn_array<string>                                    string_vector;
+typedef dyn_array<string>                                 string_vector;
 typedef std::size_t                                       size_type    ;
 
 constexpr GLenum query_to_gl_enum (string_query query) noexcept
@@ -46,7 +44,7 @@ constexpr GLenum query_to_gl_enum (string_query query) noexcept
            query == string_query::version  ? InfoVersion  : InfoSLVersion;
 }
 
-resource_version get_gl_version ()
+constexpr resource_version get_gl_version ()
 {
     auto major = ::GLint ();
     auto minor = ::GLint ();
@@ -57,7 +55,7 @@ resource_version get_gl_version ()
     return resource_version { major, minor };
 }
 
-version_map get_sl_versions ()
+constexpr version_map get_sl_versions ()
 {
     version_map slVersions;
 
@@ -79,7 +77,7 @@ version_map get_sl_versions ()
     return slVersions;
 }
 
-string_vector get_gl_extensions ()
+constexpr string_vector get_gl_extensions ()
 {
     GLint n = GLint ();
 
@@ -97,7 +95,7 @@ string_vector get_gl_extensions ()
     return extensions;
 }
 
-string_vector get_gl_labels ()
+constexpr string_vector get_gl_labels ()
 {
     string_vector labels;
 

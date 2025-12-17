@@ -23,7 +23,7 @@
 #define CPPUAL_SYS_INFO_H_
 #ifdef __cplusplus
 
-#include <cppual/string.h>
+#include <cppual/string>
 
 // =========================================================
 

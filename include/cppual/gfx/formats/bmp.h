@@ -40,13 +40,14 @@ namespace cppual {
 class bitmap_stream : public std::fstream
 {
 public:
+    typedef bitmap_stream               self_type ;
+    typedef std::fstream                base_type ;
     typedef std::size_t                 size_type ;
     typedef std::streamsize             streamsize;
     typedef gfx::rgb_color              rgb_type  ;
     typedef std::unique_ptr<rgb_type[]> pointer   ;
-    typedef std::fstream                base      ;
 
-    enum class bmp_type : u16
+    typedef enum class bmp_type : u16 // -- must be 2 bytes --
     {
         BM = 0x4D42, // Windows 3.1x, 95, NT, ... etc.
         BA = 0x4142, // OS/2 struct bitmap array
@@ -54,9 +55,10 @@ public:
         CP = 0x5043, // OS/2 const color pointer
         IC = 0x4349, // OS/2 struct icon
         PT = 0x5450  // OS/2 pointer
-    };
+    }
+    const const_bmp;
 
-    enum class compression_type : u32
+    typedef enum class compression_type : u32 // -- must be 4 bytes --
     {
         BI_RGB,
         BI_RLE8, // RLE 8-bit/pixel Can be used only with 8-bit/pixel bitmaps
@@ -72,7 +74,8 @@ public:
         BI_CMYK = 11, // only Windows Metafile CMYK
         BI_CMYKRLE8,  // RLE-8 only Windows Metafile CMYK
         BI_CMYKRLE4   // RLE-4 only Windows Metafile CMYK
-    };
+    }
+    const const_compression;
 
     struct PACKED bmp_header  // -- must be 14 bytes --
     {
@@ -116,8 +119,8 @@ public:
     ~bitmap_stream ();
 
 
-    bitmap_stream (cchar* path, bool create = false)
-    : base (path, in | out | binary),
+    inline bitmap_stream (cchar* path, bool create = false)
+    : base_type   (path, in | out | binary),
       _M_infoHeader { },
       _M_header     { }
     {
@@ -131,17 +134,17 @@ public:
         {
             off_type tmp_off = obj.tellg ();
 
-            reset_seek        ( );
-            obj.seekg         (0);
-            base::operator << (obj.rdbuf ());
-            obj.seekg         (tmp_off     );
-            _parse_header     ( );
+            reset_seek             ( );
+            obj.seekg              (0);
+            base_type::operator << (obj.rdbuf ());
+            obj.seekg              (tmp_off     );
+            _parse_header          ( );
         }
 
         return *this;
     }
 
-    bool valid () const noexcept
+    inline bool valid () const noexcept
     {
         return header ().type == bmp_type::BM             &&
                header ().offset                           >=
@@ -150,14 +153,14 @@ public:
                info   ().image_size_calc   ();
     }
 
-    void reset_seek ()
+    inline void reset_seek ()
     {
         seekg (0);
         seekp (0);
     }
 
-    bmp_header  const& header () const noexcept { return _M_header    ; }
-    info_header const& info   () const noexcept { return _M_infoHeader; }
+    inline bmp_header  const& header () const noexcept { return _M_header    ; }
+    inline info_header const& info   () const noexcept { return _M_infoHeader; }
 
     size_type replace (rgb_type const target_color, rgb_type const new_color);
 

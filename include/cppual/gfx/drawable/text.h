@@ -28,7 +28,7 @@
 
 namespace cppual { namespace gfx {
 
-class label2d final : public drawable2d_interface, public transformable2d_interface
+class label2d final : public drawable_interface, public transformable2d_interface
 {
 public:
     typedef font::styles styles     ;

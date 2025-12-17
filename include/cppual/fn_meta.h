@@ -43,7 +43,7 @@ namespace cppual {
 // ====================================================
 
 //! forward declarations
-template <pair_t P, std::size_t N>
+template <pair_like P, std::size_t N>
 struct consteval_bimap;
 
 // ====================================================
@@ -54,10 +54,10 @@ struct consteval_bimap;
 // ====================================================
 
 template <typename P, typename T, typename U>
-concept bimap_pair_t = non_void<T> && non_void<U> && std::same_as<P, std::pair<T, U>>;
+concept bimap_pair = non_void<T> && non_void<U> && std::same_as<P, std::pair<T, U>>;
 
 template <typename P, typename T, typename U>
-concept switch_map_pair_t = switch_value_t<T> && void_functional<U> && std::same_as<P, std::pair<T, U>>;
+concept switch_map_pair = switch_value<T> && void_functional<U> && std::same_as<P, std::pair<T, U>>;
 
 // =========================================================
 
@@ -78,25 +78,25 @@ consteval auto overload (R (* fn)(Args...)) noexcept -> decltype (fn)
 
 // ====================================================
 
-template <void_or_class_t C, typename S>
+template <void_or_class C, typename S>
 struct any_fn_type;
 
 template <class_t C, typename R, non_void... Args>
 struct any_fn_type <C, R(Args...)>
 {
-    typedef R(C::* type)(Args...);
+    using type = R(C::*)(Args...);
 };
 
 template <class_t C, typename R, non_void... Args>
 struct any_fn_type <C, R(Args...) const>
 {
-    typedef R(C::* type)(Args...) const;
+    using type = R(C::*)(Args...) const;
 };
 
 template <typename R, non_void... Args>
 struct any_fn_type <void, R(Args...)>
 {
-    typedef R(* type)(Args...);
+    using type = R(*)(Args...);
 };
 
 template <typename R, non_void... Args>
@@ -105,91 +105,43 @@ struct any_fn_type <void, R(Args...) const>
     static_assert (false, "CANNOT have const function pointer without class type!");
 };
 
-template <typename S>
-using any_fn_t = any_fn_type<void, S>::type;
-
-template <class_t C, typename S>
-using any_mem_fn_t = any_fn_type<C, S>::type;
-
-// =========================================================
-
-template <typename> struct remove_fn_const   ;
-template <typename> struct remove_fn_volatile;
-template <typename> struct remove_fn_cv      ;
-template <typename> struct add_fn_const      ;
-template <typename> struct add_fn_volatile   ;
-template <typename> struct add_fn_cv         ;
-
-template <typename R, typename... ArgTypes>
-struct remove_fn_const<R(ArgTypes...) const>  { using type = R(ArgTypes...); };
-
-template <typename R, typename... ArgTypes>
-struct add_fn_const<R(ArgTypes...)>  { using type = R(ArgTypes...) const; };
-
-template <typename R, typename... ArgTypes>
-struct remove_fn_volatile<R(ArgTypes...) volatile>  { using type = R(ArgTypes...); };
-
-template <typename R, typename... ArgTypes>
-struct add_fn_volatile<R(ArgTypes...)>  { using type = R(ArgTypes...) volatile; };
-
-template <typename R, typename... ArgTypes>
-struct remove_fn_cv<R(ArgTypes...) const volatile>  { using type = R(ArgTypes...); };
-
-template <typename R, typename... ArgTypes>
-struct add_fn_cv<R(ArgTypes...)>  { using type = R(ArgTypes...) const volatile; };
-
-template <typename S>
-using remove_fn_const_t = typename remove_fn_const<S>::type;
-
-template <typename S>
-using add_fn_const_t = typename add_fn_const<S>::type;
-
-template <typename S>
-using remove_fn_volatile_t = typename remove_fn_volatile<S>::type;
-
-template <typename S>
-using add_fn_volatile_t = typename add_fn_volatile<S>::type;
-
-template <typename S>
-using remove_fn_cv_t = typename remove_fn_cv<S>::type;
-
-template <typename S>
-using add_fn_cv_t = typename add_fn_cv<S>::type;
+template <void_or_class C, typename S>
+using any_fn_t = any_fn_type<C, S>::type;
 
 // =========================================================
 
 /**
  ** @arg_t is a single function argument that is memory compact.
- ** if the argument type is smaller than or equal to 4 bytes then it's passed as const value,
+ ** if the argument type is smaller than or equal to 4 bytes then it's passed as value,
  ** however if it's bigger than 4 bytes or is a class then it's passed as const reference
  **
  ** T and U are the same type except U has reference and const removed.
  **/
 template <typename T, typename U = remove_cref_t<T>>
-using arg_t = std::conditional_t<sizeof (U) <= arch_32_bits_v && !std::is_class_v<U>, U const, U const&>;
+using arg_t = std::conditional_t<sizeof (U) <= arch_32_bits_v && !std::is_class_v<U>, U, U const&>;
 
 // =========================================================
 
-template <typename T>
+template <typename T = void>
 struct var_type
 {
-    typedef std::remove_reference_t<T> value_type   ;
-    typedef value_type      *          pointer      ;
-    typedef value_type const*          const_pointer;
+    typedef remove_cref_t<T>  value_type   ;
+    typedef value_type      * pointer      ;
+    typedef value_type const* const_pointer;
 
     inline constexpr static pointer value = nullptr;
 };
 
-template <typename T>
-using type_t = var_type<T>::pointer;
+template <typename T = void>
+using type_ptr_t = var_type<T>::pointer;
 
-template <typename T>
-inline constexpr static type_t<T   > type      = var_type<T>::value   ;
-inline constexpr static type_t<void> default_v = var_type<void>::value;
+template <typename T = void>
+inline constexpr type_ptr_t<T   > type_v    = var_type<T   >::value;
+inline constexpr type_ptr_t<void> default_v = var_type<void>::value;
 
-template <typename T>
-inline constexpr static type_t<T   > ret         = type<T>  ;
-inline constexpr static type_t<void> default_ret = default_v;
+template <typename T = void>
+inline constexpr type_ptr_t<T   > ret         = type_v<T>;
+inline constexpr type_ptr_t<void> default_ret = default_v;
 
 // ====================================================
 
@@ -210,7 +162,7 @@ using tuple_repeat_t = typename tuple_repeat_helper<T, N>::type;
 
 // ====================================================
 
-template <switch_value_t K, non_void V, std::size_t N>
+template <switch_value K, non_void V, std::size_t N>
 struct consteval_bimap <std::pair<K, V>, N>
 {
 public:
@@ -230,7 +182,7 @@ public:
     typedef value_type &                          value_reference       ;
     typedef const_key  &                          key_const_reference   ;
     typedef const_value&                          value_const_reference ;
-    typedef pair_type*                            iterator              ;
+    typedef pair_type *                           iterator              ;
     typedef pair_type const*                      const_iterator        ;
     typedef std::reverse_iterator<iterator>       reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
@@ -239,9 +191,9 @@ public:
     consteval static size_type size () noexcept { return N; }
 
     static_assert (size () > 0, "consteval_bimap is empty!");
-    static_assert (non_convertible_t<key_type, value_type>, "key & value must NOT be of the same type!");
-    static_assert (copyable_movable_t<key_type> &&
-                   copyable_movable_t<value_type>, "key or/and value are NOT copyable & movable!");
+    static_assert (!std::same_as<key_type, value_type>, "key & value must NOT be of the same type!");
+    static_assert (copyable_movable<key_type  > &&
+                   copyable_movable<value_type>, "key or/and value are NOT copyable & movable!");
 
     inline constexpr static const_size npos = size_type (-1);
 
@@ -537,8 +489,8 @@ private:
 
 // ====================================================
 
-template <switch_value_t K = int, functional V = function<void()>, std::size_t N = 0, pair_t... Ps>
-requires (switch_map_pair_t<Ps, K, V> && ...)
+template <switch_value K = int, functional V = function<void()>, std::size_t N = 0, pair_like... Ps>
+requires (switch_map_pair<Ps, K, V> && ...)
 constexpr consteval_bimap<std::pair<K, V>, sizeof... (Ps)>
 make_switch_map (Ps&&... case_pairs) noexcept
 {
@@ -550,8 +502,8 @@ make_switch_map (Ps&&... case_pairs) noexcept
 
 // ====================================================
 
-template <non_void K, non_void V, std::size_t N = 0, pair_t... Ps>
-requires (bimap_pair_t<Ps, K, V> && ...)
+template <non_void K, non_void V, std::size_t N = 0, pair_like... Ps>
+requires (bimap_pair<Ps, K, V> && ...)
 constexpr consteval_bimap<std::pair<K, V>, sizeof... (Ps)>
 make_consteval_bimap (Ps&&... pairs) noexcept
 {

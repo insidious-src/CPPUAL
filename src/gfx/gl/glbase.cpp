@@ -25,11 +25,15 @@
 #include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/gldef.h>
 
+// ====================================================
+
 namespace cppual::gfx::gl {
+
+// ====================================================
 
 namespace { // optimize for internal unit usage
 
-inline ::GLuint generate_object (resource_type eType)
+constexpr ::GLuint generate_object (resource_type eType)
 {
     auto const pContext = context_interface::current ();
 
@@ -41,19 +45,19 @@ inline ::GLuint generate_object (resource_type eType)
     switch (eType)
     {
     case resource_type::buffer:
-        pContext->version () < 3 ?
-                    ::glGenBuffers (1, &uId) : ::glGenBuffersARB (1, &uId);
+        pContext->version () < 3 ? ::glGenBuffers    (1, &uId) :
+                                   ::glGenBuffersARB (1, &uId) ;
         break;
     case resource_type::macro:
-        glGenVertexArrays (1, &uId);
+        ::glGenVertexArrays (1, &uId);
         break;
     case resource_type::program:
-        uId = pContext->version () < 3 ?
-                  ::glCreateProgram () : ::glCreateProgramObjectARB ();
+        uId = pContext->version () < 3 ? ::glCreateProgram          () :
+                                         ::glCreateProgramObjectARB () ;
         break;
     case resource_type::query:
-        pContext->version () < 3 ?
-                    ::glGenQueries (1, &uId) : ::glGenQueriesARB (1, &uId);
+        pContext->version () < 3 ? ::glGenQueries    (1, &uId) :
+                                   ::glGenQueriesARB (1, &uId) ;
         break;
     case resource_type::texture:
         ::glGenTextures (1, &uId);
@@ -67,15 +71,15 @@ inline ::GLuint generate_object (resource_type eType)
     return uId;
 }
 
-inline ::GLuint generate_shader (::GLenum uType)
+constexpr ::GLuint generate_shader (::GLenum uType)
 {
     auto const pContext = context_interface::current ();
 
     if (!pContext || pContext->device () != device_backend::gl)
         throw bad_context ("NO GL context bound to thread!");
 
-    return pContext->version () < 3 ?
-               ::glCreateShader (uType) : ::glCreateShaderObjectARB (uType);
+    return pContext->version () < 3 ? ::glCreateShader          (uType) :
+                                      ::glCreateShaderObjectARB (uType) ;
 }
 
 constexpr static uint convert_shader_type (shader_type eType) noexcept
@@ -115,7 +119,7 @@ object::object (shader_type eShaderType)
 
 object::~object () noexcept
 {
-    auto const uId = handle ();
+    auto const uId = handle<::GLuint> ();
 
     if (uId)
     {

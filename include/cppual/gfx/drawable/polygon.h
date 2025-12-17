@@ -33,7 +33,7 @@ namespace cppual { namespace gfx {
  * rect coordinates
  */
 
-class gl_polygon : public drawable2d_interface
+class gl_polygon : public drawable_interface
 {
 public:
     typedef std::array<point2i, 3> polygon_array;

@@ -225,6 +225,8 @@ add_library(cppual-endoskeleton SHARED
     "src/compute/devmemory.cpp"
     "src/compute/devtask.cpp"
     "src/compute/task.cpp"
+    "src/compute/cv.cpp"
+    "src/compute/mutex.cpp"
     "src/compute/thread.cpp"
     "src/compute/unbound_matrix.cpp"
 

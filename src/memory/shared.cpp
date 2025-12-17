@@ -40,7 +40,11 @@
 #   include "os/ios.h"
 #endif
 
+// =========================================================
+
 namespace cppual::memory { namespace { /// optimized for internal usage
+
+// =========================================================
 
 #if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
 
@@ -57,21 +61,24 @@ constexpr int convert_mode (mode_type eMode) noexcept
 
 #endif
 
-} /// anonymous namespace
+} //! anonymous namespace
+
+// =========================================================
 
 shared_object::shared_object (string_type const& gName, mode_type eMode, state_type eState)
-: _M_gName  (gName),
-  _M_eMode  (eMode),
-  _M_eState (eState)
-#if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
-  , _M_nId  (::shm_open (gName.c_str (), convert_mode (eMode) | convert_state (eState), 0600u))
-#endif
+:
+  #if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
+  base_type (::shm_open (gName.c_str (), convert_mode (eMode) | convert_state (eState), 0600u))
+  #endif
+,  _M_gName  (gName )
+,  _M_eMode  (eMode )
+,  _M_eState (eState)
 { }
 
 shared_object::~shared_object () noexcept
 {
 #   if defined (OS_STD_UNIX) && !defined (OS_ANDROID)
-    if (_M_nId > -1) ::shm_unlink (_M_gName.c_str ());
+    if (valid ()) ::shm_unlink (_M_gName.c_str ());
 #   endif
 }
 
@@ -80,30 +87,33 @@ bool shared_object::truncate (size_type /*mem_size*/) noexcept
     return false;
 }
 
-shared_memory::shared_memory (object_type& gObj, size_type uSize, bool bWritable)
-: _M_gObject   (&gObj),
-  // _M_pRegion   (),
-  _M_uSize     (gObj.valid () ? uSize : 0),
-  _M_bWritable (bWritable)
-{
-    if (gObj.valid ())
-    {
-        if (gObj.mode () != mode_type::open) gObj.truncate (uSize);
+// =========================================================
 
-#       ifdef OS_STD_UNIX
-        _M_pRegion = ::mmap (nullptr, uSize,
-                             bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
-                             MAP_SHARED, gObj.id (), 0);
-#       elif defined OS_WINDOWS
-#       endif
-    }
+shared_memory::shared_memory (object_type& gObj, size_type uSize, bool bWritable)
+:
+  #ifdef OS_STD_UNIX
+  base_type (::mmap (nullptr,
+                     uSize,
+                     bWritable ? PROT_READ | PROT_WRITE : PROT_READ,
+                     MAP_SHARED, gObj.handle<int> (), 0))
+  #elif defined OS_WINDOWS
+  #endif
+, _M_pObject   (&gObj)
+, _M_uSize     (gObj.valid () ? uSize : 0)
+, _M_bWritable (bWritable)
+{
+    if (gObj.valid ()) if (gObj.mode () != mode_type::open) gObj.truncate (uSize);
 }
 
 shared_memory::~shared_memory () noexcept
 {
 #   ifdef OS_STD_UNIX
-    if (_M_pRegion) ::munmap (_M_pRegion, _M_uSize);
+    if (valid ()) ::munmap (handle<value_type> (), _M_uSize);
 #   endif
 }
 
+                           // =========================================================
+
 } // namespace Memory
+
+// =========================================================

@@ -35,12 +35,12 @@
 
 #define CL_TARGET_OPENCL_VERSION 200
 
-#include <CL/cl.h>
-#include <CL/cl_ext.h>
-
 #include <type_traits>
 #include <exception>
 #include <stdexcept>
+
+#include <CL/cl.h>
+#include <CL/cl_ext.h>
 
 /*
  * API Typesafe Encapsulation Guide Lines
@@ -88,18 +88,18 @@ typedef std::remove_pointer_t<::cl_sampler      > sampler_type    ;
 
 // =========================================================
 
-// template <resource_type> class resource_object;
+template <resource_type> class resource_object;
 
-// typedef resource_object<resource_type::instance   > platform_object;
-// typedef resource_object<resource_type::device     > device_object  ;
-// typedef resource_object<resource_type::buffer     > buffer_object  ;
-// typedef resource_object<resource_type::image      > image_object   ;
-// typedef resource_object<resource_type::context    > context_object ;
-// typedef resource_object<resource_type::source_code> cmd_object     ;
-// typedef resource_object<resource_type::program    > cmd_seq_object ;
-// typedef resource_object<resource_type::queue      > queue_object   ;
-// typedef resource_object<resource_type::event      > event_object   ;
-// typedef resource_object<resource_type::sampler    > sampler_object ;
+typedef resource_object<resource_type::instance   > platform_object;
+typedef resource_object<resource_type::device     > device_object  ;
+typedef resource_object<resource_type::buffer     > buffer_object  ;
+typedef resource_object<resource_type::image      > image_object   ;
+typedef resource_object<resource_type::context    > context_object ;
+typedef resource_object<resource_type::source_code> cmd_object     ;
+typedef resource_object<resource_type::program    > cmd_seq_object ;
+typedef resource_object<resource_type::queue      > queue_object   ;
+typedef resource_object<resource_type::event      > event_object   ;
+typedef resource_object<resource_type::sampler    > sampler_object ;
 
 // =========================================================
 
@@ -159,11 +159,11 @@ template <> struct is_cl_object_helper<event_type      > : public std::true_type
 template <> struct is_cl_object_helper<queue_type      > : public std::true_type  { };
 template <> struct is_cl_object_helper<sampler_type    > : public std::true_type  { };
 
-template <typename T>
+template <non_void T>
 struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<remove_cref_t<T>>::value)>
 { static_assert (is_cl_object<T>::value, "T is NOT an opencl object type!"); };
 
-template <typename T>
+template <non_void T>
 inline constexpr bool const is_cl_object_v = is_cl_object<T>::value;
 
 template <typename T>
@@ -195,7 +195,7 @@ class opencl_error : public std::runtime_error
 {
 public:
     /// Creates a new opencl_error exception object for \p error.
-    explicit opencl_error  (i32 error) noexcept
+    explicit opencl_error (i32 error) noexcept
     : runtime_error (to_string (error)),
       _M_error      (error)
     {
@@ -587,31 +587,31 @@ inline T get_object_info(Function f, Object o, Info i, AuxInfo j, const size_t k
 //! simplified implementation for managing opencl handles & a polymorphic interface
 //! ================================================================================
 
-// template <resource_type T>
-// class resource_object : public object<T>
-// {
-// public:
-//     typedef resource_object<T>       self_type  ;
-//     typedef object<T>                base_type  ;
-//     typedef CLObject<conv_type_t<T>> value_type ;
-//     typedef value_type*              pointer    ;
-//     typedef std::size_t              size_type  ;
-//     typedef resource_handle          handle_type;
+template <resource_type T>
+class resource_object : public object<T>
+{
+public:
+    typedef resource_object<T>       self_type  ;
+    typedef object<T>                base_type  ;
+    typedef CLObject<conv_type_t<T>> value_type ;
+    typedef value_type*              pointer    ;
+    typedef std::size_t              size_type  ;
+    typedef resource_handle          handle_type;
 
-//     resource_object  () = delete ;
-//     ~resource_object () = default;
+    resource_object  () = delete ;
+    ~resource_object () = default;
 
-//     inline resource_object (self_type&&) = default;
-//     inline self_type& operator = (self_type&&) = default;
+    inline resource_object (self_type&&) = default;
+    inline self_type& operator = (self_type&&) = default;
 
-//     constexpr pointer handle () const noexcept
-//     {
-//         return base_type::template handle<pointer> ();
-//     }
+    constexpr pointer handle () const noexcept
+    {
+        return base_type::template handle<pointer> ();
+    }
 
-// protected:
-//     constexpr explicit resource_object (pointer handle) noexcept : base_type (handle) { }
-// };
+protected:
+    constexpr explicit resource_object (pointer handle) noexcept : base_type (handle) { }
+};
 
 // =========================================================
 

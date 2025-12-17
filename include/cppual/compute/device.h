@@ -23,10 +23,11 @@
 #define CPPUAL_COMPUTE_DEVICE_H_
 #ifdef __cplusplus
 
-#include <cppual/bitset.h>
-//#include <cppual/string.h>
-#include <cppual/containers.h>
-#include <cppual/noncopyable.h>
+#include <cppual/bitflags>
+//#include <cppual/string>
+#include <cppual/containers>
+#include <cppual/noncopyable>
+#include <cppual/compute/object.h>
 #include <cppual/compute/backend_iface.h>
 
 //#include <memory>
@@ -50,14 +51,15 @@ class device : public object<resource_type::device>
 public:
     typedef std::size_t size_type;
 
-    enum class info_type : u8
+    typedef enum class info_type : u8
     {
         name,
         board,
         vendor,
         profile,
         version
-    };
+    }
+    const const_info;
 
     static size_type count () noexcept;
 

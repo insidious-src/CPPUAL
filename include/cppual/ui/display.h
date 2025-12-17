@@ -41,10 +41,10 @@ typedef std::weak_ptr  <display_interface> weak_display  ;
 class SHARED_API display_interface : public dyn_unbound_interface
 {
 public:
-    typedef display_interface   self_type  ;
-    typedef resource_connection handle_type;
-    typedef string              string_type;
-    typedef shared_display      pointer    ;
+    typedef display_interface self_type  ;
+    typedef shared_display    pointer    ;
+    typedef resource_handle   handle_type;
+    typedef string            string_type;
 
     constexpr display_interface () noexcept
     : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
@@ -64,13 +64,13 @@ public:
     handle_type native () const noexcept { return _M_native; }
     handle_type legacy () const noexcept { return _M_legacy; }
 
-    template <typename U>
-    constexpr typename std::remove_pointer<U>::type* native () const noexcept
-    { return _M_native.get<U> (); }
+    template <class_or_ptr U>
+    constexpr remove_ptr_t<U>* native () const noexcept
+    { return _M_native.get<remove_ptr_t<U>*> (); }
 
-    template <typename U>
-    constexpr typename std::remove_pointer<U>::type* legacy () const noexcept
-    { return _M_legacy.get<U> (); }
+    template <class_or_ptr U>
+    constexpr remove_ptr_t<U>* legacy () const noexcept
+    { return _M_legacy.get<remove_ptr_t<U>*> (); }
 
 protected:
     constexpr display_interface (handle_type native, handle_type legacy) noexcept
@@ -81,7 +81,7 @@ protected:
     , _M_legacy (legacy)
     { }
 
-    template <pair_t... Ps>
+    template <pair_like... Ps>
     constexpr display_interface (handle_type native, handle_type legacy, Ps... pairs) noexcept
     : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
                  std::make_pair ("screen_count", make_fn (*this, &self_type::screen_count)),

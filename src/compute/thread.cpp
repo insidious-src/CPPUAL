@@ -136,7 +136,7 @@ int this_thread::sleep_for (uint uMillisec)
 {
 #ifdef OS_WINDOWS
     ::Sleep (uMillisec);
-    return static_cast<int>(uMillisec);
+    return static_cast<int> (uMillisec);
 #elif defined (OS_STD_POSIX)
     return ::usleep (uMillisec * 1000);
 #endif

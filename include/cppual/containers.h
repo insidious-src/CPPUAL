@@ -24,7 +24,6 @@
 #ifdef __cplusplus
 
 #include <cppual/memory_allocator>
-//#include <cppual/array_map>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -44,52 +43,52 @@ namespace cppual {
 
 // ====================================================
 
-template <typename T, std::size_t N>
-using array = std::array<T, N>;
+template <non_void T, std::size_t N>
+using static_array = std::array<T, N>;
 
-template <typename T>
+template <non_void T>
 using vector = std::vector<T, memory::allocator<T>>;
 
-template <typename T>
-using dyn_array = vector<T>;
+template <non_void T>
+using dyn_array = std::vector<T, memory::allocator<T>>;
 
-template <typename T>
+template <non_void T>
 using deque = std::deque<T, memory::allocator<T>>;
 
-template <typename T>
+template <non_void T>
 using list = std::list<T, memory::allocator<T>>;
 
-template <typename T>
+template <non_void T>
 using forward_list = std::forward_list<T, memory::allocator<T>>;
 
-template <class K, class V, class Hash = std::hash<K>, class Pred = std::equal_to<K>>
+template <non_void K, non_void V, struct_or_class Hash = std::hash<K>, struct_or_class Pred = std::equal_to<K>>
 using unordered_map =
 std::unordered_map<K, V, Hash, Pred, memory::allocator<std::pair<K const, V>>>;
 
-template <class K, class V, class Hash = std::hash<K>, class Pred = std::equal_to<K>>
+template <non_void K, non_void V, struct_or_class Hash = std::hash<K>, struct_or_class Pred = std::equal_to<K>>
 using unordered_multimap =
 std::unordered_multimap<K, V, Hash, Pred, memory::allocator<std::pair<K const, V>>>;
 
-template <class T, class Hash = std::hash<T>, class Pred = std::equal_to<T>>
+template <non_void T, struct_or_class Hash = std::hash<T>, struct_or_class Pred = std::equal_to<T>>
 using unordered_set =
 std::unordered_set<T, Hash, Pred, memory::allocator<T>>;
 
-template <class T, class Hash = std::hash<T>, class Pred = std::equal_to<T>>
+template <non_void T, struct_or_class Hash = std::hash<T>, struct_or_class Pred = std::equal_to<T>>
 using unordered_multiset =
 std::unordered_multiset<T, Hash, Pred, memory::allocator<T>>;
 
-template <class Key, class Tp, class Compare = std::less<Key>>
+template <non_void K, non_void V, struct_or_class Compare = std::less<K>>
 using map =
-std::map<Key, Tp, Compare, memory::allocator<std::pair<Key const, Tp>>>;
+std::map<K, V, Compare, memory::allocator<std::pair<K const, V>>>;
 
-template <class Key, class Tp, class Compare = std::less<Key>>
+template <non_void K, non_void V, struct_or_class Compare = std::less<K>>
 using multimap =
-std::multimap<Key, Tp, Compare, memory::allocator<std::pair<Key const, Tp>>>;
+std::multimap<K, V, Compare, memory::allocator<std::pair<K const, V>>>;
 
-template <class Key, class Compare = std::less<Key>>
+template <non_void Key, struct_or_class Compare = std::less<Key>>
 using set = std::set<Key, Compare, memory::allocator<Key>>;
 
-template <class Key, class Compare = std::less<Key>>
+template <non_void Key, struct_or_class Compare = std::less<Key>>
 using multiset = std::multiset<Key, Compare, memory::allocator<Key>>;
 
 // ====================================================
@@ -144,7 +143,7 @@ typedef std::basic_stringstream<wchar , std::char_traits<wchar> , memory::alloca
 template <non_void T, std::size_t SZ>
 constexpr bool operator == (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
 {
-    if  (lh.size ()  !=  rh.size ()) return false;
+    if  (lh.size ()   !=  rh.size ()) return false;
     for (auto i = 0U; i < rh.size (); ++i) if (lh[i] != rh[i]) return false;
 
     return true;
@@ -153,7 +152,7 @@ constexpr bool operator == (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
 template <non_void T, std::size_t SZ>
 constexpr bool operator == (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
 {
-    if  (lh.size ()  !=  rh.size ()) return false;
+    if  (lh.size ()   !=  rh.size ()) return false;
     for (auto i = 0U; i < lh.size (); ++i) if (lh[i] != rh[i]) return false;
 
     return true;
@@ -164,7 +163,7 @@ constexpr bool operator == (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
 template <non_void T, std::size_t SZ>
 constexpr bool operator != (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
 {
-    if  (lh.size ()  !=  rh.size ()) return true;
+    if  (lh.size ()   !=  rh.size ()) return true;
     for (auto i = 0U; i < lh.size (); ++i) if (lh[i] != rh[i]) return true;
 
     return false;
@@ -173,7 +172,7 @@ constexpr bool operator != (dyn_array<T> const& lh, std::array<T, SZ> const& rh)
 template <non_void T, std::size_t SZ>
 constexpr bool operator != (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
 {
-    if  (lh.size ()  !=  rh.size ()) return true;
+    if  (lh.size ()   !=  rh.size ()) return true;
     for (auto i = 0U; i < lh.size (); ++i) if (lh[i] != rh[i]) return true;
 
     return false;
@@ -182,6 +181,8 @@ constexpr bool operator != (std::array<T, SZ> const& lh, dyn_array<T> const& rh)
 // ====================================================
 
 } // namespace cppual
+
+// ====================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_CONTAINERS_H_

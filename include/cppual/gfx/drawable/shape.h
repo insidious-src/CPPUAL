@@ -27,7 +27,7 @@
 
 namespace cppual { namespace gfx {
 
-class shape : public drawable2d_interface, public transformable_interface
+class shape : public drawable_interface, public transformable_interface
 {
 public:
     enum type

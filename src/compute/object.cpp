@@ -21,9 +21,13 @@
 
 #include <cppual/compute/object.h>
 
-namespace cppual { namespace compute {
+// =========================================================
 
-namespace { // optimize for internal unit usage
+namespace cppual::compute {
+
+// =========================================================
+
+namespace { //! optimize for internal unit usage
 
 } // anonymous namespace
 
@@ -33,4 +37,4 @@ namespace { // optimize for internal unit usage
 
 // =========================================================
 
-} } // namespace Compute
+} // namespace Compute

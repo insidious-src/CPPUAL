@@ -23,12 +23,9 @@
 #define CPPUAL_BITSET_H_
 #ifdef __cplusplus
 
-
 #include <cppual/containers>
 #include <cppual/concepts>
 #include <cppual/iterator>
-
-#include <cppual/string.h>
 
 #include <string_view>
 #include <type_traits>
@@ -44,26 +41,26 @@ namespace cppual {
 
 // =========================================================
 
-template <enum_t> class bitset;
+template <enumeration> class bitset;
 
 // =========================================================
 
 //! bitset reference proxy
-template <enum_t T>
+template <enumeration T>
 class reference_proxy
 {
 public:
-    typedef reference_proxy<T>        self_type;
-    typedef bitset<T>                 buf_type ;
-    typedef std::underlying_type_t<T> int_type ;
-    typedef int_type                  const_int;
+    typedef reference_proxy<T>        self_type  ;
+    typedef bitset<T>                 bitset_type;
+    typedef std::underlying_type_t<T> int_type   ;
+    typedef int_type                  const_int  ;
 
     constexpr reference_proxy (self_type &&) noexcept = default;
     consteval reference_proxy (self_type const&) noexcept = default;
     constexpr self_type& operator = (self_type &&) noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
-    consteval reference_proxy (buf_type& bitset, const_int mask) noexcept
+    consteval reference_proxy (bitset_type& bitset, const_int mask) noexcept
     : _M_bs (&bitset), _M_mask (mask)
     { }
 
@@ -77,13 +74,13 @@ private:
     reference_proxy () = delete;
 
 private:
-    buf_type* _M_bs   { };
-    int_type  _M_mask { };
+    bitset_type* _M_bs   { };
+    int_type     _M_mask { };
 };
 
 // =========================================================
 
-template <enum_t T>
+template <enumeration T>
 class bitset
 {
 public:
@@ -119,7 +116,7 @@ public:
     : _M_flags (flags)
     { }
 
-    template <integer_t U,
+    template <integer U,
               typename = std::enable_if_t<!std::is_same_v<U, int_type>>
               >
     constexpr bitset (U const eFlag) noexcept
@@ -145,9 +142,8 @@ public:
     constexpr self_type& operator = (const_int nFlags) noexcept
     { _M_flags = nFlags; return *this; }
 
-    template <integer_t U,
-              typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
-                                          !std::is_same_v<U, int>>
+    template <integer U,
+              typename = std::enable_if_t<!std::is_same_v<U, int_type> && !std::is_same_v<U, int>>
               >
     constexpr self_type& operator = (U const nFlags) noexcept
     {
@@ -182,7 +178,7 @@ public:
     constexpr bool test (const_int flags) const noexcept
     { return (_M_flags & flags) == flags; }
 
-    template <integer_t U,
+    template <integer U,
               typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
                                           !std::is_same_v<U, int>>
               >
@@ -214,7 +210,7 @@ public:
     { return std::countr_zero (_M_flags); }
 
     constexpr size_type find_last_set () const noexcept
-    { return size () - 1 - std::countl_zero (_M_flags); }
+    { return size () - 1 - count_leading_zeros (); }
 
     constexpr self_type& operator += (const_value eFlag) noexcept
     { _M_flags |= static_cast<int_type> (eFlag); return *this; }
@@ -222,9 +218,8 @@ public:
     constexpr self_type& operator += (const_int flags) noexcept
     { _M_flags |= flags; return *this; }
 
-    template <integer_t U,
-              typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
-                                          !std::is_same_v<U, int>>
+    template <integer U,
+              typename = std::enable_if_t<!std::is_same_v<U, int_type> && !std::is_same_v<U, int>>
               >
     constexpr self_type& operator += (U const flags) noexcept
     {
@@ -240,9 +235,8 @@ public:
     constexpr self_type& operator -= (const_int flags) noexcept
     { _M_flags &= ~flags; return *this; }
 
-    template <integer_t U,
-              typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
-                                          !std::is_same_v<U, int>>
+    template <integer U,
+              typename = std::enable_if_t<!std::is_same_v<U, int_type> && !std::is_same_v<U, int>>
               >
     constexpr self_type& operator -= (U const flags) noexcept
     {
@@ -342,44 +336,44 @@ public:
         static_assert (N <= size (), "N must NOT exceed bitset size!");
 
         if constexpr (N == size ())
-            return self_type { static_cast<int_type> (~static_cast<int_type> (0)) };
+            return self_type (static_cast<int_type> (~static_cast<int_type> (0)));
         else
-            return self_type { (static_cast<int_type> (1) << N) - 1 };
+            return self_type ((static_cast<int_type> (1) << N) - 1);
     }
 
     //! friend functions
-    template <enum_t U>
+    template <enumeration U>
     friend
     constexpr bool operator == (bitset<U> const&, U const) noexcept;
 
-    template <enum_t U>
+    template <enumeration U>
     friend
     constexpr bool operator == (bitset<U> const&, typename bitset<U>::const_int) noexcept;
 
-    template <enum_t U>
+    template <enumeration U>
     friend
     constexpr bool operator == (typename bitset<U>::const_int, bitset<U> const&) noexcept;
 
-    template <enum_t U>
+    template <enumeration U>
     friend
     constexpr bool operator == (bitset<U> const&, bitset<U> const&) noexcept;
 
-    template <enum_t U>
+    template <enumeration U>
     friend
     constexpr bitset<U> operator + (bitset<U> const&,
                                     typename bitset<U>::const_value) noexcept;
 
-    template <enum_t U>
+    template <enumeration U>
     friend
     constexpr bitset<U> operator + (bitset<U> const&,
                                     typename bitset<U>::const_int) noexcept;
 
-    template <enum_t U>
+    template <enumeration U>
     friend
     constexpr bitset<U> operator - (bitset<U> const&,
                                     typename bitset<U>::const_value) noexcept;
 
-    template <enum_t U>
+    template <enumeration U>
     friend
     constexpr bitset<U> operator - (bitset<U> const&,
                                     typename bitset<U>::const_int) noexcept;
@@ -390,66 +384,58 @@ private:
 
 // =========================================================
 
-template <enum_t T>
+template <enumeration T>
 constexpr bitset<T> operator + (bitset<T> const& lh,
                                 typename bitset<T>::const_value eFlag) noexcept
 { return lh._M_flags | static_cast<typename bitset<T>::int_type> (eFlag); }
 
-template <enum_t T>
+template <enumeration T>
 constexpr bitset<T> operator + (bitset<T> const& lh,
                                 typename bitset<T>::const_int flags) noexcept
 { return lh._M_flags | flags; }
 
-template <enum_t T>
+template <enumeration T>
 constexpr bitset<T> operator - (bitset<T> const& lh,
                                 typename bitset<T>::const_value eFlag) noexcept
 { return lh._M_flags & ~static_cast<typename bitset<T>::int_type> (eFlag); }
 
-template <enum_t T>
+template <enumeration T>
 constexpr bitset<T> operator - (bitset<T> const& lh,
                                 typename bitset<T>::const_int flags) noexcept
 { return lh._M_flags & ~flags; }
 
 // =========================================================
 
-template <enum_t T>
-constexpr bool operator == (bitset<T> const& lh, T const eFlag) noexcept
-{ return lh._M_flags == eFlag; }
-
-template <enum_t T>
-constexpr bool operator == (bitset<T> const& lh, typename bitset<T>::const_int flags) noexcept
-{ return lh._M_flags == flags; }
-
-template <enum_t T>
-constexpr bool operator == (typename bitset<T>::const_int flags, bitset<T> const& rh) noexcept
-{ return flags == rh._M_flags; }
-
-template <enum_t T>
-constexpr bool operator == (bitset<T> const& lh, bitset<T> const& rh) noexcept
+template <enumeration U>
+constexpr bool operator == (bitset<U> const& lh, bitset<U> const& rh) noexcept
 { return lh._M_flags == rh._M_flags; }
 
-template <enum_t T>
-constexpr bool operator != (bitset<T> const& lh, T const eFlag) noexcept
-{ return !(lh == eFlag); }
+template <enumeration T>
+constexpr auto operator <=> (bitset<T> const& lh, bitset<T> const& rh) noexcept
+{ return lh._M_flags <=> rh._M_flags; }
 
-template <enum_t T>
-constexpr bool operator != (bitset<T> const& lh, typename bitset<T>::const_int flags) noexcept
-{ return !(lh == flags); }
+template <enumeration T>
+constexpr auto operator <=> (bitset<T> const& lh, T const eFlag) noexcept
+{ return lh._M_flags <=> eFlag; }
 
-template <enum_t T>
-constexpr bool operator != (typename bitset<T>::const_int flags, bitset<T> const& rh) noexcept
-{ return !(flags == rh); }
+template <enumeration T>
+constexpr auto operator <=> (T const eFlag, bitset<T> const& lh) noexcept
+{ return eFlag <=> lh._M_flags; }
 
-template <enum_t T>
-constexpr bool operator != (bitset<T> const& lh, bitset<T> const& rh) noexcept
-{ return !(lh == rh); }
+template <enumeration T>
+constexpr auto operator <=> (bitset<T> const& lh, typename bitset<T>::const_int flags) noexcept
+{ return lh._M_flags <=> flags; }
+
+template <enumeration T>
+constexpr auto operator <=> (typename bitset<T>::const_int flags, bitset<T> const& rh) noexcept
+{ return flags <=> rh._M_flags; }
 
 // =========================================================
 
 //! compile-time bit manipulation
 template <auto... Flags,
           typename E = std::common_type_t<decltype (Flags)...>,
-          typename   = std::enable_if_t<std::is_enum_v<E>>
+          std::enable_if_t<std::is_enum_v<E>, int> = 0
           >
 consteval bitset<E> make_bitset () noexcept
 {
@@ -464,9 +450,9 @@ consteval bitset<E> make_bitset () noexcept
 
 namespace std {
 
-using cppual::enum_t;
+using cppual::enumeration;
 
-template <enum_t T>
+template <enumeration T>
 struct hash <cppual::bitset<T>>
 {
     typedef size_t size_type;

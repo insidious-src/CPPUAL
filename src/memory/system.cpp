@@ -468,7 +468,7 @@ std::size_t working_size ()
 #define SINGLE_SEGMENT_MARKER 1
 
 #define pointer_offset(ptr, ofs) \
-    static_cast<void*>(reinterpret_cast<char*>(ptr) + static_cast<std::ptrdiff_t>(ofs))
+    static_cast<void*>(reinterpret_cast<char*>(ptr) + static_cast<ptrdiff>(ofs))
 
 #define pointer_diff(first, second) \
     reinterpret_cast<ptrdiff_t>(reinterpret_cast<char*>(first) - reinterpret_cast<char*>(second))
@@ -1839,7 +1839,7 @@ void _return_span_to_segment(Segment* segment, Span* span) {
     u32 new_slots;
     do
     {
-        new_slots = slots & ~(1 << slot);
+        new_slots = slots & static_cast<decltype (new_slots)> (~(1 << slot));
     } while (!std::atomic_compare_exchange_weak(&segment->free_markers, &slots, new_slots));
 
     // Check if it's completely empty and we should free it
@@ -1859,7 +1859,7 @@ void _return_span_to_segment(Segment* segment, Span* span) {
         if (head)
         {
             slots = head->free_markers.load();
-            new_slots = slots & ~(1 << slot);
+            new_slots = slots & static_cast<decltype (slots)> (~(1 << slot));
 
             // Still empty?
             if (new_slots == 0)

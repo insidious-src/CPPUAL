@@ -77,7 +77,7 @@ bool tcp_client::connect (tcp_stream& stream, address const& server, u16 port) n
     }
 
     if (stream.valid ())
-        ::connect (stream.handle (),
+        ::connect (stream.handle<int> (),
                    reinterpret_cast<::sockaddr*> (&gAddr),
                    sizeof (::sockaddr_in));
     return true;

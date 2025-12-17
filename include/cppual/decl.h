@@ -22,6 +22,8 @@
 #ifndef CPPUAL_DECL_H_
 #define CPPUAL_DECL_H_
 
+// =========================================================
+
 #undef OS_CURRENT
 #undef OS_STD_UNIX
 #undef OS_STD_POSIX
@@ -39,13 +41,14 @@
 #undef OS_AIX
 #undef OS_SOLARIS
 #undef OS_IOS
-#undef OS_MACX
+#undef OS_MAC
 #undef OS_WIN32
 #undef OS_WIN64
 #undef OS_WINDOWS
+#undef OS_PS1         // undefined
 #undef OS_PS2         // undefined
 #undef OS_PS3         // undefined
-#undef OS_PS4
+#undef OS_PS4         // undefined
 #undef OS_PS5         // undefined
 #undef OS_XBOX        // undefined
 #undef OS_XBOX360     // undefined
@@ -71,6 +74,8 @@
 #undef DECL_EXPORT
 #undef DECL_IMPORT
 #undef DECL_HIDDEN
+
+// =========================================================
 
 #define STRINGIFY(S) STRINGIFY_HELPER(S)
 #define STRINGIFY_HELPER(S) #S
@@ -331,7 +336,11 @@
 #   define TXT(quote) quote
 #endif
 
+// =========================================================
+
 namespace cppual {
+
+// =========================================================
 
 /// void typedefs
 typedef  void const cvoid    ;
@@ -381,36 +390,36 @@ typedef cchar ctchar;
 #endif
 
 /// short int typedefs
-typedef const short cshort;
-typedef unsigned short ushort;
-typedef const unsigned short cushort;
+typedef const short int cshort;
+typedef unsigned short int ushort;
+typedef const unsigned short int cushort;
 
 /// int typedefs
 typedef const int cint;
-typedef unsigned uint;
-typedef const unsigned cuint;
-typedef const long clong;
-typedef unsigned long ulong;
-typedef const unsigned long culong;
+typedef unsigned int uint;
+typedef const unsigned int cuint;
+typedef const long int clong;
+typedef unsigned long int ulong;
+typedef const unsigned long int culong;
 
 /// 64-bit long int typedefs
-typedef long long long64;
-typedef const long long clong64;
-typedef unsigned long long ulong64;
-typedef const unsigned long long culong64;
+typedef long long int long64;
+typedef const long long int clong64;
+typedef unsigned long long int ulong64;
+typedef const unsigned long long int culong64;
 
 /// long_t typedefs
 #ifdef OS_WIN64
-typedef long long long_t;
-typedef const long long clong_t;
-typedef unsigned long long ulong_t;
-typedef const unsigned long long culong_t;
-typedef long long call_ret_t;
+typedef long64 long_t;
+typedef clong64 clong_t;
+typedef ulong64 ulong_t;
+typedef culong64 culong_t;
+typedef long64 call_ret_t;
 #else
-typedef long long_t;
-typedef const long clong_t;
-typedef unsigned long ulong_t;
-typedef const unsigned long culong_t;
+typedef long int long_t;
+typedef clong clong_t;
+typedef ulong ulong_t;
+typedef culong culong_t;
 typedef int call_ret_t;
 #endif
 
@@ -420,7 +429,15 @@ typedef const double cdouble;
 typedef long double ldouble;
 typedef const long double cldouble;
 
-} // cppual
+// =========================================================
+
+} // namespace cppual
+
+// =========================================================
+
+namespace std { using namespace cppual; } //! namespace std
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_DECL_H_

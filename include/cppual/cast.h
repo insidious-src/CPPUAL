@@ -26,13 +26,14 @@
 #include <cppual/concepts>
 
 #include <type_traits>
-#include <bit>
+
+// =========================================================
 
 namespace cppual {
 
 // =========================================================
 
-template <typename Out, typename In>
+template <non_void Out, non_void In>
 union cast_union
 {
     In  in ;
@@ -45,7 +46,7 @@ union cast_union
 // =========================================================
 
 //! (non-consteval) non-const safe cast using union for same size types
-template <non_void Out, non_void In>
+template <typename Out, typename In>
 constexpr Out direct_cast (In val) noexcept
 {
     static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are NOT equal!");
@@ -53,15 +54,23 @@ constexpr Out direct_cast (In val) noexcept
 }
 
 //! (non-consteval) const safe cast using union for same size types
-template <non_void Out, non_void In>
-constexpr Out const const_direct_cast (In const val) noexcept
+template <variable Out, constant In>
+constexpr Out const_direct_cast (In val) noexcept
 {
     static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are NOT equal!");
-    return cast_union<Out const, In const> (val).out;
+    return cast_union<Out, In> (val).out;
+}
+
+//! (non-consteval) const safe cast using union for same size types
+template <constant Out, variable In>
+constexpr Out const_direct_cast (In val) noexcept
+{
+    static_assert (sizeof (In) == sizeof (Out), "The sizes of In & Out are NOT equal!");
+    return cast_union<Out, In> (val).out;
 }
 
 //! (non-consteval) non-const safe cast using union without type size check
-template <non_void Out, non_void In>
+template <typename Out, typename In>
 constexpr Out unsafe_direct_cast (In val) noexcept
 {
     return cast_union<Out, In> (val).out;
@@ -90,7 +99,7 @@ constexpr Out& class_cast (In& obj) noexcept
 }
 
 template <class_t Out, class_t In>
-constexpr Out* obj_ptr_cast (In* obj) noexcept
+constexpr Out* class_ptr_cast (In* obj) noexcept
 {
     return static_cast<Out*> (static_cast<void*> (obj));
 }
@@ -98,7 +107,7 @@ constexpr Out* obj_ptr_cast (In* obj) noexcept
 // =========================================================
 
 template <class_t Out, class_t In>
-constexpr Out& dyn_obj_cast (In& obj) noexcept
+constexpr Out& dyn_class_cast (In& obj) noexcept
 {
 #   ifdef DEBUG_MODE
     return *dynamic_cast<Out*> (&obj);
@@ -112,38 +121,32 @@ constexpr Out& dyn_obj_cast (In& obj) noexcept
 template <class_t D, class_t C, typename R, typename... Args>
 constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept -> R(D::*)(Args...)
 {
-    typedef R(D::* out_fn)(Args...);
-
-    return std::bit_cast<out_fn> (mem_fn);
+    return cast_union<R(D::*)(Args...), decltype (mem_fn)> (mem_fn).out;
 }
 
 template <class_t D, class_t C, typename R, typename... Args>
 constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...)
 {
-    typedef R(D::* out_fn)(Args...);
-
-    return std::bit_cast<out_fn> (mem_fn);
+    return cast_union<R(D::*)(Args...), decltype (mem_fn)> (mem_fn).out;
 }
 
 template <class_t D, class_t C, typename R, typename... Args>
 constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...) const
 {
-    typedef R(D::* const_out_fn)(Args...) const;
-
-    return std::bit_cast<const_out_fn> (mem_fn);
+    return cast_union<R(D::*)(Args...) const, decltype (mem_fn)> (mem_fn).out;
 }
 
 template <class_t D, class_t C, typename R, typename... Args>
 constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept -> R(D::*)(Args...) const
 {
-    typedef R(D::* const_out_fn)(Args...) const;
-
-    return std::bit_cast<const_out_fn> (mem_fn);
+    return cast_union<R(D::*)(Args...) const, decltype (mem_fn)> (mem_fn).out;
 }
 
 // =========================================================
 
 } // cppual
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_CAST_H_

@@ -27,31 +27,29 @@
 #include <cppual/meta_type>
 #include <cppual/functional>
 #include <cppual/circular_queue>
-#include <cppual/memory/allocator.h>
+#include <cppual/memory_allocator>
 
 #include <iterator>
 #include <vector>
+
+// =========================================================
 
 namespace cppual {
 
 // =========================================================
 
-using memory::allocator_t;
-
-// =========================================================
-
 template <fn_sig S>
-using signal_allocator = memory::allocator_traits<function<S>>::allocator_type;
+using signal_allocator = memory::allocator<function<S>>;
 
-template <non_void T, allocator_t A = signal_allocator<T>>
+template <non_void T, memory::allocator_like A = signal_allocator<T>>
 using signal_queue = circular_queue<T, A>;
 
 // =========================================================
 
-template <fn_sig S, allocator_t = signal_allocator<S>>
+template <fn_sig S, memory::allocator_like = signal_allocator<S>>
 class signal;
 
-template <typename T, allocator_t = signal_allocator<T>>
+template <typename T, memory::allocator_like = signal_allocator<T>>
 class scoped_connection;
 
 // =========================================================
@@ -61,29 +59,28 @@ inline constexpr std::size_t const reserve_slot_count_v = 5;
 
 // =========================================================
 
-template <typename R, typename... Args, allocator_t A>
+template <non_void R, typename... Args, memory::allocator_like A>
 class SHARED_API signal <R(Args...), A>
 {
 public:
-    typedef signal<R(Args...), A>                          self_type             ;
-    typedef std::allocator_traits<A>                       alloc_traits          ;
-    typedef alloc_traits::allocator_type                   allocator_type        ;
-    typedef alloc_traits::size_type                        size_type             ;
-    typedef size_type const                                const_size            ;
-    typedef function<R(Args...)>                           value_type            ;
-    typedef value_type &                                   reference             ;
-    typedef value_type const&                              const_reference       ;
-    typedef signal_queue<value_type, allocator_type>       container_type        ;
-    typedef container_type&                                container_ref         ;
-    typedef container_type const&                          container_const_ref   ;
-    typedef container_type::iterator                       iterator              ;
-    typedef container_type::const_iterator                 const_iterator        ;
-    typedef std::reverse_iterator<iterator>                reverse_iterator      ;
-    typedef std::reverse_iterator<const_iterator>          const_reverse_iterator;
-    typedef const_iterator                                 slot_type             ;
-    typedef R                                              return_type           ;
-    typedef allocator_type::template rebind_t<return_type> return_allocator      ;
-    typedef std::vector<return_type, return_allocator>     collector_type        ;
+    typedef signal<R(Args...), A>                    self_type             ;
+    typedef memory::allocator_traits<A>              alloc_traits          ;
+    typedef alloc_traits::allocator_type             allocator_type        ;
+    typedef alloc_traits::size_type                  size_type             ;
+    typedef size_type const                          const_size            ;
+    typedef function<R(Args...)>                     value_type            ;
+    typedef value_type &                             reference             ;
+    typedef value_type const&                        const_reference       ;
+    typedef signal_queue<value_type, allocator_type> container_type        ;
+    typedef container_type &                         container_ref         ;
+    typedef container_type const&                    container_const_ref   ;
+    typedef container_type::iterator                 iterator              ;
+    typedef container_type::const_iterator           const_iterator        ;
+    typedef std::reverse_iterator<iterator>          reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
+    typedef const_iterator                           slot_type             ;
+    typedef allocator_type::template rebind_t<R>     return_allocator      ;
+    typedef std::vector<R, return_allocator>         collector_type        ;
 
     using scoped_connection_type = scoped_connection<R(Args...), allocator_type>;
     using static_fn_ref          = R(&)(Args...);
@@ -199,19 +196,19 @@ public:
     }
 
     /// callable object (signal/slot) connect
-    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <callable_class C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator << (C& obj) const
     {
         if (this == &obj) return *this;
 
-        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
+        static_assert (std::is_same_v<R, callable_return<C, Args...>>,
                       "C::operator () return type is NOT void!");
 
         connect (*this, obj);
         return   *this;
     }
 
-    template <fn_sig, allocator_t>
+    template <fn_sig, memory::allocator_like>
     friend class signal;
 
 private:
@@ -220,12 +217,12 @@ private:
 
 // =========================================================
 
-template <typename... Args, allocator_t A>
+template <typename... Args, memory::allocator_like A>
 class SHARED_API signal <void(Args...), A>
 {
 public:
     typedef signal<void(Args...), A>                 self_type             ;
-    typedef std::allocator_traits<A>                 traits_type           ;
+    typedef memory::allocator_traits<A>              traits_type           ;
     typedef traits_type::allocator_type              allocator_type        ;
     typedef traits_type::size_type                   size_type             ;
     typedef size_type const                          const_size            ;
@@ -318,7 +315,7 @@ public:
     //! emit signal to connected slots
     constexpr void operator () (Args... args) const
     {
-        for (size_type i = 0U; i < _M_slots.size(); ++i)
+        for (size_type i = 0; i < _M_slots.size(); ++i)
             if (_M_slots[i] != nullptr) _M_slots[i] (std::forward<Args> (args)...);
     }
 
@@ -344,19 +341,19 @@ public:
     }
 
     /// callable object (signal/slot) connect
-    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <callable_class C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator << (C& obj) const
     {
         if (this == &obj) return *this;
 
-        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
-                      "C::operator () return type is NOT void!");
+        static_assert (std::is_same_v<return_type, callable_return<C, Args...>>,
+                       "C::operator () return type is NOT void!");
 
         connect (*this, obj);
         return   *this;
     }
 
-    template <fn_sig, allocator_t>
+    template <fn_sig, memory::allocator_like>
     friend class signal;
 
 private:
@@ -365,12 +362,12 @@ private:
 
 // =========================================================
 
-template <typename... Args, allocator_t A>
+template <typename... Args, memory::allocator_like A>
 class SHARED_API signal <bool(Args...), A>
 {
 public:
     typedef signal<void(Args...), A>                 self_type             ;
-    typedef std::allocator_traits<A>                 traits_type           ;
+    typedef memory::allocator_traits<A>              traits_type           ;
     typedef traits_type::allocator_type              allocator_type        ;
     typedef traits_type::size_type                   size_type             ;
     typedef size_type const                          const_size            ;
@@ -385,7 +382,7 @@ public:
     typedef std::reverse_iterator<iterator>          reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
     typedef container_type::const_iterator           slot_type             ;
-    typedef void                                     return_type           ;
+    typedef bool                                     return_type           ;
 
     using scoped_connection_type = scoped_connection<void(Args...), allocator_type>;
     using static_fn_ref          = bool(&)(Args...);
@@ -463,7 +460,7 @@ public:
     //! emit signal to connected slots
     constexpr void operator () (Args... args) const
     {
-        for (size_type i = 0U; i < _M_slots.size (); ++i)
+        for (size_type i = 0; i < _M_slots.size (); ++i)
             if (_M_slots[i] != nullptr && !(_M_slots[i] (std::forward<Args> (args)...))) return;
     }
 
@@ -489,19 +486,19 @@ public:
     }
 
     /// callable object (signal/slot) connect
-    template <callable_class_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <callable_class C, typename = std::enable_if_t<!is_functional_v<C>>>
     inline self_type& operator << (C& obj) const
     {
         if (this == &obj) return *this;
 
-        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
+        static_assert (std::is_same_v<return_type, callable_return<C, Args...>>,
                       "C::operator () return type is NOT bool!");
 
         connect (*this, obj);
         return   *this;
     }
 
-    template <fn_sig, allocator_t>
+    template <fn_sig, memory::allocator_like>
     friend class signal;
 
 private:
@@ -512,7 +509,7 @@ private:
 
 template <typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
     typename signal<R(Args...), A>::slot_type
@@ -540,7 +537,7 @@ inline
 
 template <typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 typename signal<R(Args...), A>::slot_type
@@ -566,10 +563,10 @@ connect (signal<R(Args...), A>& gSignal,
     return --gSignal.get_slots ().end ();
 }
 
-template <lambda_non_capture_t Call,
-          typename    R,
-          typename... Args,
-          allocator_t A
+template <lambda_non_capture Call,
+          typename           R,
+          typename...        Args,
+          memory::allocator_like A
           >
 inline
 typename signal<R(Args...), A>::slot_type
@@ -596,10 +593,10 @@ connect (signal<R(Args...), A>& gSignal,
     return --gSignal.get_slots ().end ();
 }
 
-template <lambda_capture_t Call,
-          typename    R,
-          typename... Args,
-          allocator_t A
+template <lambda_capture Call,
+          typename       R,
+          typename...    Args,
+          memory::allocator_like A
           >
 inline
 typename signal<R(Args...), A>::slot_type
@@ -629,7 +626,7 @@ connect (signal<R(Args...), A>& gSignal,
 template <class_t     C,
           typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 typename signal<R(Args...), A>::slot_type
 connect (signal<R(Args...), A>& gSignal,
@@ -658,7 +655,7 @@ connect (signal<R(Args...), A>& gSignal,
 template <class_t     C,
           typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 typename signal<R(Args...), A>::slot_type
@@ -669,7 +666,7 @@ connect (signal<R(Args...), A>& gSignal,
 {
     for (auto it = gSignal.get_slots ().begin (); it != gSignal.get_slots ().end (); ++it)
     {
-        if (*it == tmake_fn (pObj, fn))
+        if (*it == make_fn (pObj, fn))
         {
             if (bTop)
             {
@@ -685,10 +682,10 @@ connect (signal<R(Args...), A>& gSignal,
     return --gSignal.get_slots ().end ();
 }
 
-template <callable_class_t C,
-          typename         R,
-          typename...      Args,
-          allocator_t      A
+template <callable_class C,
+          typename       R,
+          typename...    Args,
+          memory::allocator_like      A
           >
 inline
 typename signal<R(Args...), A>::slot_type
@@ -714,7 +711,7 @@ connect (signal<R(Args...), A>& gSignal, C& pObj, bool bTop = false)
 
 template <typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 typename signal<R(Args...), A>::slot_type
@@ -742,7 +739,7 @@ connect (signal<R(Args...), A>& gSignal, R(& fn)(Args...), bool bTop = false)
 
 template <typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 void
@@ -754,7 +751,7 @@ disconnect (signal<R(Args...), A>& gSignal,
 
 template <typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 void
@@ -769,7 +766,7 @@ disconnect (signal<R(Args...), A>& gSignal,
 template <class_t     C,
           typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 void disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R(C::* fn)(Args...))
@@ -786,7 +783,7 @@ void disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R
 template <class_t     C,
           typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 void disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R(C::* fn)(Args...) const)
@@ -798,10 +795,10 @@ void disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R
     if (it != gSignal.end ()) gSignal.get_slots ().erase (it);
 }
 
-template <callable_class_t C,
-          typename         R,
-          typename...      Args,
-          allocator_t      A
+template <callable_class C,
+          typename       R,
+          typename...    Args,
+          memory::allocator_like A
           >
 inline
 void
@@ -816,7 +813,7 @@ disconnect (signal<R(Args...), A>& gSignal, C& pObj)
 
 template <typename    R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 void
@@ -831,7 +828,7 @@ disconnect (signal<R(Args...), A>& gSignal, R(& fn)(Args...))
 
 // =========================================================
 
-template <typename R, typename... Args, allocator_t A>
+template <typename R, typename... Args, memory::allocator_like A>
 class SHARED_API scoped_connection <R(Args...), A> : public non_copyable
 {
 public:
@@ -868,7 +865,7 @@ public:
     }
 
     //! non capture lambda constructor
-    template <lambda_non_capture_t Call>
+    template <lambda_non_capture Call>
     inline scoped_connection (reference gSignal,
                               Call&&    fn,
                               bool      bTop = false,
@@ -880,7 +877,7 @@ public:
     }
 
     //! capture lambda constructor
-    template <lambda_capture_t Call, typename CallableAlloc>
+    template <lambda_capture Call, typename CallableAlloc>
     inline scoped_connection (reference            gSignal,
                               Call&&               fn,
                               bool                 bTop = false,
@@ -938,7 +935,7 @@ private:
 
 template <typename R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A>>
@@ -950,10 +947,10 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
     return pointer (new scoped_connection<R(Args...), A> (_signal, std::move (fn), top));
 }
 
-template <lambda_non_capture_t Call,
+template <lambda_non_capture Call,
           typename R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A>>
@@ -966,11 +963,11 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
     return pointer (new scoped_connection<R(Args...), A> (_signal, std::forward<Call> (fn), top));
 }
 
-template <lambda_capture_t Call,
+template <lambda_capture Call,
           typename R,
           typename... Args,
-          allocator_t A,
-          allocator_t CallableA
+          memory::allocator_like A,
+          memory::allocator_like CallableA
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A>>
@@ -985,7 +982,7 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
 
 template <typename R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A>>
@@ -1000,7 +997,7 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
 template <class_t  C,
           typename R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A>>
@@ -1016,7 +1013,7 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
 template <class_t  C,
           typename R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A>>
@@ -1031,7 +1028,7 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
 
 template <typename R,
           typename... Args,
-          allocator_t A
+          memory::allocator_like A
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A>>
@@ -1047,7 +1044,7 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
 
 template <typename R,
           typename... Args,
-          allocator_t A,
+          memory::allocator_like A,
           typename SharedA
           >
 inline
@@ -1061,11 +1058,11 @@ allocate_shared_scoped_connection (SharedA alloc,
                                  std::move (scoped_connection<R(Args...), A> (_signal, fn, top)));
 }
 
-template <lambda_non_capture_t Call,
+template <lambda_non_capture Call,
           typename R,
           typename... Args,
-          allocator_t A,
-          allocator_t SharedA
+          memory::allocator_like A,
+          memory::allocator_like SharedA
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A>>
@@ -1080,12 +1077,12 @@ allocate_shared_scoped_connection (SharedA alloc,
                                            (_signal, std::forward<Call>(fn), top)));
 }
 
-template <lambda_capture_t Call,
+template <lambda_capture Call,
           typename R,
           typename... Args,
-          allocator_t A,
-          allocator_t SharedA,
-          allocator_t CallableA
+          memory::allocator_like A,
+          memory::allocator_like SharedA,
+          memory::allocator_like CallableA
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A> >
@@ -1103,8 +1100,8 @@ allocate_shared_scoped_connection (SharedA alloc,
 
 template <typename R,
           typename... Args,
-          allocator_t A,
-          allocator_t SharedA
+          memory::allocator_like A,
+          memory::allocator_like SharedA
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A> >
@@ -1120,8 +1117,8 @@ allocate_shared_scoped_connection (SharedA alloc,
 template <class_t  C,
           typename R,
           typename... Args,
-          allocator_t A,
-          allocator_t SharedA
+          memory::allocator_like A,
+          memory::allocator_like SharedA
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A> >
@@ -1138,8 +1135,8 @@ allocate_shared_scoped_connection (SharedA alloc,
 template <class_t  C,
           typename R,
           typename... Args,
-          allocator_t A,
-          allocator_t SharedA
+          memory::allocator_like A,
+          memory::allocator_like SharedA
           >
 inline
     std::shared_ptr<scoped_connection<R(Args...), A> >
@@ -1155,8 +1152,8 @@ inline
 
 template <typename R,
           typename... Args,
-          allocator_t A,
-          allocator_t SharedA
+          memory::allocator_like A,
+          memory::allocator_like SharedA
           >
 inline
 std::shared_ptr<scoped_connection<R(Args...), A> >

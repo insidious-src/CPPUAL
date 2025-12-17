@@ -23,9 +23,10 @@
 #define CPPUAL_GFX_COLOR_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
+#include <cppual/types>
+#include <cppual/concepts>
 
-#include <type_traits>
+//#include <type_traits>
 
 namespace cppual { namespace gfx {
 
@@ -115,8 +116,8 @@ constexpr bool operator != (rgb_color const& gObj1, rgb_color const& gObj2) noex
                                               gObj1.blue () != gObj2.blue ());
 }
 
-static_assert (sizeof (rgb_color) == sizeof (u8) * 3, "RGBColor is not 24-bit!");
-static_assert (std::is_pod<rgb_color>::value, "RGBColor is not POD!");
+static_assert (sizeof (rgb_color) == (sizeof (u8) * 3), "RGBColor is not 24-bit!");
+static_assert (pod<rgb_color>, "RGBColor is not POD!");
 
 // =========================================================
 

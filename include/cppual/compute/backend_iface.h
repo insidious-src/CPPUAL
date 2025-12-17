@@ -23,21 +23,22 @@
 #define CPPUAL_COMPUTE_BACKEND_INTERFACE_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/bitset.h>
-#include <cppual/containers.h>
-#include <cppual/noncopyable.h>
-#include <cppual/process/plugin.h>
+#include <cppual/types>
+#include <cppual/plugin>
+#include <cppual/bitflags>
+#include <cppual/containers>
+#include <cppual/noncopyable>
 #include <cppual/compute/object.h>
 
 #include <memory>
-//#include <type_traits>
-
-namespace cppual { namespace compute {
 
 // =========================================================
 
-enum device_type
+namespace cppual::compute {
+
+// =========================================================
+
+typedef enum device_type
 {
     none        =      0,
     cpu         = 1 << 0,
@@ -45,18 +46,20 @@ enum device_type
     gpgpu       = 1 << 2,
     specialized = 1 << 3,
     any         = cpu | gpu | gpgpu | specialized
-};
+}
+const const_device;
 
-enum class backend_type : u8
+typedef enum class backend_type : u8
 {
     native,
     vulkan,
     opencl,
     d3d12 ,
     metal
-};
+}
+const const_backend;
 
-enum class il_type : u8
+typedef enum class il_type : u8
 {
     none   =      0,
     native = 1 << 0,
@@ -65,21 +68,24 @@ enum class il_type : u8
     spir   = 1 << 3,
     spirv  = 1 << 4,
     hlil   = 1 << 5
-};
+}
+const const_il;
 
-enum class memory_cat : u8
+typedef enum class memory_cat : u8
 {
-    restricted,
+    restricted ,
     specialized,
     global
-};
+}
+const const_memory_cat;
 
-enum class memory_access : u8
+typedef enum class memory_access : u8
 {
     read_only ,
     write_only,
     read_write
-};
+}
+const const_memory_access;
 
 typedef bitset<device_type> device_types;
 typedef bitset<il_type>     device_ils  ;
@@ -338,7 +344,9 @@ protected:
 
 // =========================================================
 
-} } // namespace Compute
+} // namespace compute
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_BACKEND_INTERFACE_H_

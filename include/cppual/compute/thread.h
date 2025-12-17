@@ -23,82 +23,94 @@
 #define CPPUAL_PROCESS_THREAD
 #ifdef __cplusplus
 
-#include <cppual/resource.h>
-#include <cppual/functional.h>
-#include <cppual/noncopyable.h>
+#include <cppual/resource>
+#include <cppual/functional>
+#include <cppual/noncopyable>
 #include <cppual/process/details.h>
 
 #include <atomic>
 //#include <thread>
 
-using std::atomic_size_t;
-using std::atomic_bool;
+// =========================================================
 
-namespace cppual { namespace compute {
+namespace cppual::compute {
 
-enum class thread_priority : u8
+// =========================================================
+
+typedef enum class thread_priority : u8
 {
     inherit = 0,
-    idle,
-    lowest,
-    very_low,
-    low,
-    normal,
-    high,
-    very_high,
+    idle       ,
+    lowest     ,
+    very_low   ,
+    low        ,
+    normal     ,
+    high       ,
+    very_high  ,
     highest
-};
+}
+const const_thread_priority;
 
 // =========================================================
 
 namespace main_thread {
 
-resource_handle handle () noexcept;
-thread_priority priority ();
+resource_handle handle       () noexcept;
+thread_priority priority     ();
 int			    set_priority (thread_priority priority);
 
-} // namespace main_thread
+} //! namespace main_thread
 
 // =========================================================
 
 namespace this_thread {
 
-resource_handle handle () noexcept;
-void		    exit ();
+resource_handle handle    () noexcept;
+void		    exit      ();
 int			    sleep_for (uint millisec);
 
-} // namespace this_thread
+} //! namespace this_thread
 
 // =========================================================
 
 class thread : public non_copyable
 {
 public:
+    typedef thread           self_type;
     typedef function<void()> callable ;
     typedef std::size_t      size_type;
+
+    using atomic_size_t = std::atomic_size_t;
+    using atomic_bool   = std::atomic_bool  ;
 
     class id final
     {
     public:
-        id () noexcept : _M_handle () { }
+        typedef id            self_type  ;
+        typedef thread_handle handle_type;
 
-        explicit
-        id (thread_handle __id) : _M_handle (__id) { }
+        constexpr id () noexcept = default;
+
+        constexpr id (handle_type id) noexcept
+        : _M_handle (id)
+        { }
 
     private:
-        friend class  thread  ;
-        thread_handle _M_handle;
-
         static bool thread_handles_equal (resource_handle h1, resource_handle h2);
 
         friend bool
-        operator == (thread::id, thread::id) noexcept;
+        operator == (self_type, self_type) noexcept;
 
         friend bool
-        operator  < (thread::id, thread::id) noexcept;
+        operator  < (self_type, self_type) noexcept;
+
+        friend class thread;
+
+    private:
+        handle_type _M_handle { };
     };
 
-    thread () noexcept;
+    thread  () noexcept;
     ~thread ();
 
     static uint hardware_concurency () noexcept;
@@ -143,7 +155,7 @@ inline bool operator > (thread::id x, thread::id y) noexcept
 inline bool operator >= (thread::id x, thread::id y) noexcept
 { return !(x < y); }
 
-} } // Concurency
+} //! namespace compute
 
 #endif // __cplusplus
 #endif // CPPUAL_PROCESS_THREAD

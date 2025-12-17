@@ -22,25 +22,31 @@
 #include <cppual/compute/mutex.h>
 #include <cppual/system/clock.h>
 
-using namespace cppual::Clock;
+// ====================================================
 
-namespace cppual { namespace Compute {
+namespace cppual::compute {
 
-Mutex::Mutex ()
-: _M_gCond ()
+// ====================================================
+
+mutex::mutex ()
+: _M_gCond   ()
 { }
 
-void Mutex::lock ()
+void mutex::lock ()
 {
-    if (_M_gOwner.load () != Thread::Id ()) _M_gCond.wait ();
-    _M_gOwner.store (Thread::Id (ThisThread::handle ()));
+    if (_M_gOwner.load () != thread::id ()) _M_gCond.wait ();
+    _M_gOwner.store (thread::id (this_thread::handle ()));
 }
 
-void Mutex::unlock ()
+void mutex::unlock ()
 {
-    if (_M_gOwner.load () != Thread::Id (ThisThread::handle ())) return;
-    _M_gOwner.store (Thread::Id ());
-    _M_gCond.notifyAll ();
+    if (_M_gOwner.load () != thread::id (this_thread::handle ())) return;
+    _M_gOwner.store (thread::id ());
+    _M_gCond.notify_all ();
 }
 
-} } // Concurency
+// ====================================================
+
+} // compute
+
+// ====================================================

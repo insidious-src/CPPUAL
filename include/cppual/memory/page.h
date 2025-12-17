@@ -24,9 +24,12 @@
 #ifdef __cplusplus
 
 #include <cppual/memory_allocator>
-#include <cppual/string>
 
-namespace cppual { namespace memory {
+// =========================================================
+
+namespace cppual::memory {
+
+// =========================================================
 
 class page_resource final : public memory_resource
 {
@@ -35,24 +38,23 @@ public:
 
     void clear () noexcept;
 
-    constexpr size_type count () const noexcept
-    { return 0; }
-
-    constexpr size_type capacity () const noexcept
-    { return 0; }
-
-    constexpr size_type max_size () const noexcept
-    { return 0; }
+    constexpr size_type count    () const noexcept { return 0; }
+    constexpr size_type capacity () const noexcept { return 0; }
+    constexpr size_type max_size () const noexcept { return 0; }
 
 private:
-    void* do_allocate   (size_type size, align_type align);
-    void  do_deallocate (void* p, size_type size, align_type align);
+    pointer do_allocate   (size_type size, align_type align);
+    void    do_deallocate (pointer p, size_type size, align_type align);
 
     constexpr bool do_is_equal (abs_base_type const& gObj) const noexcept
     { return &gObj == this; }
 };
 
-} } // Memory
+// =========================================================
+
+} // Memory
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_MEMORY_PAGE_ALLOCATOR_H_

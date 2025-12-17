@@ -23,33 +23,35 @@
 #define CPPUAL_COMPUTE_OBJECT_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/bitset.h>
-#include <cppual/string.h>
-#include <cppual/resource.h>
+#include <cppual/types>
+#include <cppual/bitflags>
+#include <cppual/resource>
+#include <cppual/containers>
 
-//#include <string_view>
+// =========================================================
 
-namespace cppual { namespace compute {
+namespace cppual::compute {
+
+// =========================================================
 
 /// application instance info
-class host_connection;
-class device;
+class host_connection ;
+class device          ;
 /// device and queue load balancing
-class behaviour;
+class behaviour       ;
 /// different types of devices in one queue
-class mixed_queue;
+class mixed_queue     ;
 /// thread queue
-class host_queue;
-class device_queue;
-class device_surface;
-class pipeline;
-class image;
+class host_queue      ;
+class device_queue    ;
+class device_surface  ;
+class pipeline        ;
+class image           ;
 /// render passes and states
-class render;
-class command;
+class render          ;
+class command         ;
 class command_sequence;
-class event;
+class event           ;
 
 // =========================================================
 
@@ -62,22 +64,24 @@ public:
     typedef std::size_t           size_type  ;
     typedef string                string_type;
 
-    constexpr object () noexcept               = default;
-    inline object (self_type&&) noexcept       = default;
-    inline self_type& operator = (self_type&&) = default;
+    constexpr object () noexcept = default;
 
-    constexpr static resource_type type () noexcept { return R; }
+    consteval static resource_type type () noexcept { return R; }
 
     constexpr operator handle_type::value_type () const noexcept
     { return handle<handle_type::value_type> (); }
 
 protected:
     constexpr object (handle_type handle) noexcept
-    : resource (handle)
+    : base_type (handle)
     { }
 };
 
-} } // Compute
+// =========================================================
+
+} // compute
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_OBJECT_H_

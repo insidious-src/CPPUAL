@@ -33,7 +33,7 @@ namespace { // optimize for internal unit usage
 
 inline uint generate_object (object_type eType) noexcept
 {
-    uint n = 0;
+    ::ALuint n = 0;
 
     switch (eType)
     {
@@ -82,7 +82,7 @@ void object::reset () noexcept
 {
     if (!valid ()) return;
 
-    auto const id = handle ();
+    auto id = handle<::ALuint> ();
 
     switch (_M_eObjType)
     {

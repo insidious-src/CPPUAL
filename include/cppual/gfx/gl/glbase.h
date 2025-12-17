@@ -50,7 +50,7 @@ class vertex_array          ;
 
 // ====================================================
 
-enum class shader_type : u8
+typedef enum class shader_type : u8
 {
     compute         = 1 << 0,
     vertex          = 1 << 1,
@@ -58,7 +58,10 @@ enum class shader_type : u8
     tess_evaluation = 1 << 3,
     geometry        = 1 << 4,
     fragment        = 1 << 5
-};
+}
+const const_shader;
+
+// ====================================================
 
 typedef bitset<shader_type> shader_types;
 
@@ -85,6 +88,8 @@ private:
 // ====================================================
 
 } // namespace GL
+
+// ====================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_GL_BASE_H_

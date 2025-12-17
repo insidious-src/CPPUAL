@@ -22,22 +22,24 @@
 #include <cppual/memory/allocator.h>
 #include <cppual/compute/device.h>
 
-#include <new>
 #include <cstdlib>
+#include <new>
+
+// =========================================================
 
 namespace cppual::memory {
 
 // =========================================================
 
-namespace { // optimize for internal unit usage
+namespace { //! optimize for internal unit usage
 
 // =========================================================
 
-static const std::thread::id _main_thread_id = std::this_thread::get_id ();
+inline static const std::thread::id _main_thread_id = std::this_thread::get_id ();
 
 // =========================================================
 
-inline static memory_resource::base_pointer_reference internal_default_resource () noexcept
+constexpr static memory_resource::base_pointer_reference internal_default_resource () noexcept
 {
     static memory_resource::base_pointer def_ptr = &new_delete_resource ();
     return def_ptr;
@@ -45,7 +47,7 @@ inline static memory_resource::base_pointer_reference internal_default_resource 
 
 // =========================================================
 
-inline static memory_resource::base_pointer_reference internal_default_thread_resource () noexcept
+constexpr static memory_resource::base_pointer_reference internal_default_thread_resource () noexcept
 {
     static thread_local memory_resource::base_pointer def_ptr = internal_default_resource ();
     return def_ptr;
@@ -59,17 +61,19 @@ public:
     using base_type::base_type;
     using base_type::operator=;
 
+    constexpr bool is_thread_safe () const noexcept { return true; }
+
 private:
-    inline void* do_allocate (size_type /*bytes*/, size_type /*align*/)
+    constexpr void* do_allocate (size_type /*bytes*/, size_type /*align*/)
     { throw std::bad_alloc (); return nullptr; }
 
-    inline void* do_reallocate (pointer /*p*/, size_type /*old_size*/, size_type /*size*/, size_type /*align*/)
+    constexpr void* do_reallocate (pointer /*p*/, size_type /*old_size*/, size_type /*size*/, size_type /*align*/)
     { throw std::bad_alloc (); return nullptr; }
 
-    inline void do_deallocate (void* /*p*/, size_type /*bytes*/, size_type /*align*/)
+    constexpr void do_deallocate (pointer /*p*/, size_type /*bytes*/, size_type /*align*/)
     { }
 
-    inline bool do_is_equal (abs_base_type const& other) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& other) const noexcept
     { return this == &other; }
 };
 
@@ -81,21 +85,22 @@ public:
     using base_type::base_type;
     using base_type::operator=;
 
-    inline bool is_thread_safe () const noexcept { return true; }
+    constexpr bool is_thread_safe () const noexcept { return true ; }
+    constexpr bool is_lock_free   () const noexcept { return false; }
 
 private:
-    inline void* do_allocate (size_type bytes, size_type align)
+    constexpr void* do_allocate (size_type bytes, size_type align)
     {
         if (bytes > max_size ()) throw std::bad_alloc ();
         return ::operator new (bytes, std::align_val_t (align));
     }
 
-    inline void do_deallocate (void* p, size_type bytes, size_type align)
+    constexpr void do_deallocate (pointer p, size_type bytes, size_type align)
     {
         ::operator delete (p, bytes, std::align_val_t (align));
     }
 
-    inline bool do_is_equal (abs_base_type const& other) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& other) const noexcept
     {
         return this == &other;
     }
@@ -109,25 +114,26 @@ public:
     using base_type::base_type;
     using base_type::operator=;
 
-    inline bool is_thread_safe () const noexcept { return true; }
+    constexpr bool is_thread_safe () const noexcept { return true ; }
+    constexpr bool is_lock_free   () const noexcept { return false; }
 
 private:
-    inline void* do_allocate (size_type bytes, size_type /*align*/)
+    constexpr void* do_allocate (size_type bytes, size_type /*align*/)
     {
         return std::malloc (bytes);
     }
 
-    inline void do_deallocate (void* p, size_type /*bytes*/, size_type /*align*/)
+    constexpr void do_deallocate (pointer p, size_type /*bytes*/, size_type /*align*/)
     {
         std::free (p);
     }
 
-    inline void* do_reallocate (void* p, size_type /*old_size*/, size_type new_size, size_type /*align*/)
+    constexpr void* do_reallocate (pointer p, size_type /*old_size*/, size_type new_size, size_type /*align*/)
     {
         return p ? std::realloc (p, new_size) : std::malloc (new_size);
     }
 
-    inline bool do_is_equal (abs_base_type const& other) const noexcept
+    constexpr bool do_is_equal (abs_base_type const& other) const noexcept
     {
         return this == &other;
     }

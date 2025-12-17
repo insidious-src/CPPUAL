@@ -25,11 +25,13 @@
 #include <iostream>
 #include <new>
 
-namespace cppual { namespace memory {
+// =========================================================
+
+namespace cppual::memory {
 
 // =========================================================
 
-namespace {
+namespace { //! optimize for internal usage - anonymous namespace
 
 constexpr memory_resource::difference_type to_diff (u8 val) noexcept
 {
@@ -46,13 +48,15 @@ constexpr memory_resource::math_pointer to_math_ptr (memory_resource::pointer p)
     return static_cast<memory_resource::math_pointer> (p);
 }
 
-} // anonymous namespace
+// =========================================================
+
+} //! anonymous namespace
 
 // =========================================================
 
 stacked_resource::stacked_resource (size_type uSize)
-: _M_gOwner (uSize ? get_default_resource().max_size() >= (uSize + max_adjust) ?
-                     get_default_resource() : new_delete_resource() : *this),
+: _M_gOwner (uSize ? get_default_resource ().max_size () >= (uSize + max_adjust) ?
+                     get_default_resource () : new_delete_resource () : *this),
   _M_pMarker (&_M_gOwner != this ? _M_gOwner.allocate (uSize + max_adjust, alignof (uptr)) : nullptr),
   _M_pBegin (_M_pMarker),
   _M_pEnd (_M_pBegin != nullptr ? static_cast<math_pointer> (_M_pBegin) + uSize + max_adjust : nullptr),
@@ -93,7 +97,7 @@ stacked_resource::stacked_resource (memory_resource& pOwner, size_type uSize)
 
 stacked_resource::~stacked_resource ()
 {
-    if (_M_pBegin && &_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity (), alignof (uptr));
+    if (_M_pBegin && &_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
 }
 
 void* stacked_resource::do_allocate (size_type uBytes, align_type uAlign)
@@ -165,7 +169,7 @@ void* stacked_resource::do_reallocate(void* p, size_type old_size, size_type siz
     return new_p;
 }
 
-void stacked_resource::do_deallocate (void* p, size_type uSize, align_type)
+void stacked_resource::do_deallocate (pointer p, size_type uSize, align_type)
 {
     auto const pMarker = to_math_ptr (p) + uSize;
 
@@ -218,8 +222,8 @@ dstacked_resource::dstacked_resource (memory_resource& pOwner, size_type uSize, 
   _M_pBottomMarker (_M_pTopMarker != nullptr ?
             static_cast<math_pointer> (_M_pTopMarker) + uSize + max_adjust : nullptr),
   _M_pBegin (_M_pTopMarker),
-  _M_uHint (uHint),
-  _M_pEnd (_M_pBottomMarker),
+  _M_uHint  (uHint),
+  _M_pEnd   (_M_pBottomMarker),
   _M_bIsMemShared (&_M_gOwner != this ? _M_gOwner.is_shared () : false)
 {
     if (!_M_pBegin) throw std::bad_alloc ();
@@ -234,14 +238,14 @@ dstacked_resource::dstacked_resource (memory_resource& pOwner, size_type uSize, 
 
 dstacked_resource::~dstacked_resource ()
 {
-    if (_M_pBegin && &_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity (), alignof (uptr));
+    if (_M_pBegin && &_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
 }
 
 void* dstacked_resource::do_allocate (size_type uBytes, align_type uAlign)
 {
     constexpr static auto align_uptr = static_cast<difference_type> (alignof (uptr));
 
-    // check whether there is enough space to allocate
+    //! check whether there is enough space to allocate
     if (!_M_pBegin or !uBytes) throw std::bad_alloc ();
     if (!uAlign || uAlign > max_align) uAlign = alignof (uptr);
 
@@ -282,7 +286,7 @@ void* dstacked_resource::do_allocate (size_type uBytes, align_type uAlign)
     return _M_pBottomMarker = pNewBottomMarker;
 }
 
-void* dstacked_resource::do_reallocate(void* p, size_type old_size, size_type size, align_type align_size)
+void* dstacked_resource::do_reallocate (pointer p, size_type old_size, size_type size, align_type align_size)
 {
     constexpr static auto align_uptr = static_cast<difference_type> (alignof (uptr));
 
@@ -298,7 +302,7 @@ void* dstacked_resource::do_reallocate(void* p, size_type old_size, size_type si
         old_size = 0;
     }
 
-    if (!align_size || align_size > max_align) align_size = alignof(uptr);
+    if (!align_size || align_size > max_align) align_size = alignof (uptr);
 
     auto new_p   = p;
     auto pMarker = to_math_ptr (new_p) + old_size;
@@ -374,7 +378,7 @@ void* dstacked_resource::do_reallocate(void* p, size_type old_size, size_type si
     return new_p;
 }
 
-void dstacked_resource::do_deallocate (void* p, size_type uBytes, align_type)
+void dstacked_resource::do_deallocate (pointer p, size_type uBytes, align_type)
 {
     auto const pMarker = to_math_ptr (p) + uBytes;
 
@@ -395,4 +399,8 @@ void dstacked_resource::do_deallocate (void* p, size_type uBytes, align_type)
     }
 }
 
-} } // namespace Memory
+// =========================================================
+
+} // namespace Memory
+
+// =========================================================

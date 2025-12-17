@@ -21,33 +21,33 @@
 
 #include <cppual/compute/cv.h>
 
-namespace cppual { namespace Compute {
+namespace cppual::compute {
 
-void ConditionVariable::notifyOne ()
+void condition_variable::notify_one ()
 {
 
 }
 
-void ConditionVariable::notifyAll ()
+void condition_variable::notify_all ()
 {
 
 }
 
-void ConditionVariable::waitUntil()
+void condition_variable::wait_until()
 {
 
 }
 
-void ConditionVariable::waitFor()
+void condition_variable::wait_for()
 {
 
 }
 
-void ConditionVariable::wait ()
+void condition_variable::wait ()
 {
 
 }
 
 
 
-} } // Concurency
+} // compute

@@ -21,7 +21,11 @@
 
 #include <cppual/gfx/matrix.h>
 
-namespace cppual { namespace gfx {
+// =========================================================
+
+namespace cppual::gfx {
+
+// =========================================================
 
 matrix2& matrix2::transpose () noexcept
 {
@@ -54,4 +58,8 @@ matrix4& matrix4::transpose () noexcept
     return *this;
 }
 
-} } // namespace Graphics
+// =========================================================
+
+} // namespace gfx
+
+// =========================================================

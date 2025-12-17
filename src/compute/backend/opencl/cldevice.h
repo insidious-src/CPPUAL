@@ -41,6 +41,7 @@ public:
     typedef dyn_array<pointer>       device_ids_vector;
     typedef factory::device_vector   device_vector    ;
     typedef std::size_t              size_type        ;
+    typedef size_type const          const_size       ;
     typedef resource_handle          handle_type      ;
 
     device  () = delete;

@@ -19,18 +19,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_CONCURENCY_CV_H_
-#define CPPUAL_CONCURENCY_CV_H_
+#ifndef CPPUAL_COMPUTE_CV_H_
+#define CPPUAL_COMPUTE_CV_H_
 #ifdef __cplusplus
 
 #include <cppual/compute/thread.h>
 
-#include <atomic>
-#include <chrono>
+//#include <atomic>
+//#include <chrono>
 
-namespace cppual { namespace compute {
+namespace cppual::compute {
 
-class condition_variable final
+class condition_variable
 {
 public:
     void notify_one ();
@@ -40,7 +40,7 @@ public:
     void wait ();
 };
 
-} } // Concurency
+} // compute
 
 #endif // __cplusplus
-#endif // CPPUAL_CONCURENCY_CV_H_
+#endif // CPPUAL_COMPUTE_CV_H_

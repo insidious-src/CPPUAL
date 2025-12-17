@@ -23,11 +23,15 @@
 #define CPPUAL_DEVICES_MOUSE_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/noncopyable.h>
+#include <cppual/types>
+#include <cppual/noncopyable>
 #include <cppual/gfx/coord.h>
 
+// =========================================================
+
 namespace cppual::input {
+
+// =========================================================
 
 struct touch_event;
 struct mouse      ;

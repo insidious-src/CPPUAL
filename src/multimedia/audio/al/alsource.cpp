@@ -124,67 +124,67 @@ sound_source::~sound_source () noexcept
 sound_state sound_source::state () const noexcept
 {
     int nState = 0;
-    ::alGetSourcei (handle (), al::current_emitter_state, &nState);
+    ::alGetSourcei (handle<::ALuint> (), al::current_emitter_state, &nState);
     return convert_emitter_state (nState);
 }
 
 void sound_source::play () noexcept
 {
     int nState = 0;
-    ::alGetSourcei (handle (), al::current_emitter_state, &nState);
-    if (_M_pBuffer and nState and nState != al::sound_playing) ::alSourcePlay (handle ());
+    ::alGetSourcei (handle<::ALuint> (), al::current_emitter_state, &nState);
+    if (_M_pBuffer and nState and nState != al::sound_playing) ::alSourcePlay (handle<::ALuint> ());
 }
 
 void sound_source::replay () noexcept
 {
     int nState = 0;
-    ::alGetSourcei (handle (), al::current_emitter_state, &nState);
+    ::alGetSourcei (handle<::ALuint> (), al::current_emitter_state, &nState);
 
     if (nState and _M_pBuffer)
     {
-        ::alSourceRewind (handle ());
-        if (nState != al::sound_playing) ::alSourcePlay (handle ());
+        ::alSourceRewind (handle<::ALuint> ());
+        if (nState != al::sound_playing) ::alSourcePlay (handle<::ALuint> ());
     }
 }
 
 void sound_source::pause () noexcept
 {
     int nState = 0;
-    ::alGetSourcei (handle (), al::current_emitter_state, &nState);
-    if (nState == al::sound_playing) ::alSourcePause (handle ());
+    ::alGetSourcei (handle<::ALuint> (), al::current_emitter_state, &nState);
+    if (nState == al::sound_playing) ::alSourcePause (handle<::ALuint> ());
 }
 
 void sound_source::stop () noexcept
 {
     int nState = 0;
-    ::alGetSourcei (handle (), al::current_emitter_state, &nState);
+    ::alGetSourcei (handle<::ALuint> (), al::current_emitter_state, &nState);
 
     if ((nState == al::sound_playing or nState == al::sound_paused))
-        ::alSourceStop (handle ());
+        ::alSourceStop (handle<::ALuint> ());
 }
 
 void sound_source::rewind () noexcept
 {
     if (_M_pBuffer and _M_pBuffer->valid () and state () != sound_state::initial)
-        ::alSourceRewind (handle ());
+        ::alSourceRewind (handle<::ALuint> ());
 }
 
 bool sound_source::is_playing () const noexcept
 {
     int nState = 0;
-    ::alGetSourcei (handle (), al::current_emitter_state, &nState);
+    ::alGetSourcei (handle<::ALuint> (), al::current_emitter_state, &nState);
     return nState == al::sound_playing;
 }
 
 void sound_source::set_looping (bool bLoop) noexcept
 {
-    if (valid ()) ::alSourcei (handle (), al::looping, bLoop);
+    if (valid ()) ::alSourcei (handle<::ALuint> (), al::looping, bLoop);
 }
 
 bool sound_source::is_looping () const noexcept
 {
     int nIsLooping = 0;
-    if (valid ()) ::alGetSourcei (handle (), al::looping, &nIsLooping);
+    if (valid ()) ::alGetSourcei (handle<::ALuint> (), al::looping, &nIsLooping);
     return nIsLooping == true;
 }
 
@@ -210,7 +210,7 @@ void sound_source::detach () noexcept
 void sound_source::on_detach () noexcept
 {
     stop ();
-    ::alSourcei (handle (), al::buffer, 0);
+    ::alSourcei (handle<::ALuint> (), al::buffer, 0);
     _M_pBuffer = nullptr;
 }
 
@@ -218,7 +218,7 @@ void sound_source::set_volume (float fValue) noexcept
 {
     if (valid ())
     {
-        ::alSourcef     (handle (), al::volume, fValue);
+        ::alSourcef      (handle<::ALuint> (), al::volume, fValue);
         _M_gMutex.lock   ();
         _M_fVolume = fValue;
         _M_gMutex.unlock ();
@@ -233,36 +233,36 @@ float sound_source::volume () const noexcept
 
 void sound_source::set_playing_speed (float fValue) noexcept
 {
-    if (valid ()) ::alSourcef (handle (), al::pitch, fValue);
+    if (valid ()) ::alSourcef (handle<::ALuint> (), al::pitch, fValue);
 }
 
 float sound_source::playing_speed () const noexcept
 {
     float fValue = .0f;
-    if (valid ()) ::alGetSourcef (handle (), al::pitch, &fValue);
+    if (valid ()) ::alGetSourcef (handle<::ALuint> (), al::pitch, &fValue);
     return fValue;
 }
 
 void sound_source::set_playing_offset (std::chrono::seconds nValue) noexcept
 {
-    if (valid ()) ::alSourcei (handle (), al::sec_offset, static_cast<int> (nValue.count ()));
+    if (valid ()) ::alSourcei (handle<::ALuint> (), al::sec_offset, static_cast<int> (nValue.count ()));
 }
 
 int sound_source::playing_offset () noexcept
 {
     int nValue = 0;
-    if (valid ()) ::alGetSourcei (handle (), al::sec_offset, &nValue);
+    if (valid ()) ::alGetSourcei (handle<::ALuint> (), al::sec_offset, &nValue);
     return nValue;
 }
 
 void sound_source::set_sample_offset (float fValue) noexcept
 {
-    if (valid ()) ::alSourcef (handle (), al::sample_offset, fValue);
+    if (valid ()) ::alSourcef (handle<::ALuint> (), al::sample_offset, fValue);
 }
 
 void sound_source::set_byte_offset (float fValue) noexcept
 {
-    if (valid ()) ::alSourcef (handle (), al::byte_offset, fValue);
+    if (valid ()) ::alSourcef (handle<::ALuint> (), al::byte_offset, fValue);
 }
 
 void sound_source::mute () noexcept
@@ -281,9 +281,10 @@ void sound_source::unmute () noexcept
 
 void sound_source::enqueue (sound_buffer& gBuffer) noexcept
 {
-    value_type uBuffId = gBuffer.handle ();
+    auto uBuffId = gBuffer.handle<::ALuint> ();
+
     _M_gQueue.push_back (&gBuffer);
-    ::alSourceQueueBuffers (handle (), 1, &uBuffId);
+    ::alSourceQueueBuffers (handle<::ALuint> (), 1, &uBuffId);
 }
 
 } } } // namespace Audio

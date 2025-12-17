@@ -61,7 +61,7 @@ enum atom_state
 
 typedef string                          string_type             ;
 typedef ::xcb_connection_t              display_type            ;
-typedef ::Display                       legacy_type             ;
+typedef remove_ptr_t<::Display>*        legacy_type             ;
 typedef ::xcb_screen_t                  screen_type             ;
 typedef ::xcb_window_t                  handle_type             ;
 typedef ::xcb_atom_t                    atom_type               ;

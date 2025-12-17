@@ -186,7 +186,7 @@ bool audio_device::is_extension_supported (string_type const& gExt) noexcept
 bool audio_device::is_extension_present (string_type const& gExt) noexcept
 {
     if (valid ())
-        return ::alcIsExtensionPresent (handle<ALCdevice*> (), gExt.c_str ());
+        return ::alcIsExtensionPresent (handle<::ALCdevice*> (), gExt.c_str ());
     return false;
 }
 
@@ -206,7 +206,7 @@ playback_device::playback_device (string_type const& gName) noexcept
 
 playback_device::~playback_device () noexcept
 {
-    if (valid ()) ::alcCloseDevice (handle<ALCdevice*> ());
+    if (valid ()) ::alcCloseDevice (handle<::ALCdevice*> ());
 }
 
 // ====================================================
@@ -246,14 +246,12 @@ capture_device::~capture_device () noexcept
 // ====================================================
 
 instance::instance (playback_device& gDevice, bool bMakeCurrent) noexcept
-: _M_gDevice (&gDevice),
-  _M_pDevContext (gDevice.valid () ?
-                     ::alcCreateContext
-                     (static_cast<ALCdevice*> (gDevice.handle ()), nullptr) :
-                     nullptr)
+: _M_gDevice     (&gDevice),
+  _M_pDevContext (gDevice.valid () ? ::alcCreateContext (gDevice.handle<::ALCdevice*> (), nullptr) :
+                                     nullptr)
 {
     if (_M_pDevContext && bMakeCurrent &&
-            ::alcMakeContextCurrent (static_cast<ALCcontext*> (_M_pDevContext)) == 1)
+        ::alcMakeContextCurrent (_M_pDevContext.get<ALCcontext*> ()) == 1)
         current_context () = this;
 }
 
@@ -262,13 +260,13 @@ instance::~instance () noexcept
     if (_M_pDevContext)
     {
         invalidate ();
-        ::alcDestroyContext (static_cast<ALCcontext*> (_M_pDevContext));
+        ::alcDestroyContext (_M_pDevContext.get<ALCcontext*> ());
     }
 }
 
 bool instance::use () noexcept
 {
-    if (current_context () != this && ::alcMakeContextCurrent (static_cast<ALCcontext*> (_M_pDevContext)) == 1)
+    if (current_context () != this && ::alcMakeContextCurrent (_M_pDevContext.get<::ALCcontext*> ()) == 1)
     {
         current_context () = this;
         return true;
@@ -293,7 +291,7 @@ bool instance::set_capability (int nCap, bool bEnable) noexcept
 
         if (pPrevContext && pPrevContext != this)
         {
-            if (::alcMakeContextCurrent (static_cast<ALCcontext*> (pPrevContext->_M_pDevContext)) == 1)
+            if (::alcMakeContextCurrent (_M_pDevContext.get<::ALCcontext*> ()) == 1)
                 current_context () = pPrevContext;
         }
 
@@ -313,8 +311,7 @@ bool instance::has_capability (int nCap) noexcept
 
         if (pPrevContext && pPrevContext != this)
         {
-            if (::alcMakeContextCurrent
-                    (static_cast<ALCcontext*> (pPrevContext->_M_pDevContext)) == 1)
+            if (::alcMakeContextCurrent (_M_pDevContext.get<::ALCcontext*> ()) == 1)
                 current_context () = pPrevContext;
         }
 
@@ -326,12 +323,12 @@ bool instance::has_capability (int nCap) noexcept
 
 void instance::process () noexcept
 {
-    if (_M_pDevContext) ::alcProcessContext (static_cast<ALCcontext*> (_M_pDevContext));
+    if (_M_pDevContext) ::alcProcessContext (_M_pDevContext.get<::ALCcontext*> ());
 }
 
 void instance::suspend () noexcept
 {
-    if (_M_pDevContext) ::alcSuspendContext (static_cast<ALCcontext*> (_M_pDevContext));
+    if (_M_pDevContext) ::alcSuspendContext (_M_pDevContext.get<::ALCcontext*> ());
 }
 
 distance_type instance::distance_model () noexcept

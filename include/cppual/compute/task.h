@@ -33,16 +33,15 @@
 #include <cppual/unbound_matrix>
 #include <cppual/memory_allocator>
 
+#include <condition_variable>
+#include <shared_mutex>
+#include <optional>
+#include <future>
+#include <tuple>
 
 #ifdef DEBUG_MODE
 #   include <iostream>
 #endif
-
-#include <tuple>
-#include <future>
-#include <optional>
-#include <shared_mutex>
-#include <condition_variable>
 
 // =========================================================
 
@@ -64,7 +63,7 @@ class unbound_task;
 template <non_void, typename...>
 class unbound_task_adaptor;
 
-using memory::allocator_t;
+using memory::allocator_like;
 
 // =========================================================
 
@@ -345,7 +344,7 @@ public:
     { then (fn, std::forward<Args> (args)...); }
 
     /// non-capture lambda & callable object constructor
-    template <lambda_non_capture_t Callable,
+    template <lambda_non_capture Callable,
               typename... Args,
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
@@ -357,8 +356,8 @@ public:
     { then (std::move (fn), std::forward<Args> (args)...); }
 
     /// capture lambda constructor
-    template <lambda_capture_t Callable,
-              allocator_t A = memory::allocator<Callable>,
+    template <lambda_capture Callable,
+              allocator_like A = memory::allocator<Callable>,
               typename... Args,
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
@@ -413,7 +412,7 @@ public:
     }
 
     /// non-capture lambda & callable object then
-    template <lambda_non_capture_t Callable,
+    template <lambda_non_capture Callable,
               typename... Args,
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
@@ -434,8 +433,8 @@ public:
     }
 
     /// capture lambda then
-    template <lambda_capture_t Callable,
-              allocator_t A = memory::allocator<Callable>,
+    template <lambda_capture Callable,
+              allocator_like A = memory::allocator<Callable>,
               typename... Args,
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
@@ -590,7 +589,7 @@ public:
     { then (fn, std::forward<Args> (args)...); }
 
     /// non-capture lambda & callable object constructor
-    template <lambda_non_capture_t Callable,
+    template <lambda_non_capture Callable,
               typename... Args,
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
@@ -602,8 +601,8 @@ public:
     { then (std::forward<Callable> (fn), std::forward<Args> (args)...); }
 
     /// capture lambda constructor
-    template <lambda_capture_t Callable,
-              allocator_t A = memory::allocator<Callable>,
+    template <lambda_capture Callable,
+              allocator_like A = memory::allocator<Callable>,
               typename... Args,
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
@@ -658,7 +657,7 @@ public:
     }
 
     /// non-capture lambda & callable objects then
-    template <lambda_non_capture_t Callable,
+    template <lambda_non_capture Callable,
               typename... Args,
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
@@ -679,8 +678,8 @@ public:
     }
 
     /// capture lambda then
-    template <lambda_capture_t Callable,
-              allocator_t A = memory::allocator<Callable>,
+    template <lambda_capture Callable,
+              allocator_like A = memory::allocator<Callable>,
               typename... Args,
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>

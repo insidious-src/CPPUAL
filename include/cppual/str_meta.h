@@ -25,8 +25,11 @@
 
 
 #include <cppual/types>
+#include <cppual/string.h>
 #include <cppual/concepts>
+#include <cppual/containers>
 
+#include <string_view>
 #include <string>
 
 namespace cppual {
@@ -58,8 +61,17 @@ constexpr std::size_t char_fast_hash (T const* str) noexcept
                5381;
 }
 
+// ====================================================
+
+constexpr std::size_t char_fast_hash (std::string_view const& str) noexcept
+{
+    return char_fast_hash (str.data ());
+}
+
+// ====================================================
+
 //! char string consteval performance hash (ex. usage as a map hash)
-template <char_t T = char, T const* In>
+template <auto const* In> requires (c_const_tstr<decltype (In)>)
 consteval std::size_t char_fast_hash () noexcept
 {
     typedef std::size_t size_type;
@@ -78,23 +90,37 @@ consteval std::size_t char_fast_hash () noexcept
 // ====================================================
 
 //! char string constexpr complete hash (ex. usage in switch cases or as a hash)
-constexpr u32 char_hash (cchar* input) noexcept
+template <char_t T = char>
+constexpr std::size_t char_hash (T const* input) noexcept
 {
-    return *input ? static_cast<u32> (*input) + 33 * char_hash (input + 1) : 5381;
+    return *input ? static_cast<std::size_t> (*input) + 33 * char_hash (input + 1) : 5381;
+}
+
+constexpr std::size_t char_hash (std::string_view const& input) noexcept
+{
+    return char_hash (input.data ());
 }
 
 //! char string consteval complete hash (ex. usage in switch cases or as a hash)
-template <cchar* In>
-consteval u32 char_hash () noexcept
+template <auto const* In> requires (c_const_tstr<decltype (In)>)
+consteval std::size_t char_hash () noexcept
 {
-    return *In ? static_cast<u32> (*In) + 33 * char_hash<In + 1> () : 5381;
+    return *In ? static_cast<std::size_t> (*In) + 33 * char_hash<In + 1> () : 5381;
 }
 
 // ====================================================
 
 struct char_hash
 {
-    constexpr std::size_t operator () (cchar* key) const noexcept
+    typedef std::size_t size_type;
+
+    template <c_const_tstr Char>
+    constexpr size_type operator () (Char key) const noexcept
+    {
+        return char_fast_hash (key);
+    }
+
+    constexpr size_type operator () (std::string_view key) const noexcept
     {
         return char_fast_hash (key);
     }
@@ -104,17 +130,35 @@ struct char_hash
 
 struct fnv1a_hash
 {
-    constexpr std::size_t operator () (cchar* str) const noexcept
+    typedef std::size_t size_type;
+
+    template <c_const_tstr Char>
+    constexpr size_type operator () (Char str) const noexcept
     {
-        std::size_t hash = 2166136261;
+        size_type hash = 2166136261;
 
         while (*str)
         {
-            hash ^= static_cast<std::size_t> (*str++);
+            hash ^= static_cast<size_type> (*str++);
             hash *= 16777619;
         }
 
         return hash;
+    }
+
+    constexpr size_type operator () (std::string_view const& sv) const noexcept
+    {
+        return (*this)(sv.data ());
+    }
+
+    constexpr size_type operator () (fstring const& sv) const noexcept
+    {
+        return (*this)(sv.data ());
+    }
+
+    constexpr size_type operator () (string const& sv) const noexcept
+    {
+        return (*this)(sv.data ());
     }
 };
 

@@ -27,7 +27,7 @@
 #include <cppual/signal>
 #include <cppual/concepts>
 #include <cppual/meta_functional>
-#include <cppual/memory/allocator.h>
+#include <cppual/memory_allocator>
 
 // =========================================================
 
@@ -35,9 +35,7 @@ namespace cppual {
 
 // =========================================================
 
-using memory::allocator_t;
-
-template <non_void T, allocator_t = signal_allocator<void(arg_t<T>)>>
+template <non_void T, memory::allocator_like = memory::allocator<function<void(arg_t<T>)>>>
 class reactive;
 
 // =========================================================
@@ -69,29 +67,26 @@ typedef reactive<ldouble> reactive_ldouble;
 
 // =========================================================
 
-template <non_void T, allocator_t A>
+template <non_void T, memory::allocator_like A>
 class reactive : private signal<void(arg_t<T>), A>
 {
 public:
-    typedef reactive<T, A>              self_type      ;
-    typedef arg_t<T>                    arg_type       ;
-    typedef signal<void(arg_type), A>   base_type      ;
-    typedef std::allocator_traits<A>    traits_type    ;
-    typedef traits_type::allocator_type allocator_type ;
-    typedef remove_cref_t<T>            value_type     ;
-    typedef value_type const            const_value    ;
-    typedef value_type &                reference      ;
-    typedef value_type const&           const_reference;
-    typedef value_type *                pointer        ;
-    typedef value_type const*           const_pointer  ;
-    typedef base_type::value_type       fn_type        ;
-    typedef base_type::static_fn_ref    static_fn_ref  ;
+    typedef reactive<T, A>               self_type      ;
+    typedef arg_t<T>                     arg_type       ;
+    typedef signal<void(arg_type), A>    base_type      ;
+    typedef memory::allocator_traits<A>  alloc_traits   ;
+    typedef alloc_traits::allocator_type allocator_type ;
+    typedef remove_cref_t<T>             value_type     ;
+    typedef value_type const             const_value    ;
+    typedef value_type &                 reference      ;
+    typedef value_type const&            const_reference;
+    typedef value_type *                 pointer        ;
+    typedef value_type const*            const_pointer  ;
+    typedef base_type::value_type        fn_type        ;
+    typedef base_type::static_fn_ref     static_fn_ref  ;
 
     static_assert (std::equality_comparable<value_type>, "value_type is NOT equality comparable!");
-    static_assert (std::is_copy_constructible_v<value_type>, "value_type is NOT copy constructable!");
-    static_assert (std::is_copy_assignable_v<value_type>, "value_type is NOT copy assignable!");
-    static_assert (std::is_move_constructible_v<value_type>, "value_type is NOT move constructable!");
-    static_assert (std::is_move_assignable_v<value_type>, "value_type is NOT move assignable!");
+    static_assert (is_copyable_movable_v<value_type>, "value_type is NOT neighter copyable nor movable!");
 
     template <class_t C>
     using mem_fn_type = any_fn_type<C, void(arg_type)>::type;
@@ -99,8 +94,8 @@ public:
     template <class_t C>
     using const_mem_fn_type = any_fn_type<C, void(arg_type) const>::type;
 
-    constexpr reactive () noexcept    = default;
-    constexpr reactive (self_type &&) = default;
+    constexpr reactive () noexcept   = default;
+    constexpr reactive (self_type&&) = default;
 
     constexpr reactive (self_type const& rh) noexcept
     : base_type ( rh         )
@@ -124,7 +119,7 @@ public:
     {
         if (this == &rh) return *this;
 
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         base_type::operator = (rh);
 
@@ -134,10 +129,10 @@ public:
         for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
         {
             if (next != _M_pNext) next->_M_value = _M_value;
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        (*signal)(_M_value);
+        (*reactive_signal)(_M_value);
 
         return *this;
     }
@@ -159,7 +154,7 @@ public:
     {
         if (_M_value == value) return *this;
 
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         _M_value = std::move (value);
 
@@ -167,10 +162,10 @@ public:
         {
             next->_M_value = _M_value;
 
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        (*signal)(_M_value);
+        (*reactive_signal)(_M_value);
 
         return *this;
     }
@@ -179,7 +174,7 @@ public:
     {
         if (_M_value == value) return *this;
 
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         _M_value = value;
 
@@ -187,10 +182,10 @@ public:
         {
             next->_M_value = _M_value;
 
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        (*signal)(_M_value);
+        (*reactive_signal)(_M_value);
 
         return *this;
     }
@@ -207,14 +202,14 @@ public:
     /// reactive (signal/slot) connect
     constexpr self_type& operator << (fn_type&& fn) const
     {
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
         {
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        *signal << std::move (fn);
+        *reactive_signal << std::move (fn);
 
         return *this;
     }
@@ -222,27 +217,27 @@ public:
     /// reactive (signal/slot) connect
     constexpr self_type& operator << (fn_type const& fn) const
     {
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
         {
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        *signal << fn;
+        *reactive_signal << fn;
 
         return *this;
     }
 
     /// reactive (signal/slot) connect
-    template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <callable C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator << (std::pair<C&, mem_fn_type<C>> pair) const
     {
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
         {
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
         connect (*this, pair.first, pair.second);
@@ -251,14 +246,14 @@ public:
     }
 
     /// reactive (signal/slot) connect
-    template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <callable C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator << (std::pair<C&, const_mem_fn_type<C>> pair) const
     {
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
         {
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
         connect (*this, pair.first, pair.second);
@@ -269,38 +264,38 @@ public:
     /// reactive (signal/slot) connect
     constexpr self_type& operator << (static_fn_ref fn) const
     {
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
         {
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        *signal << fn;
+        *reactive_signal << fn;
 
         return *this;
     }
 
     /// callable object reactive (signal/slot) connect
-    template <callable_t C, typename = std::enable_if_t<!is_functional_v<C>>>
+    template <callable C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator << (C& obj) const
     {
-        static_assert (std::is_same_v<void, callable_return_t<C, arg_type>>,
+        static_assert (std::is_same_v<void, callable_return<C, arg_type>>,
                        "C::operator () return type is NOT void!");
 
-        self_type* signal = this;
+        self_type* reactive_signal = this;
 
         for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
         {
-            if (signal == this && !next->empty ()) signal = next;
+            if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        *signal << obj;
+        *reactive_signal << obj;
 
         return *this;
     }
 
-    template <non_void, allocator_t>
+    template <non_void, memory::allocator_like>
     friend class reactive;
 
 private:
@@ -311,6 +306,8 @@ private:
 // =========================================================
 
 } // cppual
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_REACTIVE_H_

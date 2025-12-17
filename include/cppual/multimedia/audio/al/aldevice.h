@@ -24,10 +24,10 @@
 #ifdef __cplusplus
 
 
-#include <cppual/noncopyable.h>
-#include <cppual/containers.h>
-#include <cppual/resource.h>
-#include <cppual/string.h>
+#include <cppual/noncopyable>
+#include <cppual/containers>
+#include <cppual/resource>
+#include <cppual/string>
 
 #include <cppual/multimedia/audio/sound.h>
 #include <cppual/multimedia/audio/spatial.h>
@@ -113,6 +113,7 @@ class SHARED_API instance final : public non_copyable
 public:
     typedef string                 string_type;
     typedef dyn_array<string_type> ext_list   ;
+    typedef resource_handle        handle_type;
 
     instance () = delete;
     instance (playback_device& device, bool current = false) noexcept;
@@ -140,7 +141,7 @@ public:
 
 private:
     playback_device* _M_gDevice    ;
-    void*            _M_pDevContext;
+    handle_type      _M_pDevContext;
 };
 
 } } } // namespace Audio

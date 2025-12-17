@@ -1,6 +1,6 @@
 ![Logo](https://raw.githubusercontent.com/insidious-src/CPPUAL/master/cppual.png "C++ Unified Abstraction Library")
 
->Latest Supported Language Standard: C++20
+>Latest Supported Language Standard: C++23
 
 ***[The Source Code - Github](https://github.com/insidious-src/CPPUAL)***
 
@@ -24,13 +24,11 @@
 
 ## Technical Specifications
 
-### Host
+### Endoskeleton
 * plugins
 * utilities
 * cross-platform process management and interprocess communication
 * query hardware and os information
-
-### Compute
 * use concurrency as fallback host implementation
 * specialized device & shared memory allocators
 * unified memory management & allocator patterns

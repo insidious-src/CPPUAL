@@ -23,7 +23,7 @@
 #define CPPUAL_BITFIELD_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
+#include <cppual/types>
 
 #include <type_traits>
 

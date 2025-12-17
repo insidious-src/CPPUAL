@@ -61,7 +61,7 @@ bool tcp_listener::accept (tcp_stream&) noexcept
     ::sockaddr_in gAddr = ::sockaddr_in { };
     ::socklen_t   uLen  = sizeof (::sockaddr_in);
 
-    replace_from_id (::accept (handle (),
+    replace_from_id (::accept (handle<int> (),
                                reinterpret_cast<::sockaddr*> (&gAddr),
                                &uLen));
     return true;
@@ -82,9 +82,9 @@ bool tcp_listener::listen (address const& addr, u16 uPort) noexcept
         gAddr.sin_addr.s_addr = INADDR_ANY;
 
     int optval = 1;
-    ::setsockopt (handle (), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
+    ::setsockopt (handle<int> (), SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval));
 
-    if (::bind (handle (), (::sockaddr*) &gAddr, sizeof (gAddr)) == -1 || ::listen (handle (), 0) == -1)
+    if (::bind (handle<int> (), (::sockaddr*) &gAddr, sizeof (gAddr)) == -1 || ::listen (handle<int> (), 0) == -1)
         return _M_bIsListening;
 #   endif
 

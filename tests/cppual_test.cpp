@@ -28,7 +28,7 @@ private:
     {
         using cppual::point2i;
         using cppual::gfx::color;
-        typedef cppual::gfx::drawable2d_interface::line_style line_style;
+        typedef cppual::gfx::drawable_interface::line_style line_style;
 
         cppual::gfx::painter paint (platform_surface ());
 

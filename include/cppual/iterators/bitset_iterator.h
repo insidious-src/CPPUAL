@@ -34,12 +34,12 @@ namespace cppual {
 
 // =========================================================
 
-template <enum_t> class bitset;
+template <enumeration> class bitset;
 
 // =========================================================
 
 //! iterator for set bits
-template <enum_t T>
+template <enumeration T>
 class set_bit_iterator
 {
 public:
@@ -55,7 +55,7 @@ public:
     typedef std::ptrdiff_t                  difference_type  ;
     typedef std::bidirectional_iterator_tag iterator_category;
 
-    template <enum_t U> using self_type_t = set_bit_iterator<U>;
+    template <enumeration U> using self_type_t = set_bit_iterator<U>;
 
     typedef std::conditional_t<std::is_const_v<value_type>, const_value, int_type> elem_type;
 

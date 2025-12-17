@@ -24,30 +24,32 @@
 #ifdef __cplusplus
 
 #include <cppual/decl>
+#include <cppual/types>
 #include <cppual/concepts>
 #include <cppual/meta_type>
-#include <cppual/containers>
+#include <cppual/array_map>
 #include <cppual/memory_allocator>
 
 #include <cppual/string.h>
 
+//#include <array>
 #include <cstring>
 #include <string>
 #include <vector>
 #include <memory>
 #include <cassert>
 
+// ====================================================
+
 namespace cppual {
+
+// ====================================================
 
 template <typename>
 class consteval_array_iterator;
 
 template <non_void, std::size_t>
 class consteval_array;
-
-// ====================================================
-
-using memory::allocator_t;
 
 // ====================================================
 
@@ -64,6 +66,7 @@ public:
     typedef T::reference                    reference        ;
     typedef T::const_reference              const_reference  ;
     typedef T::string_type                  string_type      ;
+    typedef T::string_view                  string_view      ;
     typedef T::difference_type              difference_type  ;
     typedef T::size_type                    size_type        ;
     typedef size_type const                 const_size       ;
@@ -72,13 +75,15 @@ public:
     template <typename U>
     using self_type_t = consteval_array_iterator<U>;
 
-    typedef std::conditional_t<std::is_const_v<buf_type>, const_value, value_type> elem_type;
+    typedef std::conditional_t<std::is_const_v<buf_type>, const_value, value_type> elem_type     ;
+    typedef std::conditional_t<char_t<value_type>, string_view , reference>        elem_reference;
+    typedef std::conditional_t<char_t<value_type>, string_view*, pointer  >        elem_pointer  ;
 
     friend class consteval_array_iterator<buf_type const>;
     friend class consteval_array_iterator<std::remove_const_t<buf_type>>;
 
-    constexpr string_type  operator  * () const { return  (*_M_buf)[_M_pos]; }
-    constexpr string_type* operator -> () const { return &(*_M_buf)[_M_pos]; }
+    constexpr elem_reference operator  * () const { return  (*_M_buf)[_M_pos]; }
+    constexpr elem_pointer   operator -> () const { return &(*_M_buf)[_M_pos]; }
 
     consteval_array_iterator () = delete;
 
@@ -184,24 +189,8 @@ constexpr bool operator == (consteval_array_iterator<T> const& lh, consteval_arr
 { return lh.pos () == rh.pos () && &lh.get () == &rh.get (); }
 
 template <typename T>
-constexpr bool operator != (consteval_array_iterator<T> const& lh, consteval_array_iterator<T> const& rh)
-{ return !(lh == rh); }
-
-template <typename T>
-constexpr bool operator > (consteval_array_iterator<T> const& lh, consteval_array_iterator<T> const& rh)
-{ return lh.pos () > rh.pos (); }
-
-template <typename T>
-constexpr bool operator >= (consteval_array_iterator<T> const& lh, consteval_array_iterator<T> const& rh)
-{ return lh.pos () >= rh.pos (); }
-
-template <typename T>
-constexpr bool operator < (consteval_array_iterator<T> const& lh, consteval_array_iterator<T> const& rh)
-{ return lh.pos () < rh.pos (); }
-
-template <typename T>
-constexpr bool operator <= (consteval_array_iterator<T> const& lh, consteval_array_iterator<T> const& rh)
-{ return lh.pos () <= rh.pos (); }
+constexpr auto operator <=> (consteval_array_iterator<T> const& lh, consteval_array_iterator<T> const& rh)
+{ return lh.pos () <=> rh.pos () && &lh.get () <=> &rh.get (); }
 
 // =========================================================
 
@@ -248,10 +237,11 @@ public:
     typedef value_type const*                         const_pointer         ;
     typedef value_type const&                         reference             ;
     typedef value_type const&                         const_reference       ;
-    typedef std::basic_string_view<T>                 string_type           ;
+    typedef string                                    string_type           ;
+    typedef std::basic_string_view<T>                 string_view           ;
     typedef decltype (N)                              size_type             ;
     typedef size_type const                           const_size            ;
-    typedef std::ptrdiff_t                            difference_type       ;
+    typedef ptrdiff                                   difference_type       ;
     typedef consteval_array_iterator<self_type>       iterator              ;
     typedef consteval_array_iterator<self_type const> const_iterator        ;
     typedef std::reverse_iterator<iterator>           reverse_iterator      ;
@@ -263,15 +253,16 @@ public:
 
     inline constexpr static const_size npos = static_cast<size_type> (-1);
 
-    typedef std::conditional_t<is_char_v<T>, const_pointer, value_type> elem_type;
-    typedef std::conditional_t<is_char_v<T>, string_type&, const_reference> elem_reference;
-    typedef std::conditional_t<is_char_v<T>, string_type const&, const_reference> elem_const_reference;
-    typedef std::conditional_t<is_char_v<T>, string_type, value_type> array_type;
+    typedef std::conditional_t<char_t<T>, const_pointer, value_type>                elem_type           ;
+    typedef std::conditional_t<char_t<T>, string_view *, pointer>                   elem_pointer        ;
+    typedef std::conditional_t<char_t<T>, string_view const*, const_pointer>        elem_const_pointer  ;
+    typedef std::conditional_t<char_t<T>, string_view &, reference>                 elem_reference      ;
+    typedef std::conditional_t<char_t<T>, string_view const&, const_reference>      elem_const_reference;
+    typedef std::conditional_t<char_t<T>, string_view[size ()], elem_type[size ()]> array_type          ;
 
     consteval_array () = delete;
 
-    template <c_str_const_t... Ts>
-    requires (sizeof... (Ts) == size ())
+    template <c_const_str... Ts> requires (sizeof... (Ts) == size ())
     consteval consteval_array (Ts... array) noexcept
     : _M_array { std::forward<Ts> (array)... }
     {
@@ -285,13 +276,24 @@ public:
         static_assert (list.size () == size (), "string array initializer list size mismatch!");
     }
 
-    constexpr elem_const_reference operator [] (const_size i) const noexcept
+    constexpr elem_const_reference operator [] (size_type i) const noexcept
+    {
+        return _M_array[i];
+    }
+
+    constexpr elem_reference operator [] (size_type i) noexcept
+    {
+        return _M_array[i];
+    }
+
+
+    constexpr elem_const_reference at (size_type i) const noexcept
     {
         assert (i < size () && "index out of range!");
         return _M_array[i];
     }
 
-    constexpr elem_reference operator [] (const_size i) noexcept
+    constexpr elem_reference at (size_type i) noexcept
     {
         assert (i < size () && "index out of range!");
         return _M_array[i];
@@ -299,23 +301,23 @@ public:
 
     consteval size_type hash (const_size i) const noexcept
     {
-        static_assert (is_char_v<value_type>, "hash is only available for C string types!");
+        static_assert (char_t<value_type>, "hash is only available for C string types!");
 
         assert (i < size () && "index out of range!");
-        return char_hash<(*this)[i]> ();
+        return char_hash<_M_array[i]> ();
     }
 
     consteval elem_const_reference front  () const noexcept { return _M_array[0]; }
     consteval elem_const_reference back   () const noexcept { return _M_array[size () - 1]; }
-    consteval const_iterator       begin  () const noexcept { return const_iterator (*this, 0); }
+    consteval iterator             begin  () const noexcept { return const_iterator (*this, 0); }
+    consteval iterator             end    () const noexcept { return iterator (*this, size ()); }
     consteval const_iterator       cbegin () const noexcept { return const_iterator (*this, 0); }
-    consteval const_iterator       end    () const noexcept { return const_iterator (*this, size ()); }
     consteval const_iterator       cend   () const noexcept { return const_iterator (*this, size ()); }
 
-    consteval const_reverse_iterator rbegin () const noexcept
+    consteval reverse_iterator rbegin () const noexcept
     {  return const_reverse_iterator (const_iterator (*this, size () - 1)); }
 
-    consteval const_reverse_iterator rend () const noexcept
+    consteval reverse_iterator rend () const noexcept
     {  return const_reverse_iterator (const_iterator (*this, npos)); }
 
     consteval const_reverse_iterator crbegin () const noexcept
@@ -325,26 +327,26 @@ public:
     {  return const_reverse_iterator (const_iterator (*this, npos)); }
 
 private:
-    array_type _M_array[size ()];
+    array_type _M_array;
 };
 
 //======================================================
 
-template <non_void T = char, c_str_const_t... Ts>
-consteval auto make_consteval_array (Ts... ts) -> consteval_array<T, sizeof... (Ts)>
+template <non_void T = char, c_const_str... Ts>
+consteval consteval_array<T, sizeof... (Ts)> make_consteval_array (Ts... ts)
 {
     return { std::forward<Ts> (ts)... };
 }
 
 template <non_void T = char>
-consteval auto make_consteval_array (std::initializer_list<T> list) -> consteval_array<T, list.size ()>
+consteval auto make_consteval_array (std::initializer_list<T> list)
 {
     return consteval_array<T, list.size ()> (list);
 }
 
 // ====================================================
 
-template <char_t T = char, allocator_t A = memory::allocator<T>>
+template <char_t T = char, memory::allocator_like A = memory::allocator<T>>
 auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str, T delim)
 {
     static_assert (std::is_same_v<T, typename A::value_type>, "");
@@ -376,7 +378,7 @@ auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str, T de
 
 // ====================================================
 
-template <char_t T = char, allocator_t A = memory::allocator<T>>
+template <char_t T = char, memory::allocator_like A = memory::allocator<T>>
 auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str,
                    std::basic_string<T, std::char_traits<T>, A> const& delim)
 {
@@ -401,18 +403,20 @@ auto split_string (std::basic_string<T, std::char_traits<T>, A> const& str,
 
 // ====================================================
 
-template <number_t    T,
-          char_t      Char = char,
-          allocator_t A    = memory::allocator<Char>
+template <number T,
+          char_t Char = char,
+          memory::allocator_like A = memory::allocator<Char>
           >
-inline auto number_to_string (T val)
+constexpr auto number_to_string (T val)
 {
-    typedef std::basic_string<Char, std::char_traits<Char>, A> string_type;
+    typedef cow_string<Char, char_traits<Char>, A> string_type;
     typedef std::size_t size_type;
+
+    static_assert (memory::is_allocator_v<A>, "A must be a valid allocator type!");
 
     string_type str_val (sizeof (T), ' ');
 
-    unordered_map<size_type, cchar*> formats_map
+    dyn_array_map<size_type, cchar*> formats_map
     {
         std::make_pair (typeid(ushort).hash_code  (), "%hu"),
         std::make_pair (typeid(short).hash_code   (), "%hd"),
@@ -434,15 +438,16 @@ inline auto number_to_string (T val)
 
 // ====================================================
 
-template <non_void  T,
-          char_t      Char = char,
-          allocator_t A    = memory::allocator<Char>,
-          typename         = std::enable_if_t<std::is_same_v<Char, typename A::value_type>>
+template <non_void T,
+          char_t Char = char,
+          memory::allocator_like A = memory::allocator<Char>
           >
-inline auto to_string (T val, A const& ator = A ())
+constexpr auto to_string (T val, A const& ator = A ())
 {
     typedef std::basic_string<Char, std::char_traits<Char>, A>        string_type  ;
     typedef std::basic_ostringstream<Char, std::char_traits<Char>, A> ostringstream;
+
+    static_assert (memory::is_allocator_v<A>, "A must be a valid allocator type!");
 
     string_type   in_str (ator);
     ostringstream ss   (in_str);
@@ -455,42 +460,58 @@ inline auto to_string (T val, A const& ator = A ())
 // ====================================================
 
 template <char_t Char = char>
-inline auto to_std_string (std::basic_string<Char, std::char_traits<Char>, memory::allocator<Char>> const& val)
+constexpr auto to_std_string (std::basic_string<Char,
+                                                std::char_traits<Char>,
+                                                memory::allocator<Char>> const& val)
 {
     typedef std::basic_string<Char, std::char_traits<Char>, std::allocator<Char>> std_string_type;
 
     return std_string_type (val.c_str (), val.size ());
 }
 
+//======================================================
+
 template <char_t Char = char>
-inline auto to_std_string (fstring<Char>, char_traits<Char>, memory::allocator<Char> const& val)
+constexpr auto to_std_string (cow_string<Char,
+                                         char_traits<Char>,
+                                         memory::allocator<Char>> const& val)
 {
     typedef std::basic_string<Char, std::char_traits<Char>, std::allocator<Char>> std_string_type;
 
     return std_string_type (val.c_str (), val.size ());
+}
+
+//======================================================
+
+template <number T>
+constexpr auto operator + (fstring const& lh, T rh)
+{
+    fstring ret_obj, suffix = number_to_string<T> (rh);
+
+    ret_obj.reserve (lh.size () + suffix.size ());
+
+    ret_obj += lh    ;
+    ret_obj += suffix;
+
+    return ret_obj;
+}
+
+template <number T>
+constexpr auto operator + (T lh, fstring const& rh)
+{
+    fstring ret_obj, prefix = number_to_string (lh);
+
+    ret_obj.reserve (prefix.size () + rh.size ());
+
+    ret_obj += prefix;
+    ret_obj += rh    ;
+
+    return ret_obj;
 }
 
 //======================================================
 
 } // cppual
-
-//======================================================
-
-// template <cppual::number_t T>
-// constexpr cppual::string operator + (cppual::cchar* lh, T rh)
-// {
-//     cppual::string ret_obj (lh);
-//     ret_obj += cppual::number_to_string<T> (rh);
-//     return ret_obj;
-// }
-
-// template <cppual::number_t T>
-// constexpr cppual::string operator + (T lh, cppual::cchar* rh)
-// {
-//     cppual::string ret_obj (cppual::number_to_string<T> (lh));
-//     ret_obj += rh;
-//     return ret_obj;
-// }
 
 //======================================================
 

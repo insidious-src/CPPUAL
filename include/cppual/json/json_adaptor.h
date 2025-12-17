@@ -24,7 +24,7 @@ namespace cppual::json {
 
 //======================================================
 
-using memory::allocator_t;
+using memory::allocator_like;
 
 //======================================================
 
@@ -174,12 +174,12 @@ class template_object;
 class template_array ;
 
 template <json_value_t T,
-          allocator_t  A = memory::allocator<value_reference<remove_cref_t<T>>>
+          allocator_like  A = memory::allocator<value_reference<remove_cref_t<T>>>
           >
 class values_array;
 
 template <typename    T,
-          allocator_t A = memory::allocator<T>,
+          allocator_like A = memory::allocator<T>,
           typename      = std::enable_if_t<std::is_base_of_v<template_object, T> ||
                                            std::is_base_of_v<template_array , T>>
           >
@@ -249,10 +249,10 @@ public:
     friend class template_object;
     friend class template_array ;
 
-    template <json_value_t, allocator_t>
+    template <json_value_t, allocator_like>
     friend class values_array;
 
-    template <typename, allocator_t, typename>
+    template <typename, allocator_like, typename>
     friend class objects_array;
 
     template <json_value_t T>
@@ -433,7 +433,7 @@ public:
         return _M_parser;
     }
 
-    inline string_type category () const noexcept
+    constexpr string_type category () const noexcept
     {
         return _M_category;
     }
@@ -483,10 +483,10 @@ private:
     template <json_value_t>
     friend class value_reference;
 
-    template <json_value_t, allocator_t>
+    template <json_value_t, allocator_like>
     friend class values_array;
 
-    template <typename, allocator_t, typename>
+    template <typename, allocator_like, typename>
     friend class objects_array;
 
     friend class template_object;
@@ -539,10 +539,10 @@ private:
     template <json_value_t>
     friend class value_reference_template;
 
-    template <json_value_t, allocator_t>
+    template <json_value_t, allocator_like>
     friend class values_array;
 
-    template <typename, allocator_t, typename>
+    template <typename, allocator_like, typename>
     friend class objects_array;
 
     friend class template_array;
@@ -606,10 +606,10 @@ private:
     template <json_value_t>
     friend class value_reference_template;
 
-    template <json_value_t, allocator_t>
+    template <json_value_t, allocator_like>
     friend class values_array;
 
-    template <typename, allocator_t, typename>
+    template <typename, allocator_like, typename>
     friend class objects_array;
 
     friend class template_object;
@@ -629,7 +629,7 @@ public:
 
     static constexpr auto npos = static_cast<size_type> (-1);
 
-    inline Type type() const
+    constexpr Type type() const
     {
         return ref()->GetType();
     }
@@ -685,17 +685,17 @@ private:
     template <json_value_t>
     friend class value_reference;
 
-    template <json_value_t, allocator_t>
+    template <json_value_t, allocator_like>
     friend class values_array;
 
-    template <typename, allocator_t, typename>
+    template <typename, allocator_like, typename>
     friend class objects_array;
 
     template <typename U>
-    friend inline bool operator == (value_reference<U> const&, std::nullptr_t);
+    friend constexpr bool operator == (value_reference<U> const&, std::nullptr_t);
 
     template <typename U>
-    friend inline bool operator == (std::nullptr_t, value_reference<U> const&);
+    friend constexpr bool operator == (std::nullptr_t, value_reference<U> const&);
 };
 
 // ======================================================================
@@ -706,7 +706,7 @@ class value_reference_template : public value_reference_base
 public:
     typedef value_reference_template<T> self_type ;
     typedef value_reference_base        base_type ;
-    typedef remove_cref_t<T>      value_type;
+    typedef remove_cref_t<T>            value_type;
 
     typedef typename std::conditional<std::is_same_v<i16, T> || std::is_enum_v<T>,
             typename std::conditional<sizeof (T) <= sizeof (i32), i32, i64>::type,
@@ -715,7 +715,7 @@ public:
             default_type;
 
 protected:
-    inline value_reference_template (template_object*    owner,
+    constexpr value_reference_template (template_object*    owner,
                                      string_type  const& key,
                                      default_type const& default_val = default_type ())
     : base_type (owner)
@@ -749,7 +749,7 @@ protected:
         _M_fn (this);
     }
 
-    inline value_reference_template (template_array*     owner,
+    constexpr value_reference_template (template_array*     owner,
                                      size_type           idx,
                                      default_type const& default_val = default_type ())
     : base_type (owner)
@@ -784,10 +784,10 @@ protected:
 
     friend class value_reference<T>;
 
-    template <json_value_t, allocator_t>
+    template <json_value_t, allocator_like>
     friend class values_array;
 
-    template <typename, allocator_t, typename>
+    template <typename, allocator_like, typename>
     friend class objects_array;
 };
 
@@ -813,10 +813,10 @@ protected:
 private:
     friend class value_reference<value_type>;
 
-    template <json_value_t, allocator_t>
+    template <json_value_t, allocator_like>
     friend class values_array;
 
-    template <typename, allocator_t, typename>
+    template <typename, allocator_like, typename>
     friend class objects_array;
 };
 
@@ -834,13 +834,13 @@ public:
     typedef base_type::value_type       value_type    ;
     typedef base_type::default_type     default_type  ;
 
-    inline value_reference (template_object*    owner,
+    constexpr value_reference (template_object*    owner,
                             string_type  const& name,
                             default_type const& default_val = default_type())
     : base_type (owner, name, default_val)
     { }
 
-    inline value_reference (template_array*     owner,
+    constexpr value_reference (template_array*     owner,
                             size_type           idx,
                             default_type const& default_val = default_type())
     : base_type (owner, idx, default_val)
@@ -850,26 +850,26 @@ public:
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return static_cast<value_type>(sizeof (default_type) <= sizeof (i32) ? this->ref()->GetInt   () :
                                                                                this->ref()->GetInt64 ());
     }
 
-    inline auto value () const noexcept
+    constexpr auto value () const noexcept
     {
         return static_cast<std::underlying_type_t<value_type>>
                           (sizeof (default_type) <= sizeof (i32) ? this->ref()->GetInt   () :
                                                                    this->ref()->GetInt64 ());
     }
 
-    inline self_type& operator = (self_type const& ref)
+    constexpr self_type& operator = (self_type const& ref)
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type value)
+    constexpr self_type& operator = (value_type value)
     {
         if (sizeof (default_type) <= sizeof (i32))
             this->ref ()->SetInt (static_cast<i32> (value));
@@ -900,27 +900,27 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return ref ()->GetBool ();
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return ref ()->GetBool ();
     }
 
-    inline self_type& operator = (self_type const& ref)
+    constexpr self_type& operator = (self_type const& ref)
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type value)
+    constexpr self_type& operator = (value_type value)
     {
         ref ()->SetBool (value);
         return *this;
@@ -948,27 +948,27 @@ public:
                      size_type       idx,
                      value_type      default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return static_cast<value_type>(ref ()->GetUint ());
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return static_cast<value_type>(ref ()->GetUint ());
     }
 
-    inline self_type& operator = (self_type const& ref) noexcept
+    constexpr self_type& operator = (self_type const& ref) noexcept
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type value)
+    constexpr self_type& operator = (value_type value)
     {
         ref ()->SetUint (static_cast<uint>(value));
         return *this;
@@ -996,27 +996,27 @@ public:
                      size_type       idx,
                      value_type      default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return static_cast<value_type> (ref ()->GetInt ());
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return static_cast<value_type> (ref ()->GetInt ());
     }
 
-    inline self_type& operator = (self_type const& ref) noexcept
+    constexpr self_type& operator = (self_type const& ref) noexcept
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type value)
+    constexpr self_type& operator = (value_type value)
     {
         ref ()->SetInt (static_cast<int> (value));
         return *this;
@@ -1043,27 +1043,27 @@ public:
                      size_type       idx,
                      value_type      default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return ref ()->GetUint ();
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return ref ()->GetUint ();
     }
 
-    inline self_type& operator = (self_type const& ref) noexcept
+    constexpr self_type& operator = (self_type const& ref) noexcept
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type value)
+    constexpr self_type& operator = (value_type value)
     {
         ref ()->SetUint (value);
         return *this;
@@ -1090,27 +1090,27 @@ public:
                      size_type         idx  ,
                      value_type const& default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return ref ()->GetInt ();
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return ref ()->GetInt ();
     }
 
-    inline self_type& operator = (self_type const& ref) noexcept
+    constexpr self_type& operator = (self_type const& ref) noexcept
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type value) noexcept
+    constexpr self_type& operator = (value_type value) noexcept
     {
         ref ()->SetInt (value);
         return *this;
@@ -1137,27 +1137,27 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return ref ()->GetUint64 ();
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return ref ()->GetUint64 ();
     }
 
-    inline self_type& operator = (self_type const& ref) noexcept
+    constexpr self_type& operator = (self_type const& ref) noexcept
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type const& value)
+    constexpr self_type& operator = (value_type const& value)
     {
         ref ()->SetUint64 (value);
         return *this;
@@ -1184,27 +1184,27 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return ref ()->GetInt64 ();
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return ref ()->GetInt64 ();
     }
 
-    inline self_type& operator = (self_type const& ref) noexcept
+    constexpr self_type& operator = (self_type const& ref) noexcept
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type const& value)
+    constexpr self_type& operator = (value_type const& value)
     {
         ref ()->SetInt64 (value);
         return *this;
@@ -1231,27 +1231,27 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return ref ()->GetFloat ();
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return ref ()->GetFloat ();
     }
 
-    inline self_type& operator = (self_type const& ref) noexcept
+    constexpr self_type& operator = (self_type const& ref) noexcept
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type const& value)
+    constexpr self_type& operator = (value_type const& value)
     {
         ref ()->SetFloat (value);
         return *this;
@@ -1278,27 +1278,27 @@ public:
                      size_type         idx,
                      value_type const& default_val = value_type());
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj)
     { }
 
-    inline operator value_type () const noexcept
+    constexpr operator value_type () const noexcept
     {
         return ref ()->GetDouble ();
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return ref ()->GetDouble ();
     }
 
-    inline self_type& operator = (self_type const& ref) noexcept
+    constexpr self_type& operator = (self_type const& ref) noexcept
     {
         if (this != &ref) base_type::operator = (ref);
         return *this;
     }
 
-    inline self_type& operator = (value_type const& value)
+    constexpr self_type& operator = (value_type const& value)
     {
         ref ()->SetDouble (value);
         return *this;
@@ -1331,7 +1331,7 @@ public:
     template <typename R,
               typename = std::enable_if_t<std::is_same_v<R, value_type>>
               >
-    inline value_reference(template_object*     owner,
+    constexpr value_reference(template_object*     owner,
                            string_type const&   name ,
                            function<R()> const& fn   ,
                            value_type const&    default_val = value_type())
@@ -1348,7 +1348,7 @@ public:
     template <typename R,
               typename = std::enable_if_t<std::is_same_v<R, value_type>>
               >
-    inline value_reference (template_array*      owner,
+    constexpr value_reference (template_array*      owner,
                             size_type            idx,
                             function<R()> const& fn,
                             value_type const&    default_val = value_type())
@@ -1365,7 +1365,7 @@ public:
     template <typename E,
               typename = std::enable_if_t<std::is_enum_v<E>>
               >
-    inline value_reference (template_object*     owner,
+    constexpr value_reference (template_object*     owner,
                             string_type const&   name,
                             function<E()> const& fn,
                             value_type  const&   default_val = value_type(),
@@ -1383,7 +1383,7 @@ public:
     template <typename E,
               typename = std::enable_if_t<std::is_enum_v<E>>
               >
-    inline value_reference (template_array*      owner,
+    constexpr value_reference (template_array*      owner,
                             size_type            idx,
                             function<E()> const& fn,
                             value_type const&    default_val = value_type(),
@@ -1398,23 +1398,23 @@ public:
         });
     }
 
-    inline value_reference (self_type const& obj)
+    constexpr value_reference (self_type const& obj)
     : base_type (obj),
       json_enum_invoked(obj.json_enum_invoked),
       json_string_invoked(obj.json_string_invoked)
     { }
 
-    inline operator value_type () const
+    constexpr operator value_type () const
     {
         return value_type(ref ()->GetString (), ref ()->GetStringLength ());
     }
 
-    inline value_type value () const noexcept
+    constexpr value_type value () const noexcept
     {
         return value_type(ref ()->GetString (), ref ()->GetStringLength ());
     }
 
-    inline value_type operator () () const
+    constexpr value_type operator () () const
     {
         value_type value;
 
@@ -1425,7 +1425,7 @@ public:
     template <typename U,
               typename = std::enable_if_t<std::is_enum_v<U>>
               >
-    inline U to_enum () const
+    constexpr U to_enum () const
     {
         int value = 0;
 
@@ -1433,24 +1433,24 @@ public:
         return static_cast<U> (value);
     }
 
-    inline cchar* c_str () const
+    constexpr cchar* c_str () const
     {
         return ref ()->GetString ();
     }
 
     //! string length
-    inline size_type length () const
+    constexpr size_type length () const
     {
         return ref()->GetStringLength();
     }
 
     //! string length
-    inline size_type size () const
+    constexpr size_type size () const
     {
         return length ();
     }
 
-    inline self_type& operator = (self_type const& rh) noexcept
+    constexpr self_type& operator = (self_type const& rh) noexcept
     {
         if (this != &rh)
         {
@@ -1463,7 +1463,7 @@ public:
         return *this;
     }
 
-    inline self_type& operator = (value_type const& value)
+    constexpr self_type& operator = (value_type const& value)
     {
         switch (owner().type())
         {
@@ -1484,7 +1484,7 @@ public:
         return *this;
     }
 
-    inline self_type& operator = (value_type::value_type const* value)
+    constexpr self_type& operator = (value_type::value_type const* value)
     {
         switch (owner ().type ())
         {
@@ -1508,65 +1508,65 @@ private:
 
 //======================================================
 
-inline bool operator == (value_reference<doc_parser::string_type> const& str1,
+constexpr bool operator == (value_reference<doc_parser::string_type> const& str1,
                          value_reference<doc_parser::string_type> const& str2)
 {
    return str1.value () == str2.value ();
 }
 
-inline bool operator != (value_reference<doc_parser::string_type> const& str1,
+constexpr bool operator != (value_reference<doc_parser::string_type> const& str1,
                          value_reference<doc_parser::string_type> const& str2)
 {
    return !(str1 == str2);
 }
 
-inline bool operator == (value_reference<doc_parser::string_type> const& str1,
+constexpr bool operator == (value_reference<doc_parser::string_type> const& str1,
                          value_reference<doc_parser::string_type>::value_type const& str2)
 {
    return str1.value () == str2;
 }
 
-inline bool operator != (value_reference<doc_parser::string_type> const& str1,
+constexpr bool operator != (value_reference<doc_parser::string_type> const& str1,
                          value_reference<doc_parser::string_type>::value_type const& str2)
 {
    return !(str1 == str2);
 }
 
-inline bool operator == (value_reference<doc_parser::string_type>::value_type const& str1,
+constexpr bool operator == (value_reference<doc_parser::string_type>::value_type const& str1,
                          value_reference<doc_parser::string_type> const& str2)
 {
    return str1 == str2.value ();
 }
 
-inline bool operator != (value_reference<doc_parser::string_type>::value_type const& str1,
+constexpr bool operator != (value_reference<doc_parser::string_type>::value_type const& str1,
                          value_reference<doc_parser::string_type> const& str2)
 {
    return !(str1 == str2);
 }
 
-inline bool operator == (cchar* str1, value_reference<doc_parser::string_type> const& str2) noexcept
+constexpr bool operator == (cchar* str1, value_reference<doc_parser::string_type> const& str2) noexcept
 {
    return str1 == str2.value ();
 }
 
-inline bool operator != (cchar* str1, value_reference<doc_parser::string_type> const& str2) noexcept
+constexpr bool operator != (cchar* str1, value_reference<doc_parser::string_type> const& str2) noexcept
 {
    return !(str1 == str2);
 }
 
-inline bool operator == (value_reference<doc_parser::string_type> const& str1, cchar* str2) noexcept
+constexpr bool operator == (value_reference<doc_parser::string_type> const& str1, cchar* str2) noexcept
 {
    return str1.value () == str2;
 }
 
-inline bool operator != (value_reference<doc_parser::string_type> const& str1, cchar* str2) noexcept
+constexpr bool operator != (value_reference<doc_parser::string_type> const& str1, cchar* str2) noexcept
 {
    return !(str1 == str2);
 }
 
 //======================================================
 
-inline
+constexpr
 value_reference<doc_parser::string_type>::value_type
 operator + (value_reference<doc_parser::string_type> const& ref,
             value_reference<doc_parser::string_type>::value_type const& str)
@@ -1576,7 +1576,7 @@ operator + (value_reference<doc_parser::string_type> const& ref,
     return value_type (ref.value () + str);
 }
 
-inline
+constexpr
 value_reference<doc_parser::string_type>::value_type
 operator + (value_reference<doc_parser::string_type> const& ref,
             value_reference<doc_parser::string_type>::value_type::value_type str)
@@ -1586,7 +1586,7 @@ operator + (value_reference<doc_parser::string_type> const& ref,
     return value_type(ref.value () + str);
 }
 
-inline
+constexpr
 value_reference<doc_parser::string_type>::value_type
 operator + (value_reference<doc_parser::string_type> const& ref,
             value_reference<doc_parser::string_type>::value_type::value_type const* str)
@@ -1596,7 +1596,7 @@ operator + (value_reference<doc_parser::string_type> const& ref,
     return value_type(ref.value () + str);
 }
 
-inline
+constexpr
 value_reference<doc_parser::string_type>::value_type
 operator + (value_reference<doc_parser::string_type>::value_type const& str,
             value_reference<doc_parser::string_type> const& ref)
@@ -1606,7 +1606,7 @@ operator + (value_reference<doc_parser::string_type>::value_type const& str,
     return value_type(str + ref.c_str ());
 }
 
-inline
+constexpr
 value_reference<doc_parser::string_type>::value_type
 operator + (value_reference<doc_parser::string_type>::value_type::value_type str,
             value_reference<doc_parser::string_type> const& ref)
@@ -1616,7 +1616,7 @@ operator + (value_reference<doc_parser::string_type>::value_type::value_type str
     return value_type(str + ref.value ());
 }
 
-inline
+constexpr
 value_reference<doc_parser::string_type>::value_type
 operator + (value_reference<doc_parser::string_type>::value_type::value_type const* str,
             value_reference<doc_parser::string_type> const& ref)
@@ -1629,34 +1629,34 @@ operator + (value_reference<doc_parser::string_type>::value_type::value_type con
 //======================================================
 
 template <typename T>
-inline bool operator == (value_reference<T> const& lh, std::nullptr_t)
+constexpr bool operator == (value_reference<T> const& lh, std::nullptr_t)
 {
    return lh._M_owner.type ()  == doc_type::null    ||
           lh._M_ref == nullptr || lh._M_ref->IsNull ();
 }
 
 template <typename T>
-inline bool operator == (std::nullptr_t, value_reference<T> const& rh)
+constexpr bool operator == (std::nullptr_t, value_reference<T> const& rh)
 {
     return rh._M_owner.type ()  == doc_type::null    ||
            rh._M_ref == nullptr || rh._M_ref->IsNull ();
 }
 
 template <typename T>
-inline bool operator != (value_reference<T> const& lh, std::nullptr_t)
+constexpr bool operator != (value_reference<T> const& lh, std::nullptr_t)
 {
    return !(lh == nullptr);
 }
 
 template <typename T>
-inline bool operator != (std::nullptr_t, value_reference<T> const& rh)
+constexpr bool operator != (std::nullptr_t, value_reference<T> const& rh)
 {
    return !(nullptr == rh);
 }
 
 // ======================================================================
 
-template <typename T, allocator_t A>
+template <typename T, allocator_like A>
 class objects_array<T, A> : public template_array, public A
 {
 public:
@@ -1709,67 +1709,67 @@ public:
         values_connections ();
     }
 
-    inline ~objects_array ()
+    constexpr ~objects_array ()
     {
         values_disconnections ();
     }
 
-    inline iterator begin ()
+    constexpr iterator begin ()
     {
         return _M_values.begin();
     }
 
-    inline const_iterator begin () const
+    constexpr const_iterator begin () const
     {
         return _M_values.begin();
     }
 
-    inline const_iterator cbegin () const
+    constexpr const_iterator cbegin () const
     {
         return _M_values.cbegin();
     }
 
-    inline reverse_iterator rbegin ()
+    constexpr reverse_iterator rbegin ()
     {
         return _M_values.rbegin();
     }
 
-    inline const_reverse_iterator rbegin () const
+    constexpr const_reverse_iterator rbegin () const
     {
         return _M_values.rbegin();
     }
 
-    inline const_reverse_iterator crbegin () const
+    constexpr const_reverse_iterator crbegin () const
     {
         return _M_values.crbegin();
     }
 
-    inline iterator end ()
+    constexpr iterator end ()
     {
         return _M_values.end();
     }
 
-    inline const_iterator end () const
+    constexpr const_iterator end () const
     {
         return _M_values.end();
     }
 
-    inline const_iterator cend () const
+    constexpr const_iterator cend () const
     {
         return _M_values.cend();
     }
 
-    inline reverse_iterator rend ()
+    constexpr reverse_iterator rend ()
     {
         return _M_values.rend();
     }
 
-    inline const_reverse_iterator rend () const
+    constexpr const_reverse_iterator rend () const
     {
         return _M_values.rend();
     }
 
-    inline const_reverse_iterator crend () const
+    constexpr const_reverse_iterator crend () const
     {
         return _M_values.crend();
     }
@@ -1779,13 +1779,13 @@ public:
         return *this;
     }
 
-    inline const_reference operator [] (size_type i) const
+    constexpr const_reference operator [] (size_type i) const
     {
         assert(_M_values.size() > i);
         return _M_values[i];
     }
 
-    inline reference operator [] (size_type i)
+    constexpr reference operator [] (size_type i)
     {
         assert(_M_values.size() > i);
         return _M_values[i];
@@ -1878,13 +1878,13 @@ private:
 
 // ======================================================================
 
-template <json_value_t T, allocator_t A>
+template <json_value_t T, allocator_like A>
 class values_array : public template_array, public A
 {
 public:
     typedef values_array<T, A>                          self_type             ;
     typedef template_array                              base_type             ;
-    typedef value_reference<remove_cref_t<T>>     value_type            ;
+    typedef value_reference<remove_cref_t<T>>           value_type            ;
     typedef std::allocator_traits<A>                    traits_type           ;
     typedef traits_type::allocator_type                 allocator_type        ;
     typedef std::deque<value_type, allocator_type>      array_type            ;
@@ -1920,67 +1920,67 @@ public:
         values_connections ();
     }
 
-    inline ~values_array ()
+    constexpr ~values_array ()
     {
         values_disconnections ();
     }
 
-    inline iterator begin ()
+    constexpr iterator begin ()
     {
         return _M_values.begin();
     }
 
-    inline const_iterator begin () const
+    constexpr const_iterator begin () const
     {
         return _M_values.begin();
     }
 
-    inline const_iterator cbegin () const
+    constexpr const_iterator cbegin () const
     {
         return _M_values.cbegin();
     }
 
-    inline reverse_iterator rbegin ()
+    constexpr reverse_iterator rbegin ()
     {
         return _M_values.rbegin();
     }
 
-    inline const_reverse_iterator rbegin () const
+    constexpr const_reverse_iterator rbegin () const
     {
         return _M_values.rbegin();
     }
 
-    inline const_reverse_iterator crbegin () const
+    constexpr const_reverse_iterator crbegin () const
     {
         return _M_values.crbegin();
     }
 
-    inline iterator end ()
+    constexpr iterator end ()
     {
         return _M_values.end();
     }
 
-    inline const_iterator end () const
+    constexpr const_iterator end () const
     {
         return _M_values.end();
     }
 
-    inline const_iterator cend () const
+    constexpr const_iterator cend () const
     {
         return _M_values.cend();
     }
 
-    inline reverse_iterator rend ()
+    constexpr reverse_iterator rend ()
     {
         return _M_values.rend();
     }
 
-    inline const_reverse_iterator rend () const
+    constexpr const_reverse_iterator rend () const
     {
         return _M_values.rend();
     }
 
-    inline const_reverse_iterator crend () const
+    constexpr const_reverse_iterator crend () const
     {
         return _M_values.crend();
     }
@@ -1990,13 +1990,13 @@ public:
         return *this;
     }
 
-    inline const_reference operator [] (size_type i) const
+    constexpr const_reference operator [] (size_type i) const
     {
         assert(size() > i);
         return _M_values[i];
     }
 
-    inline reference operator [] (size_type i)
+    constexpr reference operator [] (size_type i)
     {
         assert(size() > i);
         return _M_values[i];
@@ -2095,26 +2095,27 @@ public:
     template <typename T>
     using shared_ptr = std::shared_ptr<T>;
 
-    typedef factory                                      self_type          ;
-    typedef doc_parser::string_type                      string_type        ;
-    typedef doc_parser::size_type                        size_type          ;
-    typedef shared_ptr<doc_parser>                       json_ptr           ;
-    typedef std::pair<string_type, json_ptr>             json_pair          ;
-    typedef std::tuple<size_type, string_type, doc_type> file_tuple         ;
-    typedef shared_ptr<template_object>                  generic_object_ptr ;
-    typedef shared_ptr<template_array>                   generic_array_ptr  ;
-    typedef std::pair<size_type, generic_object_ptr>     generic_object_pair;
-    typedef std::pair<size_type, generic_array_ptr>      generic_array_pair ;
-    typedef unordered_map<size_type, json_pair>          json_map           ;
-    typedef unordered_map<size_type, generic_object_ptr> objects_container  ;
-    typedef unordered_map<size_type, generic_array_ptr>  arrays_container   ;
-    typedef unordered_map<size_type, objects_container>  objects_map        ;
-    typedef unordered_map<size_type, arrays_container>   arrays_map         ;
-    typedef json_map::iterator                           iterator           ;
-    typedef json_map::const_iterator                     const_iterator     ;
-    typedef json_map::mapped_type                        value_type         ;
-    typedef json_map::mapped_type&                       reference          ;
-    typedef json_map::mapped_type const&                 const_reference    ;
+    typedef factory                                       self_type          ;
+    typedef doc_parser::string_type                       string_type        ;
+    typedef doc_parser::size_type                         size_type          ;
+    typedef std::size_t                                   uptr_type          ;
+    typedef shared_ptr<doc_parser>                        json_ptr           ;
+    typedef std::pair<string_type, json_ptr>              json_pair          ;
+    typedef std::tuple<size_type, string_type, doc_type>  file_tuple         ;
+    typedef shared_ptr<template_object>                   generic_object_ptr ;
+    typedef shared_ptr<template_array>                    generic_array_ptr  ;
+    typedef std::pair<size_type, generic_object_ptr>      generic_object_pair;
+    typedef std::pair<size_type, generic_array_ptr>       generic_array_pair ;
+    typedef unordered_map<uptr_type, json_pair>           json_map           ;
+    typedef unordered_map<uptr_type, generic_object_ptr>  objects_container  ;
+    typedef unordered_map<uptr_type, generic_array_ptr>   arrays_container   ;
+    typedef unordered_map<uptr_type, objects_container>   objects_map        ;
+    typedef unordered_map<uptr_type, arrays_container>    arrays_map         ;
+    typedef json_map::iterator                            iterator           ;
+    typedef json_map::const_iterator                      const_iterator     ;
+    typedef json_map::mapped_type                         value_type         ;
+    typedef json_map::mapped_type&                        reference          ;
+    typedef json_map::mapped_type const&                  const_reference    ;
 
     // ======================================================================
 
@@ -2130,7 +2131,7 @@ public:
     // ======================================================================
 
     template<typename T, typename... Args>
-    shared_ptr<T> make_object(size_type type, size_type key, Args&&... args)
+    shared_ptr<T> make_object(size_type type, uptr_type key, Args&&... args)
     {
         auto json = _M_jsonDocs.find(type);
 
@@ -2161,7 +2162,7 @@ public:
     }
 
     template<typename T, typename... Args>
-    shared_ptr<T> make_array(size_type type, size_type key, Args&&... args)
+    shared_ptr<T> make_array(size_type type, uptr_type key, Args&&... args)
     {
         auto json = _M_jsonDocs.find(type);
 
@@ -2257,7 +2258,7 @@ private:
 
 // ======================================================================
 
-inline std::ostream& operator << (std::ostream& stream, value_reference<doc_parser::string_type> const& ref)
+constexpr std::ostream& operator << (std::ostream& stream, value_reference<doc_parser::string_type> const& ref)
 {
    return stream << ref.value();
 }

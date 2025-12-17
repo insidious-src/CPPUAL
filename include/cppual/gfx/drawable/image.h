@@ -36,7 +36,7 @@ using memory::memory_resource;
 
 // =========================================================
 
-class image_interface : public drawable2d_interface, public transformable_interface
+class image_interface : public drawable_interface, public transformable_interface
 {
 public:
     typedef string string_type;

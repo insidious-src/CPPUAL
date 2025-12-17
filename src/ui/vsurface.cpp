@@ -27,7 +27,7 @@ namespace cppual { namespace ui {
 
 proxy_renderable::proxy_renderable (wnd_const_reference pParent, rect const& gRect) noexcept
 : platform_wnd_interface (pParent != nullptr ? pParent->connection () : nullptr,
-                          pParent != nullptr ? pParent->handle<resource_handle> () : nullptr),
+                          pParent != nullptr ? pParent->handle     () : nullptr),
   _M_pParent (pParent),
   _M_gRect (gRect),
   _M_bIsVisible ()

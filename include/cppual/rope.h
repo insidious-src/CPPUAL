@@ -41,16 +41,23 @@ namespace cppual {
 // ====================================================
 
 //! Node policy interface
-template <char_t T = char, allocator_t A = memory::allocator<T>>
+template <char_t          T = char,
+          struct_or_class E = char_traits<T>,
+          allocator_like  A = memory::allocator<T>>
 struct default_node_policy
 {
-    typedef default_node_policy<T, A>                   self_type     ;
-    typedef remove_cref_t<T>                            value_type    ;
-    typedef std::size_t                                 size_type     ;
-    typedef size_type const                             const_size    ;
-    typedef memory::allocator<T> allocator_type;
-    typedef fstring<value_type, allocator_type>         string_type   ;
-    typedef std::basic_string_view<value_type>          string_view   ;
+    typedef default_node_policy<T, E, A>                        self_type     ;
+    typedef E                                                   traits_type   ;
+    typedef memory::allocator_traits<A>                         alloc_traits  ;
+    typedef alloc_traits::allocator_type                        allocator_type;
+    typedef alloc_traits::value_type                            value_type    ;
+    typedef value_type const                                    const_value   ;
+    typedef alloc_traits::size_type                             size_type     ;
+    typedef size_type const                                     const_size    ;
+    typedef alloc_traits::pointer                               pointer       ;
+    typedef alloc_traits::const_pointer                         const_pointer ;
+    typedef cow_string<value_type, traits_type, allocator_type> string_type   ;
+    typedef cow_string<value_type, traits_type, void>           string_view   ;
 
     //! Optimal chunk size for cache line alignment (typically 64 bytes)
     inline constexpr static const_size cache_line_size   =      64;
@@ -71,7 +78,7 @@ struct default_node_policy
         : str (data, ator)
         { }
 
-        template <str_view_like_t U = string_view>
+        template <str_view_like U = string_view>
         constexpr explicit node (U const& sv = U (),
                                  allocator_type const& ator = allocator_type ())
         : str (sv, ator)
@@ -296,9 +303,10 @@ private:
  ** @brief frope (fast rope) implements a rope data structure using a double-linked list of fstrings
  ** Maintains interface compatibility with std::basic_string and fstring
  **/
-template <char_t       T = char,
-          allocator_t  A = memory::allocator<T>,
-          class_t Policy = default_node_policy<T, A>
+template <char_t          T = char,
+          struct_or_class E = char_traits<T>,
+          allocator_like  A = memory::allocator<T>,
+          struct_or_class Policy = default_node_policy<T, E, A>
           >
 class SHARED_API frope : private A
 {
@@ -307,8 +315,8 @@ public:
     struct tree_node;
     struct list_node;
 
-    typedef frope<T, A>                                       self_type             ;
-    typedef fstring<T, A>                                     string_type           ;
+    typedef frope<T, E, A, Policy>                            self_type             ;
+    typedef cow_string<T, E, A>                               string_type           ;
     typedef std::char_traits<T>                               char_traits           ;
     typedef list<string_type>                                 list_type             ;
     typedef std::allocator_traits<A>                          alloc_traits          ;
@@ -352,7 +360,7 @@ public:
         : str (data, ator)
         { }
 
-        template <str_view_like_t U = string_view>
+        template <str_view_like U = string_view>
         constexpr explicit node (U const& sv = U (),
                                  allocator_type const& ator = allocator_type ())
         : str (sv, ator)
@@ -455,7 +463,7 @@ public:
         }
     }
 
-    template <str_view_like_t U>
+    template <str_view_like U>
     constexpr frope (U const& sv, allocator_type const& ator = allocator_type ()) noexcept
     : allocator_type (ator)
     , _M_uLength (sv.size ())
@@ -471,7 +479,7 @@ public:
     : self_type (string_view (pchar), ator)
     { }
 
-    template <iterator_t Iter>
+    template <common_iterator Iter>
     constexpr frope (Iter first, Iter last, allocator_type const& ator = allocator_type ()) noexcept
     : allocator_type (ator)
     , self_type (string_view (first, last))
@@ -848,7 +856,7 @@ public:
         return npos;
     }
 
-    template <str_view_like_t U>
+    template <str_view_like U>
     constexpr size_type find (U const& sv, size_type pos = 0, size_type count = 0) const
     {
         if (pos >= size () || sv.empty ()) return npos;
@@ -878,7 +886,7 @@ public:
         return rfind (&ch, pos, 1);
     }
 
-    template <str_view_like_t U>
+    template <str_view_like U>
     size_type rfind (U const& sv, size_type pos = npos, size_type count = 0) const
     {
         if ((pos != npos && pos >= size ()) || sv.empty ()) return npos;
@@ -1300,19 +1308,19 @@ public:
         return lhs.compare (rhs) >= 0;
     }
 
-    template <char_t U, allocator_t _A>
+    template <char_t U, allocator_like _A>
     friend frope<U, _A> operator + (frope<U, _A> const& obj1, frope<U, _A> const& obj2) noexcept;
 
-    template <char_t U, allocator_t _A>
+    template <char_t U, allocator_like _A>
     friend frope<U, _A> operator + (frope<U, _A> const& obj1, U const* obj2) noexcept;
 
-    template <char_t U, allocator_t _A>
+    template <char_t U, allocator_like _A>
     friend frope<U, _A>& operator += (frope<U, _A>& obj1, frope<U, _A> const& obj2) noexcept;
 
-    template <char_t U, allocator_t _A>
+    template <char_t U, allocator_like _A>
     friend frope<U, _A>& operator += (frope<U, _A>& obj1, U const* obj2) noexcept;
 
-    template <char_t U, allocator_t _A>
+    template <char_t U, allocator_like _A>
     friend constexpr void swap (frope<U, _A>& lhs, frope<U, _A>& rhs) noexcept;
 
 private:
@@ -2031,19 +2039,19 @@ private:
 
 // ====================================================
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator <=> (frope<T, A> const& lhs, frope<T, A> const& rhs) noexcept
 {
     return std::basic_string_view<T> (lhs) <=> std::basic_string_view<T> (rhs);
 }
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator <=> (frope<T, A> const& lhs, T const* rhs) noexcept
 {
     return std::basic_string_view<T> (lhs) <=> std::basic_string_view<T> (rhs);
 }
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator <=> (T const* lhs, frope<T, A> const& rhs) noexcept
 {
     return std::basic_string_view<T> (lhs) <=> std::basic_string_view<T> (rhs);
@@ -2051,19 +2059,19 @@ constexpr bool operator <=> (T const* lhs, frope<T, A> const& rhs) noexcept
 
 // ====================================================
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator == (frope<T, A> const& lhs, frope<T, A> const& rhs) noexcept
 {
     return std::basic_string_view<T> (lhs) == std::basic_string_view<T> (rhs);
 }
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator == (frope<T, A> const& lhs, T const* rhs) noexcept
 {
     return std::basic_string_view<T> (lhs) == std::basic_string_view<T> (rhs);
 }
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator == (T const* lhs, frope<T, A> const& rhs) noexcept
 {
     return std::basic_string_view<T> (lhs) == std::basic_string_view<T> (rhs);
@@ -2071,31 +2079,31 @@ constexpr bool operator == (T const* lhs, frope<T, A> const& rhs) noexcept
 
 // ====================================================
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator != (frope<T, A> const& lhObj, frope<T, A> const& rhObj) noexcept
 { return !(lhObj == rhObj); }
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator != (frope<T, A> const& lhObj, T const* pText2) noexcept
 { return !(lhObj == pText2); }
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 { return !(pText1 == rhObj); }
 
 // ====================================================
 
-// template <char_t T, allocator_t A>
+// template <char_t T, allocator_like A>
 // inline frope<T, A>& operator += (frope<T, A>& lhObj, frope<T, A> const& rhObj) noexcept
 // { return add_to_string (lhObj, rhObj._M_gBuffer.heap.data, rhObj._M_uLength); }
 
-// template <char_t T, allocator_t A>
+// template <char_t T, allocator_like A>
 // inline frope<T, A>& operator += (frope<T>& gObj, T const* pText) noexcept
 // { return add_to_string (gObj, pText, str_size (pText)); }
 
 // ====================================================
 
-// template <char_t T, allocator_t A>
+// template <char_t T, allocator_like A>
 // inline frope<T, A> operator + (frope<T, A> const& lhObj, frope<T, A> const& rhObj) noexcept
 // {
 //     frope<T, A> gStr (lhObj);
@@ -2104,7 +2112,7 @@ constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 
 // ====================================================
 
-// template <char_t T, allocator_t A>
+// template <char_t T, allocator_like A>
 // inline frope<T, A> operator + (frope<T, A> const& gObj, T const* pText) noexcept
 // {
 //     frope<T, A> gStr (gObj);
@@ -2113,7 +2121,7 @@ constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 
 // ====================================================
 
-template <char_t T, allocator_t A>
+template <char_t T, allocator_like A>
 constexpr void swap (frope<T, A>& lhs, frope<T, A>& rhs) noexcept
 {
     std::swap (lhs._M_gBuffer, rhs._M_gBuffer);
@@ -2129,23 +2137,23 @@ typedef frope<wchar , memory::allocator<wchar >> fwrope  ;
 
 // ====================================================
 
-template <allocator_t A>
+template <allocator_like A>
 struct is_string <frope<char, A>> : std::true_type
 { };
 
-template <allocator_t A>
+template <allocator_like A>
 struct is_string <frope<char8, A>> : std::true_type
 { };
 
-template <allocator_t A>
+template <allocator_like A>
 struct is_string <frope<char16, A>> : std::true_type
 { };
 
-template <allocator_t A>
+template <allocator_like A>
 struct is_string <frope<char32, A>> : std::true_type
 { };
 
-template <allocator_t A>
+template <allocator_like A>
 struct is_string <frope<wchar, A>> : std::true_type
 { };
 

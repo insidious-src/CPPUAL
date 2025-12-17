@@ -35,7 +35,11 @@
 #include <memory>
 #include <mutex>
 
+// =========================================================
+
 namespace cppual::gfx {
+
+// =========================================================
 
 class font;
 
@@ -85,7 +89,7 @@ enum class polygon_face : u8
 
 struct  context_interface   ;
 struct  surface_interface   ;
-struct  drawable2d_interface;
+struct  drawable_interface;
 struct  drawable3d_interface;
 struct  painter_interface   ;
 struct  draw_factory        ;
@@ -95,11 +99,11 @@ typedef std::shared_ptr<painter_interface>    shared_painter   ;
 typedef std::shared_ptr<draw_factory>         shared_factory   ;
 typedef std::shared_ptr<context_interface>    shared_context   ;
 typedef std::shared_ptr<surface_interface>    shared_surface   ;
-typedef std::shared_ptr<drawable2d_interface> shared_drawable2d;
+typedef std::shared_ptr<drawable_interface> shared_drawable2d;
 typedef std::shared_ptr<drawable3d_interface> shared_drawable3d;
 typedef std::weak_ptr  <context_interface>    weak_context     ;
 typedef std::weak_ptr  <surface_interface>    weak_surface     ;
-typedef std::weak_ptr  <drawable2d_interface> weak_drawable2d  ;
+typedef std::weak_ptr  <drawable_interface> weak_drawable2d  ;
 typedef std::weak_ptr  <drawable3d_interface> weak_drawable3d  ;
 
 // ====================================================
@@ -314,31 +318,20 @@ private:
 
 // =========================================================
 
-struct SHARED_API drawable2d_interface : public non_copyable_virtual
+struct SHARED_API drawable_interface : public non_copyable_virtual
 {
-    typedef drawable2d_interface self_type;
+    typedef drawable_interface self_type;
 
-    enum class line_style : u8
+    typedef enum class line_style : u8
     {
         solid = 1,
         dash     ,
         dot      ,
         dash_dot_dot
-    };
+    }
+    const const_line_style;
 
-    constexpr drawable2d_interface () noexcept = default;
-
-    virtual device_backend type () const noexcept  = 0;
-    virtual void           draw (transform const&) = 0;
-};
-
-// =========================================================
-
-struct SHARED_API drawable3d_interface : public non_copyable_virtual
-{
-    typedef drawable3d_interface self_type;
-
-    constexpr drawable3d_interface () noexcept = default;
+    constexpr drawable_interface () noexcept = default;
 
     virtual device_backend type () const noexcept  = 0;
     virtual void           draw (transform const&) = 0;
@@ -359,7 +352,7 @@ struct SHARED_API painter_interface : public non_copyable_virtual
 {
     typedef painter_interface                self_type    ;
     typedef string                           string_type  ;
-    typedef drawable2d_interface::line_style line_style   ;
+    typedef drawable_interface::line_style line_style   ;
     typedef resource_version                 version_type ;
     typedef std::array<point2i, 3>           polygon_array;
 
@@ -395,7 +388,7 @@ public:
     typedef painter                                       self_type         ;
     typedef string                                        string_type       ;
     typedef dyn_array<std::pair<shared_drawable2d, rect>> drawable_container;
-    typedef drawable2d_interface::line_style              line_style        ;
+    typedef drawable_interface::line_style              line_style        ;
     typedef std::array<point2i, 3>                        polygon_array     ;
 
     painter  (shared_surface const& surface);

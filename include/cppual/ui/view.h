@@ -24,11 +24,12 @@
 #ifdef __cplusplus
 
 #include <cppual/string.h>
+#include <cppual/resource>
 #include <cppual/gfx/draw.h>
 #include <cppual/input/event.h>
 #include <cppual/ui/vsurface.h>
 #include <cppual/circular_queue.h>
-#include <cppual/memory/allocator.h>
+#include <cppual/memory_allocator>
 
 namespace cppual::ui {
 
@@ -84,34 +85,34 @@ public:
     void get_focus ();
     void kill_focus ();
 
-    inline window_type    renderable        () const noexcept { return _M_pRenderable; }
-    inline platform_wnd*  renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
-    inline handle_type    platform_handle   () const { return renderable ()->handle (); }
-    inline shared_display platform_display  () const { return renderable ()->connection (); }
-    inline surface_type   platform_surface  () const noexcept { return _M_pSurface; }
-    inline context_type   platform_context  () const noexcept { return _M_pContext; }
-    inline point2u        minimum_size      () const noexcept { return _M_gMinSize; }
-    inline point2u        maximum_size      () const noexcept { return _M_gMaxSize; }
+    inline    window_type    renderable        () const noexcept { return _M_pRenderable; }
+    constexpr platform_wnd*  renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
+    inline    handle_type    platform_handle   () const { return renderable ()->handle (); }
+    inline    shared_display platform_display  () const { return renderable ()->connection (); }
+    inline    surface_type   platform_surface  () const noexcept { return _M_pSurface; }
+    inline    context_type   platform_context  () const noexcept { return _M_pContext; }
+    constexpr point2u        minimum_size      () const noexcept { return _M_gMinSize; }
+    constexpr point2u        maximum_size      () const noexcept { return _M_gMaxSize; }
 
-    inline bool valid () const noexcept
+    constexpr bool valid () const noexcept
     { return _M_gStateFlags.test (state_flag::is_valid); }
 
-    inline bool is_enabled () const noexcept
+    constexpr bool is_enabled () const noexcept
     { return _M_gStateFlags.test (state_flag::enabled); }
 
-    inline bool has_focus () const noexcept
+    constexpr bool has_focus () const noexcept
     { return _M_gStateFlags.test (state_flag::focus); }
 
-    inline bool is_hidden () const noexcept
+    constexpr bool is_hidden () const noexcept
     { return !_M_gStateFlags.test (state_flag::is_valid) or !_M_pRenderable->is_mapped (); }
 
-    inline rect geometry () const noexcept
+    constexpr rect geometry () const noexcept
     { return _M_gStateFlags.test (state_flag::is_valid) ? _M_pRenderable->geometry () : rect (); }
 
-    inline view_container& children () noexcept
+    constexpr view_container& children () noexcept
     { return _M_gChildrenList; }
 
-    inline view_container const& children () const noexcept
+    constexpr view_container const& children () const noexcept
     { return _M_gChildrenList; }
 
 protected:

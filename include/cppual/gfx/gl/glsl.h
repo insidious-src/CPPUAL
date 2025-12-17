@@ -23,35 +23,46 @@
 #define CPPUAL_GFX_GL_SL_H_
 #ifdef __cplusplus
 
-#include <cppual/bitset.h>
+#include <cppual/bitflags>
 #include <cppual/common.h>
-#include <cppual/noncopyable.h>
+#include <cppual/noncopyable>
 #include <cppual/gfx/gl/glbase.h>
 #include <cppual/string.h>
 
 #include <unordered_map>
 
-namespace cppual { namespace gfx { namespace gl {
+// ====================================================
 
-enum class TessGenType : u8
-{
-    Quads    ,
-    Triangles,
-    Isolines
-};
+namespace cppual::gfx::gl {
 
-enum class TessGenSpacing : u8
-{
-    Equal         ,
-    FractionalEven,
-    FractionalOdd
-};
+// ====================================================
 
-enum class VertexOrder : u8
+typedef enum class tess_gen_type : u8
 {
-    OrientCW,
-    OrientCCW
-};
+    quads    ,
+    triangles,
+    isolines
+}
+const const_tess_gen_type;
+
+// ====================================================
+
+typedef enum class tess_gen_spacing : u8
+{
+    equal          ,
+    fractional_even,
+    fractional_odd
+}
+const const_tess_gen_spacing;
+
+// ====================================================
+
+typedef enum class vertex_order : u8
+{
+    orient_cw,
+    orient_ccw
+}
+const const_vertex_order;
 
 // ====================================================
 
@@ -102,11 +113,12 @@ public:
     }
 
 private:
-    enum state
+    typedef enum state
     {
         loaded   = 1 << 0,
         compiled = 1 << 1
-    };
+    }
+    const const_state;
 
     typedef bitset<shader::state> states;
 
@@ -286,7 +298,11 @@ private:
     states       _M_gStates;
 };
 
-} } } // namespace GL
+// ====================================================
+
+} // namespace GL
+
+// ====================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_GFX_GL_SL_H_

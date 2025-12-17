@@ -110,7 +110,7 @@ heap_resource::heap_resource (memory_resource& pOwner, size_type uSize)
 
 heap_resource::~heap_resource ()
 {
-    if (_M_pBegin && &_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity (), alignof (uptr));
+    if (_M_pBegin && &_M_gOwner != this) _M_gOwner.deallocate (_M_pBegin, capacity ());
 }
 
 void* heap_resource::do_allocate (size_type uSize, align_type uAlign)
