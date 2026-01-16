@@ -311,8 +311,7 @@ private:
     {
         constexpr const_size I = get_index<fn_name.data ()> ();
 
-        if (I == npos) std::get<I> (_M_fn_map).first = char_hash (fn_name.data ());
-        std::get<I> (_M_fn_map).second = fn;
+        if (I == npos) std::get<I> (_M_fn_map) = std::pair { char_hash (fn_name.data ()), fn };
     }
 
     template <size_type SZ = def_capture_size_v, typename R, typename... Args>
@@ -320,8 +319,7 @@ private:
     {
         constexpr const_size I = get_index<fn_name.data ()> ();
 
-        if (I == npos) std::get<I> (_M_fn_map).first = char_hash (fn_name.data ());
-        std::get<I> (_M_fn_map).second = fn;
+        if (I == npos) std::get<I> (_M_fn_map) = std::pair { char_hash (fn_name.data ()), fn };
     }
 
     template <typename R, typename... Args>
@@ -329,8 +327,7 @@ private:
     {
         constexpr const_size I = get_index<fn_name> ();
 
-        if (I == npos) std::get<I> (_M_fn_map).first = char_hash (fn_name);
-        std::get<I> (_M_fn_map).second = fn;
+        if (I == npos) std::get<I> (_M_fn_map) = std::pair { char_hash (fn_name), fn };
     }
 
     template <size_type SZ = def_capture_size_v, typename R, typename... Args>
@@ -338,8 +335,7 @@ private:
     {
         constexpr const_size I = get_index<fn_name> ();
 
-        if (I == npos) std::get<I> (_M_fn_map).first = char_hash (fn_name);
-        std::get<I> (_M_fn_map).second = fn;
+        if (I == npos) std::get<I> (_M_fn_map) = std::pair { char_hash (fn_name), fn };
     }
 
     // ====================================================
