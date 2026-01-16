@@ -43,7 +43,7 @@ namespace cppual { namespace network {
 
 namespace { // internal unit optimization
 
-inline bool resolve_host_name (cchar* hostname, ::in_addr* addr) noexcept
+constexpr bool resolve_host_name (cchar* hostname, ::in_addr* addr) noexcept
 {
 #   ifdef OS_STD_UNIX
     ::addrinfo* res;

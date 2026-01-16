@@ -50,21 +50,13 @@ namespace cppual::memory {
 //! extend the capacity of the allocated memory (allocating more fixed memory).
 class memory_resource_adaptor;
 
-//! redefined polymorphic memory allocator
-template <typename> class allocator;
-
 // =========================================================
 
 using std::scoped_allocator_adaptor;
 
 // =========================================================
 
-template <typename T>
-concept class_or_void = struct_or_class<T> || void_t<T>;
-
-// =========================================================
-
-template <struct_or_class A>
+template <allocator_like A>
 struct allocator_traits : public std::allocator_traits<A>
 { typedef A allocator_type; };
 
@@ -107,12 +99,12 @@ public:
     : _M_pDevice (&dev)
     { }
 
-    inline memory_resource (abs_base_type const& other) noexcept
+    constexpr memory_resource (abs_base_type const& other) noexcept
     : abs_base_type (other          )
     , _M_pDevice    (&host_device ())
     { }
 
-    inline bool is_host_device () const noexcept
+    constexpr bool is_host_device () const noexcept
     { return _M_pDevice == &host_device (); }
 
     constexpr device_const_reference device () const noexcept
@@ -213,7 +205,7 @@ constexpr bool operator != (memory_resource const& a, memory_resource const& b) 
 //! statically constructed memory_resource using new & delete operators
 memory_resource& SHARED_FN_API new_delete_resource () noexcept;
 
-//! statically constructed memory_resource for testing purposes.
+//! statically constructed memory_resource for testing purposes and move semantics.
 //! on allocation throws std::bad_alloc on deallocation does nothing
 memory_resource& SHARED_FN_API null_resource () noexcept;
 
@@ -238,18 +230,19 @@ std::thread::id SHARED_FN_API main_thread_id () noexcept;
 // =========================================================
 
 //! redefined polymorphic memory allocator
-template <typename T>
+template <non_void T>
 class SHARED_API allocator
 {
 public:
     typedef allocator<T>               self_type                             ;
-    typedef T                          value_type                            ;
+    typedef remove_const_t<T>          value_type                            ;
     typedef value_type *               pointer                               ;
     typedef value_type const*          const_pointer                         ;
     typedef value_type &               reference                             ;
     typedef value_type const&          const_reference                       ;
     typedef memory_resource            resource_type                         ;
     typedef resource_type *            resource_pointer                      ;
+    typedef resource_type const*       resource_const_pointer                ;
     typedef resource_type &            resource_reference                    ;
     typedef resource_type const&       resource_const_reference              ;
     typedef std::size_t                size_type                             ;
@@ -263,8 +256,8 @@ public:
     typedef std::true_type             propagate_on_container_move_assignment;
     typedef std::true_type             propagate_on_container_swap           ;
     typedef resource_type::device_type device_type                           ;
-    typedef device_type&               device_pointer                        ;
-    typedef device_type*               device_reference                      ;
+    typedef device_type*               device_pointer                        ;
+    typedef device_type&               device_reference                      ;
 
     inline constexpr static const_align max_align = memory_resource::max_align;
 
@@ -281,56 +274,62 @@ public:
     using self_type_t = allocator<U>;
 
     constexpr device_reference device () const noexcept
-    {  return resource ()->device (); }
+    {  return resource ().device (); }
 
     constexpr bool is_host_device () const noexcept
-    {  return resource ()->is_host_device (); }
+    {  return resource ().is_host_device (); }
 
     constexpr bool is_thread_safe () const noexcept
-    {  return resource ()->is_thread_safe (); }
+    {  return resource ().is_thread_safe (); }
 
     constexpr bool is_lock_free () const noexcept
-    {  return resource ()->is_lock_free (); }
+    {  return resource ().is_lock_free (); }
 
     constexpr bool is_shared () const noexcept
-    {  return resource ()->is_shared (); }
+    {  return resource ().is_shared (); }
 
     //! upstream memory_resource owner
     constexpr resource_reference resource_owner () noexcept
-    {  return resource ()->owner (); }
+    {  return resource ().owner (); }
 
     //! upstream const memory_resource owner
     constexpr resource_const_reference resource_owner () const noexcept
-    {  return resource ()->owner (); }
+    {  return resource ().owner (); }
 
-    inline resource_pointer resource () const noexcept
+    /**
+     ** @brief get the memory_resource used by the allocator.
+     ** if no resource is set, the default thread resource is used.
+     ** the resource is cached after the first call.
+     ** this way the default constructor can be consteval.
+     **
+     ** @return resource_pointer
+     **/
+    constexpr resource_reference resource () const noexcept
     {
-        static thread_local resource_pointer rc = std::this_thread::get_id () == main_thread_id () ?
-                                                  &get_default_resource        () :
-                                                  &get_default_thread_resource () ;
+        static thread_local resource_reference rc = get_default_thread_resource ();
 
-        return !_M_pRc ? _M_pRc = rc : _M_pRc;
+        return _M_pRc != nullptr ? *_M_pRc : *(_M_pRc = &rc);
     }
 
     constexpr pointer allocate (size_type n = 1)
     {
-        return static_cast<pointer> (resource ()->allocate (sizeof  (value_type) * n,
-                                                            alignof (value_type)));
+        return static_cast<pointer> (resource ().allocate (sizeof  (value_type) * n,
+                                                           alignof (value_type)));
     }
 
     constexpr pointer reallocate (pointer p, size_type old_n, size_type n)
     {
-        return static_cast<pointer> (resource ()->reallocate (p,
-                                                              sizeof  (value_type) * old_n,
-                                                              sizeof  (value_type) *     n,
-                                                              alignof (value_type)));
+        return static_cast<pointer> (resource ().reallocate (p,
+                                                             sizeof  (value_type) * old_n,
+                                                             sizeof  (value_type) *     n,
+                                                             alignof (value_type)));
     }
 
-    constexpr void deallocate (pointer p, size_type n = 1)
-    { resource ()->deallocate (p, n * sizeof (value_type), alignof (value_type)); }
+    constexpr void deallocate (const_pointer p, size_type n = 1)
+    { resource ().deallocate (const_cast<pointer> (p), n * sizeof (value_type), alignof (value_type)); }
 
     constexpr size_type max_size () const noexcept
-    { return resource ()->max_size () / sizeof (value_type); }
+    { return resource ().max_size () / sizeof (value_type); }
 
     constexpr size_type max_count () const noexcept
     { return max_size (); }
@@ -348,19 +347,22 @@ public:
     constexpr static void destroy (pointer p)
     { p->~value_type (); }
 
+    constexpr void set_resource (resource_reference res) noexcept
+    { _M_pRc = &res; }
+
     constexpr base_pointer allocate_bytes (size_type bytes, align_type align = max_align)
-    { return resource ()->allocate (bytes, align); }
+    { return resource ().allocate (bytes, align); }
 
     constexpr void deallocate_bytes (pointer p, size_type bytes, align_type align = max_align)
-    { return resource ()->deallocate (p, bytes, align); }
+    { return resource ().deallocate (p, bytes, align); }
 
     template <non_void U>
     constexpr U* allocate_object (size_type n = 1)
-    { return static_cast<U*> (resource ()->allocate (n * sizeof (U), alignof (U))); }
+    { return static_cast<U*> (resource ().allocate (n * sizeof (U), alignof (U))); }
 
     template <non_void U>
     constexpr void deallocate_object (U* p, size_type n = 1)
-    { resource ()->deallocate (p, n * sizeof (U), alignof (U)); }
+    { resource ().deallocate (p, n * sizeof (U), alignof (U)); }
 
     template <non_void U, typename... Args>
     constexpr U* new_object (Args&&... args)
@@ -389,8 +391,8 @@ public:
 
     consteval allocator () noexcept = default;
 
-    constexpr allocator (resource_reference rc) noexcept
-    : _M_pRc (&rc)
+    constexpr allocator (resource_reference res) noexcept
+    : _M_pRc (&res)
     { }
 
     template <non_void U>
@@ -401,7 +403,7 @@ public:
     template <non_void U>
     constexpr allocator (self_type_t<U>&& rh) noexcept
     : _M_pRc (rh._M_pRc)
-    { rh._M_pRc = &new_delete_resource (); }
+    { rh._M_pRc = &null_resource (); }
 
     template <non_void U>
     constexpr allocator (std::allocator<U> const&) noexcept
@@ -414,9 +416,19 @@ public:
     { }
 
     template <non_void U>
+    constexpr allocator (std::pmr::polymorphic_allocator<U> const&) noexcept
+    : _M_pRc (&get_default_resource ())
+    { }
+
+    template <non_void U>
+    constexpr allocator (std::pmr::polymorphic_allocator<U>&& rh) noexcept
+    : _M_pRc (&get_default_resource ())
+    { rh = std::pmr::polymorphic_allocator<U> (&null_resource ()); }
+
+    template <non_void U>
     constexpr self_type& operator = (self_type_t<U> const& rh) noexcept
     {
-        _M_pRc = rh._M_pRc;
+        if (this != &rh) _M_pRc = rh._M_pRc;
         return *this;
     }
 
@@ -426,7 +438,7 @@ public:
         if (this != &rh)
         {
             _M_pRc    = rh._M_pRc;
-            rh._M_pRc = &new_delete_resource ();
+            rh._M_pRc = &null_resource ();
         }
 
         return *this;
@@ -435,7 +447,7 @@ public:
     template <non_void U>
     constexpr self_type& operator = (resource_reference res) noexcept
     {
-        _M_pRc = &res;
+        set_resource (res);
         return *this;
     }
 
@@ -453,7 +465,22 @@ public:
         return *this;
     }
 
-    template <typename>
+    template <non_void U>
+    constexpr self_type& operator = (std::pmr::polymorphic_allocator<U> const&) noexcept
+    {
+        _M_pRc = &get_default_resource ();
+        return *this;
+    }
+
+    template <non_void U>
+    constexpr self_type& operator = (std::pmr::polymorphic_allocator<U>&& rh) noexcept
+    {
+        _M_pRc = &get_default_resource ();
+        rh     = std::pmr::polymorphic_allocator<U> (&null_resource ());
+        return *this;
+    }
+
+    template <non_void>
     friend class allocator;
 
     template <non_void U>
@@ -473,8 +500,7 @@ private:
 template <non_void T>
 constexpr bool operator == (allocator<T> const& lh, allocator<T> const& rh) noexcept
 {
-    return lh.resource () == rh.resource () ||
-          (lh.resource () && rh.resource () && lh.resource ()->is_equal (*rh.resource ()));
+    return &lh.resource () == &rh.resource () || lh.resource ().is_equal (rh.resource ());
 }
 
 template <non_void T>
@@ -484,12 +510,11 @@ constexpr bool operator != (allocator<T> const& lh, allocator<T> const& rh) noex
 template <non_void T1, non_void T2>
 constexpr bool operator == (allocator<T1> const& lh, allocator<T2> const& rh) noexcept
 {
-    return lh.resource () == rh.resource () ||
-          (lh.resource () && rh.resource () && lh.resource ()->is_equal (*rh.resource ()));
+    return &lh.resource () == &rh.resource () || lh.resource ().is_equal (rh.resource ());
 }
 
 template <non_void T1, non_void T2>
-inline bool operator != (allocator<T1> const& lh, allocator<T2> const& rh) noexcept
+constexpr bool operator != (allocator<T1> const& lh, allocator<T2> const& rh) noexcept
 { return !(lh == rh); }
 
 template <non_void T>
@@ -536,60 +561,6 @@ template <non_void U1, non_void U2>
 constexpr void swap (allocator<U1>& lh, allocator<U2>& rh) noexcept
 { std::swap (lh._M_pRc, rh._M_pRc); }
 
-//! =========================================================
-//! allocator concept
-//! =========================================================
-
-//! is allocator primary template declaration
-template <class_t A>
-struct is_allocator_helper : public std::false_type
-{ typedef A type; };
-
-template <non_void T>
-struct is_allocator_helper <allocator<T>> : public std::true_type
-{ typedef allocator<T> type; };
-
-template <non_void T>
-struct is_allocator_helper <std::allocator<T>> : public std::true_type
-{ typedef std::allocator<T> type; };
-
-template <non_void T>
-struct is_allocator_helper <std::pmr::polymorphic_allocator<T>> : public std::true_type
-{ typedef std::pmr::polymorphic_allocator<T> type; };
-
-template <class_t A>
-struct is_allocator : public is_allocator_helper<A>
-{ static_assert (is_allocator_helper<A>::value, "A is NOT an allocator!"); };
-
-template <class_t A>
-using is_allocator_t = is_allocator<A>::type;
-
-//! is allocator -> value
-template <class_t A>
-inline constexpr cbool is_allocator_v = is_allocator<A>::value;
-
-//! polymorphic allocator concept type
-template <typename A>
-using AllocatorType = std::enable_if_t<is_allocator_v<A>, A>;
-
-//! polymorphic allocator concept
-template <typename A>
-concept allocator_like = is_allocator_v<A> || requires (A& ator)
-{
-    typename A::value_type     ;
-    typename A::pointer        ;
-    typename A::const_pointer  ;
-    typename A::reference      ;
-    typename A::const_reference;
-    typename A::size_type      ;
-    typename A::difference_type;
-
-    { ator.allocate (typename A::size_type {}) } -> std::same_as<typename A::pointer>;
-    { ator.deallocate (typename A::pointer {}, typename A::size_type {}) } -> std::same_as<void>;
-    { ator.max_size () } -> std::same_as<typename A::size_type>;
-    { ator.select_on_container_copy_construction () } -> std::same_as<A>;
-};
-
 // =========================================================
 
 } // namespace Memory
@@ -600,7 +571,9 @@ namespace std {
 
 // =========================================================
 
-using namespace cppual;
+using cppual::non_void               ;
+using cppual::memory::allocator      ;
+using cppual::memory::memory_resource;
 
 // =========================================================
 

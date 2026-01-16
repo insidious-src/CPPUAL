@@ -46,15 +46,9 @@ public:
     typedef resource_handle   handle_type;
     typedef string            string_type;
 
-    constexpr display_interface () noexcept
-    : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
-                 std::make_pair ("screen_count", make_fn (*this, &self_type::screen_count)),
-                 std::make_pair ("flush", make_fn (*this, &self_type::flush)))
-    { }
-
-    virtual string_type name             () const = 0;
-    virtual uint        screen_count     () const = 0;
-    virtual void        flush            ()       = 0;
+    virtual string_type name         () const = 0;
+    virtual uint        screen_count () const = 0;
+    virtual void        flush        ()       = 0;
 
     static  pointer primary            ();
     static  bool    has_valid_instance () noexcept;
@@ -64,23 +58,15 @@ public:
     handle_type native () const noexcept { return _M_native; }
     handle_type legacy () const noexcept { return _M_legacy; }
 
-    template <class_or_ptr U>
-    constexpr remove_ptr_t<U>* native () const noexcept
-    { return _M_native.get<remove_ptr_t<U>*> (); }
+    template <ptr U>
+    constexpr U native () const noexcept
+    { return _M_native.get<U> (); }
 
-    template <class_or_ptr U>
-    constexpr remove_ptr_t<U>* legacy () const noexcept
-    { return _M_legacy.get<remove_ptr_t<U>*> (); }
+    template <ptr U>
+    constexpr U legacy () const noexcept
+    { return _M_legacy.get<U> (); }
 
 protected:
-    constexpr display_interface (handle_type native, handle_type legacy) noexcept
-    : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
-                 std::make_pair ("screen_count", make_fn (*this, &self_type::screen_count)),
-                 std::make_pair ("flush", make_fn (*this, &self_type::flush)))
-    , _M_native (native)
-    , _M_legacy (legacy)
-    { }
-
     template <pair_like... Ps>
     constexpr display_interface (handle_type native, handle_type legacy, Ps... pairs) noexcept
     : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
@@ -90,6 +76,9 @@ protected:
     , _M_native (native  )
     , _M_legacy (legacy  )
     { }
+
+private:
+    display_interface () = delete;
 
 private:
     handle_type _M_native { }, _M_legacy { };

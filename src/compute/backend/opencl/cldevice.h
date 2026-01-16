@@ -49,8 +49,8 @@ public:
 
     explicit device (pointer handle) noexcept;
 
-    inline device (self_type&&) = default;
-    inline self_type& operator = (self_type&&) = default;
+    constexpr device (self_type&&) = default;
+    constexpr self_type& operator = (self_type&&) = default;
 
     constexpr pointer handle () const noexcept
     { return base_type::handle<pointer> (); }

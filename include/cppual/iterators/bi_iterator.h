@@ -38,8 +38,9 @@ class bi_iterator
 {
 public:
     typedef bi_iterator<T>                  self_type        ;
-    typedef std::remove_reference_t<T>      buf_type         ;
-    typedef std::remove_const_t<buf_type>   buf_clean_type   ;
+    typedef remove_ref_t<T>                 buf_type         ;
+    typedef std::add_const_t<buf_type>      const_buf        ;
+    typedef remove_const_t<buf_type>        clean_buf        ;
     typedef typename T::value_type          value_type       ;
     typedef value_type const                const_value      ;
     typedef typename T::pointer             pointer          ;

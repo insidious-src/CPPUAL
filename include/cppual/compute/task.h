@@ -63,7 +63,7 @@ class unbound_task;
 template <non_void, typename...>
 class unbound_task_adaptor;
 
-using memory::allocator_like;
+using allocator_like;
 
 // =========================================================
 
@@ -93,7 +93,7 @@ public:
     host_queue& operator = (host_queue&&     );
     host_queue& operator = (host_queue const&);
 
-    inline host_queue () noexcept = default;
+    constexpr host_queue () noexcept = default;
     ~host_queue ();
 
     bool schedule (fn_const_type& task_fn);
@@ -108,69 +108,69 @@ public:
     void when_all_finish   () const;
     void when_all_exit     () const;
 
-    inline size_type num_assigned () const
+    constexpr size_type num_assigned () const
     {
         read_lock lock (_M_gQueueMutex);
         return _M_uNumAssigned;
     }
 
-    inline size_type num_finished () const
+    constexpr size_type num_finished () const
     {
         read_lock lock (_M_gQueueMutex);
         return _M_uNumCompleted;
     }
 
-    inline state_type state () const
+    constexpr state_type state () const
     {
         read_lock lock (_M_gQueueMutex);
         return _M_eState;
     }
 
-    inline bool is_running () const
+    constexpr bool is_running () const
     {
         return state () == running;
     }
 
-    inline bool is_inactive_or_interrupted () const
+    constexpr bool is_inactive_or_interrupted () const
     {
         return state () <= inactive;
     }
 
-    inline bool is_inactive () const
+    constexpr bool is_inactive () const
     {
         return state () == inactive;
     }
 
-    inline bool is_interrupted () const
+    constexpr bool is_interrupted () const
     {
         return state () == interrupted;
     }
 
-    inline bool is_canceled () const
+    constexpr bool is_canceled () const
     {
         return state () == canceled;
     }
 
-    inline bool empty () const
+    constexpr bool empty () const
     {
         read_lock lock (_M_gQueueMutex);
         return _M_gTaskQueue.empty ();
     }
 
-    inline void cancel () noexcept
+    constexpr void cancel () noexcept
     {
         write_lock lock (_M_gQueueMutex);
         _M_eState = canceled;
     }
 
-    inline void revert_cancellation () noexcept
+    constexpr void revert_cancellation () noexcept
     {
         write_lock lock (_M_gQueueMutex);
         _M_eState = running;
     }
 
     /// remove all tasks from the queue
-    inline void clear ()
+    constexpr void clear ()
     {
         write_lock lock (_M_gQueueMutex);
         _M_gTaskQueue.clear ();
@@ -259,7 +259,7 @@ class host_task : private host_queue
 public:
     typedef host_task<T>              self_type      ;
     typedef host_queue                base_type      ;
-    typedef remove_cref_t<T>    value_type     ;
+    typedef remove_cvref_t<T>         value_type     ;
     typedef value_type const          const_value    ;
     typedef value_type&               reference      ;
     typedef value_type const&         const_reference;
@@ -270,39 +270,39 @@ public:
     typedef std::future <value_type>  future_type    ;
     typedef std::promise<value_type>  promise_type   ;
 
-    inline self_type& when_any () const
+    constexpr self_type& when_any () const
     {
         when_any_finish ();
         return const_cast<self_type&> (*this);
     }
 
-    inline self_type& when_first () const
+    constexpr self_type& when_first () const
     {
         when_first_finish ();
         return const_cast<self_type&> (*this);
     }
 
-    inline self_type& when_all () const
+    constexpr self_type& when_all () const
     {
         when_all_finish ();
         return const_cast<self_type&> (*this);
     }
 
-    inline void finish ()
+    constexpr void finish ()
     {
         quit (false);
     }
 
-    inline host_task () : _M_value ()
+    constexpr host_task () : _M_value ()
     { thread_pool::reserve (*this); }
 
-    inline bool valid () const noexcept
+    constexpr bool valid () const noexcept
     { return num_assigned () == 1; }
 
-    inline bool ready () const noexcept
+    constexpr bool ready () const noexcept
     { return state () == running && empty () && num_finished () > 0; }
 
-    inline void reuse ()
+    constexpr void reuse ()
     {
         if (!valid ())
         {
@@ -312,12 +312,12 @@ public:
         }
     }
 
-    inline result_type get () const noexcept
+    constexpr result_type get () const noexcept
     {
         return ready () ? _M_value : std::nullopt;
     }
 
-    inline value_type operator ()() const noexcept
+    constexpr value_type operator ()() const noexcept
     {
         when_all ();
         return ready () ? _M_value.get () : value_type ();
@@ -329,17 +329,17 @@ public:
     }
 
     template <class_t C, typename... Args>
-    inline host_task (C& obj, value_type (C::* fn)(Args...), Args&&... args)
+    constexpr host_task (C& obj, value_type (C::* fn)(Args...), Args&&... args)
     : self_type ()
     { then (obj, fn, std::forward<Args> (args)...); }
 
     template <class_t C, typename... Args>
-    inline host_task (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
+    constexpr host_task (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
     : self_type ()
     { then (obj, fn, std::forward<Args> (args)...); }
 
     template <typename... Args>
-    inline host_task (value_type (* fn)(Args...), Args&&... args)
+    constexpr host_task (value_type (* fn)(Args...), Args&&... args)
     : self_type ()
     { then (fn, std::forward<Args> (args)...); }
 
@@ -349,7 +349,7 @@ public:
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
               >
-    inline host_task (Callable&& fn,
+    constexpr host_task (Callable&& fn,
                       Args&&... args,
                       LambdaNonCaptureType<Callable>* = nullptr)
     : self_type ()
@@ -362,7 +362,7 @@ public:
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
               >
-    inline host_task (Callable&& fn,
+    constexpr host_task (Callable&& fn,
                       Args&&... args,
                       A const&  ator = A (),
                       LambdaCaptureType<Callable>* = nullptr)
@@ -370,7 +370,7 @@ public:
     { then (std::move (fn), ator, std::forward<Args> (args)...); }
 
     template <class_t C, typename... Args>
-    inline self_type& then (C& obj, value_type (C::* fn)(Args...), Args&&... args)
+    constexpr self_type& then (C& obj, value_type (C::* fn)(Args...), Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args), &obj]
         {
@@ -384,7 +384,7 @@ public:
     }
 
     template <class_t C, typename... Args>
-    inline self_type& then (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
+    constexpr self_type& then (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args), &obj]
         {
@@ -398,7 +398,7 @@ public:
     }
 
     template <typename... Args>
-    inline self_type& then (value_type (* fn)(Args...), Args&&... args)
+    constexpr self_type& then (value_type (* fn)(Args...), Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args)]
         {
@@ -417,7 +417,7 @@ public:
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
               >
-    inline self_type& then (Callable&& fn,
+    constexpr self_type& then (Callable&& fn,
                             Args&&... args,
                             LambdaNonCaptureType<Callable>* = nullptr)
     {
@@ -439,7 +439,7 @@ public:
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
               >
-    inline self_type& then (Callable&& fn,
+    constexpr self_type& then (Callable&& fn,
                             Args&&... args,
                             A const& ator = A (),
                             LambdaCaptureType<Callable>* = nullptr)
@@ -466,7 +466,7 @@ public:
               typename = std::enable_if_t<std::is_same_v<fn_tpl_type<value_type()>, std::decay_t<Else>> ||
                                           std::is_same_v<value_type(*)(), Else>>
               >
-    inline self_type& then_if_else (Cond& cond_fn, If& if_fn, Else& else_fn)
+    constexpr self_type& then_if_else (Cond& cond_fn, If& if_fn, Else& else_fn)
     {
         schedule ([=, this]
         {
@@ -515,7 +515,7 @@ class unbound_task : private host_queue
 public:
     typedef unbound_task<T>           self_type      ;
     typedef host_queue                base_type      ;
-    typedef remove_cref_t<T>    value_type     ;
+    typedef remove_cvref_t<T>         value_type     ;
     typedef value_type const          const_value    ;
     typedef value_type&               reference      ;
     typedef value_type const&         const_reference;
@@ -526,43 +526,41 @@ public:
     typedef std::future <value_type>  future_type    ;
     typedef std::promise<value_type>  promise_type   ;
 
-    inline self_type& when_any () const
-    {
-        when_any_finish ();
-        return const_cast<self_type&> (*this);
-    }
+    constexpr self_type& when_any () const
+    { when_any_finish (); return *this; }
 
-    inline self_type& when_first () const
-    {
-        when_first_finish ();
-        return const_cast<self_type&> (*this);
-    }
+    constexpr self_type& when_any ()
+    { when_any_finish (); return *this; }
 
-    inline self_type& when_all () const
-    {
-        when_all_finish ();
-        return const_cast<self_type&> (*this);
-    }
+    constexpr self_type const& when_first () const
+    { when_first_finish (); return *this; }
 
-    inline void finish ()
-    {
-        quit (false);
-    }
+    constexpr self_type& when_first ()
+    { when_first_finish (); return *this; }
+
+    constexpr self_type const& when_all () const
+    { when_all_finish (); return *this; }
+
+    constexpr self_type& when_all ()
+    { when_all_finish (); return *this; }
+
+    constexpr void finish ()
+    { quit (false); }
 
     constexpr unbound_task () noexcept = default;
 
-    inline bool valid () const noexcept
+    constexpr bool valid () const noexcept
     { return num_assigned () == 1; }
 
-    inline bool ready () const
+    constexpr bool ready () const
     { return state () == running && empty () && num_finished () > 0; }
 
-    inline result_type get () const noexcept
+    constexpr result_type get () const noexcept
     {
         return ready () ? _M_value : std::nullopt;
     }
 
-    inline value_type operator ()() const noexcept
+    constexpr value_type operator ()() const noexcept
     {
         when_all ();
         return ready () ? _M_value.value_ref () : value_type ();
@@ -574,17 +572,17 @@ public:
     }
 
     template <class_t C, typename... Args>
-    inline unbound_task (C& obj, value_type (C::* fn)(Args...), Args&&... args)
+    constexpr unbound_task (C& obj, value_type (C::* fn)(Args...), Args&&... args)
     : self_type ()
     { then (obj, fn, std::forward<Args> (args)...); }
 
     template <class_t C, typename... Args>
-    inline unbound_task (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
+    constexpr unbound_task (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
     : self_type ()
     { then (obj, fn, std::forward<Args> (args)...); }
 
     template <typename... Args>
-    inline unbound_task (value_type (* fn)(Args...), Args&&... args)
+    constexpr unbound_task (value_type (* fn)(Args...), Args&&... args)
     : self_type ()
     { then (fn, std::forward<Args> (args)...); }
 
@@ -594,7 +592,7 @@ public:
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
               >
-    inline unbound_task (Callable&& fn,
+    constexpr unbound_task (Callable&& fn,
                          Args&&... args,
                          LambdaNonCaptureType<Callable>* = nullptr)
     : self_type ()
@@ -607,7 +605,7 @@ public:
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
               >
-    inline unbound_task (Callable&& fn,
+    constexpr unbound_task (Callable&& fn,
                          Args&&... args,
                          A const& ator = A (),
                          LambdaCaptureType<Callable>* = nullptr)
@@ -615,7 +613,7 @@ public:
     { then (std::move (fn), ator, std::forward<Args> (args)...); }
 
     template <class_t C, typename... Args>
-    inline self_type& then (C& obj, value_type (C::* fn)(Args...), Args&&... args)
+    constexpr self_type& then (C& obj, value_type (C::* fn)(Args...), Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args), &obj]
         {
@@ -629,7 +627,7 @@ public:
     }
 
     template <class_t C, typename... Args>
-    inline self_type& then (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
+    constexpr self_type& then (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args), &obj]
         {
@@ -643,7 +641,7 @@ public:
     }
 
     template <typename... Args>
-    inline self_type& then (value_type (* fn)(Args...), Args&&... args)
+    constexpr self_type& then (value_type (* fn)(Args...), Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args)]
         {
@@ -662,7 +660,7 @@ public:
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
               >
-    inline self_type& then (Callable&& fn,
+    constexpr self_type& then (Callable&& fn,
                             Args&&... args,
                             LambdaNonCaptureType<Callable>* = nullptr)
     {
@@ -684,7 +682,7 @@ public:
               typename = std::enable_if_t<!std::is_same_v<function<value_type(Args...)>,
                                                           std::decay_t<Callable>>>
               >
-    inline self_type& then (Callable&& fn,
+    constexpr self_type& then (Callable&& fn,
                             Args&&... args,
                             A const& ator = A (),
                             LambdaCaptureType<Callable>* = nullptr)
@@ -712,7 +710,7 @@ public:
               typename = std::enable_if_t<std::is_same_v<fn_tpl_type<value_type()>, std::decay_t<Else>> ||
                                           std::is_same_v<value_type(*)(), Else>>
               >
-    inline self_type& then_if_else (Cond&& cond_fn, If&& if_fn, Else&& else_fn)
+    constexpr self_type& then_if_else (Cond&& cond_fn, If&& if_fn, Else&& else_fn)
     {
         schedule ([=, this]
         {
@@ -735,7 +733,7 @@ public:
               typename = std::enable_if_t<std::is_same_v<fn_tpl_type<value_type()>, std::decay_t<Else>> ||
                                           std::is_same_v<value_type(*)(), Else>>
               >
-    inline self_type& then_if_else (Cond& cond_fn, If& if_fn, Else& else_fn)
+    constexpr self_type& then_if_else (Cond& cond_fn, If& if_fn, Else& else_fn)
     {
         schedule ([=, this]
         {
@@ -791,8 +789,9 @@ public:
     typedef matrix_type::value_type                 value_type  ;
 
     int matrix_main ();
+    int exec ();
 
-    inline unbound_task_adaptor ()
+    constexpr unbound_task_adaptor ()
     : _M_gThreadTask (*this, &unbound_task_adaptor::matrix_main)
     { }
 

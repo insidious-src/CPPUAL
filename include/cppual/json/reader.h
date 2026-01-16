@@ -272,7 +272,7 @@ void SkipWhitespace(InputStream& is) {
         s.Take();
 }
 
-inline const char* SkipWhitespace(const char* p, const char* end) {
+constexpr const char* SkipWhitespace(const char* p, const char* end) {
     while (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
         ++p;
     return p;
@@ -280,7 +280,7 @@ inline const char* SkipWhitespace(const char* p, const char* end) {
 
 #ifdef RAPIDJSON_SSE42
 //! Skip whitespace with SSE 4.2 pcmpistrm instruction, testing 16 8-byte characters at once.
-inline const char *SkipWhitespace_SIMD(const char* p) {
+constexpr const char *SkipWhitespace_SIMD(const char* p) {
     // Fast return for single non-whitespace
     if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
         ++p;
@@ -307,7 +307,7 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
     }
 }
 
-inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
+constexpr const char *SkipWhitespace_SIMD(const char* p, const char* end) {
     // Fast return for single non-whitespace
     if (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
         ++p;
@@ -331,7 +331,7 @@ inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
 #elif defined(RAPIDJSON_SSE2)
 
 //! Skip whitespace with SSE2 instructions, testing 16 8-byte characters at once.
-inline const char *SkipWhitespace_SIMD(const char* p) {
+constexpr const char *SkipWhitespace_SIMD(const char* p) {
     // Fast return for single non-whitespace
     if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
         ++p;
@@ -375,7 +375,7 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
     }
 }
 
-inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
+constexpr const char *SkipWhitespace_SIMD(const char* p, const char* end) {
     // Fast return for single non-whitespace
     if (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
         ++p;
@@ -416,7 +416,7 @@ inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
 #elif defined(RAPIDJSON_NEON)
 
 //! Skip whitespace with ARM Neon instructions, testing 16 8-byte characters at once.
-inline const char *SkipWhitespace_SIMD(const char* p) {
+constexpr const char *SkipWhitespace_SIMD(const char* p) {
     // Fast return for single non-whitespace
     if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
         ++p;
@@ -460,7 +460,7 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
     }
 }
 
-inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
+constexpr const char *SkipWhitespace_SIMD(const char* p, const char* end) {
     // Fast return for single non-whitespace
     if (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
         ++p;
@@ -502,16 +502,16 @@ inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
 
 #ifdef RAPIDJSON_SIMD
 //! Template function specialization for InsituStringStream
-template<> inline void SkipWhitespace(InsituStringStream& is) {
+template<> constexpr void SkipWhitespace(InsituStringStream& is) {
     is.src_ = const_cast<char*>(SkipWhitespace_SIMD(is.src_));
 }
 
 //! Template function specialization for StringStream
-template<> inline void SkipWhitespace(StringStream& is) {
+template<> constexpr void SkipWhitespace(StringStream& is) {
     is.src_ = SkipWhitespace_SIMD(is.src_);
 }
 
-template<> inline void SkipWhitespace(EncodedInputStream<UTF8<>, MemoryStream>& is) {
+template<> constexpr void SkipWhitespace(EncodedInputStream<UTF8<>, MemoryStream>& is) {
     is.is_.src_ = SkipWhitespace_SIMD(is.is_.src_, is.is_.end_);
 }
 #endif // RAPIDJSON_SIMD

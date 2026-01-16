@@ -27,7 +27,7 @@
 
 namespace cppual { namespace audio { namespace al {
 
-//inline int convertQuality (OutputFormat eFormat,
+//constexpr int convertQuality (OutputFormat eFormat,
 //                           SoundQuality eQuality) noexcept
 //{
 //    switch (eFormat)

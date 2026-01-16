@@ -23,18 +23,20 @@
 #define CPPUAL_UNBOUND_INTERFACE_H_
 #ifdef __cplusplus
 
+#include <cppual/abi>
+#include <cppual/decl>
 #include <cppual/types>
 #include <cppual/casts>
-//#include <cppual/string>
 #include <cppual/concepts>
 #include <cppual/array_map>
 #include <cppual/meta_type>
 #include <cppual/functional>
 #include <cppual/containers>
 #include <cppual/noncopyable>
+#include <cppual/meta_string>
 #include <cppual/meta_functional>
-#include <cppual/memory_allocator>
 #include <cppual/memory_resource>
+#include <cppual/memory_allocator>
 
 #include <string_view>
 #include <utility>
@@ -51,18 +53,25 @@ namespace cppual {
 
 // =========================================================
 
-template <struct_or_class C>
+template <typename T>
+concept unbound_key = are_same<std::size_t, T>;
+
+// =========================================================
+
+template <structure C>
 class function_proxy
 {
 public:
-    typedef function_proxy<C> self_type            ;
-    typedef cchar*            const_pointer        ;
-    typedef std::string_view  string_view          ;
-    typedef remove_cptr_t <C> iface_type           ;
-    typedef iface_type      * iface_pointer        ;
-    typedef iface_type const* iface_const_pointer  ;
-    typedef iface_type      & iface_reference      ;
-    typedef iface_type const& iface_const_reference;
+    typedef function_proxy<C> self_type          ;
+    typedef cchar*            const_pointer      ;
+    typedef std::size_t       size_type          ;
+    typedef size_type  const  const_size         ;
+    typedef fstring_view      string_view        ;
+    typedef remove_cvref_t<C> iface_type         ;
+    typedef iface_type      * iface_pointer      ;
+    typedef iface_type const* iface_const_pointer;
+    typedef iface_type      & iface_ref          ;
+    typedef iface_type const& iface_const_ref    ;
 
     constexpr function_proxy (self_type &&)            noexcept = default;
     constexpr function_proxy (self_type const&)        noexcept = default;
@@ -72,42 +81,46 @@ public:
     template <typename R, typename... Args>
     constexpr self_type& operator = (function<R(Args...) const> const& fn) noexcept
     {
-        _M_iface->iface_type::template add_function<R> (_M_fn_name, fn);
+        _M_iface->iface_type::template add_function<R> (_M_name, fn);
         return *this;
     };
 
     template <typename R, typename... Args>
     constexpr self_type& operator = (function<R(Args...)> const& fn) noexcept
     {
-        _M_iface->iface_type::template add_function<R> (_M_fn_name, fn);
+        _M_iface->iface_type::template add_function<R> (_M_name, fn);
         return *this;
     };
 
     template <typename R, typename... Args>
     constexpr R operator () (R*, Args... args) const
-    { return _M_iface->iface_type::template invoke<_M_fn_name, R> (std::forward<Args> (args)...); }
+    {
+        return _M_iface->iface_type::template invoke<_M_name, R> (std::forward<Args> (args)...);
+    }
 
-    //template <typename... Args>
-    //constexpr void operator () (Args... args) const
-    //{ _M_iface->iface_type::template invoke<_M_fn_name, void> (std::forward<Args> (args)...); }
+    template <typename... Args>
+    constexpr void operator () (Args... args) const
+    {
+        _M_iface->iface_type::template invoke<_M_name, void> (std::forward<Args> (args)...);
+    }
 
 private:
-    constexpr function_proxy (iface_const_reference interface, string_view const& fn_name) noexcept
-    : _M_iface   (&interface     )
-    , _M_fn_name (fn_name.data ())
+    consteval function_proxy (iface_const_ref interface, string_view fn_name) noexcept
+    : _M_iface (&interface)
+    , _M_name  (fn_name   )
     { }
 
-    constexpr function_proxy (iface_reference interface, string_view const& fn_name) noexcept
-    : _M_iface   (&interface     )
-    , _M_fn_name (fn_name.data ())
+    consteval function_proxy (iface_const_ref interface, const_pointer fn_name) noexcept
+    : _M_iface (&interface)
+    , _M_name  (fn_name   )
     { }
 
     function_proxy () = delete;
     friend iface_type;
 
 private:
-    iface_const_pointer _M_iface  ;
-    const_pointer       _M_fn_name;
+    iface_const_pointer _M_iface { };
+    string_view         _M_name  { };
 };
 
 //! =======================================================
@@ -115,25 +128,25 @@ private:
 //! =======================================================
 
 template <functional... FNs>
-class unbound_interface : public non_copyable
+class unbound_interface : public non_copyable_virtual
 {
 public:
     typedef unbound_interface<FNs...>               self_type             ;
     typedef self_type                               base_type             ;
-    typedef std::size_t                             size_type             ;
+    typedef function_proxy<self_type>               fn_proxy_type         ;
+    typedef fn_proxy_type::size_type                size_type             ;
     typedef size_type const                         const_size            ;
     typedef size_type                               key_type              ;
-    typedef key_type const                          const_key             ;
+    typedef key_type  const                         const_key             ;
     typedef std::tuple<std::pair<key_type, FNs>...> map_type              ;
     typedef ptrdiff                                 difference_type       ;
-    typedef std::string_view                        string_view           ;
+    typedef fstring_view                            string_view           ;
     typedef string                                  string_type           ;
     typedef map_type::iterator                      iterator              ;
     typedef map_type::const_iterator                const_iterator        ;
     typedef std::reverse_iterator<iterator>         reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator>   reverse_const_iterator;
     typedef std::pair<iterator, bool>               iterator_pair         ;
-    typedef function_proxy<self_type>               fn_proxy_type         ;
     typedef cchar*                                  char_ptr              ;
 
     // ====================================================
@@ -144,25 +157,25 @@ public:
     template <size_type I>
     using return_t = selected_tuple_t<map_type, I>::second_type::return_type;
 
-    template <struct_or_class C>
-    using any_member_fn_t = any_fn_t<C, void()>;
+    template <structure C>
+    using any_member_fn_t = fn_ptr_t<C, void()>;
 
-    template <struct_or_class C>
-    using any_const_member_fn_t = any_fn_t<C, void() const>;
+    template <structure C>
+    using any_const_member_fn_t = fn_ptr_t<C, void() const>;
 
-    template <struct_or_class C, fn_sig S>
-    using member_fn_t = any_fn_t<C, S>;
+    template <structure C, fn_sig S>
+    using member_fn_t = fn_ptr_t<C, S>;
 
-    template <struct_or_class C>
+    template <structure C>
     using any_mem_fn_pair = std::pair<key_type, any_member_fn_t<C>>;
 
-    template <struct_or_class C>
+    template <structure C>
     using any_const_mem_fn_pair = std::pair<key_type, any_const_member_fn_t<C>>;
 
-    template <struct_or_class C, typename R, typename... Args>
+    template <structure C, typename R, typename... Args>
     using mem_fn_pair = std::pair<key_type, member_fn_t<C, R(Args...)>>;
 
-    template <struct_or_class C, typename R, typename... Args>
+    template <structure C, typename R, typename... Args>
     using const_mem_fn_pair = std::pair<key_type, member_fn_t<C, R(Args...) const>>;
 
     // ====================================================
@@ -172,29 +185,28 @@ public:
     // ====================================================
 
     unbound_interface () = delete;
-    constexpr virtual ~unbound_interface () = default;
 
     // ====================================================
 
-    template <key_type... Ks, std::enable_if_t<sizeof... (Ks) >= 2, void>>
+    template <key_type... Ks> requires (sizeof... (Ks) >= 2)
     consteval bool contains () const noexcept
     {
         return ((get_index<Ks> () != npos) && ...);
     }
 
-    template <char_ptr... Ks, std::enable_if_t<sizeof... (Ks) >= 2, void>>
+    template <char_ptr... Ks> requires (sizeof... (Ks) >= 2)
     consteval bool contains () const noexcept
     {
         return ((get_index<Ks> () != npos) && ...);
     }
 
-    template <unsigned_integer... Ks>
+    template <unbound_key... Ks> requires (sizeof... (Ks) >= 2)
     constexpr bool contains (Ks... keys) const noexcept
     {
         return ((get_index (keys) != npos) && ...);
     }
 
-    template <c_const_str... Ks>
+    template <c_const_str... Ks> requires (sizeof... (Ks) >= 2)
     constexpr bool contains (Ks... keys) const noexcept
     {
         return ((get_index (keys) != npos) && ...);
@@ -225,8 +237,8 @@ public:
 
     // ====================================================
 
-    consteval function_proxy<self_type> operator [] (string_view const& fn_name) const noexcept
-    {  return function_proxy<self_type> (*this, fn_name); }
+    consteval fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    {  return fn_proxy_type (*this, fn_name); }
 
     // ====================================================
 
@@ -239,8 +251,10 @@ protected:
     requires (sizeof... (Ts) <= size () &&
              (functional_str_pair<Ts, typename Ts::first_type, typename Ts::second_type> && ...))
     consteval unbound_interface (Ts... pairs)
-    : _M_fn_map { std::make_pair (char_hash<pairs.first> (), pairs.second)... }
+    : _M_fn_map { std::make_pair (char_hash (pairs.first), pairs.second)... }
     { }
+
+    // ====================================================
 
     template <key_type K>
     consteval size_type get_index () const noexcept
@@ -259,6 +273,15 @@ protected:
         return std::get<I> (_M_fn_map).first == K ? I : npos;
     }
 
+    template <string_view STR_>
+    consteval size_type get_index () const noexcept
+    {
+        constexpr const_key  K = char_hash<STR_.data ()> ();
+        constexpr const_size I = K % size ();
+
+        return std::get<I> (_M_fn_map).first == K ? I : npos;
+    }
+
     constexpr size_type get_index (const_key k) const noexcept
     {
         constexpr const_size I = k % size ();
@@ -269,6 +292,14 @@ protected:
     constexpr size_type get_index (char_ptr k) const noexcept
     {
         const_key key = char_hash (k);
+        constexpr const_size I = key % size ();
+
+        return std::get<I> (_M_fn_map).first == key ? I : npos;
+    }
+
+    constexpr size_type get_index (string_view k) const noexcept
+    {
+        const_key key = char_hash (k.data ());
         constexpr const_size I = key % size ();
 
         return std::get<I> (_M_fn_map).first == key ? I : npos;
@@ -293,11 +324,30 @@ private:
         std::get<I> (_M_fn_map).second = fn;
     }
 
-    template <auto Name, typename R = void, typename... Args>
-    requires (std::same_as<decltype (Name), char_ptr>)
-    constexpr R invoke (Args&&... args) const noexcept
+    template <typename R, typename... Args>
+    constexpr void add_function (char_ptr fn_name, fn_t<R(Args...) const> const& fn) noexcept
     {
-        constexpr const_size I = get_index<Name> ();
+        constexpr const_size I = get_index<fn_name> ();
+
+        if (I == npos) std::get<I> (_M_fn_map).first = char_hash (fn_name);
+        std::get<I> (_M_fn_map).second = fn;
+    }
+
+    template <size_type SZ = def_capture_size_v, typename R, typename... Args>
+    constexpr void add_function (char_ptr fn_name, fn_t<R(Args...), SZ> const& fn) noexcept
+    {
+        constexpr const_size I = get_index<fn_name> ();
+
+        if (I == npos) std::get<I> (_M_fn_map).first = char_hash (fn_name);
+        std::get<I> (_M_fn_map).second = fn;
+    }
+
+    // ====================================================
+
+    template <string_view K, typename R = void, typename... Args>
+    consteval R invoke (Args&&... args) const noexcept
+    {
+        constexpr const_size I = get_index<K> ();
 
         static_assert (I != npos, "key NOT found!");
         return std::get<I> (_M_fn_map).second (std::forward<Args> (args)...);
@@ -305,7 +355,7 @@ private:
 
     // ====================================================
 
-    template <struct_or_class>
+    template <structure>
     friend class function_proxy;
 
 private:
@@ -333,7 +383,7 @@ public:
     typedef self_type                             base_type             ;
     typedef size_type                             key_type              ;
     typedef key_type const                        const_key             ;
-    typedef function_rtti<>                       mapped_type           ;
+    typedef abi::function_rtti<>                  mapped_type           ;
     typedef mapped_type const                     const_mapped          ;
     typedef std::pair<key_type, mapped_type>      value_type            ;
     typedef value_type const                      const_value           ;
@@ -342,14 +392,16 @@ public:
     typedef std::allocator_traits<allocator_type> alloc_traits          ;
     typedef size_type const                       const_size            ;
     typedef ptrdiff                               difference_type       ;
-    typedef std::string_view                      string_view           ;
+    typedef fstring_view                          string_view           ;
     typedef string                                string_type           ;
-    typedef fn_t<void()>                          any_fn_type           ;
+    typedef fn_t<void()>                          fn_type               ;
     typedef container_type::iterator              iterator              ;
     typedef container_type::const_iterator        const_iterator        ;
     typedef std::reverse_iterator<iterator>       reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
-    typedef mapped_type::array_type               rtti_array            ;
+    typedef mapped_type::array_type               array_type            ;
+    typedef mapped_type::array_ref                array_ref             ;
+    typedef mapped_type::array_const_ref          array_const_ref       ;
     typedef std::pair<iterator, bool>             iterator_pair         ;
     typedef abi::rtti                             rtti_type             ;
     typedef function_proxy<self_type>             fn_proxy_type         ;
@@ -358,7 +410,7 @@ public:
 
     // ====================================================
 
-    template <struct_or_class>
+    template <structure>
     friend class function_proxy;
 
     template <size_type>
@@ -366,25 +418,25 @@ public:
 
     // ====================================================
 
-    template <struct_or_class C>
-    using any_member_fn_t = any_fn_t<C, void()>;
+    template <structure C>
+    using any_member_fn_t = fn_ptr_t<C, void()>;
 
-    template <struct_or_class C>
-    using any_const_member_fn_t = any_fn_t<C, void() const>;
+    template <structure C>
+    using any_const_member_fn_t = fn_ptr_t<C, void() const>;
 
-    template <struct_or_class C, fn_sig S>
-    using member_fn_t = any_fn_t<C, S>;
+    template <structure C, fn_sig S>
+    using member_fn_t = fn_ptr_t<C, S>;
 
-    template <struct_or_class C>
+    template <structure C>
     using any_mem_fn_pair = std::pair<key_type, any_member_fn_t<C>>;
 
-    template <struct_or_class C>
+    template <structure C>
     using any_const_mem_fn_pair = std::pair<key_type, any_const_member_fn_t<C>>;
 
-    template <struct_or_class C, typename R, typename... Args>
+    template <structure C, typename R, typename... Args>
     using mem_fn_pair = std::pair<key_type, member_fn_t<C, R(Args...)>>;
 
-    template <struct_or_class C, typename R, typename... Args>
+    template <structure C, typename R, typename... Args>
     using const_mem_fn_pair = std::pair<key_type, member_fn_t<C, R(Args...) const>>;
 
     // ====================================================
@@ -393,8 +445,8 @@ public:
 
     // ====================================================
 
-    constexpr function_proxy<self_type> operator [] (string_view const& fn_name) const noexcept
-    {  return function_proxy<self_type> (*this, fn_name); }
+    consteval fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    {  return fn_proxy_type (*this, fn_name); }
 
     // ====================================================
 
@@ -415,24 +467,24 @@ public:
 
     // ====================================================
 
-    constexpr const_mapped& rtti (string_view const& fn_name) const noexcept
+    constexpr const_mapped& fn_rtti (string_view const& fn_name) const noexcept
     {
         return _M_fn_map[fn_name].second;
     }
 
-    constexpr mapped_type& rtti (string_view const& fn_name) noexcept
+    constexpr mapped_type& fn_rtti (string_view const& fn_name) noexcept
     {
         return _M_fn_map[fn_name].second;
     }
 
     template <char_ptr FN_NAME>
-    constexpr const_mapped& rtti () const noexcept
+    constexpr const_mapped& fn_rtti () const noexcept
     {
         return _M_fn_map[FN_NAME].second;
     }
 
     template <char_ptr FN_NAME>
-    constexpr mapped_type& rtti () noexcept
+    constexpr mapped_type& fn_rtti () noexcept
     {
         return _M_fn_map[FN_NAME].second;
     }
@@ -440,53 +492,74 @@ public:
     // ====================================================
 
     template <char_ptr Name>
-    constexpr abi::rtti const& return_type () const noexcept
+    constexpr rtti_type return_type () const noexcept
     {
-        return _M_fn_map[Name].second._M_ret_type;
+        return _M_fn_map[Name].second.return_type ();
     }
 
-    constexpr abi::rtti const& return_type (char_ptr Name) const noexcept
+    constexpr rtti_type return_type (char_ptr Name) const noexcept
     {
-        return _M_fn_map[Name].second._M_ret_type;
+        return _M_fn_map[Name].second.return_type ();
     }
 
     template <key_type K>
-    constexpr abi::rtti const& return_type () const noexcept
+    constexpr rtti_type return_type () const noexcept
     {
-        return _M_fn_map[K].second._M_ret_type;
+        return _M_fn_map[K].second.return_type ();
     }
 
-    constexpr abi::rtti const& return_type (key_type k) const noexcept
+    template <fstring_view K>
+    constexpr rtti_type return_type () const noexcept
     {
-        return _M_fn_map[k].second._M_ret_type;
+        return _M_fn_map[K].second.return_type ();
+    }
+
+    constexpr rtti_type return_type (key_type k) const noexcept
+    {
+        return _M_fn_map[k].second.return_type ();
+    }
+
+    constexpr rtti_type return_type (string_view k) const noexcept
+    {
+        return _M_fn_map[k].second.return_type ();
     }
 
     template <char_ptr Name>
-    constexpr rtti_array const& arg_types () const noexcept
+    constexpr array_const_ref arg_types () const noexcept
     {
-        return _M_fn_map[Name].second._M_arg_types;
+        return _M_fn_map[Name].second.arg_types ();
     }
 
-    constexpr rtti_array const& arg_types (char_ptr Name) const noexcept
+    constexpr array_const_ref arg_types (char_ptr Name) const noexcept
     {
-        return _M_fn_map[Name].second._M_arg_types;
+        return _M_fn_map[Name].second.arg_types ();
     }
 
     template <key_type K>
-    constexpr rtti_array const& arg_types () const noexcept
+    constexpr array_const_ref arg_types () const noexcept
     {
-        return _M_fn_map[K].second._M_arg_types;
+        return _M_fn_map[K].second.arg_types ();
     }
 
-    constexpr rtti_array const& arg_types (key_type k) const noexcept
+    template <fstring_view K>
+    constexpr array_const_ref arg_types () const noexcept
     {
-        return _M_fn_map[k].second._M_arg_types;
+        return _M_fn_map[K].second.arg_types ();
+    }
+
+    constexpr array_const_ref arg_types (key_type k) const noexcept
+    {
+        return _M_fn_map[k].second.arg_types ();
+    }
+
+    constexpr array_const_ref arg_types (string_view k) const noexcept
+    {
+        return _M_fn_map[k].second.arg_types ();
     }
 
     // ====================================================
 
-    template <typename... Keys>
-    requires (std::is_same_v<key_type, Keys> && ...)
+    template <unbound_key... Keys>
     consteval bool contains (Keys... keys) const noexcept
     {
         return ((contains<keys> ()) && ...);
@@ -520,13 +593,27 @@ public:
         return _M_fn_map[str].first == char_hash (str);
     }
 
+    template <string_view K, typename R = void, typename... Args, size_type... Is>
+    constexpr R invoke (Args&&... args, std::index_sequence<Is...> = std::index_sequence_for<Args...> ())
+    {
+        static_assert (arg_types (K).size () <= sizeof... (Args),
+                       "function argument count mismatch!");
+        static_assert (std::convertible_to<R, abi::type_t<return_type (K)>>,
+                       "function return type mismatch!");
+
+        typedef abi::type_t<return_type (K)> (fn_sign)
+               (abi::arg_type_t<arg_types (K).data (), Args, Is>...);
+
+        return (fn_cast<fn_sign> (_M_fn_map[K].second.function ()))(std::forward<Args> (args)...);
+    }
+
 protected:
     //! a pair of Ps... consists of const char* and cppual::function class
     template <pair_like... Ps>
     requires (functional_str_pair<Ps, typename Ps::first_type, typename Ps::second_type> && ...)
     constexpr dyn_unbound_interface (Ps... pairs)
     : _M_rc     (sizeof... (Ps) * sizeof (value_type)),
-      _M_fn_map (sizeof... (Ps), value_type (), allocator_type (_M_rc))
+      _M_fn_map (sizeof... (Ps), allocator_type (_M_rc))
     {
         check_pairs_types<0, Ps...> ();
 
@@ -572,24 +659,6 @@ private:
         }
     }
 
-    template <auto Name, typename R = void, typename... Args, size_type... Is>
-    requires (std::same_as<decltype (Name), char_ptr>)
-    constexpr R invoke (Args&&... args,
-                        std::index_sequence<Is...> = std::index_sequence_for<Args...> { }) const
-    {
-        constexpr const_key K = char_hash<Name> ();
-
-        static_assert (arg_types (K).size () < sizeof... (Args),
-                       "function argument count mismatch!");
-        static_assert (std::same_as<R, abi::type_t<return_type (K)>>,
-                       "function return type mismatch!");
-
-        using fn_sign = abi::type_t<return_type (K)> (abi::arg_type_t<arg_types (K).data (), Args, Is>...);
-
-        return (fn_cast<fn_sign> (_M_fn_map[K].second._M_fn))
-               (std::forward<abi::arg_type_t<arg_types (K).data (), Args, Is>> (args)...);
-    }
-
 private:
     memory::stacked_resource _M_rc    ;
     container_type           _M_fn_map;
@@ -618,7 +687,7 @@ template <class_t T>
 using is_reverse_interface_t = is_reverse_interface<T>::type;
 
 template <class_t T>
-inline constexpr bool const is_reverse_interface_v = is_reverse_interface<T>::value;
+inline constexpr cbool is_reverse_interface_v = is_reverse_interface<T>::value;
 
 template <typename T>
 concept reverse_interface_t = is_reverse_interface_v<T>;
@@ -629,12 +698,13 @@ template <reverse_interface_t T>
 class reverse_interface
 {
 public:
-    typedef reverse_interface<T> self_type  ;
-    typedef remove_cvrefptr_t<T> iface_type ;
-    typedef std::size_t          size_type  ;
-    typedef size_type const      const_size ;
-    typedef std::string_view     string_view;
-    typedef string               string_type;
+    typedef reverse_interface<T>       self_type    ;
+    typedef remove_cvrefptr_t<T>       iface_type   ;
+    typedef std::size_t                size_type    ;
+    typedef size_type const            const_size   ;
+    typedef std::string_view           string_view  ;
+    typedef string                     string_type  ;
+    typedef function_proxy<iface_type> fn_proxy_type;
 
     template <pair_like... Ps>
     constexpr reverse_interface (Ps... pairs) noexcept
@@ -644,8 +714,8 @@ public:
     constexpr size_type size () const noexcept
     { return _M_iface.size (); }
 
-    constexpr function_proxy<self_type> operator [] (string_view const& fn_name) const noexcept
-    {  return function_proxy<self_type> (_M_iface, fn_name); }
+    constexpr fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    {  return fn_proxy_type (_M_iface, fn_name); }
 
 private:
     iface_type _M_iface;

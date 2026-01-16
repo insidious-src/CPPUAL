@@ -614,7 +614,7 @@ public:
         return ret_atoms;
     }
 
-    inline event_type to_event (display_const_reference conn) const noexcept
+    constexpr event_type to_event (display_const_reference conn) const noexcept
     {
         switch (type ())
         {
@@ -702,7 +702,7 @@ public:
         return event_type (event_type::null);
     }
 
-    inline void operator () (display_const_reference conn)
+    constexpr void operator () (display_const_reference conn)
     {
         switch (type ())
         {

@@ -41,14 +41,14 @@ struct thread_pool_initializer final
     typedef value_type                 thread_type ;
     typedef circular_queue<value_type> thread_queue;
 
-    inline thread_pool_initializer ()
+    constexpr thread_pool_initializer ()
     : threadMutex (),
       threads     ()
     {
         threads.reserve (5);
     }
 
-    inline ~thread_pool_initializer ()
+    constexpr ~thread_pool_initializer ()
     {
         /// block thread reservation until all threads exit
         /// and clear the container
@@ -66,7 +66,7 @@ struct thread_pool_initializer final
 
 // =========================================================
 
-inline static thread_pool_initializer& pool () noexcept
+constexpr static thread_pool_initializer& pool () noexcept
 {
     static thread_pool_initializer thread_pool;
     return thread_pool;

@@ -103,8 +103,8 @@ public:
 
     bool isValid () const noexcept;
 
-    inline string const& message () const noexcept { return _M_gMsg; }
-    inline u16           status () const noexcept { return _M_uStatus; }
+    constexpr string const& message () const noexcept { return _M_gMsg; }
+    constexpr u16           status () const noexcept { return _M_uStatus; }
 
 private:
     string _M_gMsg;

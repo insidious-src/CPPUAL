@@ -23,14 +23,15 @@
 #define CPPUAL_STRING_META_H_
 #ifdef __cplusplus
 
-
+#include <cppual/decl>
 #include <cppual/types>
-#include <cppual/string.h>
 #include <cppual/concepts>
 #include <cppual/containers>
 
 #include <string_view>
 #include <string>
+
+// ====================================================
 
 namespace cppual {
 
@@ -91,9 +92,13 @@ consteval std::size_t char_fast_hash () noexcept
 
 //! char string constexpr complete hash (ex. usage in switch cases or as a hash)
 template <char_t T = char>
-constexpr std::size_t char_hash (T const* input) noexcept
+constexpr std::size_t char_hash (T const* input,
+                                 std::size_t sz = static_cast<decltype (sz)> (-1)) noexcept
 {
-    return *input ? static_cast<std::size_t> (*input) + 33 * char_hash (input + 1) : 5381;
+    constexpr static const auto npos = static_cast<decltype (sz)> (-1);
+
+    return (sz == npos || sz-- > 0) && *input ?
+            static_cast<decltype (sz)> (*input) + 33 * char_hash (input + 1, sz) : 5381;
 }
 
 constexpr std::size_t char_hash (std::string_view const& input) noexcept
@@ -102,10 +107,14 @@ constexpr std::size_t char_hash (std::string_view const& input) noexcept
 }
 
 //! char string consteval complete hash (ex. usage in switch cases or as a hash)
-template <auto const* In> requires (c_const_tstr<decltype (In)>)
+template <auto const* In, std::size_t SZ = static_cast<std::size_t> (-1)>
+requires (c_const_tstr<decltype (In)>)
 consteval std::size_t char_hash () noexcept
 {
-    return *In ? static_cast<std::size_t> (*In) + 33 * char_hash<In + 1> () : 5381;
+    constexpr static const auto npos = static_cast<decltype (SZ)> (-1);
+
+    return (SZ == npos || SZ > 0) && *In ?
+            static_cast<decltype (SZ)> (*In) + 33 * char_hash<In + 1, SZ == npos ? SZ : SZ - 1> () : 5381;
 }
 
 // ====================================================
@@ -114,8 +123,8 @@ struct char_hash
 {
     typedef std::size_t size_type;
 
-    template <c_const_tstr Char>
-    constexpr size_type operator () (Char key) const noexcept
+    template <char_t T>
+    constexpr size_type operator () (T const* key) const noexcept
     {
         return char_fast_hash (key);
     }
@@ -147,11 +156,6 @@ struct fnv1a_hash
     }
 
     constexpr size_type operator () (std::string_view const& sv) const noexcept
-    {
-        return (*this)(sv.data ());
-    }
-
-    constexpr size_type operator () (fstring const& sv) const noexcept
     {
         return (*this)(sv.data ());
     }

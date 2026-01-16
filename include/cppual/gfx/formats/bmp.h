@@ -97,19 +97,19 @@ public:
         u32              colors; // number of colors -> 4 bytes
         u32              importantColors; // important colors -> 4 bytes
 
-        constexpr u32 absolute_width () const noexcept
+        inline u32 absolute_width () const noexcept
         { return static_cast<u32> (width);  }
 
-        constexpr u32 absolute_height () const noexcept
+        inline u32 absolute_height () const noexcept
         { return static_cast<u32> (height); }
 
-        constexpr size_type pixel_count () const noexcept
+        inline size_type pixel_count () const noexcept
         { return static_cast<size_type> (width * height); }
 
-        constexpr size_type image_size_calc () const noexcept
+        inline size_type image_size_calc () const noexcept
         { return row_size_calc () * absolute_height (); }
 
-        constexpr size_type row_size_calc () const noexcept
+        inline size_type row_size_calc () const noexcept
         {
             return (sizeof (rgb_type) * 8 * absolute_width () + 31) / 8;
         }

@@ -85,12 +85,12 @@ public:
     void get_focus ();
     void kill_focus ();
 
-    inline    window_type    renderable        () const noexcept { return _M_pRenderable; }
+    constexpr    window_type    renderable        () const noexcept { return _M_pRenderable; }
     constexpr platform_wnd*  renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
-    inline    handle_type    platform_handle   () const { return renderable ()->handle (); }
-    inline    shared_display platform_display  () const { return renderable ()->connection (); }
-    inline    surface_type   platform_surface  () const noexcept { return _M_pSurface; }
-    inline    context_type   platform_context  () const noexcept { return _M_pContext; }
+    constexpr    handle_type    platform_handle   () const { return renderable ()->handle (); }
+    constexpr    shared_display platform_display  () const { return renderable ()->connection (); }
+    constexpr    surface_type   platform_surface  () const noexcept { return _M_pSurface; }
+    constexpr    context_type   platform_context  () const noexcept { return _M_pContext; }
     constexpr point2u        minimum_size      () const noexcept { return _M_gMinSize; }
     constexpr point2u        maximum_size      () const noexcept { return _M_gMaxSize; }
 

@@ -40,25 +40,25 @@ class SHARED_API command
 public:
     typedef gfx::icon icon_type;
 
-    inline icon_type* icon () const noexcept { return const_cast<icon_type*> (&_M_gIcon); }
-    inline uint       id () const noexcept { return _M_uId; }
-    inline uint       hotkey () const noexcept { return _M_uHotkey; }
-    inline bool       has_menu () const noexcept { return _M_pMenu; }
-    inline bool       has_side_menu () const noexcept { return _M_bSideMenu; }
+    constexpr icon_type* icon () const noexcept { return const_cast<icon_type*> (&_M_gIcon); }
+    constexpr uint       id () const noexcept { return _M_uId; }
+    constexpr uint       hotkey () const noexcept { return _M_uHotkey; }
+    constexpr bool       has_menu () const noexcept { return _M_pMenu; }
+    constexpr bool       has_side_menu () const noexcept { return _M_bSideMenu; }
 
-    inline bool set_icon (string const& gPath) noexcept
+    constexpr bool set_icon (string const& gPath) noexcept
     { return _M_gIcon.load (gPath); }
 
-    inline void set_text (string const& gText) noexcept
+    constexpr void set_text (string const& gText) noexcept
     { _M_gText = gText; }
 
-    inline void set_menu (popup_menu* pMenu) noexcept
+    constexpr void set_menu (popup_menu* pMenu) noexcept
     { if (pMenu) _M_pMenu = pMenu; }
 
-    inline void set_menu_side_mode (bool bSide) noexcept
+    constexpr void set_menu_side_mode (bool bSide) noexcept
     { if (_M_pMenu) _M_bSideMenu = bSide; }
 
-    inline string const& text () const noexcept
+    constexpr string const& text () const noexcept
     { return _M_gText; }
 
     signal<void(bool)> triggered;

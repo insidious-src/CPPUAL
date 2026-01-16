@@ -84,13 +84,13 @@ public:
                 image_type*   icon,
                 window_flags  flags = WindowHints);
 
-    inline image_type*  icon () const noexcept { return _M_pIcon; }
-    inline view*        attached () const noexcept { return _M_pTarget; }
-    inline popup_menu*  menu () noexcept { return &_M_gSysMenu; }
-    inline window_flags flags () const noexcept { return _M_gFrameFlags; }
-    inline vis_type     visibility () const noexcept { return _M_eVisibility; }
+    constexpr image_type*  icon () const noexcept { return _M_pIcon; }
+    constexpr view*        attached () const noexcept { return _M_pTarget; }
+    constexpr popup_menu*  menu () noexcept { return &_M_gSysMenu; }
+    constexpr window_flags flags () const noexcept { return _M_gFrameFlags; }
+    constexpr vis_type     visibility () const noexcept { return _M_eVisibility; }
 
-    inline bool is_stretched () const noexcept
+    constexpr bool is_stretched () const noexcept
     { return _M_eVisibility == vis_type::maximized; }
 
 protected:

@@ -41,9 +41,9 @@ namespace cppual {
 // ====================================================
 
 //! Node policy interface
-template <char_t          T = char,
-          struct_or_class E = char_traits<T>,
-          allocator_like  A = memory::allocator<T>>
+template <char_t                 T = char,
+          structure              E = locale_traits<T>,
+          allocator_like A = memory::allocator<T>>
 struct default_node_policy
 {
     typedef default_node_policy<T, E, A>                        self_type     ;
@@ -303,10 +303,10 @@ private:
  ** @brief frope (fast rope) implements a rope data structure using a double-linked list of fstrings
  ** Maintains interface compatibility with std::basic_string and fstring
  **/
-template <char_t          T = char,
-          struct_or_class E = char_traits<T>,
-          allocator_like  A = memory::allocator<T>,
-          struct_or_class Policy = default_node_policy<T, E, A>
+template <symbolic_char          T = char,
+          structure              E = locale_traits<T>,
+          allocator_like A = memory::allocator<T>,
+          structure         Policy = default_node_policy<T, E, A>
           >
 class SHARED_API frope : private A
 {
@@ -317,7 +317,7 @@ public:
 
     typedef frope<T, E, A, Policy>                            self_type             ;
     typedef cow_string<T, E, A>                               string_type           ;
-    typedef std::char_traits<T>                               char_traits           ;
+    typedef E                                                 char_traits           ;
     typedef list<string_type>                                 list_type             ;
     typedef std::allocator_traits<A>                          alloc_traits          ;
     typedef alloc_traits::allocator_type                      allocator_type        ;
@@ -337,7 +337,7 @@ public:
     typedef std::basic_string_view<value_type>                string_view           ;
     typedef string_type::difference_type                      difference_type       ;
 
-    static_assert (std::is_same_v<T, value_type>, "T & value_type are NOT the same!");
+    static_assert (are_same<T, value_type>, "T & value_type are NOT the same!");
 
     inline constexpr static const_size npos = size_type (-1);
     //! 256KB threshold for list/tree mode switch
@@ -479,7 +479,7 @@ public:
     : self_type (string_view (pchar), ator)
     { }
 
-    template <common_iterator Iter>
+    template <generic_iterator Iter>
     constexpr frope (Iter first, Iter last, allocator_type const& ator = allocator_type ()) noexcept
     : allocator_type (ator)
     , self_type (string_view (first, last))
@@ -498,7 +498,7 @@ public:
     : allocator_type (), self_type ()
     { }
 
-    inline ~frope ()
+    constexpr ~frope ()
     { clear (); }
 
     // copy assignment operator
@@ -537,16 +537,16 @@ public:
     //self_type substr  (size_type begin_pos, size_type end_pos = npos);
 
 
-    constexpr const_iterator c_str         () const noexcept { return cbegin ()                       ; }
-    constexpr const_iterator data          () const noexcept { return cbegin ()                       ; }
-    constexpr iterator       data          ()       noexcept { return  begin ()                       ; }
-    constexpr size_type      length        () const noexcept { return  _M_uLength                     ; }
-    constexpr size_type      size          () const noexcept { return  _M_uLength                     ; }
-    constexpr bool           empty         () const noexcept { return !_M_uLength                     ; }
-    constexpr allocator_type get_allocator () const noexcept { return *this                           ; }
-    constexpr size_type      max_size      () const noexcept { return allocator_type::max_size ()     ; }
-    constexpr size_type      size_bytes    () const noexcept { return _M_uLength * sizeof (value_type); }
-    constexpr size_type      capacity      () const noexcept { return _M_uLength                      ; }
+    constexpr const_iterator c_str         () const noexcept { return cbegin ()                      ; }
+    constexpr const_iterator data          () const noexcept { return cbegin ()                      ; }
+    constexpr iterator       data          ()       noexcept { return  begin ()                      ; }
+    constexpr size_type      length        () const noexcept { return  _M_uLength                    ; }
+    constexpr size_type      size          () const noexcept { return  length ()                     ; }
+    constexpr bool           empty         () const noexcept { return !length ()                     ; }
+    constexpr allocator_type get_allocator () const noexcept { return *this                          ; }
+    constexpr size_type      max_size      () const noexcept { return allocator_type::max_size ()    ; }
+    constexpr size_type      size_bytes    () const noexcept { return length () * sizeof (value_type); }
+    constexpr size_type      capacity      () const noexcept { return length ()                      ; }
 
     /**
      * @brief Copy substring to character array
@@ -559,7 +559,7 @@ public:
     {
         if (pos >= size ()) return 0;
 
-        count = std::min (count, _M_uLength - pos);
+        count = std::min (count, length () - pos);
         if (count == 0) return 0;
 
         size_type copied = 0;
@@ -624,7 +624,7 @@ public:
      * @brief Reserve capacity for future growth
      * For ropes, we optimize node capacities in the current mode
      */
-    inline void reserve (size_type new_cap)
+    constexpr void reserve (size_type new_cap)
     {
         if (new_cap <= size ()) return;
 
@@ -662,7 +662,7 @@ public:
     /**
      * @brief Add character to end
      */
-    inline void push_back (value_type ch)
+    constexpr void push_back (value_type ch)
     {
         if (is_tree ())
         {
@@ -2094,17 +2094,17 @@ constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 // ====================================================
 
 // template <char_t T, allocator_like A>
-// inline frope<T, A>& operator += (frope<T, A>& lhObj, frope<T, A> const& rhObj) noexcept
+// constexpr frope<T, A>& operator += (frope<T, A>& lhObj, frope<T, A> const& rhObj) noexcept
 // { return add_to_string (lhObj, rhObj._M_gBuffer.heap.data, rhObj._M_uLength); }
 
 // template <char_t T, allocator_like A>
-// inline frope<T, A>& operator += (frope<T>& gObj, T const* pText) noexcept
+// constexpr frope<T, A>& operator += (frope<T>& gObj, T const* pText) noexcept
 // { return add_to_string (gObj, pText, str_size (pText)); }
 
 // ====================================================
 
 // template <char_t T, allocator_like A>
-// inline frope<T, A> operator + (frope<T, A> const& lhObj, frope<T, A> const& rhObj) noexcept
+// constexpr frope<T, A> operator + (frope<T, A> const& lhObj, frope<T, A> const& rhObj) noexcept
 // {
 //     frope<T, A> gStr (lhObj);
 //     return std::move (add_to_string (gStr, rhObj._M_gBuffer.heap.data, rhObj._M_uLength));
@@ -2113,7 +2113,7 @@ constexpr bool operator != (T const* pText1, frope<T, A> const& rhObj) noexcept
 // ====================================================
 
 // template <char_t T, allocator_like A>
-// inline frope<T, A> operator + (frope<T, A> const& gObj, T const* pText) noexcept
+// constexpr frope<T, A> operator + (frope<T, A> const& gObj, T const* pText) noexcept
 // {
 //     frope<T, A> gStr (gObj);
 //     return std::move (add_to_string (gStr, pText, str_size (pText)));

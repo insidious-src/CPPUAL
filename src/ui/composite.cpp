@@ -31,7 +31,7 @@ namespace {
 
 typedef std::atomic_bool bool_type;
 
-inline static bool_type& compositing ()
+constexpr static bool_type& compositing ()
 {
     static bool_type internal = false;
     return internal;

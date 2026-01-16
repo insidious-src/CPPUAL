@@ -42,12 +42,12 @@ namespace cppual {
 
 // ====================================================
 
-template <struct_or_class Tuple, std::size_t I>
+template <structure Tuple, std::size_t I>
 using selected_tuple_t = std::tuple_element_t<I, Tuple>;
 
 // ===================================================
 
-template <typename T, struct_or_class Tuple, std::size_t I = 0>
+template <typename T, structure Tuple, std::size_t I = 0>
 struct tuple_ref_index;
 
 template <typename T, typename Base, typename... Bases, std::size_t I>
@@ -59,7 +59,7 @@ struct tuple_ref_index<T, std::tuple<Base, Bases...>, I>
 { };
 
 /// get base class from derived using a list of bases
-template <struct_or_class Derived, struct_or_class... Bases>
+template <structure Derived, structure... Bases>
 using base_from_derived = selected_tuple_t
 <std::tuple<Bases...>, tuple_ref_index<Derived, std::tuple<Bases...>>::value>;
 
@@ -184,7 +184,7 @@ typedef traits_enum::type  traits_enum_t ;
 typedef traits_enum::types traits_enum_ts;
 
 template <traits_enum_t E, typename T>
-inline constexpr bool const traits_enum_v = traits_enum::value<E, T>;
+inline constexpr cbool traits_enum_v = traits_enum::value<E, T>;
 
 // ====================================================
 
@@ -268,13 +268,13 @@ inline constexpr cbool are_any_of_type_v = are_any_of_type<E, Ts...>::value;
 
 // ====================================================
 
-template <array T>
+template <array_like T>
 constexpr std::size_t array_length (T val) noexcept
 {
     return (sizeof (val) / sizeof (T));
 }
 
-template <array T>
+template <array_like T>
 constexpr std::size_t array_size (T val) noexcept
 {
     return sizeof (val);

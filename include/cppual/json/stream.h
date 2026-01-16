@@ -81,20 +81,20 @@ struct StreamTraits {
 
 //! Reserve n characters for writing to a stream.
 template<typename Stream>
-inline void PutReserve(Stream& stream, size_t count) {
+constexpr void PutReserve(Stream& stream, size_t count) {
     (void)stream;
     (void)count;
 }
 
 //! Write character to a stream, presuming buffer is reserved.
 template<typename Stream>
-inline void PutUnsafe(Stream& stream, typename Stream::Ch c) {
+constexpr void PutUnsafe(Stream& stream, typename Stream::Ch c) {
     stream.Put(c);
 }
 
 //! Put N copies of a character to a stream.
 template<typename Stream, typename Ch>
-inline void PutN(Stream& stream, Ch c, size_t n) {
+constexpr void PutN(Stream& stream, Ch c, size_t n) {
     PutReserve(stream, n);
     for (size_t i = 0; i < n; i++)
         PutUnsafe(stream, c);

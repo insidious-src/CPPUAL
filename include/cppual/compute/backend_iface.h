@@ -170,7 +170,7 @@ public:
 
     factories (lib_vector_const_reference);
 
-    inline size_type size () const noexcept
+    constexpr size_type size () const noexcept
     {
         return _M_factory_vec.size ();
     }

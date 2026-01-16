@@ -45,24 +45,29 @@ class set_bit_iterator
 public:
     typedef set_bit_iterator<T>             self_type        ;
     typedef bitset<T>                       buf_type         ;
-    typedef std::remove_reference_t<T>      value_type       ;
-    typedef std::underlying_type_t<T>       int_type         ;
+    typedef remove_cref_t<T>                value_type       ;
     typedef value_type const                const_value      ;
+    typedef std::underlying_type_t<T>       int_type         ;
     typedef int_type   const                const_int        ;
-    typedef value_type const*               pointer          ;
-    typedef value_type const&               reference        ;
+    typedef value_type const *              pointer          ;
+    typedef value_type const *              const_pointer    ;
+    typedef value_type const &              reference        ;
+    typedef value_type const &              const_reference  ;
+    typedef bitset<const_value>             const_buf        ;
+    typedef bitset<value_type>              clean_buf        ;
     typedef std::size_t                     size_type        ;
+    typedef size_type const                 const_size       ;
     typedef std::ptrdiff_t                  difference_type  ;
     typedef std::bidirectional_iterator_tag iterator_category;
 
     template <enumeration U> using self_type_t = set_bit_iterator<U>;
 
-    typedef std::conditional_t<std::is_const_v<value_type>, const_value, int_type> elem_type;
+    typedef std::conditional_t<std::is_const_v<T>, const_value, int_type> elem_type;
 
     inline constexpr static size_type const npos = size_type (-1);
 
     friend class set_bit_iterator<value_type const>;
-    friend class set_bit_iterator<std::remove_const_t<value_type>>;
+    friend class set_bit_iterator<remove_const_t<value_type>>;
 
     consteval elem_type operator * () const noexcept
     { return static_cast<elem_type> (1 << _M_bit_pos); }
@@ -79,12 +84,12 @@ public:
     { }
 
     //! converting a non-const iterator to a const iterator
-    consteval set_bit_iterator (self_type_t<std::remove_const_t<value_type>> const& other) noexcept
+    consteval set_bit_iterator (self_type_t<remove_const_t<value_type>> const& other) noexcept
     : _M_bs (other._M_bs), _M_bit_pos (other._M_bit_pos)
     { }
 
     //! converting a non-const iterator to a const iterator
-    constexpr self_type& operator = (self_type_t<std::remove_const_t<value_type>> const& other) noexcept
+    constexpr self_type& operator = (self_type_t<remove_const_t<value_type>> const& other) noexcept
     {
         if (this == &other) return *this;
 

@@ -27,7 +27,7 @@ namespace cppual { namespace audio { namespace al {
 
 namespace { // optimize for internal unit usage
 
-inline static instance*& current_context() noexcept
+constexpr static instance*& current_context() noexcept
 {
     static thread_local instance* inst = nullptr;
     return inst;
@@ -37,7 +37,7 @@ inline static instance*& current_context() noexcept
 
 // ====================================================
 
-inline int convert_quality (output_format eFormat, sound_quality eQuality) noexcept
+constexpr int convert_quality (output_format eFormat, sound_quality eQuality) noexcept
 {
     switch (eFormat)
     {
@@ -134,7 +134,7 @@ inline int convert_quality (output_format eFormat, sound_quality eQuality) noexc
     return 0;
 }
 
-inline distance_type convert_distance_model (int nModel) noexcept
+constexpr distance_type convert_distance_model (int nModel) noexcept
 {
     switch (nModel)
     {
@@ -155,7 +155,7 @@ inline distance_type convert_distance_model (int nModel) noexcept
     }
 }
 
-inline int convert_distance_model (distance_type eModel) noexcept
+constexpr int convert_distance_model (distance_type eModel) noexcept
 {
     switch (eModel)
     {

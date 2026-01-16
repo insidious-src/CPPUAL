@@ -23,7 +23,7 @@
 #define CPPUAL_ROPE_ITERATOR_H_
 #ifdef __cplusplus
 
-#include <cppual/concept/concepts.h>
+#include <cppual/concepts>
 
 // =========================================================
 
@@ -35,27 +35,28 @@ namespace cppual {
  * @brief Iterator for frope
  * Provides bidirectional iteration over rope characters
  */
-template <class_t Rope>
+template <structure T>
 class frope_iterator
 {
 public:
-    // Standard iterator type definitions
-    typedef frope_iterator<Rope>            self_type          ;
-    typedef std::remove_reference_t<Rope>   buf_type           ;
+    //! standard iterator type definitions
+    typedef frope_iterator<T>               self_type          ;
+    typedef remove_vref_t<T>                buf_type           ;
     typedef std::add_const_t<buf_type>      const_buf          ;
+    typedef remove_const_t<buf_type>        clean_buf          ;
     typedef buf_type *                      buf_pointer        ;
     typedef buf_type const*                 buf_const_pointer  ;
     typedef buf_type &                      buf_reference      ;
     typedef buf_type const&                 buf_const_reference;
     typedef remove_cref_t<buf_type>         buf_clean_type     ;
-    typedef typename Rope::pointer          pointer            ;
-    typedef typename Rope::const_pointer    const_pointer      ;
-    typedef typename Rope::reference        reference          ;
-    typedef typename Rope::const_reference  const_reference    ;
-    typedef typename Rope::difference_type  difference_type    ;
-    typedef typename Rope::size_type        size_type          ;
+    typedef buf_type::pointer               pointer            ;
+    typedef buf_type::const_pointer         const_pointer      ;
+    typedef buf_type::reference             reference          ;
+    typedef buf_type::const_reference       const_reference    ;
+    typedef buf_type::difference_type       difference_type    ;
+    typedef buf_type::size_type             size_type          ;
     typedef size_type const                 const_size         ;
-    typedef typename Rope::value_type       value_type         ;
+    typedef buf_type::value_type            value_type         ;
     typedef value_type const                const_value        ;
     typedef std::bidirectional_iterator_tag iterator_category  ;
     typedef buf_clean_type::list_node       list_node          ;

@@ -66,10 +66,10 @@ using cppual::compute::device_memory;
 void* operator new    (std::size_t size, device& obj);
 void  operator delete (void* ptr, device& obj);
 
-inline void* operator new[] (std::size_t size, device& obj)
+constexpr void* operator new[] (std::size_t size, device& obj)
 { return ::operator new (size, obj); }
 
-inline void  operator delete[] (void* ptr, device& obj)
+constexpr void  operator delete[] (void* ptr, device& obj)
 { ::operator delete (ptr, obj); }
 
 // =========================================================

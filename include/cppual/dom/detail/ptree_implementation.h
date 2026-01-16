@@ -919,7 +919,7 @@ namespace boost { namespace property_tree
     // Free functions
 
     template<class K, class D, class C>
-    inline void swap(basic_ptree<K, D, C> &pt1, basic_ptree<K, D, C> &pt2)
+    constexpr void swap(basic_ptree<K, D, C> &pt1, basic_ptree<K, D, C> &pt2)
     {
         pt1.swap(pt2);
     }

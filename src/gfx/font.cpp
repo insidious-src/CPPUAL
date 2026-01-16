@@ -36,13 +36,13 @@ typedef ::FT_GlyphSlot glyph_pointer   ;
 typedef ::FT_List      list_pointer    ;
 typedef ::FT_ListNode  listnode_pointer;
 
-inline library_pointer init () noexcept
+constexpr library_pointer init () noexcept
 {
     library_pointer lib;
     return ::FT_Init_FreeType (&lib) == 0 ? lib : nullptr;
 }
 
-inline library_pointer instance () noexcept
+constexpr library_pointer instance () noexcept
 {
     static const library_pointer lib = init ();
     return lib;

@@ -33,14 +33,14 @@ public:
     typedef thread_object self_type  ;
     typedef std::thread   thread_type;
 
-    inline thread_object () noexcept
+    constexpr thread_object () noexcept
     : _M_uThreadOwner (std::this_thread::get_id ())
     { }
 
-    inline virtual ~thread_object ()
+    constexpr virtual ~thread_object ()
     { }
 
-    inline thread_type::id thread_owner_id () const noexcept
+    constexpr thread_type::id thread_owner_id () const noexcept
     { return _M_uThreadOwner; }
 
 private:

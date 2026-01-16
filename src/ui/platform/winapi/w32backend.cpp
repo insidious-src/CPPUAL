@@ -32,13 +32,13 @@ namespace {
 typedef ::HDC  display_type;
 typedef ::HWND handle_type ;
 
-inline display_type get_display () noexcept
+constexpr display_type get_display () noexcept
 {
     static const display_type dc = ::GetDC (handle_type ());
     return dc;
 }
 
-inline handle_type desktop_window () noexcept
+constexpr handle_type desktop_window () noexcept
 {
     static const handle_type desktop_wnd = ::GetDesktopWindow ();
     return desktop_wnd;

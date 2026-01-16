@@ -49,13 +49,15 @@
  * define all API typedefs in a consistent non-conflicting way;
  * for integer bit fields use enums;
  * for object encapsulation use template specialization,
- * inline & constexpr functions as much as possible;
+ * constexpr & constexpr functions as much as possible;
  * if the api requires some initialization then use STL containers + cppual polymorphic allocators;
  * if possible prefer stack allocators (cpu stack memory);
  * define all class typedefs according to STL (ex. typedef T value_type);
  * maintain strict typesafety;
  *
  */
+
+// =========================================================
 
 namespace cppual::compute::cl {
 
@@ -164,7 +166,7 @@ struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<remove_c
 { static_assert (is_cl_object<T>::value, "T is NOT an opencl object type!"); };
 
 template <non_void T>
-inline constexpr bool const is_cl_object_v = is_cl_object<T>::value;
+inline constexpr cbool is_cl_object_v = is_cl_object<T>::value;
 
 template <typename T>
 using CLObject = std::enable_if_t<is_cl_object_v<T>, T>;
@@ -362,21 +364,21 @@ struct bound_info_function<Function, void, void>
 };
 
 template <class Function>
-inline bound_info_function<Function, void, void>
+constexpr bound_info_function<Function, void, void>
 bind_info_function(Function f)
 {
     return bound_info_function<Function, void, void>(f);
 }
 
 template <class Function, class Object>
-inline bound_info_function<Function, Object, void>
+constexpr bound_info_function<Function, Object, void>
 bind_info_function(Function f, Object o)
 {
     return bound_info_function<Function, Object, void>(f, o);
 }
 
 template <class Function, class Object, class AuxInfo>
-inline bound_info_function<Function, Object, AuxInfo>
+constexpr bound_info_function<Function, Object, AuxInfo>
 bind_info_function(Function f, Object o, AuxInfo j)
 {
     return bound_info_function<Function, Object, AuxInfo>(f, o, j);
@@ -559,26 +561,26 @@ struct get_object_info_impl< dyn_array<device_type*> >
 
 //! returns the value (of type T) from the given clGet*Info() function call.
 template <class T, class Function>
-inline T get_object_info(Function f)
+constexpr T get_object_info(Function f)
 {
     return get_object_info_impl<T>()(bind_info_function(f));
 }
 
 template <class T, class Function, class Object, class Info>
-inline T get_object_info(Function f, Object o, Info i)
+constexpr T get_object_info(Function f, Object o, Info i)
 {
     return get_object_info_impl<T>()(bind_info_function(f, o), i);
 }
 
 
 template <class T, class Function, class Object, class Info, class AuxInfo>
-inline T get_object_info(Function f, Object o, Info i, AuxInfo j)
+constexpr T get_object_info(Function f, Object o, Info i, AuxInfo j)
 {
     return get_object_info_impl<T>()(bind_info_function(f, o, j), i);
 }
 
 template <class T, class Function, class Object, class Info, class AuxInfo>
-inline T get_object_info(Function f, Object o, Info i, AuxInfo j, const size_t k, cvoid* l)
+constexpr T get_object_info(Function f, Object o, Info i, AuxInfo j, const size_t k, cvoid* l)
 {
     return get_object_info_impl<T>()(bind_info_function(f, o, j), i, k, l);
 }
@@ -601,8 +603,8 @@ public:
     resource_object  () = delete ;
     ~resource_object () = default;
 
-    inline resource_object (self_type&&) = default;
-    inline self_type& operator = (self_type&&) = default;
+    constexpr resource_object (self_type&&) = default;
+    constexpr self_type& operator = (self_type&&) = default;
 
     constexpr pointer handle () const noexcept
     {
@@ -629,8 +631,8 @@ protected:
 //     resource_object  () = delete;
 //     ~resource_object () noexcept;
 
-//     inline resource_object (self_type&&) = default;
-//     inline self_type& operator = (self_type&&) = default;
+//     constexpr resource_object (self_type&&) = default;
+//     constexpr self_type& operator = (self_type&&) = default;
 
 //     constexpr pointer handle () const noexcept
 //     {

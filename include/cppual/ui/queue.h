@@ -65,7 +65,7 @@ public:
     bool            valid   () const noexcept { return _M_display.get (); }
 
 protected:
-    inline display_queue_interface (connection_type const& display) noexcept
+    constexpr display_queue_interface (connection_type const& display) noexcept
     : _M_display (display)
     { }
 
@@ -108,7 +108,7 @@ public:
         signal<void(handle_type)>                            winClose;
     };
 
-    inline static event_signals& events ()
+    constexpr static event_signals& events ()
     {
         static event_signals inst;
         return inst;

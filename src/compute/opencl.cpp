@@ -63,26 +63,26 @@ struct Initializer
 
 };
 
-inline Initializer& get () noexcept
+constexpr Initializer& get () noexcept
 {
     static Initializer init;
     return init;
 }
 
-inline CL::size_type init_num_platforms () noexcept
+constexpr CL::size_type init_num_platforms () noexcept
 {
     CL::size_type n;
     ::clGetPlatformIDs (0, nullptr, &n);
     return n;
 }
 
-inline CL::size_type get_num_platforms () noexcept
+constexpr CL::size_type get_num_platforms () noexcept
 {
     static CL::size_type n = init_num_platforms ();
     return n;
 }
 
-inline std::size_t size_of_platforms_data () noexcept
+constexpr std::size_t size_of_platforms_data () noexcept
 {
     CL::size_type n    = get_num_platforms ();
     std::size_t   size = n * sizeof (Initializer::PlatformInfo);
@@ -99,7 +99,7 @@ inline std::size_t size_of_platforms_data () noexcept
     return size;
 }
 
-inline string infostr (u16 id, CL::size_type info) noexcept
+constexpr string infostr (u16 id, CL::size_type info) noexcept
 {
     static thread_local std::size_t n = 0;
     static thread_local string      text;

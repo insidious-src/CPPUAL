@@ -40,6 +40,7 @@ class context;
 class config
 {
 public:
+    typedef config                              self_type      ;
     typedef resource_handle                     handle_type    ;
     typedef ulong                               value_type     ;
     typedef handle_type  config::*              safe_bool      ;
@@ -72,10 +73,12 @@ public:
 
     typedef bitset<feature> feature_types;
 
-    config (connection_type native, connection_type legacy, format_type format = format_type::default2d ());
+    config (connection_type native,
+            connection_type legacy,
+            format_type format = format_type::default2d ());
 
-    constexpr config (config const&) noexcept = default;
-    inline    config& operator = (config const&) noexcept = default;
+    constexpr config (self_type const&)                noexcept = default;
+    constexpr self_type& operator = (self_type const&) noexcept = default;
 
     value_type id    () const;
     void       print () const;
@@ -133,19 +136,21 @@ consteval bool operator != (config const& lh, config const& rh) noexcept
 class surface : public surface_interface
 {
 public:
+    typedef surface       self_type     ;
     typedef config        conf_value    ;
     typedef config const* conf_pointer  ;
     typedef config const& conf_reference;
 
-    surface (surface const&);
-    surface (surface&&) noexcept = default;
-    surface& operator = (surface&&) noexcept;
+
+    surface (self_type &&) noexcept = default;
+    surface (self_type const&);
+    surface& operator = (self_type &&) noexcept;
     ~surface ();
 
-    surface (conf_reference cfg,
-             point2u size,
-             handle_type wnd,
-             surface_type type = surface_type::double_buffer);
+    surface (conf_reference cfg ,
+             point2u        size,
+             handle_type    wnd ,
+             surface_type   type = surface_type::double_buffer);
 
     void           set_parent (shared_surface /*parent*/) noexcept { }
     shared_surface parent     () const noexcept { return shared_surface (); }
@@ -179,14 +184,16 @@ private:
 class context : public context_interface
 {
 public:
+    typedef context       self_type     ;
     typedef config        conf_value    ;
     typedef config const* conf_pointer  ;
     typedef config const& conf_reference;
 
-    context (context const&);
-    context& operator = (context&&) noexcept;
-    context& operator = (context const&);
-    context (context&&) noexcept = default;
+
+    context (self_type &&) noexcept = default;
+    context (self_type const&);
+    self_type& operator = (self_type &&) noexcept;
+    self_type& operator = (self_type const&);
     ~context () noexcept;
 
     context (conf_reference conf, version_type const& version = default_version ());
@@ -199,8 +206,7 @@ public:
     void finish  () noexcept;
     void release () noexcept;
 
-    constexpr
-    conf_reference configuration () const noexcept
+    constexpr conf_reference configuration () const noexcept
     { return _M_pConf; }
 
     shared_surface  readable      () const noexcept { return  _M_pReadTarget;       }
@@ -211,7 +217,7 @@ public:
     connection_type connection    () const noexcept { return  _M_pConf.native  ();  }
     format_type     format        () const noexcept { return  _M_pConf.format  ();  }
 
-    static constexpr version_type default_version () noexcept
+    constexpr static version_type default_version () noexcept
     { return version_type { 3, 0 }; }
 
 private:

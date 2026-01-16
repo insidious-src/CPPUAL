@@ -281,7 +281,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
 
         // Find length of the string
         template<class Ch>
-        inline std::size_t measure(const Ch *p)
+        constexpr std::size_t measure(const Ch *p)
         {
             const Ch *tmp = p;
             while (*tmp) 
@@ -291,7 +291,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
 
         // Compare strings for equality
         template<class Ch>
-        inline bool compare(const Ch *p1, std::size_t size1, const Ch *p2, std::size_t size2, bool case_sensitive)
+        constexpr bool compare(const Ch *p1, std::size_t size1, const Ch *p2, std::size_t size2, bool case_sensitive)
         {
             if (size1 != size2)
                 return false;
@@ -311,7 +311,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         }
 
         template<class Ch>
-        inline size_t get_index(const Ch c)
+        constexpr size_t get_index(const Ch c)
         {
             // If not ASCII char, its semantic is same as plain 'z'.
             // char could be signed, so first stretch and make unsigned.

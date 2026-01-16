@@ -80,7 +80,7 @@ struct Win32Event final : public message_type
     constexpr point2u position () const noexcept
     { return { static_cast<u16> (pt.x), static_cast<u16> (pt.y) }; }
 
-    inline void operator ()() const
+    constexpr void operator ()() const
     {
         switch (type ())
         {
@@ -122,7 +122,7 @@ struct Win32Event final : public message_type
         }
     }
 
-    inline event_type toEvent () const noexcept
+    constexpr event_type toEvent () const noexcept
     {
         switch (type ())
         {

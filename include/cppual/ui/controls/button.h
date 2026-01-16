@@ -36,7 +36,7 @@ public:
     void set_label (string_type const&);
     ~abstract_button () noexcept;
 
-    inline string_type label () const noexcept
+    constexpr string_type label () const noexcept
     { return _M_gLabel; }
 
 protected:
@@ -52,7 +52,7 @@ public:
     void press ();
     void release ();
 
-    inline bool is_pushed () const noexcept
+    constexpr bool is_pushed () const noexcept
     { return _M_bIsPushed; }
 
 protected:
@@ -73,7 +73,7 @@ public:
     void select ();
     void clear ();
 
-    inline bool is_selected () const noexcept
+    constexpr bool is_selected () const noexcept
     { return _M_bIsSelected; }
 
 protected:
@@ -105,7 +105,7 @@ public:
 
     void set_state (check_state);
 
-    inline check_state state () const noexcept
+    constexpr check_state state () const noexcept
     { return _M_eCheckState; }
 
 protected:

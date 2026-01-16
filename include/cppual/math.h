@@ -30,7 +30,7 @@
 namespace cppual {
 
 template <number T>
-inline T round (T const& value) noexcept
+constexpr T round (T const& value) noexcept
 {
     return static_cast<T> (std::round (value));
 }

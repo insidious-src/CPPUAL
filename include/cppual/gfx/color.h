@@ -149,10 +149,10 @@ struct ypb_pr_color
 struct Gradient
 { rgb_color color; u8 position; };
 
-inline bool operator == (Gradient const& gObj1, Gradient const& gObj2) noexcept
+constexpr bool operator == (Gradient const& gObj1, Gradient const& gObj2) noexcept
 { return (gObj1.position == gObj2.position and gObj1.color == gObj2.color); }
 
-inline bool operator != (Gradient const& gObj1, Gradient const& gObj2) noexcept
+constexpr bool operator != (Gradient const& gObj1, Gradient const& gObj2) noexcept
 { return (gObj1.position != gObj2.position or gObj1.color != gObj2.color); }
 
 // =========================================================

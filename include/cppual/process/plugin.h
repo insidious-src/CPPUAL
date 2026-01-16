@@ -51,7 +51,7 @@ class SHARED_API dyn_loader : public non_copyable
 public:
     typedef dyn_loader                self_type    ;
     typedef string                    string_type  ;
-    typedef std::string_view          string_view  ;
+    typedef fstring_view              string_view  ;
     typedef resource_handle           handle_type  ;
     typedef void *                    pointer      ;
     typedef function_proxy<self_type> fn_proxy_type;
@@ -93,21 +93,20 @@ public:
     constexpr bool contains (string_view const& gName) const noexcept
     { return get_address (gName) != nullptr; }
 
-    constexpr function_proxy<self_type> operator [] (string_view const& fn_name) const noexcept
-    { return  function_proxy<self_type> (*this, fn_name); }
+    consteval fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    { return  fn_proxy_type (*this, fn_name); }
 
-    template <typename T = void>
+    template <non_function T = void>
     constexpr T* import (string_view const& pName) const
     { return static_cast<T*> (get_address (pName)); }
 
-    template <typename R = void, typename... Args>
-    constexpr auto import (string_view const& pName) const -> R(*)(Args...)
-    { return direct_cast<R(*)(Args...)> (get_function (pName)); }
+    template <static_function F = void(*)()>
+    constexpr F import (string_view const& pName) const
+    { return direct_cast<F> (get_function (pName)); }
 
-    template <auto Name, typename R = void, typename... Args>
-    requires (std::same_as<decltype (Name), char_ptr>)
-    inline R invoke (Args&&... args) const
-    { return (*direct_cast<R(*)(Args...)> (get_function (Name)))(std::forward<Args> (args)...); }
+    template <string_view K, typename R = void, typename... Args>
+    constexpr R invoke (Args&&... args) const
+    { return (*direct_cast<R(*)(Args...)> (get_function (K.data ())))(std::forward<Args> (args)...); }
 
 private:
     pointer       get_address  (string_view const& name) const;
@@ -134,10 +133,10 @@ extern "C" typedef struct SHARED_API plugin_vars
     std::shared_ptr<void> iface    { };
     dyn_array<cchar*>     required { };
 
-    inline plugin_vars (self_type const&)           = default;
-    inline self_type& operator = (self_type const&) = default;
+    constexpr plugin_vars (self_type const&)           = default;
+    constexpr self_type& operator = (self_type const&) = default;
 
-    inline plugin_vars (memory::memory_resource* res = nullptr)
+    constexpr plugin_vars (memory::memory_resource* res = nullptr)
     : name     (),
       provides (),
       desc     (),
@@ -148,7 +147,7 @@ extern "C" typedef struct SHARED_API plugin_vars
                                  dyn_array<cchar*>::allocator_type (*res))
     { }
 
-    inline plugin_vars (self_type&& obj)
+    constexpr plugin_vars (self_type&& obj)
     : name     (obj.name),
       provides (obj.provides),
       desc     (obj.desc),
@@ -158,7 +157,7 @@ extern "C" typedef struct SHARED_API plugin_vars
       required (std::move (obj.required))
     { }
 
-    inline self_type& operator = (self_type&& obj)
+    constexpr self_type& operator = (self_type&& obj)
     {
         if (this == &obj) return *this;
 
@@ -180,8 +179,8 @@ typedef std::pair<loader_type const, plugin_vars> plugin_pair;
 
 // =========================================================
 
-template <typename Interface,
-          memory::allocator_like A = memory::allocator
+template <non_void Interface,
+          allocator_like A = memory::allocator
           <std::pair<loader_type::string_type const, plugin_pair>>
           >
 class SHARED_API plugin_manager : public non_copyable
@@ -233,7 +232,7 @@ public:
 
         plugin_pointer () = delete;
 
-        template <typename, memory::allocator_like>
+        template <non_void, allocator_like>
         friend class plugin_manager;
 
     private:
@@ -265,7 +264,7 @@ public:
     { }
 
     template <typename... Args>
-    bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args&&... args)
+    constexpr bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args&&... args)
     {
         static_assert (!are_any_of_type_v<traits_enum_t::reference, Args...>,
                 "references are not a 'C' concept!");

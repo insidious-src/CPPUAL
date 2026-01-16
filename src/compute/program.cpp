@@ -26,7 +26,7 @@ namespace cppual { namespace compute {
 
 namespace {
 
-//inline Program::handle_type createProgramFromSource (Behaviour const& context,
+//constexpr Program::handle_type createProgramFromSource (Behaviour const& context,
 //                                                     std::dyn_array<string> const& source)
 //{
 //    if (!source.empty ())

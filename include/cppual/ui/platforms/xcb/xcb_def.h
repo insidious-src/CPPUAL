@@ -148,7 +148,7 @@ private:
 
 // =========================================================
 
-inline screen_type* screen_handle (display_type* conn, u32& screen) noexcept
+constexpr screen_type* screen_handle (display_type* conn, u32& screen) noexcept
 {
     auto setup = screen_setup (conn);
     auto it    = setup.begin ();

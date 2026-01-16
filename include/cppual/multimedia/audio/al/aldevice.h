@@ -63,7 +63,7 @@ public:
     bool        is_extension_present   (string const& name) noexcept;
 
     constexpr device_type type () const noexcept { return _M_eType      ; }
-    inline    string_type name () const noexcept { return _M_gDeviceName; }
+    constexpr    string_type name () const noexcept { return _M_gDeviceName; }
 
 protected:
     string_type _M_gDeviceName;

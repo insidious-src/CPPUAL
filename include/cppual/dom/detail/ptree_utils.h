@@ -26,11 +26,11 @@ namespace boost { namespace property_tree { namespace detail
     {
         typedef typename T::value_type Ch;
         std::locale _M_locale;
-        inline bool operator()(Ch c1, Ch c2) const
+        constexpr bool operator()(Ch c1, Ch c2) const
         {
             return std::toupper(c1, _M_locale) < std::toupper(c2, _M_locale);
         }
-        inline bool operator()(const T &t1, const T &t2) const
+        constexpr bool operator()(const T &t1, const T &t2) const
         {
             return std::lexicographical_compare(t1.begin(), t1.end(),
                                                 t2.begin(), t2.end(), *this);

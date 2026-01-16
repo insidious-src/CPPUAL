@@ -39,13 +39,15 @@ private:
     typedef factories::lib_vector                 lib_vector                ;
     typedef factories::lib_vector_reference       lib_vector_reference      ;
     typedef factories::lib_vector_const_reference lib_vector_const_reference;
+    typedef std::size_t                           size_type                 ;
+    typedef size_type const                       const_size                ;
 
     factory::manager_type manager        ;
     vector_type           local_factories;
 
-    inline static lib_vector_reference platform_names () noexcept
+    consteval static lib_vector_const_reference platform_names () noexcept
     {
-        static std::array<cchar*, 2> ret_vec
+        constexpr static std::array<cchar*, 2> ret_vec
         {
             "libcppual-compute-opencl",
             "libcppual-compute-vulkan"
@@ -54,27 +56,31 @@ private:
         return ret_vec;
     }
 
-    inline static initializer& platforms () noexcept
+    constexpr static initializer& platforms () noexcept
     {
         static initializer init;
         return init;
     }
 
-    inline initializer ()
+    constexpr initializer ()
+    : manager ()
+    , local_factories ()
     {
-        static lib_vector_reference vec = platform_names ();
+        constexpr static lib_vector_const_reference array = platform_names ();
 
-        for (auto i = 0U; i < vec.size (); ++i)
+        local_factories.reserve (array.size ());
+
+        for (lib_vector::const_reference val : array)
         {
-            if (manager.load_plugin (vec[i]))
+            if (manager.load_plugin (val))
             {
-                local_factories.push_back (manager.plugin (vec[i]).iface ());
+                local_factories.push_back (manager.plugin (val).iface ());
             }
         }
     }
 
 public:
-    inline static vector_reference instances () noexcept
+    constexpr static vector_reference instances () noexcept
     {
         return platforms ().local_factories;
     }

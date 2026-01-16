@@ -127,7 +127,7 @@ platform::version_type platform::sl_version ()
     if(!context_interface::current() || context_interface::current()->device() != device_backend::gl)
         throw std::runtime_error("NO OpenGL context is assigned to the current thread!");
 
-    static auto versions = get_sl_versions();
+    static auto versions = get_sl_versions ();
     return versions[version()];
 }
 

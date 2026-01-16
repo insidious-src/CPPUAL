@@ -51,7 +51,7 @@
 
 namespace cppual { namespace memory { namespace { //! internal unit optimization
 
-inline static void initializer ()
+constexpr static void initializer ()
 {
     static auto ret = memory::model::initialize ();
     static thread_local auto thread_ret = memory::model::thread_initialize ();
@@ -64,18 +64,18 @@ inline static void initializer ()
 class system_memory_resource final : public memory_resource
 {
 public:
-    inline bool is_thread_safe () const noexcept
+    constexpr bool is_thread_safe () const noexcept
     {
         return true;
     }
 
-    inline size_type max_size () const noexcept
+    constexpr size_type max_size () const noexcept
     {
         auto const max = memory::max_size ();
         return max ? max : memory_resource::max_size ();
     }
 
-    inline size_type capacity () const noexcept
+    constexpr size_type capacity () const noexcept
     {
         auto const cap = memory::capacity ();
         return cap ? cap : memory_resource::capacity ();

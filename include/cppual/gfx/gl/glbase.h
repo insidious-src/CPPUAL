@@ -23,7 +23,7 @@
 #define CPPUAL_GFX_GL_BASE_H_
 #ifdef __cplusplus
 
-#include <cppual/resource.h>
+#include <cppual/resource>
 
 #include <cstddef>
 
@@ -70,19 +70,10 @@ typedef bitset<shader_type> shader_types;
 class object : public resource<void, uint>
 {
 public:
-    typedef std::ptrdiff_t difference_type;
-    typedef std::size_t    size_type      ;
-
-    object  () noexcept = default;
+    object  () noexcept = default    ;
     object  (resource_type      type);
     object  (shader_type shader_type);
-    ~object () noexcept;
-
-    constexpr resource_type type () const noexcept
-    { return _M_eResType; }
-
-private:
-    resource_type _M_eResType { };
+    ~object () noexcept              ;
 };
 
 // ====================================================

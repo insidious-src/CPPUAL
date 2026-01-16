@@ -60,7 +60,7 @@ constexpr std::conditional_t<is_compact_forwarded_v<T>, T, T&&> forward_compact 
 }
 
 template <non_void T>
-constexpr  std::conditional_t<is_compact_forwarded_v<T>, T, T&&> forward_compact (T& val) noexcept
+constexpr std::conditional_t<is_compact_forwarded_v<T>, T, T&&> forward_compact (T& val) noexcept
 {
     return is_compact_forwarded_v<T> ? val : std::forward<T> (val);
 }
@@ -74,13 +74,13 @@ constexpr  std::conditional_t<is_compact_forwarded_v<T>, T, T&&> forward_compact
 // }
 
 template <non_void T>
-constexpr forward_t<T> forward_perfect (std::remove_reference_t<T> var) noexcept
+constexpr forward_t<T> forward_perfect (remove_ref_t<T> var) noexcept
 {
     return var;
 }
 
 template <non_void T>
-constexpr forward_t<T> forward_perfect (std::remove_reference_t<T>&& var) noexcept
+constexpr forward_t<T> forward_perfect (remove_ref_t<T>&& var) noexcept
 {
     return var;
 }

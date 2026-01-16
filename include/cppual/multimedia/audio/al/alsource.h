@@ -71,8 +71,8 @@ public:
     void  mute   () noexcept;
     void  unmute () noexcept;
 
-    inline sound_buffer* buffer () const noexcept { return _M_pBuffer;  }
-    inline void          clear  ()       noexcept { _M_gQueue.clear (); }
+    constexpr sound_buffer* buffer () const noexcept { return _M_pBuffer;  }
+    constexpr void          clear  ()       noexcept { _M_gQueue.clear (); }
 
 protected:
     queue_type         _M_gQueue;

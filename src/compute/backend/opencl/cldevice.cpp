@@ -108,7 +108,7 @@ public:
     static size_type count () noexcept
     { return all ().size (); }
 
-    inline size_type device_count () const noexcept
+    constexpr size_type device_count () const noexcept
     { return _M_devices.size (); }
 
     static platform_ids_vector& all ()

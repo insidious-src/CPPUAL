@@ -55,12 +55,12 @@ public:
 class raster_image final : public image_interface, private memory::allocator<raster_image>
 {
 public:
-    inline raster_image () noexcept = default;
+    constexpr raster_image () noexcept = default;
     ~raster_image () { }
 
     void draw (transform const& info);
 
-    inline raster_image (string_type  const& gPath,
+    constexpr raster_image (string_type  const& gPath,
                          pixel_format const& gFomat = pixel_format (),
                          color               gMask  = color        (),
                          memory_resource&    pAtor  = memory::get_default_resource ())
@@ -70,16 +70,16 @@ public:
       _M_bIsLoaded  (parse_image (gPath))
     { }
 
-    inline color mask      () const noexcept { return _M_gColorMask; }
-    inline bool  is_loaded () const noexcept { return _M_bIsLoaded ; }
+    constexpr color mask      () const noexcept { return _M_gColorMask; }
+    constexpr bool  is_loaded () const noexcept { return _M_bIsLoaded ; }
 
-    inline device_backend type () const noexcept
+    constexpr device_backend type () const noexcept
     { return device_backend::gl; }
 
-    inline void set_mask (color gMask) noexcept
+    constexpr void set_mask (color gMask) noexcept
     { _M_gColorMask = gMask; }
 
-    inline virtual_buffer* map () noexcept
+    constexpr virtual_buffer* map () noexcept
     { return &_M_gPixBuffer; }
 
 private:
@@ -105,16 +105,16 @@ public:
 
     void draw (transform const& info);
 
-    inline device_backend type () const noexcept
+    constexpr device_backend type () const noexcept
     { return device_backend::gl; }
 
-    inline virtual_buffer* map () noexcept
+    constexpr virtual_buffer* map () noexcept
     { return &_M_gPixBuffer; }
 
-    inline bool is_loaded () const noexcept
+    constexpr bool is_loaded () const noexcept
     { return _M_bIsLoaded; }
 
-    inline vector_image (string_type const&  gPath,
+    constexpr vector_image (string_type const&  gPath,
                          memory_resource&    pAtor  = memory::get_default_resource (),
                          pixel_format const& gFomat = pixel_format ())
     : allocator (pAtor),

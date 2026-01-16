@@ -35,7 +35,7 @@ private:
     factory::manager_type mgr          ;
     shared_manager        local_factory;
 
-    inline static cchar* platform_name () noexcept
+    constexpr static cchar* platform_name () noexcept
     {
     #   if defined OS_GNU_LINUX or defined OS_BSD
             //return std::getenv ("WAYLAND_DISPLAY") ? "libcppual-ui-plugin-wayland" :
@@ -49,12 +49,12 @@ private:
     }
 
 public:
-    inline initializer ()
+    constexpr initializer ()
     {
         if (mgr.load_plugin (platform_name ())) local_factory = mgr.plugin (platform_name ()).iface ();
     }
 
-    inline operator shared_manager () const
+    constexpr operator shared_manager () const
     {
         return local_factory;
     }
@@ -62,7 +62,7 @@ public:
 
 // ====================================================
 
-inline static shared_manager platform_instance ()
+constexpr static shared_manager platform_instance ()
 {
     static auto inst = initializer();
     return inst;

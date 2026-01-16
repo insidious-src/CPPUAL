@@ -30,12 +30,12 @@ namespace boost { namespace property_tree
     ///////////////////////////////////////////////////////////////////////////
     // ptree_error
 
-    inline ptree_error::ptree_error(const string &w): 
+    constexpr ptree_error::ptree_error(const string &w): 
         std::runtime_error(w) 
     {
     }
 
-    inline ptree_error::~ptree_error() throw()
+    constexpr ptree_error::~ptree_error() throw()
     {
     }
 
@@ -48,7 +48,7 @@ namespace boost { namespace property_tree
     {
     }
 
-    inline ptree_bad_data::~ptree_bad_data() throw()
+    constexpr ptree_bad_data::~ptree_bad_data() throw()
     {
     }
 
@@ -68,7 +68,7 @@ namespace boost { namespace property_tree
 
     }
 
-    inline ptree_bad_path::~ptree_bad_path() throw()
+    constexpr ptree_bad_path::~ptree_bad_path() throw()
     {
     }
 

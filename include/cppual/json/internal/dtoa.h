@@ -32,7 +32,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 RAPIDJSON_DIAG_OFF(array-bounds) // some gcc versions generate wrong warnings https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59124
 #endif
 
-inline void GrisuRound(char* buffer, int len, uint64_t delta, uint64_t rest, uint64_t ten_kappa, uint64_t wp_w) {
+constexpr void GrisuRound(char* buffer, int len, uint64_t delta, uint64_t rest, uint64_t ten_kappa, uint64_t wp_w) {
     while (rest < wp_w && delta - rest >= ten_kappa &&
            (rest + ten_kappa < wp_w ||  /// closer
             wp_w - rest > rest + ten_kappa - wp_w)) {
@@ -41,7 +41,7 @@ inline void GrisuRound(char* buffer, int len, uint64_t delta, uint64_t rest, uin
     }
 }
 
-inline int CountDecimalDigit32(uint32_t n) {
+constexpr int CountDecimalDigit32(uint32_t n) {
     // Simple pure C++ implementation was faster than __builtin_clz version in this situation.
     if (n < 10) return 1;
     if (n < 100) return 2;
@@ -57,7 +57,7 @@ inline int CountDecimalDigit32(uint32_t n) {
     return 9;
 }
 
-inline void DigitGen(const DiyFp& W, const DiyFp& Mp, uint64_t delta, char* buffer, int* len, int* K) {
+constexpr void DigitGen(const DiyFp& W, const DiyFp& Mp, uint64_t delta, char* buffer, int* len, int* K) {
     static const uint32_t kPow10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
     const DiyFp one(uint64_t(1) << -Mp.e, Mp.e);
     const DiyFp wp_w = Mp - W;
@@ -109,7 +109,7 @@ inline void DigitGen(const DiyFp& W, const DiyFp& Mp, uint64_t delta, char* buff
     }
 }
 
-inline void Grisu2(double value, char* buffer, int* length, int* K) {
+constexpr void Grisu2(double value, char* buffer, int* length, int* K) {
     const DiyFp v(value);
     DiyFp w_m, w_p;
     v.NormalizedBoundaries(&w_m, &w_p);
@@ -123,7 +123,7 @@ inline void Grisu2(double value, char* buffer, int* length, int* K) {
     DigitGen(W, Wp, Wp.f - Wm.f, buffer, length, K);
 }
 
-inline char* WriteExponent(int K, char* buffer) {
+constexpr char* WriteExponent(int K, char* buffer) {
     if (K < 0) {
         *buffer++ = '-';
         K = -K;
@@ -147,7 +147,7 @@ inline char* WriteExponent(int K, char* buffer) {
     return buffer;
 }
 
-inline char* Prettify(char* buffer, int length, int k, int maxDecimalPlaces) {
+constexpr char* Prettify(char* buffer, int length, int k, int maxDecimalPlaces) {
     const int kk = length + k;  // 10^(kk-1) <= v < 10^kk
 
     if (0 <= k && kk <= 21) {
@@ -213,7 +213,7 @@ inline char* Prettify(char* buffer, int length, int k, int maxDecimalPlaces) {
     }
 }
 
-inline char* dtoa(double value, char* buffer, int maxDecimalPlaces = 324) {
+constexpr char* dtoa(double value, char* buffer, int maxDecimalPlaces = 324) {
     RAPIDJSON_ASSERT(maxDecimalPlaces >= 1);
     Double d(value);
     if (d.IsZero()) {

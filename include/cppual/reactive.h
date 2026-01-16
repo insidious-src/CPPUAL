@@ -35,7 +35,7 @@ namespace cppual {
 
 // =========================================================
 
-template <non_void T, memory::allocator_like = memory::allocator<function<void(arg_t<T>)>>>
+template <non_void T, allocator_like = memory::allocator<function<void(arg_t<T>)>>>
 class reactive;
 
 // =========================================================
@@ -67,7 +67,7 @@ typedef reactive<ldouble> reactive_ldouble;
 
 // =========================================================
 
-template <non_void T, memory::allocator_like A>
+template <non_void T, allocator_like A>
 class reactive : private signal<void(arg_t<T>), A>
 {
 public:
@@ -76,7 +76,7 @@ public:
     typedef signal<void(arg_type), A>    base_type      ;
     typedef memory::allocator_traits<A>  alloc_traits   ;
     typedef alloc_traits::allocator_type allocator_type ;
-    typedef remove_cref_t<T>             value_type     ;
+    typedef remove_cvref_t<T>            value_type     ;
     typedef value_type const             const_value    ;
     typedef value_type &                 reference      ;
     typedef value_type const&            const_reference;
@@ -89,10 +89,10 @@ public:
     static_assert (is_copyable_movable_v<value_type>, "value_type is NOT neighter copyable nor movable!");
 
     template <class_t C>
-    using mem_fn_type = any_fn_type<C, void(arg_type)>::type;
+    using mem_fn_type = fn_ptr_t<C, void(arg_type)>;
 
     template <class_t C>
-    using const_mem_fn_type = any_fn_type<C, void(arg_type) const>::type;
+    using const_mem_fn_type = fn_ptr_t<C, void(arg_type) const>;
 
     constexpr reactive () noexcept   = default;
     constexpr reactive (self_type&&) = default;
@@ -132,7 +132,7 @@ public:
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        (*reactive_signal)(_M_value);
+        (*reactive_signal)(get ());
 
         return *this;
     }
@@ -165,7 +165,7 @@ public:
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        (*reactive_signal)(_M_value);
+        (*reactive_signal)(get ());
 
         return *this;
     }
@@ -185,16 +185,19 @@ public:
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
 
-        (*reactive_signal)(_M_value);
+        (*reactive_signal)(get ());
 
         return *this;
     }
 
-    constexpr explicit operator value_type () const noexcept
+    constexpr explicit operator const_reference () const noexcept
     { return _M_value; }
 
     constexpr const_reference get () const noexcept
     { return _M_value; }
+
+    constexpr bool empty () const noexcept
+    { return base_type::empty (); }
 
     constexpr void clear () noexcept
     { base_type::clear (); }
@@ -295,7 +298,7 @@ public:
         return *this;
     }
 
-    template <non_void, memory::allocator_like>
+    template <non_void, allocator_like>
     friend class reactive;
 
 private:

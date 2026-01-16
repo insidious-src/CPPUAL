@@ -26,7 +26,7 @@
 
 namespace cppual { namespace audio { namespace al {
 
-inline void make_player (uint uId) noexcept
+constexpr void make_player (uint uId) noexcept
 {
     point3f gValue (.0f, .0f, .0f);
 

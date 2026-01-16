@@ -55,9 +55,9 @@ private:
 
 public:
     constexpr initializer ()
-    {
-        if (mgr.load_plugin (plugin_name ())) factory = mgr.plugin (plugin_name ()).iface ();
-    }
+    : mgr     ()
+    , factory (mgr.load_plugin (plugin_name ()) ? mgr.plugin (plugin_name ()).iface () : nullptr)
+    { }
 
     constexpr operator shared_factory () const
     {

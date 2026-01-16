@@ -30,7 +30,7 @@ namespace cppual { namespace memory {
 namespace { // anonymous namespace for internal unit optimization
 
 template <typename H>
-inline H* shift_to_header (void* p, std::size_t /*uAlign*/) noexcept
+constexpr H* shift_to_header (void* p, std::size_t /*uAlign*/) noexcept
 {
     return reinterpret_cast<H*> (reinterpret_cast<memory_resource::math_pointer> (p) - sizeof (H)/* -
                                  align_adjustment_header (p, uAlign, sizeof (H))*/);
@@ -267,7 +267,7 @@ memory_resource::size_type heap_resource::max_size () const noexcept
 // List Allocator
 // =========================================================
 
-inline void* forward_alloc (list_resource::header*    const hdr,
+constexpr void* forward_alloc (list_resource::header*    const hdr,
                             list_resource::header*    const prev_hdr,
                             list_resource::size_type  const size,
                             list_resource::align_type const align) noexcept
@@ -287,7 +287,7 @@ inline void* forward_alloc (list_resource::header*    const hdr,
     return ptr;
 }
 
-inline list_resource::header* find (list_resource::header*          hdr,
+constexpr list_resource::header* find (list_resource::header*          hdr,
                                     list_resource::header*&         prev_hdr,
                                     list_resource::size_type  const size,
                                     list_resource::align_type const align) noexcept

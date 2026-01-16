@@ -54,13 +54,13 @@ public:
     static address local_address  () noexcept;
     static address public_address () noexcept;
 
-    inline bool is_v4 () const noexcept
+    constexpr bool is_v4 () const noexcept
     { return std::memcmp (&_M_uBytes[0], &v4_mapped_prefix[0], 12) == 0; }
 
-    inline bool is_multicast () const noexcept
+    constexpr bool is_multicast () const noexcept
     { return is_v4 () ? _M_uBytes[12] == 224 : _M_uBytes[0] == 0xff; }
 
-    inline bool is_loopback () const noexcept
+    constexpr bool is_loopback () const noexcept
     {
         return is_v4 () ? _M_uBytes[12] == 127 :
                           _M_uBytes[ 0] == 0 && _M_uBytes[ 1] == 0 &&
@@ -73,7 +73,7 @@ public:
                           _M_uBytes[14] == 0 && _M_uBytes[15] == 1;
     }
 
-    inline bool is_broadcast () const noexcept
+    constexpr bool is_broadcast () const noexcept
     {
         return is_v4 () &&
                _M_uBytes[12] == 0xff && _M_uBytes[13] == 0xff &&

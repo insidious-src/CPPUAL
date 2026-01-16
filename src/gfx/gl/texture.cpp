@@ -34,7 +34,7 @@ namespace { //! optimize for internal unit usage
 
 struct GLStates final
 {
-    inline static bool hasDirectAccess = false;
+    inline constinit static bool hasDirectAccess = false;
 };
 
 constexpr int convert_mag_filter (texture::MagFilter eMag) noexcept

@@ -12,16 +12,16 @@ namespace boost { namespace property_tree {
     namespace constants
     {
         template <typename Ch> const Ch* null_value();
-        template <> inline const char* null_value() { return "null"; }
-        template <> inline const wchar_t* null_value() { return L"null"; }
+        template <> constexpr const char* null_value() { return "null"; }
+        template <> constexpr const wchar_t* null_value() { return L"null"; }
 
         template <typename Ch> const Ch* true_value();
-        template <> inline const char* true_value() { return "true"; }
-        template <> inline const wchar_t* true_value() { return L"true"; }
+        template <> constexpr const char* true_value() { return "true"; }
+        template <> constexpr const wchar_t* true_value() { return L"true"; }
 
         template <typename Ch> const Ch* false_value();
-        template <> inline const char* false_value() { return "false"; }
-        template <> inline const wchar_t* false_value() { return L"false"; }
+        template <> constexpr const char* false_value() { return "false"; }
+        template <> constexpr const wchar_t* false_value() { return L"false"; }
     }
 
     template <typename Ptree>

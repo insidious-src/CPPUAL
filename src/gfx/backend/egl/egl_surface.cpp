@@ -95,7 +95,7 @@ enum class error_type : u8
     choose_config
 };
 
-inline version_type& version () noexcept
+constexpr version_type& version () noexcept
 {
     static version_type eglVersion { 0, 0 };
     return eglVersion;
@@ -107,7 +107,7 @@ template <error_type>
 void error ();
 
 template <>
-inline void error <error_type::initialize> ()
+constexpr void error <error_type::initialize> ()
 {
     switch (::eglGetError ())
     {
@@ -175,7 +175,7 @@ void error <error_type::create> ()
 }
 
 template <>
-inline void error <error_type::destroy> ()
+constexpr void error <error_type::destroy> ()
 {
     switch (::eglGetError ())
     {
@@ -205,7 +205,7 @@ void error <error_type::query_surface> ()
 }
 
 template <>
-inline void error <error_type::get_configs> ()
+constexpr void error <error_type::get_configs> ()
 {
     switch (::eglGetError ())
     {
@@ -219,7 +219,7 @@ inline void error <error_type::get_configs> ()
 }
 
 template <>
-inline void error <error_type::choose_config> ()
+constexpr void error <error_type::choose_config> ()
 {
     switch (::eglGetError ())
     {
@@ -237,7 +237,7 @@ inline void error <error_type::choose_config> ()
 
 // ====================================================
 
-inline bool_type initialize (display_pointer dsp)
+constexpr bool_type initialize (display_pointer dsp)
 {
     bool_type ret;
 
@@ -269,7 +269,7 @@ constexpr value_type api_bits (API eAPI) noexcept
 
 // ====================================================
 
-inline config::feature_types convert_extensions (display_pointer dsp)
+constexpr config::feature_types convert_extensions (display_pointer dsp)
 {
     config::feature_types eFeatures;
 
@@ -307,7 +307,7 @@ inline config::feature_types convert_extensions (display_pointer dsp)
     return eFeatures;
 }
 
-inline surface_pointer create_drawable (config const&                   gConf,
+constexpr surface_pointer create_drawable (config const&                   gConf,
                                         point2u                         /*gSize*/,
                                         resource_interface::handle_type uWndHandle,
                                         bool                            bDouble)
@@ -334,7 +334,7 @@ inline surface_pointer create_drawable (config const&                   gConf,
     return pSurface;
 }
 
-inline surface_pointer create_pbuffer (config const& gConf, point2u gSize)
+constexpr surface_pointer create_pbuffer (config const& gConf, point2u gSize)
 {
     value_type const nPBufferAttribs[] =
     {
@@ -355,7 +355,7 @@ inline surface_pointer create_pbuffer (config const& gConf, point2u gSize)
     return _M_pPixelBuffer;
 }
 
-inline surface_pointer create_pixmap (config const& gConf)
+constexpr surface_pointer create_pixmap (config const& gConf)
 {
     surface_pointer _M_pSurface = ::eglCreatePixmapSurface (gConf.display (),
                                                             gConf,
@@ -366,7 +366,7 @@ inline surface_pointer create_pixmap (config const& gConf)
     return _M_pSurface;
 }
 
-inline surface_pointer create_surface (config const&         gConf,
+constexpr surface_pointer create_surface (config const&         gConf,
                                        point2u               size,
                                        surface_type          type,
                                        surface::handle_type  owner)
@@ -382,7 +382,7 @@ inline surface_pointer create_surface (config const&         gConf,
     }
 }
 
-inline context_pointer create_gc (config const& gConf, version_type version, void* pShared)
+constexpr context_pointer create_gc (config const& gConf, version_type version, void* pShared)
 {
     value_type nContextAttribs[5];
 
@@ -414,7 +414,7 @@ inline context_pointer create_gc (config const& gConf, version_type version, voi
     return pContext;
 }
 
-inline point2u get_size (display_pointer dsp, surface_pointer surface) noexcept
+constexpr point2u get_size (display_pointer dsp, surface_pointer surface) noexcept
 {
     value_type size[2];
 

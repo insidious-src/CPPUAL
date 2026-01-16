@@ -578,7 +578,7 @@ inline bool Writer<StringBuffer>::WriteDouble(double d) {
 
 #if defined(RAPIDJSON_SSE2) || defined(RAPIDJSON_SSE42)
 template<>
-inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, size_t length) {
+constexpr bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, size_t length) {
     if (length < 16)
         return RAPIDJSON_LIKELY(is.Tell() < length);
 
@@ -639,7 +639,7 @@ inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, siz
 }
 #elif defined(RAPIDJSON_NEON)
 template<>
-inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, size_t length) {
+constexpr bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, size_t length) {
     if (length < 16)
         return RAPIDJSON_LIKELY(is.Tell() < length);
 

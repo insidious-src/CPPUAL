@@ -21,7 +21,7 @@ namespace boost { namespace property_tree { namespace xml_parser
     /// Whitespace should be collapsed and trimmed.
     static const int trim_whitespace = 0x4;
 
-    inline bool validate_flags(int flags)
+    constexpr bool validate_flags(int flags)
     {
         return (flags & ~(no_concat_text | no_comments | trim_whitespace)) == 0;
     }

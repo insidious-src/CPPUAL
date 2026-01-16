@@ -27,7 +27,7 @@ using std::mutex;
 
 namespace cppual { namespace audio { namespace al {
 
-inline int convert_emitter_state (audio::sound_state eState) noexcept
+constexpr int convert_emitter_state (audio::sound_state eState) noexcept
 {
     switch (eState)
     {
@@ -46,7 +46,7 @@ inline int convert_emitter_state (audio::sound_state eState) noexcept
     return 0;
 }
 
-inline audio::sound_state convert_emitter_state (int nState) noexcept
+constexpr audio::sound_state convert_emitter_state (int nState) noexcept
 {
     switch (nState)
     {

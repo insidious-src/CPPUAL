@@ -28,7 +28,7 @@ namespace cppual { namespace ui {
 
 namespace { // optimize for internal unit usage
 
-inline static shared_display& backend () noexcept
+constexpr static shared_display& backend () noexcept
 {
     static shared_display back;
     return back;

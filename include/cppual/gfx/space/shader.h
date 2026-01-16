@@ -60,7 +60,7 @@ enum class VertexOrder : bool
 class Binary
 {
 public:
-    inline static uint getNumBinaryFormats () noexcept
+    constexpr static uint getNumBinaryFormats () noexcept
     { return sm_uNumFormats; }
 
 private:
@@ -94,13 +94,13 @@ public:
     bool   load (string const& str, LoadFrom mode = LoadFrom::File);
     bool   compile () noexcept;
 
-    inline string const& source () const noexcept { return _M_gSource; }
-    inline Shader::Type  type   () const noexcept { return _M_eType  ; }
+    constexpr string const& source () const noexcept { return _M_gSource; }
+    constexpr Shader::Type  type   () const noexcept { return _M_eType  ; }
 
-    inline bool isLoaded () const noexcept
+    constexpr bool isLoaded () const noexcept
     { return _M_gStates.test (Shader::IsLoaded); }
 
-    inline bool isCompiled () const noexcept
+    constexpr bool isCompiled () const noexcept
     { return _M_gStates.test (Shader::IsCompiled); }
 
 private:
@@ -123,11 +123,11 @@ private:
 
 struct FragmentShader final : public Shader
 {
-    inline FragmentShader () noexcept
+    constexpr FragmentShader () noexcept
     : Shader (Shader::Fragment)
     { }
 
-    inline FragmentShader (string const& gString,
+    constexpr FragmentShader (string const& gString,
                            LoadFrom      eMode = LoadFrom::File)
     : Shader (Shader::Fragment)
     { load (gString, eMode); }
@@ -135,11 +135,11 @@ struct FragmentShader final : public Shader
 
 struct VertexShader final : public Shader
 {
-    inline VertexShader () noexcept
+    constexpr VertexShader () noexcept
     : Shader (Shader::Vertex)
     { }
 
-    inline VertexShader (string const& gString,
+    constexpr VertexShader (string const& gString,
                          LoadFrom      eMode = LoadFrom::File)
     : Shader (Shader::Vertex)
     { load (gString, eMode); }
@@ -147,11 +147,11 @@ struct VertexShader final : public Shader
 
 struct GeometryShader final : public Shader
 {
-    inline GeometryShader () noexcept
+    constexpr GeometryShader () noexcept
     : Shader (Shader::Geometry)
     { }
 
-    inline GeometryShader (string const& gString,
+    constexpr GeometryShader (string const& gString,
                            LoadFrom      eMode = LoadFrom::File)
     : Shader (Shader::Geometry)
     { load (gString, eMode); }
@@ -159,11 +159,11 @@ struct GeometryShader final : public Shader
 
 struct ComputeShader final : public Shader
 {
-    inline ComputeShader () noexcept
+    constexpr ComputeShader () noexcept
     : Shader (Shader::Compute)
     { }
 
-    inline ComputeShader (string const& gString,
+    constexpr ComputeShader (string const& gString,
                           LoadFrom      eMode = LoadFrom::File)
     : Shader (Shader::Compute)
     { load (gString, eMode); }
@@ -171,11 +171,11 @@ struct ComputeShader final : public Shader
 
 struct TessControlShader final : public Shader
 {
-    inline TessControlShader () noexcept
+    constexpr TessControlShader () noexcept
     : Shader (Shader::TessControl)
     { }
 
-    inline TessControlShader (string const& gString,
+    constexpr TessControlShader (string const& gString,
                               LoadFrom      eMode = LoadFrom::File)
     : Shader (Shader::TessControl)
     { load (gString, eMode); }
@@ -183,11 +183,11 @@ struct TessControlShader final : public Shader
 
 struct TessEvaluationShader final : public Shader
 {
-    inline TessEvaluationShader () noexcept
+    constexpr TessEvaluationShader () noexcept
     : Shader (Shader::TessEvaluation)
     { }
 
-    inline TessEvaluationShader (string const& gString,
+    constexpr TessEvaluationShader (string const& gString,
                                  LoadFrom      eMode = LoadFrom::File)
     : Shader (Shader::TessEvaluation)
     { load (gString, eMode); }
@@ -195,11 +195,11 @@ struct TessEvaluationShader final : public Shader
 
 struct AtomicShader final : public Shader
 {
-    inline AtomicShader () noexcept
+    constexpr AtomicShader () noexcept
     : Shader (Shader::Atomic)
     { }
 
-    inline AtomicShader (string const& gString,
+    constexpr AtomicShader (string const& gString,
                          LoadFrom      eMode = LoadFrom::File)
     : Shader (Shader::Fragment)
     { load (gString, eMode); }
@@ -237,31 +237,31 @@ public:
     void   use () noexcept;
     void   disable () noexcept;
 
-    inline uint    shaderCount () const noexcept
+    constexpr uint    shaderCount () const noexcept
     { return _M_uShaderCount; }
 
-    inline bool isLinked () const noexcept
+    constexpr bool isLinked () const noexcept
     { return _M_gStates.test (SLProgram::IsLinked); }
 
-    inline int attribute (string const& gName)
+    constexpr int attribute (string const& gName)
     { return _M_gAttribLocList[gName]; }
 
-    inline int uniform (string const& gName)
+    constexpr int uniform (string const& gName)
     { return _M_gUniformLocList[gName]; }
 
-    inline bool hasFragmentShader () const noexcept
+    constexpr bool hasFragmentShader () const noexcept
     { return _M_gShaderTypes.test (Shader::Fragment); }
 
-    inline bool hasVertexShader () const noexcept
+    constexpr bool hasVertexShader () const noexcept
     { return _M_gShaderTypes.test (Shader::Vertex); }
 
-    inline bool hasComputeShader () const noexcept
+    constexpr bool hasComputeShader () const noexcept
     { return _M_gShaderTypes.test (Shader::Compute); }
 
-    inline bool hasTessControlShader () const noexcept
+    constexpr bool hasTessControlShader () const noexcept
     { return _M_gShaderTypes.test (Shader::TessControl); }
 
-    inline bool hasTessEvaluationShader () const noexcept
+    constexpr bool hasTessEvaluationShader () const noexcept
     { return _M_gShaderTypes.test (Shader::TessEvaluation); }
 
 private:

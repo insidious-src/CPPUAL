@@ -53,7 +53,7 @@ public:
 
     void setBlocking (bool) noexcept;
 
-    inline bool isBlocking () const noexcept
+    constexpr bool isBlocking () const noexcept
     { return _M_bIsBlocking; }
 
 private:

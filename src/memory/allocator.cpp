@@ -178,12 +178,13 @@ memory_resource& get_default_thread_resource () noexcept
     return *internal_default_thread_resource ();
 }
 
-void set_default_resource(memory_resource& res) noexcept
+void set_default_resource (memory_resource& res) noexcept
 {
     internal_default_resource () = &res;
+    std::pmr::set_default_resource (&res);
 }
 
-void set_default_thread_resource(memory_resource& res) noexcept
+void set_default_thread_resource (memory_resource& res) noexcept
 {
     internal_default_thread_resource () = &res;
 }

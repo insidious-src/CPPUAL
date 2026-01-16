@@ -114,21 +114,24 @@ class MemoryPoolResource : public cppual::memory::memory_resource
     static const size_type SIZEOF_SHARED_DATA = RAPIDJSON_ALIGN(sizeof(SharedData));
     static const size_type SIZEOF_CHUNK_HEADER = RAPIDJSON_ALIGN(sizeof(ChunkHeader));
 
-    static inline ChunkHeader* GetChunkHead(SharedData* shared)
+    static constexpr ChunkHeader* GetChunkHead(SharedData* shared)
     {
         return reinterpret_cast<ChunkHeader*>
                 (reinterpret_cast<uptr> (reinterpret_cast<uint8_t*>(shared) + SIZEOF_SHARED_DATA));
     }
-    static inline uint8_t* GetChunkBuffer(SharedData* shared)
+    static constexpr uint8_t* GetChunkBuffer(SharedData* shared)
     {
         return reinterpret_cast<uint8_t*>(shared->chunkHead) + SIZEOF_CHUNK_HEADER;
     }
 
-    static const size_type kDefaultChunkCapacity = RAPIDJSON_ALLOCATOR_DEFAULT_CHUNK_CAPACITY; //!< Default chunk capacity.
+    //!< Default chunk capacity.
+    inline constexpr static const size_type kDefaultChunkCapacity = RAPIDJSON_ALLOCATOR_DEFAULT_CHUNK_CAPACITY;
 
 public:
-    static const bool kNeedFree = false;    //!< Tell users that no need to call Free() with this allocator. (concept Allocator)
-    static const bool kRefCounted = true;   //!< Tell users that this allocator is reference counted on copy
+    //!< Tell users that no need to call Free() with this allocator. (concept Allocator)
+    inline constexpr static cbool kNeedFree = false;
+    //!< Tell users that this allocator is reference counted on copy
+    inline constexpr static cbool kRefCounted = true;
 
     //! Constructor with chunkSize.
     /*! \param chunkSize The size of memory chunk. The default is kDefaultChunkSize.
@@ -384,7 +387,7 @@ private:
             return false;
     }
 
-    static inline void* AlignBuffer(void* buf, size_type &size)
+    static constexpr void* AlignBuffer(void* buf, size_type &size)
     {
         RAPIDJSON_NOEXCEPT_ASSERT(buf != 0);
         const uintptr_t mask = sizeof(void*) - 1;
@@ -403,7 +406,7 @@ private:
     SharedData*   shared_         { }; //!< The shared data of the allocator
 };
 
-inline MemoryPoolResource<cppual::memory::memory_resource>* memory_pool_resource()
+constexpr MemoryPoolResource<cppual::memory::memory_resource>* memory_pool_resource()
 {
     static auto rc = MemoryPoolResource<cppual::memory::memory_resource> ();
     return &rc;
@@ -421,20 +424,20 @@ namespace internal {
 }
 
 template<typename T, typename A>
-inline T* Realloc(A& a, T* old_p, size_t old_n, size_t new_n)
+constexpr T* Realloc(A& a, T* old_p, size_t old_n, size_t new_n)
 {
     RAPIDJSON_NOEXCEPT_ASSERT(old_n <= SIZE_MAX / sizeof(T) && new_n <= SIZE_MAX / sizeof(T));
     return static_cast<T*>(a.reallocate(old_p, old_n * sizeof(T), new_n * sizeof(T)));
 }
 
 template<typename T, typename A>
-inline T* Malloc(A& a, size_t n = 1)
+constexpr T* Malloc(A& a, size_t n = 1)
 {
     return static_cast<T*>(a.allocate(n * sizeof(T)));
 }
 
 template<typename T, typename A>
-inline void Free(A& a, T* p, size_t n = 1)
+constexpr void Free(A& a, T* p, size_t n = 1)
 {
     a.deallocate(p, n * sizeof(T));
 }

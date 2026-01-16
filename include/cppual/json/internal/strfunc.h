@@ -28,7 +28,7 @@ namespace internal {
     \note This has the same semantics as strlen(), the return value is not number of Unicode codepoints.
 */
 template <typename Ch>
-inline SizeType StrLen(const Ch* s) {
+constexpr SizeType StrLen(const Ch* s) {
     RAPIDJSON_ASSERT(s != 0);
     const Ch* p = s;
     while (*p) ++p;
@@ -36,12 +36,12 @@ inline SizeType StrLen(const Ch* s) {
 }
 
 template <>
-inline SizeType StrLen(const char* s) {
+constexpr SizeType StrLen(const char* s) {
     return SizeType(std::strlen(s));
 }
 
 template <>
-inline SizeType StrLen(const wchar_t* s) {
+constexpr SizeType StrLen(const wchar_t* s) {
     return SizeType(std::wcslen(s));
 }
 

@@ -27,7 +27,7 @@
 
 #include <cstring>
 #include <iostream>
-#include <algorithm>
+//#include <algorithm>
 
 #include <X11/Xlib.h>
 #include <xcb/xcb.h>
@@ -77,7 +77,7 @@ enum class error_type : u8
     destroy
 };
 
-inline version_type& version () noexcept
+constexpr version_type& version () noexcept
 {
     static version_type ver { 0, 0 };
     return ver;
@@ -85,14 +85,14 @@ inline version_type& version () noexcept
 
 // ====================================================
 
-inline bool_type initialize (display_pointer dsp)
+constexpr bool_type initialize (display_pointer dsp)
 {
     return ::glXQueryVersion (dsp, &internal::version ().major, &internal::version ().minor);
 }
 
 // ====================================================
 
-inline surface_id create_drawable (config const&                   gConf,
+constexpr surface_id create_drawable (config const&                   gConf,
                                    point2u                         /*gSize*/,
                                    resource_interface::handle_type uWndHandle,
                                    bool                            /*bDouble*/)
@@ -111,7 +111,7 @@ inline surface_id create_drawable (config const&                   gConf,
     return id;
 }
 
-inline pbuffer_id create_pbuffer (config const& gConf, point2u /*gSize*/)
+constexpr pbuffer_id create_pbuffer (config const& gConf, point2u /*gSize*/)
 {
     auto const id = ::glXCreatePbuffer (gConf.legacy ().get<internal::display_pointer> (),
                                         gConf.handle ().get<internal::fbconfig_pointer> (),
@@ -120,7 +120,7 @@ inline pbuffer_id create_pbuffer (config const& gConf, point2u /*gSize*/)
     return id;
 }
 
-inline pixmap_id create_pixmap (config const& gConf)
+constexpr pixmap_id create_pixmap (config const& gConf)
 {
     auto const id = ::glXCreatePixmap (gConf.legacy ().get<internal::display_pointer> (),
                                        gConf.handle ().get<internal::fbconfig_pointer> (),
@@ -130,7 +130,7 @@ inline pixmap_id create_pixmap (config const& gConf)
     return id;
 }
 
-inline surface_id create_surface (config const&        gConf,
+constexpr surface_id create_surface (config const&        gConf,
                                   point2u              size,
                                   surface_type         type,
                                   surface::handle_type owner)
@@ -146,7 +146,7 @@ inline surface_id create_surface (config const&        gConf,
     }
 }
 
-inline context_pointer create_gc (config const& gConf, version_type const& /*version*/)
+constexpr context_pointer create_gc (config const& gConf, version_type const& /*version*/)
 {
     return ::glXCreateNewContext (gConf.legacy ().get<display_pointer> (),
                                   gConf.handle ().get<fbconfig_pointer> (),
@@ -155,7 +155,7 @@ inline context_pointer create_gc (config const& gConf, version_type const& /*ver
                                   TRUE);
 }
 
-inline point2u get_size (config const& config, surface::handle_type surface) noexcept
+constexpr point2u get_size (config const& config, surface::handle_type surface) noexcept
 {
     value_type size[2];
 
@@ -167,7 +167,7 @@ inline point2u get_size (config const& config, surface::handle_type surface) noe
 
 // ====================================================
 
-inline config::feature_types convert_extensions (display_pointer dsp)
+constexpr config::feature_types convert_extensions (display_pointer dsp)
 {
     config::feature_types eFeatures;
 

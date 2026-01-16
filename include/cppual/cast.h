@@ -31,6 +31,12 @@
 
 namespace cppual {
 
+template <typename T>
+constexpr void* voidifty (T& obj) noexcept
+{
+    return const_cast<void*> (static_cast<cvvoid*> (std::addressof (obj)));
+}
+
 // =========================================================
 
 template <non_void Out, non_void In>
@@ -90,7 +96,7 @@ constexpr To safe_member_cast (From from)
 
 // =========================================================
 
-template <class_t Out, class_t In>
+template <structure Out, structure In>
 constexpr Out& class_cast (In& obj) noexcept
 {
     static_assert (std::is_base_of_v<In, Out> || std::is_base_of_v<Out, In>,
@@ -98,7 +104,7 @@ constexpr Out& class_cast (In& obj) noexcept
     return *direct_cast<Out*, In*> (&obj);
 }
 
-template <class_t Out, class_t In>
+template <structure Out, structure In>
 constexpr Out* class_ptr_cast (In* obj) noexcept
 {
     return static_cast<Out*> (static_cast<void*> (obj));
@@ -106,8 +112,8 @@ constexpr Out* class_ptr_cast (In* obj) noexcept
 
 // =========================================================
 
-template <class_t Out, class_t In>
-constexpr Out& dyn_class_cast (In& obj) noexcept
+template <structure Out, structure In>
+constexpr Out& dyn_cast (In& obj) noexcept
 {
 #   ifdef DEBUG_MODE
     return *dynamic_cast<Out*> (&obj);
@@ -118,28 +124,28 @@ constexpr Out& dyn_class_cast (In& obj) noexcept
 
 // ====================================================
 
-template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept -> R(D::*)(Args...)
+template <structure Out, structure In, typename R, typename... Args>
+constexpr auto mem_fn_cast (R(In::* mem_fn)(Args...)) noexcept -> R(Out::*)(Args...)
 {
-    return cast_union<R(D::*)(Args...), decltype (mem_fn)> (mem_fn).out;
+    return cast_union<R(Out::*)(Args...), decltype (mem_fn)> (mem_fn).out;
 }
 
-template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...)
+template <structure Out, structure In, typename R, typename... Args>
+constexpr auto mem_fn_cast (R(In::* mem_fn)(Args...) const) noexcept -> R(Out::*)(Args...)
 {
-    return cast_union<R(D::*)(Args...), decltype (mem_fn)> (mem_fn).out;
+    return cast_union<R(Out::*)(Args...), decltype (mem_fn)> (mem_fn).out;
 }
 
-template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...) const) noexcept -> R(D::*)(Args...) const
+template <structure Out, structure In, typename R, typename... Args>
+constexpr auto const_mem_fn_cast (R(In::* mem_fn)(Args...) const) noexcept -> R(Out::*)(Args...) const
 {
-    return cast_union<R(D::*)(Args...) const, decltype (mem_fn)> (mem_fn).out;
+    return cast_union<R(Out::*)(Args...) const, decltype (mem_fn)> (mem_fn).out;
 }
 
-template <class_t D, class_t C, typename R, typename... Args>
-constexpr auto const_mem_fn_cast (R(C::* mem_fn)(Args...)) noexcept -> R(D::*)(Args...) const
+template <structure Out, structure In, typename R, typename... Args>
+constexpr auto const_mem_fn_cast (R(In::* mem_fn)(Args...)) noexcept -> R(Out::*)(Args...) const
 {
-    return cast_union<R(D::*)(Args...) const, decltype (mem_fn)> (mem_fn).out;
+    return cast_union<R(Out::*)(Args...) const, decltype (mem_fn)> (mem_fn).out;
 }
 
 // =========================================================

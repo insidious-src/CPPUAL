@@ -40,10 +40,10 @@ public:
     hotkey (value_type const) noexcept;
     void set_key_code (value_type const) noexcept;
 
-    inline value_type key_code () const noexcept
+    constexpr value_type key_code () const noexcept
     { return _M_gKeyCode; }
 
-    inline bool is_triggered () const noexcept
+    constexpr bool is_triggered () const noexcept
     { return _M_bIsTriggered.load (std::memory_order_consume); }
 
     signal<void()> signal_triggered;

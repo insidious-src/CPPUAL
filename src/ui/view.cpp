@@ -74,7 +74,7 @@ typedef std::unordered_map<handle_type,
 
 typedef consteval_bimap<std::pair<uptr, view*>, 1> bimap_type;
 
-inline bimap_type& map ()
+constexpr bimap_type& map ()
 {
     static auto views_map = make_consteval_bimap<uptr, view*> (bimap_type::pair_type ());
     return views_map;
@@ -89,7 +89,7 @@ vec_type& vec ()
 }
 
 #ifdef DEBUG_MODE
-inline void print_map_values (handle_type wnd)
+constexpr void print_map_values (handle_type wnd)
 {
     std::cout << "wnd value: " << wnd.get<uptr> () << std::endl;
 
@@ -100,7 +100,7 @@ inline void print_map_values (handle_type wnd)
 }
 #endif
 
-inline view::window_type create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
+constexpr view::window_type create_renderable (view* pParentObj, rect const& gRect, u32 nScreen)
 {
     return pParentObj ? std::allocate_shared<platform_wnd_interface, proxy_renderable>
                                                                (renderable_allocator (),

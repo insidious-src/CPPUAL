@@ -33,7 +33,7 @@ namespace cppual { namespace json {
     \note User can make a copy of this function for localization.
         Using switch-case is safer for future modification of error codes.
 */
-inline const RAPIDJSON_ERROR_CHARTYPE* GetParseError_En(ParseErrorCode parseErrorCode) {
+constexpr const RAPIDJSON_ERROR_CHARTYPE* GetParseError_En(ParseErrorCode parseErrorCode) {
     switch (parseErrorCode) {
         case kParseErrorNone:                           return RAPIDJSON_ERROR_STRING("No error.");
 
@@ -73,7 +73,7 @@ inline const RAPIDJSON_ERROR_CHARTYPE* GetParseError_En(ParseErrorCode parseErro
     \note User can make a copy of this function for localization.
         Using switch-case is safer for future modification of error codes.
 */
-inline const RAPIDJSON_ERROR_CHARTYPE* GetValidateError_En(ValidateErrorCode validateErrorCode) {
+constexpr const RAPIDJSON_ERROR_CHARTYPE* GetValidateError_En(ValidateErrorCode validateErrorCode) {
     switch (validateErrorCode) {
         case kValidateErrors:                           return RAPIDJSON_ERROR_STRING("One or more validation errors have occurred");
         case kValidateErrorNone:                        return RAPIDJSON_ERROR_STRING("No error.");

@@ -53,7 +53,7 @@ public:
     int bits () const noexcept;
     int duration () const noexcept;
 
-    inline instance* context () const noexcept
+    constexpr instance* context () const noexcept
     { return _M_pContext; }
 
 private:

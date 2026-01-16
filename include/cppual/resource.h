@@ -40,7 +40,7 @@ typedef resource_handle resource_connection;
 
 // =========================================================
 
-enum class resource_type : u32
+typedef enum class resource_type : u32
 {
     null            =       0,
     instance        = 1 <<  0,
@@ -69,7 +69,8 @@ enum class resource_type : u32
     descriptor_pool = 1 << 23, //! TODO: rename to more generic name
     socket          = 1 << 24,
     custom          = 1 << 30
-};
+}
+const const_resource_type;
 
 // =========================================================
 
@@ -78,16 +79,11 @@ typedef bitset<resource_type> resource_types;
 // =========================================================
 
 template <typename T>
-concept resource_handle_c = std::is_void_v<T>    ||
-                            std::is_pointer_v<T> ||
-                            is_integer_v<T>      ||
-                            std::is_class_v<T>   ||
-                            std::is_same_v<T, resource_connection>;
+concept resource_handle_c = void_t<T> || ptr<T> || integer<T> || structure<T> ||
+                            are_same<T, resource_connection>;
 
 template <typename T>
-concept resource_handle_h = std::is_pointer_v<T> ||
-                            is_integer_v<T>      ||
-                            std::is_same_v<T, resource_handle>;
+concept resource_handle_h = ptr<T> || integer<T> || are_same<T, resource_handle>;
 
 // =========================================================
 
@@ -137,7 +133,7 @@ public:
 
     template <integer T>
     constexpr resource_handle (T const _handle) noexcept
-    : _M_handle (is_unsigned_integer_v<T> ? _handle : static_cast<value_type> (_handle))
+    : _M_handle (unsigned_integer<T> ? _handle : static_cast<value_type> (_handle))
     {
         static_assert (sizeof (T) <= sizeof (value_type), "T is bigger than the size of uptr!");
     }
@@ -162,13 +158,13 @@ public:
         return direct_cast<T> (_M_handle.ptr);
     }
 
-    template <struct_or_class T, std::enable_if_t<!std::is_same_v<remove_cref_t<T>, self_type>, void>>
+    template <structure T, std::enable_if_t<!are_same<remove_cref_t<T>, self_type>, void>>
     constexpr T* get () const noexcept
     {
         return direct_cast<T*> (_M_handle.ptr);
     }
 
-    template <struct_or_class T, std::enable_if_t<std::is_same_v<remove_cref_t<T>, self_type>, void>>
+    template <structure T, std::enable_if_t<are_same<remove_cref_t<T>, self_type>, void>>
     constexpr self_type get () const noexcept
     {
         return *this;
@@ -275,40 +271,52 @@ class SHARED_API resource : public non_copyable_virtual
 {
 public:
     typedef resource<C, H, NULL_V>  self_type       ;
+    typedef std::size_t             size_type       ;
+    typedef size_type const         const_size      ;
     typedef remove_cref_t<C>        connection_type ;
     typedef connection_type const   const_connection;
     typedef remove_cref_t<H>        value_type      ;
     typedef resource_handle         handle_type     ;
     typedef handle_type const       const_handle    ;
+    typedef ptrdiff                 difference_type ;
     typedef self_type* self_type::* safe_bool       ;
 
-    inline constexpr static const handle_type::value_type npos = NULL_V;
+    inline constexpr static const handle_type::const_value npos = NULL_V;
 
     constexpr resource () noexcept = default;
 
     constexpr resource (self_type&& rc) noexcept
-    : _M_connection (rc._M_connection),
-      _M_handle     (rc._M_handle    )
+    : _M_connection (rc._M_connection)
+    , _M_handle     (rc._M_handle    )
+    , _M_eResType   (rc._M_eResType  )
     {
-        rc._M_connection = connection_type ();
-        rc._M_handle     = npos              ;
+        rc._M_connection = connection_type () ;
+        rc._M_handle     = npos               ;
+        rc._M_eResType   = resource_type::null;
     }
 
     constexpr self_type& operator = (self_type&& rc) noexcept
     {
         if (this != &rc)
         {
-            _M_connection = rc._M_connection;
-            _M_handle     = rc._M_handle    ;
-            rc._M_handle  = npos            ;
+            _M_connection    = rc._M_connection   ;
+            _M_handle        = rc._M_handle       ;
+            _M_eResType      = rc._M_eResType     ;
+
+            rc._M_connection = connection_type () ;
+            rc._M_handle     = npos               ;
+            rc._M_eResType   = resource_type::null;
         }
 
         return *this;
     }
 
-    constexpr resource (const_connection conn, const_handle handle) noexcept
-    : _M_connection (conn  ),
-      _M_handle     (handle)
+    constexpr resource (const_connection conn  ,
+                        const_handle     handle,
+                        resource_type    res) noexcept
+    : _M_connection (conn  )
+    , _M_handle     (handle)
+    , _M_eResType   (res   )
     { }
 
     constexpr bool valid () const noexcept
@@ -330,6 +338,9 @@ public:
     constexpr void set_handle (const_handle handle) noexcept
     { _M_handle = handle; }
 
+    constexpr resource_type type () const noexcept
+    { return _M_eResType; }
+
     constexpr explicit operator safe_bool () const noexcept
     { return valid () ? this : nullptr; }
 
@@ -338,8 +349,9 @@ public:
                                        resource<C_, H_, NULL_V_> const&);
 
 private:
-    connection_type _M_connection {      };
-    handle_type     _M_handle     { npos };
+    connection_type _M_connection {                     };
+    handle_type     _M_handle     {         npos        };
+    resource_type   _M_eResType   { resource_type::null };
 };
 
 // =========================================================
@@ -348,33 +360,43 @@ template <resource_handle_h H, resource_handle::value_type NULL_V>
 class SHARED_API resource <void, H, NULL_V> : public non_copyable_virtual
 {
 public:
-    typedef resource<void, H, NULL_V> self_type   ;
-    typedef remove_cref_t<H>          value_type  ;
-    typedef value_type const          const_value ;
-    typedef resource_handle           handle_type ;
-    typedef handle_type const         const_handle;
-    typedef self_type* self_type::*   safe_bool   ;
+    typedef resource<void, H, NULL_V> self_type      ;
+    typedef std::size_t               size_type      ;
+    typedef size_type const           const_size     ;
+    typedef remove_cref_t<H>          value_type     ;
+    typedef value_type const          const_value    ;
+    typedef resource_handle           handle_type    ;
+    typedef handle_type const         const_handle   ;
+    typedef ptrdiff                   difference_type;
+    typedef self_type* self_type::*   safe_bool      ;
 
     inline constexpr static handle_type::const_value npos = NULL_V;
 
     constexpr resource () noexcept = default;
 
-    constexpr explicit resource (const_handle handle) noexcept
-    : _M_handle (handle)
+    constexpr explicit resource (const_handle  handle,
+                                 resource_type res_type = resource_type ()) noexcept
+    : _M_handle   (handle  )
+    , _M_eResType (res_type)
     { }
 
     constexpr resource (self_type&& rc) noexcept
-    : _M_handle (rc._M_handle)
+    : _M_handle   (rc._M_handle  )
+    , _M_eResType (rc._M_eResType)
     {
-        rc._M_handle = npos;
+        rc._M_handle   = npos               ;
+        rc._M_eResType = resource_type::null;
     }
 
     constexpr self_type& operator = (self_type&& rc) noexcept
     {
         if (this != &rc)
         {
-            _M_handle    = rc._M_handle;
-            rc._M_handle = npos        ;
+            _M_handle      = rc._M_handle       ;
+            _M_eResType    = rc._M_eResType     ;
+
+            rc._M_handle   = npos               ;
+            rc._M_eResType = resource_type::null;
         }
 
         return *this;
@@ -393,6 +415,9 @@ public:
     constexpr void set_handle (const_handle handle) noexcept
     { _M_handle = handle; }
 
+    constexpr resource_type type () const noexcept
+    { return _M_eResType; }
+
     consteval explicit operator safe_bool () const noexcept
     { return valid () ? this : nullptr; }
 
@@ -401,7 +426,8 @@ public:
                                        resource<void, ID_, NULL_V_> const&);
 
 private:
-    handle_type _M_handle { npos };
+    handle_type   _M_handle   {         npos        };
+    resource_type _M_eResType { resource_type::null };
 };
 
 // =========================================================
@@ -442,7 +468,11 @@ struct SHARED_API resource_version
     }
     const const_parts;
 
-    consteval resource_version () noexcept = default;
+    consteval resource_version ()                      noexcept = default;
+    constexpr resource_version (self_type &&)          noexcept = default;
+    constexpr resource_version (self_type const&)      noexcept = default;
+    constexpr self_type& operator = (self_type &&)     noexcept = default;
+    constexpr self_type& operator = (self_type const&) noexcept = default;
 
     constexpr resource_version (const_value _major,
                                 const_value _minor,
@@ -454,7 +484,7 @@ struct SHARED_API resource_version
       revision (_rev  )
     { }
 
-    inline string_type to_string (const_parts parts = version_parts::all) const noexcept
+    constexpr string_type to_string (const_parts parts = version_parts::all) const noexcept
     {
         ostringstream stream;
 

@@ -24,7 +24,7 @@ namespace cppual::json {
 
 //======================================================
 
-using memory::allocator_like;
+using allocator_like;
 
 //======================================================
 

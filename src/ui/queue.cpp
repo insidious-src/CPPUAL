@@ -26,7 +26,7 @@ namespace cppual::ui {
 
 namespace { namespace internal { /// optimize for internal unit usage
 
-inline static const shared_queue& queue ()
+constexpr static const shared_queue& queue ()
 {
     static const shared_queue instance (platform::factory::instance ()->createQueueInstance ());
     return instance;

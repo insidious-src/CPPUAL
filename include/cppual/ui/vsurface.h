@@ -75,18 +75,18 @@ public:
     window_flags flags () const { return window_flags (); }
     void         set_flags (window_flags) { }
 
-    inline ~proxy_renderable     ()       noexcept { unmap ();             }
-    inline wnd_pointer owner     () const noexcept { return _M_pParent;    }
-    inline rect        geometry  () const noexcept { return _M_gRect;      }
-    inline bool        is_mapped () const noexcept { return _M_bIsVisible; }
+    constexpr ~proxy_renderable     ()       noexcept { unmap ();             }
+    constexpr wnd_pointer owner     () const noexcept { return _M_pParent;    }
+    constexpr rect        geometry  () const noexcept { return _M_gRect;      }
+    constexpr bool        is_mapped () const noexcept { return _M_bIsVisible; }
 
-    inline u32 screen () const noexcept
+    constexpr u32 screen () const noexcept
     { return _M_pParent != nullptr ? _M_pParent->screen () : 0; }
 
-    inline void raise () noexcept
+    constexpr void raise () noexcept
     { if (_M_pParent != nullptr) _M_pParent->raise (); }
 
-    inline void lower () noexcept
+    constexpr void lower () noexcept
     { if (_M_pParent != nullptr) _M_pParent->lower (); }
 
 private:

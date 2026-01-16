@@ -88,34 +88,34 @@ public:
     bool is_floating () const;
     bool add_group (view_group&, size_type pos);
 
-    inline tool_button button_type () const noexcept
+    constexpr tool_button button_type () const noexcept
     { return _M_eButtonType; }
 
-    inline orientation_type orientation () const noexcept
+    constexpr orientation_type orientation () const noexcept
     { return _M_eOrientation; }
 
-    inline bool is_movable () const noexcept
+    constexpr bool is_movable () const noexcept
     { return _M_eToolFlags.test (toolbar::movable); }
 
-    inline bool is_draggable () const noexcept
+    constexpr bool is_draggable () const noexcept
     { return _M_eToolFlags.test (toolbar::draggable); }
 
-    inline bool is_floatable () const noexcept
+    constexpr bool is_floatable () const noexcept
     { return _M_eToolFlags.test (toolbar::floatable); }
 
-    inline bool is_auto_hide () const noexcept
+    constexpr bool is_auto_hide () const noexcept
     { return _M_eToolFlags.test (toolbar::auto_hide); }
 
-    inline bool has_hot_tracking () const noexcept
+    constexpr bool has_hot_tracking () const noexcept
     { return _M_eToolFlags.test (toolbar::hot_tracking); }
 
-    inline bool has_splitter () const noexcept
+    constexpr bool has_splitter () const noexcept
     { return _M_eToolFlags.test (toolbar::splitter); }
 
-    inline size_type group_count () const noexcept
+    constexpr size_type group_count () const noexcept
     { return _M_gGroups.size (); }
 
-    inline view_group* group (size_type uId) const noexcept
+    constexpr view_group* group (size_type uId) const noexcept
     { return _M_gGroups[uId]; }
 
 public:

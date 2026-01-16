@@ -34,7 +34,7 @@ public:
     sound_player () noexcept;
     sound_player (sound_buffer&) noexcept;
 
-    inline bool is_usable () const noexcept
+    constexpr bool is_usable () const noexcept
     { return _M_pBuffer and _M_pBuffer->channel_count () > 1; }
 };
 

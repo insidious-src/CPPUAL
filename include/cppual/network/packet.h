@@ -96,7 +96,7 @@ public:
     constexpr operator safe_bool () const noexcept
     { return is_valid () ? &packet::can_exchange : nullptr; }
 
-    inline void flush () noexcept
+    constexpr void flush () noexcept
     {
         _M_gData.clear ();
         _M_uPos = 0;

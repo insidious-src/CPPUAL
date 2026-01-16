@@ -22,8 +22,8 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <cppual/gfx/gl/glbase.h>
-#include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/gldef.h>
+#include <cppual/gfx/draw.h>
 
 // ====================================================
 
@@ -108,13 +108,11 @@ constexpr static uint convert_shader_type (shader_type eType) noexcept
 // ====================================================
 
 object::object (resource_type eType)
-: resource     (generate_object (eType)),
-  _M_eResType  (eType)
+: resource     (generate_object (eType), eType)
 { }
 
 object::object (shader_type eShaderType)
-: resource     (generate_shader (convert_shader_type (eShaderType))),
-  _M_eResType  (resource_type::source_code)
+: resource     (generate_shader (convert_shader_type (eShaderType)), resource_type::source_code)
 { }
 
 object::~object () noexcept

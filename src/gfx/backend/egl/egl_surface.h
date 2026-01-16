@@ -82,7 +82,7 @@ public:
             format_type     format = format_type::default2d ());
 
     constexpr config (config const&) noexcept = default;
-    inline    config& operator = (config const&) noexcept = default;
+    constexpr    config& operator = (config const&) noexcept = default;
 
 
     //! null config constructor

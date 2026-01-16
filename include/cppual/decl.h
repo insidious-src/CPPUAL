@@ -197,7 +197,7 @@
 #
 #   define PACKED __attribute__ ((__packed__))
 #   define NOVTABLE
-#   define DEPRECATED(msg) __attribute__ ((deprecated(msg)))
+#   define DEPRECATED(msg) __attribute__((deprecated(msg)))
 #   define FORCEINLINE inline __attribute__((always_inline))
 #   define DECLSPEC_ALIGN(x) __attribute__((aligned(x)))
 #   if !defined (STDCALL) and !defined (FASTCALL) and !defined (CDECL)
@@ -342,10 +342,17 @@ namespace cppual {
 
 // =========================================================
 
+//! nullptr typedef
+typedef decltype (nullptr) null_ptr;
+
 /// void typedefs
-typedef  void const cvoid    ;
-typedef  void *      void_ptr;
-typedef cvoid *     cvoid_ptr;
+typedef void volatile vvoid     ;
+typedef void const    cvoid     ;
+typedef vvoid const   cvvoid    ;
+typedef void *        void_ptr  ;
+typedef vvoid *       vvoid_ptr ;
+typedef cvoid *       cvoid_ptr ;
+typedef cvvoid *      cvvoid_ptr;
 
 /// bool typedefs
 typedef const bool cbool;
@@ -431,11 +438,11 @@ typedef const long double cldouble;
 
 // =========================================================
 
-} // namespace cppual
+} //! namespace cppual
 
 // =========================================================
 
-namespace std { using namespace cppual; } //! namespace std
+namespace std { inline namespace cppual { using namespace ::cppual; } } //! namespace std
 
 // =========================================================
 

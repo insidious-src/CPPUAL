@@ -54,20 +54,20 @@ struct consteval_bimap;
 // ====================================================
 
 template <typename P, typename T, typename U>
-concept bimap_pair = non_void<T> && non_void<U> && std::same_as<P, std::pair<T, U>>;
+concept bimap_pair = non_void<T> && non_void<U> && are_same<P, std::pair<T, U>>;
 
 template <typename P, typename T, typename U>
-concept switch_map_pair = switch_value<T> && void_functional<U> && std::same_as<P, std::pair<T, U>>;
+concept switch_map_pair = switch_value<T> && void_functional<U> && are_same<P, std::pair<T, U>>;
 
 // =========================================================
 
 /// overload member function with the same name but specific arguments
-template <typename... Args, class_t C, typename R>
+template <typename... Args, structure C, typename R>
 consteval auto overload (R (C::* fn)(Args...)) noexcept -> decltype (fn)
 { return fn; }
 
 /// overload const member function with the same name but specific arguments
-template <typename... Args, class_t C, typename R>
+template <typename... Args, structure C, typename R>
 consteval auto overload (R (C::* fn)(Args...) const) noexcept -> decltype (fn)
 { return fn; }
 
@@ -78,35 +78,32 @@ consteval auto overload (R (* fn)(Args...)) noexcept -> decltype (fn)
 
 // ====================================================
 
-template <void_or_class C, typename S>
-struct any_fn_type;
+template <void_or_class, fn_sig>
+struct fn_pointer
+{ static_assert (false, "CANNOT have CONST function pointer without class type!"); };
 
-template <class_t C, typename R, non_void... Args>
-struct any_fn_type <C, R(Args...)>
-{
-    using type = R(C::*)(Args...);
-};
+template <structure C, typename R, typename... Args>
+struct fn_pointer <C, R(Args...)>
+{ using type = R(C::*)(Args...); };
 
-template <class_t C, typename R, non_void... Args>
-struct any_fn_type <C, R(Args...) const>
-{
-    using type = R(C::*)(Args...) const;
-};
+template <structure C, typename R, typename... Args>
+struct fn_pointer <C, R(Args...) volatile>
+{ using type = R(C::*)(Args...) volatile; };
 
-template <typename R, non_void... Args>
-struct any_fn_type <void, R(Args...)>
-{
-    using type = R(*)(Args...);
-};
+template <structure C, typename R, typename... Args>
+struct fn_pointer <C, R(Args...) const>
+{ using type = R(C::*)(Args...) const; };
 
-template <typename R, non_void... Args>
-struct any_fn_type <void, R(Args...) const>
-{
-    static_assert (false, "CANNOT have const function pointer without class type!");
-};
+template <structure C, typename R, typename... Args>
+struct fn_pointer <C, R(Args...) const volatile>
+{ using type = R(C::*)(Args...) const volatile; };
 
-template <void_or_class C, typename S>
-using any_fn_t = any_fn_type<C, S>::type;
+template <typename R, typename... Args>
+struct fn_pointer <void, R(Args...)>
+{ using type = R(*)(Args...); };
+
+template <void_or_class C, fn_sig S>
+using fn_ptr_t = fn_pointer<C, S>::type;
 
 // =========================================================
 
@@ -114,11 +111,11 @@ using any_fn_t = any_fn_type<C, S>::type;
  ** @arg_t is a single function argument that is memory compact.
  ** if the argument type is smaller than or equal to 4 bytes then it's passed as value,
  ** however if it's bigger than 4 bytes or is a class then it's passed as const reference
- **
- ** T and U are the same type except U has reference and const removed.
  **/
-template <typename T, typename U = remove_cref_t<T>>
-using arg_t = std::conditional_t<sizeof (U) <= arch_32_bits_v && !std::is_class_v<U>, U, U const&>;
+template <typename T>
+using arg_t = std::conditional_t<sizeof (remove_cref_t<T>) <= arch_32_bits_v &&
+                                !std::is_class_v<remove_cref_t<T>>,
+                                 remove_cref_t<T>, remove_cref_t<T> const&>;
 
 // =========================================================
 
@@ -191,7 +188,7 @@ public:
     consteval static size_type size () noexcept { return N; }
 
     static_assert (size () > 0, "consteval_bimap is empty!");
-    static_assert (!std::same_as<key_type, value_type>, "key & value must NOT be of the same type!");
+    static_assert (!are_same<key_type, value_type>, "key & value must NOT be of the same type!");
     static_assert (copyable_movable<key_type  > &&
                    copyable_movable<value_type>, "key or/and value are NOT copyable & movable!");
 
@@ -628,7 +625,7 @@ private:
             return type_list<T> { };
         }
 
-        inline static constexpr size_type const value = N;
+        constexpr static constexpr size_type const value = N;
     };
 
 public:

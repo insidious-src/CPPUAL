@@ -85,7 +85,7 @@ constexpr static shader_type convert_shader_type (int nType) noexcept
     }
 }
 
-inline static uint format_count () noexcept
+constexpr static uint format_count () noexcept
 {
     int nNumFormats = 0;
     ::glGetIntegerv (gl::NumProgramBinaryFormats, &nNumFormats);

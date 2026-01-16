@@ -31,7 +31,7 @@ std::atomic_uint object::sm_uALObjCount { 0 };
 
 namespace { // optimize for internal unit usage
 
-inline uint generate_object (object_type eType) noexcept
+constexpr uint generate_object (object_type eType) noexcept
 {
     ::ALuint n = 0;
 

@@ -86,7 +86,7 @@ public:
     , _M_uRows  (gObj._M_uRows )
     { }
 
-    template <non_void... Ts> requires (std::same_as<value_type, Ts> && ...)
+    template <non_void... Ts> requires (are_same<value_type, Ts> && ...)
     constexpr dynamic_matrix (Ts... vals) noexcept
     : _M_matrix { vals... }
     { static_assert (sizeof... (vals) == size (), "Wrong number of initializers!"); }
@@ -184,7 +184,7 @@ public:
     , _M_matrix (gObj._M_matrix)
     { }
 
-    template <non_void... Ts> requires (std::same_as<value_type, Ts> && ...)
+    template <non_void... Ts> requires (are_same<value_type, Ts> && ...)
     constexpr static_matrix (Ts... vals) noexcept
     : self_type ()
     , _M_matrix { vals... }

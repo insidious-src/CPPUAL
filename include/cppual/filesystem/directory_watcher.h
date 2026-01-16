@@ -25,7 +25,9 @@
 
 #include <cppual/filesystem/directory.h>
 
-namespace cppual { namespace filesystem {
+// =========================================================
+
+namespace cppual::filesystem {
 
 // =========================================================
 
@@ -33,7 +35,9 @@ namespace cppual { namespace filesystem {
 
 // =========================================================
 
-} } // namespace Filesystem
+} // namespace Filesystem
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_FILESYSTEM_WATCHER_H_

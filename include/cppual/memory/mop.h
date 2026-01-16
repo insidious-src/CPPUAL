@@ -49,19 +49,19 @@ constexpr std::size_t aligned_size (std::size_t const n,
                                     std::size_t const align = alignof (uptr)) noexcept
 { return (n + (align - 1)) & ~(align - 1); }
 
-inline std::size_t align_adjust (cvoid* pAddr, std::size_t const uAlign) noexcept
+constexpr std::size_t align_adjust (cvoid* pAddr, std::size_t const uAlign) noexcept
 {
     std::size_t uAdjust  = uAlign - (reinterpret_cast<uptr> (pAddr) & (uAlign - 1));
     return      uAdjust == uAlign ? 0 : uAdjust;
 }
 
-inline void* next_aligned_addr (cvoid* pAddr, std::size_t const uAlign) noexcept
+constexpr void* next_aligned_addr (cvoid* pAddr, std::size_t const uAlign) noexcept
 {
     return reinterpret_cast<void*>
             ((reinterpret_cast<uptr> (pAddr) + (uAlign - 1)) & ~(uAlign - 1));
 }
 
-inline std::size_t align_adjustment_header (cvoid*      addr,
+constexpr std::size_t align_adjustment_header (cvoid*      addr,
                                             std::size_t align,
                                             std::size_t header_size) noexcept
 {

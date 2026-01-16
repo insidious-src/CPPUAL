@@ -77,27 +77,27 @@ namespace cppual { namespace json {
 
 namespace internal {
 
-inline void PrintInvalidKeyword(const char* keyword) {
+constexpr void PrintInvalidKeyword(const char* keyword) {
     printf("Fail keyword: %s\n", keyword);
 }
 
-inline void PrintInvalidKeyword(const wchar_t* keyword) {
+constexpr void PrintInvalidKeyword(const wchar_t* keyword) {
     wprintf(L"Fail keyword: %ls\n", keyword);
 }
 
-inline void PrintInvalidDocument(const char* document) {
+constexpr void PrintInvalidDocument(const char* document) {
     printf("Fail document: %s\n\n", document);
 }
 
-inline void PrintInvalidDocument(const wchar_t* document) {
+constexpr void PrintInvalidDocument(const wchar_t* document) {
     wprintf(L"Fail document: %ls\n\n", document);
 }
 
-inline void PrintValidatorPointers(unsigned depth, const char* s, const char* d) {
+constexpr void PrintValidatorPointers(unsigned depth, const char* s, const char* d) {
     printf("S: %*s%s\nD: %*s%s\n\n", depth * 4, " ", s, depth * 4, " ", d);
 }
 
-inline void PrintValidatorPointers(unsigned depth, const wchar_t* s, const wchar_t* d) {
+constexpr void PrintValidatorPointers(unsigned depth, const wchar_t* s, const wchar_t* d) {
     wprintf(L"S: %*ls%ls\nD: %*ls%ls\n\n", depth * 4, L" ", s, depth * 4, L" ", d);
 }
 
@@ -173,7 +173,7 @@ template <typename SchemaType>
 class ISchemaStateFactory {
 public:
     virtual ~ISchemaStateFactory() {}
-    virtual ISchemaValidator* CreateSchemaValidator(const SchemaType&, const bool inheritContinueOnErrors) = 0;
+    virtual ISchemaValidator* CreateSchemaValidator(const SchemaType&, cbool inheritContinueOnErrors) = 0;
     virtual void DestroySchemaValidator(ISchemaValidator* validator) = 0;
     virtual void* CreateHasher() = 0;
     virtual uint64_t GetHashCode(void* hasher) = 0;
@@ -1291,7 +1291,7 @@ private:
         return true;
     }
 
-    void CreateSchemaValidators(Context& context, const SchemaArray& schemas, const bool inheritContinueOnErrors) const {
+    void CreateSchemaValidators(Context& context, const SchemaArray& schemas, cbool inheritContinueOnErrors) const {
         for (SizeType i = 0; i < schemas.count; i++)
             context.validators[schemas.begin + i] = context.factory.CreateSchemaValidator(*schemas.schemas[i], inheritContinueOnErrors);
     }
@@ -2278,7 +2278,7 @@ RAPIDJSON_MULTILINEMACRO_END
 #undef RAPIDJSON_SCHEMA_HANDLE_VALUE_
 
     // Implementation of ISchemaStateFactory<SchemaType>
-    virtual ISchemaValidator* CreateSchemaValidator(const SchemaType& root, const bool inheritContinueOnErrors) {
+    virtual ISchemaValidator* CreateSchemaValidator(const SchemaType& root, cbool inheritContinueOnErrors) {
         ISchemaValidator* sv = new (GetStateAllocator().Malloc(sizeof(GenericSchemaValidator))) GenericSchemaValidator(*schemaDocument_, root, documentStack_.template Bottom<char>(), documentStack_.GetSize(),
 #if RAPIDJSON_SCHEMA_VERBOSE
         depth_ + 1,

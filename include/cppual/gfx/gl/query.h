@@ -53,7 +53,7 @@ public:
     void end_query           () noexcept;
     void query_counter       (Type type) noexcept;
 
-    inline Type query_type () const noexcept
+    constexpr Type query_type () const noexcept
     { return _M_eType; }
 
 private:

@@ -336,13 +336,13 @@ struct mouse_event : public event
     : event (is_down ? event::mbutton_down : event::mbutton_up, { mbutton_data { gPos, nBtn } })
     { }
 
-    inline mouse_event (point2u gPos) noexcept
+    constexpr mouse_event (point2u gPos) noexcept
     : event (event::mouse_move)
     {
         _M_data.position = gPos;
     }
 
-    inline mouse_event (i32 nDelta, point2u gPos) noexcept
+    constexpr mouse_event (i32 nDelta, point2u gPos) noexcept
     : event (event::mwheel_step)
     {
         _M_data.wheel.delta = nDelta;

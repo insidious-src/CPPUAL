@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/types>
+#include <cppual/string>
 #include <cppual/concepts>
 #include <cppual/containers>
 #include <cppual/meta_string>
@@ -43,7 +44,7 @@ concept array_map_key = integer<T>;
 
 // ====================================================
 
-template <array_map_key K, non_void V, memory::allocator_like A = memory::allocator<std::pair<K, V>>>
+template <array_map_key K, non_void V, allocator_like A = memory::allocator<std::pair<K, V>>>
 class dyn_array_map : public std::vector<std::pair<K, V>, A>
 {
 public:
@@ -62,7 +63,7 @@ public:
     typedef std::size_t                           size_type             ;
     typedef size_type const                       const_size            ;
     typedef ptrdiff                               difference_type       ;
-    typedef std::string_view                      string_view           ;
+    typedef fstring_view                          string_view           ;
     typedef string                                string_type           ;
     typedef base_type::iterator                   iterator              ;
     typedef base_type::const_iterator             const_iterator        ;
@@ -78,6 +79,7 @@ public:
     // ====================================================
 
     using base_type::base_type;
+    using base_type::operator=;
     using base_type::get_allocator;
     using base_type::size;
     using base_type::capacity;
@@ -100,10 +102,9 @@ public:
     using base_type::erase;
     using base_type::assign;
 
-    constexpr dyn_array_map (self_type &&)             = default;
-    constexpr dyn_array_map (self_type const&)         = default;
-    constexpr self_type& operator = (self_type &&)     = default;
-    constexpr self_type& operator = (self_type const&) = default;
+    constexpr dyn_array_map (size_type n = 10, allocator_type const& ator = allocator_type ())
+    : base_type (n, ator)
+    { }
 
     iterator lower_bound (key_type key);
     const_iterator lower_bound (key_type key) const;
@@ -120,7 +121,7 @@ public:
     iterator insert( const_iterator pos, const_reference val);
     iterator insert (const_iterator pos, value_type&& value);
     iterator insert (const_iterator pos, size_type count, const_reference val);
-    template <common_iterator InputIt>
+    template <generic_iterator InputIt>
     iterator insert (const_iterator pos, InputIt first, InputIt last);
     iterator insert (const_iterator pos, std::initializer_list<value_type> list);
     template <typename... Args>
@@ -130,17 +131,17 @@ public:
     void pop_back ();
 
     template <size_type K_>
-    iterator find () { return &(*this)[get_index<K_> ()]; }
+    iterator find () const noexcept { return &(*this)[get_index<K_> ()]; }
     template <size_type K_>
-    const_iterator find () const { return &(*this)[get_index<K_> ()]; }
+    const_iterator find () const noexcept { return &(*this)[get_index<K_> ()]; }
     template <char_ptr K_>
-    iterator find () { return &(*this)[get_index<K_> ()]; }
+    iterator find () const  noexcept { return &(*this)[get_index<K_> ()]; }
     template <char_ptr K_>
-    const_iterator find () const { return &(*this)[get_index<K_> ()]; }
-    iterator find (size_type k) { return &(*this)[get_index<k> ()]; }
-    const_iterator find (size_type k) const { return &(*this)[get_index<k> ()]; }
+    const_iterator find () const noexcept { return &(*this)[get_index<K_> ()]; }
+    iterator find (size_type k) noexcept { return &(*this)[get_index<k> ()]; }
+    const_iterator find (size_type k) const noexcept { return &(*this)[get_index<k> ()]; }
     iterator find (string_view const& k) { return &(*this)[get_index (k.data ())]; }
-    const_iterator find (string_view const& k) const { return &(*this)[get_index (k.data ())]; }
+    const_iterator find (string_view const& k) const noexcept { return &(*this)[get_index (k.data ())]; }
     consteval static size_type max_bucket_count () noexcept { return 1; }
     consteval static size_type bucket_count () noexcept { return 1; }
     consteval static size_type bucket_size (size_type) noexcept { return 1; }
@@ -150,17 +151,13 @@ public:
     std::pair<iterator, iterator> equal_range (Key x);
     template <array_map_key Key>
     std::pair<const_iterator, const_iterator> equal_range (Key const& x) const;
-    consteval static size_type count (key_type const& = key_type ()) { return 1; }
+    consteval static size_type count (key_type const& = key_type ()) noexcept { return 1; }
     template <array_map_key Key>
     consteval static size_type count (Key = Key ()) noexcept { return 1; }
     template <typename M>
     std::pair<iterator, bool> insert_or_assign (key_type k, M&& obj);
     template <array_map_key Key, typename M>
     std::pair<iterator, bool> insert_or_assign (Key k, M&& obj);
-
-    constexpr dyn_array_map (size_type n = 10, allocator_type const& ator = allocator_type ())
-    : base_type (n, value_type (), ator)
-    { }
 
     constexpr const_reference operator [] (size_type key) const noexcept
     {
@@ -182,7 +179,7 @@ public:
         return base_type::operator [] (get_index (key_str));
     }
 
-    constexpr const_reference operator [] (string_view const& key_str) const
+    constexpr const_reference operator [] (string_view const& key_str) const noexcept
     {
         return base_type::operator [] (get_index (key_str.data ()));
     }
@@ -284,7 +281,7 @@ public:
 
     constexpr bool contains (string_view const& name) const noexcept
     {
-        return (*this)[name].first == char_hash (name.data ());
+        return (*this)[name].first == char_hash (name.data (), name.size ());
     }
 
     constexpr bool contains (char_ptr name) const noexcept
@@ -301,7 +298,7 @@ public:
     { return char_hash<Name> () % size (); }
 
     constexpr size_type get_index (string_view const& name) const noexcept
-    { return char_hash (name.data ()) % size (); }
+    { return char_hash (name.data (), name.size ()) % size (); }
 
     constexpr size_type get_index (char_ptr name) const noexcept
     { return char_hash (name) % size (); }

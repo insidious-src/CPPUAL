@@ -55,15 +55,15 @@ public:
     void increment ();
     void decrement ();
 
-    inline int value     () const noexcept { return _M_nValue; }
-    inline int min_value () const noexcept { return _M_nMin  ; }
-    inline int max_value () const noexcept { return _M_nMax  ; }
-    inline int step      () const noexcept { return _M_nStep ; }
+    constexpr int value     () const noexcept { return _M_nValue; }
+    constexpr int min_value () const noexcept { return _M_nMin  ; }
+    constexpr int max_value () const noexcept { return _M_nMax  ; }
+    constexpr int step      () const noexcept { return _M_nStep ; }
 
-    inline bool is_marquee () const noexcept
+    constexpr bool is_marquee () const noexcept
     { return _M_eProgressFlags.test (progress_flag::marquee); }
 
-    inline bool is_value_visible () const noexcept
+    constexpr bool is_value_visible () const noexcept
     { return _M_eProgressFlags.test (progress_flag::show_value); }
 
 public:

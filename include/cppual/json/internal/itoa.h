@@ -20,7 +20,7 @@
 namespace cppual { namespace json {
 namespace internal {
 
-inline const char* GetDigitsLut() {
+constexpr const char* GetDigitsLut() {
     static const char cDigitsLut[200] = {
         '0','0','0','1','0','2','0','3','0','4','0','5','0','6','0','7','0','8','0','9',
         '1','0','1','1','1','2','1','3','1','4','1','5','1','6','1','7','1','8','1','9',
@@ -36,7 +36,7 @@ inline const char* GetDigitsLut() {
     return cDigitsLut;
 }
 
-inline char* u32toa(uint32_t value, char* buffer) {
+constexpr char* u32toa(uint32_t value, char* buffer) {
     RAPIDJSON_ASSERT(buffer != 0);
 
     const char* cDigitsLut = GetDigitsLut();
@@ -112,7 +112,7 @@ inline char* u32toa(uint32_t value, char* buffer) {
     return buffer;
 }
 
-inline char* i32toa(int32_t value, char* buffer) {
+constexpr char* i32toa(int32_t value, char* buffer) {
     RAPIDJSON_ASSERT(buffer != 0);
     uint32_t u = static_cast<uint32_t>(value);
     if (value < 0) {
@@ -123,7 +123,7 @@ inline char* i32toa(int32_t value, char* buffer) {
     return u32toa(u, buffer);
 }
 
-inline char* u64toa(uint64_t value, char* buffer) {
+constexpr char* u64toa(uint64_t value, char* buffer) {
     RAPIDJSON_ASSERT(buffer != 0);
     const char* cDigitsLut = GetDigitsLut();
     const uint64_t  kTen8 = 100000000;
@@ -291,7 +291,7 @@ inline char* u64toa(uint64_t value, char* buffer) {
     return buffer;
 }
 
-inline char* i64toa(int64_t value, char* buffer) {
+constexpr char* i64toa(int64_t value, char* buffer) {
     RAPIDJSON_ASSERT(buffer != 0);
     uint64_t u = static_cast<uint64_t>(value);
     if (value < 0) {

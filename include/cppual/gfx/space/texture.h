@@ -77,15 +77,15 @@ public:
                         PixelFormat const& format     = PixelFormat (),
                         bool               gen_mipmap = false);
 
-    inline TexMinFilter getMinFilter () const noexcept { return _M_eMin; }
-    inline TexMagFilter getMagFilter () const noexcept { return _M_eMag; }
-    inline PixelFormat  format () const noexcept { return _M_gFormat; }
-    inline uint            sampleId () const noexcept { return _M_uSampleId; }
+    constexpr TexMinFilter getMinFilter () const noexcept { return _M_eMin; }
+    constexpr TexMagFilter getMagFilter () const noexcept { return _M_eMag; }
+    constexpr PixelFormat  format () const noexcept { return _M_gFormat; }
+    constexpr uint            sampleId () const noexcept { return _M_uSampleId; }
 
-    inline bool    isLoaded () const noexcept
+    constexpr bool    isLoaded () const noexcept
     { return _M_gStates.hasFlag (Texture::IsLoaded); }
 
-    inline bool    hasMipMaps () const noexcept
+    constexpr bool    hasMipMaps () const noexcept
     { return _M_gStates.hasFlag (Texture::HasMipMaps); }
 
 private:

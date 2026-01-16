@@ -105,14 +105,14 @@ struct Win32Rect final : public rect_type
     { return static_cast<u16> (bottom - top); }
 };
 
-inline long_t toWindowStyles (window_flags /*flags*/) noexcept
+constexpr long_t toWindowStyles (window_flags /*flags*/) noexcept
 {
     long_t styles;
 
     return styles;
 }
 
-inline long_t toExStyles (window_flags /*flags*/) noexcept
+constexpr long_t toExStyles (window_flags /*flags*/) noexcept
 {
     long_t styles;
 

@@ -40,10 +40,10 @@ public:
     constexpr object () noexcept : _M_eObjType () { }
     virtual  ~object () noexcept { reset (); }
 
-    inline object_type type () const noexcept
+    constexpr object_type type () const noexcept
     { return _M_eObjType; }
 
-    inline static uint count () noexcept
+    constexpr static uint count () noexcept
     { return sm_uALObjCount.load (std::memory_order_consume); }
 
 private:

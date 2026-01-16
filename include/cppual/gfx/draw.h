@@ -257,7 +257,7 @@ struct SHARED_API context_interface : public resource_interface
     static context_interface* current () noexcept;
     static void               acquire (shared_context cntxt) noexcept;
 
-    inline bool active () const noexcept
+    constexpr bool active () const noexcept
     { return this == current (); }
 };
 
@@ -289,7 +289,7 @@ class SHARED_API transform
 public:
     typedef transform self_type;
 
-    inline transform (rect const& gRect, float z, shared_surface const& surface, float rotate = .0f) noexcept
+    constexpr transform (rect const& gRect, float z, shared_surface const& surface, float rotate = .0f) noexcept
     : _M_rect    (gRect  ),
       _M_surface (surface),
       _M_z_depth (z      ),
@@ -298,15 +298,15 @@ public:
 
     constexpr transform () noexcept = default;
 
-    inline transform (self_type&&)                noexcept = default;
-    inline transform (self_type const&)           noexcept = default;
-    inline self_type& operator = (self_type&&)      noexcept = default;
-    inline self_type& operator = (self_type const&) noexcept = default;
+    constexpr transform (self_type&&)                noexcept = default;
+    constexpr transform (self_type const&)           noexcept = default;
+    constexpr self_type& operator = (self_type&&)      noexcept = default;
+    constexpr self_type& operator = (self_type const&) noexcept = default;
 
     constexpr rect           geometry () const noexcept { return _M_rect              ; }
     constexpr float          z_depth  () const noexcept { return _M_z_depth           ; }
-    inline    shared_surface surface  () const noexcept { return _M_surface           ; }
-    inline    shared_context context  () const noexcept { return _M_surface->context(); }
+    constexpr    shared_surface surface  () const noexcept { return _M_surface           ; }
+    constexpr    shared_context context  () const noexcept { return _M_surface->context(); }
     constexpr float          rotation () const noexcept { return _M_rotate            ; }
 
 private:
@@ -429,11 +429,11 @@ public:
     typedef std::recursive_mutex           mutex_type        ;
     typedef mutex_type::native_handle_type native_handle_type;
 
-    inline context_mutex (shared_context const& context) noexcept
+    constexpr context_mutex (shared_context const& context) noexcept
     : _M_context (context)
     { }
 
-    inline ~context_mutex () noexcept
+    constexpr ~context_mutex () noexcept
     {
         if (context_interface::current () == _M_context.get ()) unlock ();
     }
@@ -443,13 +443,13 @@ public:
         return _M_mutex.native_handle ();
     }
 
-    inline void lock ()
+    constexpr void lock ()
     {
         _M_mutex.lock ();
         context_interface::acquire (_M_context);
     }
 
-    inline bool try_lock ()
+    constexpr bool try_lock ()
     {
         if (!_M_mutex.try_lock ()) return false;
 
@@ -457,7 +457,7 @@ public:
         return true;
     }
 
-    inline void unlock ()
+    constexpr void unlock ()
     {
         context_interface::acquire (nullptr);
         _M_mutex.unlock ();

@@ -45,13 +45,13 @@ class animation_base : public animation_interface
 public:
     typedef std::atomic_bool bool_type;
 
-    inline float speed () const noexcept
+    constexpr float speed () const noexcept
     { return _M_fSpeed; }
 
-    inline void cancel () noexcept
+    constexpr void cancel () noexcept
     { _M_bIsPlaying.store (true, std::memory_order_relaxed); }
 
-    inline void set_speed (float fSpeed) noexcept
+    constexpr void set_speed (float fSpeed) noexcept
     { if (!_M_bIsPlaying.load ()) _M_fSpeed = fSpeed; }
 
 protected:

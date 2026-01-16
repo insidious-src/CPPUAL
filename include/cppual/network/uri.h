@@ -42,57 +42,57 @@ public:
     typedef string_type::const_iterator iterator      ;
     typedef string_type::const_iterator const_iterator;
 
-    inline uri () = default;
-    inline uri (uri&&) noexcept = default;
-    inline uri (uri const&) = default;
-    inline uri& operator = (uri&&) = default;
-    inline uri& operator = (uri const&) = default;
+    constexpr uri () = default;
+    constexpr uri (uri&&) noexcept = default;
+    constexpr uri (uri const&) = default;
+    constexpr uri& operator = (uri&&) = default;
+    constexpr uri& operator = (uri const&) = default;
 
     bool valid       () const;
     bool is_absolute () const;
 
-    inline const_iterator begin () const noexcept
+    constexpr const_iterator begin () const noexcept
     { return _M_gUri.begin (); }
 
-    inline const_iterator end () const noexcept
+    constexpr const_iterator end () const noexcept
     { return _M_gUri.end (); }
 
-    inline string_type protocol () const noexcept
+    constexpr string_type protocol () const noexcept
     { return _M_gUri.substr (0, _M_uProtEnd + 1); }
 
-    inline string_type user_info () const
+    constexpr string_type user_info () const
     { return _M_gUri.substr (_M_uProtEnd + 1, _M_uUserNfoEnd - _M_uProtEnd); }
 
-    inline string_type host () const
+    constexpr string_type host () const
     { return _M_gUri.substr (_M_uUserNfoEnd + 1, _M_uHostEnd - _M_uUserNfoEnd); }
 
-    inline string_type port () const
+    constexpr string_type port () const
     { return _M_gUri.substr (_M_uHostEnd + 1, _M_uPortEnd - _M_uHostEnd); }
 
-    inline string_type path () const
+    constexpr string_type path () const
     { return _M_gUri.substr (_M_uPortEnd + 1, _M_uPathEnd - _M_uPortEnd); }
 
-    inline string_type query () const
+    constexpr string_type query () const
     { return _M_gUri.substr (_M_uPathEnd + 1, _M_uQueryEnd - _M_uPathEnd); }
 
-    inline string_type fragment () const
+    constexpr string_type fragment () const
     { return _M_gUri.substr (_M_uQueryEnd + 1); }
 
     template <typename T>
-    inline uri (T const&);
+    constexpr uri (T const&);
 
-    inline const_pointer c_str () const noexcept
+    constexpr const_pointer c_str () const noexcept
     { return _M_gUri.c_str (); }
 
-    inline operator string_type const& () const noexcept
+    constexpr operator string_type const& () const noexcept
     { return _M_gUri; }
 
-    inline string_type to_string () const
+    constexpr string_type to_string () const
     {
         return _M_gUri;
     }
 
-    inline wstring to_wstring () const
+    constexpr wstring to_wstring () const
     {
         return std::wstring_convert<
                    std::codecvt_utf8<wchar_t>,
@@ -102,7 +102,7 @@ public:
                    >().from_bytes(_M_gUri);
     }
 
-    inline u16string to_u16string () const
+    constexpr u16string to_u16string () const
     {
         return std::wstring_convert<
                    std::codecvt_utf8<char16_t>,
@@ -112,7 +112,7 @@ public:
                    >().from_bytes(_M_gUri);
     }
 
-    inline u32string to_u32string () const
+    constexpr u32string to_u32string () const
     {
         return std::wstring_convert<
                    std::codecvt_utf8<char32_t>,

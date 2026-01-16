@@ -47,10 +47,10 @@ public:
     void set_position (int);
     void set_orientation (orientation_type);
 
-    inline orientation_type orientation () const noexcept
+    constexpr orientation_type orientation () const noexcept
     { return _M_eOrientation; }
 
-    inline arrows arrow_style () const noexcept
+    constexpr arrows arrow_style () const noexcept
     { return _M_eArrows; }
 
 public:

@@ -33,17 +33,16 @@ namespace cppual { namespace network {
 
 // ====================================================
 
-enum class socket_type : u8
+typedef enum class socket_type : u8
 {
     tcp,
     udp
-};
+}
+const const_socket;
 
 // ====================================================
 
-class transport_socket
-    : public virtual protocol,
-      public virtual resource<void, int, static_cast<resource_handle::value_type> (-1)>
+class transport_socket : public protocol, public resource<void, int, resource_handle::value_type (-1)>
 {
 public:
     typedef value_type       socket_id;
@@ -58,7 +57,7 @@ public:
     void set_blocking (bool block) noexcept;
     bool is_blocking  ()     const noexcept;
 
-    inline socket_type type () const noexcept { return _M_eProtocol; }
+    constexpr socket_type type () const noexcept { return _M_eProtocol; }
 
 protected:
     static socket_id create_socket (socket_type) noexcept;

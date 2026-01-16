@@ -70,10 +70,10 @@ public:
 
     string_type title () const;
 
-    inline frame_view* frame () const noexcept { return _M_gFrame; }
-    inline image_type* icon  () const noexcept { return _M_pIcon ; }
+    constexpr frame_view* frame () const noexcept { return _M_gFrame; }
+    constexpr image_type* icon  () const noexcept { return _M_pIcon ; }
 
-    inline bool is_fullscreen () const noexcept
+    constexpr bool is_fullscreen () const noexcept
     { return renderable_unsafe()->is_fullscreen (); }
 
     bool is_minimized () const noexcept;

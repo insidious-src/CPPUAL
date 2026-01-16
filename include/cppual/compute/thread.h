@@ -89,9 +89,9 @@ public:
         typedef id            self_type  ;
         typedef thread_handle handle_type;
 
-        constexpr id () noexcept = default;
+        inline id () noexcept = default;
 
-        constexpr id (handle_type id) noexcept
+        inline id (handle_type id) noexcept
         : _M_handle (id)
         { }
 

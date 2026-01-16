@@ -84,7 +84,7 @@ public:
     static size_type default_delay     ();
     static void      set_default_delay (size_type ms);
 
-    inline size_type item_count () const noexcept
+    constexpr size_type item_count () const noexcept
     { return _M_gItemList.size (); }
 
 private:

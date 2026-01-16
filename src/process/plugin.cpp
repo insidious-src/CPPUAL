@@ -38,7 +38,7 @@ namespace cppual { namespace process {
 
 namespace { // optimize for internal unit usage
 
-inline static dyn_loader::string_view ext () noexcept
+consteval static dyn_loader::string_view ext () noexcept
 {
 #   if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
     return ".so";
@@ -51,11 +51,11 @@ inline static dyn_loader::string_view ext () noexcept
 #   endif
 }
 
-inline static dyn_loader::string_type format (dyn_loader::string_type const& path) noexcept
+constexpr static dyn_loader::string_type format (dyn_loader::string_type const& path) noexcept
 {
-    static const auto _ext = ext ();
+    constexpr static const auto _ext = ext ();
 
-    const auto pos = path.rfind (_ext);
+    const auto pos = path.rfind (_ext.data ());
 
     return pos == dyn_loader::string_type::npos ? path + _ext.data () : path;
 }

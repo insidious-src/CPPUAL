@@ -39,7 +39,7 @@ namespace boost { namespace property_tree
      * @post @c ar will contain the serialized form of @c t.
      */
     template<class Archive, class K, class D, class C>
-    inline void save(Archive &ar,
+    constexpr void save(Archive &ar,
                      const basic_ptree<K, D, C> &t,
                      const unsigned int file_version)
     {
@@ -51,7 +51,7 @@ namespace boost { namespace property_tree
     namespace detail
     {
         template <class Archive, class K, class D, class C>
-        inline void load_children(Archive &ar,
+        constexpr void load_children(Archive &ar,
                                   basic_ptree<K, D, C> &t)
         {
             namespace bsl = boost::serialization;
@@ -97,7 +97,7 @@ namespace boost { namespace property_tree
      * @post @c t will contain the de-serialized data from @c ar.
      */
     template<class Archive, class K, class D, class C>
-    inline void load(Archive &ar,
+    constexpr void load(Archive &ar,
                      basic_ptree<K, D, C> &t,
                      const unsigned int file_version)
     {
@@ -116,7 +116,7 @@ namespace boost { namespace property_tree
      * @param file_version file_version for the archive.
      */
     template<class Archive, class K, class D, class C>
-    inline void serialize(Archive &ar,
+    constexpr void serialize(Archive &ar,
                           basic_ptree<K, D, C> &t,
                           const unsigned int file_version)
     {

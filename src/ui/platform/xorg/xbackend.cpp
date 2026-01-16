@@ -32,7 +32,7 @@ namespace cppual { namespace ui {
 
 namespace { // optimize for internal unit usage
 
-inline xcb_display::handle_type x11_connection (cchar* pName) noexcept
+constexpr xcb_display::handle_type x11_connection (cchar* pName) noexcept
 {
     static xcb_display::handle_type pDisplay    = nullptr;
     static cchar*                   pCachedName = "";
@@ -42,7 +42,7 @@ inline xcb_display::handle_type x11_connection (cchar* pName) noexcept
                                 pDisplay = ::XOpenDisplay (pCachedName = pName);
 }
 
-inline x::display_type* get_connection (cchar* pName) noexcept
+constexpr x::display_type* get_connection (cchar* pName) noexcept
 {
     return ::XGetXCBConnection (x11_connection (pName).get<x::legacy_type> ());
 }

@@ -28,7 +28,7 @@ namespace boost { namespace property_tree { namespace ini_parser
      * @param flags value to check for validity as flags to ini_parser.
      * @return true if the flags are valid, false otherwise.
      */
-    inline bool validate_flags(int flags)
+    constexpr bool validate_flags(int flags)
     {
         return flags == 0;
     }

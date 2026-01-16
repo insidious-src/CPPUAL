@@ -78,13 +78,13 @@ public:
     bool         valid   () const noexcept;
     backend_type backend () const noexcept;
 
-    inline static device& host () noexcept
+    constexpr static device& host () noexcept
     { return get_host_device (); }
 
 private:
     void assign_dev_from_cat () const;
 
-    inline static device& get_host_device ()
+    constexpr static device& get_host_device ()
     {
         static device host (device_type::cpu);
         return host;

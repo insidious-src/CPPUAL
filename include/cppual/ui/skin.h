@@ -137,7 +137,7 @@ public:
 
     void set_skin (skin_interface*) noexcept;
 
-    inline skin_interface* skin () noexcept
+    constexpr skin_interface* skin () noexcept
     { return _M_pSkin; }
 
 protected:

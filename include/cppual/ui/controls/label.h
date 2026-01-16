@@ -52,8 +52,8 @@ public:
            rect        const& rect,
            text_format       format = text_format::plain);
 
-    inline text_format format () const noexcept { return _M_eFormat; }
-    inline string_type text   () const noexcept { return _M_gText  ; }
+    constexpr text_format format () const noexcept { return _M_eFormat; }
+    constexpr string_type text   () const noexcept { return _M_gText  ; }
 
 public:
     signal<void()> text_changed;

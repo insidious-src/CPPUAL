@@ -39,8 +39,8 @@ public:
     void stop        () noexcept;
     void set_samples (int samples) noexcept;
 
-    inline capture_device& get_device ()       noexcept { return *_M_gDevice ; }
-    inline int             samples    () const noexcept { return  _M_nSamples; }
+    constexpr capture_device& get_device ()       noexcept { return *_M_gDevice ; }
+    constexpr int             samples    () const noexcept { return  _M_nSamples; }
 
 private:
     capture_device* _M_gDevice     ;

@@ -61,34 +61,34 @@ using list = std::list<T, memory::allocator<T>>;
 template <non_void T>
 using forward_list = std::forward_list<T, memory::allocator<T>>;
 
-template <non_void K, non_void V, struct_or_class Hash = std::hash<K>, struct_or_class Pred = std::equal_to<K>>
+template <non_void K, non_void V, structure Hash = std::hash<K>, structure Pred = std::equal_to<K>>
 using unordered_map =
 std::unordered_map<K, V, Hash, Pred, memory::allocator<std::pair<K const, V>>>;
 
-template <non_void K, non_void V, struct_or_class Hash = std::hash<K>, struct_or_class Pred = std::equal_to<K>>
+template <non_void K, non_void V, structure Hash = std::hash<K>, structure Pred = std::equal_to<K>>
 using unordered_multimap =
 std::unordered_multimap<K, V, Hash, Pred, memory::allocator<std::pair<K const, V>>>;
 
-template <non_void T, struct_or_class Hash = std::hash<T>, struct_or_class Pred = std::equal_to<T>>
+template <non_void T, structure Hash = std::hash<T>, structure Pred = std::equal_to<T>>
 using unordered_set =
 std::unordered_set<T, Hash, Pred, memory::allocator<T>>;
 
-template <non_void T, struct_or_class Hash = std::hash<T>, struct_or_class Pred = std::equal_to<T>>
+template <non_void T, structure Hash = std::hash<T>, structure Pred = std::equal_to<T>>
 using unordered_multiset =
 std::unordered_multiset<T, Hash, Pred, memory::allocator<T>>;
 
-template <non_void K, non_void V, struct_or_class Compare = std::less<K>>
+template <non_void K, non_void V, structure Compare = std::less<K>>
 using map =
 std::map<K, V, Compare, memory::allocator<std::pair<K const, V>>>;
 
-template <non_void K, non_void V, struct_or_class Compare = std::less<K>>
+template <non_void K, non_void V, structure Compare = std::less<K>>
 using multimap =
 std::multimap<K, V, Compare, memory::allocator<std::pair<K const, V>>>;
 
-template <non_void Key, struct_or_class Compare = std::less<Key>>
+template <non_void Key, structure Compare = std::less<Key>>
 using set = std::set<Key, Compare, memory::allocator<Key>>;
 
-template <non_void Key, struct_or_class Compare = std::less<Key>>
+template <non_void Key, structure Compare = std::less<Key>>
 using multiset = std::multiset<Key, Compare, memory::allocator<Key>>;
 
 // ====================================================

@@ -36,7 +36,7 @@ namespace cppual::compute {
 
 struct defer_lock { };
 
-template <struct_or_class T>
+template <structure T>
 class unique_lock final
 {
 private:
@@ -45,7 +45,7 @@ private:
 
 // ====================================================
 
-template <struct_or_class T>
+template <structure T>
 class shared_lock final
 {
 public:

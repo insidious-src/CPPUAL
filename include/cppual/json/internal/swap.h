@@ -30,7 +30,7 @@ namespace internal {
     \note This has the same semantics as std::swap().
 */
 template <typename T>
-inline void Swap(T& a, T& b) RAPIDJSON_NOEXCEPT {
+constexpr void Swap(T& a, T& b) RAPIDJSON_NOEXCEPT {
     T tmp = a;
         a = b;
         b = tmp;

@@ -96,7 +96,7 @@ public:
     void       set_size  (uint uSize)          noexcept { _M_uSize  = uSize ; }
     void       set_style (line_style eStyle)   noexcept { _M_eStyle = eStyle; }
 
-    inline gl_path () noexcept = default;
+    constexpr gl_path () noexcept = default;
 
     gl_path (vector<point2i> const& coord,
              color           const& gFillColor,
