@@ -24,13 +24,10 @@
 #ifdef __cplusplus
 
 #include <cppual/bitflags>
-//#include <cppual/string>
 #include <cppual/containers>
 #include <cppual/noncopyable>
 #include <cppual/compute/object.h>
 #include <cppual/compute/backend_iface.h>
-
-//#include <memory>
 
 // =========================================================
 
@@ -43,10 +40,11 @@ class bad_device          : public device_exception   { };
 class not_available       : public device_exception   { };
 class already_created     : public device_exception   { };
 class bad_partition_count : public device_exception   { };
+class out_of_memory       : public device_exception   { };
 
 // =========================================================
 
-class device : public object<resource_type::device>
+class device : public object<resource_type::device> /*, public device_interface */
 {
 public:
     typedef std::size_t size_type;
@@ -104,7 +102,9 @@ private:
 
 // =========================================================
 
-} // Compute
+} //! compute
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_DEVICE_H_

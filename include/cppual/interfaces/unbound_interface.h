@@ -27,6 +27,7 @@
 #include <cppual/decl>
 #include <cppual/types>
 #include <cppual/casts>
+#include <cppual/string>
 #include <cppual/concepts>
 #include <cppual/array_map>
 #include <cppual/meta_type>
@@ -53,8 +54,16 @@ namespace cppual {
 
 // =========================================================
 
+template <functional...>
+class unbound_interface;
+class dyn_unbound_interface;
+
+// =========================================================
+
+typedef std::size_t unbound_key_t;
+
 template <typename T>
-concept unbound_key = are_same<std::size_t, T>;
+concept unbound_key = are_same<T, unbound_key_t>;
 
 // =========================================================
 
@@ -65,7 +74,9 @@ public:
     typedef function_proxy<C> self_type          ;
     typedef cchar*            const_pointer      ;
     typedef std::size_t       size_type          ;
-    typedef size_type  const  const_size         ;
+    typedef size_type const   const_size         ;
+    typedef unbound_key_t     key_type           ;
+    typedef key_type  const   const_key          ;
     typedef fstring_view      string_view        ;
     typedef remove_cvref_t<C> iface_type         ;
     typedef iface_type      * iface_pointer      ;
@@ -95,32 +106,38 @@ public:
     template <typename R, typename... Args>
     constexpr R operator () (R*, Args... args) const
     {
-        return _M_iface->iface_type::template invoke<_M_name, R> (std::forward<Args> (args)...);
+        return _M_iface->iface_type::template invoke<R> (_M_name, std::forward<Args> (args)...);
     }
 
     template <typename... Args>
     constexpr void operator () (Args... args) const
     {
-        _M_iface->iface_type::template invoke<_M_name, void> (std::forward<Args> (args)...);
+        _M_iface->iface_type::template invoke<void> (_M_name, std::forward<Args> (args)...);
     }
 
+    constexpr string_view name () const noexcept
+    { return _M_name; }
+
+    constexpr iface_const_pointer interface () const noexcept
+    { return _M_iface; }
+
 private:
-    consteval function_proxy (iface_const_ref interface, string_view fn_name) noexcept
+    constexpr function_proxy (iface_const_ref interface, string_view fn_name) noexcept
+        : _M_iface (&interface)
+        , _M_name  (fn_name   )
+    { }
+
+    consteval explicit function_proxy (iface_const_ref interface, const_pointer fn_name) noexcept
     : _M_iface (&interface)
     , _M_name  (fn_name   )
     { }
-
-    consteval function_proxy (iface_const_ref interface, const_pointer fn_name) noexcept
-    : _M_iface (&interface)
-    , _M_name  (fn_name   )
-    { }
-
-    function_proxy () = delete;
-    friend iface_type;
 
 private:
     iface_const_pointer _M_iface { };
     string_view         _M_name  { };
+
+    function_proxy () = delete;
+    friend iface_type;
 };
 
 //! =======================================================
@@ -134,20 +151,20 @@ public:
     typedef unbound_interface<FNs...>               self_type             ;
     typedef self_type                               base_type             ;
     typedef function_proxy<self_type>               fn_proxy_type         ;
+    typedef cchar*                                  char_ptr              ;
     typedef fn_proxy_type::size_type                size_type             ;
     typedef size_type const                         const_size            ;
-    typedef size_type                               key_type              ;
+    typedef unbound_key_t                           key_type              ;
     typedef key_type  const                         const_key             ;
     typedef std::tuple<std::pair<key_type, FNs>...> map_type              ;
     typedef ptrdiff                                 difference_type       ;
     typedef fstring_view                            string_view           ;
-    typedef string                                  string_type           ;
+    typedef fstring                                 string_type           ;
     typedef map_type::iterator                      iterator              ;
     typedef map_type::const_iterator                const_iterator        ;
     typedef std::reverse_iterator<iterator>         reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator>   reverse_const_iterator;
     typedef std::pair<iterator, bool>               iterator_pair         ;
-    typedef cchar*                                  char_ptr              ;
 
     // ====================================================
 
@@ -340,10 +357,16 @@ private:
 
     // ====================================================
 
-    template <string_view K, typename R = void, typename... Args>
-    consteval R invoke (Args&&... args) const noexcept
+    template <typename R = void, typename... Args, c_const_str STR>
+    consteval R invoke (STR fn_name, Args&&... args) const noexcept
     {
-        constexpr const_size I = get_index<K> ();
+        constexpr const_size I = get_index<fn_name> ();
+
+        typedef
+        callable_return_t<typename selected_tuple_t<map_type, I>::second_type, Args...>
+        return_type;
+
+        static_assert (std::convertible_to<return_type, R>, "return type mismatch!");
 
         static_assert (I != npos, "key NOT found!");
         return std::get<I> (_M_fn_map).second (std::forward<Args> (args)...);
@@ -366,31 +389,29 @@ class dyn_unbound_interface : public non_copyable_virtual
 {
 
 public:
-    typedef std::size_t size_type;
-
-    // ====================================================
-
-    template <fn_sig S, size_type SZ = def_capture_size_v>
+    template <fn_sig S, std::size_t SZ = def_capture_size_v>
     using fn_t = function<S, max_capture_size_v<SZ>>;
 
     // ====================================================
 
     typedef dyn_unbound_interface                 self_type             ;
     typedef self_type                             base_type             ;
-    typedef size_type                             key_type              ;
+    typedef function_proxy<self_type>             fn_proxy_type         ;
+    typedef fn_t<void()>                          fn_type               ;
+    typedef fn_proxy_type::size_type              size_type             ;
+    typedef size_type const                       const_size            ;
+    typedef unbound_key_t                         key_type              ;
     typedef key_type const                        const_key             ;
     typedef abi::function_rtti<>                  mapped_type           ;
     typedef mapped_type const                     const_mapped          ;
     typedef std::pair<key_type, mapped_type>      value_type            ;
     typedef value_type const                      const_value           ;
-    typedef dyn_array_map<key_type, mapped_type>  container_type        ;
+    typedef dyn_index_map<key_type, mapped_type>  container_type        ;
     typedef container_type::allocator_type        allocator_type        ;
     typedef std::allocator_traits<allocator_type> alloc_traits          ;
-    typedef size_type const                       const_size            ;
     typedef ptrdiff                               difference_type       ;
     typedef fstring_view                          string_view           ;
     typedef string                                string_type           ;
-    typedef fn_t<void()>                          fn_type               ;
     typedef container_type::iterator              iterator              ;
     typedef container_type::const_iterator        const_iterator        ;
     typedef std::reverse_iterator<iterator>       reverse_iterator      ;
@@ -400,7 +421,7 @@ public:
     typedef mapped_type::array_const_ref          array_const_ref       ;
     typedef std::pair<iterator, bool>             iterator_pair         ;
     typedef abi::rtti                             rtti_type             ;
-    typedef function_proxy<self_type>             fn_proxy_type         ;
+    typedef rtti_type const                       const_rtti            ;
     typedef cchar*                                char_ptr              ;
     typedef void *                                void_ptr              ;
 
@@ -504,15 +525,15 @@ public:
         return _M_fn_map[K].second.return_type ();
     }
 
-    template <fstring_view K>
-    constexpr rtti_type return_type () const noexcept
-    {
-        return _M_fn_map[K].second.return_type ();
-    }
-
     constexpr rtti_type return_type (key_type k) const noexcept
     {
         return _M_fn_map[k].second.return_type ();
+    }
+
+    template <string_view K>
+    constexpr rtti_type return_type () const noexcept
+    {
+        return _M_fn_map[K].second.return_type ();
     }
 
     constexpr rtti_type return_type (string_view k) const noexcept
@@ -537,15 +558,15 @@ public:
         return _M_fn_map[K].second.arg_types ();
     }
 
-    template <fstring_view K>
-    constexpr array_const_ref arg_types () const noexcept
-    {
-        return _M_fn_map[K].second.arg_types ();
-    }
-
     constexpr array_const_ref arg_types (key_type k) const noexcept
     {
         return _M_fn_map[k].second.arg_types ();
+    }
+
+    template <string_view K>
+    constexpr array_const_ref arg_types () const noexcept
+    {
+        return _M_fn_map[K].second.arg_types ();
     }
 
     constexpr array_const_ref arg_types (string_view k) const noexcept
@@ -589,18 +610,21 @@ public:
         return _M_fn_map[str].first == char_hash (str);
     }
 
-    template <string_view K, typename R = void, typename... Args, size_type... Is>
-    constexpr R invoke (Args&&... args, std::index_sequence<Is...> = std::index_sequence_for<Args...> ())
+    template <typename R = void, typename... Args, size_type... Is, c_const_str STR>
+    constexpr R invoke (STR       fn_name,
+                        Args&&... args   ,
+                        std::index_sequence<Is...> = std::index_sequence_for<Args...> ())
     {
-        static_assert (arg_types (K).size () <= sizeof... (Args),
-                       "function argument count mismatch!");
-        static_assert (std::convertible_to<R, abi::type_t<return_type (K)>>,
-                       "function return type mismatch!");
+        constexpr const_size      Key           = char_hash<fn_name> ();
+        constexpr const_rtti      return_type_v = return_type<Key>   ();
+        constexpr array_const_ref arg_types_v   = arg_types  <Key>   ();
 
-        typedef abi::type_t<return_type (K)> (fn_sign)
-               (abi::arg_type_t<arg_types (K).data (), Args, Is>...);
+        static_assert (arg_types_v.size () <= sizeof...(Args), "function argument count mismatch!");
 
-        return (fn_cast<fn_sign> (_M_fn_map[K].second.function ()))(std::forward<Args> (args)...);
+        typedef abi::type_convertable_t<R, return_type_v> (fn_sign)
+               (abi::arg_type_t<arg_types_v.data (), Args, Is>...);
+
+        return (fn_cast<fn_sign> (_M_fn_map[Key].second.function ()))(std::forward<Args> (args)...);
     }
 
 protected:
@@ -613,7 +637,7 @@ protected:
     {
         check_pairs_types<0, Ps...> ();
 
-        add_all_member_functions<0> (std::make_tuple (pairs...));
+        add_all_member_functions (std::make_tuple (pairs...));
 
 #       ifdef DEBUG_MODE
         std::cout << "unbound_interface size: " << sizeof... (Ps) * sizeof (value_type)
@@ -622,7 +646,7 @@ protected:
     }
 
 private:
-    template <size_type I, pair_like... Ps>
+    template <size_type I = 0, pair_like... Ps>
     requires (functional_str_pair<Ps, typename Ps::first_type, typename Ps::second_type> && ...)
     constexpr void add_all_member_functions (std::tuple<Ps...> const& fn_pairs)
     {
@@ -664,7 +688,7 @@ private:
 //! template adaptor for reversed interface
 //! ====================================================
 
-template <class_t T>
+template <structure T>
 struct is_reverse_interface : public std::conditional_t<std::is_base_of_v<dyn_unbound_interface, T>,
                                                         std::true_type,
                                                         std::false_type
@@ -679,10 +703,10 @@ template <>
 struct is_reverse_interface <dyn_unbound_interface> : public std::true_type
 { };
 
-template <class_t T>
+template <structure T>
 using is_reverse_interface_t = is_reverse_interface<T>::type;
 
-template <class_t T>
+template <structure T>
 inline constexpr cbool is_reverse_interface_v = is_reverse_interface<T>::value;
 
 template <typename T>

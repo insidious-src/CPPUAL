@@ -20,6 +20,7 @@
  */
 
 #include <cppual/process/plugin.h>
+
 #include <cppual/types>
 
 #include <functional>
@@ -38,7 +39,7 @@ namespace cppual { namespace process {
 
 namespace { // optimize for internal unit usage
 
-consteval static dyn_loader::string_view ext () noexcept
+consteval static cchar* ext () noexcept
 {
 #   if defined (OS_GNU_LINUX) || defined (OS_BSD) || defined (OS_ANDROID)
     return ".so";
@@ -47,17 +48,13 @@ consteval static dyn_loader::string_view ext () noexcept
 #   elif defined (OS_WINDOWS)
     return ".dll";
 #   else
-    return dyn_loader::string_view ();
+    return "";
 #   endif
 }
 
-constexpr static dyn_loader::string_type format (dyn_loader::string_type const& path) noexcept
+constexpr static dyn_loader::string_type format (dyn_loader::string_view const& path) noexcept
 {
-    constexpr static const auto _ext = ext ();
-
-    const auto pos = path.rfind (_ext.data ());
-
-    return pos == dyn_loader::string_type::npos ? path + _ext.data () : path;
+    return path.rfind (ext ()) == dyn_loader::string_view::npos ? path + ext () : path;
 }
 
 } // anonymous namespace
@@ -68,7 +65,7 @@ dyn_loader::dyn_loader (string_view const& strPath,
                         bool               bAttach,
                         resolve_policy     eResolve) noexcept
 : _M_pHandle  (),
-  _M_gLibPath (format (strPath.data ())),
+  _M_gLibPath (format (strPath)),
   _M_eResolve (eResolve)
 {
     if (bAttach) attach ();

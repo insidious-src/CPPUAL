@@ -44,7 +44,8 @@ public:
     typedef display_interface self_type  ;
     typedef shared_display    pointer    ;
     typedef resource_handle   handle_type;
-    typedef string            string_type;
+    typedef fstring           string_type;
+    typedef fstring_view      string_view;
 
     virtual string_type name         () const = 0;
     virtual uint        screen_count () const = 0;
@@ -52,8 +53,8 @@ public:
 
     static  pointer primary            ();
     static  bool    has_valid_instance () noexcept;
-    static  bool    primary            (string_type const& name);
-    static  pointer connect            (string_type const& name);
+    static  bool    primary            (string_view const& name);
+    static  pointer connect            (string_view const& name);
 
     handle_type native () const noexcept { return _M_native; }
     handle_type legacy () const noexcept { return _M_legacy; }

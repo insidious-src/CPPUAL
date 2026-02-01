@@ -62,8 +62,6 @@ typedef bitset         <window_flag           > window_flags ;
 class SHARED_API platform_wnd_interface : public resource<shared_display, resource_handle>
 {
 public:
-    using resource<shared_display, resource_handle>::resource;
-
     typedef platform_wnd_interface                 self_type          ;
     typedef shared_display                         connection_type    ;
     typedef resource_handle                        handle_type        ;
@@ -73,6 +71,11 @@ public:
     typedef wnd_pointer const&                     wnd_const_reference;
     typedef std::size_t                            size_type          ;
     typedef std::string_view                       string_type        ;
+
+    constexpr platform_wnd_interface (connection_type pConn = connection_type (),
+                                      handle_type      hWnd = handle_type ()) noexcept
+    : resource (pConn, hWnd, resource_type::window)
+    { }
 
     virtual wnd_pointer  owner () const = 0;
     virtual window_flags flags () const = 0;

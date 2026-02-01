@@ -20,17 +20,17 @@
  */
 
 #include "vulkan.h"
-#include <cppual/compute/backend_iface.h>
 
-#include <cppual/types.h>
-#include <cppual/containers.h>
-#include <cppual/memory/stacked.h>
+#include <cppual/types>
+#include <cppual/containers>
+#include <cppual/memory_resource>
 #include <cppual/compute/device.h>
-
-#include <vulkan/vulkan.h>
+#include <cppual/compute/backend_iface.h>
 
 //#include <cstring>
 //#include <type_traits>
+
+#include <vulkan/vulkan.h>
 
 namespace cppual { namespace compute {
 

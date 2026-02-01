@@ -23,10 +23,10 @@
 #define CPPUAL_COMPUTE_BACKEND_VULKAN_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/string.h>
-#include <cppual/containers.h>
-#include <cppual/noncopyable.h>
+#include <cppual/types>
+#include <cppual/string>
+#include <cppual/containers>
+#include <cppual/noncopyable>
 #include <cppual/compute/object.h>
 #include <cppual/compute/device.h>
 #include <cppual/compute/backend_iface.h>

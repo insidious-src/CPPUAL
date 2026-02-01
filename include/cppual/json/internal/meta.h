@@ -15,6 +15,8 @@
 #ifndef RAPIDJSON_INTERNAL_META_H_
 #define RAPIDJSON_INTERNAL_META_H_
 
+#include <cppual/decl>
+
 #include "../rapidjson.h"
 
 #ifdef __GNUC__

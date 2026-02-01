@@ -20,10 +20,15 @@
  */
 
 #include <cppual/gfx/formats/bmp.h>
+#include <cppual/casts>
+
+// =========================================================
 
 namespace cppual {
 
-void bitmap_stream::_parse_header ()
+// =========================================================
+
+void bitmap_stream::parse_header ()
 {
     //! check header sizes
     seekg (0, end);
@@ -32,18 +37,16 @@ void bitmap_stream::_parse_header ()
 
     //! read Header
     seekg (0);
-    read  (reinterpret_cast<char_type*> (&_M_header), sizeof (bmp_header));
+    read  (direct_cast<char_type*> (&_M_header), sizeof (bmp_header));
 
     //! read InfoHeader
     if (header ().type == bmp_type::BM)
-        read (reinterpret_cast<char_type*> (&_M_infoHeader), sizeof (info_header));
+        read (direct_cast<char_type*> (&_M_infoHeader), sizeof (info_header));
     else
         close ();
 }
 
-bitmap_stream::~bitmap_stream()
-{
-}
+// =========================================================
 
 bitmap_stream::size_type bitmap_stream::replace (rgb_type const target_clr, rgb_type const new_clr)
 {
@@ -92,5 +95,9 @@ bitmap_stream::size_type bitmap_stream::replace (rgb_type const target_clr, rgb_
     return num_changes;
 }
 
-} // namespace cppual
+// =========================================================
+
+} //! namespace cppual
+
+// =========================================================
 

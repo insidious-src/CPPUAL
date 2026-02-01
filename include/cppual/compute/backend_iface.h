@@ -92,20 +92,20 @@ typedef bitset<il_type>     device_ils  ;
 
 // =========================================================
 
-class factory;
-class device_interface;
-class context_interface;
-class memory_interface;
-class cmd_seq_interface;
-class image_interface;
-class pipeline_interface;
-class render_pass_interface;
-class shader_interface;
+class factory                  ;
+class device_interface         ;
+class context_interface        ;
+class memory_interface         ;
+class cmd_seq_interface        ;
+class image_interface          ;
+class pipeline_interface       ;
+class render_pass_interface    ;
+class shader_interface         ;
 class descriptor_pool_interface;
-class event_interface;
-class state_interface;
-class queue_interface;
-class sampler_interface;
+class event_interface          ;
+class state_interface          ;
+class queue_interface          ;
+class sampler_interface        ;
 
 // =========================================================
 
@@ -235,15 +235,16 @@ protected:
 class SHARED_API memory_interface : public object<resource_type::buffer>
 {
 public:
-    enum class address_space : u8
+    typedef enum class address_space : u8
     {
         global_memory ,
         local_memory  ,
         private_memory,
         constant_memory
-    };
+    }
+    const const_address_space;
 
-    enum class memory_flag : u16
+    typedef enum class memory_flag : u16
     {
         read_write      = 1 << 0,
         read_only       = 1 << 1,
@@ -254,7 +255,8 @@ public:
         host_write_only = 1 << 6,
         host_read_only  = 1 << 7,
         host_no_access  = 1 << 8
-    };
+    }
+    const const_memory_flag;
 
     typedef bitset<memory_flag> memory_flags;
 

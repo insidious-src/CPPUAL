@@ -22,10 +22,18 @@
 #include <cppual/gfx/gl/batch.h>
 #include <cppual/gfx/gl/gldef.h>
 
-namespace cppual { namespace gfx { namespace gl {
+// =========================================================
+
+namespace cppual::gfx::gl {
+
+// =========================================================
 
 batch::~batch ()
 {
 }
 
-} } } // namespace GL
+// =========================================================
+
+} //! namespace gl
+
+// =========================================================

@@ -21,6 +21,8 @@
 
 #include <cppual/compute/thread.h>
 
+#include <thread>
+
 namespace cppual { namespace compute {
 
 namespace { // optimize for internal unit usage
@@ -166,9 +168,9 @@ bool thread::id::thread_handles_equal (resource_handle pth1, resource_handle pth
 
 static void* bind (void* p)
 {
-    thread::callable pFunc = std::move (*static_cast<thread::callable*> (p));
-    pFunc ();
-    return nullptr;
+    //const auto pFunc = std::move (*static_cast<thread::fn_type*> (p));
+    //pFunc ();
+    return p;
 }
 
 uint thread::hardware_concurency () noexcept
@@ -179,8 +181,8 @@ uint thread::hardware_concurency () noexcept
 // =========================================================
 
 thread::thread () noexcept
-: _M_gId (),
-  _M_uStackSize (),
+: _M_gId         (),
+  _M_uStackSize  (),
   _M_bIsJoinable ()
 { }
 
@@ -189,13 +191,11 @@ thread::~thread ()
     if (_M_bIsJoinable.load ()) join ();
 }
 
-bool thread::start (callable&       gFunc,
+bool thread::start (fn_type&        gFunc,
                     bool            bJoinable,
                     thread_priority ePrio,
                     size_type       uStackSize)
 {
-    UNUSED(ePrio);
-
 #   ifdef OS_STD_POSIX
 
     ::pthread_attr_t attr { };
@@ -203,7 +203,7 @@ bool thread::start (callable&       gFunc,
     if (::pthread_attr_init (&attr) != 0) return false;
 
     if (::pthread_attr_setstacksize (&attr, uStackSize) != 0 ||
-            //ThreadPriority::Inherit == ePrio ? 0 :
+            // ThreadPriority::Inherit == ePrio ? 0 :
             //::pthread_attr_setschedparam (&attr, &gParam) != 0 ||
             ::pthread_attr_setdetachstate (&attr, !bJoinable ?
                                            PTHREAD_CREATE_JOINABLE :

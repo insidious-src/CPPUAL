@@ -57,9 +57,9 @@ public:
     typedef list_interface self_type;
 
     void              add_next_node (self_type*);
-    void              add_prev_node (self_type*);
-    self_type*        last_node     () const;
+    void              add_prev_node (self_type *);
     self_type*        first_node    () const;
+    self_type*        last_node     () const;
 
     constexpr self_type* next_node () const noexcept { return _M_pNextProt; }
     constexpr self_type* prev_node () const noexcept { return _M_pPrevProt; }

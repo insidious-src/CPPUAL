@@ -63,8 +63,6 @@ class unbound_task;
 template <non_void, typename...>
 class unbound_task_adaptor;
 
-using allocator_like;
-
 // =========================================================
 
 class host_queue
@@ -88,17 +86,17 @@ public:
         running     =  2
     };
 
-    host_queue (host_queue&&                 );
-    host_queue (host_queue const&            );
-    host_queue& operator = (host_queue&&     );
-    host_queue& operator = (host_queue const&);
+    inline host_queue ()  noexcept = default;
+    host_queue (self_type&&                );
+    host_queue (self_type const&           );
+    self_type& operator = (self_type&&     );
+    self_type& operator = (self_type const&);
 
-    constexpr host_queue () noexcept = default;
     ~host_queue ();
 
     bool schedule (fn_const_type& task_fn);
     bool schedule (fn_type&& task_fn);
-    void quit     (bool interrupt = false) noexcept;
+    void quit     (cbool interrupt = false) noexcept;
 
     /// work thread entry function (main)
     void thread_main ();
@@ -328,12 +326,12 @@ public:
         return _M_value;
     }
 
-    template <class_t C, typename... Args>
+    template <structure C, typename... Args>
     constexpr host_task (C& obj, value_type (C::* fn)(Args...), Args&&... args)
     : self_type ()
     { then (obj, fn, std::forward<Args> (args)...); }
 
-    template <class_t C, typename... Args>
+    template <structure C, typename... Args>
     constexpr host_task (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
     : self_type ()
     { then (obj, fn, std::forward<Args> (args)...); }
@@ -369,7 +367,7 @@ public:
     : self_type ()
     { then (std::move (fn), ator, std::forward<Args> (args)...); }
 
-    template <class_t C, typename... Args>
+    template <structure C, typename... Args>
     constexpr self_type& then (C& obj, value_type (C::* fn)(Args...), Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args), &obj]
@@ -383,7 +381,7 @@ public:
         return *this;
     }
 
-    template <class_t C, typename... Args>
+    template <structure C, typename... Args>
     constexpr self_type& then (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args), &obj]
@@ -571,12 +569,12 @@ public:
         return _M_value;
     }
 
-    template <class_t C, typename... Args>
+    template <structure C, typename... Args>
     constexpr unbound_task (C& obj, value_type (C::* fn)(Args...), Args&&... args)
     : self_type ()
     { then (obj, fn, std::forward<Args> (args)...); }
 
-    template <class_t C, typename... Args>
+    template <structure C, typename... Args>
     constexpr unbound_task (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
     : self_type ()
     { then (obj, fn, std::forward<Args> (args)...); }
@@ -612,7 +610,7 @@ public:
     : self_type ()
     { then (std::move (fn), ator, std::forward<Args> (args)...); }
 
-    template <class_t C, typename... Args>
+    template <structure C, typename... Args>
     constexpr self_type& then (C& obj, value_type (C::* fn)(Args...), Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args), &obj]
@@ -626,7 +624,7 @@ public:
         return *this;
     }
 
-    template <class_t C, typename... Args>
+    template <structure C, typename... Args>
     constexpr self_type& then (C& obj, value_type (C::* fn)(Args...) const, Args&&... args)
     {
         schedule ([=, this, ... args = std::forward<Args> (args), &obj]

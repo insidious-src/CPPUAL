@@ -20,40 +20,22 @@
  */
 
 #include <cppual/compute/devmemory.h>
+
 #include <cppual/compute/device.h>
-
-#include <iostream>
-#include <new>
-
-void* operator new (std::size_t size, device& obj)
-{
-    using namespace cppual;
-
-    if (!obj.valid ()) throw compute::bad_device ();
-    if ( obj.max_alloc_size () < size) throw std::bad_alloc ();
-
-    return reinterpret_cast<void*> (1);
-}
-
-void operator delete (void* /*ptr*/, device& obj)
-{
-    if (!obj.valid ())
-    {
-        std::cerr << "compute device NOT valid!";
-        return;
-    }
-}
 
 // =========================================================
 
-namespace cppual { namespace compute {
+void* operator new (std::size_t size, cppual::memory::memory_resource& res)
+{
+    if (res.device ().valid () == false       ) throw cppual::compute::bad_device    ();
+    if (res.device ().max_alloc_size () < size) throw cppual::compute::out_of_memory ();
 
-// void fn ()
-// {
-//     device_memory mem (device::host (), 512);
+    return res.allocate (size, alignof (std::max_align_t));
+}
 
-//     auto value = new (mem) int (5);
-//     ::operator delete (value, sizeof (int), mem);
-// }
+void* operator new [] (std::size_t size, cppual::memory::memory_resource& res)
+{
+    return ::operator new (size, res);
+}
 
-} } // namespace Compute
+// =========================================================

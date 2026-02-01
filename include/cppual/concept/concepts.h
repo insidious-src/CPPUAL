@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <iterator>
 #include <concepts>
+#include <variant>
 #include <tuple>
 
 // ====================================================
@@ -51,16 +52,15 @@ namespace cppual {
 // ====================================================
 
 //! void concepts
-template <typename T>
-concept void_t = std::is_void_v<T>;
-
-template <typename T>
-concept non_void = !std::is_void_v<T>;
+template <typename T> concept     void_t =  std::is_void_v<T>;
+template <typename T> concept non_void   = !std::is_void_v<T>;
 
 // ====================================================
 
 namespace memory {
 
+//! redefined polymorphic memory resource
+//! derived from std::pmr::memory_resource
 class memory_resource;
 
 //! redefined polymorphic memory allocator
@@ -87,7 +87,7 @@ consteval decltype (SZ) lambda_calc_size () noexcept
 }
 
 
-inline constexpr static const std::size_t def_capture_size_v = lambda_calc_size ();
+inline constexpr static const auto def_capture_size_v = lambda_calc_size ();
 
 template <decltype (def_capture_size_v) SZ = def_capture_size_v>
 inline constexpr static decltype (SZ) const max_capture_size_v = lambda_calc_size<SZ> ();
@@ -97,13 +97,10 @@ inline constexpr static decltype (SZ) const max_capture_size_v = lambda_calc_siz
 template <typename T1, typename T2>
 concept are_same = std::is_same_v<T1, T2>;
 
-template <typename T1, typename T2>
-concept are_not_same = !std::is_same_v<T1, T2>;
-
 // ====================================================
 
 //! is bool type
-template <non_void> struct is_bool : std::false_type { };
+template <typename> struct is_bool : std::false_type { };
 template <> struct is_bool<bool>   : std::true_type  { };
 
 //! is bool value
@@ -113,113 +110,113 @@ inline constexpr static cbool is_bool_v = is_bool<T>::value;
 // ===================================================
 
 //! is byte (unsigned char)
-template <non_void> struct is_byte : public std::false_type { };
+template <typename> struct is_byte : public std::false_type { };
 template <> struct is_byte<uchar > : public std::true_type  { };
 template <> struct is_byte<cuchar> : public std::true_type  { };
 
 //! is byte value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_byte_v = is_byte<T>::value;
 
 // ===================================================
 
 //! is char type (char, uchar, char8, char16, char32, wchar)
-template <non_void> struct is_char : public std::false_type { };
-template <> struct is_char<char>   : public std::true_type  { };
-template <> struct is_char<char8>  : public std::true_type  { };
+template <typename> struct is_char : public std::false_type { };
+template <> struct is_char<char  > : public std::true_type  { };
+template <> struct is_char<char8 > : public std::true_type  { };
 template <> struct is_char<char16> : public std::true_type  { };
 template <> struct is_char<char32> : public std::true_type  { };
-template <> struct is_char<wchar>  : public std::true_type  { };
+template <> struct is_char<wchar > : public std::true_type  { };
 
 //! is char value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_char_v = is_char<T>::value;
 
 // ===================================================
 
 //! is char type (char, uchar)
-template <non_void> struct is_stream_char : public std::false_type { };
+template <typename> struct is_stream_char : public std::false_type { };
 template <> struct is_stream_char<char>   : public std::true_type  { };
 template <> struct is_stream_char<uchar>  : public std::true_type  { };
 
 //! is char value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_stream_char_v = is_stream_char<T>::value;
 
 // ====================================================
 
-template <non_void T> struct is_symbolic_char
+template <typename T> struct is_symbolic_char
 { inline constexpr static cbool value = is_char_v<T> || is_stream_char_v<T>; };
 
 //! is symbol char value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_symbolic_char_v = is_symbolic_char<T>::value;
 
 // ====================================================
 
 //! is unsigned integer type
-template <non_void> struct is_signed_integer : std::false_type { };
+template <typename> struct is_signed_integer : std::false_type { };
 template <> struct is_signed_integer<short>  : std::true_type  { };
 template <> struct is_signed_integer<int>    : std::true_type  { };
 template <> struct is_signed_integer<long>   : std::true_type  { };
 template <> struct is_signed_integer<long64> : std::true_type  { };
 
 //! is unsigned integer value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_signed_integer_v = is_signed_integer<T>::value;
 
 // ====================================================
 
 //! is unsigned integer type
-template <non_void> struct is_unsigned_integer  : std::false_type { };
+template <typename> struct is_unsigned_integer  : std::false_type { };
 template <> struct is_unsigned_integer<ushort>  : std::true_type  { };
 template <> struct is_unsigned_integer<uint>    : std::true_type  { };
 template <> struct is_unsigned_integer<ulong>   : std::true_type  { };
 template <> struct is_unsigned_integer<ulong64> : std::true_type  { };
 
 //! is unsigned integer value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_unsigned_integer_v = is_unsigned_integer<T>::value;
 
 // ====================================================
 
 //! is unsigned integer value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_integer_v = is_signed_integer_v<T> || is_unsigned_integer_v<T>;
 
 // ====================================================
 
 //! is unsigned type
-template <non_void T> struct is_unsigned_type : is_unsigned_integer<T> { };
+template <typename T> struct is_unsigned_type : is_unsigned_integer<T> { };
 template <> struct is_unsigned_type<uchar>    : std::true_type         { };
 
 //! is unsigned value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_unsigned_v = is_unsigned_type<T>::value;
 
 // ====================================================
 
 //! is unsigned type
-template <non_void T> struct is_signed_type : is_signed_integer<T> { };
+template <typename T> struct is_signed_type : is_signed_integer<T> { };
 template <> struct is_signed_type<char>     : std::true_type       { };
 
 //! is unsigned value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_signed_v = is_unsigned_type<T>::value;
 
 // ====================================================
 
 //! is float type
-template <non_void> struct is_floating_point  : std::false_type { };
+template <typename> struct is_floating_point  : std::false_type { };
 template <> struct is_floating_point<float>   : std::true_type  { };
 template <> struct is_floating_point<double>  : std::true_type  { };
 template <> struct is_floating_point<ldouble> : std::true_type  { };
 
 //! is float value
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_float_v = is_floating_point<T>::value;
 
-template <non_void T>
+template <typename T>
 inline constexpr static cbool is_pod_v = std::is_trivial_v<T> && std::is_standard_layout_v<T>;
 
 // ====================================================
@@ -249,45 +246,259 @@ template <typename T>
 inline constexpr static cbool is_crefptr_v = std::is_const_v<T> && is_refptr_v<T>;
 
 template <typename T>
-inline constexpr static cbool is_cvrefptr_v = is_crefptr_v<T> && std::is_volatile_v <T>;
+inline constexpr static cbool is_cvrefptr_v = is_crefptr_v<T> && std::is_volatile_v<T>;
+
+// ====================================================
+
+template <typename> struct is_const_function : std::false_type
+{
+};
+
+template <typename R, typename... Args>
+struct is_const_function<R (Args...) const> : std::true_type { };
+
+template <typename R, typename... Args>
+struct is_const_function<R (Args...) const volatile> : std::true_type { };
+
+template <typename> struct is_non_const_function : std::false_type { };
+
+template <typename R, typename... Args>
+struct is_non_const_function<R (Args...)> : std::true_type { };
+
+template <typename R, typename... Args>
+struct is_non_const_function<R (Args...) volatile> : std::true_type { };
+
+template <typename T>
+inline constexpr static cbool is_const_fn_sig_v = is_const_function<T>::value;
+
+template <typename T>
+inline constexpr static cbool is_non_const_fn_sig_v = is_non_const_function<T>::value;
+
+template <typename T>
+inline constexpr static cbool is_fn_sig_v = is_non_const_function<T>::value ||
+                                            is_const_function<T>::value;
+
+// ====================================================
+
+template <typename> struct member_function_to_static
+{ };
+
+template <typename C, typename R, typename... Args>
+struct member_function_to_static<R(C::*)(Args...) const volatile>
+{ using type = R(*)(Args...); };
+
+template <typename C, typename R, typename... Args>
+struct member_function_to_static<R(C::*)(Args...) const>
+{ using type = R(*)(Args...); };
+
+template <typename C, typename R, typename... Args>
+struct member_function_to_static<R(C::*)(Args...) volatile>
+{ using type = R(*)(Args...); };
+
+template <typename C, typename R, typename... Args>
+struct member_function_to_static<R(C::*)(Args...)>
+{ using type = R(*)(Args...); };
+
+template <non_void F>
+using member_function_to_static_t = member_function_to_static<F>::type;
+
+template <auto MEM_FN>
+inline constexpr static cbool member_function_to_static_v =
+static_cast<member_function_to_static_t<decltype (MEM_FN)>> (MEM_FN);
+
+// ====================================================
+
+//! basic type concepts
+template <typename T>
+concept constant = std::is_const_v<T>;
+
+template <typename T>
+concept variable = !std::is_const_v<T>;
+
+template <typename T>
+concept fundamental = std::is_fundamental_v<T>;
+
+template <typename T>
+concept unsigned_t = is_unsigned_v<T>;
+
+template <typename T>
+concept unsigned_integer = is_unsigned_integer_v<T>;
+
+template <typename T>
+concept signed_integer = is_signed_integer_v<T>;
+
+template <typename T>
+concept integer = is_integer_v<T>;
+
+template <typename T>
+concept floating_point = is_float_v<T>;
+
+template <typename T>
+concept number = is_integer_v<T> || is_float_v<T>;
+
+template <typename T>
+concept char_t = is_char_v<T>;
+
+template <typename T>
+concept stream_char = is_stream_char_v<T>;
+
+template <typename T>
+concept symbolic_char = is_symbolic_char_v<T>;
+
+template <typename T>
+concept ptr = std::is_pointer_v<T>;
+
+template <typename T>
+concept integer_or_ptr = is_integer_v<T> || std::is_pointer_v<T>;
+
+template <typename T>
+concept class_or_ptr = std::is_pointer_v<T> || std::is_class_v<T>;
+
+template <typename T>
+concept switch_value = is_integer_v<T> || std::is_enum_v<T> || is_char_v<T> || is_stream_char_v<T>;
+
+template <typename T>
+concept c_str = std::is_same_v<T, char*>;
+
+template <typename T>
+concept c_const_str = std::is_same_v<T, cchar*>;
+
+template <typename T>
+concept c_str8 = std::is_same_v<T, char8*>;
+
+template <typename T>
+concept c_const_str8 = std::is_same_v<T, cchar8*>;
+
+template <typename T>
+concept c_str16 = std::is_same_v<T, char16*>;
+
+template <typename T>
+concept c_const_str16 = std::is_same_v<T, cchar16*>;
+
+template <typename T>
+concept c_str32 = std::is_same_v<T, char32*>;
+
+template <typename T>
+concept c_const_str32 = std::is_same_v<T, cchar32*>;
+
+template <typename T>
+concept c_wstr = std::is_same_v<T, wchar*>;
+
+template <typename T>
+concept c_const_wstr = std::is_same_v<T, cwchar*>;
+
+template <typename T>
+concept c_tstr = c_str  <T>  ||
+                 c_str8 <T>  ||
+                 c_str16<T>  ||
+                 c_str32<T>  ||
+                 c_wstr <T>;
+
+template <typename T>
+concept c_const_tstr = c_const_str  <T> ||
+                       c_const_str8 <T> ||
+                       c_const_str16<T> ||
+                       c_const_str32<T> ||
+                       c_const_wstr <T>;
+
+// ====================================================
+
+template <typename T>
+concept compact = !std::is_class_v<T> && sizeof (T) <= sizeof (uptr);
+
+//! type category concepts
+template <typename T>
+concept arithmetic = std::is_arithmetic_v<T>;
+
+template <typename T>
+concept scalar = std::is_scalar_v<T>;
+
+template <typename T>
+concept compound = std::is_compound_v<T>;
+
+template <typename T>
+concept reference_t = std::is_reference_v<T>;
+
+template <typename T>
+concept lvalue_reference = std::is_lvalue_reference_v<T>;
+
+template <typename T>
+concept rvalue_reference = std::is_rvalue_reference_v<T>;
+
+template <typename T>
+concept enumeration = std::is_enum_v<T>;
+
+template <typename T>
+concept array_like = std::is_array_v<T>;
+
+template <typename T>
+concept union_like = std::is_union_v<T>;
+
+template <typename T>
+concept object = std::is_object_v<T>;
+
+template <typename T>
+concept structure = std::is_class_v<T>;
+
+template <typename T>
+concept class_or_void = structure<T> || void_t<T>;
+
+template <typename T>
+concept class_or_union = structure<T> || union_like<T>;
+
+template <typename T>
+concept void_or_class = void_t<T> || std::is_class_v<T>;
+
+template <typename T>
+concept abstract = std::is_abstract_v<T>;
+
+//! type property concepts
+template <typename T>
+concept volatile_type = std::is_volatile_v<T>;
+
+template <typename T>
+concept standard_layout = std::is_standard_layout_v<T>;
+
+template <typename T>
+concept trivial = std::is_trivial_v<T>;
+
+template <typename T>
+concept pod = trivial<T> && standard_layout<T>;
+
+// ====================================================
+
+template <typename>
+struct is_static_function : std::false_type { };
+
+template <typename R, typename... Args>
+struct is_static_function<R (*) (Args...)> : std::true_type { };
+
+template <typename T>
+inline constexpr static cbool is_static_function_v = is_static_function<T>::value;
+
+// ====================================================
+
+template <typename> struct is_static_function_ref : std::false_type { };
+
+template <typename R, typename... Args>
+struct is_static_function_ref<R (&) (Args...)> : std::true_type { };
+
+template <typename T>
+inline constexpr static cbool is_static_function_ref_v = is_static_function_ref<T>::value;
+
+// ====================================================
+
+template <typename> struct is_member_function : std::false_type { };
+
+template <structure C, typename R, typename... Args>
+struct is_member_function<R (C::*) (Args...)> : std::true_type { };
+
+template <typename T>
+inline constexpr static cbool is_member_function_v = is_member_function<T>::value;
 
 //! ====================================================
 //! Delegate Concept
 //! ====================================================
-
-template <non_void>
-struct is_const_function : std::false_type
-{ };
-
-template <typename R, typename... Args>
-struct is_const_function <R(Args...) const> : std::true_type
-{ };
-
-template <typename R, typename... Args>
-struct is_const_function <R(Args...) const volatile> : std::true_type
-{ };
-
-template <non_void>
-struct is_non_const_function : std::false_type
-{ };
-
-template <typename R, typename... Args>
-struct is_non_const_function <R(Args...)> : std::true_type
-{ };
-
-template <typename R, typename... Args>
-struct is_non_const_function <R(Args...) volatile> : std::true_type
-{ };
-
-template <non_void T>
-inline constexpr static cbool is_const_fn_sig_v = is_const_function<T>::value;
-
-template <non_void T>
-inline constexpr static cbool is_non_const_fn_sig_v = is_non_const_function<T>::value;
-
-template <non_void T>
-inline constexpr static cbool is_fn_sig_v = is_non_const_function<T>::value ||
-                                            is_const_function    <T>::value;
 
 template <typename T>
 concept non_const_fn_sig = is_non_const_fn_sig_v<T>;
@@ -297,6 +508,24 @@ concept const_fn_sig = is_const_fn_sig_v<T>;
 
 template <typename T>
 concept fn_sig = is_const_fn_sig_v<T> || is_non_const_fn_sig_v<T>;
+
+template <typename T>
+concept static_function = is_static_function_v<T>;
+
+template <typename T>
+concept static_function_ref = is_static_function_ref_v<T>;
+
+template <typename T>
+concept member_function = is_member_function_v<T>;
+
+template <typename T>
+concept function_like = static_function<T> || member_function<T>;
+
+template <typename T>
+concept non_function = !static_function<T> &&
+                       !member_function<T> &&
+                       !fn_sig         <T> &&
+                       !std::is_function_v<T>;
 
 // ====================================================
 
@@ -326,7 +555,7 @@ struct is_copyable
 {
     typedef T type;
     inline constexpr static cbool value = std::is_copy_constructible_v<T> &&
-                                          std::is_copy_assignable_v<T>;
+                                          std::is_copy_assignable_v   <T>;
 
     static_assert (value, "T is NOT copyable!");
 };
@@ -344,7 +573,7 @@ struct is_movable
 {
     typedef T type;
     inline constexpr static cbool value = std::is_move_constructible_v<T> &&
-                                          std::is_move_assignable_v<T>;
+                                          std::is_move_assignable_v   <T>;
 
     static_assert (value, "T is NOT movable!");
 };
@@ -455,8 +684,8 @@ using compact_forwarded_t = compact_forwarded<T>::type;
 
 template <non_void T>
 inline constexpr static cbool is_compact_forwarded_v = !std::is_class_v<T> &&
-                                                !std::is_union_v<T> &&
-                                                sizeof (T) <= sizeof (uptr);
+                                                       !std::is_union_v<T> &&
+                                                        sizeof (T) <= sizeof (uptr);
 
 // =========================================================
 
@@ -505,272 +734,57 @@ using add_fn_cv_t = typename add_fn_cv<S>::type;
 
 // ====================================================
 
-template <non_void>
-struct is_static_function : std::false_type { };
+template <structure C>
+using callable_operator_t =
+    std::enable_if_t<is_member_function_v<decltype (&std::decay_t<C>::operator ())>,
+                     decltype (&std::decay_t<C>::operator ())>;
 
-template <typename R, typename... Args>
-struct is_static_function <R(*)(Args...)> : std::true_type { };
+template <structure C>
+inline constexpr static cbool has_callable_operator_v = is_member_function_v<callable_operator_t<C>>;
 
-template <non_void T>
-inline constexpr static cbool is_static_function_v = is_static_function<T>::value;
-
-// ====================================================
-
-template <non_void>
-struct is_static_function_ref : std::false_type { };
-
-template <typename R, typename... Args>
-struct is_static_function_ref <R(&)(Args...)> : std::true_type { };
-
-template <non_void T>
-inline constexpr static cbool is_static_function_ref_v = is_static_function_ref<T>::value;
-
-// ====================================================
-
-template <non_void>
-struct member_function_to_static
-{ };
-
-template <typename C, typename R, typename... Args>
-struct member_function_to_static <R(C::*)(Args...) const volatile>
-{ using type = R(*)(Args...); };
-
-template <typename C, typename R, typename... Args>
-struct member_function_to_static <R(C::*)(Args...) const>
-{ using type = R(*)(Args...); };
-
-template <typename C, typename R, typename... Args>
-struct member_function_to_static <R(C::*)(Args...) volatile>
-{ using type = R(*)(Args...); };
-
-template <typename C, typename R, typename... Args>
-struct member_function_to_static <R(C::*)(Args...)>
-{ using type = R(*)(Args...); };
-
-template <non_void F>
-using member_function_to_static_t = member_function_to_static<F>::type;
-
-template <auto MEM_FN>
-inline constexpr static cbool member_function_to_static_v =
-static_cast<member_function_to_static<decltype (MEM_FN)>::type> (MEM_FN);
-
-// ====================================================
-
-//! basic type concepts
-template <typename T>
-concept constant = std::is_const_v<T>;
-
-template <typename T>
-concept variable = !std::is_const_v<T>;
-
-template <typename T>
-concept fundamental = std::is_fundamental_v<T>;
-
-template <typename T>
-concept unsigned_t = is_unsigned_v<T>;
-
-template <typename T>
-concept unsigned_integer = is_unsigned_integer_v<T>;
-
-template <typename T>
-concept signed_integer = is_signed_integer_v<T>;
-
-template <typename T>
-concept integer = is_integer_v<T>;
-
-template <typename T>
-concept floating_point = is_float_v<T>;
-
-template <typename T>
-concept number = is_integer_v<T> || is_float_v<T>;
-
-template <typename T>
-concept char_t = is_char_v<T>;
-
-template <typename T>
-concept stream_char = is_stream_char_v<T>;
-
-template <typename T>
-concept symbolic_char = is_symbolic_char_v<T>;
-
-template <typename T>
-concept ptr = std::is_pointer_v<T>;
-
-template <typename T>
-concept integer_or_ptr = is_integer_v<T> || std::is_pointer_v<T>;
-
-template <typename T>
-concept class_or_ptr = std::is_pointer_v<T> || std::is_class_v<T>;
-
-template <typename T>
-concept switch_value = is_integer_v<T> || std::is_enum_v<T> || is_char_v<T> || is_stream_char_v<T>;
-
-template <typename T>
-concept c_str = std::is_same_v<T, char*>;
-
-template <typename T>
-concept c_const_str = std::is_same_v<T, cchar*>;
-
-template <typename T>
-concept c_str8 = std::is_same_v<T, char8*>;
-
-template <typename T>
-concept c_const_str8 = std::is_same_v<T, cchar8*>;
-
-template <typename T>
-concept c_str16 = std::is_same_v<T, char16*>;
-
-template <typename T>
-concept c_const_str16 = std::is_same_v<T, cchar16*>;
-
-template <typename T>
-concept c_str32 = std::is_same_v<T, char32*>;
-
-template <typename T>
-concept c_const_str32 = std::is_same_v<T, cchar32*>;
-
-template <typename T>
-concept c_wstr = std::is_same_v<T, wchar*>;
-
-template <typename T>
-concept c_const_wstr = std::is_same_v<T, cwchar*>;
-
-template <typename T>
-concept c_tstr = c_str  <T>  ||
-                 c_str8 <T>  ||
-                 c_str16<T>  ||
-                 c_str32<T>  ||
-                 c_wstr <T>;
-
-template <typename T>
-concept c_const_tstr = c_const_str  <T> ||
-                       c_const_str8 <T> ||
-                       c_const_str16<T> ||
-                       c_const_str32<T> ||
-                       c_const_wstr <T>;
-
-template <typename T>
-concept compact = !std::is_class_v<T> && sizeof (T) <= sizeof (uptr);
-
-template <typename T>
-concept static_function = is_static_function_v<T>;
-
-template <typename T>
-concept static_function_ref = is_static_function_ref_v<T>;
-
-template <typename T>
-concept member_function = std::is_member_function_pointer_v<T>;
-
-template <typename T>
-concept function_like = static_function<T> || member_function<T>;
-
-template <typename T>
-concept non_function = !static_function<T> &&
-                       !member_function<T> &&
-                       !fn_sig         <T> &&
-                       !std::is_function_v<T>;
-
-// ====================================================
-
-//! type property concepts
-template <typename T>
-concept volatile_type = std::is_volatile_v<T>;
-
-template <typename T>
-concept standard_layout = std::is_standard_layout_v<T>;
-
-template <typename T>
-concept trivial = std::is_trivial_v<T>;
-
-template <typename T>
-concept pod = trivial<T> && standard_layout<T>;
-
-// ====================================================
-
-template <typename T>
-concept callable_class = std::is_class_v<T> && requires (T&) { &std::decay_t<T>::operator (); };
-
-//! lambda concepts
-template <typename T>
-concept lambda_non_capture = callable_class<T> && std::is_constructible_v<
-        member_function_to_static_t<decltype (&std::decay_t<T>::operator())>, T>;
-
-template <typename T>
-concept lambda_capture = callable_class<T> && !std::is_constructible_v<
-        member_function_to_static_t<decltype (&std::decay_t<T>::operator())>, T>;
-
-template <typename T>
-concept lambda = lambda_non_capture<T> || lambda_capture<T>;
-
-template <typename T>
-concept callable_non_capture_object = (std::is_class_v<T> && callable_class<T>) ||
-                                       lambda_non_capture<T>;
-
-template <typename T>
-concept callable = lambda_non_capture<T> ||
-                   lambda_capture    <T> ||
-                   member_function   <T> ||
-                   static_function   <T> ||
-                   callable_class    <T> ;
-
-// ====================================================
+template <typename C>
+concept callable_class = structure<C> && has_callable_operator_v<C>;
 
 template <callable_class C>
-inline constexpr auto callable_operator_v = &std::decay_t<C>::operator ();
+inline constexpr decltype (&std::decay_t<C>::operator ()) callable_operator_v
+    = &std::decay_t<C>::operator ();
 
-template <callable_class C, typename... Args>
-using callable_return = std::invoke_result_t<decltype (callable_operator_v<C>), Args...>;
+//! lambda concepts
+template <typename C>
+concept lambda_non_capture
+    = callable_class<C>
+      && std::is_constructible_v<member_function_to_static_t<callable_operator_t<C>>, C>;
+
+template <typename C>
+concept lambda_capture
+    = callable_class<C>
+      && !std::is_constructible_v<member_function_to_static_t<callable_operator_t<C>>, C>;
+
+template <typename C>
+concept lambda = lambda_non_capture<C> || lambda_capture<C>;
+
+template <typename C>
+concept callable_non_capture_object = (std::is_class_v<C> && callable_class<C>) ||
+                                       lambda_non_capture<C>;
+
+template <typename C>
+concept callable =
+lambda_non_capture<C> ||
+lambda_capture    <C> ||
+member_function   <C> ||
+static_function   <C> ||
+callable_class    <C>;
+
+/// delegate concept
+template <typename C>
+concept void_callable = requires (C& t) { { t () } -> are_same<void>; };
 
 // ====================================================
 
-//! type category concepts
-template <typename T>
-concept arithmetic = std::is_arithmetic_v<T>;
+template <callable_class C, typename... Args>
+using callable_return_t = std::invoke_result_t<callable_operator_t<C>, Args...>;
 
-template <typename T>
-concept scalar = std::is_scalar_v<T>;
-
-template <typename T>
-concept compound = std::is_compound_v<T>;
-
-template <typename T>
-concept reference_t = std::is_reference_v<T>;
-
-template <typename T>
-concept lvalue_reference = std::is_lvalue_reference_v<T>;
-
-template <typename T>
-concept rvalue_reference = std::is_rvalue_reference_v<T>;
-
-template <typename T>
-concept enumeration = std::is_enum_v<T>;
-
-template <typename T>
-concept array_like = std::is_array_v<T>;
-
-template <typename T>
-concept union_like = std::is_union_v<T>;
-
-template <typename T>
-concept object = std::is_object_v<T>;
-
-template <typename T>
-concept structure = std::is_class_v<T>;
-
-template <typename T>
-concept class_t = structure<T>;
-
-template <typename T>
-concept class_or_void = structure<T> || void_t<T>;
-
-template <typename T>
-concept class_or_union = structure<T> || union_like<T>;
-
-template <typename T>
-concept void_or_class = void_t<T> || std::is_class_v<T>;
-
-template <typename T>
-concept abstract = std::is_abstract_v<T>;
+// ====================================================
 
 //! pointer concepts
 template <typename T>
@@ -825,10 +839,6 @@ using is_functional_t = is_functional<T>::type;
 /// is functional -> value
 template <structure T>
 inline constexpr static cbool is_functional_v = is_functional<T>::value;
-
-/// delegate concept
-template <typename T>
-concept void_callable = requires (T& t) { { t () } -> are_same<void>; };
 
 template <typename T>
 concept functional = is_functional_v<T>;
@@ -1176,8 +1186,8 @@ struct is_allocator_helper : public std::false_type
 { typedef A type; };
 
 template <non_void T>
-struct is_allocator_helper <allocator<T>> : public std::true_type
-{ typedef allocator<T> type; };
+struct is_allocator_helper <memory::allocator<T>> : public std::true_type
+{ typedef memory::allocator<T> type; };
 
 template <non_void T>
 struct is_allocator_helper <std::allocator<T>> : public std::true_type

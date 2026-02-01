@@ -19,60 +19,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_COMPUTE_MEMORY_H_
-#define CPPUAL_COMPUTE_MEMORY_H_
+#ifndef CPPUAL_COMPUTE_DEVMEMORY_H_
+#define CPPUAL_COMPUTE_DEVMEMORY_H_
 #ifdef __cplusplus
 
-#include <cppual/noncopyable.h>
-
-//#include <new>
+#include <cppual/memory_resource>
 
 // =========================================================
 
-namespace cppual::compute {
-
-// =========================================================
-
-class device;
-
-// =========================================================
-
-class device_memory : public non_copyable
-{
-public:
-    typedef device      device_type     ;
-    typedef device*     device_pointer  ;
-    typedef device&     device_reference;
-    typedef std::size_t size_type       ;
-
-    device_memory (device_reference dev, size_type size);
-
-    constexpr device_reference device () const noexcept
-    { return *_M_pDevice; }
-
-private:
-    device_pointer _M_pDevice;
-};
-
-} // namespace Compute
-
-// =========================================================
-
-using cppual::compute::device       ;
-using cppual::compute::device_memory;
-
-// =========================================================
-
-void* operator new    (std::size_t size, device& obj);
-void  operator delete (void* ptr, device& obj);
-
-constexpr void* operator new[] (std::size_t size, device& obj)
-{ return ::operator new (size, obj); }
-
-constexpr void  operator delete[] (void* ptr, device& obj)
-{ ::operator delete (ptr, obj); }
+void* operator new    (std::size_t size, cppual::memory::memory_resource& res);
+void* operator new [] (std::size_t size, cppual::memory::memory_resource& res);
 
 // =========================================================
 
 #endif // __cplusplus
-#endif // CPPUAL_COMPUTE_MEMORY_H_
+#endif // CPPUAL_COMPUTE_DEVMEMORY_H_

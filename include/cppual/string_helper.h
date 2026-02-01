@@ -419,11 +419,11 @@ constexpr auto number_to_string (T val)
     typedef cow_string<Char, E, A> string_type;
     typedef std::size_t size_type;
 
-    static_assert (memory::is_allocator_v<A>, "A must be a valid allocator type!");
+    static_assert (is_allocator_v<A>, "A must be a valid allocator type!");
 
     string_type str_val (sizeof (T), ' ');
 
-    dyn_array_map<size_type, cchar*> formats_map
+    dyn_index_map<size_type, cchar*> formats_map
     {
         std::make_pair (typeid(ushort).hash_code  (), "%hu"),
         std::make_pair (typeid(short).hash_code   (), "%hd"),
@@ -455,7 +455,7 @@ constexpr auto to_string (T val, A const& ator = A ())
     typedef std::basic_string<Char, E, A>        string_type  ;
     typedef std::basic_ostringstream<Char, E, A> ostringstream;
 
-    static_assert (memory::is_allocator_v<A>, "A must be a valid allocator type!");
+    static_assert (is_allocator_v<A>, "A must be a valid allocator type!");
 
     string_type   in_str (ator);
     ostringstream ss   (in_str);

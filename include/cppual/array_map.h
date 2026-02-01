@@ -45,10 +45,10 @@ concept array_map_key = integer<T>;
 // ====================================================
 
 template <array_map_key K, non_void V, allocator_like A = memory::allocator<std::pair<K, V>>>
-class dyn_array_map : public std::vector<std::pair<K, V>, A>
+class dyn_index_map : public std::vector<std::pair<K, V>, A>
 {
 public:
-    typedef dyn_array_map<K, V, A>                self_type             ;
+    typedef dyn_index_map<K, V, A>                self_type             ;
     typedef std::vector<std::pair<K, V>, A>       base_type             ;
     typedef remove_cref_t<K>                      key_type              ;
     typedef key_type const                        const_key             ;
@@ -102,7 +102,7 @@ public:
     using base_type::erase;
     using base_type::assign;
 
-    constexpr dyn_array_map (size_type n = 10, allocator_type const& ator = allocator_type ())
+    constexpr dyn_index_map (size_type n = 10, allocator_type const& ator = allocator_type ())
     : base_type (n, ator)
     { }
 

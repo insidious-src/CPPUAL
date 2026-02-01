@@ -131,7 +131,7 @@ set(CPPUAL_ENDOSKELETON_HEADERS
     "include/cppual/iterators/rope_iterator.h"
     "include/cppual/bitfield.h"
     "include/cppual/fibers/fibers.h"
-    "include/cppual/unbound_matrix.h"
+    "include/cppual/compute/unbound_matrix.h"
     "include/cppual/bitset.h"
     "include/cppual/signal.h"
     "include/cppual/object.h"

@@ -52,19 +52,20 @@ public:
     typedef fstring         string_type  ;
     typedef fstring_view    string_view  ;
 
+    consteval rtti ()                                  noexcept = default;
     constexpr rtti (self_type &&)                      noexcept = default;
     constexpr rtti (self_type const&)                  noexcept = default;
     constexpr self_type& operator = (self_type &&)     noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
     template <typename U = void>
-    consteval rtti (type_ptr_t<U> = type_v<U>) noexcept
-    : _M_type_hash (type_hash_v<U>)
+    consteval rtti (type_ptr_t<U>) noexcept
+    : _M_type_hash (char_hash<type_name<U> ()> ())
     { }
 
     template <typename U>
     constexpr self_type& operator = (type_ptr_t<U>) noexcept
-    { _M_type_hash = type_hash_v<U>; return *this; }
+    { _M_type_hash = char_hash<type_name<U> ()> (); return *this; }
 
     consteval const_pointer name () const noexcept
     { return type_name (_M_type_hash); }
@@ -112,12 +113,12 @@ public:
         else if constexpr (are_same<U, cdouble>) return "const double";
         else if constexpr (are_same<U, ldouble>) return "long double";
         else if constexpr (are_same<U, cldouble>) return "const long double";
-        else if constexpr (array_like<U>) return typename_str_v<remove_array_t<U>> + "[]";
-        else if constexpr (is_ref_v<U>) return typename_str_v<remove_ref_t<U>> + " &";
-        else if constexpr (is_cref_v<U>) return typename_str_v<remove_cref_t<U>> + " const &";
-        else if constexpr (is_refptr_v<U>) return typename_str_v<remove_refptr_t<U>> + " &*";
-        else if constexpr (is_crefptr_v<U>) return typename_str_v<remove_crefptr_t<U>> + " const &*";
-        else if constexpr (std::is_pointer_v<U>) return typename_str_v<remove_ptr_t<U>> + " *";
+        else if constexpr (array_like<U>) return type_name<remove_array_t<U>> () + "[]";
+        else if constexpr (is_ref_v<U>) return type_name<remove_ref_t<U>> () + " &";
+        else if constexpr (is_cref_v<U>) return type_name<remove_cref_t<U>> () + " const &";
+        else if constexpr (is_refptr_v<U>) return type_name<remove_refptr_t<U>> () + " &*";
+        else if constexpr (is_crefptr_v<U>) return type_name<remove_crefptr_t<U>> () + " const &*";
+        else if constexpr (ptr<U>) return type_name<remove_ptr_t<U>> () + " *";
         else if constexpr (member_function<U>) return "member function pointer";
         else if constexpr (static_function<U>) return "function";
         else if constexpr (structure<U>) return "class";
@@ -184,29 +185,6 @@ public:
 
     // =========================================================
 
-    template <typename U>
-    inline constexpr static const_pointer const typename_v = type_name<U> ();
-
-    template <size_type Hash>
-    inline constexpr static const_pointer const typename_hash_v = type_name (Hash);
-
-    template <typename U>
-    inline constexpr static string_view const typename_sv_v = type_name<U> ();
-
-    template <size_type Hash>
-    inline constexpr static string_view const typename_hash_sv_v = type_name (Hash);
-
-    template <typename U>
-    inline constexpr static string_type const typename_str_v = type_name<U> ();
-
-    template <size_type Hash>
-    inline constexpr static string_type const typename_hash_str_v = type_name (Hash);
-
-    template <typename U>
-    inline constexpr static const_size type_hash_v = char_hash (type_name<U> ());
-
-    // =========================================================
-
     template <const_pointer STR = "void">
     using type_t =
     std::conditional_t<char_hash<STR> () == char_hash (type_name<char> ()), char,
@@ -250,8 +228,31 @@ public:
     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 public:
-    size_type _M_type_hash { };
+    size_type _M_type_hash { char_hash (type_name<void> ()) };
 };
+
+// =========================================================
+
+template <typename U>
+inline constexpr static rtti::const_pointer const typename_v = rtti::type_name<U> ();
+
+template <rtti::size_type Hash>
+inline constexpr static rtti::const_pointer const typename_hash_v = rtti::type_name (Hash);
+
+template <typename U>
+inline constexpr static rtti::string_view const typename_sv_v = rtti::type_name<U> ();
+
+template <rtti::size_type Hash>
+inline constexpr static rtti::string_view const typename_hash_sv_v = rtti::type_name (Hash);
+
+template <typename U>
+inline constexpr static rtti::string_type const typename_str_v = rtti::type_name<U> ();
+
+template <rtti::size_type Hash>
+inline constexpr static rtti::string_type const typename_hash_str_v = rtti::type_name (Hash);
+
+template <typename U>
+inline constexpr static rtti::const_size type_hash_v = char_hash<rtti::type_name<U> ()> ();
 
 // =========================================================
 
@@ -268,26 +269,26 @@ consteval bool operator != (rtti const& lh, rtti const& rh) noexcept
 
 // ====================================================
 
-template <std::size_t N = def_args_v>
+template <std::size_t N = def_arity_v>
 class function_rtti
 {
 public:
-    typedef function_rtti<N>                       self_type      ;
-    typedef decltype (N)                           size_type      ;
-    typedef size_type const                        const_size     ;
-    typedef function<void()>                       fn_type        ;
-    typedef fn_type &                              fn_ref         ;
-    typedef fn_type const&                         fn_const_ref   ;
-    typedef abi::rtti                              rtti_type      ;
-    typedef static_array<rtti_type, max_args_v<N>> array_type     ;
-    typedef array_type &                           array_ref      ;
-    typedef array_type const&                      array_const_ref;
+    typedef function_rtti<N>                    self_type      ;
+    typedef decltype (N)                        size_type      ;
+    typedef size_type const                     const_size     ;
+    typedef function<void()>                    fn_type        ;
+    typedef fn_type &                           fn_ref         ;
+    typedef fn_type const&                      fn_const_ref   ;
+    typedef abi::rtti                           rtti_type      ;
+    typedef static_array<rtti_type, arity_v<N>> array_type     ;
+    typedef array_type &                        array_ref      ;
+    typedef array_type const&                   array_const_ref;
 
     template <fn_sig S, size_type SZ = def_capture_size_v>
     using fn_t = function<S, max_capture_size_v<SZ>>;
 
     template <size_type SZ>
-    using self_type_t = function_rtti<max_args_v<SZ>>;
+    using self_type_t = function_rtti<arity_v<SZ>>;
 
     consteval static size_type arity () noexcept
     { return N; }
@@ -298,21 +299,21 @@ public:
     , _M_ret_type  ()
     { }
 
-    template <size_type SZ = N, std::enable_if_t<max_args_v<N> >= max_args_v<SZ>, void>>
+    template <size_type SZ = N, std::enable_if_t<arity_v<N> >= arity_v<SZ>, void>>
     constexpr function_rtti (self_type_t<SZ>&& rh) noexcept
     : _M_fn        (std::move (rh._M_fn       ))
     , _M_arg_types (std::move (rh._M_arg_types))
     , _M_ret_type  (std::move (rh._M_ret_type ))
     { }
 
-    template <size_type SZ = N, std::enable_if_t<max_args_v<N> >= max_args_v<SZ>, void>>
+    template <size_type SZ = N, std::enable_if_t<arity_v<N> >= arity_v<SZ>, void>>
     constexpr function_rtti (self_type_t<SZ> const& rh) noexcept
     : _M_fn        (rh._M_fn       )
     , _M_arg_types (rh._M_arg_types)
     , _M_ret_type  (rh._M_ret_type )
     { }
 
-    template <size_type SZ = N, std::enable_if_t<max_args_v<N> >= max_args_v<SZ>, void>>
+    template <size_type SZ = N, std::enable_if_t<arity_v<N> >= arity_v<SZ>, void>>
     constexpr self_type& operator = (self_type_t<SZ>&& rh) noexcept
     {
         if (this == &rh) return *this; //! self-assignment check
@@ -324,7 +325,7 @@ public:
         return *this;
     }
 
-    template <size_type SZ = N, std::enable_if_t<max_args_v<N> >= max_args_v<SZ>, void>>
+    template <size_type SZ = N, std::enable_if_t<arity_v<N> >= arity_v<SZ>, void>>
     constexpr self_type& operator = (self_type_t<SZ> const& rh) noexcept
     {
         if (this == &rh) return *this; //! self-assignment check
@@ -350,7 +351,7 @@ public:
     template <size_type I>
     consteval rtti_type arg_type () const noexcept
     {
-        static_assert (I < max_args_v<N>, "function_rtti::arg_type: index out of range!");
+        static_assert (I < arity_v<N>, "index out of range!");
         return _M_arg_types[I];
     }
 
@@ -420,23 +421,23 @@ using arg_type_t = abi::type_convertable_t<From, Array[I]>;
 
 template <std::size_t SZ = def_capture_size_v, typename R, typename... Args>
 constexpr
-abi::function_rtti<max_args_v<sizeof... (Args)>>
+abi::function_rtti<arity_v<sizeof... (Args)>>
 make_fn_rtti (function<R(Args...), max_capture_size_v<SZ>> const& fn) noexcept
 {
-   return abi::function_rtti<max_args_v<sizeof... (Args)>> (fn);
+   return abi::function_rtti<arity_v<sizeof... (Args)>> (fn);
 }
 
 template <typename R, typename... Args>
 constexpr
-abi::function_rtti<max_args_v<sizeof... (Args)>>
+abi::function_rtti<arity_v<sizeof... (Args)>>
 make_fn_rtti (function<R(Args...) const> const& fn) noexcept
 {
-   return abi::function_rtti<max_args_v<sizeof... (Args)>> (fn);
+   return abi::function_rtti<arity_v<sizeof... (Args)>> (fn);
 }
 
 // =========================================================
 
-} // namespace cppual
+} //! namespace cppual
 
 // =========================================================
 

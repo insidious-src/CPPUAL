@@ -66,20 +66,18 @@ public:
 
     constexpr object () noexcept = default;
 
-    consteval static resource_type type () noexcept { return R; }
-
     constexpr operator handle_type::value_type () const noexcept
     { return handle<handle_type::value_type> (); }
 
 protected:
     constexpr object (handle_type handle) noexcept
-    : base_type (handle)
+    : base_type (handle, R)
     { }
 };
 
 // =========================================================
 
-} // compute
+} //! compute
 
 // =========================================================
 

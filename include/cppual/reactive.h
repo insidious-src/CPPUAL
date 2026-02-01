@@ -88,10 +88,10 @@ public:
     static_assert (std::equality_comparable<value_type>, "value_type is NOT equality comparable!");
     static_assert (is_copyable_movable_v<value_type>, "value_type is NOT neighter copyable nor movable!");
 
-    template <class_t C>
+    template <structure C>
     using mem_fn_type = fn_ptr_t<C, void(arg_type)>;
 
-    template <class_t C>
+    template <structure C>
     using const_mem_fn_type = fn_ptr_t<C, void(arg_type) const>;
 
     constexpr reactive () noexcept   = default;
@@ -283,7 +283,7 @@ public:
     template <callable C, typename = std::enable_if_t<!is_functional_v<C>>>
     constexpr self_type& operator << (C& obj) const
     {
-        static_assert (std::is_same_v<void, callable_return<C, arg_type>>,
+        static_assert (std::is_same_v<void, callable_return_t<C, arg_type>>,
                        "C::operator () return type is NOT void!");
 
         self_type* reactive_signal = this;

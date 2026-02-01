@@ -107,7 +107,7 @@ constexpr Out& class_cast (In& obj) noexcept
 template <structure Out, structure In>
 constexpr Out* class_ptr_cast (In* obj) noexcept
 {
-    return static_cast<Out*> (static_cast<void*> (obj));
+    return direct_cast<Out*> (obj);
 }
 
 // =========================================================

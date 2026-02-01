@@ -289,29 +289,31 @@ class SHARED_API transform
 public:
     typedef transform self_type;
 
-    constexpr transform (rect const& gRect, float z, shared_surface const& surface, float rotate = .0f) noexcept
+    constexpr transform (rect const& gRect,
+                         float z,
+                         shared_surface const& surface,
+                         float rotate = .0f) noexcept
     : _M_rect    (gRect  ),
       _M_surface (surface),
       _M_z_depth (z      ),
       _M_rotate  (rotate )
     { }
 
-    constexpr transform () noexcept = default;
-
-    constexpr transform (self_type&&)                noexcept = default;
-    constexpr transform (self_type const&)           noexcept = default;
-    constexpr self_type& operator = (self_type&&)      noexcept = default;
-    constexpr self_type& operator = (self_type const&) noexcept = default;
+    constexpr transform ()                             noexcept = default;
+    inline    transform (self_type &&)                 noexcept = default;
+    inline    transform (self_type const&)             noexcept = default;
+    inline    self_type& operator = (self_type &&)     noexcept = default;
+    inline    self_type& operator = (self_type const&) noexcept = default;
 
     constexpr rect           geometry () const noexcept { return _M_rect              ; }
     constexpr float          z_depth  () const noexcept { return _M_z_depth           ; }
-    constexpr    shared_surface surface  () const noexcept { return _M_surface           ; }
-    constexpr    shared_context context  () const noexcept { return _M_surface->context(); }
+    constexpr shared_surface surface  () const noexcept { return _M_surface           ; }
+    constexpr shared_context context  () const noexcept { return _M_surface->context(); }
     constexpr float          rotation () const noexcept { return _M_rotate            ; }
 
 private:
-    rect           _M_rect       ;
-    shared_surface _M_surface    ;
+    rect           _M_rect    { };
+    shared_surface _M_surface { };
     float          _M_z_depth { };
     float          _M_rotate  { };
 };

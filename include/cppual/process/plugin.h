@@ -36,9 +36,9 @@
 #include <cppual/memory_allocator>
 
 #include <memory>
-#include <cstring>
+//#include <cstring>
 #include <version>
-#include <string_view>
+//#include <string_view>
 
 // =========================================================
 
@@ -50,7 +50,7 @@ class SHARED_API dyn_loader : public non_copyable
 {
 public:
     typedef dyn_loader                self_type    ;
-    typedef string                    string_type  ;
+    typedef fstring                   string_type  ;
     typedef fstring_view              string_view  ;
     typedef resource_handle           handle_type  ;
     typedef void *                    pointer      ;
@@ -93,7 +93,7 @@ public:
     constexpr bool contains (string_view const& gName) const noexcept
     { return get_address (gName) != nullptr; }
 
-    consteval fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    constexpr fn_proxy_type operator [] (string_view const& fn_name) const noexcept
     { return  fn_proxy_type (*this, fn_name); }
 
     template <non_function T = void>
@@ -104,9 +104,9 @@ public:
     constexpr F import (string_view const& pName) const
     { return direct_cast<F> (get_function (pName)); }
 
-    template <string_view K, typename R = void, typename... Args>
-    constexpr R invoke (Args&&... args) const
-    { return (*direct_cast<R(*)(Args...)> (get_function (K.data ())))(std::forward<Args> (args)...); }
+    template <typename R = void, typename... Args, c_const_str STR>
+    constexpr R invoke (STR fn_name, Args&&... args) const
+    { return (*direct_cast<R(*)(Args...)> (get_function (fn_name)))(std::forward<Args> (args)...); }
 
 private:
     pointer       get_address  (string_view const& name) const;
@@ -133,10 +133,11 @@ extern "C" typedef struct SHARED_API plugin_vars
     std::shared_ptr<void> iface    { };
     dyn_array<cchar*>     required { };
 
-    constexpr plugin_vars (self_type const&)           = default;
-    constexpr self_type& operator = (self_type const&) = default;
+    constexpr plugin_vars ()                           noexcept = default;
+    inline    plugin_vars (self_type const&)           noexcept = default;
+    inline    self_type& operator = (self_type const&) noexcept = default;
 
-    constexpr plugin_vars (memory::memory_resource* res = nullptr)
+    constexpr plugin_vars (memory::memory_resource* res) noexcept
     : name     (),
       provides (),
       desc     (),
@@ -147,7 +148,7 @@ extern "C" typedef struct SHARED_API plugin_vars
                                  dyn_array<cchar*>::allocator_type (*res))
     { }
 
-    constexpr plugin_vars (self_type&& obj)
+    constexpr plugin_vars (self_type&& obj) noexcept
     : name     (obj.name),
       provides (obj.provides),
       desc     (obj.desc),
@@ -157,7 +158,7 @@ extern "C" typedef struct SHARED_API plugin_vars
       required (std::move (obj.required))
     { }
 
-    constexpr self_type& operator = (self_type&& obj)
+    constexpr self_type& operator = (self_type&& obj) noexcept
     {
         if (this == &obj) return *this;
 
@@ -179,7 +180,7 @@ typedef std::pair<loader_type const, plugin_vars> plugin_pair;
 
 // =========================================================
 
-template <non_void Interface,
+template <structure Interface,
           allocator_like A = memory::allocator
           <std::pair<loader_type::string_type const, plugin_pair>>
           >
@@ -190,13 +191,13 @@ public:
     typedef memory::allocator_traits<A>       traits_type   ;
     typedef traits_type::allocator_type       allocator_type;
     typedef traits_type::size_type            size_type     ;
-    typedef string                            string_type   ;
+    typedef loader_type::string_type          string_type   ;
+    typedef loader_type::string_view          string_view   ;
     typedef string_type                       key_type      ;
     typedef key_type const                    const_key     ;
     typedef plugin_pair                       mapped_type   ;
     typedef mapped_type const                 const_mapped  ;
     typedef std::pair<const_key, plugin_pair> value_type    ;
-    typedef std::string_view                  string_view   ;
     typedef std::hash<key_type>               hash_type     ;
     typedef std::equal_to<key_type>           equal_type    ;
     typedef Interface                         iface_type    ;
@@ -232,11 +233,11 @@ public:
 
         plugin_pointer () = delete;
 
-        template <non_void, allocator_like>
+        template <structure, allocator_like>
         friend class plugin_manager;
 
     private:
-        const_pointer _M_ptr;
+        const_pointer _M_ptr { };
     };
 
     inline constexpr static cchar* plugin_main = "plugin_main";
@@ -264,7 +265,7 @@ public:
     { }
 
     template <typename... Args>
-    constexpr bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args&&... args)
+    bool load_plugin (const_key& path, memory::memory_resource* rc = nullptr, Args&&... args)
     {
         static_assert (!are_any_of_type_v<traits_enum_t::reference, Args...>,
                 "references are not a 'C' concept!");
@@ -276,7 +277,7 @@ public:
         if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
 
         plugin_vars* plugin = loader[plugin_main](ret<plugin_vars*>,
-                                                  rc == nullptr ? get_allocator ().resource () : rc,
+                                                  rc == nullptr ? &get_allocator ().resource () : rc,
                                                   std::forward<Args> (args)...);
 
         for (value_type& pair : _M_gPluginMap)

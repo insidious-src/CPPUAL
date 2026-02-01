@@ -196,11 +196,11 @@ struct rect
     constexpr self_type& operator = (self_type &&)     noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
-    constexpr rect (point2i position, point2u size) noexcept
-    : left   (position.x)
-    , top    (position.y)
-    , right  (static_cast<value_type> (position.x + size.x))
-    , bottom (static_cast<value_type> (position.y + size.y))
+    constexpr rect (point2i pos, point2u size) noexcept
+    : left   (pos.x)
+    , top    (pos.y)
+    , right  (static_cast<value_type> (pos.x + size.x))
+    , bottom (static_cast<value_type> (pos.y + size.y))
     { }
 
     constexpr rect (value_type x, value_type y, size_type width, size_type height) noexcept
@@ -295,7 +295,7 @@ constexpr rect& operator -= (rect& gObj, point2i gPoint) noexcept
 template <arithmetic T>
 struct angle final
 {
-    typedef remove_cvrefptr_t<T> value_type;
+    typedef remove_const_t<T> value_type;
 
     value_type radians { };
 

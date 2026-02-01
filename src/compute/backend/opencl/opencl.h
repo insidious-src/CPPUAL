@@ -42,20 +42,20 @@
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
 
-/*
- * API Typesafe Encapsulation Guide Lines
- *
- * API calls should always start with root namespace "::";
- * define all API typedefs in a consistent non-conflicting way;
- * for integer bit fields use enums;
- * for object encapsulation use template specialization,
- * constexpr & constexpr functions as much as possible;
- * if the api requires some initialization then use STL containers + cppual polymorphic allocators;
- * if possible prefer stack allocators (cpu stack memory);
- * define all class typedefs according to STL (ex. typedef T value_type);
- * maintain strict typesafety;
- *
- */
+/**
+ ** API Typesafe Encapsulation Guide Lines
+ **
+ ** API calls should always start with root namespace "::";
+ ** define all API typedefs in a consistent non-conflicting way;
+ ** for integer bit fields use enums;
+ ** for object encapsulation use template specialization,
+ ** constexpr & constexpr functions as much as possible;
+ ** if the api requires some initialization then use STL containers + cppual polymorphic allocators;
+ ** if possible prefer stack allocators (cpu stack memory);
+ ** define all class typedefs according to STL (ex. typedef T value_type);
+ ** maintain strict typesafety;
+ **
+ **/
 
 // =========================================================
 

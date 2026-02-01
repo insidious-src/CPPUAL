@@ -23,11 +23,11 @@
 #define CPPUAL_GFX_MATRIX_H_
 #ifdef __cplusplus
 
-
+#include <cppual/concepts>
+#include <cppual/containers>
 #include <cppual/memory_allocator>
 #include <cppual/gfx/coord.h>
 #include <cppual/gfx/color.h>
-#include <cppual/containers>
 
 // =========================================================
 
@@ -176,7 +176,7 @@ public:
 
     static_assert (1 < C && 1 < R, "Ivalid number of dimensions!");
 
-    consteval static_matrix () noexcept = default;
+    constexpr static_matrix () noexcept = default;
 
     constexpr static_matrix (self_type const& gObj) noexcept
     : _M_uCols  (gObj._M_uCols )
@@ -186,7 +186,8 @@ public:
 
     template <non_void... Ts> requires (are_same<value_type, Ts> && ...)
     constexpr static_matrix (Ts... vals) noexcept
-    : self_type ()
+    : _M_uCols  (C)
+    , _M_uRows  (R)
     , _M_matrix { vals... }
     { static_assert (sizeof... (vals) == size (), "Wrong number of initializers!"); }
 

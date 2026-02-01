@@ -142,6 +142,22 @@ inline constexpr type_ptr_t<void> default_ret = default_v;
 
 // ====================================================
 
+template <auto V>
+consteval decltype (V) make_consteval () noexcept
+{  return decltype (V) (V); }
+
+template <non_void T>
+constexpr T make_constexpr (T v) noexcept
+{  return T (v); }
+
+template <auto V>
+inline constexpr static decltype (V) consteval_v = make_consteval<V> ();
+
+template <auto V>
+inline constexpr static decltype (V) constexpr_v = make_constexpr (V);
+
+// ====================================================
+
 template <typename T, std::size_t N>
 struct tuple_repeat_helper
 {
@@ -625,7 +641,7 @@ private:
             return type_list<T> { };
         }
 
-        constexpr static constexpr size_type const value = N;
+        inline constexpr static const size_type value = N;
     };
 
 public:

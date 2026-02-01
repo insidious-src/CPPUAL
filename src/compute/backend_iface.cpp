@@ -45,7 +45,7 @@ private:
     factory::manager_type manager        ;
     vector_type           local_factories;
 
-    consteval static lib_vector_const_reference platform_names () noexcept
+    constexpr static lib_vector_const_reference platform_names () noexcept
     {
         constexpr static std::array<cchar*, 2> ret_vec
         {
@@ -66,15 +66,15 @@ private:
     : manager ()
     , local_factories ()
     {
-        constexpr static lib_vector_const_reference array = platform_names ();
+        constexpr static lib_vector_const_reference array_ref = platform_names ();
 
-        local_factories.reserve (array.size ());
+        local_factories.reserve (array_ref.size ());
 
-        for (lib_vector::const_reference val : array)
+        for (auto i = 0U; i < array_ref.size (); ++i)
         {
-            if (manager.load_plugin (val))
+            if (manager.load_plugin (array_ref[i]))
             {
-                local_factories.push_back (manager.plugin (val).iface ());
+                local_factories.push_back (manager.plugin (array_ref[i]).iface ());
             }
         }
     }

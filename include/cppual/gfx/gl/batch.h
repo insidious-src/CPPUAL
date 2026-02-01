@@ -23,27 +23,30 @@
 #define CPPUAL_GL_BATCH_H_
 #ifdef __cplusplus
 
-#include <vector>
-#include <cppual/noncopyable.h>
+#include <cppual/noncopyable>
 #include <cppual/gfx/matrix.h>
 #include <cppual/gfx/gl/glbase.h>
 
-namespace cppual { namespace gfx { namespace gl {
+#include <vector>
+
+// =========================================================
+
+namespace cppual::gfx::gl {
+
+// =========================================================
 
 struct batch_config
 {
-    uint    uRenderType;
-    int     iPriority;
-    uint    uTextureId;
-    matrix4 transformMatrix; //initialized as identity matrix
+public:
+    typedef batch_config self_type;
 
-    batch_config (unsigned uRenderTypeIn, int iPriorityIn, unsigned uTextureIdIn)
-    : uRenderType (uRenderTypeIn),
-      iPriority   (iPriorityIn),
-      uTextureId  (uTextureIdIn)
+    batch_config (uint uRenderTypeIn, int iPriorityIn, uint uTextureIdIn)
+    : uRenderType (uRenderTypeIn)
+    , iPriority   (iPriorityIn)
+    , uTextureId  (uTextureIdIn)
     { }
 
-    bool operator == (batch_config const& other) const
+    bool operator == (self_type const& other) const
     {
         return uRenderType      == other.uRenderType and
                 iPriority       == other.iPriority   and
@@ -51,34 +54,45 @@ struct batch_config
                 transformMatrix == other.transformMatrix*/;
     }
 
-    bool operator != (batch_config const& other) const
+    bool operator != (self_type const& other) const
     { return !(*this == other); }
+
+    uint    uRenderType    ;
+    int     iPriority      ;
+    uint    uTextureId     ;
+    matrix4 transformMatrix; //! initialized as identity matrix
 };
+
+// =========================================================
 
 struct gui_vertex
 {
 //    glm::vec2 position;
-//    glm::vec4 color;
-//    glm::vec2 texture;
+//    glm::vec4 color   ;
+//    glm::vec2 texture ;
 
-//    GuiVertex (glm::vec2 positionIn, glm::vec4 colorIn, glm::vec2 textureIn = glm::vec2 ())
-//    : position (positionIn),
-//      color (colorIn),
-//      texture (textureIn)
+//    gui_vertex (glm::vec2 positionIn, glm::vec4 colorIn, glm::vec2 textureIn = glm::vec2 ())
+//    : position (positionIn)
+//    , color    (colorIn)
+//    , texture  (textureIn)
 //    { }
 };
+
+// =========================================================
 
 class batch final : non_copyable
 {
 public:
+    typedef batch self_type;
+
     batch  (uint uMaxNumVertices);
     ~batch ();
 
-    batch* fullest (batch*);
-    int    priority () const;
-    bool   empty () const;
-    bool   is_batch_config (batch_config const&) const;
-    bool   is_enough_room (uint uNumVertices) const;
+    self_type* fullest (batch*);
+    int        priority () const;
+    bool       empty () const;
+    bool       is_batch_config (batch_config const&) const;
+    bool       is_enough_room (uint uNumVertices) const;
 
     void add (dyn_array<gui_vertex> const& vertices, batch_config const&);
     void add (dyn_array<gui_vertex> const& vertices);
@@ -90,13 +104,17 @@ private:
 private:
     uint         _M_uMaxNumVertices;
     uint         _M_uNumUsedVertices;
-    uint         _M_vao; //only used in OpenGL v3.x +
+    uint         _M_vao; //! only used in OpenGL v3.x +
     uint         _M_vbo;
     batch_config _M_config;
     gui_vertex   _M_lastVertex;
 };
 
-} } } // namespace GL
+// =========================================================
+
+} //! namespace gl
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_GL_BATCH_H_

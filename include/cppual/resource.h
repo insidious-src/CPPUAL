@@ -105,7 +105,7 @@ public:
         value_type value { };
         pointer    ptr      ;
 
-        constexpr handle_value () noexcept = default;
+        consteval handle_value () noexcept = default;
         constexpr handle_value (value_type _handle) noexcept : value (_handle) { }
         constexpr handle_value (pointer    _handle) noexcept : ptr   (_handle) { }
         constexpr handle_value (std::nullptr_t    ) noexcept : ptr   ()        { }
@@ -121,7 +121,7 @@ public:
     }
     const const_handle;
 
-    constexpr resource_handle () noexcept = default;
+    consteval resource_handle () noexcept = default;
     constexpr resource_handle (value_type handle) noexcept : _M_handle (handle) { }
     constexpr resource_handle (pointer    handle) noexcept : _M_handle (handle) { }
     constexpr resource_handle (std::nullptr_t   ) noexcept : _M_handle ()       { }
@@ -266,7 +266,8 @@ constexpr bool operator != (resource_handle::const_pointer ptr, resource_handle 
 
 template <resource_handle_c C = resource_connection,
           resource_handle_h H = resource_handle    ,
-          resource_handle::value_type NULL_V = 0>
+          resource_handle::value_type NULL_V = 0
+          >
 class SHARED_API resource : public non_copyable_virtual
 {
 public:

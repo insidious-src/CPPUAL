@@ -303,10 +303,10 @@ private:
  ** @brief frope (fast rope) implements a rope data structure using a double-linked list of fstrings
  ** Maintains interface compatibility with std::basic_string and fstring
  **/
-template <symbolic_char          T = char,
-          structure              E = locale_traits<T>,
+template <symbolic_char  T = char,
+          structure      E = locale_traits<T>,
           allocator_like A = memory::allocator<T>,
-          structure         Policy = default_node_policy<T, E, A>
+          structure Policy = default_node_policy<T, E, A>
           >
 class SHARED_API frope : private A
 {
@@ -334,7 +334,7 @@ public:
     typedef frope_iterator<self_type const>                   const_iterator        ;
     typedef std::reverse_iterator<iterator>                   reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator>             const_reverse_iterator;
-    typedef std::basic_string_view<value_type>                string_view           ;
+    typedef cow_string<T, locale_traits<T>, void>             string_view           ;
     typedef string_type::difference_type                      difference_type       ;
 
     static_assert (are_same<T, value_type>, "T & value_type are NOT the same!");
@@ -410,24 +410,24 @@ public:
     {
         struct
         {
-            list_node* head;   // First node in list
-            list_node* tail;   // Last node in list
+            list_node* head { };   // First node in list
+            list_node* tail { };   // Last node in list
         }
         list;
 
         struct
         {
-            tree_node* root;   // Root of tree
+            tree_node* root { };   // Root of tree
         }
         tree;
 
         struct
         {
-            btree_node* root;   // Root of btree
+            btree_node* root { };   // Root of btree
         }
         btree;
 
-        consteval buffer () noexcept : list { } { }
+        consteval buffer () noexcept : list () { }
     };
 
     constexpr frope () noexcept = default;
@@ -482,7 +482,8 @@ public:
     template <generic_iterator Iter>
     constexpr frope (Iter first, Iter last, allocator_type const& ator = allocator_type ()) noexcept
     : allocator_type (ator)
-    , self_type (string_view (first, last))
+    , _M_gBuffer { first, last }
+    , _M_uLength (std::distance (first, last) + sizeof (buffer))
     { }
 
     constexpr frope (std::initializer_list<value_type> list,
@@ -491,11 +492,11 @@ public:
     { }
 
     constexpr frope (allocator_type const& ator) noexcept
-    : allocator_type (ator), self_type ()
+    : allocator_type (ator)
     { }
 
     constexpr frope (std::nullptr_t) noexcept
-    : allocator_type (), self_type ()
+    : allocator_type ()
     { }
 
     constexpr ~frope ()

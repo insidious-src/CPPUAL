@@ -372,7 +372,7 @@ public:
     {
         if (this == &obj) return *this;
 
-        static_assert (std::is_same_v<return_type, callable_return<C, Args...>>,
+        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
                        "C::operator () return type is NOT void!");
 
         connect (*this, obj);
@@ -531,7 +531,7 @@ public:
     {
         if (this == &obj) return *this;
 
-        static_assert (std::is_same_v<return_type, callable_return<C, Args...>>,
+        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
                       "C::operator () return type is NOT bool!");
 
         connect (*this, obj);
@@ -663,7 +663,7 @@ connect (signal<R(Args...), A>& gSignal,
     return --gSignal.get_slots ().end ();
 }
 
-template <class_t     C,
+template <structure   C,
           typename    R,
           typename... Args,
           slot_allocator A
@@ -692,7 +692,7 @@ connect (signal<R(Args...), A>& gSignal,
     return --gSignal.get_slots ().end ();
 }
 
-template <class_t     C,
+template <structure   C,
           typename    R,
           typename... Args,
           slot_allocator A
@@ -803,14 +803,14 @@ disconnect (signal<R(Args...), A>& gSignal,
     if (it != gSignal.end ()) gSignal.get_slots ().erase (it);
 }
 
-template <class_t     C,
+template <structure   C,
           typename    R,
           typename... Args,
           slot_allocator A
           >
 inline
 void
-disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R(C::* fn)(Args...))
+disconnect (signal<R(Args...), A>& gSignal, remove_const_t<C>& pObj, R(C::* fn)(Args...))
 {
     using value_type = typename signal<R(Args...), A>::value_type;
 
@@ -821,14 +821,14 @@ disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R(C::*
 
 
 
-template <class_t     C,
+template <structure   C,
           typename    R,
           typename... Args,
           slot_allocator A
           >
 inline
 void
-disconnect (signal<R(Args...), A>& gSignal, std::remove_const_t<C>& pObj, R(C::* fn)(Args...) const)
+disconnect (signal<R(Args...), A>& gSignal, remove_const_t<C>& pObj, R(C::* fn)(Args...) const)
 {
     using value_type = typename signal<R(Args...), A>::value_type;
 
@@ -1036,8 +1036,8 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
     return  shared_ptr (new scoped_connection<R(Args...), A> (_signal, fn, top));
 }
 
-template <class_t  C,
-          typename R,
+template <structure   C,
+          typename    R,
           typename... Args,
           slot_allocator A
           >
@@ -1052,8 +1052,8 @@ make_shared_scoped_connection (signal<R(Args...), A>& _signal,
     return  shared_ptr (new scoped_connection<R(Args...), A> (_signal, pObj, fn, top));
 }
 
-template <class_t  C,
-          typename R,
+template <structure   C,
+          typename    R,
           typename... Args,
           slot_allocator A
           >
@@ -1156,8 +1156,8 @@ allocate_shared_scoped_connection (SharedA alloc,
                                  std::move (scoped_connection<R(Args...), A> (_signal, fn, top)));
 }
 
-template <class_t  C,
-          typename R,
+template <structure   C,
+          typename    R,
           typename... Args,
           slot_allocator A,
           slot_allocator SharedA
@@ -1174,8 +1174,8 @@ allocate_shared_scoped_connection (SharedA alloc,
                                  std::move (scoped_connection<R(Args...), A> (_signal, pObj, fn, top)));
 }
 
-template <class_t  C,
-          typename R,
+template <structure   C,
+          typename    R,
           typename... Args,
           slot_allocator A,
           slot_allocator SharedA
@@ -1192,7 +1192,7 @@ inline
                                  std::move (scoped_connection<R(Args...), A> (_signal, pObj, fn, top)));
 }
 
-template <typename R,
+template <typename    R,
           typename... Args,
           slot_allocator A,
           slot_allocator SharedA

@@ -55,9 +55,9 @@ public:
     typedef std::underlying_type_t<T> int_type   ;
     typedef int_type                  const_int  ;
 
-    constexpr reference_proxy (self_type &&) noexcept = default;
-    consteval reference_proxy (self_type const&) noexcept = default;
-    constexpr self_type& operator = (self_type &&) noexcept = default;
+    constexpr reference_proxy (self_type &&)           noexcept = default;
+    consteval reference_proxy (self_type const&)       noexcept = default;
+    constexpr self_type& operator = (self_type &&)     noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
     consteval reference_proxy (bitset_type& bitset, const_int mask) noexcept
@@ -85,7 +85,7 @@ class bitset
 {
 public:
     typedef bitset<T>                                     self_type             ;
-    typedef remove_cref_t<T>                              value_type            ;
+    typedef remove_cvref_t<T>                             value_type            ;
     typedef value_type const                              const_value           ;
     typedef std::underlying_type_t<value_type>            int_type              ;
     typedef int_type const                                const_int             ;
@@ -100,7 +100,7 @@ public:
     typedef std::reverse_iterator<const_iterator>         reverse_const_iterator;
     typedef std::array<char, (sizeof (int_type) * 8) + 1> str_vector_type       ;
 
-    inline constexpr static const_size npos = static_cast<const_size> (-1);
+    inline constexpr static const_size npos = static_cast<size_type> (-1);
 
     constexpr bitset () noexcept = default;
     constexpr bitset (self_type&&) noexcept = default;
@@ -116,9 +116,7 @@ public:
     : _M_flags (flags)
     { }
 
-    template <integer U,
-              typename = std::enable_if_t<!std::is_same_v<U, int_type>>
-              >
+    template <integer U, std::enable_if_t<!are_same<U, int_type>, void>>
     constexpr bitset (U const eFlag) noexcept
     : _M_flags (static_cast<int_type> (eFlag))
     {
@@ -143,7 +141,7 @@ public:
     { _M_flags = nFlags; return *this; }
 
     template <integer U,
-              typename = std::enable_if_t<!std::is_same_v<U, int_type> && !std::is_same_v<U, int>>
+              std::enable_if_t<!are_same<U, int_type> && !are_same<U, int>, void>
               >
     constexpr self_type& operator = (U const nFlags) noexcept
     {
@@ -179,8 +177,7 @@ public:
     { return (_M_flags & flags) == flags; }
 
     template <integer U,
-              typename = std::enable_if_t<!std::is_same_v<U, int_type> &&
-                                          !std::is_same_v<U, int>>
+              std::enable_if_t<!are_same<U, int_type> && !are_same<U, int>, void>
               >
     constexpr bool test (U const flags) const noexcept
     {
@@ -219,7 +216,7 @@ public:
     { _M_flags |= flags; return *this; }
 
     template <integer U,
-              typename = std::enable_if_t<!std::is_same_v<U, int_type> && !std::is_same_v<U, int>>
+              std::enable_if_t<!are_same<U, int_type> && !are_same<U, int>, void>
               >
     constexpr self_type& operator += (U const flags) noexcept
     {
@@ -236,7 +233,7 @@ public:
     { _M_flags &= ~flags; return *this; }
 
     template <integer U,
-              typename = std::enable_if_t<!std::is_same_v<U, int_type> && !std::is_same_v<U, int>>
+              std::enable_if_t<!are_same<U, int_type> && !are_same<U, int>, void>
               >
     constexpr self_type& operator -= (U const flags) noexcept
     {
@@ -265,6 +262,10 @@ public:
     consteval iterator        begin () const noexcept { return iterator       (*this); }
     consteval const_iterator cbegin () const noexcept { return const_iterator (*this); }
     consteval const_iterator cbegin ()       noexcept { return const_iterator (*this); }
+    consteval iterator        end   ()       noexcept { return iterator       (*this, size ()); }
+    consteval iterator        end   () const noexcept { return iterator       (*this, size ()); }
+    consteval const_iterator cend   () const noexcept { return const_iterator (*this, size ()); }
+    consteval const_iterator cend   ()       noexcept { return const_iterator (*this, size ()); }
 
     consteval reverse_iterator  rbegin () noexcept
     { return reverse_iterator (*this, size () - 1); }
@@ -277,11 +278,6 @@ public:
 
     consteval reverse_const_iterator crbegin () noexcept
     { return reverse_const_iterator (*this, size () - 1); }
-
-    consteval iterator        end   ()       noexcept { return iterator (*this, size ()); }
-    consteval iterator        end   () const noexcept { return iterator (*this, size ()); }
-    consteval const_iterator cend   () const noexcept { return const_iterator (*this, size ()); }
-    consteval const_iterator cend   ()       noexcept { return const_iterator (*this, size ()); }
 
     consteval reverse_iterator rend () noexcept
     { return reverse_iterator (*this, npos); }
@@ -435,7 +431,7 @@ constexpr auto operator <=> (typename bitset<T>::const_int flags, bitset<T> cons
 //! compile-time bit manipulation
 template <auto... Flags,
           typename E = std::common_type_t<decltype (Flags)...>,
-          std::enable_if_t<std::is_enum_v<E>, int> = 0
+          std::enable_if_t<enumeration<E>, void>
           >
 consteval bitset<E> make_bitset () noexcept
 {

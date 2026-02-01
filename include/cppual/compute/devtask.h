@@ -28,25 +28,24 @@
 
 // =========================================================
 
-namespace cppual { namespace compute {
+namespace cppual::compute {
 
 // =========================================================
 
 class device_queue : public object<resource_type::queue>
 {
 public:
-    enum class engine_type : u8
+    typedef enum class engine_type : u8
     {
         none      =      0,
         compute   = 1 << 0,
         graphics  = 1 << 1,
-
-        /// direct memory access
-        dma       = 1 << 2,
+        dma       = 1 << 2, // direct memory access
         universal = 1 << 3,
         timer     = 1 << 4,
         custom    = 1 << 7
-    };
+    }
+    const const_engine;
 
     typedef bitset<engine_type> engine_types;
 
@@ -73,7 +72,7 @@ class device_task : private device_queue
 
 // =========================================================
 
-} } // namespace Compute
+} //! namespace compute
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_PARALLEL_TASK_H_

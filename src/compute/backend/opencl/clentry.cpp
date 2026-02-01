@@ -197,7 +197,7 @@ extern "C" plugin_vars* plugin_main (memory_resource* rc)
 {
     static unsigned char buffer[sizeof (cl_factory) + memory_resource::max_adjust];
     static stacked_resource static_resource (buffer, sizeof (buffer));
-    static plugin_vars plugin;
+    static plugin_vars      plugin;
 
     plugin.name     = "cl_factory"      ;
     plugin.desc     = "OpenCL Factory"  ;

@@ -23,7 +23,7 @@
 #define CPPUAL_BITMAP_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
+#include <cppual/types>
 #include <cppual/gfx/color.h>
 
 #include <memory>
@@ -68,24 +68,25 @@ public:
                       // BITMAPV3INFOHEADER+: RGBA
         BI_JPEG, // OS22XBITMAPHEADER  :  RLE-24
                  // BITMAPV4INFOHEADER+: JPEG image for printing
-        BI_PNG,  // BITMAPV4INFOHEADER+:  PNG image for printing
+        BI_PNG, // BITMAPV4INFOHEADER+:  PNG image for printing
         BI_ALPHABITFIELDS, // RGBA bit field masks
                            // only Windows CE 5.0 with .NET 4.0 or later
         BI_CMYK = 11, // only Windows Metafile CMYK
-        BI_CMYKRLE8,  // RLE-8 only Windows Metafile CMYK
-        BI_CMYKRLE4   // RLE-4 only Windows Metafile CMYK
+        BI_CMYKRLE8, // RLE-8 only Windows Metafile CMYK
+        BI_CMYKRLE4 // RLE-4 only Windows Metafile CMYK
     }
     const const_compression;
 
-    struct PACKED bmp_header  // -- must be 14 bytes --
+    typedef struct PACKED bmp_header // -- must be 14 bytes --
     {
         bmp_type type; // magic identifier -> 2 bytes
         u32      filesize; // file size in bytes -> 4 bytes
         u16      reserved1, reserved2; // 2 * 2 bytes
         u32      offset; // offset to pixel data in bytes -> 4 bytes
-    };
+    }
+    const const_bmp_header;
 
-    struct PACKED info_header  // -- must be 40 bytes --
+    typedef struct PACKED info_header // -- must be 40 bytes --
     {
         u32              size; // header size in bytes -> 4 bytes
         i32              width, height; // width / height of image -> 2 * 4 bytes
@@ -97,38 +98,35 @@ public:
         u32              colors; // number of colors -> 4 bytes
         u32              importantColors; // important colors -> 4 bytes
 
-        inline u32 absolute_width () const noexcept
+        constexpr u32 absolute_width () const noexcept
         { return static_cast<u32> (width);  }
 
-        inline u32 absolute_height () const noexcept
+        constexpr u32 absolute_height () const noexcept
         { return static_cast<u32> (height); }
 
-        inline size_type pixel_count () const noexcept
+        constexpr size_type pixel_count () const noexcept
         { return static_cast<size_type> (width * height); }
 
-        inline size_type image_size_calc () const noexcept
+        constexpr size_type image_size_calc () const noexcept
         { return row_size_calc () * absolute_height (); }
 
-        inline size_type row_size_calc () const noexcept
+        constexpr size_type row_size_calc () const noexcept
         {
             return (sizeof (rgb_type) * 8 * absolute_width () + 31) / 8;
         }
-    };
+    }
+    const const_info_header;
 
-    bitmap_stream  () = delete;
-    ~bitmap_stream ();
-
-
-    inline bitmap_stream (cchar* path, bool create = false)
-    : base_type   (path, in | out | binary),
+    constexpr bitmap_stream (cchar* path, bool create = false)
+    : base_type     (path, in | out | binary),
       _M_infoHeader { },
       _M_header     { }
     {
         if (!is_open () && create) open (path, in | out | binary | trunc);
-        if ( good    ())  _parse_header ();
+        if ( good    ())  parse_header ();
     }
 
-    inline bitmap_stream& operator = (bitmap_stream& obj)
+    constexpr bitmap_stream& operator = (bitmap_stream& obj)
     {
         if (this != &obj)
         {
@@ -144,7 +142,7 @@ public:
         return *this;
     }
 
-    inline bool valid () const noexcept
+    constexpr bool valid () const noexcept
     {
         return header ().type == bmp_type::BM             &&
                header ().offset                           >=
@@ -153,7 +151,7 @@ public:
                info   ().image_size_calc   ();
     }
 
-    inline void reset_seek ()
+    constexpr void reset_seek ()
     {
         seekg (0);
         seekp (0);
@@ -165,7 +163,9 @@ public:
     size_type replace (rgb_type const target_color, rgb_type const new_color);
 
 private:
-    void _parse_header ();
+    void parse_header ();
+
+    bitmap_stream  () = delete;
 
 private:
     info_header _M_infoHeader;

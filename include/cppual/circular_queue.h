@@ -135,13 +135,7 @@ public:
     constexpr const_reverse_iterator crend () const noexcept
     { return const_reverse_iterator (const_iterator (*this, npos)); }
 
-    constexpr circular_queue () noexcept
-    : allocator_type ()
-    , _M_pArray      ()
-    , _M_beginPos    ()
-    , _M_endPos      ()
-    , _M_uCapacity   ()
-    { }
+    constexpr circular_queue () noexcept = default;
 
     constexpr circular_queue (size_type uCapacity, allocator_type const& gAtor = allocator_type ())
     : allocator_type (gAtor)
@@ -213,7 +207,7 @@ public:
         }
     }
 
-    ~circular_queue () noexcept
+    constexpr ~circular_queue () noexcept
     {
         if (!capacity()) return;
 

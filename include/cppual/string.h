@@ -38,7 +38,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
-#include <cctype>
+//#include <cctype>
 #include <ranges>
 
 // ====================================================
@@ -109,7 +109,7 @@ class SHARED_API cow_string : private A
 {
 public:
     typedef cow_string<T, E, A>                       self_type             ;
-    typedef E                                         traits_type           ;
+    typedef E                                         locale_type           ;
     typedef memory::allocator_traits<A>               alloc_traits          ;
     typedef alloc_traits::allocator_type              allocator_type        ;
     typedef remove_cvref_t<T>                         value_type            ;
@@ -125,54 +125,67 @@ public:
     typedef bi_iterator<self_type const>              const_iterator        ;
     typedef std::reverse_iterator<iterator>           reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator>     const_reverse_iterator;
-    typedef cow_string<value_type, traits_type, void> string_view           ;
+    typedef cow_string<value_type, locale_type, void> string_view           ;
     typedef string                                    std_string            ;
     typedef std::basic_string_view<value_type>        std_string_view       ;
 
     inline constexpr static const_size npos = size_type (-1);
-    inline constexpr static cbool  is_cow_v = std::is_same_v<A, void>;
+    inline constexpr static cbool  is_cow_v = are_same<A, void>;
 
     union buffer
     {
+        typedef buffer self_type;
+
         struct buffer_heap ;
         struct buffer_stack;
 
         inline constexpr static size_type const sso_capacity =
             sizeof (buffer_heap) / sizeof (value_type) - 1;
-        inline constexpr static size_type const sso_bytes =
+        inline constexpr static size_type const sso_bytes    =
             sizeof (buffer_heap) - sizeof (value_type);
 
         struct buffer_heap
         {
+            typedef buffer_heap self_type;
+
             pointer   c_str    { };
             size_type capacity { };
 
-            consteval buffer_heap ()                   noexcept = default;
-            constexpr buffer_heap (buffer_heap const&) noexcept = default;
+            consteval buffer_heap ()                           noexcept = default;
+            constexpr buffer_heap (self_type &&)               noexcept = default;
+            constexpr buffer_heap (self_type const&)           noexcept = default;
+            constexpr self_type& operator = (self_type &&)     noexcept = default;
+            constexpr self_type& operator = (self_type const&) noexcept = default;
 
             constexpr buffer_heap (const_pointer pdata, const_size cap) noexcept
             : c_str (const_cast<pointer> (pdata)), capacity (cap)
             { }
 
-            constexpr buffer_heap (pointer pdata, const_size cap) noexcept
+            constexpr explicit buffer_heap (pointer pdata, const_size cap) noexcept
             : c_str (pdata), capacity (cap)
             { }
         }
-        heap;
+        heap { };
 
         struct buffer_stack
         {
+            typedef buffer_stack self_type;
+
             value_type data[sso_capacity + 1];
 
-            consteval buffer_stack ()                    noexcept = default;
-            constexpr buffer_stack (buffer_stack const&) noexcept = default;
+            consteval buffer_stack ()                          noexcept = default;
+            constexpr buffer_stack (self_type &&)              noexcept = default;
+            constexpr buffer_stack (self_type const&)          noexcept = default;
+            constexpr self_type& operator = (self_type &&)     noexcept = default;
+            constexpr self_type& operator = (self_type const&) noexcept = default;
         }
         stack;
 
-        constexpr buffer (buffer &&)                 noexcept = default;
-        consteval buffer (buffer const&)             noexcept = default;
-        constexpr buffer& operator = (buffer &&)     noexcept = default;
-        constexpr buffer& operator = (buffer const&) noexcept = default;
+        consteval buffer ()                                noexcept = default;
+        constexpr buffer (self_type &&)                    noexcept = default;
+        constexpr buffer (self_type const&)                noexcept = default;
+        constexpr self_type& operator = (self_type &&)     noexcept = default;
+        constexpr self_type& operator = (self_type const&) noexcept = default;
 
         constexpr buffer (const_pointer pdata, const_size cap) noexcept
         : heap (pdata, cap)
@@ -184,10 +197,6 @@ public:
 
         constexpr buffer (const_size cap) noexcept
         : heap (pointer (), cap)
-        { }
-
-        consteval buffer () noexcept
-        : heap ()
         { }
     };
 
@@ -207,37 +216,37 @@ public:
 
     constexpr cow_string (string_view const& sv, bool copy = !is_cow_v) noexcept
     : allocator_type ()
-    , _M_uLength (sv.size ())
-    , _M_gBuffer (copy ? is_on_stack () ? buffer () : buffer (size ()) : buffer (sv.data (), size ()))
+    , _M_uLength (sv.length ())
+    , _M_gBuffer (copy ? is_on_stack () ? buffer () : buffer (length ()) : buffer (sv.data (), length ()))
     {
         if (!copy) return;
 
         if (is_on_stack ())
         {
             std::copy (sv.begin (), sv.end (), _M_gBuffer.stack.data);
-            *(_M_gBuffer.stack.data + size ()) = value_type ();
+            *(_M_gBuffer.stack.data + length ()) = value_type ();
         }
         else
         {
-            copy_to_string (*this, sv.data (), size ());
+            copy_to_string (*this, sv.data (), length ());
         }
     }
 
     constexpr cow_string (std_string const& str, bool copy = !is_cow_v) noexcept
     : allocator_type ()
-    , _M_uLength (str.size ())
-    , _M_gBuffer (copy ? is_on_stack () ? buffer () : buffer (size ()) : buffer (str.data (), size ()))
+    , _M_uLength (str.length ())
+    , _M_gBuffer (copy ? is_on_stack () ? buffer () : buffer (length ()) : buffer (str.data (), length ()))
     {
         if (!copy) return;
 
         if (is_on_stack ())
         {
             std::copy (str.begin (), str.end (), _M_gBuffer.stack.data);
-            *(_M_gBuffer.stack.data + size ()) = value_type ();
+            *(_M_gBuffer.stack.data + length ()) = value_type ();
         }
         else
         {
-            copy_to_string (*this, str.data (), size ());
+            copy_to_string (*this, str.data (), length ());
         }
     }
 
@@ -246,18 +255,18 @@ public:
                                    bool copy = !is_cow_v)
     : allocator_type (ator)
     , _M_uLength     (size (pText))
-    , _M_gBuffer     (copy ? is_on_stack () ? buffer () : buffer (size ()) : buffer (pText, _M_uLength))
+    , _M_gBuffer     (copy ? is_on_stack () ? buffer () : buffer (length ()) : buffer (pText, _M_uLength))
     {
         if (!copy) return;
 
         if (is_on_stack ())
         {
             std::copy (pText, pText + _M_uLength, _M_gBuffer.stack.data);
-            *(_M_gBuffer.stack.data + size ()) = value_type ();
+            *(_M_gBuffer.stack.data + length ()) = value_type ();
         }
         else
         {
-            copy_to_string (*this, pText, size ());
+            copy_to_string (*this, pText, length ());
         }
     }
 
@@ -266,94 +275,92 @@ public:
                           allocator_type const& ator = allocator_type (),
                           bool copy = !is_cow_v)
     : allocator_type (ator)
+    , _M_gBuffer     (copy ? is_on_stack () ? buffer () : buffer (length ()) : buffer (first, _M_uLength))
     , _M_uLength     (last - first)
-    , _M_gBuffer     (copy ? is_on_stack () ? buffer () : buffer (size ()) : buffer (first, _M_uLength))
     {
         if (!copy) return;
 
         if (is_on_stack ())
         {
             std::copy (first, last, _M_gBuffer.stack.data);
-            *(_M_gBuffer.stack.data + size ()) = value_type ();
+            *(_M_gBuffer.stack.data + length ()) = value_type ();
         }
         else
         {
-            copy_to_string (*this, first, size ());
+            copy_to_string (*this, first, length ());
         }
     }
 
     constexpr cow_string (std::initializer_list<value_type> list,
                           allocator_type const& ator = allocator_type ())
     : allocator_type (ator)
-    , _M_uLength     (list.size ())
     , _M_gBuffer     ()
+    , _M_uLength     (list.size ())
     {
         if (is_on_stack ())
         {
             std::copy (list.begin (), list.end (), _M_gBuffer.stack.data);
-            *(_M_gBuffer.stack.data + size ()) = value_type ();
+            *(_M_gBuffer.stack.data + length ()) = value_type ();
         }
         else
         {
-            copy_to_string (*this, list.begin (), size ());
+            copy_to_string (*this, list.begin (), length ());
         }
     }
 
     constexpr cow_string (self_type const& rh)
     : allocator_type (rh.select_on_container_copy_construction ())
-    , _M_uLength     (rh.size ())
-    , _M_gBuffer     (!is_cow_v ? rh.is_on_stack () ? buffer () : buffer (rh.size ()) :
+    , _M_gBuffer     (!is_cow_v ? rh.is_on_stack () ? buffer () : buffer (rh.length ()) :
                                                       buffer (rh.data (), _M_uLength))
+    , _M_uLength     (rh.length ())
     {
         if (is_on_stack ())
         {
             std::copy (rh.begin (), rh.end (), _M_gBuffer.stack.data);
-            *(_M_gBuffer.stack.data + size ()) = value_type ();
+            *(_M_gBuffer.stack.data + length ()) = value_type ();
         }
         else
         {
-            copy_to_string (*this, rh.begin (), size ());
+            copy_to_string (*this, rh.begin (), length ());
         }
     }
 
-
     constexpr cow_string (self_type&& rh) noexcept
     : allocator_type (rh           )
-    , _M_uLength     (rh._M_uLength)
     , _M_gBuffer     (rh._M_gBuffer)
+    , _M_uLength     (rh._M_uLength)
     {
         rh._M_uLength = size_type ();
         rh._M_gBuffer = buffer    ();
     }
 
-    constexpr cow_string (size_type uCapacity)
-    : self_type ()
-    {
-        if (uCapacity > buffer::sso_capacity)
-        {
-            _M_gBuffer.heap.data     = allocator_type::allocate (uCapacity + 1);
-            _M_gBuffer.heap.capacity = (_M_gBuffer.heap.data ? uCapacity : size_type ());
-        }
-    }
+    constexpr cow_string (size_type uCapacity, allocator_type const& ator = allocator_type ())
+    : allocator_type (ator)
+    , _M_gBuffer     (uCapacity > buffer::sso_capacity ?
+                      buffer (allocator_type::allocate (uCapacity + 1),
+                              data () ? uCapacity : size_type ()) :
+                      buffer ())
+    , _M_uLength     ()
+    { }
 
     constexpr ~cow_string ()
     {
         if (!is_on_stack () && size () > buffer::sso_capacity && !is_cow_v)
-            allocator_type::deallocate (_M_gBuffer.heap.c_str, capacity () + 1);
+            allocator_type::deallocate (data (), capacity () + 1);
     }
 
-    constexpr self_type& operator = (self_type&& rh) noexcept
+    inline self_type& operator = (self_type&& rh) noexcept
     {
         if (this == &rh) return *this;
 
         if (is_cow_v)
         {
-            _M_gBuffer = buffer (rh.data (), rh.size ());
+            _M_gBuffer = buffer (rh.data (), rh.length ());
             return *this;
         }
 
-        if (!is_on_stack () && size () > buffer::sso_capacity)
-            allocator_type::deallocate (_M_gBuffer.heap.data, capacity () + 1);
+        if (!is_on_stack () && length () > buffer::sso_capacity)
+            allocator_type::deallocate (data (), capacity () + 1);
 
         _M_uLength = rh._M_uLength;
         _M_gBuffer = rh._M_gBuffer;
@@ -402,27 +409,27 @@ public:
     /**
      * Explicitly converts to const char*.
      */
-    // consteval explicit operator const_pointer () const noexcept
-    // {
-    //     return _M_gBuffer.heap.data;
-    // }
+    constexpr explicit operator const_pointer () const noexcept
+    {
+        return _M_gBuffer.heap.c_str;
+    }
 
     /**
      * Explicit converts.
      */
     constexpr explicit operator std_string () noexcept
     {
-        return std_string (_M_gBuffer.heap.data, size (_M_gBuffer.heap.data));
+        return std_string (_M_gBuffer.heap.c_str, length ());
     }
 
-    constexpr operator string_view () const noexcept
+    constexpr explicit operator string_view () const noexcept
     {
-        return string_view (_M_gBuffer.heap.data, size (_M_gBuffer.heap.data));
+        return string_view (_M_gBuffer.heap.c_str, length ());
     }
 
-    constexpr operator std_string_view () const noexcept
+    constexpr explicit operator std_string_view () const noexcept
     {
-        return std_string_view (_M_gBuffer.heap.data, size (_M_gBuffer.heap.data));
+        return std_string_view (_M_gBuffer.heap.c_str, length ());
     }
 
     /**
@@ -431,7 +438,7 @@ public:
      **/
     constexpr std_string str () noexcept
     {
-        return std_string (_M_gBuffer.heap.data, size (_M_gBuffer.heap.data));
+        return std_string (_M_gBuffer.heap.c_str, size (_M_gBuffer.heap.c_str));
     }
 
     self_type& assign (self_type const& str);
@@ -473,16 +480,16 @@ public:
     void      clear       () noexcept;
 
     template <str_view_like U>
-    void  find (U const& sv, size_type pos = 0, size_type count = 0);
-    void  find (self_type const& str, size_type pos = 0, size_type count = 0);
-    void  find (value_type const& str, size_type pos = 0, size_type count = 0);
-    void  find (value_type ch, size_type pos = 0);
+    size_type  find (U const& sv, size_type pos = 0, size_type count = 0) const;
+    size_type  find (self_type const& str, size_type pos = 0, size_type count = 0) const;
+    size_type  find (value_type const& str, size_type pos = 0, size_type count = 0) const;
+    size_type  find (value_type ch, size_type pos = 0) const;
 
     template <str_view_like U>
-    void rfind (U const& sv, size_type pos = npos, size_type count = 0);
-    void rfind (self_type const& str, size_type pos = npos, size_type count = 0);
-    void rfind (value_type const& str, size_type pos = npos, size_type count = 0);
-    void rfind (value_type ch, size_type pos = npos);
+    size_type rfind (U const& sv, size_type pos = npos, size_type count = 0) const;
+    size_type rfind (self_type const& str, size_type pos = npos, size_type count = 0) const;
+    size_type rfind (value_type const& str, size_type pos = npos, size_type count = 0) const;
+    size_type rfind (value_type ch, size_type pos = npos) const;
 
     template <str_view_like U>
     constexpr int compare (U const& sv) const noexcept;
@@ -521,15 +528,15 @@ public:
     constexpr size_type find_last_not_of (const_pointer s, size_type pos, size_type count) const;
     constexpr size_type find_last_not_of (const_pointer s, size_type pos = npos) const;
 
-    constexpr const_pointer  data          () const noexcept { return  _M_gBuffer.heap.c_str; }
+    inline    const_pointer  data          () const noexcept { return  _M_gBuffer.heap.c_str; }
     constexpr const_pointer  c_str         () const noexcept { return  data ()              ; }
     constexpr size_type      length        () const noexcept { return  _M_uLength           ; }
     constexpr size_type      size          () const noexcept { return  length ()            ; }
     constexpr bool           empty         () const noexcept { return !length ()            ; }
-    consteval allocator_type get_allocator () const noexcept { return *this                 ; }
+    constexpr allocator_type get_allocator () const noexcept { return *this                 ; }
 
     constexpr static size_type size (const_pointer str) noexcept
-    { return traits_type::length (str); }
+    { return locale_type::length (str); }
 
     constexpr size_type size_bytes () const noexcept
     { return  _M_uLength * sizeof (value_type); }
@@ -666,32 +673,32 @@ public:
         _M_uLength               = size_type  ();
     }
 
-    template <symbolic_char U, structure _E, allocator_or_void _A, generic_iterator Iterator>
+    template <symbolic_char U, structure _E, allocator_like _A, generic_iterator Iterator>
     friend cow_string<U, _E, _A>& copy_to_string (cow_string<U, _E, _A>& copy_to,
                                                   Iterator            copy_from,
                                                   size_type           length);
 
-    template <symbolic_char U, structure _E, allocator_or_void _A, generic_iterator Iterator>
+    template <symbolic_char U, structure _E, allocator_like _A, generic_iterator Iterator>
     friend cow_string<U, _E, _A>& assign_to_string (cow_string<U, _E, _A>& assign_to,
                                                     Iterator            assign_from,
                                                     size_type           length);
 
-    template <symbolic_char U, structure _E, allocator_or_void _A, generic_iterator Iterator>
+    template <symbolic_char U, structure _E, allocator_like _A, generic_iterator Iterator>
     friend cow_string<U, _E, _A>& add_to_string (cow_string<U, _E, _A>& add_to,
                                                  Iterator            add_from,
                                                  size_type           add_length);
 
     template <symbolic_char U, structure _E, allocator_or_void _A>
-    friend constexpr cow_string<U, _E, _A> operator + (cow_string<U, _E, _A> const& obj1,
-                                                       cow_string<U, _E, _A> const& obj2) noexcept;
+    friend constexpr cow_string<U, _E> operator + (cow_string<U, _E, _A> const& obj1,
+                                                   cow_string<U, _E, _A> const& obj2) noexcept;
 
     template <symbolic_char U, structure _E, allocator_or_void _A>
-    friend constexpr cow_string<U, _E, _A> operator + (cow_string<U, _E, _A> const& obj1,
-                                                       U const* obj2) noexcept;
+    friend constexpr cow_string<U, _E> operator + (cow_string<U, _E, _A> const& obj1,
+                                                   U const* obj2) noexcept;
 
-    template <symbolic_char U, structure _E, allocator_or_void _A>
-    friend constexpr cow_string<U, _E, _A>& operator += (cow_string<U, _E, _A>& obj1,
-                                                         cow_string<U, _E, _A> const& obj2) noexcept;
+    template <symbolic_char U, structure _E, allocator_or_void _A1, allocator_like _A2>
+    friend constexpr cow_string<U, _E, _A2>& operator += (cow_string<U, _E, _A2>& obj1,
+                                                          cow_string<U, _E, _A1> const& obj2) noexcept;
 
     template <symbolic_char U, structure _E, allocator_or_void _A>
     friend constexpr cow_string<U, _E, _A>& operator += (cow_string<U, _E, _A>& obj1,
@@ -706,8 +713,8 @@ protected:
     { return _M_uLength <= buffer::sso_capacity; }
 
 private:
-    size_type _M_uLength { };
     buffer    _M_gBuffer { };
+    size_type _M_uLength { };
 };
 
 // ====================================================
@@ -717,7 +724,7 @@ class SHARED_API cow_string <T, E, void>
 {
 public:
     typedef cow_string<T, E, void>                self_type             ;
-    typedef E                                     traits_type           ;
+    typedef E                                     locale_type           ;
     typedef T                                     value_type            ;
     typedef value_type const                      const_value           ;
     typedef value_type *                          pointer               ;
@@ -731,44 +738,64 @@ public:
     typedef bi_iterator<self_type const>          const_iterator        ;
     typedef std::reverse_iterator<iterator>       reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef cow_string<value_type, traits_type>   string_type           ;
-    typedef string                                std_string            ;
+    typedef cow_string<value_type, locale_type>   string_type           ;
     typedef std::basic_string_view<value_type>    std_string_view       ;
+
+    typedef std::basic_string<value_type, std::char_traits<value_type>, memory::allocator<value_type>>
+    std_string;
 
     inline constexpr static const_size npos = size_type (-1);
 
     constexpr static size_type size (const_pointer str) noexcept
-    { return traits_type::length (str); }
+    { return locale_type::length (str); }
 
     consteval cow_string () noexcept                            = default;
     constexpr cow_string (self_type &&)                         = default;
-    consteval cow_string (self_type const&) noexcept            = default;
+    constexpr cow_string (self_type const&) noexcept            = default;
     constexpr self_type& operator = (self_type &&) noexcept     = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
-    consteval cow_string (const_pointer str, const_size len = npos) noexcept
+    constexpr cow_string (const_pointer str, const_size len = npos) noexcept
     : _M_c_str  (str)
     , _M_length (len == npos ? size (str) : len)
     { }
 
-    constexpr cow_string (std::string_view sv) noexcept
+    constexpr cow_string (std_string_view sv) noexcept
     : _M_c_str  (sv.data ())
     , _M_length (sv.size ())
     { }
 
     constexpr cow_string (std_string const& str) noexcept
-    : _M_c_str  (str.data ())
-    , _M_length (str.size ())
+    : _M_c_str  (str.c_str  ())
+    , _M_length (str.length ())
+    { }
+
+    constexpr cow_string (string_type const& str) noexcept
+    : _M_c_str  (str.c_str  ())
+    , _M_length (str.length ())
     { }
 
     /**
-     * Explicit converts.
-     */
-    constexpr explicit operator std_string () noexcept
-    {  return std_string (_M_c_str, size ()); }
+     ** Explicitly converts to const char*.
+     **/
+    constexpr explicit operator const_pointer () const noexcept
+    { return _M_c_str; }
 
-    constexpr operator std_string_view () const noexcept
-    {  return std_string_view (_M_c_str, size ()); }
+    /**
+     ** Explicit converts.
+     **/
+    constexpr explicit operator std_string () noexcept
+    { return std_string (_M_c_str, length ()); }
+
+    constexpr explicit operator std_string_view () const noexcept
+    { return std_string_view (_M_c_str, length ()); }
+
+    /**
+     ** @brief str()
+     ** Returns the contained string as an std::string.
+     **/
+    constexpr std_string str () noexcept
+    { return std_string (_M_c_str, size (_M_c_str)); }
 
     template <str_view_like U>
     bool      contains    (U const& sv) const noexcept;
@@ -788,16 +815,18 @@ public:
     size_type copy        (pointer dest, size_type count, size_type pos = size_type ()) const;
 
     template <str_view_like U>
-    void  find (U const& sv, size_type pos = 0, size_type count = 0);
-    void  find (self_type const& str, size_type pos = 0, size_type count = 0);
-    void  find (value_type const& str, size_type pos = 0, size_type count = 0);
-    void  find (value_type ch, size_type pos = 0);
+    size_type  find (U const& sv, size_type pos = 0, size_type count = 0) const;
+    size_type  find (self_type const& str, size_type pos = 0, size_type count = 0) const;
+    size_type  find (value_type const& str, size_type pos = 0, size_type count = 0) const;
+    size_type  find (value_type ch, size_type pos = 0) const;
+    size_type  find (const_pointer str, size_type pos = 0) const;
 
     template <str_view_like U>
-    void rfind (U const& sv, size_type pos = npos, size_type count = 0);
-    void rfind (self_type const& str, size_type pos = npos, size_type count = 0);
-    void rfind (value_type const& str, size_type pos = npos, size_type count = 0);
-    void rfind (value_type ch, size_type pos = npos);
+    size_type rfind (U const& sv, size_type pos = npos, size_type count = 0) const;
+    size_type rfind (self_type const& str, size_type pos = npos, size_type count = 0) const;
+    size_type rfind (value_type const& str, size_type pos = npos, size_type count = 0) const;
+    size_type rfind (value_type ch, size_type pos = npos) const;
+    size_type rfind (const_pointer str, size_type pos = npos) const;
 
     template <str_view_like U>
     constexpr int compare (U const& sv) const noexcept;
@@ -841,13 +870,13 @@ public:
 
     /**
      ** @brief str()
-     ** Returns the contained string as an std::string.
+     ** Returns the contained string as an fstring.
      **/
-    constexpr string_type str () noexcept
+    constexpr string_type str () const noexcept
     {  return string_type (data (), length ()); }
 
     constexpr bool empty () const noexcept
-    {  return !size (); }
+    {  return length () == 0; }
 
     consteval static bool full () noexcept
     {  return true; }
@@ -855,10 +884,10 @@ public:
     consteval static size_type space_remaining () noexcept
     {  return 0; }
 
-    consteval size_type size_bytes () const noexcept
+    constexpr size_type size_bytes () const noexcept
     {  return _M_length * sizeof (value_type); }
 
-    consteval size_type capacity () const noexcept
+    constexpr size_type capacity () const noexcept
     {  return  _M_length; }
 
     constexpr const_pointer data () const noexcept
@@ -935,13 +964,13 @@ public:
 
     constexpr reference at (size_type uPos) noexcept
     {
-        assert  (uPos < size () && "pos out of range (equal or larger than the size)!");
+        assert  (uPos < length () && "pos out of range (equal or larger than the size)!");
         return *(_M_c_str + uPos);
     }
 
     constexpr const_reference at (size_type uPos) const noexcept
     {
-        assert  (uPos < size () && "pos out of range (equal or larger than the size)!");
+        assert  (uPos < length () && "pos out of range (equal or larger than the size)!");
         return *(_M_c_str + uPos);
     }
 
@@ -961,7 +990,7 @@ public:
 template <symbolic_char T, structure E, allocator_or_void A>
 cow_string<T, E, A> cow_string<T, E, A>::substr (size_type uBeginPos, size_type uEndPos)
 {
-    if (empty () || static_cast<difference_type> (uEndPos - uBeginPos) <= 0 || uBeginPos >= _M_uLength)
+    if (empty () || static_cast<difference_type> (uEndPos - uBeginPos) <= 0 || uBeginPos >= length ())
         return self_type ();
 
     self_type gSubStr (uEndPos - uBeginPos);
@@ -980,7 +1009,7 @@ cow_string<T, E, A> cow_string<T, E, A>::substr (size_type uBeginPos, size_type 
 
 // ====================================================
 
-template <symbolic_char T, structure E, allocator_or_void A, generic_iterator Iterator>
+template <symbolic_char T, structure E, allocator_like A, generic_iterator Iterator>
 cow_string<T, E, A>& copy_to_string (cow_string<T, E, A>&                    rh,
                                      Iterator                                pFromText,
                                      typename cow_string<T, E, A>::size_type uLength)
@@ -992,27 +1021,27 @@ cow_string<T, E, A>& copy_to_string (cow_string<T, E, A>&                    rh,
         if (!rh.is_on_stack () && !rh.is_cow_v)
              rh.deallocate (rh.data (), rh.capacity () + 1);
 
-        if (!(rh._M_gBuffer.heap.data = rh.allocate (uLength + 1)))
+        if (!(rh._M_gBuffer.heap.c_str = rh.allocate (uLength + 1)))
         {
             rh._M_uLength    = 0;
-            rh.stack.data[0] = cow_string<T, E, A>::value_type ();
+            rh._M_gBuffer.stack.data[0] = typename cow_string<T, E, A>::value_type ();
             return rh;
         }
 
         rh._M_gBuffer.heap.capacity = uLength;
     }
 
-    std::copy (pFromText, pFromText + uLength, rh._M_gBuffer.heap.data);
+    std::copy (pFromText, pFromText + uLength, rh._M_gBuffer.heap.c_str);
     rh._M_uLength = uLength;
-    rh._M_gBuffer.heap.is_copied = true;
+    //rh._M_gBuffer.heap.is_copied = true;
 
-    rh._M_gBuffer.heap.data[uLength] = typename cow_string<T, E, A>::value_type ();
+    rh._M_gBuffer.heap.c_str[uLength] = typename cow_string<T, E, A>::value_type ();
     return rh;
 }
 
 // ====================================================
 
-template <symbolic_char T, structure E, allocator_or_void A, generic_iterator Iterator>
+template <symbolic_char T, structure E, allocator_like A, generic_iterator Iterator>
 cow_string<T, E, A>& assign_to_string (cow_string<T, E, A>&                    rh,
                                        Iterator                                pFromText,
                                        typename cow_string<T, E, A>::size_type uLength)
@@ -1023,28 +1052,28 @@ cow_string<T, E, A>& assign_to_string (cow_string<T, E, A>&                    r
     {
         if (!rh.is_cow_v) rh.deallocate (rh.data (), rh.capacity () + 1);
 
-        if (!(rh._M_gBuffer.heap.data = rh.allocate (uLength + 1)))
+        if (!(rh._M_gBuffer.heap.c_str = rh.allocate (uLength + 1)))
         {
             rh._M_uLength    = 0;
-            rh.stack.data[0] = cow_string<T, E, A>::value_type ();
+            rh._M_gBuffer.stack.data[0] = typename cow_string<T, E, A>::value_type ();
             return rh;
         }
 
         rh._M_gBuffer.heap.capacity = uLength;
     }
 
-    std::copy (pFromText, pFromText + uLength, rh._M_gBuffer.heap.data);
+    std::copy (pFromText, pFromText + uLength, rh._M_gBuffer.heap.c_str);
     rh._M_uLength = uLength;
 
-    rh._M_gBuffer.heap.data[uLength] = cow_string<T, E, A>::value_type ();
+    rh._M_gBuffer.heap.c_str[uLength] = typename cow_string<T, E, A>::value_type ();
     return rh;
 }
 
 // ====================================================
 
-template <symbolic_char T, structure E, allocator_or_void A, generic_iterator Iterator>
+template <symbolic_char T, structure E, allocator_like A, generic_iterator Iterator>
 cow_string<T, E, A>& add_to_string (cow_string<T, E, A>& rh,
-                                    Iterator             pFromText,
+                                    Iterator const       pFromText,
                                     std::size_t          uAddLength)
 {
     auto const uLength = rh.size () + uAddLength;
@@ -1056,7 +1085,7 @@ cow_string<T, E, A>& add_to_string (cow_string<T, E, A>& rh,
 
         if (!(rh._M_gBuffer.heap.c_str = rh.allocate (uLength + 1))) return rh;
 
-        std::copy (pOldBuffer, pOldBuffer + rh.size (), &rh[0]);
+        std::copy (pOldBuffer, pOldBuffer + rh.length (), &rh[0]);
 
         rh._M_gBuffer.heap.capacity = uLength;
         if (!rh.is_cow_v) rh.deallocate (pOldBuffer, uOldCapacity + 1);
@@ -1073,94 +1102,140 @@ cow_string<T, E, A>& add_to_string (cow_string<T, E, A>& rh,
 template <symbolic_char T, structure E, allocator_or_void A>
 constexpr auto operator <=> (cow_string<T, E, A> const& lhs, cow_string<T, E, A> const& rhs) noexcept
 {
-    return cow_string<T, E, void> (lhs) <=> cow_string<T, E, void> (rhs);
+    return lhs.data () <=> rhs.data () && lhs.length () <=> rhs.length ();
 }
 
 template <symbolic_char T, structure E, allocator_or_void A>
 constexpr auto operator <=> (cow_string<T, E, A> const& lhs, T const* rhs) noexcept
 {
-    return cow_string<T, E, void> (lhs) <=> cow_string<T, E, void> (rhs);
+    return lhs <=> cow_string<T, E, A> (rhs);
 }
 
 template <symbolic_char T, structure E, allocator_or_void A>
 constexpr auto operator <=> (T const* lhs, cow_string<T, E, A> const& rhs) noexcept
 {
-    return cow_string<T, E, void> (lhs) <=> cow_string<T, E, void> (rhs);
+    return cow_string<T, E, A> (lhs) <=> rhs;
+}
+
+template <symbolic_char T, structure E, allocator_or_void A1, allocator_like A2>
+constexpr auto operator <=> (cow_string<T, E, A1> const& lhs,
+                             std::basic_string<T, std::char_traits<T>, A2> const& rhs) noexcept
+{
+    return lhs <=> rhs.data ();
+}
+
+template <symbolic_char T, structure E, allocator_like A1, allocator_or_void A2>
+constexpr auto operator <=> (std::basic_string<T, std::char_traits<T>, A1> const& lhs,
+                             cow_string<T, E, A2> const& rhs) noexcept
+{
+    return lhs.data () <=> rhs;
 }
 
 // ====================================================
 
 template <symbolic_char T, structure E, allocator_or_void A>
-constexpr bool operator == (cow_string<T, E, A> const& lhs,
-                            cow_string<T, E, A> const& rhs) noexcept
+constexpr bool operator == (cow_string<T, E, A> const& lhs, cow_string<T, E, A> const& rhs) noexcept
 {
-    return cow_string<T, E, void> (lhs) == cow_string<T, E, void> (rhs);
+    return lhs.data   () == rhs.data   () ||
+          (lhs.length () == rhs.length () &&
+           cow_string<T, E, A>::locale_type::compare (lhs.data (), rhs.data (), lhs.length ()) == 0);
 }
 
 template <symbolic_char T, structure E, allocator_or_void A>
 constexpr bool operator == (cow_string<T, E, A> const& lhs, T const* rhs) noexcept
 {
-    return cow_string<T, E, void> (lhs) == cow_string<T, E, void> (rhs);
+    return lhs == cow_string<T, E, A> (rhs);
 }
 
 template <symbolic_char T, structure E, allocator_or_void A>
 constexpr bool operator == (T const* lhs, cow_string<T, E, A> const& rhs) noexcept
 {
-    return cow_string<T, E, void> (lhs) == cow_string<T, E, void> (rhs);
+    return cow_string<T, E, A> (lhs) == rhs;
+}
+
+template <symbolic_char T, structure E, allocator_or_void A1, allocator_like A2>
+constexpr bool operator == (cow_string<T, E, A1> const& lhs,
+                            std::basic_string<T, std::char_traits<T>, A2> const& rhs) noexcept
+{
+    return lhs == rhs.data ();
+}
+
+template <symbolic_char T, structure E, allocator_like A1, allocator_or_void A2>
+constexpr bool operator == (std::basic_string<T, std::char_traits<T>, A1> const& lhs,
+                            cow_string<T, E, A2> const& rhs) noexcept
+{
+    return lhs.data () == rhs;
 }
 
 // ====================================================
 
 template <symbolic_char T, structure E, allocator_or_void A>
-constexpr bool operator != (cow_string<T, E, A> const& lh,
-                            cow_string<T, E, A> const& rh) noexcept
-{ return !(lh == rh); }
+constexpr bool operator != (cow_string<T, E, A> const& lhs, cow_string<T, E, A> const& rhs) noexcept
+{ return !(lhs == rhs); }
 
 template <symbolic_char T, structure E, allocator_or_void A>
-constexpr bool operator != (cow_string<T, E, A> const& lh, T const* pText2) noexcept
-{ return !(lh == pText2); }
+constexpr bool operator != (cow_string<T, E, A> const& lhs, T const* str) noexcept
+{ return !(lhs == str); }
 
 template <symbolic_char T, structure E, allocator_or_void A>
-constexpr bool operator != (T const* pText1, cow_string<T, E, A> const& rh) noexcept
-{ return !(pText1 == rh); }
+constexpr bool operator != (T const* str, cow_string<T, E, A> const& rhs) noexcept
+{ return !(str == rhs); }
 
-// ====================================================
-
-template <symbolic_char T, structure E, allocator_or_void A>
-constexpr cow_string<T, E, A>& operator += (cow_string<T, E, A>& lh,
-                                            cow_string<T, E, A> const& rh) noexcept
-{ return add_to_string (lh, rh._M_gBuffer.heap.c_str, rh._M_uLength); }
-
-template <symbolic_char T, structure E, allocator_or_void A>
-constexpr cow_string<T, E, A>& operator += (cow_string<T, E, A>& rh, T const* pText) noexcept
-{ return add_to_string (rh, pText, str_size (pText)); }
-
-// ====================================================
-
-template <symbolic_char T, structure E, allocator_or_void A>
-constexpr cow_string<T, E, A> operator + (cow_string<T, E, A> const& lh,
-                                          cow_string<T, E, A> const& rh) noexcept
+template <symbolic_char T, structure E, allocator_or_void A1, allocator_like A2>
+constexpr bool operator != (cow_string<T, E, A1> const& lhs,
+                            std::basic_string<T, std::char_traits<T>, A2> const& rhs) noexcept
 {
-    cow_string<T, E, A> gStr (lh);
-    return std::move (add_to_string (gStr, rh._M_gBuffer.heap.c_str, rh._M_uLength));
+    return !(lhs == rhs);
+}
+
+template <symbolic_char T, structure E, allocator_like A1, allocator_or_void A2>
+constexpr bool operator != (std::basic_string<T, std::char_traits<T>, A1> const& lhs,
+                            cow_string<T, E, A2> const& rhs) noexcept
+{
+    return !(lhs == rhs);
+}
+
+// ====================================================
+
+template <symbolic_char T, structure E, allocator_or_void A1, allocator_like A2>
+constexpr cow_string<T, E, A2>& operator += (cow_string<T, E, A2>& lhs,
+                                             cow_string<T, E, A1> const& rhs) noexcept
+{
+    return add_to_string (lhs, rhs.data (), rhs.length ());
+}
+
+template <symbolic_char T, structure E, allocator_like A>
+constexpr cow_string<T, E, A>& operator += (cow_string<T, E, A>& lhs, T const* str) noexcept
+{
+    return add_to_string (lhs, str, str_size (str));
 }
 
 // ====================================================
 
 template <symbolic_char T, structure E, allocator_or_void A>
-constexpr cow_string<T, E, A> operator + (cow_string<T, E, A> const& lh, T const* pText) noexcept
+constexpr cow_string<T, E> operator + (cow_string<T, E, A> const& lhs,
+                                       cow_string<T, E, A> const& rhs) noexcept
 {
-    cow_string<T, E, A> gStr (lh);
-    return std::move (add_to_string (gStr, pText, str_size (pText)));
+    cow_string<T, E> gStr (lhs);
+    return std::move (add_to_string (gStr, rhs.data (), rhs.length ()));
 }
 
 // ====================================================
 
 template <symbolic_char T, structure E, allocator_or_void A>
-constexpr cow_string<T, E, A> operator + (T const* pText, cow_string<T, E, A> const& rh) noexcept
+constexpr cow_string<T, E> operator + (cow_string<T, E, A> const& lhs, T const* str) noexcept
 {
-    cow_string<T, E, A> gStr (pText);
-    return std::move (add_to_string (gStr, rh._M_gBuffer.heap.data, rh._M_uLength));
+    cow_string<T, E> gStr (lhs);
+    return std::move (add_to_string (gStr, str, str_size (str)));
+}
+
+// ====================================================
+
+template <symbolic_char T, structure E, allocator_or_void A>
+constexpr cow_string<T, E> operator + (T const* str, cow_string<T, E, A> const& rhs) noexcept
+{
+    cow_string<T, E> gStr (str);
+    return std::move (add_to_string (gStr, rhs.data (), rhs.length ()));
 }
 
 // ====================================================
@@ -1171,19 +1246,6 @@ constexpr void swap (cow_string<T, E, A>& lhs, cow_string<T, E, A>& rhs) noexcep
     std::swap (lhs._M_gBuffer, rhs._M_gBuffer);
     std::swap (lhs._M_uLength, rhs._M_uLength);
 }
-
-// ====================================================
-
-template <symbolic_char T = char>
-using std_string = std::basic_string<T, std::char_traits<T>, std::allocator<T>>;
-
-template <symbolic_char T = char>
-using std_isstream = std::basic_istringstream<T, std::char_traits<T>, std::allocator<T>>;
-
-template <symbolic_char T = char>
-using std_osstream = std::basic_ostringstream<T, std::char_traits<T>, std::allocator<T>>;
-template <symbolic_char T = char>
-using std_sstream = std::basic_stringstream<T, std::char_traits<T>, std::allocator<T>>;
 
 // ====================================================
 
@@ -1277,13 +1339,62 @@ struct is_string <cow_string<wchar, A>> : std::true_type
 
 /// is of string type -> value
 template <typename T>
-inline constexpr auto const is_string_v = is_string<T>::value;
+inline constexpr auto const is_string_v = is_string<T>::value || requires (T& t)
+{
+    typename T::traits_type           ;
+    typename T::allocator_type        ;
+    typename T::value_type            ;
+    typename T::size_type             ;
+    typename T::pointer               ;
+    typename T::const_pointer         ;
+    typename T::reference             ;
+    typename T::const_reference       ;
+    typename T::difference_type       ;
+    typename T::iterator              ;
+    typename T::const_iterator        ;
+    typename T::reverse_iterator      ;
+    typename T::const_reverse_iterator;
+
+    { t.c_str   () } -> are_same<typename T::const_pointer>;
+    { t.data    () } -> are_same<typename T::const_pointer>;
+    { t.size    () } -> are_same<typename T::size_type>;
+    { t.length  () } -> are_same<typename T::size_type>;
+    { t.empty   () } -> are_same<bool>;
+    { t.begin   () } -> are_same<typename T::iterator>;
+    { t.end     () } -> are_same<typename T::iterator>;
+    { t.cbegin  () } -> are_same<typename T::const_iterator>;
+    { t.cend    () } -> are_same<typename T::const_iterator>;
+    { t.rbegin  () } -> are_same<typename T::reverse_iterator>;
+    { t.rend    () } -> are_same<typename T::reverse_iterator>;
+    { t.crbegin () } -> are_same<typename T::const_reverse_iterator>;
+    { t.crend   () } -> are_same<typename T::const_reverse_iterator>;
+    { t.front   () } -> are_same<typename T::reference>;
+    { t.back    () } -> are_same<typename T::reference>;
+    { t.at      (typename T::size_type ()) } -> are_same<typename T::reference>;
+    { t.operator [] (typename T::size_type ()) } -> are_same<typename T::reference>;
+    { t.max_size () } -> are_same<typename T::size_type>;
+    { t.capacity () } -> are_same<typename T::size_type>;
+    { t.reserve (typename T::size_type ()) } -> are_same<void>;
+    { t.shrink_to_fit () } -> are_same<void>;
+    { t.erase (typename T::iterator ()) } -> are_same<typename T::iterator>;
+    { t.clear () } -> are_same<void>;
+    { t.pop_back () } -> are_same<void>;
+    { t.pop_front () } -> are_same<void>;
+    { t.get_allocator () } -> are_same<typename T::allocator_type>;
+    { t.swap (t) } -> are_same<void>;
+    { t.remove_prefix (typename T::size_type ()) } -> are_same<void>;
+    { t.remove_suffix (typename T::size_type ()) } -> are_same<void>;
+    { t.resize (typename T::size_type ()) } -> are_same<void>;
+    { t.find (typename T::const_pointer ()) } -> are_same<typename T::size_type>;
+    { t.substr () } -> are_same<T>;
+    { t.compare (typename T::const_pointer ()) } -> are_same<int>;
+};
+
+template <typename T>
+concept string_like = is_string_v<T>;
 
 template <typename T>
 using StringType = std::enable_if_t<is_string_v<T>, T>;
-
-template <typename T>
-concept string_t = is_string_v<T>;
 
 } // namespace cppual
 
@@ -1291,15 +1402,8 @@ concept string_t = is_string_v<T>;
 
 namespace std {
 
-using cppual::symbolic_char         ;
-using cppual::structure             ;
-using cppual::char_hash             ;
-using cppual::cow_string            ;
-using cppual::allocator_or_void     ;
-using cppual::allocator_like;
-
 template <symbolic_char T, structure E, allocator_or_void A>
-struct uses_allocator <cow_string<T, E, A>, A> : std::bool_constant<allocator_like<A>>
+struct uses_allocator <cow_string<T, E, A>, A> : bool_constant<allocator_like<A>>
 { };
 
 template <symbolic_char T, structure E, allocator_or_void A>
@@ -1311,15 +1415,17 @@ inline constexpr cbool ranges::enable_view<cow_string<T, E, A>> = true;
 template <symbolic_char T, structure E, allocator_or_void A>
 struct hash <cow_string<T, E, A>>
 {
-   size_t operator () (cow_string<T, E, A> const& value) const noexcept
-   { return char_hash<value.data ()> (); }
+   constexpr std::size_t operator () (cow_string<T, E, A> const& value) const noexcept
+   {
+       return char_hash (value.data ());
+   }
 };
 
 template <symbolic_char T, structure E, allocator_or_void A>
 basic_ostream<T, E>& operator << (basic_ostream<T, E>& os, cow_string<T, E, A> const& str)
 { os << str.data (); return os; }
 
-} // namespace std
+} //! namespace std
 
 // ====================================================
 

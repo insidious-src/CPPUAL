@@ -4,14 +4,14 @@
 #undef  JSON_HAS_STDSTRING
 #define JSON_HAS_STDSTRING 1
 
-#include <cppual/memory/allocator.h>
-#include <cppual/functional.h>
-#include <cppual/signal.h>
-#include <cppual/types.h>
-#include <cppual/string.h>
-#include <cppual/containers.h>
+#include <cppual/types>
+#include <cppual/string>
+#include <cppual/signal>
+#include <cppual/concepts>
+#include <cppual/containers>
+#include <cppual/functional>
+#include <cppual/memory_allocator>
 #include <cppual/json/document.h>
-#include <cppual/concept/concepts.h>
 
 #include <iostream>
 #include <utility>
@@ -21,10 +21,6 @@
 // ====================================================
 
 namespace cppual::json {
-
-//======================================================
-
-using allocator_like;
 
 //======================================================
 

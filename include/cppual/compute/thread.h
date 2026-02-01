@@ -29,7 +29,6 @@
 #include <cppual/process/details.h>
 
 #include <atomic>
-//#include <thread>
 
 // =========================================================
 
@@ -39,14 +38,14 @@ namespace cppual::compute {
 
 typedef enum class thread_priority : u8
 {
-    inherit = 0,
-    idle       ,
-    lowest     ,
-    very_low   ,
-    low        ,
-    normal     ,
-    high       ,
-    very_high  ,
+    inherit  ,
+    idle     ,
+    lowest   ,
+    very_low ,
+    low      ,
+    normal   ,
+    high     ,
+    very_high,
     highest
 }
 const const_thread_priority;
@@ -76,12 +75,11 @@ int			    sleep_for (uint millisec);
 class thread : public non_copyable
 {
 public:
-    typedef thread           self_type;
-    typedef function<void()> callable ;
-    typedef std::size_t      size_type;
-
-    using atomic_size_t = std::atomic_size_t;
-    using atomic_bool   = std::atomic_bool  ;
+    typedef thread             self_type    ;
+    typedef function<void()>   fn_type      ;
+    typedef std::size_t        size_type    ;
+    typedef std::atomic_size_t atomic_size_t;
+    typedef std::atomic_bool   atomic_bool  ;
 
     class id final
     {
@@ -89,20 +87,24 @@ public:
         typedef id            self_type  ;
         typedef thread_handle handle_type;
 
-        inline id () noexcept = default;
+        constexpr id ()                                    noexcept = default;
+        constexpr id (self_type &&)                        noexcept = default;
+        constexpr id (self_type const&)                    noexcept = default;
+        constexpr self_type& operator = (self_type &&)     noexcept = default;
+        constexpr self_type& operator = (self_type const&) noexcept = default;
 
-        inline id (handle_type id) noexcept
-        : _M_handle (id)
+        constexpr id (handle_type h) noexcept
+        : _M_handle  (h)
         { }
 
     private:
         static bool thread_handles_equal (resource_handle h1, resource_handle h2);
 
-        friend bool
-        operator == (self_type, self_type) noexcept;
+        friend
+        constexpr bool operator == (self_type, self_type) noexcept;
 
-        friend bool
-        operator  < (self_type, self_type) noexcept;
+        friend
+        constexpr bool operator  < (self_type, self_type) noexcept;
 
         friend class thread;
 
@@ -118,41 +120,41 @@ public:
     void        cancel ();
     void        detach ();
     void        join   ();
-    //bool        try_join_for (uint millisec);
+    bool        try_join_for (uint millisec);
 
-    bool start (callable&       func,
+    bool start (fn_type&        func,
                 bool            joinable   = true,
                 thread_priority priority   = thread_priority::inherit,
                 size_type       stack_size = 1048576U);
 
-    inline size_type stack_size  () const noexcept { return _M_uStackSize;  }
-    inline id        handle      () const noexcept { return _M_gId;         }
-    inline bool      is_joinable () const noexcept { return _M_bIsJoinable; }
+    constexpr size_type stack_size  () const noexcept { return _M_uStackSize;  }
+    constexpr id        handle      () const noexcept { return _M_gId;         }
+    constexpr bool      is_joinable () const noexcept { return _M_bIsJoinable; }
 
 private:
-    id          _M_gId        ;
-    size_type   _M_uStackSize ;
-    atomic_bool _M_bIsJoinable;
+    id          _M_gId         { };
+    size_type   _M_uStackSize  { };
+    atomic_bool _M_bIsJoinable { };
 };
 
 // =========================================================
 
-inline bool operator == (thread::id x, thread::id y) noexcept
+constexpr bool operator == (thread::id x, thread::id y) noexcept
 { return thread::id::thread_handles_equal (x._M_handle, y._M_handle); }
 
-inline bool operator < (thread::id x, thread::id y) noexcept
+constexpr bool operator < (thread::id x, thread::id y) noexcept
 { return x._M_handle < y._M_handle; }
 
-inline bool operator != (thread::id x, thread::id y) noexcept
+constexpr bool operator != (thread::id x, thread::id y) noexcept
 { return !(x == y); }
 
-inline bool operator <= (thread::id x, thread::id y) noexcept
+constexpr bool operator <= (thread::id x, thread::id y) noexcept
 { return !(y < x); }
 
-inline bool operator > (thread::id x, thread::id y) noexcept
+constexpr bool operator > (thread::id x, thread::id y) noexcept
 { return y < x; }
 
-inline bool operator >= (thread::id x, thread::id y) noexcept
+constexpr bool operator >= (thread::id x, thread::id y) noexcept
 { return !(x < y); }
 
 } //! namespace compute

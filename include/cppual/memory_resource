@@ -38,6 +38,6 @@ using std::pmr::synchronized_pool_resource  ;
 
 // =========================================================
 
-} // namespace memory
+} //! namespace memory
 
 // =========================================================

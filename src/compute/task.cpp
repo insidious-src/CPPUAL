@@ -126,10 +126,10 @@ bool thread_pool::reserve (host_queue& gTaskQueue, size_type uAddThreads, bool b
 
     write_lock lock (pool ().threadMutex);
 
-    /// add threads to the container and initialize them
+    //! add threads to the container and initialize them
     while (uAddThreads-- > 0)
     {
-        /// add and initialize a thread with host_queue::thread_main ()
+        //! add and initialize a thread with host_queue::thread_main ()
         pool ().threads.emplace_back (host_queue::fn_type (gTaskQueue, &host_queue::thread_main));
         if (bDetached) pool ().threads.back ().detach ();
     }
@@ -139,11 +139,11 @@ bool thread_pool::reserve (host_queue& gTaskQueue, size_type uAddThreads, bool b
 
 // =========================================================
 
-host_queue::host_queue (host_queue const&)
+host_queue::host_queue (self_type const&)
 {
 }
 
-host_queue::host_queue (host_queue&&)
+host_queue::host_queue (self_type&&)
 {
 }
 
@@ -153,12 +153,12 @@ host_queue::~host_queue ()
     when_all_exit ();
 }
 
-host_queue& host_queue::operator = (host_queue const&)
+host_queue& host_queue::operator = (self_type const&)
 {
     return *this;
 }
 
-host_queue& host_queue::operator = (host_queue&&)
+host_queue& host_queue::operator = (self_type&&)
 {
     return *this;
 }
@@ -305,7 +305,7 @@ bool host_queue::schedule (fn_type&& task_fn)
     return is_scheduled;
 }
 
-void host_queue::quit (bool bInterrupt) noexcept
+void host_queue::quit (cbool bInterrupt) noexcept
 {
     if (is_running ())
     {

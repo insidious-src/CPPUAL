@@ -24,7 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/ui/wm.h>
-#include <cppual/string.h>
+#include <cppual/string>
 
 namespace cppual { namespace ui {
 
