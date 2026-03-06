@@ -73,19 +73,19 @@ bool xcb_queue::set_window_events (window_type const& window, mask_type gFlags) 
         if (gFlags.test (event_type::focus))        uMask |= XCB_EVENT_MASK_FOCUS_CHANGE;
     }
 
-    ::xcb_change_window_attributes (display ()->native<x::display_type> (),
+    ::xcb_change_window_attributes (display ()->native<x::display_type*> (),
                                     window.handle<x::handle_type> (),
                                     XCB_CW_EVENT_MASK,
                                     &uMask);
 
-    ::xcb_flush (display ()->native<x::display_type> ());
+    ::xcb_flush (display ()->native<x::display_type*> ());
     return true;
 }
 
 bool xcb_queue::pop_front (bool bWait) noexcept
 {
-    x::event_handle event (bWait ? ::xcb_wait_for_event (display ()->native<x::display_type> ()) :
-                                   ::xcb_poll_for_event (display ()->native<x::display_type> ()));
+    x::event_handle event (bWait ? ::xcb_wait_for_event (display ()->native<x::display_type*> ()) :
+                                   ::xcb_poll_for_event (display ()->native<x::display_type*> ()));
 
     if (!event.get ()) return false;
 
@@ -97,7 +97,7 @@ int xcb_queue::poll (bool_type& poll)
 {
     while (poll)
     {
-        x::event_handle event (::xcb_wait_for_event (display ()->native<x::display_type> ()));
+        x::event_handle event (::xcb_wait_for_event (display ()->native<x::display_type*> ()));
 
         if (!event.get ()) continue;
 
@@ -111,26 +111,26 @@ void xcb_queue::send (window_type const& window, event_type const& event)
 {
     x::event_handle::base_type send_event = x::event_handle::to_xcb_event (event);
 
-    ::xcb_send_event (display ()->native<x::display_type> (),
+    ::xcb_send_event (display ()->native<x::display_type*> (),
                       x::dont_propagate,
                       window.handle<x::handle_type> (),
                       send_event.response_type & ~0x80,
                       direct_cast<cchar*> (&send_event));
 
-    ::xcb_flush (display ()->native<x::display_type> ());
+    ::xcb_flush (display ()->native<x::display_type*> ());
 }
 
 void xcb_queue::post (window_type const& window, event_type const& event)
 {
     x::event_handle::base_type post_event = x::event_handle::to_xcb_event (event);
 
-    ::xcb_send_event (display ()->native<x::display_type> (),
+    ::xcb_send_event (display ()->native<x::display_type*> (),
                       x::dont_propagate,
                       window.handle<x::handle_type> (),
                       post_event.response_type & ~0x80,
                       direct_cast<cchar*> (&post_event));
 
-    ::xcb_flush (display ()->native<x::display_type> ());
+    ::xcb_flush (display ()->native<x::display_type*> ());
 }
 
 } } // namespace ui

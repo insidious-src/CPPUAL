@@ -26,9 +26,13 @@
 #include <cppual/network/transport/socket.h>
 #include <cppual/network/address.h>
 #include <cppual/network/packet.h>
-#include <cppual/string.h>
+#include <cppual/string>
+
+// =========================================================
 
 namespace cppual { namespace network {
+
+// =========================================================
 
 class udp_stream : public virtual transport_socket
 {
@@ -67,11 +71,15 @@ protected:
     udp_stream (address const& address, u16 port) noexcept;
 
 private:
-    address _M_gPeerAddr;
-    u16     _M_nPeerPort;
+    address _M_gPeerAddr { };
+    u16     _M_nPeerPort { };
 };
 
+// =========================================================
+
 } } // namespace Network
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_NETWORK_UDP_H_

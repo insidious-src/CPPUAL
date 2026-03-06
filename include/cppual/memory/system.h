@@ -23,8 +23,8 @@
 #define CPPUAL_MEMORY_MODEL_H_
 #ifdef __cplusplus
 
-#include <cppual/decl.h>
-#include <cppual/types.h>
+#include <cppual/decl>
+#include <cppual/types>
 
 #include <cstddef>
 

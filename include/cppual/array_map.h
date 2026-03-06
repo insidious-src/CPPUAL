@@ -40,11 +40,11 @@ namespace cppual {
 // ====================================================
 
 template <typename T>
-concept array_map_key = integer<T>;
+concept index_map_key = integer<T>;
 
 // ====================================================
 
-template <array_map_key K, non_void V, allocator_like A = memory::allocator<std::pair<K, V>>>
+template <index_map_key K, non_void V, allocator_like A = memory::allocator<std::pair<K, V>>>
 class dyn_index_map : public std::vector<std::pair<K, V>, A>
 {
 public:
@@ -147,16 +147,16 @@ public:
     consteval static size_type bucket_size (size_type) noexcept { return 1; }
     std::pair<iterator, iterator> equal_range (key_type key);
     std::pair<const_iterator, const_iterator> equal_range (key_type key) const;
-    template <array_map_key Key>
+    template <index_map_key Key>
     std::pair<iterator, iterator> equal_range (Key x);
-    template <array_map_key Key>
+    template <index_map_key Key>
     std::pair<const_iterator, const_iterator> equal_range (Key const& x) const;
     consteval static size_type count (key_type const& = key_type ()) noexcept { return 1; }
-    template <array_map_key Key>
+    template <index_map_key Key>
     consteval static size_type count (Key = Key ()) noexcept { return 1; }
     template <typename M>
     std::pair<iterator, bool> insert_or_assign (key_type k, M&& obj);
-    template <array_map_key Key, typename M>
+    template <index_map_key Key, typename M>
     std::pair<iterator, bool> insert_or_assign (Key k, M&& obj);
 
     constexpr const_reference operator [] (size_type key) const noexcept
@@ -296,6 +296,10 @@ public:
     template <char_ptr Name>
     consteval size_type get_index () const noexcept
     { return char_hash<Name> () % size (); }
+
+    template <string_view STR>
+    constexpr size_type get_index () const noexcept
+    { return char_hash<STR.data (), STR.size ()> () % size (); }
 
     constexpr size_type get_index (string_view const& name) const noexcept
     { return char_hash (name.data (), name.size ()) % size (); }

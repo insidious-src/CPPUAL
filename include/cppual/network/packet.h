@@ -23,91 +23,111 @@
 #define CPPUAL_NETWORK_PACKET_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/string.h>
-#include <cppual/containers.h>
-#include <cppual/noncopyable.h>
+#include <cppual/types>
+#include <cppual/string>
+#include <cppual/containers>
+#include <cppual/noncopyable>
 
-namespace cppual { namespace network {
+// =========================================================
+
+namespace cppual::network {
 
 // =========================================================
 
 class packet : public non_copyable_virtual
 {
 public:
-    typedef char                  value_type ;
-    typedef value_type const      const_value;
-    typedef std::size_t           size_type  ;
-    typedef u32                   stream_size;
-    typedef dyn_array<value_type> stream_type;
+    typedef packet                  self_type    ;
+    typedef char                    value_type   ;
+    typedef value_type const        const_value  ;
+    typedef std::size_t             size_type    ;
+    typedef size_type const         const_size   ;
+    typedef  void*                  pointer      ;
+    typedef cvoid*                  const_pointer;
+    typedef u32                     stream_size  ;
+    typedef dyn_array<value_type>   stream_type  ;
 
-    typedef bool (packet::* safe_bool)(size_type);
+    using safe_bool = bool (self_type::*) (size_type) const noexcept;
 
-    void append (cvoid* data, size_type size_in_bytes) noexcept;
+    void append (const_pointer data, size_type size_in_bytes) noexcept;
 
-    packet& operator << (cbool)              noexcept;
-    packet& operator << (ci8)                noexcept;
-    packet& operator << (cu8)                noexcept;
-    packet& operator << (ci16)               noexcept;
-    packet& operator << (cu16)               noexcept;
-    packet& operator << (ci32)               noexcept;
-    packet& operator << (cu32)               noexcept;
-    packet& operator << (ci64&)              noexcept;
-    packet& operator << (cu64&)              noexcept;
-    packet& operator << (cfloat&)            noexcept;
-    packet& operator << (cdouble&)           noexcept;
-    packet& operator << (cldouble&)          noexcept;
-    packet& operator << (stream_type const&) noexcept;
-    packet& operator << (string const&)      noexcept;
-    packet& operator << (wstring const&)     noexcept;
-    packet& operator << (u16string const&)   noexcept;
-    packet& operator << (u32string const&)   noexcept;
+    self_type& operator << (cbool)              noexcept;
+    self_type& operator << (ci8)                noexcept;
+    self_type& operator << (cu8)                noexcept;
+    self_type& operator << (ci16)               noexcept;
+    self_type& operator << (cu16)               noexcept;
+    self_type& operator << (ci32)               noexcept;
+    self_type& operator << (cu32)               noexcept;
+    self_type& operator << (ci64&)              noexcept;
+    self_type& operator << (cu64&)              noexcept;
+    self_type& operator << (cfloat&)            noexcept;
+    self_type& operator << (cdouble&)           noexcept;
+    self_type& operator << (cldouble&)          noexcept;
+    self_type& operator << (stream_type const&) noexcept;
+    self_type& operator << (string const&)      noexcept;
+    self_type& operator << (u8string const&)    noexcept;
+    self_type& operator << (u16string const&)   noexcept;
+    self_type& operator << (u32string const&)   noexcept;
+    self_type& operator << (wstring const&)     noexcept;
+    self_type& operator << (fstring const&)     noexcept;
+    self_type& operator << (fu8string const&)   noexcept;
+    self_type& operator << (fu16string const&)  noexcept;
+    self_type& operator << (fu32string const&)  noexcept;
+    self_type& operator << (fwstring const&)    noexcept;
 
-    packet& operator >> (bool&)        noexcept;
-    packet& operator >> (i8&)          noexcept;
-    packet& operator >> (u8&)          noexcept;
-    packet& operator >> (i16&)         noexcept;
-    packet& operator >> (u16&)         noexcept;
-    packet& operator >> (i32&)         noexcept;
-    packet& operator >> (u32&)         noexcept;
-    packet& operator >> (i64&)         noexcept;
-    packet& operator >> (u64&)         noexcept;
-    packet& operator >> (float&)       noexcept;
-    packet& operator >> (double&)      noexcept;
-    packet& operator >> (ldouble&)     noexcept;
-    packet& operator >> (stream_type&) noexcept;
-    packet& operator >> (string&)      noexcept;
-    packet& operator >> (wstring&)     noexcept;
-    packet& operator >> (u16string&)   noexcept;
-    packet& operator >> (u32string&)   noexcept;
+    self_type& operator >> (bool&)        noexcept;
+    self_type& operator >> (i8&)          noexcept;
+    self_type& operator >> (u8&)          noexcept;
+    self_type& operator >> (i16&)         noexcept;
+    self_type& operator >> (u16&)         noexcept;
+    self_type& operator >> (i32&)         noexcept;
+    self_type& operator >> (u32&)         noexcept;
+    self_type& operator >> (i64&)         noexcept;
+    self_type& operator >> (u64&)         noexcept;
+    self_type& operator >> (float&)       noexcept;
+    self_type& operator >> (double&)      noexcept;
+    self_type& operator >> (ldouble&)     noexcept;
+    self_type& operator >> (stream_type&) noexcept;
+    self_type& operator >> (string&)      noexcept;
+    self_type& operator >> (u8string&)    noexcept;
+    self_type& operator >> (u16string&)   noexcept;
+    self_type& operator >> (u32string&)   noexcept;
+    self_type& operator >> (wstring&)     noexcept;
+    self_type& operator >> (fstring&)     noexcept;
+    self_type& operator >> (fu8string&)   noexcept;
+    self_type& operator >> (fu16string&)  noexcept;
+    self_type& operator >> (fu32string&)  noexcept;
+    self_type& operator >> (fwstring&)    noexcept;
 
     constexpr size_type size () const noexcept
     { return _M_gData.size (); }
 
-    constexpr cvoid* data () const noexcept
+    constexpr const_pointer data () const noexcept
     { return !_M_gData.empty () ? _M_gData.data () : nullptr; }
 
     constexpr bool is_end_of_packet () const noexcept
     { return _M_uPos >= _M_gData.size (); }
 
-    constexpr bool is_valid () const noexcept
+    constexpr bool valid () const noexcept
     { return _M_gData.capacity () > 0; }
 
     constexpr operator safe_bool () const noexcept
-    { return is_valid () ? &packet::can_exchange : nullptr; }
+    {
+      return valid () ? &self_type::can_exchange : nullptr;
+    }
 
     constexpr void flush () noexcept
     {
         _M_gData.clear ();
-        _M_uPos = 0;
+        _M_uPos = size_type ();
     }
 
 protected:
-    virtual cvoid* on_send    (size_type& size);
-    virtual void   on_receive (cvoid* data, size_type size_in_bytes);
+    virtual const_pointer on_send (size_type& size);
+    virtual void on_receive (const_pointer data, size_type size_in_bytes);
 
 private:
-    bool can_exchange (size_type size_in_bytes) noexcept;
+    bool can_exchange (size_type size_in_bytes) const noexcept;
 
 private:
     stream_type _M_gData;
@@ -116,7 +136,9 @@ private:
 
 // =========================================================
 
-} } // namespace Network
+} //! namespace network
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_NETWORK_PACKET_H_

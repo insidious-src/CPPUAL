@@ -70,7 +70,7 @@ public:
     typedef wnd_pointer&                           wnd_reference      ;
     typedef wnd_pointer const&                     wnd_const_reference;
     typedef std::size_t                            size_type          ;
-    typedef std::string_view                       string_type        ;
+    typedef fstring_view                           string_type        ;
 
     constexpr platform_wnd_interface (connection_type pConn = connection_type (),
                                       handle_type      hWnd = handle_type ()) noexcept

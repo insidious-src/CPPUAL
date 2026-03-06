@@ -43,7 +43,7 @@ private:
 public:
     typedef string string_type;
 
-    consteval address () noexcept = default;
+    constexpr address () noexcept = default;
 
     address (string_type const& ip_str) noexcept;
     address (byte byte1, byte byte2, byte byte3, byte byte4) noexcept;

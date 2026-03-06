@@ -62,7 +62,7 @@ private:
         return init;
     }
 
-    constexpr initializer ()
+    initializer ()
     : manager ()
     , local_factories ()
     {

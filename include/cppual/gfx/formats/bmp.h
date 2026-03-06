@@ -117,7 +117,7 @@ public:
     }
     const const_info_header;
 
-    constexpr bitmap_stream (cchar* path, bool create = false)
+    inline bitmap_stream (cchar* path, bool create = false)
     : base_type     (path, in | out | binary),
       _M_infoHeader { },
       _M_header     { }
@@ -126,7 +126,7 @@ public:
         if ( good    ())  parse_header ();
     }
 
-    constexpr bitmap_stream& operator = (bitmap_stream& obj)
+    inline bitmap_stream& operator = (bitmap_stream& obj)
     {
         if (this != &obj)
         {
@@ -135,14 +135,14 @@ public:
             reset_seek             ( );
             obj.seekg              (0);
             base_type::operator << (obj.rdbuf ());
-            obj.seekg              (tmp_off     );
-            _parse_header          ( );
+            obj.seekg              (tmp_off);
+            parse_header           ( );
         }
 
         return *this;
     }
 
-    constexpr bool valid () const noexcept
+    inline bool valid () const noexcept
     {
         return header ().type == bmp_type::BM             &&
                header ().offset                           >=
@@ -151,7 +151,7 @@ public:
                info   ().image_size_calc   ();
     }
 
-    constexpr void reset_seek ()
+    inline void reset_seek ()
     {
         seekg (0);
         seekp (0);

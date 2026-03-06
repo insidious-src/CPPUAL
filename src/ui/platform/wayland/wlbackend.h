@@ -50,10 +50,10 @@ public:
     constexpr void flush () noexcept
     { ::wl_display_flush (native<wl_handle_type> ()); }
 
-    constexpr wl_display (string_view const& strName) noexcept
-    : display_interface  (::wl_display_connect (strName.data ()), nullptr),
-      _M_nScreenCount    (),
-      _M_gName           (strName)
+    inline wl_display (string_view const& strName) noexcept
+    : display_interface (::wl_display_connect (strName.data ()), nullptr),
+      _M_nScreenCount   (),
+      _M_gName          (strName)
     { }
 
 private:

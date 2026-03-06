@@ -104,15 +104,15 @@ public:
     };
 
     template <typename R, typename... Args>
-    constexpr R operator () (R*, Args... args) const
+    constexpr R operator () (R*, Args&&... args) const
     {
-        return _M_iface->iface_type::template invoke<R> (_M_name, std::forward<Args> (args)...);
+        return _M_iface->iface_type::template invoke<R> (_M_name.data (), std::forward<Args> (args)...);
     }
 
     template <typename... Args>
-    constexpr void operator () (Args... args) const
+    constexpr void operator () (Args&&... args) const
     {
-        _M_iface->iface_type::template invoke<void> (_M_name, std::forward<Args> (args)...);
+        _M_iface->iface_type::template invoke<void> (_M_name.data (), std::forward<Args> (args)...);
     }
 
     constexpr string_view name () const noexcept
@@ -123,11 +123,11 @@ public:
 
 private:
     constexpr function_proxy (iface_const_ref interface, string_view fn_name) noexcept
-        : _M_iface (&interface)
-        , _M_name  (fn_name   )
+    : _M_iface (&interface)
+    , _M_name  (fn_name   )
     { }
 
-    consteval explicit function_proxy (iface_const_ref interface, const_pointer fn_name) noexcept
+    constexpr explicit function_proxy (iface_const_ref interface, const_pointer fn_name) noexcept
     : _M_iface (&interface)
     , _M_name  (fn_name   )
     { }
@@ -197,7 +197,7 @@ public:
 
     // ====================================================
 
-    inline constexpr static const_size npos = static_cast<size_type> (-1);
+    inline constexpr static const_size npos = size_type (-1);
 
     // ====================================================
 
@@ -205,25 +205,25 @@ public:
 
     // ====================================================
 
-    template <key_type... Ks> requires (sizeof... (Ks) >= 2)
+    template <key_type... Ks> requires (sizeof... (Ks) > 1)
     consteval bool contains () const noexcept
     {
         return ((get_index<Ks> () != npos) && ...);
     }
 
-    template <char_ptr... Ks> requires (sizeof... (Ks) >= 2)
+    template <char_ptr... Ks> requires (sizeof... (Ks) > 1)
     consteval bool contains () const noexcept
     {
         return ((get_index<Ks> () != npos) && ...);
     }
 
-    template <unbound_key... Ks> requires (sizeof... (Ks) >= 2)
+    template <unbound_key... Ks> requires (sizeof... (Ks) > 1)
     constexpr bool contains (Ks... keys) const noexcept
     {
         return ((get_index (keys) != npos) && ...);
     }
 
-    template <c_const_str... Ks> requires (sizeof... (Ks) >= 2)
+    template <c_const_str... Ks> requires (sizeof... (Ks) > 1)
     constexpr bool contains (Ks... keys) const noexcept
     {
         return ((get_index (keys) != npos) && ...);
@@ -254,7 +254,10 @@ public:
 
     // ====================================================
 
-    consteval fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    constexpr fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    {  return fn_proxy_type (*this, fn_name); }
+
+    constexpr fn_proxy_type operator [] (char_ptr fn_name) const noexcept
     {  return fn_proxy_type (*this, fn_name); }
 
     // ====================================================
@@ -264,10 +267,10 @@ public:
 
 protected:
     //! a pair of Ps... consists of const char* and cppual::function class
-    template <pair_like... Ts>
-    requires (sizeof... (Ts) <= size () &&
-             (functional_str_pair<Ts, typename Ts::first_type, typename Ts::second_type> && ...))
-    consteval unbound_interface (Ts... pairs)
+    template <pair_like... Ps>
+    requires (sizeof... (Ps) <= size () &&
+             (functional_str_pair<Ps, typename Ps::first_type, typename Ps::second_type> && ...))
+    consteval unbound_interface (Ps... pairs)
     : _M_fn_map { std::make_pair (char_hash (pairs.first), pairs.second)... }
     { }
 
@@ -324,23 +327,29 @@ protected:
 
 private:
     template <typename R, typename... Args>
-    constexpr void add_function (string_view const& fn_name, fn_t<R(Args...) const> const& fn) noexcept
+    constexpr
+    void
+    add_function (string_view const& fn_name, fn_t<R(Args...) const> const& fn) noexcept
     {
-        constexpr const_size I = get_index<fn_name.data ()> ();
+        constexpr const_size I = get_index<fn_name> ();
 
         if (I == npos) std::get<I> (_M_fn_map) = std::pair { char_hash (fn_name.data ()), fn };
     }
 
-    template <size_type SZ = def_capture_size_v, typename R, typename... Args>
-    constexpr void add_function (string_view const& fn_name, fn_t<R(Args...), SZ> const& fn) noexcept
+    template <typename R, size_type SZ = def_capture_size_v, typename... Args>
+    constexpr
+    void
+    add_function (string_view const& fn_name, fn_t<R(Args...), SZ> const& fn) noexcept
     {
-        constexpr const_size I = get_index<fn_name.data ()> ();
+        constexpr const_size I = get_index<fn_name> ();
 
         if (I == npos) std::get<I> (_M_fn_map) = std::pair { char_hash (fn_name.data ()), fn };
     }
 
     template <typename R, typename... Args>
-    constexpr void add_function (char_ptr fn_name, fn_t<R(Args...) const> const& fn) noexcept
+    constexpr
+    void
+    add_function (char_ptr fn_name, fn_t<R(Args...) const> const& fn) noexcept
     {
         constexpr const_size I = get_index<fn_name> ();
 
@@ -348,7 +357,9 @@ private:
     }
 
     template <size_type SZ = def_capture_size_v, typename R, typename... Args>
-    constexpr void add_function (char_ptr fn_name, fn_t<R(Args...), SZ> const& fn) noexcept
+    constexpr
+    void
+    add_function (char_ptr fn_name, fn_t<R(Args...), SZ> const& fn) noexcept
     {
         constexpr const_size I = get_index<fn_name> ();
 
@@ -357,7 +368,7 @@ private:
 
     // ====================================================
 
-    template <typename R = void, typename... Args, c_const_str STR>
+    template <typename R = void, c_const_str STR, typename... Args>
     consteval R invoke (STR fn_name, Args&&... args) const noexcept
     {
         constexpr const_size I = get_index<fn_name> ();
@@ -462,7 +473,10 @@ public:
 
     // ====================================================
 
-    consteval fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    constexpr fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    {  return fn_proxy_type (*this, fn_name); }
+
+    constexpr fn_proxy_type operator [] (char_ptr fn_name) const noexcept
     {  return fn_proxy_type (*this, fn_name); }
 
     // ====================================================
@@ -471,13 +485,17 @@ public:
     {  return _M_fn_map.size (); }
 
     template <typename R, typename... Args>
-    constexpr void add_function (string_view const& fn_name, fn_t<R(Args...) const> const& fn) noexcept
+    constexpr
+    void
+    add_function (string_view const& fn_name, fn_t<R(Args...) const> const& fn) noexcept
     {
         _M_fn_map[fn_name].second = make_fn_rtti (fn);
     }
 
-    template <size_type SZ = def_capture_size_v, typename R, typename... Args>
-    constexpr void add_function (string_view const& fn_name, fn_t<R(Args...), SZ> const& fn) noexcept
+    template <typename R, size_type SZ = def_capture_size_v, typename... Args>
+    constexpr
+    void
+    add_function (string_view const& fn_name, fn_t<R(Args...), SZ> const& fn) noexcept
     {
         _M_fn_map[fn_name].second = make_fn_rtti (fn);
     }
@@ -611,20 +629,19 @@ public:
     }
 
     template <typename R = void, typename... Args, size_type... Is, c_const_str STR>
-    constexpr R invoke (STR       fn_name,
-                        Args&&... args   ,
+    consteval R invoke (STR fn_name, Args&&... args,
                         std::index_sequence<Is...> = std::index_sequence_for<Args...> ())
     {
-        constexpr const_size      Key           = char_hash<fn_name> ();
-        constexpr const_rtti      return_type_v = return_type<Key>   ();
-        constexpr array_const_ref arg_types_v   = arg_types  <Key>   ();
+        constexpr const_size      Key           = char_hash (fn_name);
+        constexpr const_rtti      return_type_v = return_type<Key> ();
+        constexpr array_const_ref arg_types_v   = arg_types  <Key> ();
 
-        static_assert (arg_types_v.size () <= sizeof...(Args), "function argument count mismatch!");
+        static_assert (sizeof... (Args) <= arg_types_v.size (), "function argument count mismatch!");
 
         typedef abi::type_convertable_t<R, return_type_v> (fn_sign)
                (abi::arg_type_t<arg_types_v.data (), Args, Is>...);
 
-        return (fn_cast<fn_sign> (_M_fn_map[Key].second.function ()))(std::forward<Args> (args)...);
+        return (fn_cast<fn_sign> (_M_fn_map[Key].second.fn ()))(std::forward<Args> (args)...);
     }
 
 protected:
@@ -662,7 +679,7 @@ private:
         }
     }
 
-    template <size_type I, pair_like... Ps>
+    template <size_type I = 0, pair_like... Ps>
     requires (functional_str_pair<Ps, typename Ps::first_type, typename Ps::second_type> && ...)
     consteval static void check_pairs_types () noexcept
     {

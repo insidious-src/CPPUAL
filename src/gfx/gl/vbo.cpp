@@ -149,7 +149,7 @@ void vertex_buffer::bind (buffer_type eType) noexcept
     if (handle ())
     {
         _M_eType = eType;
-        glBindBuffer (get_buffer_type (eType), handle ());
+        glBindBuffer (get_buffer_type (eType), handle<::GLuint> ());
     }
 }
 

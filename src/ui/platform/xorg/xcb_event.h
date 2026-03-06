@@ -23,7 +23,7 @@
 #define CPPUAL_PLATFORM_XCB_EVENT_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
+#include <cppual/types>
 #include <cppual/ui/queue.h>
 #include <cppual/input/keyboard.h>
 #include <cppual/input/pointer.h>
@@ -34,13 +34,13 @@
 
 #include <cppual/ui/platforms/xcb/xcb_def.h>
 
-#include "xbackend.h"
-
 #include <X11/Xlibint.h>
+
+#include "xbackend.h"
 
 namespace cppual { namespace x {
 
-enum class key : u8
+typedef enum class key : u8
 {
     undefined_key = 0,
     Escape = 9,
@@ -167,16 +167,18 @@ enum class key : u8
     PrintScr = 107,
     NumLock = 77,
     ScrollLock = 78
-};
+}
+const const_key;
 
-enum class key_state : u16
+typedef enum class key_state : u16
 {
     none      = 16,
     shift     = 17,
     caps_lock = 18,
     alt       = 24,
     ctrl      = 20
-};
+}
+const const_key_state;
 
 // ====================================================
 
@@ -386,12 +388,12 @@ private:
 class event_handle final
 {
 public:
+    typedef event_handle           self_type              ;
     typedef base_event_type        base_type              ;
     typedef input::event           event_type             ;
-    typedef event_handle           self_type              ;
     typedef event_handle*          pointer                ;
     typedef ui::shared_display     display_pointer        ;
-    typedef display_pointer&       display_reference      ;
+    typedef display_pointer &      display_reference      ;
     typedef display_pointer const& display_const_reference;
 
     enum Type
@@ -445,9 +447,6 @@ public:
     { }
 
     constexpr event_ptr::pointer get () const noexcept
-    { return _M_pEvent.get (); }
-
-    constexpr event_ptr::pointer get () noexcept
     { return _M_pEvent.get (); }
 
     constexpr u32 type () const noexcept
@@ -775,7 +774,7 @@ public:
         case TProperty:
             if (get ()->property.atom == data (conn)._NET_WM_STATE)
             {
-                auto prop = x::get_property (conn->native<x::display_type> (),
+                auto prop = x::get_property (conn->native<x::display_type*> (),
                                              x::dont_delete,
                                              get ()->property.window,
                                              data (conn)._NET_WM_STATE,
@@ -799,7 +798,7 @@ public:
                     if (atom == x::atom_type ()) continue;
 
                     std::cout << " :: [" << atom << "] "
-                              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                              << x::get_atom_name (conn->native<x::display_type*> (), atom).name ();
                 }
 
                 std::cout << "\n_NET_WM_STATE";
@@ -807,7 +806,7 @@ public:
                 for (auto atom : atoms)
                 {
                     std::cout << " :: [" << atom << "] "
-                              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                              << x::get_atom_name (conn->native<x::display_type*> (), atom).name ();
                 }
 
                 std::cout << std::endl;
@@ -836,7 +835,7 @@ public:
             }
             /*else if (get ()->property.atom == data (conn).WM_STATE)
             {
-                auto prop = x::get_property (conn->native<x::display_type> (),
+                auto prop = x::get_property (conn->native<x::display_type*> (),
                                              x::dont_delete,
                                              window (),
                                              data (conn)._NET_WM_STATE,
@@ -860,7 +859,7 @@ public:
                       if (atom == x::atom_type ()) continue;
                 //
                 //    std::cout << " :: [" << atom << "] "
-                //              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                //              << x::get_atom_name (conn->native<x::display_type*> (), atom).name ();
                 //}
 
                 //std::cout << std::endl;
@@ -870,7 +869,7 @@ public:
                 //for (auto atom : atoms)
                 //{
                 //    std::cout << " :: [" << atom << "] "
-                //              << x::get_atom_name (conn->native<x::display_type> (), atom).name ();
+                //              << x::get_atom_name (conn->native<x::display_type*> (), atom).name ();
                 //}
 
                 //std::cout << std::endl;

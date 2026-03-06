@@ -78,15 +78,15 @@ typedef ::cl_image_info         image_info_type     ;
 
 // =========================================================
 
-typedef std::remove_pointer_t<::cl_platform_id  > platform_id_type;
-typedef std::remove_pointer_t<::cl_device_id    > device_id_type  ;
-typedef std::remove_pointer_t<::cl_event        > event_type      ;
-typedef std::remove_pointer_t<::cl_kernel       > kernel_type     ;
-typedef std::remove_pointer_t<::cl_program      > program_type    ;
-typedef std::remove_pointer_t<::cl_context      > context_type    ;
-typedef std::remove_pointer_t<::cl_mem          > memory_type     ;
-typedef std::remove_pointer_t<::cl_command_queue> queue_type      ;
-typedef std::remove_pointer_t<::cl_sampler      > sampler_type    ;
+typedef remove_ptr_t<::cl_platform_id  > platform_id_type;
+typedef remove_ptr_t<::cl_device_id    > device_id_type  ;
+typedef remove_ptr_t<::cl_event        > event_type      ;
+typedef remove_ptr_t<::cl_kernel       > kernel_type     ;
+typedef remove_ptr_t<::cl_program      > program_type    ;
+typedef remove_ptr_t<::cl_context      > context_type    ;
+typedef remove_ptr_t<::cl_mem          > memory_type     ;
+typedef remove_ptr_t<::cl_command_queue> queue_type      ;
+typedef remove_ptr_t<::cl_sampler      > sampler_type    ;
 
 // =========================================================
 
@@ -162,7 +162,7 @@ template <> struct is_cl_object_helper<queue_type      > : public std::true_type
 template <> struct is_cl_object_helper<sampler_type    > : public std::true_type  { };
 
 template <non_void T>
-struct is_cl_object : std::integral_constant<bool, (is_cl_object_helper<remove_cref_t<T>>::value)>
+struct is_cl_object : std::integral_constant<bool, is_cl_object_helper<remove_cref_t<T>>::value>
 { static_assert (is_cl_object<T>::value, "T is NOT an opencl object type!"); };
 
 template <non_void T>
@@ -196,32 +196,30 @@ using conv_type_t = conv_type<T>::type;
 class opencl_error : public std::runtime_error
 {
 public:
+    typedef opencl_error self_type    ;
+    typedef i32          value_type   ;
+    typedef cchar*       const_pointer;
+
     /// Creates a new opencl_error exception object for \p error.
-    explicit opencl_error (i32 error) noexcept
+    constexpr explicit opencl_error (value_type error) noexcept
     : runtime_error (to_string (error)),
       _M_error      (error)
-    {
-    }
-
-    /// Destroys the opencl_error object.
-    ~opencl_error () noexcept
-    {
-    }
+    { }
 
     /// Returns the numeric error code.
-    constexpr i32 error_code () const noexcept
+    constexpr value_type error_code () const noexcept
     {
         return _M_error;
     }
 
     /// Returns a string description of the error.
-    cchar* error_string () const noexcept
+    constexpr const_pointer error_string () const noexcept
     {
         return to_string (_M_error);
     }
 
     /// Returns a C-string description of the error.
-    cchar* what () const noexcept
+    constexpr const_pointer what () const noexcept
     {
         return to_string (_M_error);
     }
@@ -239,10 +237,10 @@ public:
     /// If the error code is unknown (e.g. not a valid opencl error), a string
     /// containing "Unknown opencl Error" along with the error number will be
     /// returned.
-    static cchar* to_string (i32 error);
+    static const_pointer to_string (value_type error);
 
 private:
-    i32 _M_error;
+    value_type _M_error;
 };
 
 // =========================================================
@@ -600,9 +598,6 @@ public:
     typedef std::size_t              size_type  ;
     typedef resource_handle          handle_type;
 
-    resource_object  () = delete ;
-    ~resource_object () = default;
-
     constexpr resource_object (self_type&&) = default;
     constexpr self_type& operator = (self_type&&) = default;
 
@@ -613,6 +608,9 @@ public:
 
 protected:
     constexpr explicit resource_object (pointer handle) noexcept : base_type (handle) { }
+
+private:
+    resource_object  () = delete;
 };
 
 // =========================================================

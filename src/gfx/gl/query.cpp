@@ -19,13 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/query.h>
+
+#include <cppual/gfx/draw.h>
 #include <cppual/gfx/gl/gldef.h>
 
-namespace cppual { namespace gfx { namespace gl {
+// ====================================================
 
-namespace {
+namespace cppual { namespace gfx { namespace gl { namespace {
+
+// ====================================================
 
 constexpr uint convert_target_type (query::Type eType) noexcept
 {
@@ -50,6 +53,8 @@ constexpr uint convert_target_type (query::Type eType) noexcept
     }
 }
 
+// ====================================================
+
 } // anonymous
 
 // ====================================================
@@ -65,9 +70,9 @@ query::~query () noexcept
     if (_M_bHasQuery)
     {
         if (context_interface::current ()->version () < 3)
-            glEndQuery     (convert_target_type (_M_eType));
+            ::glEndQuery     (convert_target_type (_M_eType));
         else
-            glEndQueryARB  (convert_target_type (_M_eType));
+            ::glEndQueryARB  (convert_target_type (_M_eType));
     }
 }
 
@@ -76,7 +81,7 @@ u64 query::get64 () noexcept
     if (_M_bHasQuery)
     {
         u64 uResult;
-        glGetQueryObjectui64v (handle (), gl::QueryResult, &uResult);
+        ::glGetQueryObjectui64v (handle<::GLuint> (), gl::QueryResult, &uResult);
         return uResult;
     }
 
@@ -88,7 +93,7 @@ uint query::get () noexcept
     if (_M_bHasQuery)
     {
         uint uResult;
-        glGetQueryObjectuiv (handle (), gl::QueryResult, &uResult);
+        ::glGetQueryObjectuiv (handle<::GLuint> (), gl::QueryResult, &uResult);
         return uResult;
     }
 
@@ -100,7 +105,7 @@ bool query::is_ready () noexcept
     if (_M_bHasQuery)
     {
         int nReady;
-        glGetQueryObjectiv (handle (), gl::QueryResult, &nReady);
+        ::glGetQueryObjectiv (handle<::GLuint> (), gl::QueryResult, &nReady);
         return nReady;
     }
 
@@ -112,7 +117,7 @@ void query::begin_query (query::Type eType) noexcept
     if (handle () and !_M_bHasQuery)
     {
         _M_eType = eType;
-        glBeginQuery (convert_target_type (eType), handle ());
+        ::glBeginQuery (convert_target_type (eType), handle<::GLuint> ());
     }
 }
 
@@ -121,13 +126,13 @@ void query::begin_query_indexed (query::Type eType, uint uIdx) noexcept
     if (handle () and !_M_bHasQuery)
     {
         _M_eType = eType;
-        glBeginQueryIndexed (convert_target_type (eType), uIdx, handle ());
+        ::glBeginQueryIndexed (convert_target_type (eType), uIdx, handle<::GLuint> ());
     }
 }
 
 void query::end_query () noexcept
 {
-    if (_M_bHasQuery) glEndQuery (convert_target_type (_M_eType));
+    if (_M_bHasQuery) ::glEndQuery (convert_target_type (_M_eType));
 }
 
 void query::query_counter (query::Type eType) noexcept
@@ -135,7 +140,7 @@ void query::query_counter (query::Type eType) noexcept
     if (handle () and !_M_bHasQuery)
     {
         _M_eType = eType;
-        glQueryCounter (handle (), convert_target_type (eType));
+        ::glQueryCounter (handle<::GLuint> (), convert_target_type (eType));
     }
 }
 

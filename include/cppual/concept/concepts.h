@@ -71,11 +71,10 @@ template <non_void> class allocator;
 // ====================================================
 
 //! max array size for function's capture lambda storage
-template <std::size_t SZ = 32>
+template <std::size_t SZ = 256>
 consteval decltype (SZ) lambda_calc_size () noexcept
 {
     return SZ <=  32 ?  32 :
-           SZ <=  48 ?  48 :
            SZ <=  64 ?  64 :
            SZ <=  96 ?  96 :
            SZ <= 128 ? 128 :
@@ -90,7 +89,7 @@ consteval decltype (SZ) lambda_calc_size () noexcept
 inline constexpr static const auto def_capture_size_v = lambda_calc_size ();
 
 template <decltype (def_capture_size_v) SZ = def_capture_size_v>
-inline constexpr static decltype (SZ) const max_capture_size_v = lambda_calc_size<SZ> ();
+inline constexpr static const decltype (SZ) max_capture_size_v = lambda_calc_size<SZ> ();
 
 // ====================================================
 
@@ -334,7 +333,7 @@ template <typename T>
 concept floating_point = is_float_v<T>;
 
 template <typename T>
-concept number = is_integer_v<T> || is_float_v<T>;
+concept number = integer<T> || floating_point<T>;
 
 template <typename T>
 concept char_t = is_char_v<T>;
@@ -349,13 +348,13 @@ template <typename T>
 concept ptr = std::is_pointer_v<T>;
 
 template <typename T>
-concept integer_or_ptr = is_integer_v<T> || std::is_pointer_v<T>;
+concept integer_or_ptr = integer<T> || ptr<T>;
 
 template <typename T>
-concept class_or_ptr = std::is_pointer_v<T> || std::is_class_v<T>;
+concept class_or_ptr = ptr<T> || std::is_class_v<T>;
 
 template <typename T>
-concept switch_value = is_integer_v<T> || std::is_enum_v<T> || is_char_v<T> || is_stream_char_v<T>;
+concept switch_value = integer<T> || std::is_enum_v<T> || char_t<T> || stream_char<T>;
 
 template <typename T>
 concept c_str = std::is_same_v<T, char*>;
@@ -471,7 +470,7 @@ template <typename>
 struct is_static_function : std::false_type { };
 
 template <typename R, typename... Args>
-struct is_static_function<R (*) (Args...)> : std::true_type { };
+struct is_static_function<R(*)(Args...)> : std::true_type { };
 
 template <typename T>
 inline constexpr static cbool is_static_function_v = is_static_function<T>::value;
@@ -481,7 +480,7 @@ inline constexpr static cbool is_static_function_v = is_static_function<T>::valu
 template <typename> struct is_static_function_ref : std::false_type { };
 
 template <typename R, typename... Args>
-struct is_static_function_ref<R (&) (Args...)> : std::true_type { };
+struct is_static_function_ref<R(&)(Args...)> : std::true_type { };
 
 template <typename T>
 inline constexpr static cbool is_static_function_ref_v = is_static_function_ref<T>::value;
@@ -491,7 +490,7 @@ inline constexpr static cbool is_static_function_ref_v = is_static_function_ref<
 template <typename> struct is_member_function : std::false_type { };
 
 template <structure C, typename R, typename... Args>
-struct is_member_function<R (C::*) (Args...)> : std::true_type { };
+struct is_member_function<R(C::*)(Args...)> : std::true_type { };
 
 template <typename T>
 inline constexpr static cbool is_member_function_v = is_member_function<T>::value;
@@ -665,17 +664,85 @@ using remove_cvarray_t = remove_const_t<remove_volatile_t<std::remove_extent_t<T
 
 // =========================================================
 
+//! constructibility and destructibility concepts
+template <typename T, typename... Args>
+concept constructible = std::is_constructible_v<T, Args...>;
+
+template <typename T>
+concept default_constructible = std::is_default_constructible_v<T>;
+
+template <typename T>
+concept destructible = std::is_destructible_v<T>;
+
+template <typename T>
+concept trivially_destructible = std::is_trivially_destructible_v<T>;
+
+template <typename T>
+concept virtually_destructible = std::has_virtual_destructor_v<T>;
+
+template <typename T>
+concept copy_constructible = std::is_copy_constructible_v<T>;
+
+template <typename T>
+concept copy_assignable = std::is_copy_assignable_v<T>;
+
+template <typename T>
+concept copyable = copy_constructible<T> && copy_assignable<T>;
+
+template <typename T>
+concept move_constructible = std::is_move_constructible_v<T>;
+
+template <typename T>
+concept move_assignable = std::is_move_assignable_v<T>;
+
+template <typename T>
+concept movable = move_constructible<T> && move_assignable<T>;
+
+template <typename T>
+concept copyable_movable = copyable<T> && movable<T>;
+
+template <typename T1, typename T2>
+concept non_convertible_to = !std::convertible_to<T1, T2>;
+
+//! numeric concepts
+template <typename T>
+concept addable = requires (T a, T b) { { a + b } -> are_same<T>; };
+
+template <typename T>
+concept subtractable = requires (T a, T b) { { a - b } -> are_same<T>; };
+
+template <typename T>
+concept multiplicable = requires (T a, T b) { { a * b } -> are_same<T>; };
+
+template <typename T>
+concept divisible = requires (T a, T b) { { a / b } -> are_same<T>; };
+
+//! range concepts
+template <typename T>
+concept range = std::ranges::range<T>;
+
+template <typename T>
+concept sized_range = std::ranges::sized_range<T>;
+
+template <typename T>
+concept bidirectional_range = std::ranges::bidirectional_range<T>;
+
+template <typename T>
+concept random_access_range = std::ranges::random_access_range<T>;
+
+// =========================================================
+
 template <typename T, non_void U = remove_cvref_t<T>>
-struct compact_forwarded : std::conditional<(std::is_class_v<U> || std::is_union_v<U>) && !std::is_pointer_v<T>,
-std::conditional_t<is_cref_v<T> && std::is_copy_constructible_v<U>,
+struct compact_forwarded : std::conditional<(structure<U> || union_like<U>) && !ptr<T>,
+std::conditional_t<is_cref_v<T> && copy_constructible<U>,
                    U const&,
                    std::conditional_t<
-                   is_ref_v<T> && std::is_move_constructible_v<U>,
+                   is_ref_v<T> && move_constructible<U>,
                    U&&,
-                   std::conditional_t<(sizeof (U) < sizeof (uptr)), U, U&>
+                   std::conditional_t<sizeof (U) < sizeof (uptr), U, U&>
                                       >
                    >,
-                   std::conditional_t<std::is_fundamental_v<U>, U, U&&>
+                   std::conditional_t<fundamental<U>, U, U&&>
 >
 { };
 
@@ -683,8 +750,7 @@ template <typename T>
 using compact_forwarded_t = compact_forwarded<T>::type;
 
 template <non_void T>
-inline constexpr static cbool is_compact_forwarded_v = !std::is_class_v<T> &&
-                                                       !std::is_union_v<T> &&
+inline constexpr static cbool is_compact_forwarded_v = !structure<T> && !union_like<T> &&
                                                         sizeof (T) <= sizeof (uptr);
 
 // =========================================================
@@ -697,22 +763,34 @@ template <typename> struct add_fn_volatile   ;
 template <typename> struct add_fn_cv         ;
 
 template <typename R, typename... Args>
-struct remove_fn_const<R(Args...) const>  { using type = R(Args...); };
+struct remove_fn_const<R(Args...) const> { using type = R(Args...); };
 
 template <typename R, typename... Args>
-struct add_fn_const<R(Args...)>  { using type = R(Args...) const; };
+struct remove_fn_const<R(Args...) const volatile> { using type = R(Args...) volatile; };
 
 template <typename R, typename... Args>
-struct remove_fn_volatile<R(Args...) volatile>  { using type = R(Args...); };
+struct add_fn_const<R(Args...)> { using type = R(Args...) const; };
 
 template <typename R, typename... Args>
-struct add_fn_volatile<R(Args...)>  { using type = R(Args...) volatile; };
+struct add_fn_const<R(Args...) volatile> { using type = R(Args...) const volatile; };
 
 template <typename R, typename... Args>
-struct remove_fn_cv<R(Args...) const volatile>  { using type = R(Args...); };
+struct remove_fn_volatile<R(Args...) volatile> { using type = R(Args...); };
 
 template <typename R, typename... Args>
-struct add_fn_cv<R(Args...)>  { using type = R(Args...) const volatile; };
+struct remove_fn_volatile<R(Args...) const volatile> { using type = R(Args...) const; };
+
+template <typename R, typename... Args>
+struct add_fn_volatile<R(Args...)> { using type = R(Args...) volatile; };
+
+template <typename R, typename... Args>
+struct add_fn_volatile<R(Args...) const> { using type = R(Args...) const volatile; };
+
+template <typename R, typename... Args>
+struct remove_fn_cv<R(Args...) const volatile> { using type = R(Args...); };
+
+template <typename R, typename... Args>
+struct add_fn_cv<R(Args...)> { using type = R(Args...) const volatile; };
 
 template <fn_sig S>
 using remove_fn_const_t = typename remove_fn_const<S>::type;
@@ -735,30 +813,31 @@ using add_fn_cv_t = typename add_fn_cv<S>::type;
 // ====================================================
 
 template <structure C>
-using callable_operator_t =
-    std::enable_if_t<is_member_function_v<decltype (&std::decay_t<C>::operator ())>,
-                     decltype (&std::decay_t<C>::operator ())>;
+inline constexpr static cbool has_callable_operator_v = requires
+{
+    &std::decay_t<C>::operator ();
+    is_member_function_v<decltype (&std::decay_t<C>::operator ())>;
+};
 
 template <structure C>
-inline constexpr static cbool has_callable_operator_v = is_member_function_v<callable_operator_t<C>>;
+using callable_operator_t =
+std::enable_if_t<has_callable_operator_v<C>, decltype (&std::decay_t<C>::operator ())>;
 
 template <typename C>
 concept callable_class = structure<C> && has_callable_operator_v<C>;
 
 template <callable_class C>
-inline constexpr decltype (&std::decay_t<C>::operator ()) callable_operator_v
-    = &std::decay_t<C>::operator ();
+inline constexpr decltype (&std::decay_t<C>::operator ()) callable_operator_v =
+&std::decay_t<C>::operator ();
 
 //! lambda concepts
 template <typename C>
-concept lambda_non_capture
-    = callable_class<C>
-      && std::is_constructible_v<member_function_to_static_t<callable_operator_t<C>>, C>;
+concept lambda_non_capture = callable_class<C> &&
+constructible<member_function_to_static_t<callable_operator_t<C>>, C>;
 
 template <typename C>
-concept lambda_capture
-    = callable_class<C>
-      && !std::is_constructible_v<member_function_to_static_t<callable_operator_t<C>>, C>;
+concept lambda_capture = callable_class<C> &&
+!constructible<member_function_to_static_t<callable_operator_t<C>>, C>;
 
 template <typename C>
 concept lambda = lambda_non_capture<C> || lambda_capture<C>;
@@ -822,7 +901,8 @@ concept member_fn_pair = std::is_same_v<P, std::pair<K, FN>> &&
 // ====================================================
 
 template <structure T>
-struct is_functional : public std::false_type
+struct is_functional :
+std::conditional_t<callable_class<T>, std::true_type, std::false_type>
 { typedef T type; };
 
 template <fn_sig T, std::size_t BYTES>
@@ -857,74 +937,13 @@ concept functional_switch_pair = pair_like<P> && switch_value<remove_cptr_t<K>> 
 template <typename P, typename K, typename FN>
 concept functional_str_pair = pair_like<P> && std::is_same_v<K, cchar*> && functional<FN>;
 
+template <typename P, typename K, typename FN>
+concept fn_str_pair = pair_like<P> && std::is_same_v<K, cchar*> && (static_function   <FN> ||
+                                                                    member_function   <FN> ||
+                                                                    lambda_non_capture<FN> || lambda_capture    <FN>);
+
 template <typename Tuple, typename... Args>
 concept tuple_like = std::is_same_v<Tuple, std::tuple<Args...>>;
-
-//! constructibility and destructibility concepts
-template <typename T>
-concept constructible = std::is_constructible_v<T>;
-
-template <typename T>
-concept default_constructible = std::is_default_constructible_v<T>;
-
-template <typename T>
-concept destructible = std::is_destructible_v<T>;
-
-template <typename T>
-concept trivially_destructible = std::is_trivially_destructible_v<T>;
-
-template <typename T>
-concept virtually_destructible = std::has_virtual_destructor_v<T>;
-
-template <typename T>
-concept copy_constructible = std::is_copy_constructible_v<T>;
-
-template <typename T>
-concept copy_assignable = std::is_copy_assignable_v<T>;
-
-template <typename T>
-concept copyable = copy_constructible<T> && copy_assignable<T>;
-
-template <typename T>
-concept move_constructible = std::is_move_constructible_v<T>;
-
-template <typename T>
-concept move_assignable = std::is_move_assignable_v<T>;
-
-template <typename T>
-concept movable = move_constructible<T> && move_assignable<T>;
-
-template <typename T>
-concept copyable_movable = copyable<T> && movable<T>;
-
-template <typename T1, typename T2>
-concept non_convertible_to = !std::convertible_to<T1, T2>;
-
-//! numeric concepts
-template <typename T>
-concept addable = requires (T a, T b) { { a + b } -> are_same<T>; };
-
-template <typename T>
-concept subtractable = requires (T a, T b) { { a - b } -> are_same<T>; };
-
-template <typename T>
-concept multiplicable = requires (T a, T b) { { a * b } -> are_same<T>; };
-
-template <typename T>
-concept divisible = requires (T a, T b) { { a / b } -> are_same<T>; };
-
-//! range concepts
-template <typename T>
-concept range = std::ranges::range<T>;
-
-template <typename T>
-concept sized_range = std::ranges::sized_range<T>;
-
-template <typename T>
-concept bidirectional_range = std::ranges::bidirectional_range<T>;
-
-template <typename T>
-concept random_access_range = std::ranges::random_access_range<T>;
 
 // ====================================================
 

@@ -57,8 +57,8 @@ public:
     bool        is_visible_in_taskbar () const noexcept { return false; }
     void        set_visible_in_pager (bool) noexcept { }
     bool        is_visible_in_pager () const noexcept { return false; }
-    void        setMimimumSize (point2u) noexcept { }
-    void        setMaximumSize (point2u) noexcept { }
+    void        set_minimum_size (point2u) noexcept { }
+    void        set_maximum_size (point2u) noexcept { }
     void        flash (uint) noexcept { }
     void        set_geometry (rect const&) noexcept;
     void        set_owner (wnd_const_reference) noexcept;

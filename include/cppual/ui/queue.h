@@ -33,7 +33,7 @@
 #include <atomic>
 #include <memory>
 
-namespace cppual { namespace ui {
+namespace cppual::ui {
 
 // =========================================================
 
@@ -46,6 +46,7 @@ typedef std::shared_ptr<display_queue_interface> shared_queue;
 class SHARED_API display_queue_interface : public non_copyable_virtual
 {
 public:
+    typedef display_queue_interface  self_type      ;
     typedef input::event             event_type     ;
     typedef shared_display           connection_type;
     typedef platform_wnd_interface   window_type    ;
@@ -78,6 +79,7 @@ private:
 class event_queue : public non_copyable
 {
 public:
+    typedef event_queue                         self_type   ;
     typedef display_queue_interface::event_type event_type  ;
     typedef resource_handle                     handle_type ;
     typedef std::atomic_bool                    bool_type   ;
@@ -145,7 +147,7 @@ private:
     bool_type    polling;
 };
 
-} } // namespace Input
+} //! namespace ui
 
 #endif // __cplusplus
 #endif // CPPUAL_UI_QUEUE_H

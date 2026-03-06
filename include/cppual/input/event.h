@@ -48,9 +48,10 @@ struct system_message final
 class event
 {
 public:
+    typedef event       self_type;
     typedef std::size_t size_type;
 
-    enum bits
+    typedef enum bits
     {
         null               =       0,
         key_pressed        = 1 <<  0,
@@ -84,8 +85,9 @@ public:
         joystick = joy_connect   | joy_disconnect | joy_button_press | joy_button_release   |
                    joy_move      | joy_trigger    | joy_track_move,
         window   = paint | focus | size           | visibility     | property | destroy | step,
-        all      = key   | mouse | touch          | window         | sys_message
-    };
+        all      = key   | mouse | touch          | window         | joystick | sys_message
+    }
+    const const_bits;
 
     typedef bitset<bits> bit_flags;
 
@@ -182,7 +184,11 @@ public:
         bool             state       ;
         property_data    property    ;
 
-        constexpr data_value () noexcept : base { } { }
+        constexpr data_value () noexcept = default;
+
+        constexpr data_value (i32 nMsg) noexcept
+        : message (nMsg)
+        { }
 
         constexpr data_value (key_data const& gKeyData) noexcept
         : key_code (gKeyData)
@@ -194,18 +200,19 @@ public:
     };
 
     typedef data_value        value_type     ;
-    typedef data_value const  const_value    ;
-    typedef data_value&       reference      ;
-    typedef data_value const& const_reference;
+    typedef value_type const  const_value    ;
+    typedef value_type &      reference      ;
+    typedef value_type const& const_reference;
 
-    constexpr event () noexcept : _M_data (), _M_type { } { }
+    constexpr event () noexcept = default;
+
+    constexpr event (bits type, const_reference data = value_type ()) noexcept
+    : _M_data (data)
+    , _M_type (type)
+    { }
+
     constexpr const_reference data () const noexcept { return _M_data; }
     constexpr bit_flags       type () const noexcept { return _M_type; }
-
-    constexpr event (bits type, const_reference data = value_type()) noexcept
-    : _M_data (data),
-      _M_type (type)
-    { }
 
 protected:
     value_type _M_data;
@@ -216,21 +223,23 @@ protected:
 
 struct message_event : public event
 {
-    inline
-    message_event (int nMsg) noexcept
-    : event   (event::sys_message)
-    {
-        _M_data.message = nMsg;
-    }
+    typedef message_event self_type;
+    typedef event         base_type;
+
+    consteval message_event (i32 nMsg) noexcept
+    : base_type (base_type::sys_message, base_type::value_type (nMsg))
+    { }
 };
 
 // =========================================================
 
 struct visibility_event : public event
 {
-    inline
-    visibility_event (bool bVis) noexcept
-    : event      (event::visibility)
+    typedef visibility_event self_type;
+    typedef event            base_type;
+
+    constexpr visibility_event (bool bVis) noexcept
+    : base_type (base_type::visibility)
     {
         _M_data.state = bVis;
     }
@@ -240,9 +249,11 @@ struct visibility_event : public event
 
 struct paint_event : public event
 {
-    inline
-    paint_event (rect gRect) noexcept
-    : event (event::paint)
+    typedef paint_event self_type;
+    typedef event       base_type;
+
+    constexpr paint_event (rect gRect) noexcept
+    : base_type (base_type::paint)
     {
         _M_data.paint.region = gRect;
     }
@@ -252,9 +263,11 @@ struct paint_event : public event
 
 struct size_event : public event
 {
-    inline
-    size_event (point2u size) noexcept
-    : event(event::size)
+    typedef size_event self_type;
+    typedef event      base_type;
+
+    constexpr size_event (point2u size) noexcept
+    : base_type (base_type::size)
     {
         _M_data.size = size;
     }
@@ -264,9 +277,11 @@ struct size_event : public event
 
 struct focus_event : public event
 {
-    inline
-    focus_event (bool in) noexcept
-    : event (event::focus)
+    typedef focus_event self_type;
+    typedef event       base_type;
+
+    constexpr focus_event (bool in) noexcept
+    : base_type (base_type::focus)
     {
         _M_data.state = in;
     }
@@ -276,9 +291,11 @@ struct focus_event : public event
 
 struct step_event : public event
 {
-    inline
-    step_event (bool in) noexcept
-    : event(event::step)
+    typedef step_event self_type;
+    typedef event      base_type;
+
+    constexpr step_event (bool in) noexcept
+    : base_type (base_type::step)
     {
         _M_data.state = in;
     }
@@ -288,9 +305,11 @@ struct step_event : public event
 
 struct property_event : public event
 {
-    inline
-    property_event (u32 prop, i32 value) noexcept
-    : event    (event::property)
+    typedef property_event self_type;
+    typedef event            base_type;
+
+    constexpr property_event (u32 prop, i32 value) noexcept
+    : base_type (base_type::property)
     {
         _M_data.property.prop  = prop ;
         _M_data.property.value = value;
@@ -301,10 +320,14 @@ struct property_event : public event
 
 struct key_event : public event
 {
+    typedef key_event self_type;
+    typedef event     base_type;
+
     constexpr key_event (keyboard::key nKey,
                          keyboard::modifier uMask = keyboard::modifier::none,
                          bool is_pressed = true) noexcept
-    : event (is_pressed ? event::key_pressed : event::key_released, { key_data { nKey, uMask } })
+    : base_type (is_pressed ? base_type::key_pressed :
+                              base_type::key_released, { key_data { nKey, uMask } })
     { }
 };
 
@@ -312,9 +335,12 @@ struct key_event : public event
 
 struct key_press_event : public key_event
 {
-    constexpr key_press_event (keyboard::key nKey,
+    typedef key_press_event self_type;
+    typedef key_event       base_type;
+
+    constexpr key_press_event (keyboard::key      nKey,
                                keyboard::modifier uMask = keyboard::modifier::none) noexcept
-    : key_event (nKey, uMask, true)
+    : base_type (nKey, uMask, true)
     { }
 };
 
@@ -322,9 +348,12 @@ struct key_press_event : public key_event
 
 struct key_release_event : public key_event
 {
+    typedef key_release_event self_type;
+    typedef key_event         base_type;
+
     constexpr key_release_event (keyboard::key nKey,
                                  keyboard::modifier uMask = keyboard::modifier::none) noexcept
-    : key_event (nKey, uMask, false)
+    : base_type (nKey, uMask, false)
     { }
 };
 
@@ -332,18 +361,22 @@ struct key_release_event : public key_event
 
 struct mouse_event : public event
 {
-    constexpr mouse_event (u8 nBtn, point2u gPos, bool is_down) noexcept
-    : event (is_down ? event::mbutton_down : event::mbutton_up, { mbutton_data { gPos, nBtn } })
+    typedef mouse_event self_type;
+    typedef event       base_type;
+
+    consteval mouse_event (u8 nBtn, point2u gPos, bool is_down) noexcept
+    : base_type (is_down ? base_type::mbutton_down : base_type::mbutton_up,
+                { mbutton_data { gPos, nBtn } })
     { }
 
     constexpr mouse_event (point2u gPos) noexcept
-    : event (event::mouse_move)
+    : base_type (base_type::mouse_move)
     {
         _M_data.position = gPos;
     }
 
     constexpr mouse_event (i32 nDelta, point2u gPos) noexcept
-    : event (event::mwheel_step)
+    : base_type (base_type::mwheel_step)
     {
         _M_data.wheel.delta = nDelta;
         _M_data.wheel.pos   = gPos;
@@ -354,8 +387,11 @@ struct mouse_event : public event
 
 struct mouse_press_event : public mouse_event
 {
-    constexpr mouse_press_event (u8 nBtn, point2u gPos) noexcept
-    : mouse_event (nBtn, gPos, true)
+    typedef mouse_press_event self_type;
+    typedef mouse_event       base_type;
+
+    consteval mouse_press_event (u8 nBtn, point2u gPos) noexcept
+    : base_type (nBtn, gPos, true)
     { }
 };
 
@@ -363,8 +399,11 @@ struct mouse_press_event : public mouse_event
 
 struct mouse_release_event : public mouse_event
 {
-    constexpr mouse_release_event (u8 nBtn, point2u gPos) noexcept
-    : mouse_event (nBtn, gPos, false)
+    typedef mouse_release_event self_type;
+    typedef mouse_event         base_type;
+
+    consteval mouse_release_event (u8 nBtn, point2u gPos) noexcept
+    : base_type (nBtn, gPos, false)
     { }
 };
 
@@ -372,9 +411,11 @@ struct mouse_release_event : public mouse_event
 
 struct mouse_move_event : public mouse_event
 {
-    inline
-    mouse_move_event (point2u gPos) noexcept
-    : mouse_event (gPos)
+    typedef mouse_move_event self_type;
+    typedef mouse_event      base_type;
+
+    constexpr mouse_move_event (point2u gPos) noexcept
+    : base_type (gPos)
     { }
 };
 
@@ -382,9 +423,11 @@ struct mouse_move_event : public mouse_event
 
 struct wheel_event : public mouse_event
 {
-    inline
-    wheel_event (i32 nDelta, point2u gPos) noexcept
-    : mouse_event (nDelta, gPos)
+    typedef wheel_event self_type;
+    typedef mouse_event base_type;
+
+    constexpr wheel_event (i32 nDelta, point2u gPos) noexcept
+    : base_type (nDelta, gPos)
     { }
 };
 
@@ -392,9 +435,11 @@ struct wheel_event : public mouse_event
 
 struct touch_event : public event
 {
-    inline
-    touch_event (i32 pid, point2u gPos, bits action) noexcept
-    : event (action)
+    typedef touch_event self_type;
+    typedef event       base_type;
+
+    constexpr touch_event (i32 pid, point2u gPos, bits action) noexcept
+    : base_type (action)
     {
         _M_data.touch.pid = pid;
         _M_data.touch.pos = gPos;
@@ -405,9 +450,11 @@ struct touch_event : public event
 
 struct touch_press_event : public touch_event
 {
-    inline
-    touch_press_event (i32 pid, point2u gPos) noexcept
-    : touch_event     (pid, gPos, event::touch_press)
+    typedef touch_press_event self_type;
+    typedef touch_event       base_type;
+
+    constexpr touch_press_event (i32 pid, point2u gPos) noexcept
+    : base_type (pid, gPos, base_type::base_type::touch_press)
     { }
 };
 
@@ -415,9 +462,11 @@ struct touch_press_event : public touch_event
 
 struct touch_release_event : public touch_event
 {
-    inline
-    touch_release_event (i32 pid, point2u gPos) noexcept
-    : touch_event       (pid, gPos, event::touch_release)
+    typedef touch_release_event self_type;
+    typedef touch_event         base_type;
+
+    constexpr touch_release_event (i32 pid, point2u gPos) noexcept
+    : base_type (pid, gPos, base_type::base_type::touch_release)
     { }
 };
 
@@ -425,9 +474,11 @@ struct touch_release_event : public touch_event
 
 struct touch_moved_event : public touch_event
 {
-    inline
-    touch_moved_event (i32 pid, point2u gPos) noexcept
-    : touch_event     (pid, gPos, event::touch_move)
+    typedef touch_moved_event self_type;
+    typedef touch_event       base_type;
+
+    constexpr touch_moved_event (i32 pid, point2u gPos) noexcept
+    : base_type (pid, gPos, base_type::base_type::touch_move)
     { }
 };
 

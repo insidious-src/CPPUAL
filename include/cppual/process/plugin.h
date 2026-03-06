@@ -32,6 +32,7 @@
 #include <cppual/resource>
 #include <cppual/interface>
 #include <cppual/containers>
+#include <cppual/functional>
 #include <cppual/noncopyable>
 #include <cppual/memory_allocator>
 
@@ -50,6 +51,7 @@ class SHARED_API dyn_loader : public non_copyable
 {
 public:
     typedef dyn_loader                self_type    ;
+    typedef std::size_t               size_type    ;
     typedef fstring                   string_type  ;
     typedef fstring_view              string_view  ;
     typedef resource_handle           handle_type  ;
@@ -57,7 +59,20 @@ public:
     typedef function_proxy<self_type> fn_proxy_type;
     typedef cchar*                    char_ptr     ;
 
-    using function_type = call_ret_t (DLCALL*)();
+    typedef call_ret_t (DLCALL generic_fn_sig)();
+
+    template <typename R, typename... Args>
+    using function_type = R(DLCALL &)(Args...);
+
+    template <typename R, typename... Args>
+    using function_ptr = R(DLCALL *)(Args...);
+
+    using generic_fn_type = function_type<call_ret_t>;
+    using generic_fn_ptr  = function_ptr <call_ret_t>;
+
+    template <non_const_fn_sig S>
+    using fn_t         = function<S>         ;
+    using generic_fn_t = fn_t<generic_fn_sig>;
 
     typedef enum class resolve_policy : u8
     {
@@ -82,19 +97,22 @@ public:
 
     static string_view extension () noexcept;
 
-    consteval string_view    path        () const noexcept { return _M_gLibPath; }
+    constexpr string_view    path        () const noexcept { return _M_gLibPath; }
     constexpr pointer        handle      () const noexcept { return _M_pHandle ; }
     constexpr resolve_policy policy      () const noexcept { return _M_eResolve; }
     constexpr bool           is_attached () const noexcept { return _M_pHandle ; }
 
-    constexpr ~dyn_loader ()
-    { if (_M_eResolve != resolve_policy::statically) detach (); }
+    constexpr ~dyn_loader () noexcept
+    { if (policy () != resolve_policy::statically) detach (); }
 
     constexpr bool contains (string_view const& gName) const noexcept
     { return get_address (gName) != nullptr; }
 
     constexpr fn_proxy_type operator [] (string_view const& fn_name) const noexcept
     { return  fn_proxy_type (*this, fn_name); }
+
+    constexpr fn_proxy_type operator [] (char_ptr fn_name) const noexcept
+    {  return fn_proxy_type (*this, fn_name); }
 
     template <non_function T = void>
     constexpr T* import (string_view const& pName) const
@@ -104,13 +122,13 @@ public:
     constexpr F import (string_view const& pName) const
     { return direct_cast<F> (get_function (pName)); }
 
-    template <typename R = void, typename... Args, c_const_str STR>
+    template <typename R = void, c_const_str STR, typename... Args>
     constexpr R invoke (STR fn_name, Args&&... args) const
-    { return (*direct_cast<R(*)(Args...)> (get_function (fn_name)))(std::forward<Args> (args)...); }
+    { return (fn_cast<R(Args...)> (get_function (fn_name)))(std::forward<Args> (args)...); }
 
 private:
-    pointer       get_address  (string_view const& name) const;
-    function_type get_function (string_view const& name) const;
+    pointer         get_address  (string_view const& name) const;
+    generic_fn_type get_function (string_view const& name) const;
 
 private:
     handle_type    _M_pHandle  { };
@@ -148,7 +166,7 @@ extern "C" typedef struct SHARED_API plugin_vars
                                  dyn_array<cchar*>::allocator_type (*res))
     { }
 
-    constexpr plugin_vars (self_type&& obj) noexcept
+    inline plugin_vars (self_type&& obj) noexcept
     : name     (obj.name),
       provides (obj.provides),
       desc     (obj.desc),

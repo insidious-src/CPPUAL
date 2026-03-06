@@ -52,14 +52,14 @@ constexpr x::display_type* get_connection (cchar* pName) noexcept
 xcb_display::xcb_display (string_type const& name)
 : display_interface (get_connection (name.c_str()), x11_connection (name.c_str())),
   _M_gName (native () ? name : string_type ()),
-  _M_data  (native<x::display_type> ())
+  _M_data  (native<x::display_type*> ())
 {
     if (!native ()) return;
 
     // take ownership of the event queue
     ::XSetEventQueueOwner (legacy<x::legacy_type> (), XCBOwnsEventQueue);
 
-    if (::xcb_connection_has_error (native<x::display_type> ()))
+    if (::xcb_connection_has_error (native<x::display_type*> ()))
     {
         std::cerr << "error when connecting to display: "
                   << name << std::endl;
@@ -76,12 +76,12 @@ xcb_display::~xcb_display ()
 uint xcb_display::screen_count () const noexcept
 {
     return static_cast<uint>
-            (::xcb_setup_roots_length (::xcb_get_setup (native<x::display_type> ())));
+            (::xcb_setup_roots_length (::xcb_get_setup (native<x::display_type*> ())));
 }
 
 void xcb_display::flush () noexcept
 {
-    ::xcb_flush (native<x::display_type> ());
+    ::xcb_flush (native<x::display_type*> ());
 }
 
 } } // namespace Ui

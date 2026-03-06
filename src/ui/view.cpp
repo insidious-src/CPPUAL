@@ -74,13 +74,13 @@ typedef std::unordered_map<handle_type,
 
 typedef consteval_bimap<std::pair<uptr, view*>, 1> bimap_type;
 
-constexpr bimap_type& map ()
+inline bimap_type& map ()
 {
     static auto views_map = make_consteval_bimap<uptr, view*> (bimap_type::pair_type ());
     return views_map;
 }
 
-vec_type& vec ()
+constexpr vec_type& vec ()
 {
     static vec_type views_vec;
 
@@ -89,11 +89,13 @@ vec_type& vec ()
 }
 
 #ifdef DEBUG_MODE
-constexpr void print_map_values (handle_type wnd)
+inline void print_map_values (handle_type wnd)
 {
+    auto& map_ref = internal::map ();
+
     std::cout << "wnd value: " << wnd.get<uptr> () << std::endl;
 
-    for (auto it = internal::map ().cbegin (); it != internal::map ().cend (); ++it)
+    for (auto it = map_ref.cbegin (); it != map_ref.cend (); ++it)
     {
         std::cout << "view map key: " << it->first << " value: " << it->second << std::endl;
     }

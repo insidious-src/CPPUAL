@@ -54,7 +54,7 @@ consteval static cchar* ext () noexcept
 
 constexpr static dyn_loader::string_type format (dyn_loader::string_view const& path) noexcept
 {
-    return path.rfind (ext ()) == dyn_loader::string_view::npos ? path + ext () : path;
+    return path.rfind (ext ()) == dyn_loader::string_view::npos ? path + ext () : path.data ();
 }
 
 } // anonymous namespace
@@ -101,7 +101,7 @@ dyn_loader& dyn_loader::operator = (dyn_loader&& obj) noexcept
 bool dyn_loader::attach () noexcept
 {
     if (_M_pHandle) return true;
-    int nLibMode = 0;
+    int nLibMode;
 
 #   ifdef OS_STD_POSIX
 
@@ -113,7 +113,7 @@ bool dyn_loader::attach () noexcept
     case resolve_policy::immediate:
         nLibMode = RTLD_NOW;
         break;
-    case resolve_policy::lazy:
+    default:
         nLibMode = RTLD_LAZY;
         break;
     }
@@ -131,7 +131,8 @@ bool dyn_loader::attach () noexcept
     case resolve_policy::lazy:
         nLibMode |= DONT_RESOLVE_DLL_REFERENCES;
         break;
-    case resolve_policy::immediate:
+    default:
+        nLibMode = 0;
         break;
     }
 
@@ -155,7 +156,7 @@ void dyn_loader::detach () noexcept
 
 #    elif defined (OS_WINDOWS)
 
-    if (!::FreeLibrary (_M_pHandle.get<HMODULE> ()))
+    if (!::FreeLibrary (_M_pHandle.get<::HMODULE> ()))
         std::cerr << ::GetLastError () << std::endl;
 
 #    endif
@@ -173,7 +174,8 @@ void* dyn_loader::get_address (string_view const& pName) const
 
 #   elif defined (OS_WINDOWS)
 
-    auto const convert = direct_cast<void*> (::GetProcAddress (_M_pHandle.get<HMODULE> (), pName.data ()));
+    auto const convert =
+    direct_cast<void*> (::GetProcAddress (_M_pHandle.get<::HMODULE> (), pName.data ()));
 
     if (!convert)
         std::cerr << "error: " << ::GetLastError () << "\naddress not found!" << std::endl;
@@ -182,31 +184,33 @@ void* dyn_loader::get_address (string_view const& pName) const
 #   endif
 }
 
-dyn_loader::function_type dyn_loader::get_function (string_view const& pName) const
+dyn_loader::generic_fn_type dyn_loader::get_function (string_view const& pName) const
 {
 #   ifdef OS_STD_POSIX
 
-    auto const fn = direct_cast<function_type> (::dlsym (_M_pHandle, pName.data ()));
+    generic_fn_ptr const fn =
+    direct_cast<generic_fn_ptr> (::dlsym (_M_pHandle, pName.data ()));
 
-    if (!fn)
+    if (fn == nullptr)
     {
         std::cerr << ::dlerror () << std::endl;
         throw std::bad_function_call ();
     }
 
-    return fn;
+    return *fn;
 
 #   elif defined (OS_WINDOWS)
 
-    function_type const fn = ::GetProcAddress (_M_pHandle.get<HMODULE> (), pName.data ());
+    generic_fn_ptr const fn =
+    direct_cast<generic_fn_ptr> (::GetProcAddress (_M_pHandle.get<::HMODULE> (), pName.data ()));
 
-    if (!fn)
+    if (fn == nullptr)
     {
         std::cerr << "error: " << ::GetLastError () << " :: function not found!" << std::endl;
         throw std::bad_function_call ();
     }
 
-    return fn;
+    return *fn;
 
 #   endif
 }

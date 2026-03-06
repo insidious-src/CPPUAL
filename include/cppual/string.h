@@ -409,25 +409,25 @@ public:
     /**
      * Explicitly converts to const char*.
      */
-    constexpr explicit operator const_pointer () const noexcept
-    {
-        return _M_gBuffer.heap.c_str;
-    }
+    // constexpr explicit operator const_pointer () const noexcept
+    // {
+    //     return _M_gBuffer.heap.c_str;
+    // }
+
+    // constexpr operator string_view () const noexcept
+    // {
+    //     return string_view (_M_gBuffer.heap.c_str, length ());
+    // }
 
     /**
      * Explicit converts.
      */
-    constexpr explicit operator std_string () noexcept
+    constexpr operator std_string () const noexcept
     {
         return std_string (_M_gBuffer.heap.c_str, length ());
     }
 
-    constexpr explicit operator string_view () const noexcept
-    {
-        return string_view (_M_gBuffer.heap.c_str, length ());
-    }
-
-    constexpr explicit operator std_string_view () const noexcept
+    constexpr operator std_string_view () const noexcept
     {
         return std_string_view (_M_gBuffer.heap.c_str, length ());
     }
@@ -436,9 +436,14 @@ public:
      ** @brief str()
      ** Returns the contained string as an std::string.
      **/
-    constexpr std_string str () noexcept
+    constexpr std_string str () const noexcept
     {
-        return std_string (_M_gBuffer.heap.c_str, size (_M_gBuffer.heap.c_str));
+        return std_string (_M_gBuffer.heap.c_str, length ());
+    }
+
+    constexpr string_view view () const noexcept
+    {
+        return string_view (_M_gBuffer.heap.c_str, length ());
     }
 
     self_type& assign (self_type const& str);
@@ -778,16 +783,19 @@ public:
     /**
      ** Explicitly converts to const char*.
      **/
-    constexpr explicit operator const_pointer () const noexcept
+    constexpr operator const_pointer () const noexcept
     { return _M_c_str; }
 
     /**
-     ** Explicit converts.
+     ** Explicitly converts to std::string.
      **/
-    constexpr explicit operator std_string () noexcept
+    constexpr operator std_string () noexcept
     { return std_string (_M_c_str, length ()); }
 
-    constexpr explicit operator std_string_view () const noexcept
+    /**
+     ** Explicitly converts to std::string_view.
+     **/
+    constexpr operator std_string_view () const noexcept
     { return std_string_view (_M_c_str, length ()); }
 
     /**
@@ -795,7 +803,7 @@ public:
      ** Returns the contained string as an std::string.
      **/
     constexpr std_string str () noexcept
-    { return std_string (_M_c_str, size (_M_c_str)); }
+    { return std_string (_M_c_str, length ()); }
 
     template <str_view_like U>
     bool      contains    (U const& sv) const noexcept;

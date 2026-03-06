@@ -20,6 +20,7 @@
  */
 
 #include <cppual/gfx/formats/bmp.h>
+
 #include <cppual/casts>
 
 // =========================================================
@@ -100,4 +101,3 @@ bitmap_stream::size_type bitmap_stream::replace (rgb_type const target_clr, rgb_
 } //! namespace cppual
 
 // =========================================================
-

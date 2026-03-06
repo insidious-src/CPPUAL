@@ -37,6 +37,10 @@
 
 // =========================================================
 
+namespace std::pmr { using namespace ::cppual::memory; } //! namespace pmr
+
+// =========================================================
+
 namespace cppual::compute { class device; } //! namespace compute
 
 // =========================================================
@@ -49,10 +53,9 @@ namespace cppual::memory {
 //! implementation that combines 2 or more resource instances (objects) into one to
 //! extend the capacity of the allocated memory (allocating more fixed memory).
 class memory_resource_adaptor;
-
-// =========================================================
-
 using std::scoped_allocator_adaptor;
+template <non_void T> class allocator;
+template <non_void T> using polymorphic_allocator = allocator<T>;
 
 // =========================================================
 
@@ -66,28 +69,29 @@ struct allocator_traits : public std::allocator_traits<A>
 class SHARED_API memory_resource : public std::pmr::memory_resource
 {
 public:
-    typedef memory_resource           self_type             ;
-    typedef self_type                 base_type             ;
-    typedef self_type *               base_pointer          ;
-    typedef self_type &               base_reference        ;
-    typedef self_type const&          base_const_reference  ;
-    typedef self_type *&              base_pointer_reference;
-    typedef self_type **              base_double_pointer   ;
-    typedef std::pmr::memory_resource abs_base_type         ;
-    typedef abs_base_type&            abs_base_reference    ;
-    typedef std::size_t               size_type             ;
-    typedef size_type const           const_size            ;
-    typedef size_type                 align_type            ;
-    typedef const_size                const_align           ;
-    typedef byte *                    math_pointer          ;
-    typedef cbyte*                    math_const_pointer    ;
-    typedef void *                    pointer               ;
-    typedef cvoid*                    const_pointer         ;
-    typedef ptrdiff                   difference_type       ;
-    typedef compute::device           device_type           ;
-    typedef device_type *             device_pointer        ;
-    typedef device_type &             device_reference      ;
-    typedef device_type const&        device_const_reference;
+    typedef memory_resource           self_type               ;
+    typedef self_type                 base_type               ;
+    typedef self_type *               base_pointer            ;
+    typedef self_type &               base_reference          ;
+    typedef self_type const&          base_const_reference    ;
+    typedef self_type *&              base_pointer_reference  ;
+    typedef self_type **              base_double_pointer     ;
+    typedef std::pmr::memory_resource abs_base_type           ;
+    typedef abs_base_type &           abs_base_reference      ;
+    typedef abs_base_type const&      abs_base_const_reference;
+    typedef std::size_t               size_type               ;
+    typedef size_type const           const_size              ;
+    typedef size_type                 align_type              ;
+    typedef const_size                const_align             ;
+    typedef byte *                    math_pointer            ;
+    typedef cbyte*                    math_const_pointer      ;
+    typedef void *                    pointer                 ;
+    typedef cvoid*                    const_pointer           ;
+    typedef ptrdiff                   difference_type         ;
+    typedef compute::device           device_type             ;
+    typedef device_type *             device_pointer          ;
+    typedef device_type &             device_reference        ;
+    typedef device_type const&        device_const_reference  ;
 
     //! maximum alignment depending on memory width
     inline constexpr static const_align max_align  = alignof (std::max_align_t);
@@ -99,7 +103,7 @@ public:
     : _M_pDevice (&dev)
     { }
 
-    inline memory_resource (abs_base_type const& other) noexcept
+    inline memory_resource (abs_base_const_reference other) noexcept
     : abs_base_type (other          )
     , _M_pDevice    (&host_device ())
     { }
@@ -152,7 +156,7 @@ public:
 
     //! maximum continues bytes that can be allocated at ones
     //! from the memory_resource
-    constexpr virtual size_type max_size () const noexcept
+    constexpr virtual size_type max_size () const
     { return std::numeric_limits<size_type>::max () - max_align; }
 
     //! memory capacity in bytes
@@ -165,10 +169,10 @@ public:
                                 align_type align = max_align)
     { return do_reallocate (p, old_size, new_size, align); }
 
-    constexpr void deallocate (const_pointer p,
+    constexpr void deallocate (const_pointer p    ,
                                size_type     bytes,
                                align_type    align = max_align)
-    { return deallocate (const_cast<pointer> (p), bytes, align); }
+    { abs_base_type::deallocate (const_cast<pointer> (p), bytes, align); }
 
 protected:
     constexpr virtual pointer do_reallocate (pointer    p       ,
@@ -301,6 +305,12 @@ public:
     constexpr resource_const_reference resource_owner () const noexcept
     {  return resource ().owner (); }
 
+
+    inline resource_reference init_resource () const noexcept
+    {
+        return _M_pRc != nullptr ? *_M_pRc : *(_M_pRc = &get_default_thread_resource ());
+    }
+
     /**
      ** @brief get the memory_resource used by the allocator.
      ** if no resource is set, the default thread resource is used.
@@ -311,9 +321,10 @@ public:
      **/
     inline resource_reference resource () const noexcept
     {
-        static thread_local resource_reference rc = get_default_thread_resource ();
+        static thread_local resource_reference unused_rc = init_resource ();
 
-        return _M_pRc != nullptr ? *_M_pRc : *(_M_pRc = &rc);
+        UNUSED (unused_rc);
+        return *_M_pRc;
     }
 
     constexpr pointer allocate (size_type n = 1)
@@ -424,13 +435,13 @@ public:
     { }
 
     template <non_void U>
-    constexpr allocator (std::pmr::polymorphic_allocator<U> const&) noexcept
-    : _M_pRc (&get_default_resource ())
+    constexpr allocator (std::pmr::polymorphic_allocator<U> const& rh) noexcept
+    : _M_pRc (rh.resource ())
     { }
 
     template <non_void U>
     constexpr allocator (std::pmr::polymorphic_allocator<U>&& rh) noexcept
-    : _M_pRc (&get_default_resource ())
+    : _M_pRc (rh.resource ())
     { rh = std::pmr::polymorphic_allocator<U> (&null_resource ()); }
 
     template <non_void U>
@@ -474,16 +485,16 @@ public:
     }
 
     template <non_void U>
-    constexpr self_type& operator = (std::pmr::polymorphic_allocator<U> const&) noexcept
+    constexpr self_type& operator = (std::pmr::polymorphic_allocator<U> const& rh) noexcept
     {
-        _M_pRc = &get_default_resource ();
+        _M_pRc = rh.resource ();
         return *this;
     }
 
     template <non_void U>
     constexpr self_type& operator = (std::pmr::polymorphic_allocator<U>&& rh) noexcept
     {
-        _M_pRc = &get_default_resource ();
+        _M_pRc = rh.resource ();
         rh     = std::pmr::polymorphic_allocator<U> (&null_resource ());
         return *this;
     }
@@ -529,7 +540,7 @@ constexpr bool operator != (allocator<T1> const& lh, allocator<T2> const& rh) no
 
 template <non_void T>
 constexpr bool operator == (allocator<T> const& lh, std::allocator<T> const&) noexcept
-{ return lh.resource () == &new_delete_resource (); }
+{ return &lh.resource () == &new_delete_resource (); }
 
 template <non_void T>
 constexpr bool operator != (allocator<T> const& lh, std::allocator<T> const& rh) noexcept
@@ -537,7 +548,7 @@ constexpr bool operator != (allocator<T> const& lh, std::allocator<T> const& rh)
 
 template <non_void T>
 constexpr bool operator == (std::allocator<T> const&, allocator<T> const& rh) noexcept
-{ return rh.resource () == &new_delete_resource (); }
+{ return &rh.resource () == &new_delete_resource (); }
 
 template <non_void T>
 constexpr bool operator != (std::allocator<T> const& lh, allocator<T> const& rh) noexcept
@@ -545,7 +556,7 @@ constexpr bool operator != (std::allocator<T> const& lh, allocator<T> const& rh)
 
 template <non_void T1, non_void T2>
 constexpr bool operator == (allocator<T1> const& lh, std::allocator<T2> const&) noexcept
-{ return lh.resource () == &new_delete_resource (); }
+{ return &lh.resource () == &new_delete_resource (); }
 
 template <non_void T1, non_void T2>
 constexpr bool operator != (allocator<T1> const& lh, std::allocator<T2> const& rh) noexcept
@@ -553,7 +564,7 @@ constexpr bool operator != (allocator<T1> const& lh, std::allocator<T2> const& r
 
 template <non_void T1, non_void T2>
 constexpr bool operator == (std::allocator<T1> const&, allocator<T2> const& rh) noexcept
-{ return rh.resource () == &new_delete_resource (); }
+{ return &rh.resource () == &new_delete_resource (); }
 
 template <non_void T1, non_void T2>
 constexpr bool operator != (std::allocator<T1> const& lh, allocator<T2> const& rh) noexcept
@@ -629,25 +640,6 @@ constexpr std::shared_ptr<U> make_shared (Args&&... args)
 }
 
 // =========================================================
-
-template <non_void T, typename... Args>
-constexpr std::shared_ptr<T> allocate_shared (memory::memory_resource& rc, Args&&... args)
-{
-    return std::allocate_shared<T> (memory::allocator<T> (rc), std::forward<Args> (args)...);
-}
-
-template <non_void T, typename... Args>
-constexpr std::shared_ptr<T> allocate_shared (memory::allocator<T> const& ator, Args&&... args)
-{
-    return std::allocate_shared<T> (ator, std::forward<Args> (args)...);
-}
-
-template <typename U, non_void T, typename... Args>
-constexpr std::shared_ptr<U> allocate_shared (memory::memory_resource& rc, Args&&... args)
-{
-    return std::static_pointer_cast<U>
-          (std::allocate_shared<T> (memory::allocator<T> (rc), std::forward<Args> (args)...));
-}
 
 template <typename U, non_void T, typename... Args>
 constexpr std::shared_ptr<U> allocate_shared (memory::allocator<T> const& ator, Args&&... args)

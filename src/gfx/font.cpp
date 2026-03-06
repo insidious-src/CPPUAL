@@ -21,14 +21,20 @@
 
 #include <cppual/gfx/font.h>
 
+#include <iostream>
+
 #include <freetype2/ft2build.h>
 #include <freetype2/freetype/freetype.h>
 
-#include <iostream>
+// =========================================================
 
 namespace cppual { namespace gfx {
 
+// =========================================================
+
 namespace { namespace freetype { // optimize for internal unit usage
+
+// =========================================================
 
 typedef ::FT_Library   library_pointer ;
 typedef ::FT_Face      face_pointer    ;
@@ -79,4 +85,8 @@ font::~font ()
 {
 }
 
+// =========================================================
+
 } } // namespace Graphics
+
+// =========================================================

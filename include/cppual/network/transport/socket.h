@@ -23,10 +23,10 @@
 #define CPPUAL_NETWORK_TRANSPORT_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/string.h>
-#include <cppual/resource.h>
-#include <cppual/noncopyable.h>
+#include <cppual/types>
+#include <cppual/string>
+#include <cppual/resource>
+#include <cppual/noncopyable>
 #include <cppual/network/protocols/protocol.h>
 
 namespace cppual { namespace network {

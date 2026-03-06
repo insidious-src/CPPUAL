@@ -32,15 +32,17 @@ namespace cppual {
 
 using namespace std::chrono_literals;
 
-class pasive_timeline
+class passive_timeline
 {
 public:
-    typedef std::chrono::steady_clock         clock_type;
-    typedef clock::pausable_timer<clock_type> timer_type;
-    typedef std::chrono::milliseconds::rep    rep       ;
-    typedef std::chrono::milliseconds         duration  ;
-    typedef u16                               count_type;
-    typedef float                             ratio_type;
+    typedef passive_timeline                  self_type   ;
+    typedef std::chrono::steady_clock         clock_type  ;
+    typedef clock::pausable_timer<clock_type> timer_type  ;
+    typedef std::chrono::milliseconds::rep    rep         ;
+    typedef std::chrono::milliseconds         duration    ;
+    typedef u16                               count_type  ;
+    typedef float                             ratio_type  ;
+    typedef std::atomic<ratio_type>           atomic_ratio;
 
     constexpr static cfloat instant        = 10.0f;
     constexpr static cfloat very_fast      =  5.0f;
@@ -64,12 +66,11 @@ public:
     }
     const const_state;
 
-    typedef std::atomic<ratio_type> atomic_ratio;
     typedef std::atomic<state_type> atomic_state;
 
-    pasive_timeline (duration length, ratio_type speed = normal) noexcept
-    : _M_length     (length),
-      _M_speed      (speed)
+    passive_timeline (duration length, ratio_type speed = normal) noexcept
+    : _M_length      (length),
+      _M_speed       (speed )
     { }
 
     duration length () const noexcept
@@ -82,7 +83,7 @@ public:
     { return time ().count () + (length ().count () / 60); }
 
     bool is_active () const noexcept
-    { return state () == pasive_timeline::active; }
+    { return state () == self_type::active; }
 
     void reverse () noexcept
     { scale (-(_M_speed.load (std::memory_order_relaxed))); }
@@ -94,7 +95,7 @@ public:
     { if (_M_speed > ratio_type ()) scale (-(_M_speed.load (std::memory_order_relaxed))); }
 
     void stop () noexcept
-    { _M_state = pasive_timeline::inactive; }
+    { _M_state = self_type::inactive; }
 
     ratio_type speed () const noexcept
     {
@@ -113,7 +114,7 @@ public:
         _M_timer.reset ();
         _M_accumulated_time = duration ();
         _M_last_speed_change_time = clock_type::now ();
-        _M_state = pasive_timeline::active;
+        _M_state = self_type::active;
     }
 
     state_type state () const noexcept
@@ -122,12 +123,12 @@ public:
 
         switch (curstate)
         {
-        case pasive_timeline::active:
+        case self_type::active:
             if (!_M_count or (normalize_elapsed () / _M_length.count ()) < _M_count)
-                return pasive_timeline::active;
+                return self_type::active;
 
-            _M_state = pasive_timeline::inactive;
-            return pasive_timeline::inactive;
+            _M_state = self_type::inactive;
+            return self_type::inactive;
         default:
             return curstate;
         }
@@ -135,14 +136,14 @@ public:
 
     void resume () noexcept
     {
-        if (_M_state.load (std::memory_order_relaxed) != pasive_timeline::paused) return;
+        if (_M_state.load (std::memory_order_relaxed) != self_type::paused) return;
         _M_timer.resume ();
-        _M_state = pasive_timeline::active;
+        _M_state = self_type::active;
     }
 
     void pause () noexcept
     {
-        if (_M_state.load (std::memory_order_relaxed) != pasive_timeline::active) return;
+        if (_M_state.load (std::memory_order_relaxed) != self_type::active) return;
         _M_timer.pause ();
 
         rep elapsed = normalize_elapsed ();
@@ -152,7 +153,7 @@ public:
         else
         {
             _M_saved = duration (elapsed);
-            _M_state = pasive_timeline::paused;
+            _M_state = self_type::paused;
         }
     }
 
@@ -160,9 +161,9 @@ public:
     // {
     //     switch (_M_state.load (std::memory_order_relaxed))
     //     {
-    //     case pasive_timeline::inactive:
+    //     case self_type::inactive:
     //         return duration ();
-    //     case pasive_timeline::paused:
+    //     case self_type::paused:
     //         return _M_saved;
     //     default:
     //         rep elapsed    = normalize_elapsed ();
@@ -179,9 +180,9 @@ public:
     {
         switch (_M_state.load (std::memory_order_relaxed))
         {
-        case pasive_timeline::inactive:
+        case self_type::inactive:
             return duration ();
-        case pasive_timeline::paused:
+        case self_type::paused:
             return _M_saved;
         default:
             auto now            = std::chrono::steady_clock::now ();
@@ -189,7 +190,7 @@ public:
             auto recent_elapsed = std::chrono::duration_cast<duration> (now - _M_last_speed_change_time);
             auto total_elapsed  = _M_accumulated_time + duration(rep(ratio_type(recent_elapsed.count()) *
                                                                                 current_speed));
-            rep play_count      = total_elapsed.count () / _M_length.count ();
+            rep play_count = total_elapsed.count () / _M_length.count ();
             return (!_M_count || play_count < _M_count) ?
                        duration (total_elapsed.count () - (play_count * _M_length.count ())) :
                        duration ();

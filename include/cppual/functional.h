@@ -105,20 +105,54 @@ struct function_traits <R(Args...)>
 };
 
 template <typename R, typename... Args>
+struct function_traits <R(Args...) volatile> : public function_traits<R(Args...)>
+{
+    typedef function_traits<R(Args...) volatile> self_type  ;
+    typedef function_traits<R(Args...)>          base_type  ;
+
+    using sig_type = R(Args...) volatile;
+
+    using base_type::arity               ;
+    using base_type::arg                 ;
+    using base_type::arg_t               ;
+    using typename base_type::size_type  ;
+    using typename base_type::const_size ;
+    using typename base_type::return_type;
+    using typename base_type::args_type  ;
+};
+
+template <typename R, typename... Args>
 struct function_traits <R(Args...) const> : public function_traits<R(Args...)>
 {
-    typedef function_traits<R(Args...) const> self_type  ;
-    typedef function_traits<R(Args...)>       base_type  ;
-    typedef base_type::size_type              size_type  ;
-    typedef size_type const                   const_size ;
-    typedef base_type::return_type            return_type;
-    typedef base_type::args_type              args_type  ;
+    typedef function_traits<R(Args...) const> self_type;
+    typedef function_traits<R(Args...)>       base_type;
 
     using sig_type = R(Args...) const;
 
-    using base_type::arity;
-    using base_type::arg  ;
-    using base_type::arg_t;
+    using base_type::arity               ;
+    using base_type::arg                 ;
+    using base_type::arg_t               ;
+    using typename base_type::size_type  ;
+    using typename base_type::const_size ;
+    using typename base_type::return_type;
+    using typename base_type::args_type  ;
+};
+
+template <typename R, typename... Args>
+struct function_traits <R(Args...) const volatile> : public function_traits<R(Args...)>
+{
+    typedef function_traits<R(Args...) const volatile> self_type  ;
+    typedef function_traits<R(Args...)>                base_type  ;
+
+    using sig_type = R(Args...) const volatile;
+
+    using base_type::arity               ;
+    using base_type::arg                 ;
+    using base_type::arg_t               ;
+    using typename base_type::size_type  ;
+    using typename base_type::const_size ;
+    using typename base_type::return_type;
+    using typename base_type::args_type  ;
 };
 
 template <typename R, typename... Args>
@@ -136,10 +170,24 @@ struct function_traits <R(C::*)(Args...)> : function_traits<R(Args...)>
 };
 
 template <structure C, typename R, typename... Args>
+struct function_traits <R(C::*)(Args...) volatile> : function_traits<R(Args...)>
+{
+    typedef remove_const_t<C>            object_type;
+    using   function_ptr = R(C::*)(Args...) volatile;
+};
+
+template <structure C, typename R, typename... Args>
 struct function_traits <R(C::*)(Args...) const> : function_traits<R(Args...) const>
 {
     typedef remove_const_t<C>         object_type;
     using   function_ptr = R(C::*)(Args...) const;
+};
+
+template <structure C, typename R, typename... Args>
+struct function_traits <R(C::*)(Args...) const volatile> : function_traits<R(Args...) const>
+{
+    typedef remove_const_t<C>                  object_type;
+    using   function_ptr = R(C::*)(Args...) const volatile;
 };
 
 template <auto F, std::enable_if_t<function_like<decltype (F)>, int> = 0>
@@ -150,7 +198,7 @@ struct fn_ptr_traits : function_traits <decltype (F)>
 
 //! deduce callable signature
 template <fn_sig T>
-using function_traits_t = function_traits<T>::sig_type;
+using function_sig_t = function_traits<T>::sig_type;
 
 //! callable signature pointer -> value
 template <auto F>
@@ -158,54 +206,30 @@ inline constexpr cbool fn_ptr_traits_v = fn_ptr_traits<F>::value;
 
 //! ====================================================
 
-template <typename R1, typename... Args1, typename R2, typename... Args2>
-consteval auto operator <=> (function_traits<R1(Args1...)>, function_traits<R2(Args2...)>) noexcept
+template <fn_sig S1, fn_sig S2>
+consteval auto operator <=> (function_traits<S1>, function_traits<S2>) noexcept
 {
-    return are_same<R1, R2>                      &&
-          (are_same<Args1, Args2> && ...)        &&
-           sizeof... (Args1) <=> sizeof... (Args2);
+    return are_same<typename function_traits<S1>::sig_type,
+                    typename function_traits<S2>::sig_type> &&
+           function_traits<S1>::arity <=> function_traits<S2>::arity;
 }
 
 //! ====================================================
 
-template <typename R1, typename... Args1, typename R2, typename... Args2>
-consteval auto operator <=> (function_traits<R1(Args1...) const>, function_traits<R2(Args2...) const>) noexcept
+template <fn_sig S, typename... Args>
+consteval auto operator <=> (function_traits<S>, std::tuple<Args...>) noexcept
 {
-    return are_same<R1, R2>                      &&
-          (are_same<Args1, Args2> && ...)        &&
-           sizeof... (Args1) <=> sizeof... (Args2);
+    return are_same<typename function_traits<S>::args_type, std::tuple<Args...>> &&
+           function_traits<S>::arity <=> sizeof... (Args);
 }
 
 //! ====================================================
 
-template <typename R1, typename... Args1, typename... Args2>
-consteval auto operator <=> (function_traits<R1(Args1...)>, std::tuple<Args2...>) noexcept
+template <fn_sig S, typename... Args>
+consteval auto operator <=> (std::tuple<Args...>, function_traits<S>) noexcept
 {
-    return sizeof... (Args1) <=> sizeof... (Args2) && (are_same<Args1, Args2> && ...);
-}
-
-//! ====================================================
-
-template <typename R, typename... Args1, typename... Args2>
-consteval auto operator <=> (function_traits<R(Args1...) const>, std::tuple<Args2...>) noexcept
-{
-    return sizeof... (Args1) <=> sizeof... (Args2) && (are_same<Args1, Args2> && ...);
-}
-
-//! ====================================================
-
-template <typename R, typename... Args1, typename... Args2>
-consteval auto operator <=> (std::tuple<Args1...>, function_traits<R(Args2...)>) noexcept
-{
-    return sizeof... (Args1) <=> sizeof... (Args2) && (are_same<Args1, Args2> && ...);
-}
-
-//! ====================================================
-
-template <typename R, typename... Args1, typename... Args2>
-consteval auto operator <=> (std::tuple<Args1...>, function_traits<R(Args2...) const>) noexcept
-{
-    return sizeof... (Args1) <=> sizeof... (Args2) && (are_same<Args1, Args2> && ...);
+    return are_same<typename function_traits<S>::args_type, std::tuple<Args...>> &&
+           function_traits<S>::arity <=> sizeof... (Args);
 }
 
 //! ====================================================
@@ -1011,6 +1035,29 @@ fn_cast (function<In, N> const& fn_in) noexcept
                                       max_capture_size_v< N > ;
 
     return function<Out, SZ> (fn_cast_helper<Out, In, N>::fn_cast (fn_in));
+}
+
+template <non_const_fn_sig Out, typename R, typename... Args>
+consteval function<Out> fn_cast (R(& static_fn_ref)(Args...)) noexcept
+{
+    return function<Out>
+    (fn_cast_helper<Out, R(Args...)>::fn_cast (function<R(Args...)> (static_fn_ref)));
+}
+
+template <non_const_fn_sig Out, structure C, typename R, typename... Args>
+consteval function<Out> fn_cast (C& obj, R(C::* member_fn)(Args...)) noexcept
+{
+    return function<Out>
+    (fn_cast_helper<Out, R(Args...)>::fn_cast (function<R(Args...)>
+    (obj, member_fn)));
+}
+
+template <const_fn_sig Out, structure C, typename R, typename... Args>
+consteval function<Out> fn_cast (C& obj, R(C::* const_member_fn)(Args...) const) noexcept
+{
+    return function<Out>
+    (fn_cast_helper<Out, R(Args...) const>::fn_cast (function<R(Args...) const>
+    (obj, const_member_fn)));
 }
 
 // ====================================================

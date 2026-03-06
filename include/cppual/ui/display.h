@@ -69,7 +69,7 @@ public:
 
 protected:
     template <pair_like... Ps>
-    constexpr display_interface (handle_type native, handle_type legacy, Ps... pairs) noexcept
+    inline display_interface (handle_type native, handle_type legacy, Ps... pairs) noexcept
     : base_type (std::make_pair ("name", make_fn (*this, &self_type::name)),
                  std::make_pair ("screen_count", make_fn (*this, &self_type::screen_count)),
                  std::make_pair ("flush", make_fn (*this, &self_type::flush)),

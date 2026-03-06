@@ -346,8 +346,8 @@ consteval auto make_consteval_array (std::initializer_list<T> list)
 
 // ====================================================
 
-template <symbolic_char          T = char,
-          structure              E = std::char_traits<T>,
+template <symbolic_char  T = char,
+          structure      E = std::char_traits<T>,
           allocator_like A = memory::allocator<T>
           >
 auto split_string (std::basic_string<T, E, A> const& str, T delim)
@@ -381,8 +381,8 @@ auto split_string (std::basic_string<T, E, A> const& str, T delim)
 
 // ====================================================
 
-template <symbolic_char          T = char,
-          structure              E = std::char_traits<T>,
+template <symbolic_char  T = char,
+          structure      E = std::char_traits<T>,
           allocator_like A = memory::allocator<T>
           >
 auto split_string (std::basic_string<T, E, A> const& str,
@@ -409,14 +409,14 @@ auto split_string (std::basic_string<T, E, A> const& str,
 
 // ====================================================
 
-template <number T,
-          symbolic_char       Char = char,
-          structure              E = locale_traits<Char>,
-          allocator_like A = memory::allocator<Char>
+template <number         T,
+          symbolic_char  Ch = char,
+          structure      E  = locale_traits<Ch>,
+          allocator_like A  = memory::allocator<Ch>
           >
 constexpr auto number_to_string (T val)
 {
-    typedef cow_string<Char, E, A> string_type;
+    typedef cow_string<Ch, E, A> string_type;
     typedef std::size_t size_type;
 
     static_assert (is_allocator_v<A>, "A must be a valid allocator type!");
@@ -445,15 +445,15 @@ constexpr auto number_to_string (T val)
 
 // ====================================================
 
-template <non_void T,
-          symbolic_char       Char = char,
-          structure              E = std::char_traits<Char>,
-          allocator_like A = memory::allocator<Char>
+template <non_void       T,
+          symbolic_char  Ch = char,
+          structure      E  = std::char_traits<Ch>,
+          allocator_like A  = memory::allocator<Ch>
           >
 constexpr auto to_string (T val, A const& ator = A ())
 {
-    typedef std::basic_string<Char, E, A>        string_type  ;
-    typedef std::basic_ostringstream<Char, E, A> ostringstream;
+    typedef std::basic_string<Ch, E, A>        string_type  ;
+    typedef std::basic_ostringstream<Ch, E, A> ostringstream;
 
     static_assert (is_allocator_v<A>, "A must be a valid allocator type!");
 
@@ -467,26 +467,26 @@ constexpr auto to_string (T val, A const& ator = A ())
 
 // ====================================================
 
-template <symbolic_char          T = char,
-          structure              E = std::char_traits<T>,
+template <symbolic_char  T = char,
+          structure      E = std::char_traits<T>,
           allocator_like A = memory::allocator<T>
           >
 constexpr auto to_std_string (std::basic_string<T, E, A> const& val)
 {
-    typedef std::basic_string<T, E, A> std_string_type;
+    typedef std::basic_string<T> std_string_type;
 
     return std_string_type (val.c_str (), val.size ());
 }
 
 //======================================================
 
-template <symbolic_char          T = char,
-          structure              E = locale_traits<T>,
+template <symbolic_char  T = char,
+          structure      E = locale_traits<T>,
           allocator_like A = memory::allocator<T>
           >
 constexpr auto to_std_string (cow_string<T, E, A> const& val)
 {
-    typedef std::basic_string<T, std::char_traits<T>, std::allocator<T>> std_string_type;
+    typedef std::basic_string<T> std_string_type;
 
     return std_string_type (val.c_str (), val.size ());
 }

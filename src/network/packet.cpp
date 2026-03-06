@@ -21,11 +21,13 @@
 
 #include <cppual/network/packet.h>
 
+#include <cppual/casts>
+
 namespace cppual { namespace network {
 
 // =========================================================
 
-void packet::append (cvoid* pData, size_type uSize) noexcept
+void packet::append (const_pointer pData, size_type uSize) noexcept
 {
     if (pData && uSize > 0)
     {
@@ -377,7 +379,7 @@ packet& packet::operator >> (u32string& gData) noexcept
 
     gData.clear ();
 
-    if ((uLength > 0) && can_exchange (uLength))
+    if (uLength > 0 && can_exchange (uLength))
     {
         // Then extract characters
         gData.assign (direct_cast<char32*> (&_M_gData[_M_uPos]), uLength / sizeof (char32));
@@ -391,20 +393,20 @@ packet& packet::operator >> (u32string& gData) noexcept
 
 // =========================================================
 
-cvoid* packet::on_send (size_type& uSize)
+packet::const_pointer packet::on_send (size_type& uSize)
 {
     uSize = size ();
     return  data ();
 }
 
-void packet::on_receive (cvoid* pData, size_type uSize)
+void packet::on_receive (const_pointer pData, size_type uSize)
 {
     append (pData, uSize);
 }
 
-bool packet::can_exchange (size_type uSize) noexcept
+bool packet::can_exchange (size_type uSize) const noexcept
 {
-    return is_valid () && ((_M_uPos + uSize) < _M_gData.size ());
+    return valid () && ((_M_uPos + uSize) < _M_gData.size ());
 }
 
 // =========================================================

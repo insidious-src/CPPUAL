@@ -60,12 +60,12 @@ public:
 
     template <typename U = void>
     consteval rtti (type_ptr_t<U>) noexcept
-    : _M_type_hash (char_hash<type_name<U> ()> ())
+    : _M_type_hash (char_hash (type_name<U> ()))
     { }
 
     template <typename U>
     constexpr self_type& operator = (type_ptr_t<U>) noexcept
-    { _M_type_hash = char_hash<type_name<U> ()> (); return *this; }
+    { _M_type_hash = char_hash (type_name<U> ()); return *this; }
 
     consteval const_pointer name () const noexcept
     { return type_name (_M_type_hash); }
@@ -180,7 +180,7 @@ public:
         case char_hash ("enumeration"): return "enumeration";
         }
 
-        return type_name<void> ();
+        return type_name<void>();
     }
 
     // =========================================================
@@ -344,7 +344,7 @@ public:
     constexpr operator bool () const noexcept
     { return _M_fn != nullptr; }
 
-    constexpr fn_const_ref     function () const noexcept { return _M_fn       ; }
+    constexpr fn_const_ref           fn () const noexcept { return _M_fn       ; }
     constexpr array_const_ref arg_types () const noexcept { return _M_arg_types; }
     constexpr rtti_type     return_type () const noexcept { return _M_ret_type ; }
 
@@ -355,7 +355,6 @@ public:
         return _M_arg_types[I];
     }
 
-private:
     template <typename R, typename... Args, size_type SZ = def_capture_size_v>
     constexpr function_rtti (fn_t<R(Args...), SZ> const& fn)
     : _M_fn        ( fn_cast<void()> (fn)        )
@@ -372,18 +371,6 @@ private:
 
     template <size_type>
     friend class function_rtti;
-
-    template <size_type SZ, typename R, typename... Args>
-    friend
-    constexpr
-    self_type_t<sizeof... (Args)>
-    make_fn_rtti (fn_t<R(Args...), SZ> const&) noexcept;
-
-    template <typename R, typename... Args>
-    friend
-    constexpr
-    self_type_t<sizeof... (Args)>
-    make_fn_rtti (fn_t<R(Args...) const> const&) noexcept;
 
 private:
     fn_type    _M_fn       ;
@@ -417,7 +404,7 @@ using arg_type_t = abi::type_convertable_t<From, Array[I]>;
 
 } // namespace abi
 
-// ====================================================
+// =========================================================
 
 template <std::size_t SZ = def_capture_size_v, typename R, typename... Args>
 constexpr

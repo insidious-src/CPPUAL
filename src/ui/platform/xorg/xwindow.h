@@ -82,7 +82,7 @@ public:
     u32          screen () const noexcept { return _M_uScreen    ; }
 
     constexpr x::display_type* display () const noexcept
-    { return connection ()->native<x::display_type> (); }
+    { return connection ()->native<x::display_type*> (); }
 
     constexpr data_const_reference data () const noexcept
     { return static_cast<xcb_display&> (*connection ()).data (); }

@@ -20,7 +20,8 @@
  */
 
 #include <cppual/memory/system.h>
-#include <cppual/memory/allocator.h>
+
+#include <cppual/memory_allocator>
 
 #ifdef OS_GNU_LINUX
 #   include "os/linux.h"
@@ -53,10 +54,11 @@ namespace cppual { namespace memory { namespace { //! internal unit optimization
 
 constexpr static void initializer ()
 {
-    static auto ret = memory::model::initialize ();
-    static thread_local auto thread_ret = memory::model::thread_initialize ();
+    static auto const is_init = memory::model::initialize ();
+    static thread_local auto const is_thread_init = memory::model::thread_initialize ();
 
-    UNUSED (ret); UNUSED (thread_ret);
+    if (is_init != 0) throw std::runtime_error ("memory model NOT initialized!");
+    if (!is_thread_init) throw std::runtime_error ("thread is NOT initialized!");
 }
 
 // =========================================================
@@ -71,43 +73,38 @@ public:
 
     constexpr size_type max_size () const noexcept
     {
-        auto const max = memory::max_size ();
-        return max ? max : memory_resource::max_size ();
+        static auto max = memory::max_size ();
+        return max ? max : max = base_type::max_size ();
     }
 
     constexpr size_type capacity () const noexcept
     {
-        auto const cap = memory::capacity ();
-        return cap ? cap : memory_resource::capacity ();
+        static auto cap = memory::capacity ();
+        return cap ? cap : cap = base_type::capacity ();
     }
 
 private:
     inline
-    void* do_allocate (size_type bytes, size_type /*align*/)
+    void* do_allocate (size_type bytes, size_type)
     {
-        if (!memory::model::is_thread_initialized ()) initializer ();
         return memory::model::allocate (bytes);
     }
 
     inline
-    void* do_reallocate (void* p, size_type old_size, size_type new_size, size_type /*align*/)
+    void* do_reallocate (pointer p, size_type old_size, size_type new_size, size_type)
     {
-        if (!memory::model::is_thread_initialized ()) initializer ();
-
         return p != nullptr ? memory::model::reallocate (p, old_size, new_size) :
-                              memory::model::allocate (new_size);
+                              memory::model::allocate   (new_size);
     }
 
     inline
-    void do_deallocate (void* p, size_type /*bytes*/, size_type /*align*/)
+    void do_deallocate (pointer p, size_type, size_type)
     {
-        if (!memory::model::is_thread_initialized ()) initializer ();
-
         memory::model::deallocate (p);
     }
 
     inline
-    bool do_is_equal (abs_base_type const& other) const noexcept
+    bool do_is_equal (abs_base_const_reference other) const noexcept
     {
         return this == &other;
     }
@@ -121,52 +118,92 @@ private:
 
 void* operator new (std::size_t size)
 {
-    return cppual::memory::model::allocate (size);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+            cppual::memory::model::allocate (size) :
+            def_thread_res_ref.allocate (size);
 }
 
 void operator delete (void* ptr) noexcept
 {
-    cppual::memory::model::deallocate (ptr);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::deallocate (ptr) :
+               def_thread_res_ref.deallocate (ptr, sizeof (cppual::uptr));
 }
 
 void* operator new [] (std::size_t size)
 {
-    return cppual::memory::model::allocate (size);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::allocate (size) :
+               def_thread_res_ref.allocate (size);
 }
 
 void operator delete [] (void* ptr) noexcept
 {
-    cppual::memory::model::deallocate (ptr);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::deallocate (ptr) :
+               def_thread_res_ref.deallocate (ptr, sizeof (cppual::uptr));
 }
 
 void* operator new (std::size_t size, const std::nothrow_t&) noexcept
 {
-    return cppual::memory::model::allocate (size);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::allocate (size) :
+               def_thread_res_ref.allocate (size);
 }
 
 void* operator new [] (std::size_t size, const std::nothrow_t&) noexcept
 {
-    return cppual::memory::model::allocate (size);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::allocate (size) :
+               def_thread_res_ref.allocate (size);
 }
 
 void operator delete (void* ptr, const std::nothrow_t&) noexcept
 {
-    cppual::memory::model::deallocate (ptr);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::deallocate (ptr) :
+               def_thread_res_ref.deallocate (ptr, sizeof (cppual::uptr));
 }
 
 void operator delete [] (void* ptr, const std::nothrow_t&) noexcept
 {
-    cppual::memory::model::deallocate (ptr);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::deallocate (ptr) :
+               def_thread_res_ref.deallocate (ptr, sizeof (cppual::uptr));
 }
 
-void operator delete (void* ptr, std::size_t) noexcept
+void operator delete (void* ptr, std::size_t size) noexcept
 {
-    cppual::memory::model::deallocate (ptr);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::deallocate (ptr) :
+               def_thread_res_ref.deallocate (ptr, size);
 }
 
-void operator delete [] (void* ptr, std::size_t) noexcept
+void operator delete [] (void* ptr, std::size_t size) noexcept
 {
-    cppual::memory::model::deallocate (ptr);
+    auto& def_thread_res_ref = cppual::memory::get_default_thread_resource ();
+
+    return &def_thread_res_ref == &cppual::memory::new_delete_resource () ?
+               cppual::memory::model::deallocate (ptr) :
+               def_thread_res_ref.deallocate (ptr, size);
 }
 
 //#endif // CPPUAL_ENABLE_MEMORY_MODEL_GLOBALLY
@@ -1674,7 +1711,10 @@ void _release_heaps_lock()
 }
 
 //! Initialize thread, assign heap
-bool thread_initialize () {
+bool thread_initialize ()
+{
+    if (is_thread_initialized ()) return true;
+
     if (!GET_THREAD_LOCAL(Heap*, _memory_thread_heap))
     {
         _acquire_heaps_lock();
@@ -2017,7 +2057,7 @@ thread_yield()
 
 void* allocate (std::size_t bytes)
 {
-    initializer ();
+    if (!is_thread_initialized ()) initializer ();
 
 #if ENABLE_VALIDATE_ARGS
     if (size >= MAX_ALLOC_SIZE)

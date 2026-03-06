@@ -1,7 +1,7 @@
 #ifndef CPPUAL_CORE_HPP
 #define CPPUAL_CORE_HPP
 
-#include <cppual/string.h>
+#include <cppual/string>
 #include <cppual/string_helper.h>
 
 #include <memory>
@@ -13,13 +13,15 @@ namespace cppual {
 class connection_error : public std::runtime_error
 {
 public:
-    typedef string string_type;
+      typedef connection_error   self_type  ;
+      typedef std::runtime_error base_type  ;
+      typedef string             string_type;
 
-    connection_error(uint8_t code, string_type const& description)
-      : std::runtime_error(to_std_string (description + '(' + to_string(code, description.get_allocator()) + ')'))
-      , _M_code(code)
-      , _M_description(description)
-    {}
+    connection_error (uint8_t code, string_type const& description)
+    : base_type (to_std_string (description + '(' + to_string (code, description.get_allocator()) + ')'))
+    , _M_code(code)
+    , _M_description(description)
+    { }
 
     uint8_t
     code(void)
@@ -60,7 +62,7 @@ class core
       }
 
       check_connection();
-      throw std::runtime_error(to_std_string (producer + " failed"));
+      throw std::runtime_error(std::string(to_std_string (producer + " failed")));
     }
 
   public:
