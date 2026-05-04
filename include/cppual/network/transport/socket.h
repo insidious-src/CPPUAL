@@ -23,6 +23,7 @@
 #define CPPUAL_NETWORK_TRANSPORT_H_
 #ifdef __cplusplus
 
+#include <cppual/decl>
 #include <cppual/types>
 #include <cppual/string>
 #include <cppual/resource>
@@ -33,7 +34,7 @@ namespace cppual { namespace network {
 
 // ====================================================
 
-typedef enum class socket_type : u8
+typedef enum class socket_type : byte
 {
     tcp,
     udp
@@ -45,14 +46,15 @@ const const_socket;
 class transport_socket : public protocol, public resource<void, int, resource_handle::value_type (-1)>
 {
 public:
+    typedef transport_socket self_type;
     typedef value_type       socket_id;
     typedef value_type const const_id ;
 
     transport_socket () = delete;
     virtual ~transport_socket () noexcept;
     transport_socket (socket_type) noexcept;
-    transport_socket (transport_socket&&) noexcept;
-    transport_socket& operator = (transport_socket&&) noexcept;
+    transport_socket (self_type&&) noexcept;
+    self_type& operator = (self_type&&) noexcept;
 
     void set_blocking (bool block) noexcept;
     bool is_blocking  ()     const noexcept;

@@ -348,8 +348,8 @@ public:
                                                           std::decay_t<Callable>>>
               >
     constexpr host_task (Callable&& fn,
-                      Args&&... args,
-                      LambdaNonCaptureType<Callable>* = nullptr)
+                         Args&&... args,
+                         LambdaNonCaptureType<Callable>* = nullptr)
     : self_type ()
     { then (std::move (fn), std::forward<Args> (args)...); }
 
@@ -361,9 +361,9 @@ public:
                                                           std::decay_t<Callable>>>
               >
     constexpr host_task (Callable&& fn,
-                      Args&&... args,
-                      A const&  ator = A (),
-                      LambdaCaptureType<Callable>* = nullptr)
+                         Args&&... args,
+                         A const&  ator = A (),
+                         LambdaCaptureType<Callable>* = nullptr)
     : self_type ()
     { then (std::move (fn), ator, std::forward<Args> (args)...); }
 
@@ -416,8 +416,8 @@ public:
                                                           std::decay_t<Callable>>>
               >
     constexpr self_type& then (Callable&& fn,
-                            Args&&... args,
-                            LambdaNonCaptureType<Callable>* = nullptr)
+                               Args&&... args,
+                               LambdaNonCaptureType<Callable>* = nullptr)
     {
         schedule ([=, this, ... args = std::forward<Args> (args)]
         {
@@ -438,9 +438,9 @@ public:
                                                           std::decay_t<Callable>>>
               >
     constexpr self_type& then (Callable&& fn,
-                            Args&&... args,
-                            A const& ator = A (),
-                            LambdaCaptureType<Callable>* = nullptr)
+                               Args&&... args,
+                               A const& ator = A (),
+                               LambdaCaptureType<Callable>* = nullptr)
     {
         schedule ([=, this, ... args = std::forward<Args> (args)]
         {
@@ -591,8 +591,8 @@ public:
                                                           std::decay_t<Callable>>>
               >
     constexpr unbound_task (Callable&& fn,
-                         Args&&... args,
-                         LambdaNonCaptureType<Callable>* = nullptr)
+                            Args&&... args,
+                            LambdaNonCaptureType<Callable>* = nullptr)
     : self_type ()
     { then (std::forward<Callable> (fn), std::forward<Args> (args)...); }
 
@@ -604,9 +604,9 @@ public:
                                                           std::decay_t<Callable>>>
               >
     constexpr unbound_task (Callable&& fn,
-                         Args&&... args,
-                         A const& ator = A (),
-                         LambdaCaptureType<Callable>* = nullptr)
+                            Args&&... args,
+                            A const& ator = A (),
+                            LambdaCaptureType<Callable>* = nullptr)
     : self_type ()
     { then (std::move (fn), ator, std::forward<Args> (args)...); }
 
@@ -659,8 +659,8 @@ public:
                                                           std::decay_t<Callable>>>
               >
     constexpr self_type& then (Callable&& fn,
-                            Args&&... args,
-                            LambdaNonCaptureType<Callable>* = nullptr)
+                               Args&&... args,
+                               LambdaNonCaptureType<Callable>* = nullptr)
     {
         schedule ([this, fn = std::forward<Callable> (fn), ... args = std::forward<Args> (args)]
         {
@@ -681,9 +681,9 @@ public:
                                                           std::decay_t<Callable>>>
               >
     constexpr self_type& then (Callable&& fn,
-                            Args&&... args,
-                            A const& ator = A (),
-                            LambdaCaptureType<Callable>* = nullptr)
+                               Args&&... args,
+                               A const& ator = A (),
+                               LambdaCaptureType<Callable>* = nullptr)
     {
         schedule (
             [this, fn = std::forward<Callable> (fn), ... args = std::forward<Args> (args)]

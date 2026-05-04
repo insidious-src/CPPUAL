@@ -47,7 +47,7 @@ namespace cppual {
   * @brief The unbound_matrix class
   * XAXAXaxAxAXAxaxa няма да ти кажа...
   */
-template <non_void T = uchar, allocator_like A = memory::allocator<T>>
+template <non_void T = byte, allocator_like A = memory::allocator<T>>
 class unbound_matrix
 {
 public:

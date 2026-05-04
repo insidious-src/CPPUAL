@@ -23,12 +23,12 @@
 #define CPPUAL_UI_VIEW_H_
 #ifdef __cplusplus
 
-#include <cppual/string.h>
+#include <cppual/string>
 #include <cppual/resource>
 #include <cppual/gfx/draw.h>
 #include <cppual/input/event.h>
 #include <cppual/ui/vsurface.h>
-#include <cppual/circular_queue.h>
+#include <cppual/circular_queue>
 #include <cppual/memory_allocator>
 
 namespace cppual::ui {
@@ -85,12 +85,12 @@ public:
     void get_focus ();
     void kill_focus ();
 
-    constexpr    window_type    renderable        () const noexcept { return _M_pRenderable; }
+    constexpr window_type    renderable        () const noexcept { return _M_pRenderable; }
     constexpr platform_wnd*  renderable_unsafe () const noexcept { return _M_pRenderable.get (); }
-    constexpr    handle_type    platform_handle   () const { return renderable ()->handle (); }
-    constexpr    shared_display platform_display  () const { return renderable ()->connection (); }
-    constexpr    surface_type   platform_surface  () const noexcept { return _M_pSurface; }
-    constexpr    context_type   platform_context  () const noexcept { return _M_pContext; }
+    constexpr handle_type    platform_handle   () const { return renderable ()->handle (); }
+    constexpr shared_display platform_display  () const { return renderable ()->connection (); }
+    constexpr surface_type   platform_surface  () const noexcept { return _M_pSurface; }
+    constexpr context_type   platform_context  () const noexcept { return _M_pContext; }
     constexpr point2u        minimum_size      () const noexcept { return _M_gMinSize; }
     constexpr point2u        maximum_size      () const noexcept { return _M_gMaxSize; }
 
@@ -141,12 +141,13 @@ protected:
     virtual void on_parent_size (point2u);
 
 private:
-    enum class state_flag : u8
+    typedef enum class state_flag : u8
     {
         is_valid = 1 << 0,
         focus    = 1 << 1,
         enabled  = 1 << 2
-    };
+    }
+    const const_state_flag;
 
     typedef bitset<state_flag> state_flags;
 

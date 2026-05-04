@@ -32,7 +32,7 @@
 #include <cppual/noncopyable>
 #include <cppual/meta_functional>
 
-//#include <source_location>
+#include <source_location>
 //#include <version>
 
 // =========================================================
@@ -44,13 +44,14 @@ namespace cppual { namespace abi {
 class rtti
 {
 public:
-    typedef rtti            self_type    ;
-    typedef char            value_type   ;
-    typedef cchar*          const_pointer;
-    typedef std::size_t     size_type    ;
-    typedef size_type const const_size   ;
-    typedef fstring         string_type  ;
-    typedef fstring_view    string_view  ;
+    typedef rtti                    self_type    ;
+    typedef char                    value_type   ;
+    typedef cchar*                  const_pointer;
+    typedef std::size_t             size_type    ;
+    typedef size_type const         const_size   ;
+    typedef fstring                 string_type  ;
+    typedef fstring_view            string_view  ;
+    typedef size_type self_type::*  safe_bool    ;
 
     consteval rtti ()                                  noexcept = default;
     constexpr rtti (self_type &&)                      noexcept = default;
@@ -60,21 +61,27 @@ public:
 
     template <typename U = void>
     consteval rtti (type_ptr_t<U>) noexcept
-    : _M_type_hash (char_hash (type_name<U> ()))
+    : _M_type_hash (char_hash (name_of<U> ()))
     { }
 
     template <typename U>
     constexpr self_type& operator = (type_ptr_t<U>) noexcept
-    { _M_type_hash = char_hash (type_name<U> ()); return *this; }
+    { _M_type_hash = char_hash (name_of<U> ()); return *this; }
+
+    consteval operator bool () const noexcept
+    { return _M_type_hash != 0; }
+
+    consteval explicit operator safe_bool () const noexcept
+    { return _M_type_hash != 0 ? &self_type::_M_type_hash : nullptr; }
 
     consteval const_pointer name () const noexcept
-    { return type_name (_M_type_hash); }
+    { return name_of (_M_type_hash); }
 
     consteval size_type hash_code () const noexcept
     { return _M_type_hash; }
 
     template <typename U = void>
-    consteval static const_pointer type_name () noexcept
+    consteval static const_pointer name_of () noexcept
     {
         if      constexpr (are_same<U, cvoid>) return "const void";
         else if constexpr (are_same<U, char>) return "char";
@@ -113,12 +120,12 @@ public:
         else if constexpr (are_same<U, cdouble>) return "const double";
         else if constexpr (are_same<U, ldouble>) return "long double";
         else if constexpr (are_same<U, cldouble>) return "const long double";
-        else if constexpr (array_like<U>) return type_name<remove_array_t<U>> () + "[]";
-        else if constexpr (is_ref_v<U>) return type_name<remove_ref_t<U>> () + " &";
-        else if constexpr (is_cref_v<U>) return type_name<remove_cref_t<U>> () + " const &";
-        else if constexpr (is_refptr_v<U>) return type_name<remove_refptr_t<U>> () + " &*";
-        else if constexpr (is_crefptr_v<U>) return type_name<remove_crefptr_t<U>> () + " const &*";
-        else if constexpr (ptr<U>) return type_name<remove_ptr_t<U>> () + " *";
+        else if constexpr (array_like<U>) return name_of<remove_array_t<U>> () + "[]";
+        else if constexpr (is_ref_v<U>) return name_of<remove_ref_t<U>> () + " &";
+        else if constexpr (is_cref_v<U>) return name_of<remove_cref_t<U>> () + " const &";
+        else if constexpr (is_refptr_v<U>) return name_of<remove_refptr_t<U>> () + " &*";
+        else if constexpr (is_crefptr_v<U>) return name_of<remove_crefptr_t<U>> () + " const &*";
+        else if constexpr (ptr<U>) return name_of<remove_ptr_t<U>> () + " *";
         else if constexpr (member_function<U>) return "member function pointer";
         else if constexpr (static_function<U>) return "function";
         else if constexpr (structure<U>) return "class";
@@ -130,49 +137,47 @@ public:
 
     // =========================================================
 
-    consteval static const_pointer type_name (size_type hash) noexcept
+    consteval static const_pointer name_of (size_type hash) noexcept
     {
         switch (hash)
         {
-        case char_hash (type_name<cvoid> ()): return type_name<cvoid> ();
-        case char_hash (type_name<bool> ()): return type_name<bool> ();
-        case char_hash (type_name<cbool> ()): return type_name<cbool> ();
-        case char_hash (type_name<char> ()): return type_name<char> ();
-        case char_hash (type_name<cchar> ()): return type_name<cchar> ();
-        case char_hash (type_name<uchar> ()): return type_name<uchar> ();
-        case char_hash (type_name<cuchar> ()): return type_name<cuchar> ();
-        case char_hash (type_name<char8> ()): return type_name<char8> ();
-        case char_hash (type_name<cchar8> ()): return type_name<cchar8> ();
-        case char_hash (type_name<char16> ()): return type_name<char16> ();
-        case char_hash (type_name<cchar16> ()): return type_name<cchar16> ();
-        case char_hash (type_name<char32> ()): return type_name<char32> ();
-        case char_hash (type_name<cchar32> ()): return type_name<cchar32> ();
-        case char_hash (type_name<wchar> ()): return type_name<wchar> ();
-        case char_hash (type_name<cwchar> ()): return type_name<cwchar> ();
-        case char_hash (type_name<short> ()): return type_name<short> ();
-        case char_hash (type_name<cshort> ()): return type_name<cshort> ();
-        case char_hash (type_name<ushort> ()): return type_name<ushort> ();
-        case char_hash (type_name<cushort> ()): return type_name<cushort> ();
-        case char_hash (type_name<int> ()): return type_name<int> ();
-        case char_hash (type_name<cint> ()): return type_name<cint> ();
-        case char_hash (type_name<uint> ()): return type_name<uint> ();
-        case char_hash (type_name<cuint> ()): return type_name<cuint> ();
-        case char_hash (type_name<long> ()): return type_name<long> ();
-        case char_hash (type_name<clong> ()): return type_name<clong> ();
-        case char_hash (type_name<ulong> ()): return type_name<ulong> ();
-        case char_hash (type_name<culong> ()): return type_name<culong> ();
-        case char_hash (type_name<long64> ()): return type_name<long64> ();
-        case char_hash (type_name<clong64> ()): return type_name<clong64> ();
-        case char_hash (type_name<ulong64> ()): return type_name<ulong64> ();
-        case char_hash (type_name<culong64> ()): return type_name<culong64> ();
-        case char_hash (type_name<float> ()): return type_name<float> ();
-        case char_hash (type_name<cfloat> ()): return type_name<cfloat> ();
-        case char_hash (type_name<double> ()): return type_name<double> ();
-        case char_hash (type_name<cdouble> ()): return type_name<cdouble> ();
-        case char_hash (type_name<ldouble> ()): return type_name<ldouble> ();
-        case char_hash (type_name<cldouble> ()): return type_name<cldouble> ();
-        case char_hash ("[]"): return "[]";
-        case char_hash (" *"): return " *";
+        case char_hash (name_of<cvoid> ()): return name_of<cvoid> ();
+        case char_hash (name_of<bool> ()): return name_of<bool> ();
+        case char_hash (name_of<cbool> ()): return name_of<cbool> ();
+        case char_hash (name_of<char> ()): return name_of<char> ();
+        case char_hash (name_of<cchar> ()): return name_of<cchar> ();
+        case char_hash (name_of<uchar> ()): return name_of<uchar> ();
+        case char_hash (name_of<cuchar> ()): return name_of<cuchar> ();
+        case char_hash (name_of<char8> ()): return name_of<char8> ();
+        case char_hash (name_of<cchar8> ()): return name_of<cchar8> ();
+        case char_hash (name_of<char16> ()): return name_of<char16> ();
+        case char_hash (name_of<cchar16> ()): return name_of<cchar16> ();
+        case char_hash (name_of<char32> ()): return name_of<char32> ();
+        case char_hash (name_of<cchar32> ()): return name_of<cchar32> ();
+        case char_hash (name_of<wchar> ()): return name_of<wchar> ();
+        case char_hash (name_of<cwchar> ()): return name_of<cwchar> ();
+        case char_hash (name_of<short> ()): return name_of<short> ();
+        case char_hash (name_of<cshort> ()): return name_of<cshort> ();
+        case char_hash (name_of<ushort> ()): return name_of<ushort> ();
+        case char_hash (name_of<cushort> ()): return name_of<cushort> ();
+        case char_hash (name_of<int> ()): return name_of<int> ();
+        case char_hash (name_of<cint> ()): return name_of<cint> ();
+        case char_hash (name_of<uint> ()): return name_of<uint> ();
+        case char_hash (name_of<cuint> ()): return name_of<cuint> ();
+        case char_hash (name_of<long> ()): return name_of<long> ();
+        case char_hash (name_of<clong> ()): return name_of<clong> ();
+        case char_hash (name_of<ulong> ()): return name_of<ulong> ();
+        case char_hash (name_of<culong> ()): return name_of<culong> ();
+        case char_hash (name_of<long64> ()): return name_of<long64> ();
+        case char_hash (name_of<clong64> ()): return name_of<clong64> ();
+        case char_hash (name_of<ulong64> ()): return name_of<ulong64> ();
+        case char_hash (name_of<culong64> ()): return name_of<culong64> ();
+        case char_hash (name_of<float> ()): return name_of<float> ();
+        case char_hash (name_of<cfloat> ()): return name_of<cfloat> ();
+        case char_hash (name_of<double> ()): return name_of<double> ();
+        case char_hash (name_of<cdouble> ()): return name_of<cdouble> ();
+        case char_hash (name_of<ldouble> ()): return name_of<ldouble> ();
+        case char_hash (name_of<cldouble> ()): return name_of<cldouble> ();
         case char_hash ("member function pointer"): return "member function pointer";
         case char_hash ("function"): return "function";
         case char_hash ("class"): return "class";
@@ -180,79 +185,85 @@ public:
         case char_hash ("enumeration"): return "enumeration";
         }
 
-        return type_name<void>();
+        return name_of<void> ();
     }
+
+    // =========================================================
+
+    template <size_type Hash>
+    consteval static const_pointer name_of () noexcept
+    { return name_of (Hash); }
 
     // =========================================================
 
     template <const_pointer STR = "void">
     using type_t =
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<char> ()), char,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cchar> ()), cchar,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<uchar> ()), uchar,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cuchar> ()), cuchar,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<char8> ()), char8,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cchar8> ()), cchar8,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<char16> ()), char16,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cchar16> ()), cchar16,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<char32> ()), char32,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cchar32> ()), cchar32,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<wchar> ()), wchar,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cwchar> ()), cwchar,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<bool> ()), bool,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cbool> ()), cbool,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<short> ()), short,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cshort> ()), cshort,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<ushort> ()), ushort,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cushort> ()), cushort,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<int> ()), int,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cint> ()), cint,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<uint> ()), uint,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cuint> ()), cuint,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<long> ()), long,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<clong> ()), clong,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<ulong> ()), ulong,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<culong> ()), culong,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<long64> ()), long64,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<clong64> ()), clong64,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<ulong64> ()), ulong64,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<culong64> ()), culong64,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<float> ()), float,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cfloat> ()), cfloat,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<double> ()), double,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cdouble> ()), cdouble,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<ldouble> ()), ldouble,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cldouble> ()), cldouble,
-    std::conditional_t<char_hash<STR> () == char_hash (type_name<cvoid> ()), cvoid,
-    std::enable_if_t  <char_hash<STR> () == char_hash (type_name<void> ()), void
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<char> ()), char,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cchar> ()), cchar,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<uchar> ()), uchar,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cuchar> ()), cuchar,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<char8> ()), char8,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cchar8> ()), cchar8,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<char16> ()), char16,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cchar16> ()), cchar16,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<char32> ()), char32,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cchar32> ()), cchar32,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<wchar> ()), wchar,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cwchar> ()), cwchar,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<bool> ()), bool,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cbool> ()), cbool,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<short> ()), short,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cshort> ()), cshort,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<ushort> ()), ushort,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cushort> ()), cushort,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<int> ()), int,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cint> ()), cint,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<uint> ()), uint,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cuint> ()), cuint,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<long> ()), long,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<clong> ()), clong,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<ulong> ()), ulong,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<culong> ()), culong,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<long64> ()), long64,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<clong64> ()), clong64,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<ulong64> ()), ulong64,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<culong64> ()), culong64,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<float> ()), float,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cfloat> ()), cfloat,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<double> ()), double,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cdouble> ()), cdouble,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<ldouble> ()), ldouble,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cldouble> ()), cldouble,
+    std::conditional_t<char_hash<STR> () == char_hash (name_of<cvoid> ()), cvoid,
+    std::enable_if_t  <char_hash<STR> () == char_hash (name_of<void> ()), void
     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 public:
-    size_type _M_type_hash { char_hash (type_name<void> ()) };
+    size_type _M_type_hash { char_hash (name_of<void> ()) };
 };
 
 // =========================================================
 
 template <typename U>
-inline constexpr static rtti::const_pointer const typename_v = rtti::type_name<U> ();
-
-template <rtti::size_type Hash>
-inline constexpr static rtti::const_pointer const typename_hash_v = rtti::type_name (Hash);
+inline constexpr static rtti::const_pointer const name_of_v = rtti::name_of<U> ();
 
 template <typename U>
-inline constexpr static rtti::string_view const typename_sv_v = rtti::type_name<U> ();
-
-template <rtti::size_type Hash>
-inline constexpr static rtti::string_view const typename_hash_sv_v = rtti::type_name (Hash);
+inline constexpr static rtti::string_view const name_of_sv_v = rtti::name_of<U> ();
 
 template <typename U>
-inline constexpr static rtti::string_type const typename_str_v = rtti::type_name<U> ();
+inline constexpr static rtti::string_type const name_of_str_v = rtti::name_of<U> ();
 
 template <rtti::size_type Hash>
-inline constexpr static rtti::string_type const typename_hash_str_v = rtti::type_name (Hash);
+inline constexpr static rtti::const_pointer const name_of_hash_v = rtti::name_of (Hash);
+
+template <rtti::size_type Hash>
+inline constexpr static rtti::string_view const name_of_hash_sv_v = rtti::name_of (Hash);
+
+template <rtti::size_type Hash>
+inline constexpr static rtti::string_type const name_of_hash_str_v = rtti::name_of (Hash);
 
 template <typename U>
-inline constexpr static rtti::const_size type_hash_v = char_hash<rtti::type_name<U> ()> ();
+inline constexpr static rtti::const_size type_hash_v = char_hash<rtti::name_of<U> ()> ();
 
 // =========================================================
 
@@ -283,6 +294,7 @@ public:
     typedef static_array<rtti_type, arity_v<N>> array_type     ;
     typedef array_type &                        array_ref      ;
     typedef array_type const&                   array_const_ref;
+    typedef fn_type* self_type::*               safe_bool      ;
 
     template <fn_sig S, size_type SZ = def_capture_size_v>
     using fn_t = function<S, max_capture_size_v<SZ>>;
@@ -344,6 +356,9 @@ public:
     constexpr operator bool () const noexcept
     { return _M_fn != nullptr; }
 
+    constexpr explicit operator safe_bool () const noexcept
+    { return _M_fn != nullptr ? &self_type::_M_fn : nullptr; }
+
     constexpr fn_const_ref           fn () const noexcept { return _M_fn       ; }
     constexpr array_const_ref arg_types () const noexcept { return _M_arg_types; }
     constexpr rtti_type     return_type () const noexcept { return _M_ret_type ; }
@@ -391,6 +406,9 @@ constexpr auto operator <=> (function_rtti<N1> const& lh, function_rtti<N2> cons
 //! Type name extraction
 template <rtti const Type>
 using type_t = rtti::type_t<Type.name ()>;
+
+template <rtti::const_pointer STR>
+using type_from_str_t = rtti::type_t<STR>;
 
 //! Type convertability check and extraction - argument convertable on std::forward
 template <typename From, rtti const To>

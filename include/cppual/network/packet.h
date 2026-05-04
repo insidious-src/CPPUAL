@@ -23,6 +23,7 @@
 #define CPPUAL_NETWORK_PACKET_H_
 #ifdef __cplusplus
 
+#include <cppual/decl>
 #include <cppual/types>
 #include <cppual/string>
 #include <cppual/containers>
@@ -47,7 +48,7 @@ public:
     typedef u32                     stream_size  ;
     typedef dyn_array<value_type>   stream_type  ;
 
-    using safe_bool = bool (self_type::*) (size_type) const noexcept;
+    using safe_bool = bool (self_type::*)(size_type) const noexcept;
 
     void append (const_pointer data, size_type size_in_bytes) noexcept;
 

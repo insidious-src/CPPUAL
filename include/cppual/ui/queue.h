@@ -46,12 +46,12 @@ typedef std::shared_ptr<display_queue_interface> shared_queue;
 class SHARED_API display_queue_interface : public non_copyable_virtual
 {
 public:
-    typedef display_queue_interface  self_type      ;
-    typedef input::event             event_type     ;
-    typedef shared_display           connection_type;
-    typedef platform_wnd_interface   window_type    ;
-    typedef std::atomic_bool         bool_type      ;
-    typedef bitset<event_type::bits> mask_type      ;
+    typedef display_queue_interface        self_type      ;
+    typedef input::event                   event_type     ;
+    typedef shared_display                 connection_type;
+    typedef platform_wnd_interface         window_type    ;
+    typedef std::atomic_bool               bool_type      ;
+    typedef bitset<event_type::event_bits> mask_type      ;
 
     virtual bool set_window_events (window_type const&, mask_type)         = 0;
     virtual bool pop_front         (bool wait)                             = 0;

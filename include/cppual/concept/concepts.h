@@ -70,8 +70,67 @@ template <non_void> class allocator;
 
 // ====================================================
 
+template <typename T>
+using remove_const_t = std::remove_const_t<T>;
+
+template <typename T>
+using remove_volatile_t = std::remove_volatile_t<T>;
+
+template <typename T>
+using remove_cv_t = std::remove_const_t<std::remove_volatile_t<T>>;
+
+template <typename T>
+using remove_ref_t = std::remove_reference_t<T>;
+
+template <typename T>
+using remove_cref_t = remove_const_t<remove_ref_t<T>>;
+
+template <typename T>
+using remove_vref_t = remove_volatile_t<remove_ref_t<T>>;
+
+template <typename T>
+using remove_cvref_t = remove_cv_t<remove_ref_t<T>>;
+
+template <typename T>
+using remove_ptr_t = std::remove_pointer_t<T>;
+
+template <typename T>
+using remove_cptr_t = remove_const_t<remove_ptr_t<T>>;
+
+template <typename T>
+using remove_vptr_t = remove_volatile_t<remove_ptr_t<T>>;
+
+template <typename T>
+using remove_cvptr_t = remove_cv_t<remove_ptr_t<T>>;
+
+template <typename T>
+using remove_refptr_t = remove_ptr_t<remove_ref_t<T>>;
+
+template <typename T>
+using remove_crefptr_t = remove_const_t<remove_ptr_t<remove_ref_t<T>>>;
+
+template <typename T>
+using remove_vrefptr_t = remove_volatile_t<remove_ptr_t<remove_ref_t<T>>>;
+
+template <typename T>
+using remove_cvrefptr_t = remove_cv_t<remove_ptr_t<remove_ref_t<T>>>;
+
+template <typename T>
+using remove_array_t = std::remove_extent_t<T>;
+
+template <typename T>
+using remove_carray_t = remove_const_t<std::remove_extent_t<T>>;
+
+template <typename T>
+using remove_varray_t = remove_volatile_t<std::remove_extent_t<T>>;
+
+template <typename T>
+using remove_cvarray_t = remove_const_t<remove_volatile_t<std::remove_extent_t<T>>>;
+
+// ====================================================
+
 //! max array size for function's capture lambda storage
-template <std::size_t SZ = 256>
+template <std::size_t SZ = 200>
 consteval decltype (SZ) lambda_calc_size () noexcept
 {
     return SZ <=  32 ?  32 :
@@ -86,10 +145,27 @@ consteval decltype (SZ) lambda_calc_size () noexcept
 }
 
 
-inline constexpr static const auto def_capture_size_v = lambda_calc_size ();
+inline constexpr static const std::size_t def_capture_size_v = lambda_calc_size ();
 
-template <decltype (def_capture_size_v) SZ = def_capture_size_v>
+template <remove_const_t<decltype (def_capture_size_v)> SZ = lambda_calc_size ()>
 inline constexpr static const decltype (SZ) max_capture_size_v = lambda_calc_size<SZ> ();
+
+//! =========================================================
+
+consteval std::size_t args_count (std::size_t const count = 5) noexcept
+{
+    return      count <=  5 ?
+            5 : count <= 10 ?
+           10 : count <= 15 ?
+           15 : count <= 20 ?
+           20 : count <= 25 ?
+           25 : count <= 30 ?
+           30 : count       ;
+}
+
+inline constexpr static const std::size_t def_arity_v = args_count ();
+template <remove_const_t<decltype (def_arity_v)> N = def_arity_v>
+inline constexpr static const decltype (N) arity_v = args_count (N);
 
 // ====================================================
 
@@ -603,65 +679,6 @@ using is_copyable_movable_t = is_copyable_movable<T>::type;
 template <non_void T>
 inline constexpr static cbool is_copyable_movable_v = is_copyable_movable<T>::value;
 
-// ====================================================
-
-template <typename T>
-using remove_const_t = std::remove_const_t<T>;
-
-template <typename T>
-using remove_volatile_t = std::remove_volatile_t<T>;
-
-template <typename T>
-using remove_cv_t = std::remove_const_t<std::remove_volatile_t<T>>;
-
-template <typename T>
-using remove_ref_t = std::remove_reference_t<T>;
-
-template <typename T>
-using remove_cref_t = remove_const_t<remove_ref_t<T>>;
-
-template <typename T>
-using remove_vref_t = remove_volatile_t<remove_ref_t<T>>;
-
-template <typename T>
-using remove_cvref_t = remove_cv_t<remove_ref_t<T>>;
-
-template <typename T>
-using remove_ptr_t = std::remove_pointer_t<T>;
-
-template <typename T>
-using remove_cptr_t = remove_const_t<remove_ptr_t<T>>;
-
-template <typename T>
-using remove_vptr_t = remove_volatile_t<remove_ptr_t<T>>;
-
-template <typename T>
-using remove_cvptr_t = remove_cv_t<remove_ptr_t<T>>;
-
-template <typename T>
-using remove_refptr_t = remove_ptr_t<remove_ref_t<T>>;
-
-template <typename T>
-using remove_crefptr_t = remove_const_t<remove_ptr_t<remove_ref_t<T>>>;
-
-template <typename T>
-using remove_vrefptr_t = remove_volatile_t<remove_ptr_t<remove_ref_t<T>>>;
-
-template <typename T>
-using remove_cvrefptr_t = remove_cv_t<remove_ptr_t<remove_ref_t<T>>>;
-
-template <typename T>
-using remove_array_t = std::remove_extent_t<T>;
-
-template <typename T>
-using remove_carray_t = remove_const_t<std::remove_extent_t<T>>;
-
-template <typename T>
-using remove_varray_t = remove_volatile_t<std::remove_extent_t<T>>;
-
-template <typename T>
-using remove_cvarray_t = remove_const_t<remove_volatile_t<std::remove_extent_t<T>>>;
-
 // =========================================================
 
 //! constructibility and destructibility concepts
@@ -927,20 +944,24 @@ template <typename T>
 concept void_functional = functional<T> && void_callable<T>;
 
 template <typename T>
-concept class_and_non_functional = structure<T> && !functional<std::decay_t<T>>;
+concept class_and_non_functional = structure<T> && !is_functional_v<T>;
 
 // ====================================================
 
 template <typename P, typename K, typename FN>
-concept functional_switch_pair = pair_like<P> && switch_value<remove_cptr_t<K>> && functional<FN>;
+concept functional_switch_pair = pair_like<P>                   &&
+                                 switch_value<remove_cptr_t<K>> &&
+                                 functional<FN>;
 
 template <typename P, typename K, typename FN>
 concept functional_str_pair = pair_like<P> && std::is_same_v<K, cchar*> && functional<FN>;
 
 template <typename P, typename K, typename FN>
-concept fn_str_pair = pair_like<P> && std::is_same_v<K, cchar*> && (static_function   <FN> ||
-                                                                    member_function   <FN> ||
-                                                                    lambda_non_capture<FN> || lambda_capture    <FN>);
+concept fn_str_pair = pair_like<P> &&
+            std::is_same_v<K, cchar*> && (static_function   <FN> ||
+                                          member_function   <FN> ||
+                                          lambda_non_capture<FN> ||
+                                          lambda_capture    <FN>);
 
 template <typename Tuple, typename... Args>
 concept tuple_like = std::is_same_v<Tuple, std::tuple<Args...>>;

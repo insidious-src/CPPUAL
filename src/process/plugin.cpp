@@ -164,7 +164,7 @@ void dyn_loader::detach () noexcept
     _M_pHandle = nullptr;
 }
 
-void* dyn_loader::get_address (string_view const& pName) const
+dyn_loader::pointer dyn_loader::get_address (string_view const& pName) const
 {
 #   ifdef OS_STD_POSIX
 
@@ -184,7 +184,7 @@ void* dyn_loader::get_address (string_view const& pName) const
 #   endif
 }
 
-dyn_loader::generic_fn_type dyn_loader::get_function (string_view const& pName) const
+dyn_loader::generic_fn_ptr dyn_loader::get_function (string_view const& pName) const
 {
 #   ifdef OS_STD_POSIX
 
@@ -197,7 +197,7 @@ dyn_loader::generic_fn_type dyn_loader::get_function (string_view const& pName) 
         throw std::bad_function_call ();
     }
 
-    return *fn;
+    return fn;
 
 #   elif defined (OS_WINDOWS)
 
@@ -210,7 +210,7 @@ dyn_loader::generic_fn_type dyn_loader::get_function (string_view const& pName) 
         throw std::bad_function_call ();
     }
 
-    return *fn;
+    return fn;
 
 #   endif
 }

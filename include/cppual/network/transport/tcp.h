@@ -23,11 +23,16 @@
 #define CPPUAL_NETWORK_TCP_H_
 #ifdef __cplusplus
 
+#include <cppual/decl>
 #include <cppual/network/transport/socket.h>
 #include <cppual/network/address.h>
 #include <cppual/network/packet.h>
 
+// =========================================================
+
 namespace cppual { namespace network {
+
+// =========================================================
 
 class tcp_stream : public virtual transport_socket
 {
@@ -65,7 +70,11 @@ private:
 
 };
 
+// =========================================================
+
 } } // namespace Network
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_NETWORK_TCP_H_

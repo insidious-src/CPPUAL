@@ -127,7 +127,7 @@ public:
         _M_value =  rh._M_value;
         _M_pNext = &rh;
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             if (next != _M_pNext) next->_M_value = _M_value;
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
@@ -159,7 +159,7 @@ public:
 
         _M_value = std::move (value);
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             next->_M_value = _M_value;
 
@@ -179,7 +179,7 @@ public:
 
         _M_value = value;
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             next->_M_value = _M_value;
 
@@ -208,7 +208,7 @@ public:
     {
         self_type* reactive_signal = this;
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
@@ -223,7 +223,7 @@ public:
     {
         self_type* reactive_signal = this;
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
@@ -239,7 +239,7 @@ public:
     {
         self_type* reactive_signal = this;
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
@@ -255,7 +255,7 @@ public:
     {
         self_type* reactive_signal = this;
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
@@ -270,7 +270,7 @@ public:
     {
         self_type* reactive_signal = this;
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }
@@ -289,7 +289,7 @@ public:
 
         self_type* reactive_signal = this;
 
-        for (self_type* next = _M_pNext; next != this; next = next->_M_pNext)
+        for (auto next = _M_pNext; next != this; next = next->_M_pNext)
         {
             if (reactive_signal == this && !next->empty ()) reactive_signal = next;
         }

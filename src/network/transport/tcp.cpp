@@ -39,7 +39,11 @@
 #   include "os/ios.h"
 #endif
 
+// =========================================================
+
 namespace cppual { namespace network {
+
+// =========================================================
 
 tcp_stream::tcp_stream () noexcept
 : transport_socket (socket_type::tcp)
@@ -106,4 +110,8 @@ tcp_stream& tcp_stream::operator >> (packet&) noexcept // receive
     return *this;
 }
 
+// =========================================================
+
 } } // namespace Network
+
+// =========================================================

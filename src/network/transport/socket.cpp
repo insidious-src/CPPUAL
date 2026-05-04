@@ -47,7 +47,7 @@ namespace cppual { namespace network {
 
 // ====================================================
 
-enum class socket_flag : int
+typedef enum class socket_flag : int
 {
 #   ifdef OS_STD_UNIX
     non_blocking = O_NONBLOCK,
@@ -57,7 +57,8 @@ enum class socket_flag : int
 #   ifdef OS_MACX
     no_sig_pipe  = SO_NOSIGPIPE
 #   endif
-};
+}
+const const_socket_flag;
 
 typedef bitset<socket_flag> socket_flags;
 
@@ -97,12 +98,12 @@ void transport_socket::set_blocking (bool bBlock) noexcept
     if (valid ())
     {
 #       ifdef OS_STD_UNIX
-        socket_flags status_flags = ::fcntl (handle<int> (), F_GETFL);
+        socket_flags status_flags = ::fcntl (handle<socket_id> (), F_GETFL);
 
         if (bBlock) status_flags -= socket_flag::non_blocking;
         else        status_flags += socket_flag::non_blocking;
 
-        ::fcntl (handle<int> (), F_SETFL, status_flags.value ());
+        ::fcntl (handle<socket_id> (), F_SETFL, status_flags.value ());
 #       endif
     }
 }
@@ -112,7 +113,7 @@ bool transport_socket::is_blocking () const noexcept
     if (valid ())
     {
 #       ifdef OS_STD_UNIX
-        socket_flags status_flags = ::fcntl (handle<int> (), F_GETFL);
+        socket_flags status_flags = ::fcntl (handle<socket_id> (), F_GETFL);
 
         return !status_flags.test (socket_flag::non_blocking);
 #       endif
@@ -137,9 +138,9 @@ void transport_socket::replace_from_id (socket_id nId) noexcept
 void transport_socket::close () noexcept
 {
 #   ifdef OS_STD_UNIX
-    if (valid ()) ::close (handle<int> ());
+    if (valid ()) ::close (handle<socket_id> ());
 #   elif defined OS_WINDOWS
-    if (valid ()) ::closesocket (handle<int> ());
+    if (valid ()) ::closesocket (handle<socket_id> ());
 #   endif
 
     set_handle (npos);
@@ -155,33 +156,33 @@ void transport_socket::init_socket () noexcept
         {
 #           ifdef OS_STD_UNIX
             /// Disable the Nagle algorithm (ie. removes buffering of TCP packets)
-            if (::setsockopt (handle<int> (),
+            if (::setsockopt (handle<socket_id> (),
                               IPPROTO_TCP,
                               int(socket_flag::no_delay),
                               reinterpret_cast<char*> (&yes),
-                              static_cast<::socklen_t> (sizeof (int))) == -1)
+                              static_cast<::socklen_t> (sizeof (socket_id))) == -1)
             {
                 std::cerr << "Failed to set socket option 'TCP_NODELAY'. "
                              "All your TCP packets will be buffered!" << std::endl;
             }
 #           elif defined OS_MACX
             /// On Mac OS X, disable the SIGPIPE signal on disconnection
-            if (::setsockopt (handle<int> (),
+            if (::setsockopt (handle<socket_id> (),
                               SOL_SOCKET,
                               int(socket_flag::no_sig_pipe),
                               reinterpret_cast<char*>(&yes),
-                              static_cast<::socklen_t> (sizeof (int))) == -1)
+                              static_cast<::socklen_t> (sizeof (socket_id))) == -1)
                 std::cerr << "Failed to set socket option 'SO_NOSIGPIPE'" << std::endl;
 #           endif
         }
         else
         {
             /// Enable broadcast by default for UDP sockets
-            if (::setsockopt (handle<int> (),
+            if (::setsockopt (handle<socket_id> (),
                               SOL_SOCKET,
                               int(socket_flag::broadcast),
                               reinterpret_cast<char*> (&yes),
-                              static_cast<::socklen_t> (sizeof (int))) == -1)
+                              static_cast<::socklen_t> (sizeof (socket_id))) == -1)
                 std::cerr << "Failed to enable broadcast on UDP socket" << std::endl;
         }
     }

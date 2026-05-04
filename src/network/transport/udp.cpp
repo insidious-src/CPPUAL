@@ -39,7 +39,11 @@
 #   include "os/ios.h"
 #endif
 
+// =========================================================
+
 namespace cppual { namespace network {
+
+// =========================================================
 
 udp_stream::udp_stream () noexcept
 : transport_socket (socket_type::udp)
@@ -90,4 +94,8 @@ byte udp_stream::encode_content(protocol_context&, packet& /*input_packet*/, pac
     return byte ();
 }
 
+// =========================================================
+
 } } // namespace Network
+
+// =========================================================

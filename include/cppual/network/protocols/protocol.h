@@ -27,6 +27,8 @@
 #include <cppual/noncopyable>
 #include <cppual/interface>
 
+// =========================================================
+
 namespace cppual { namespace network {
 
 // =========================================================
@@ -54,6 +56,8 @@ public:
 // =========================================================
 
 } } // Network
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_NETWORK_PROTOCOL_INTERFACE_H_

@@ -23,6 +23,7 @@
 #define CPPUAL_NETWORK_UDP_H_
 #ifdef __cplusplus
 
+#include <cppual/decl>
 #include <cppual/network/transport/socket.h>
 #include <cppual/network/address.h>
 #include <cppual/network/packet.h>

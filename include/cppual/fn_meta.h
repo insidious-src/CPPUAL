@@ -162,7 +162,7 @@ template <typename T, std::size_t N>
 struct tuple_repeat_helper
 {
     template <std::size_t... I>
-    static auto make_tuple (std::index_sequence<I...>)
+    static auto make_tuple (std::index_sequence<I...>) noexcept
     {
         return std::tuple<std::conditional_t<I >= 0, T, T>...> { };
     }
@@ -528,7 +528,7 @@ make_consteval_bimap (Ps&&... pairs) noexcept
 
 // ====================================================
 
-template <non_void... Ts>
+/* template <non_void... Ts>
 struct type_list
 {
     typedef type_list<Ts...> self_type;
@@ -630,7 +630,7 @@ private:
     template <size_type N>
     struct getter
     {
-        friend consteval auto flag (getter);
+        friend consteval auto flag (getter<N>);
     };
 
     template <typename T, size_type N>
@@ -815,7 +815,7 @@ struct meta_list
     consteval static void set (
         size_type = push_state<typename H::template value<>::template set<Idx, T>::result> ())
     { }
-};
+}; */
 
 // ====================================================
 

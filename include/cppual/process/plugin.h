@@ -108,27 +108,34 @@ public:
     constexpr bool contains (string_view const& gName) const noexcept
     { return get_address (gName) != nullptr; }
 
-    constexpr fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    consteval fn_proxy_type operator [] (string_view const& fn_name) const noexcept
     { return  fn_proxy_type (*this, fn_name); }
 
-    constexpr fn_proxy_type operator [] (char_ptr fn_name) const noexcept
+    consteval fn_proxy_type operator [] (char_ptr fn_name) const noexcept
     {  return fn_proxy_type (*this, fn_name); }
 
     template <non_function T = void>
     constexpr T* import (string_view const& pName) const
     { return static_cast<T*> (get_address (pName)); }
 
-    template <static_function F = void(*)()>
-    constexpr F import (string_view const& pName) const
-    { return direct_cast<F> (get_function (pName)); }
+    //template <non_const_fn_sig F = void()>
+    //constexpr F import (string_view const& pName) const
+    //{ return direct_cast<F> (get_function (pName)); }
 
-    template <typename R = void, c_const_str STR, typename... Args>
-    constexpr R invoke (STR fn_name, Args&&... args) const
-    { return (fn_cast<R(Args...)> (get_function (fn_name)))(std::forward<Args> (args)...); }
+    template <typename R, typename... Args>
+    constexpr function_type<R, Args...> import (string_view const& pName) const
+    { return *direct_cast<function_ptr<R, Args...>> (get_function (pName)); }
+
+    template <c_const_str STR, typename... Args>
+    constexpr auto invoke (STR fn_name, Args&&... args) const
+    {
+        using R = abi::type_t<abi::name_of_hash_v<char_hash (fn_name)>>;
+        return (fn_cast<R(Args...)> (get_function (fn_name)))(std::forward<Args> (args)...);
+    }
 
 private:
-    pointer         get_address  (string_view const& name) const;
-    generic_fn_type get_function (string_view const& name) const;
+    pointer        get_address  (string_view const& name) const;
+    generic_fn_ptr get_function (string_view const& name) const;
 
 private:
     handle_type    _M_pHandle  { };
@@ -294,9 +301,15 @@ public:
 
         if (!loader.is_attached () || !loader.contains (plugin_main)) return false;
 
-        plugin_vars* plugin = loader[plugin_main](ret<plugin_vars*>,
-                                                  rc == nullptr ? &get_allocator ().resource () : rc,
-                                                  std::forward<Args> (args)...);
+        auto const plugin_entry =
+        loader.import<plugin_vars*, memory::memory_resource*, Args...> (plugin_main);
+
+        if (plugin_entry == nullptr) return false;
+
+        plugin_vars* plugin = plugin_entry (rc == nullptr ? &get_allocator ().resource () : rc,
+                                            std::forward<Args> (args)...);
+
+        if (plugin == nullptr) return false;
 
         for (value_type& pair : _M_gPluginMap)
         {

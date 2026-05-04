@@ -23,10 +23,11 @@
 #define CPPUAL_PROCESS_PIPE_H_
 #ifdef __cplusplus
 
+#include <cppual/types>
+#include <cppual/noncopyable>
+
 #include <string>
 #include <vector>
-#include <cppual/types.h>
-#include <cppual/noncopyable.h>
 
 //using std::vector;
 //using string;

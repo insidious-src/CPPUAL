@@ -139,7 +139,7 @@ set(CPPUAL_ENDOSKELETON_HEADERS
     "include/cppual/error.h"
     "include/cppual/common.h"
     "include/cppual/containers.h"
-    "include/cppual/array_map.h"
+    "include/cppual/index_map.h"
     "include/cppual/string.h"
     "include/cppual/rope.h"
     "include/cppual/string_helper.h"
@@ -248,7 +248,7 @@ add_library(cppual-endoskeleton SHARED
     "include/cppual/forward"
     "include/cppual/iterator"
     "include/cppual/containers"
-    "include/cppual/array_map"
+    "include/cppual/index_map"
     "include/cppual/string"
     "include/cppual/bitflags"
     "include/cppual/functional"
@@ -1180,3 +1180,8 @@ target_link_libraries(cppual-memory-test cppual-endoskeleton)
 #   --build-makeprogram ${CMAKE_MAKE_PROGRAM}
 #   --build-project Simple
 #   --test-command memory_test)
+
+target_include_directories(
+    cppual-endoskeleton PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+    )

@@ -62,7 +62,7 @@ private:
         return init;
     }
 
-    initializer ()
+    inline initializer ()
     : manager ()
     , local_factories ()
     {

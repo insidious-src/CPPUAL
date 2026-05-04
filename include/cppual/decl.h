@@ -382,7 +382,10 @@ typedef char32_t const cchar32;
 typedef wchar_t wchar;
 typedef wchar_t const cwchar;
 
-#ifdef TXT_STD_UTF16
+#ifdef TXT_STD_UTF8
+typedef char8 tchar;
+typedef cchar8 ctchar;
+#elif defined (TXT_STD_UTF16)
 typedef char16 tchar;
 typedef cchar16 ctchar;
 #elif defined (TXT_STD_UTF32)
@@ -430,7 +433,7 @@ typedef culong culong_t;
 typedef int call_ret_t;
 #endif
 
-/// floating point typedefs
+//! floating point typedefs
 typedef const float cfloat;
 typedef const double cdouble;
 typedef long double ldouble;

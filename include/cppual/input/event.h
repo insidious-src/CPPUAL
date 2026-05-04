@@ -23,15 +23,18 @@
 #define CPPUAL_DEVICES_EVENT_H
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/bitset.h>
+#include <cppual/decl>
+#include <cppual/types>
+#include <cppual/bitflags>
+#include <cppual/noncopyable>
+#include <cppual/input_devices>
 #include <cppual/gfx/coord.h>
-#include <cppual/input/keyboard.h>
-#include <cppual/input/pointer.h>
-#include <cppual/input/joystick.h>
-#include <cppual/noncopyable.h>
+
+// =========================================================
 
 namespace cppual::input {
+
+// =========================================================
 
 struct system_message final
 {
@@ -51,7 +54,7 @@ public:
     typedef event       self_type;
     typedef std::size_t size_type;
 
-    typedef enum bits
+    typedef enum event_bits
     {
         null               =       0,
         key_pressed        = 1 <<  0,
@@ -82,14 +85,14 @@ public:
         key      = key_pressed   | key_released,
         mouse    = mbutton_down  | mbutton_up     | mouse_move | mwheel_step,
         touch    = touch_press   | touch_release  | touch_move,
-        joystick = joy_connect   | joy_disconnect | joy_button_press | joy_button_release   |
+        joystick = joy_connect   | joy_disconnect | joy_button_press | joy_button_release |
                    joy_move      | joy_trigger    | joy_track_move,
-        window   = paint | focus | size           | visibility     | property | destroy | step,
-        all      = key   | mouse | touch          | window         | joystick | sys_message
+        window   = paint | focus | size           | visibility       | property | destroy | step,
+        all      = key   | mouse | touch          | window           | joystick | sys_message
     }
-    const const_bits;
+    const const_event_bits;
 
-    typedef bitset<bits> bit_flags;
+    typedef bitset<event_bits> event_flags;
 
     struct base_data
     {
@@ -106,7 +109,7 @@ public:
     struct mbutton_data
     {
         point2u pos   ;
-        u8      button;
+        byte    button;
     };
 
     struct mwheel_data
@@ -131,14 +134,14 @@ public:
     {
         size_type id   ;
         i16       value;
-        u8        axis ;
+        byte      axis ;
     };
 
     struct joy_trigger_data
     {
         size_type id       ;
         i16       threshold;
-        u8        trigger  ;
+        byte      trigger  ;
 
     };
 
@@ -146,7 +149,7 @@ public:
     {
         size_type id   ;
         point2i   pos  ;
-        u8        track;
+        byte      track;
     };
 
     struct joy_plug_data
@@ -184,7 +187,9 @@ public:
         bool             state       ;
         property_data    property    ;
 
-        constexpr data_value () noexcept = default;
+        consteval data_value () noexcept
+        : base { 0, 0 }
+        { }
 
         constexpr data_value (i32 nMsg) noexcept
         : message (nMsg)
@@ -206,17 +211,17 @@ public:
 
     constexpr event () noexcept = default;
 
-    constexpr event (bits type, const_reference data = value_type ()) noexcept
+    constexpr event (event_bits type, const_reference data = value_type ()) noexcept
     : _M_data (data)
     , _M_type (type)
     { }
 
     constexpr const_reference data () const noexcept { return _M_data; }
-    constexpr bit_flags       type () const noexcept { return _M_type; }
+    constexpr event_flags     type () const noexcept { return _M_type; }
 
 protected:
-    value_type _M_data;
-    bit_flags  _M_type;
+    value_type  _M_data;
+    event_flags _M_type;
 };
 
 // =========================================================
@@ -438,7 +443,7 @@ struct touch_event : public event
     typedef touch_event self_type;
     typedef event       base_type;
 
-    constexpr touch_event (i32 pid, point2u gPos, bits action) noexcept
+    constexpr touch_event (i32 pid, point2u gPos, event_bits action) noexcept
     : base_type (action)
     {
         _M_data.touch.pid = pid;

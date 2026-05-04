@@ -26,8 +26,8 @@
 #include <cppual/containers>
 #include <cppual/concepts>
 #include <cppual/iterator>
+#include <cppual/string>
 
-#include <string_view>
 #include <type_traits>
 #include <iterator>
 #include <cstddef>
@@ -54,6 +54,7 @@ public:
     typedef bitset<T>                 bitset_type;
     typedef std::underlying_type_t<T> int_type   ;
     typedef int_type                  const_int  ;
+    typedef int_type self_type::*     safe_bool  ;
 
     constexpr reference_proxy (self_type &&)           noexcept = default;
     consteval reference_proxy (self_type const&)       noexcept = default;
@@ -70,6 +71,9 @@ public:
     consteval operator bool () const noexcept
     { return (_M_bs->_M_flags & _M_mask) != 0; }
 
+    consteval explicit operator safe_bool () const noexcept
+    { return (_M_bs->_M_flags & _M_mask) != 0 ? &self_type::_M_mask : nullptr; }
+
 private:
     reference_proxy () = delete;
 
@@ -84,23 +88,27 @@ template <enumeration T>
 class bitset
 {
 public:
-    typedef bitset<T>                                     self_type             ;
-    typedef remove_cvref_t<T>                             value_type            ;
-    typedef value_type const                              const_value           ;
-    typedef std::underlying_type_t<value_type>            int_type              ;
-    typedef int_type const                                const_int             ;
-    typedef std::string_view                              string_view           ;
-    typedef string                                        string_type           ;
-    typedef std::size_t                                   size_type             ;
-    typedef size_type const                               const_size            ;
-    typedef reference_proxy<T>                            ref_proxy_type        ;
-    typedef set_bit_iterator<T>                           iterator              ;
-    typedef set_bit_iterator<T const>                     const_iterator        ;
-    typedef std::reverse_iterator<iterator>               reverse_iterator      ;
-    typedef std::reverse_iterator<const_iterator>         reverse_const_iterator;
-    typedef std::array<char, (sizeof (int_type) * 8) + 1> str_vector_type       ;
+    typedef remove_cref_t<T>                   value_type ;
+    typedef value_type const                   const_value;
+    typedef std::underlying_type_t<value_type> int_type   ;
+    typedef int_type const                     const_int  ;
 
-    inline constexpr static const_size npos = static_cast<size_type> (-1);
+    inline static constexpr std::size_t capacity = (sizeof (int_type) * 8) + sizeof (char);
+
+public:
+    typedef bitset<T>                             self_type             ;
+    typedef fstring_view                          string_view           ;
+    typedef fstring                               string_type           ;
+    typedef remove_const_t<decltype (capacity)>   size_type             ;
+    typedef size_type const                       const_size            ;
+    typedef reference_proxy<T>                    ref_proxy_type        ;
+    typedef set_bit_iterator<T>                   iterator              ;
+    typedef set_bit_iterator<T const>             const_iterator        ;
+    typedef std::reverse_iterator<iterator>       reverse_iterator      ;
+    typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
+    typedef std::array<char, capacity>            str_vector_type       ;
+
+    inline static constexpr const_size npos = static_cast<size_type> (-1);
 
     constexpr bitset () noexcept = default;
     constexpr bitset (self_type&&) noexcept = default;
@@ -125,7 +133,8 @@ public:
     }
 
     //! constexpr constructor from string_view
-    constexpr bitset (string_view const& sv) noexcept
+    template <str_view_like U>
+    constexpr bitset (U const& sv) noexcept
     : _M_flags ()
     {
         for (auto i = 0U; i < sv.size () && i < size (); ++i)
@@ -163,7 +172,7 @@ public:
     { return static_cast<value_type> (_M_flags); }
 
     //! bitset size in bits
-    consteval static size_type size () noexcept
+    static consteval size_type size () noexcept
     { return sizeof (int_type) * 8; }
 
     //! use std::popcount for counting set bits
@@ -181,7 +190,9 @@ public:
               >
     constexpr bool test (U const flags) const noexcept
     {
-        static_assert (sizeof (U) <= sizeof (int_type), "size of U is bigger than the size of int_type!");
+        static_assert (sizeof (U) <= sizeof (int_type),
+                      "size of U is bigger than the size of int_type!");
+
         return (_M_flags & static_cast<int_type> (flags)) == static_cast<int_type> (flags);
     }
 
@@ -267,10 +278,10 @@ public:
     consteval const_iterator cend   () const noexcept { return const_iterator (*this, size ()); }
     consteval const_iterator cend   ()       noexcept { return const_iterator (*this, size ()); }
 
-    consteval reverse_iterator  rbegin () noexcept
+    consteval reverse_iterator rbegin () noexcept
     { return reverse_iterator (*this, size () - 1); }
 
-    consteval reverse_iterator  rbegin () const noexcept
+    consteval reverse_iterator rbegin () const noexcept
     { return reverse_iterator (*this, size () - 1); }
 
     consteval reverse_const_iterator crbegin () const noexcept
@@ -305,29 +316,26 @@ public:
 
         result.reserve (size ());
 
-        for (auto i = 0UL; i < size (); ++i)
-        {
-            result[(size () - 1) - i] = test (static_cast<int_type> (1) << i) ? '1' : '0';
-        }
+        for (size_type i = 0; i < size (); ++i)
+        { result[(size () - 1) - i] = test (static_cast<int_type> (1) << i) ? '1' : '0'; }
 
         return result;
     }
 
-    constexpr static self_type from_string (string_view const& str)
+    template <str_view_like U>
+    static constexpr self_type from_string (U const& str)
     {
         self_type result;
 
         for (size_type i = 0; i < str.size () && i < size (); ++i)
-        {
-            if (str[i] == '1') result += static_cast<value_type> (static_cast<int_type> (1) << i);
-        }
+        { if (str[i] == '1') result += static_cast<value_type> (static_cast<int_type> (1) << i); }
 
         return result;
     }
 
     //! compile-time utilities
     template <size_type N>
-    constexpr static self_type low_bits () noexcept
+    static constexpr self_type low_bits () noexcept
     {
         static_assert (N <= size (), "N must NOT exceed bitset size!");
 
@@ -380,24 +388,24 @@ private:
 
 // =========================================================
 
-template <enumeration T>
-constexpr bitset<T> operator + (bitset<T> const& lh,
-                                typename bitset<T>::const_value eFlag) noexcept
-{ return lh._M_flags | static_cast<typename bitset<T>::int_type> (eFlag); }
+template <enumeration U>
+constexpr bitset<U> operator + (bitset<U> const& lh,
+                                typename bitset<U>::const_value eFlag) noexcept
+{ return lh._M_flags | static_cast<typename bitset<U>::int_type> (eFlag); }
 
-template <enumeration T>
-constexpr bitset<T> operator + (bitset<T> const& lh,
-                                typename bitset<T>::const_int flags) noexcept
+template <enumeration U>
+constexpr bitset<U> operator + (bitset<U> const& lh,
+                                typename bitset<U>::const_int flags) noexcept
 { return lh._M_flags | flags; }
 
-template <enumeration T>
-constexpr bitset<T> operator - (bitset<T> const& lh,
-                                typename bitset<T>::const_value eFlag) noexcept
-{ return lh._M_flags & ~static_cast<typename bitset<T>::int_type> (eFlag); }
+template <enumeration U>
+constexpr bitset<U> operator - (bitset<U> const& lh,
+                                typename bitset<U>::const_value eFlag) noexcept
+{ return lh._M_flags & ~static_cast<typename bitset<U>::int_type> (eFlag); }
 
-template <enumeration T>
-constexpr bitset<T> operator - (bitset<T> const& lh,
-                                typename bitset<T>::const_int flags) noexcept
+template <enumeration U>
+constexpr bitset<U> operator - (bitset<U> const& lh,
+                                typename bitset<U>::const_int flags) noexcept
 { return lh._M_flags & ~flags; }
 
 // =========================================================
@@ -406,24 +414,24 @@ template <enumeration U>
 constexpr bool operator == (bitset<U> const& lh, bitset<U> const& rh) noexcept
 { return lh._M_flags == rh._M_flags; }
 
-template <enumeration T>
-constexpr auto operator <=> (bitset<T> const& lh, bitset<T> const& rh) noexcept
+template <enumeration U>
+constexpr auto operator <=> (bitset<U> const& lh, bitset<U> const& rh) noexcept
 { return lh._M_flags <=> rh._M_flags; }
 
-template <enumeration T>
-constexpr auto operator <=> (bitset<T> const& lh, T const eFlag) noexcept
+template <enumeration U>
+constexpr auto operator <=> (bitset<U> const& lh, U const eFlag) noexcept
 { return lh._M_flags <=> eFlag; }
 
-template <enumeration T>
-constexpr auto operator <=> (T const eFlag, bitset<T> const& lh) noexcept
+template <enumeration U>
+constexpr auto operator <=> (U const eFlag, bitset<U> const& lh) noexcept
 { return eFlag <=> lh._M_flags; }
 
-template <enumeration T>
-constexpr auto operator <=> (bitset<T> const& lh, typename bitset<T>::const_int flags) noexcept
+template <enumeration U>
+constexpr auto operator <=> (bitset<U> const& lh, typename bitset<U>::const_int flags) noexcept
 { return lh._M_flags <=> flags; }
 
-template <enumeration T>
-constexpr auto operator <=> (typename bitset<T>::const_int flags, bitset<T> const& rh) noexcept
+template <enumeration U>
+constexpr auto operator <=> (typename bitset<U>::const_int flags, bitset<U> const& rh) noexcept
 { return flags <=> rh._M_flags; }
 
 // =========================================================
@@ -434,9 +442,7 @@ template <auto... Flags,
           std::enable_if_t<enumeration<E>, void>
           >
 consteval bitset<E> make_bitset () noexcept
-{
-    return bitset<E> ((static_cast<E> (Flags) | ...));
-}
+{  return bitset<E> ((static_cast<E> (Flags) | ...)); }
 
 // =========================================================
 
@@ -448,13 +454,13 @@ namespace std {
 
 using cppual::enumeration;
 
-template <enumeration T>
-struct hash <cppual::bitset<T>>
+template <enumeration U>
+struct hash <cppual::bitset<U>>
 {
     typedef size_t size_type;
 
-    constexpr size_type operator () (cppual::bitset<T> const& bs) const noexcept
-    { return std::hash<typename cppual::bitset<T>::int_type> { } (bs.value ()); }
+    constexpr size_type operator () (cppual::bitset<U> const& bs) const noexcept
+    { return std::hash<typename cppual::bitset<U>::int_type> { } (bs.value ()); }
 };
 
 } // namespace std

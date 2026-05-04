@@ -42,73 +42,73 @@ void packet::append (const_pointer pData, size_type uSize) noexcept
 
 packet& packet::operator << (cbool bData) noexcept
 {
-    append (&bData, sizeof (cbool));
+    append (&bData, sizeof (bData));
     return *this;
 }
 
 packet& packet::operator << (ci8 nData) noexcept
 {
-    append (&nData, sizeof (ci8));
+    append (&nData, sizeof (nData));
     return *this;
 }
 
 packet& packet::operator << (cu8 uData) noexcept
 {
-    append (&uData, sizeof (cu8));
+    append (&uData, sizeof (uData));
     return *this;
 }
 
 packet& packet::operator << (ci16 nData) noexcept
 {
-    append (&nData, sizeof (ci16));
+    append (&nData, sizeof (nData));
     return *this;
 }
 
 packet& packet::operator << (cu16 uData) noexcept
 {
-    append (&uData, sizeof (cu16));
+    append (&uData, sizeof (uData));
     return *this;
 }
 
 packet& packet::operator << (ci32 nData) noexcept
 {
-    append (&nData, sizeof (ci32));
+    append (&nData, sizeof (nData));
     return *this;
 }
 
 packet& packet::operator << (cu32 uData) noexcept
 {
-    append (&uData, sizeof (cu32));
+    append (&uData, sizeof (uData));
     return *this;
 }
 
 packet& packet::operator << (ci64& nData) noexcept
 {
-    append (&nData, sizeof (ci64));
+    append (&nData, sizeof (nData));
     return *this;
 }
 
 packet& packet::operator << (cu64& uData) noexcept
 {
-    append (&uData, sizeof (cu64));
+    append (&uData, sizeof (uData));
     return *this;
 }
 
 packet& packet::operator << (cfloat& fData) noexcept
 {
-    append (&fData, sizeof (cfloat));
+    append (&fData, sizeof (fData));
     return *this;
 }
 
 packet& packet::operator << (cdouble& dData) noexcept
 {
-    append (&dData, sizeof (cdouble));
+    append (&dData, sizeof (dData));
     return *this;
 }
 
 packet& packet::operator << (cldouble& dData) noexcept
 {
-    append (&dData, sizeof (cldouble));
+    append (&dData, sizeof (dData));
     return *this;
 }
 
@@ -116,7 +116,7 @@ packet& packet::operator << (stream_type const& gData) noexcept
 {
     auto const size = static_cast<stream_size> (gData.size ());
 
-    append (&size, sizeof (stream_size));
+    append (&size , sizeof (size));
     append (&gData, gData.size ());
     return *this;
 }
@@ -125,7 +125,7 @@ packet& packet::operator << (string const& gData) noexcept
 {
     auto const size = static_cast<stream_size> (gData.size ());
 
-    append (&size, sizeof (stream_size));
+    append (&size , sizeof (size));
     append (&gData, gData.size ());
     return *this;
 }
@@ -134,7 +134,7 @@ packet& packet::operator << (wstring const& gData) noexcept
 {
     auto const size = static_cast<stream_size> (sizeof (wchar) * gData.size ());
 
-    append (&size, sizeof (stream_size));
+    append (&size , sizeof (size));
     append (&gData, size);
     return *this;
 }
@@ -143,7 +143,7 @@ packet& packet::operator << (u16string const& gData) noexcept
 {
     auto const size = static_cast<stream_size> (sizeof (char16) * gData.size ());
 
-    append (&size, sizeof (stream_size));
+    append (&size , sizeof (size));
     append (&gData, size);
     return *this;
 }
@@ -152,7 +152,7 @@ packet& packet::operator << (u32string const& gData) noexcept
 {
     auto const size = static_cast<stream_size> (sizeof (char32) * gData.size ());
 
-    append (&size, sizeof (stream_size));
+    append (&size , sizeof (size));
     append (&gData, size);
     return *this;
 }
@@ -168,7 +168,7 @@ packet& packet::operator >> (bool& bData) noexcept
 
 packet& packet::operator >> (i8& nData) noexcept
 {
-    if (can_exchange (sizeof (i8)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (nData)>)))
     {
         nData    = *direct_cast<ci8*> (&_M_gData[_M_uPos]);
         _M_uPos +=  sizeof (i8);
@@ -179,10 +179,10 @@ packet& packet::operator >> (i8& nData) noexcept
 
 packet& packet::operator >> (u8& uData) noexcept
 {
-    if (can_exchange (sizeof (u8)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (uData)>)))
     {
         uData    = *direct_cast<cu8*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (u8);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (uData)>);
     }
 
     return *this;
@@ -190,10 +190,10 @@ packet& packet::operator >> (u8& uData) noexcept
 
 packet& packet::operator >> (i16& nData) noexcept
 {
-    if (can_exchange (sizeof (i16)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (nData)>)))
     {
         nData    = *direct_cast<ci16*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (i16);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (nData)>);
     }
 
     return *this;
@@ -201,10 +201,10 @@ packet& packet::operator >> (i16& nData) noexcept
 
 packet& packet::operator >> (u16& uData) noexcept
 {
-    if (can_exchange (sizeof (u16)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (uData)>)))
     {
         uData    = *direct_cast<cu16*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (u16);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (uData)>);
     }
 
     return *this;
@@ -212,10 +212,10 @@ packet& packet::operator >> (u16& uData) noexcept
 
 packet& packet::operator >> (i32& nData) noexcept
 {
-    if (can_exchange (sizeof (i32)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (nData)>)))
     {
         nData    = *direct_cast<ci32*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (i32);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (nData)>);
     }
 
     return *this;
@@ -223,10 +223,10 @@ packet& packet::operator >> (i32& nData) noexcept
 
 packet& packet::operator >> (u32& uData) noexcept
 {
-    if (can_exchange (sizeof (u32)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (uData)>)))
     {
         uData    = *direct_cast<cu32*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (u32);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (uData)>);
     }
 
     return *this;
@@ -234,10 +234,10 @@ packet& packet::operator >> (u32& uData) noexcept
 
 packet& packet::operator >> (i64& nData) noexcept
 {
-    if (can_exchange (sizeof (i64)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (nData)>)))
     {
         nData    = *direct_cast<ci64*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (i64);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (nData)>);
     }
 
     return *this;
@@ -245,10 +245,10 @@ packet& packet::operator >> (i64& nData) noexcept
 
 packet& packet::operator >> (u64& uData) noexcept
 {
-    if (can_exchange (sizeof (u64)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (uData)>)))
     {
         uData    = *direct_cast<cu64*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (u64);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (uData)>);
     }
 
     return *this;
@@ -256,10 +256,10 @@ packet& packet::operator >> (u64& uData) noexcept
 
 packet& packet::operator >> (float& fData) noexcept
 {
-    if (can_exchange (sizeof (float)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (fData)>)))
     {
         fData    = *direct_cast<cfloat*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (float);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (fData)>);
     }
 
     return *this;
@@ -267,21 +267,21 @@ packet& packet::operator >> (float& fData) noexcept
 
 packet& packet::operator >> (double& dData) noexcept
 {
-    if (can_exchange (sizeof (double)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (dData)>)))
     {
         dData    = *direct_cast<cdouble*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (double);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (dData)>);
     }
 
     return *this;
 }
 
-packet& packet::operator >> (ldouble& dData) noexcept
+packet& packet::operator >> (ldouble& ldData) noexcept
 {
-    if (can_exchange (sizeof (ldouble)))
+    if (can_exchange (sizeof (remove_ref_t<decltype (ldData)>)))
     {
-        dData    = *direct_cast<cldouble*> (&_M_gData[_M_uPos]);
-        _M_uPos +=  sizeof (ldouble);
+        ldData   = *direct_cast<cldouble*> (&_M_gData[_M_uPos]);
+        _M_uPos +=  sizeof (remove_ref_t<decltype (ldData)>);
     }
 
     return *this;

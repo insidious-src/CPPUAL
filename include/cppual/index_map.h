@@ -19,10 +19,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPPUAL_ARRAY_MAP_H_
-#define CPPUAL_ARRAY_MAP_H_
+#ifndef CPPUAL_INDEX_MAP_H_
+#define CPPUAL_INDEX_MAP_H_
 #ifdef __cplusplus
 
+#include <cppual/decl>
 #include <cppual/types>
 #include <cppual/string>
 #include <cppual/concepts>
@@ -39,12 +40,7 @@ namespace cppual {
 
 // ====================================================
 
-template <typename T>
-concept index_map_key = integer<T>;
-
-// ====================================================
-
-template <index_map_key K, non_void V, allocator_like A = memory::allocator<std::pair<K, V>>>
+template <integer K, non_void V, allocator_like A = memory::allocator<std::pair<K, V>>>
 class dyn_index_map : public std::vector<std::pair<K, V>, A>
 {
 public:
@@ -58,13 +54,13 @@ public:
     typedef value_type const                      const_value           ;
     typedef value_type const&                     const_reference       ;
     typedef value_type &                          reference             ;
-    typedef std::allocator_traits<A>              alloc_traits          ;
+    typedef memory::allocator_traits<A>           alloc_traits          ;
     typedef alloc_traits::allocator_type          allocator_type        ;
     typedef std::size_t                           size_type             ;
     typedef size_type const                       const_size            ;
     typedef ptrdiff                               difference_type       ;
     typedef fstring_view                          string_view           ;
-    typedef string                                string_type           ;
+    typedef fstring                               string_type           ;
     typedef base_type::iterator                   iterator              ;
     typedef base_type::const_iterator             const_iterator        ;
     typedef std::reverse_iterator<iterator>       reverse_iterator      ;
@@ -134,9 +130,9 @@ public:
     iterator find () const noexcept { return &(*this)[get_index<K_> ()]; }
     template <size_type K_>
     const_iterator find () const noexcept { return &(*this)[get_index<K_> ()]; }
-    template <char_ptr K_>
+    template <auto K_> requires (c_const_str<decltype (K_)>)
     iterator find () const  noexcept { return &(*this)[get_index<K_> ()]; }
-    template <char_ptr K_>
+    template <auto K_> requires (c_const_str<decltype (K_)>)
     const_iterator find () const noexcept { return &(*this)[get_index<K_> ()]; }
     iterator find (size_type k) noexcept { return &(*this)[get_index<k> ()]; }
     const_iterator find (size_type k) const noexcept { return &(*this)[get_index<k> ()]; }
@@ -147,24 +143,28 @@ public:
     consteval static size_type bucket_size (size_type) noexcept { return 1; }
     std::pair<iterator, iterator> equal_range (key_type key);
     std::pair<const_iterator, const_iterator> equal_range (key_type key) const;
-    template <index_map_key Key>
+    template <integer Key>
     std::pair<iterator, iterator> equal_range (Key x);
-    template <index_map_key Key>
+    template <integer Key>
     std::pair<const_iterator, const_iterator> equal_range (Key const& x) const;
     consteval static size_type count (key_type const& = key_type ()) noexcept { return 1; }
-    template <index_map_key Key>
+    template <integer Key>
     consteval static size_type count (Key = Key ()) noexcept { return 1; }
     template <typename M>
     std::pair<iterator, bool> insert_or_assign (key_type k, M&& obj);
-    template <index_map_key Key, typename M>
+    template <integer Key, typename M>
     std::pair<iterator, bool> insert_or_assign (Key k, M&& obj);
 
-    constexpr const_reference operator [] (size_type key) const noexcept
+    // ====================================================
+
+    template <integer KSZ>
+    constexpr const_reference operator [] (KSZ key) const noexcept
     {
         return base_type::operator [] (get_index (key));
     }
 
-    constexpr reference operator [] (size_type key) noexcept
+    template <integer KSZ>
+    constexpr reference operator [] (KSZ key) noexcept
     {
         return base_type::operator [] (get_index (key));
     }
@@ -189,8 +189,10 @@ public:
         return base_type::operator [] (get_index (key_str.data ()));
     }
 
+    // ====================================================
 
-    constexpr const_reference at (size_type key) const noexcept
+    template <integer KSZ>
+    constexpr const_reference at (KSZ key) const noexcept
     {
         const_reference ref = base_type::operator [] (get_index<key> ());
 
@@ -198,7 +200,8 @@ public:
         return ref;
     }
 
-    constexpr reference at (size_type key) noexcept
+    template <integer KSZ>
+    constexpr reference at (KSZ key) noexcept
     {
         reference ref = base_type::operator [] (get_index<key> ());
 
@@ -206,23 +209,24 @@ public:
         return ref;
     }
 
-    constexpr const_reference at (char_ptr key_str) const noexcept
+    constexpr const_reference at (char_ptr key) const noexcept
     {
-        const_reference ref = base_type::operator [] (get_index<key_str> ());
+        const_reference ref = base_type::operator [] (get_index<key> ());
 
         assert (ref.first && "key NOT found!");
         return ref;
     }
 
-    constexpr reference at (char_ptr key_str) noexcept
+    constexpr reference at (char_ptr key) noexcept
     {
-        reference ref = base_type::operator [] (get_index<key_str> ());
+        reference ref = base_type::operator [] (get_index<key> ());
 
         assert (ref.first && "key NOT found!");
         return ref;
     }
 
-    constexpr const_reference at (string_view const& key_str) const noexcept
+    template <str_view_like U>
+    constexpr const_reference at (U const& key_str) const noexcept
     {
         const_reference ref = base_type::operator [] (get_index (key_str.data ()));
 
@@ -230,7 +234,8 @@ public:
         return ref;
     }
 
-    constexpr reference at (string_view const& key_str) noexcept
+    template <str_view_like U>
+    constexpr reference at (U const& key_str) noexcept
     {
         reference ref = base_type::operator [] (get_index (key_str.data ()));
 
@@ -238,34 +243,54 @@ public:
         return ref;
     }
 
-    template <key_type... Ks, std::enable_if_t<sizeof... (Ks) >= 1, void>>
+    // ====================================================
+
+    template <char_ptr K1, char_ptr K2, char_ptr... Ks>
     constexpr bool contains () const noexcept
     {
-        return ((contains<Ks> ()) && ...);
+        return contains<K1> () && contains<K2> () && ((contains<Ks> ()) && ...);
     }
 
-    template <char_ptr... Ks, std::enable_if_t<sizeof... (Ks) >= 1, void>>
+    template <auto K1, auto K2, auto... Ks>
+    requires (integer<decltype (K1)> && integer<decltype (K2)> && (integer<decltype (Ks)> && ...))
     constexpr bool contains () const noexcept
     {
-        return ((contains<Ks> ()) && ...);
+        return contains<K1> () && contains<K2> () && ((contains<Ks> ()) && ...);
     }
 
-    template <c_const_str... Keys>
-    constexpr bool contains (Keys... keys) const noexcept
-    {
-        return ((contains (keys)) && ...);
-    }
-
-    template <typename... Keys> requires (std::is_same_v<key_type, Keys> && ...)
-    constexpr bool contains (Keys... keys) const noexcept
-    {
-        return ((contains (keys)) && ...);
-    }
-
-    template <size_type K_>
+    template <auto K1, auto K2, auto... Ks>
+    requires (str_view_like<decltype (K1)> &&
+              str_view_like<decltype (K2)> &&
+             (str_view_like<decltype (Ks)> && ...))
     constexpr bool contains () const noexcept
     {
-        return (*this)[K_].first == K_;
+        return contains<K1> () && contains<K2> () && ((contains<Ks> ()) && ...);
+    }
+
+    template <c_const_str K1, c_const_str K2, c_const_str... Ks>
+    constexpr bool contains (K1 key1, K2 key2, Ks... keys) const noexcept
+    {
+        return contains (key1) && contains (key2) && ((contains (keys)) && ...);
+    }
+
+    template <integer K1, integer K2, integer... Ks>
+    constexpr bool contains (K1 key1, K2 key2, Ks... keys) const noexcept
+    {
+        return contains (key1) && contains (key2) && ((contains (keys)) && ...);
+    }
+
+    template <str_view_like K1, str_view_like K2, str_view_like... Ks>
+    constexpr bool contains (K1 key1, K2 key2, Ks... keys) const noexcept
+    {
+        return contains (key1) && contains (key2) && ((contains (keys)) && ...);
+    }
+
+    // ====================================================
+
+    template <auto k> requires (integer<decltype (k)>)
+    constexpr bool contains () const noexcept
+    {
+        return (*this)[k].first == k;
     }
 
     template <char_ptr Name>
@@ -274,9 +299,10 @@ public:
         return (*this)[Name].first == char_hash<Name> ();
     }
 
-    constexpr bool contains (size_type key) const noexcept
+    template <integer Key>
+    constexpr bool contains (Key k) const noexcept
     {
-        return (*this)[key].first == key;
+        return (*this)[k].first == k;
     }
 
     constexpr bool contains (string_view const& name) const noexcept
@@ -284,30 +310,36 @@ public:
         return (*this)[name].first == char_hash (name.data (), name.size ());
     }
 
-    constexpr bool contains (char_ptr name) const noexcept
+    template <c_const_str Key>
+    constexpr bool contains (Key name) const noexcept
     {
         return (*this)[name].first == char_hash (name);
     }
 
-    template <size_type K_>
-    consteval size_type get_index () const noexcept
-    { return K_ % size (); }
+    // ====================================================
 
-    template <char_ptr Name>
+    template <auto Key> requires (integer<decltype (Key)>)
     consteval size_type get_index () const noexcept
-    { return char_hash<Name> () % size (); }
+    { return Key % size (); }
 
-    template <string_view STR>
+    template <char_ptr Key>
+    consteval size_type get_index () const noexcept
+    { return char_hash<Key> () % size (); }
+
+    template <auto Key> requires (str_view_like<decltype (Key)>)
     constexpr size_type get_index () const noexcept
-    { return char_hash<STR.data (), STR.size ()> () % size (); }
+    { return char_hash<Key.data (), Key.size ()> () % size (); }
 
-    constexpr size_type get_index (string_view const& name) const noexcept
+    template <str_view_like U>
+    constexpr size_type get_index (U const& name) const noexcept
     { return char_hash (name.data (), name.size ()) % size (); }
 
-    constexpr size_type get_index (char_ptr name) const noexcept
+    template <c_const_str Key>
+    constexpr size_type get_index (Key name) const noexcept
     { return char_hash (name) % size (); }
 
-    constexpr size_type get_index (size_type k) const noexcept
+    template <integer Key>
+    constexpr size_type get_index (Key k) const noexcept
     { return k % size (); }
 };
 
@@ -318,4 +350,4 @@ public:
 // ====================================================
 
 #endif // __cplusplus
-#endif // CPPUAL_ARRAY_MAP_H_
+#endif // CPPUAL_INDEX_MAP_H_

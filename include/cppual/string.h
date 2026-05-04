@@ -23,6 +23,7 @@
 #define CPPUAL_COW_STRING_H_
 #ifdef __cplusplus
 
+#include <cppual/decl>
 #include <cppual/types>
 #include <cppual/concepts>
 #include <cppual/iterator>
@@ -886,17 +887,14 @@ public:
     constexpr bool empty () const noexcept
     {  return length () == 0; }
 
-    consteval static bool full () noexcept
-    {  return true; }
+    consteval bool full () const noexcept
+    {  return capacity () == size (); }
 
-    consteval static size_type space_remaining () noexcept
-    {  return 0; }
+    consteval size_type space_remaining () const noexcept
+    {  return capacity () - size (); }
 
     constexpr size_type size_bytes () const noexcept
     {  return _M_length * sizeof (value_type); }
-
-    constexpr size_type capacity () const noexcept
-    {  return  _M_length; }
 
     constexpr const_pointer data () const noexcept
     {  return _M_c_str; }
@@ -909,6 +907,9 @@ public:
 
     constexpr size_type size () const noexcept
     {  return length (); }
+
+    constexpr size_type capacity () const noexcept
+    {  return  size (); }
 
     constexpr iterator begin () noexcept
     {  return iterator (*this, size_type ()); }
@@ -968,7 +969,7 @@ public:
     { return *(_M_c_str + (length () - 1)); }
 
     constexpr const_reference back () const noexcept
-    { return *(_M_c_str + (length () - 1)); }
+    { return *(data () + (length () - 1)); }
 
     constexpr reference at (size_type uPos) noexcept
     {
@@ -979,14 +980,14 @@ public:
     constexpr const_reference at (size_type uPos) const noexcept
     {
         assert  (uPos < length () && "pos out of range (equal or larger than the size)!");
-        return *(_M_c_str + uPos);
+        return *(data () + uPos);
     }
 
     constexpr reference operator [] (size_type uPos) noexcept
     { return *(_M_c_str + uPos); }
 
     constexpr const_reference operator [] (size_type uPos) const noexcept
-    { return *(_M_c_str + uPos); }
+    { return *(data () + uPos); }
 
 public:
     const_pointer _M_c_str  { };

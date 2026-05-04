@@ -28,7 +28,7 @@
 #include <cppual/string>
 #include <cppual/concepts>
 #include <cppual/meta_type>
-#include <cppual/array_map>
+#include <cppual/index_map>
 #include <cppual/memory_allocator>
 
 
