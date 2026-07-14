@@ -26,6 +26,7 @@
 
 ### Endoskeleton
 * plugins
+* functionalities
 * utilities
 * cross-platform process management and interprocess communication
 * query hardware and os information

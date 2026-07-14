@@ -1093,6 +1093,7 @@ concept str_view_like = requires (T& t)
     typename T::value_type ;
     typename T::traits_type;
 
+    { !t.c_str  () } -> are_same<typename T::const_pointer>;
     { t.size    () } -> are_same<std::size_t>              ;
     { t.compare () } -> are_same<int>                      ;
     { t.empty   () } -> are_same<bool>                     ;
@@ -1157,6 +1158,7 @@ concept container = requires (T& a, T const& b)
     { b.begin    () } -> are_same<typename T::const_iterator>;
     { b.end      () } -> are_same<typename T::const_iterator>;
     { a.size     () } -> are_same<typename T::size_type>     ;
+    { a.caoacity () } -> are_same<typename T::size_type>     ;
     { a.max_size () } -> are_same<typename T::size_type>     ;
     { a.empty    () } -> are_same<bool>                      ;
 };
@@ -1201,7 +1203,7 @@ struct is_memory_resource <std::pmr::memory_resource> : public std::true_type
 
 template <structure T>
 struct is_memory_resource <T> :
-public std::conditional_t<std::is_base_of_v<memory::memory_resource, T> ||
+public std::conditional_t</*std::is_base_of_v<memory::memory_resource, T> ||*/
        std::is_base_of_v<std::pmr::memory_resource, T>,
        std::true_type,
        std::false_type

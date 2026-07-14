@@ -36,19 +36,18 @@ namespace cppual {
  * Provides bidirectional iteration over rope characters
  */
 template <structure T>
-class frope_iterator
+class seq_list_iterator
 {
 public:
     //! standard iterator type definitions
-    typedef frope_iterator<T>               self_type          ;
-    typedef remove_vref_t<T>                buf_type           ;
+    typedef seq_list_iterator<T>            self_type          ;
+    typedef remove_ref_t<T>                 buf_type           ;
     typedef std::add_const_t<buf_type>      const_buf          ;
     typedef remove_const_t<buf_type>        clean_buf          ;
     typedef buf_type *                      buf_pointer        ;
     typedef buf_type const*                 buf_const_pointer  ;
     typedef buf_type &                      buf_reference      ;
     typedef buf_type const&                 buf_const_reference;
-    typedef remove_cref_t<buf_type>         buf_clean_type     ;
     typedef buf_type::pointer               pointer            ;
     typedef buf_type::const_pointer         const_pointer      ;
     typedef buf_type::reference             reference          ;
@@ -59,36 +58,28 @@ public:
     typedef buf_type::value_type            value_type         ;
     typedef value_type const                const_value        ;
     typedef std::bidirectional_iterator_tag iterator_category  ;
-    typedef buf_clean_type::list_node       list_node          ;
-    typedef buf_clean_type::tree_node       tree_node          ;
+
+    static_assert (sequence_container<buf_type>, "seq_list_iterator requires a sequence type");
 
     template <typename U>
-    using self_type_t = frope_iterator<U>;
+    using self_type_t = seq_list_iterator<U>;
 
     typedef std::conditional_t<std::is_const_v<buf_type>, const_reference, reference> elem_ref;
     typedef std::conditional_t<std::is_const_v<buf_type>, const_pointer  , pointer  > elem_ptr;
 
-    union node_union
-    {
-        struct { list_node* node { }; } list;
-        struct { tree_node* node { }; } tree;
-    };
-
-    friend class frope_iterator<buf_type const>;
-    friend class frope_iterator<buf_clean_type>;
+    friend class seq_list_iterator<const_buf>;
+    friend class seq_list_iterator<clean_buf>;
 
 private:
-
     buf_pointer _M_pBuf     { };    // Parent rope
     size_type   _M_uPos     { };    // Position in entire rope
-    node_union  _M_current  { };
     size_type   _M_node_pos { };    // Position within current node
 
 public:
     /**
      * @brief Construct iterator at specific position
      */
-    constexpr frope_iterator (buf_reference rope, const_size pos = size_type ())
+    constexpr seq_list_iterator (buf_reference rope, const_size pos = size_type ())
     : _M_pBuf (&rope)
     , _M_uPos ( pos )
     {
@@ -100,29 +91,26 @@ public:
     }
 
     //! converting a const iterator to a non-const iterator
-    constexpr frope_iterator (self_type_t<const_buf> const& other) noexcept
+    constexpr seq_list_iterator (self_type_t<const_buf> const& other) noexcept
     : _M_pBuf     (const_cast<buf_pointer> (other._M_pBuf))
     , _M_uPos     (other._M_uPos    )
-    , _M_current  (other._M_current )
     , _M_node_pos (other._M_node_pos)
     { }
 
     //! converting a non-const iterator to a const iterator
-    constexpr frope_iterator (self_type_t<buf_clean_type> const& other) noexcept
-    : _M_pBuf     (const_cast<buf_pointer> (other._M_pBuf))
+    constexpr seq_list_iterator (self_type_t<clean_buf> const& other) noexcept
+    : _M_pBuf     (other._M_pBuf    )
     , _M_uPos     (other._M_uPos    )
-    , _M_current  (other._M_current )
     , _M_node_pos (other._M_node_pos)
     { }
 
     //! converting a non-const iterator to a const iterator
-    constexpr self_type& operator = (self_type_t<buf_clean_type> const& other) noexcept
+    constexpr self_type& operator = (self_type_t<clean_buf> const& other) noexcept
     {
         if (this == &other) return *this;
 
         _M_pBuf     = other._M_pBuf    ;
         _M_uPos     = other._M_uPos    ;
-        _M_current  = other._M_current ;
         _M_node_pos = other._M_node_pos;
 
         return *this;
@@ -133,8 +121,7 @@ public:
      */
     constexpr elem_ref operator * () const
     {
-        return _M_pBuf->is_tree () ? _M_current.tree.node->data[_M_node_pos]
-                                   : _M_current.list.node->data[_M_node_pos];
+        return (*_M_pBuf->begin () + _M_uPos)[_M_node_pos];
     }
 
     /**
@@ -150,26 +137,7 @@ public:
      */
     constexpr self_type& operator ++ ()
     {
-        if (!_M_pBuf || _M_uPos >= _M_pBuf->size()) return *this;
 
-        ++_M_uPos;
-        ++_M_node_pos;
-
-        if (_M_pBuf->is_tree ())
-        {
-            if (_M_node_pos >= _M_current.tree.node->data.size ())
-            {
-                advance_tree_node ();
-            }
-        }
-        else
-        {
-            if (_M_node_pos >= _M_current.list.node->data.size ())
-            {
-                _M_current.list.node = _M_current.list.node->next;
-                _M_node_pos          = 0;
-            }
-        }
 
         return *this;
     }
@@ -179,7 +147,7 @@ public:
      */
     constexpr self_type operator ++ (int)
     {
-        frope_iterator temp (*this);
+        self_type temp (*this);
 
         ++(*this);
         return temp;
@@ -190,26 +158,7 @@ public:
      */
     constexpr self_type& operator -- ()
     {
-        if (!_M_pBuf || _M_uPos <= 0) return *this;
 
-        --_M_uPos;
-
-        if (_M_node_pos > 0)
-        {
-            --_M_node_pos;
-        }
-        else
-        {
-            if (_M_pBuf->is_tree ())
-            {
-                retreat_tree_node ();
-            }
-            else
-            {
-                _M_current.list.node = _M_current.list.node->prev;
-                _M_node_pos = _M_current.list.node->data.size () - 1;
-            }
-        }
 
         return *this;
     }
@@ -219,7 +168,7 @@ public:
      */
     constexpr self_type operator -- (int)
     {
-        frope_iterator temp (*this);
+        seq_list_iterator temp (*this);
 
         --(*this);
         return temp;
@@ -242,131 +191,7 @@ public:
     }
 
 private:
-    consteval frope_iterator () = default;
-
-    /**
-     * @brief Find node containing position in list mode
-     */
-    constexpr void find_list_position (const_size target_pos)
-    {
-        _M_current.list.node = _M_pBuf->_M_gBuffer.list.head;
-        size_type curr_pos   = size_type ();
-
-        while (_M_current.list.node)
-        {
-            size_type node_size = _M_current.list.node->data.size ();
-
-            if (curr_pos <= target_pos && target_pos < curr_pos + node_size)
-            {
-                _M_node_pos = target_pos - curr_pos;
-                return;
-            }
-
-            curr_pos += node_size;
-            _M_current.list.node = _M_current.list.node->next;
-        }
-    }
-
-    /**
-     * @brief Find node containing position in tree mode
-     */
-    constexpr void find_tree_position (const_size target_pos)
-    {
-        _M_current.tree.node = _M_pBuf->_M_gBuffer.tree.root;
-        size_type curr_pos   = size_type ();
-
-        while (_M_current.tree.node)
-        {
-            size_type left_size = get_subtree_size (_M_current.tree.node->left);
-
-            if (target_pos < curr_pos + left_size)
-            {
-                _M_current.tree.node = _M_current.tree.node->left;
-            }
-            else if (target_pos < curr_pos + left_size + _M_current.tree.node->data.size ())
-            {
-                _M_node_pos = target_pos - (curr_pos + left_size);
-                return;
-            }
-            else
-            {
-                curr_pos += left_size + _M_current.tree.node->data.size ();
-                _M_current.tree.node = _M_current.tree.node->right;
-            }
-        }
-    }
-
-    /**
-     * @brief Move to next node in tree mode
-     */
-    constexpr void advance_tree_node ()
-    {
-        if (!_M_current.tree.node->right)
-        {
-            // No right subtree, go up until we find a parent we haven't visited
-            tree_node* prev = _M_current.tree.node;
-            _M_current.tree.node = _M_current.tree.node->parent;
-
-            while (_M_current.tree.node && _M_current.tree.node->right == prev)
-            {
-                prev = _M_current.tree.node;
-                _M_current.tree.node = _M_current.tree.node->parent;
-            }
-        }
-        else
-        {
-            // Find leftmost node in right subtree
-            _M_current.tree.node = _M_current.tree.node->right;
-
-            while (_M_current.tree.node->left)
-            {
-                _M_current.tree.node = _M_current.tree.node->left;
-            }
-        }
-
-        _M_node_pos = 0;
-    }
-
-    /**
-     * @brief Move to previous node in tree mode
-     */
-    constexpr void retreat_tree_node ()
-    {
-        if (!_M_current.tree.node->left)
-        {
-            // No left subtree, go up until we find a parent whose right child we came from
-            tree_node* prev = _M_current.tree.node;
-            _M_current.tree.node = _M_current.tree.node->parent;
-
-            while (_M_current.tree.node && _M_current.tree.node->left == prev)
-            {
-                prev = _M_current.tree.node;
-                _M_current.tree.node = _M_current.tree.node->parent;
-            }
-        }
-        else
-        {
-            // Find rightmost node in left subtree
-            _M_current.tree.node = _M_current.tree.node->left;
-
-            while (_M_current.tree.node->right)
-            {
-                _M_current.tree.node = _M_current.tree.node->right;
-            }
-        }
-        _M_node_pos = _M_current.tree.node->data.size () - 1;
-    }
-
-    /**
-     * @brief Calculate size of subtree
-     */
-    constexpr size_type get_subtree_size (tree_node* node) const
-    {
-        if (!node) return size_type ();
-
-        return get_subtree_size (node->left) + node->data.size () +
-               get_subtree_size (node->right);
-    }
+    consteval seq_list_iterator () = default;
 };
 
 // =========================================================

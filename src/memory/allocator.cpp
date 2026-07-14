@@ -20,7 +20,6 @@
  */
 
 #include <cppual/memory/allocator.h>
-
 #include <cppual/compute/device.h>
 
 #include <cstdlib>
@@ -36,7 +35,7 @@ namespace { //! optimize for internal unit usage
 
 // =========================================================
 
-constexpr static const std::thread::id init_main_thread () noexcept
+static constexpr const std::thread::id init_main_thread () noexcept
 {
     get_default_resource ();
     return std::this_thread::get_id ();
@@ -44,22 +43,27 @@ constexpr static const std::thread::id init_main_thread () noexcept
 
 // =========================================================
 
-constexpr static memory_resource::base_pointer internal_set_def_resource () noexcept
+static constexpr memory_resource::base_pointer internal_set_def_resource () noexcept
 {
-    memory_resource::base_pointer new_del_res_ptr = &new_delete_resource ();
+    //! static keyword is needed to lower the instructions count for every concecutive
+    //! call of this function, since the default resource is initialized only once.
+    //! internal_default_resource function calss this function only once as it
+    //! is suppose to be, however i am making sure just in case.
+    static memory_resource::base_pointer new_del_res_ptr = &new_delete_resource ();
+
     std::pmr::set_default_resource (new_del_res_ptr);
     return new_del_res_ptr;
 }
 
 // =========================================================
 
-constexpr static memory_resource::base_pointer_reference internal_default_resource () noexcept
+static constexpr memory_resource::base_pointer_reference internal_default_resource () noexcept
 {
     static memory_resource::base_pointer def_ptr = internal_set_def_resource ();
     return def_ptr;
 }
 
-constexpr static memory_resource::base_pointer_reference internal_default_thread_resource () noexcept
+static constexpr memory_resource::base_pointer_reference internal_default_thread_resource () noexcept
 {
     static thread_local memory_resource::base_pointer def_thread_ptr = internal_default_resource ();
     return def_thread_ptr;
@@ -158,6 +162,26 @@ private:
 } // anonymous namespace
 
 // =========================================================
+
+memory_resource::size_type memory_resource::capacity () const
+{
+    return device ().global_memory_size ();
+}
+
+memory_resource::size_type memory_resource::size () const
+{
+    return device ().global_memory_size () - device ().const_memory_size ();
+}
+
+memory_resource::size_type memory_resource::min_size () const
+{
+    return sizeof (byte);
+}
+
+memory_resource::size_type memory_resource::max_size () const
+{
+    return device ().max_alloc_size ();
+}
 
 memory_resource::device_reference memory_resource::host_device () noexcept
 {

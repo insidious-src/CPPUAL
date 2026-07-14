@@ -79,9 +79,9 @@ public:
                                        align_adjust (_M_pBegin, _M_uBlkAlign)));
     }
 
-    constexpr bool             is_shared () const noexcept { return false    ; }
-    constexpr base_reference       owner ()       noexcept { return _M_gOwner; }
-    constexpr base_const_reference owner () const noexcept { return _M_gOwner; }
+    constexpr bool                 is_shared () const noexcept { return false    ; }
+    constexpr abs_base_reference       owner ()       noexcept { return _M_gOwner; }
+    constexpr abs_base_const_reference owner () const noexcept { return _M_gOwner; }
 
 private:
     void  initialize    () noexcept;

@@ -22,3 +22,4 @@
 #include <cppual/iterators/bi_iterator.h>
 #include <cppual/iterators/tuple_iterator.h>
 #include <cppual/iterators/bitset_iterator.h>
+#include <cppual/iterators/rope_iterator.h>

@@ -39,7 +39,6 @@
 #include <cstddef>
 #include <memory>
 #include <string>
-//#include <cctype>
 #include <ranges>
 
 // ====================================================
@@ -113,7 +112,7 @@ public:
     typedef E                                         locale_type           ;
     typedef memory::allocator_traits<A>               alloc_traits          ;
     typedef alloc_traits::allocator_type              allocator_type        ;
-    typedef remove_cvref_t<T>                         value_type            ;
+    typedef remove_cvrefptr_t<T>                      value_type            ;
     typedef value_type const                          const_value           ;
     typedef value_type *                              pointer               ;
     typedef value_type const*                         const_pointer         ;
@@ -130,7 +129,7 @@ public:
     typedef string                                    std_string            ;
     typedef std::basic_string_view<value_type>        std_string_view       ;
 
-    inline constexpr static const_size npos = size_type (-1);
+    inline constexpr static const_size npos = size_type (-1)   ;
     inline constexpr static cbool  is_cow_v = are_same<A, void>;
 
     union buffer
@@ -205,20 +204,20 @@ public:
 
     constexpr cow_string (const_pointer pText, const_size len = npos) noexcept
     : allocator_type ()
-    , _M_uLength     (len == npos ? size (pText) : len)
-    , _M_gBuffer     (pText, _M_uLength)
+    , _M_gBuffer     (pText, len == npos ? size (pText) : len)
+    , _M_uLength     (len == npos ? capacity () : len)
     { }
 
     constexpr cow_string (allocator_type const& ator) noexcept
     : allocator_type (ator)
-    , _M_uLength     (    )
     , _M_gBuffer     (    )
+    , _M_uLength     (    )
     { }
 
     constexpr cow_string (string_view const& sv, bool copy = !is_cow_v) noexcept
     : allocator_type ()
-    , _M_uLength (sv.length ())
     , _M_gBuffer (copy ? is_on_stack () ? buffer () : buffer (length ()) : buffer (sv.data (), length ()))
+    , _M_uLength (sv.length ())
     {
         if (!copy) return;
 
@@ -235,8 +234,8 @@ public:
 
     constexpr cow_string (std_string const& str, bool copy = !is_cow_v) noexcept
     : allocator_type ()
-    , _M_uLength (str.length ())
     , _M_gBuffer (copy ? is_on_stack () ? buffer () : buffer (length ()) : buffer (str.data (), length ()))
+    , _M_uLength (str.length ())
     {
         if (!copy) return;
 
@@ -255,8 +254,8 @@ public:
                                    allocator_type const& ator,
                                    bool copy = !is_cow_v)
     : allocator_type (ator)
-    , _M_uLength     (size (pText))
     , _M_gBuffer     (copy ? is_on_stack () ? buffer () : buffer (length ()) : buffer (pText, _M_uLength))
+    , _M_uLength     (size (pText))
     {
         if (!copy) return;
 
@@ -415,7 +414,7 @@ public:
     //     return _M_gBuffer.heap.c_str;
     // }
 
-    // constexpr operator string_view () const noexcept
+    // constexpr explicit operator string_view () const noexcept
     // {
     //     return string_view (_M_gBuffer.heap.c_str, length ());
     // }
@@ -423,14 +422,14 @@ public:
     /**
      * Explicit converts.
      */
-    constexpr operator std_string () const noexcept
+    constexpr explicit operator std_string () const noexcept
     {
         return std_string (_M_gBuffer.heap.c_str, length ());
     }
 
-    constexpr operator std_string_view () const noexcept
+    constexpr explicit operator std_string_view () const noexcept
     {
-        return std_string_view (_M_gBuffer.heap.c_str, length ());
+        return std_string_view (data (), length ());
     }
 
     /**
@@ -439,12 +438,12 @@ public:
      **/
     constexpr std_string str () const noexcept
     {
-        return std_string (_M_gBuffer.heap.c_str, length ());
+        return std_string (data (), length ());
     }
 
     constexpr string_view view () const noexcept
     {
-        return string_view (_M_gBuffer.heap.c_str, length ());
+        return string_view (data (), length ());
     }
 
     self_type& assign (self_type const& str);
@@ -534,18 +533,22 @@ public:
     constexpr size_type find_last_not_of (const_pointer s, size_type pos, size_type count) const;
     constexpr size_type find_last_not_of (const_pointer s, size_type pos = npos) const;
 
-    inline    const_pointer  data          () const noexcept { return  _M_gBuffer.heap.c_str; }
-    constexpr const_pointer  c_str         () const noexcept { return  data ()              ; }
-    constexpr size_type      length        () const noexcept { return  _M_uLength           ; }
-    constexpr size_type      size          () const noexcept { return  length ()            ; }
-    constexpr bool           empty         () const noexcept { return !length ()            ; }
-    constexpr allocator_type get_allocator () const noexcept { return *this                 ; }
+
+    constexpr const_pointer data () const noexcept
+    { return is_on_stack () ? _M_gBuffer.stack.data : _M_gBuffer.heap.c_str; }
+
+    constexpr pointer        data          ()       noexcept { return  data ()   ; }
+    constexpr const_pointer  c_str         () const noexcept { return  data ()   ; }
+    constexpr size_type      length        () const noexcept { return  _M_uLength; }
+    constexpr size_type      size          () const noexcept { return  length () ; }
+    constexpr bool           empty         () const noexcept { return !length () ; }
+    constexpr allocator_type get_allocator () const noexcept { return *this      ; }
 
     constexpr static size_type size (const_pointer str) noexcept
     { return locale_type::length (str); }
 
     constexpr size_type size_bytes () const noexcept
-    { return  _M_uLength * sizeof (value_type); }
+    { return  length () * sizeof (value_type); }
 
     constexpr size_type max_size () const noexcept
     {  return allocator_type::max_size (); }
@@ -610,34 +613,34 @@ public:
     {  return const_reverse_iterator (*this, npos); }
 
     constexpr reference front () noexcept
-    { return *_M_gBuffer.heap.c_str; }
+    { return *data (); }
 
     constexpr const_reference front () const noexcept
-    { return *_M_gBuffer.heap.c_str; }
+    { return *data (); }
 
     constexpr reference back () noexcept
-    { return *(_M_gBuffer.heap.c_str + (length () - 1)); }
+    { return *(data () + (length () - 1)); }
 
     constexpr const_reference back () const noexcept
-    { return *(_M_gBuffer.heap.c_str + (length () - 1)); }
+    { return *(data () + (length () - 1)); }
 
     constexpr reference at (size_type uPos) noexcept
     {
         assert  (uPos < size () && "pos out of range (equal or larger than the size)!");
-        return *(_M_gBuffer.heap.c_str + uPos);
+        return *(data () + uPos);
     }
 
     constexpr const_reference at (size_type uPos) const noexcept
     {
         assert  (uPos < length () && "pos out of range (equal or larger than the size)!");
-        return *(_M_gBuffer.heap.c_str + uPos);
+        return *(data () + uPos);
     }
 
     constexpr reference operator [] (size_type uPos) noexcept
-    { return *(_M_gBuffer.heap.c_str + uPos); }
+    { return *(data () + uPos); }
 
     constexpr const_reference operator [] (size_type uPos) const noexcept
-    { return *(_M_gBuffer.heap.c_str + uPos); }
+    { return *(data () + uPos); }
 
     constexpr void pop_back () noexcept
     {
@@ -733,9 +736,9 @@ public:
     typedef E                                     locale_type           ;
     typedef T                                     value_type            ;
     typedef value_type const                      const_value           ;
-    typedef value_type *                          pointer               ;
+    typedef value_type const*                     pointer               ;
     typedef value_type const*                     const_pointer         ;
-    typedef value_type &                          reference             ;
+    typedef value_type const&                     reference             ;
     typedef value_type const&                     const_reference       ;
     typedef std::size_t                           size_type             ;
     typedef size_type const                       const_size            ;
@@ -784,27 +787,27 @@ public:
     /**
      ** Explicitly converts to const char*.
      **/
-    constexpr operator const_pointer () const noexcept
-    { return _M_c_str; }
+    constexpr /*explicit*/ operator const_pointer () const noexcept
+    { return data (); }
 
     /**
      ** Explicitly converts to std::string.
      **/
-    constexpr operator std_string () noexcept
-    { return std_string (_M_c_str, length ()); }
+    constexpr /*explicit*/ operator std_string () noexcept
+    { return std_string (data (), length ()); }
 
     /**
      ** Explicitly converts to std::string_view.
      **/
-    constexpr operator std_string_view () const noexcept
-    { return std_string_view (_M_c_str, length ()); }
+    constexpr /*explicit*/ operator std_string_view () const noexcept
+    { return std_string_view (data (), length ()); }
 
     /**
      ** @brief str()
      ** Returns the contained string as an std::string.
      **/
     constexpr std_string str () noexcept
-    { return std_string (_M_c_str, length ()); }
+    {  return std_string (data (), length ()); }
 
     template <str_view_like U>
     bool      contains    (U const& sv) const noexcept;
@@ -894,7 +897,7 @@ public:
     {  return capacity () - size (); }
 
     constexpr size_type size_bytes () const noexcept
-    {  return _M_length * sizeof (value_type); }
+    {  return length () * sizeof (value_type); }
 
     constexpr const_pointer data () const noexcept
     {  return _M_c_str; }
@@ -909,10 +912,7 @@ public:
     {  return length (); }
 
     constexpr size_type capacity () const noexcept
-    {  return  size (); }
-
-    constexpr iterator begin () noexcept
-    {  return iterator (*this, size_type ()); }
+    {  return length (); }
 
     constexpr const_iterator begin () const noexcept
     {  return const_iterator (*this, size_type ()); }
@@ -923,9 +923,6 @@ public:
     constexpr const_iterator cbegin () const noexcept
     {  return const_iterator (*this, size_type ()); }
 
-    constexpr iterator end () noexcept
-    {  return iterator (*this, length ()); }
-
     constexpr const_iterator end () const noexcept
     {  return const_iterator (*this, length ()); }
 
@@ -934,9 +931,6 @@ public:
 
     constexpr const_iterator cend () const noexcept
     {  return const_iterator (*this, length ()); }
-
-    constexpr reverse_iterator rbegin () noexcept
-    {  return reverse_iterator (*this, length () - 1); }
 
     constexpr const_reverse_iterator rbegin () const noexcept
     {  return const_reverse_iterator (*this, length () - 1); }
@@ -947,9 +941,6 @@ public:
     constexpr const_reverse_iterator crbegin () const noexcept
     {  return const_reverse_iterator (*this, length () - 1); }
 
-    constexpr reverse_iterator rend () noexcept
-    {  return reverse_iterator (*this, npos); }
-
     constexpr const_reverse_iterator rend () const noexcept
     {  return const_reverse_iterator (*this, npos); }
 
@@ -959,23 +950,11 @@ public:
     constexpr const_reverse_iterator crend () const noexcept
     {  return const_reverse_iterator (*this, npos); }
 
-    constexpr reference front () noexcept
-    { return *_M_c_str; }
-
     constexpr const_reference front () const noexcept
-    { return *_M_c_str; }
-
-    constexpr reference back () noexcept
-    { return *(_M_c_str + (length () - 1)); }
+    { return *data (); }
 
     constexpr const_reference back () const noexcept
     { return *(data () + (length () - 1)); }
-
-    constexpr reference at (size_type uPos) noexcept
-    {
-        assert  (uPos < length () && "pos out of range (equal or larger than the size)!");
-        return *(_M_c_str + uPos);
-    }
 
     constexpr const_reference at (size_type uPos) const noexcept
     {
@@ -983,15 +962,12 @@ public:
         return *(data () + uPos);
     }
 
-    constexpr reference operator [] (size_type uPos) noexcept
-    { return *(_M_c_str + uPos); }
-
     constexpr const_reference operator [] (size_type uPos) const noexcept
     { return *(data () + uPos); }
 
 public:
-    const_pointer _M_c_str  { };
-    size_type     _M_length { };
+    pointer   _M_c_str  { };
+    size_type _M_length { };
 };
 
 // ====================================================

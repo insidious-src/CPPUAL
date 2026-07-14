@@ -41,8 +41,8 @@ public:
     stacked_resource  (shared_memory& shared_name, size_type size);
     ~stacked_resource ();
 
-    constexpr void   clear  ()       noexcept {        _M_pMarker = _M_pBegin; }
-    constexpr cvoid* marker () const noexcept { return _M_pMarker            ; }
+    constexpr void    clear  ()       noexcept {        _M_pMarker = _M_pBegin; }
+    constexpr pointer marker () const noexcept { return _M_pMarker            ; }
 
     constexpr size_type max_size () const noexcept
     {
@@ -56,9 +56,8 @@ public:
                                        static_cast<math_pointer> (_M_pBegin));
     }
 
-    constexpr base_reference       owner ()       noexcept { return _M_gOwner      ; }
-    constexpr base_const_reference owner () const noexcept { return _M_gOwner      ; }
-    constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
+    constexpr abs_base_reference     owner ()       noexcept { return _M_gOwner      ; }
+    constexpr bool               is_shared () const noexcept { return _M_bIsMemShared; }
 
 private:
     void* do_allocate   (size_type capacity, align_type align);
@@ -92,9 +91,8 @@ public:
     cvoid*    bottom_marker ()          const noexcept { return _M_pBottomMarker; }
     cvoid*    top_marker    ()          const noexcept { return _M_pTopMarker   ; }
 
-    constexpr base_reference       owner ()       noexcept { return _M_gOwner      ; }
-    constexpr base_const_reference owner () const noexcept { return _M_gOwner      ; }
-    constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
+    constexpr abs_base_reference     owner ()       noexcept { return _M_gOwner      ; }
+    constexpr bool               is_shared () const noexcept { return _M_bIsMemShared; }
 
     constexpr size_type max_size () const noexcept
     {

@@ -23,6 +23,7 @@
 #define CPPUAL_COMPUTE_DEVICE_H_
 #ifdef __cplusplus
 
+#include <cppual/string>
 #include <cppual/bitflags>
 #include <cppual/containers>
 #include <cppual/noncopyable>
@@ -44,12 +45,15 @@ class out_of_memory       : public device_exception   { };
 
 // =========================================================
 
-class device : public object<resource_type::device> /*, public device_interface */
+class device : public object
 {
 public:
-    typedef std::size_t size_type;
+    typedef device      self_type  ;
+    typedef object      base_type  ;
+    typedef std::size_t size_type  ;
+    typedef fstring     string_type;
 
-    typedef enum class info_type : u8
+    typedef enum class info_type : byte
     {
         name,
         board,
@@ -61,36 +65,37 @@ public:
 
     static size_type count () noexcept;
 
-    bool      available          (string_type const& feature);
-    string    info               (info_type nfo);
-    size_type cache_size         () const;
-    size_type cache_line_size    () const;
-    size_type local_memory_size  () const;
-    size_type const_memory_size  () const;
-    size_type global_memory_size () const;
-    size_type max_alloc_size     () const;
-    u32       compute_units      () const;
-    bool      is_host            () const noexcept;
+    bool        available           (string_type const& feature);
+    string_type info                (info_type nfo);
+    size_type   cache_size          () const;
+    size_type   cache_line_size     () const;
+    size_type   local_memory_size   () const;
+    size_type   const_memory_size   () const;
+    size_type   global_memory_size  () const;
+    size_type   max_alloc_size      () const;
+    u32         compute_units_count () const;
+    bool        is_host             () const noexcept;
 
     device_type  type    () const noexcept;
     bool         valid   () const noexcept;
     backend_type backend () const noexcept;
 
-    constexpr static device& host () noexcept
+    static constexpr device& host () noexcept
     { return get_host_device (); }
 
 private:
     void assign_dev_from_cat () const;
 
-    constexpr static device& get_host_device ()
+    static constexpr device& get_host_device ()
     {
         static device host (device_type::cpu);
         return host;
     }
 
     constexpr device (device_type dev_cat) noexcept
-    : _M_pDev        (),
-      _M_eCategory   (dev_cat)
+    : base_type    (nullptr, resource_type::device)
+    , _M_pDev      ()
+    , _M_eCategory (dev_cat)
     { }
 
     friend class factory;

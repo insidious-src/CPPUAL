@@ -33,7 +33,9 @@
 #include <algorithm>
 #include <thread>
 #include <memory>
-#include <limits>
+//#include <limits>
+
+#include <cstddef>
 
 // =========================================================
 
@@ -66,17 +68,20 @@ struct allocator_traits : public std::allocator_traits<A>
 // =========================================================
 
 //! std::pmr::memory_resource replacement for compute usage
-class SHARED_API memory_resource : public std::pmr::memory_resource
+class SHARED_API memory_resource : public std::pmr::memory_resource, non_copyable
 {
 public:
     typedef memory_resource           self_type               ;
     typedef self_type                 base_type               ;
-    typedef self_type *               base_pointer            ;
-    typedef self_type &               base_reference          ;
-    typedef self_type const&          base_const_reference    ;
-    typedef self_type *&              base_pointer_reference  ;
-    typedef self_type **              base_double_pointer     ;
+    typedef base_type *               base_pointer            ;
+    typedef base_type &               base_reference          ;
+    typedef base_type &&              base_move_reference     ;
+    typedef base_type const&          base_const_reference    ;
+    typedef base_type *&              base_pointer_reference  ;
+    typedef base_type **              base_double_pointer     ;
     typedef std::pmr::memory_resource abs_base_type           ;
+    typedef abs_base_type *           abs_base_pointer        ;
+    typedef abs_base_type const*      abs_base_const_pointer  ;
     typedef abs_base_type &           abs_base_reference      ;
     typedef abs_base_type const&      abs_base_const_reference;
     typedef std::size_t               size_type               ;
@@ -93,29 +98,63 @@ public:
     typedef device_type &             device_reference        ;
     typedef device_type const&        device_const_reference  ;
 
-    //! maximum alignment depending on memory width
+    // =========================================================
+
+    //! maximum memory alignment depending on memory width
     inline constexpr static const_align max_align  = alignof (std::max_align_t);
 
-    //! maximum align ajustment for memory allocation
+    //! maximum memory align ajustment for memory allocation
     inline constexpr static const_align max_adjust = alignof (std::max_align_t) * 2;
+
+    // =========================================================
 
     constexpr memory_resource (device_reference dev = host_device ()) noexcept
     : _M_pDevice (&dev)
     { }
 
-    constexpr memory_resource (abs_base_const_reference other) noexcept
-    : abs_base_type (other          )
-    , _M_pDevice    (&host_device ())
+    //! std::pmr::memory_resource compatible constructor
+    constexpr memory_resource (abs_base_const_reference) noexcept
+    : _M_pDevice (&host_device ())
     { }
 
+    constexpr memory_resource (self_type&& rh) noexcept
+    : _M_pDevice (&rh.device ())
+    { rh._M_pDevice = &host_device (); }
+
+    // =========================================================
+
+    constexpr self_type& operator = (self_type&& rh) noexcept
+    {
+        if (this != &rh)
+        {
+            _M_pDevice    = &rh.device   ();
+            rh._M_pDevice = &host_device ();
+        }
+
+        return *this;
+    }
+
+    // =========================================================
+
+    //! memory capacity in bytes
+    virtual size_type capacity () const;
+
+    //! allocated owned memory in bytes
+    virtual size_type size () const;
+
+    //! minimum continues bytes that can be allocated at ones
+    //! from the memory_resource
+    virtual size_type min_size () const;
+
+    //! maximum continues bytes that can be allocated at ones
+    //! from the memory_resource
+    virtual size_type max_size () const;
+
+    constexpr device_reference device () const noexcept
+    { return *_M_pDevice; }
+
     constexpr bool is_host_device () const noexcept
-    { return _M_pDevice == &host_device (); }
-
-    constexpr device_const_reference device () const noexcept
-    { return *_M_pDevice; }
-
-    constexpr device_reference device () noexcept
-    { return *_M_pDevice; }
+    { return &device () == &host_device (); }
 
     //! is thread safe (ex. using mutex or atomic variables)
     virtual constexpr bool is_thread_safe () const noexcept
@@ -138,52 +177,40 @@ public:
     virtual constexpr bool is_shared () const noexcept
     { return false; }
 
-    //! upstream memory_resource owner
-    virtual constexpr base_reference owner () noexcept
+    constexpr bool is_owned () const noexcept
+    { return &owner () != this; }
+
+    //! upstream memory_resource owner or self
+    virtual constexpr abs_base_reference owner () noexcept
     { return *this; }
 
-    //! upstream memory_resource owner
-    constexpr base_const_reference owner () const noexcept
+    //! upstream memory_resource owner or self
+    constexpr abs_base_const_reference owner () const noexcept
+    { return const_cast<abs_base_const_reference> (owner ()); }
+
+    //! upstream memory_resource owner or self
+    constexpr abs_base_const_reference upstream_resource () const noexcept
     { return owner (); }
 
-    //! upstream memory_resource owner
-    constexpr base_const_reference upstream_resource () const noexcept
+    //! upstream memory_resource owner or self
+    constexpr abs_base_reference upstream_resource () noexcept
     { return owner (); }
 
-    //! upstream memory_resource owner
-    constexpr base_reference upstream_resource () noexcept
-    { return owner (); }
-
-    //! minimum continues bytes that can be allocated at ones
-    //! from the memory_resource
-    virtual constexpr size_type min_size () const
-    { return sizeof (byte); }
-
-    //! maximum continues bytes that can be allocated at ones
-    //! from the memory_resource
-    virtual constexpr size_type max_size () const
-    { return std::numeric_limits<size_type>::max () - max_adjust; }
-
-    //! memory capacity in bytes
-    virtual constexpr size_type capacity () const
-    { return std::numeric_limits<size_type>::max () - max_adjust; }
-
-    constexpr void* reallocate (pointer    p       ,
-                                size_type  old_size,
-                                size_type  new_size,
-                                align_type align = max_align)
+    constexpr
+    pointer
+    reallocate (pointer p, size_type old_size, size_type new_size, align_type align = max_align)
     { return do_reallocate (p, old_size, new_size, align); }
 
-    constexpr void deallocate (const_pointer p    ,
-                               size_type     bytes,
-                               align_type    align = max_align)
+    constexpr
+    void
+    deallocate (const_pointer p, size_type bytes, align_type align = max_align)
     { abs_base_type::deallocate (const_cast<pointer> (p), bytes, align); }
 
 protected:
-    virtual constexpr pointer do_reallocate (pointer    p       ,
-                                             size_type  old_size,
-                                             size_type  new_size,
-                                             align_type align)
+    virtual
+    constexpr
+    pointer
+    do_reallocate (pointer p, size_type old_size, size_type new_size, align_type align)
     {
         if (p && old_size && old_size == new_size) return p;
 
@@ -205,14 +232,6 @@ private:
 private:
     device_pointer _M_pDevice;
 };
-
-// =========================================================
-
-constexpr bool operator == (memory_resource const& a, memory_resource const& b) noexcept
-{ return &a == &b || a.is_equal (b); }
-
-constexpr bool operator != (memory_resource const& a, memory_resource const& b) noexcept
-{ return !(a == b); }
 
 // =========================================================
 
@@ -249,15 +268,17 @@ class SHARED_API allocator
 {
 public:
     typedef allocator<T>               self_type                             ;
-    typedef remove_const_t<T>          value_type                            ;
+    typedef remove_cref_t<T>           value_type                            ;
     typedef value_type *               pointer                               ;
     typedef value_type const*          const_pointer                         ;
     typedef value_type &               reference                             ;
+    typedef value_type &&              move_reference                        ;
     typedef value_type const&          const_reference                       ;
     typedef memory_resource            resource_type                         ;
     typedef resource_type *            resource_pointer                      ;
     typedef resource_type const*       resource_const_pointer                ;
     typedef resource_type &            resource_reference                    ;
+    typedef resource_type &&           resource_move_reference               ;
     typedef resource_type const&       resource_const_reference              ;
     typedef std::size_t                size_type                             ;
     typedef size_type  const           const_size                            ;
@@ -276,16 +297,15 @@ public:
     inline constexpr static const_align max_align = memory_resource::max_align;
 
     template <non_void U>
+    using self_type_t = allocator<U>;
+
+    template <non_void U>
     struct rebind { typedef allocator<U> other; };
 
     template <non_void U>
     using rebind_t = rebind<U>::other;
 
-    template <non_void U>
-    using rebind_alloc = rebind_t<U>;
-
-    template <non_void U>
-    using self_type_t = allocator<U>;
+    // =========================================================
 
     constexpr allocator () noexcept = default;
 
@@ -323,6 +343,8 @@ public:
     : _M_pRc (&dyn_cast<resource_type> (*rh.resource ()))
     { rh = std::pmr::polymorphic_allocator<U> (&null_resource ()); }
 
+    // =========================================================
+
     template <non_void U>
     constexpr self_type& operator = (self_type_t<U> const& rh) noexcept
     {
@@ -342,7 +364,6 @@ public:
         return *this;
     }
 
-    template <non_void U>
     constexpr self_type& operator = (resource_reference res) noexcept
     {
         set_resource (res);
@@ -366,17 +387,11 @@ public:
     template <non_void U>
     constexpr self_type& operator = (std::pmr::polymorphic_allocator<U> const& rh) noexcept
     {
-        _M_pRc = rh.resource ();
+        _M_pRc = &dyn_cast<resource_type> (*rh.resource ());
         return *this;
     }
 
-    template <non_void U>
-    constexpr self_type& operator = (std::pmr::polymorphic_allocator<U>&& rh) noexcept
-    {
-        _M_pRc = rh.resource ();
-        rh     = std::pmr::polymorphic_allocator<U> (&null_resource ());
-        return *this;
-    }
+    // =========================================================
 
     constexpr device_reference device () const noexcept
     {  return resource ().device (); }
@@ -446,14 +461,8 @@ public:
     constexpr size_type min_size () const noexcept
     { return resource ().min_size () / sizeof (value_type); }
 
-    constexpr size_type min_count () const noexcept
-    { return min_size (); }
-
     constexpr size_type max_size () const noexcept
     { return resource ().max_size () / sizeof (value_type); }
-
-    constexpr size_type max_count () const noexcept
-    { return max_size (); }
 
     constexpr static pointer address (reference o) noexcept
     { return std::addressof (o); }

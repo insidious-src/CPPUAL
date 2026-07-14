@@ -45,7 +45,7 @@ process_handle create (cchar* path, char* args[])
     UNUSED (path); UNUSED (args);
 #   if defined (OS_STD_POSIX) && !defined (OS_ANDROID)
     process_handle id = 0;
-    ::posix_spawn (&id, path, nullptr, nullptr, args, nullptr);
+    ::posix_spawn (id.get<pid_t*> (), path, nullptr, nullptr, args, nullptr);
     return id;
 #   elif defined OS_WINDOWS
     PROCESS_INFORMATION info;
@@ -86,7 +86,7 @@ bool running (cchar* gName) noexcept
 process_handle clone ()
 {
 #   ifdef OS_STD_POSIX
-    return ::fork ();
+    return process_handle (::fork ());
 #   elif defined OS_WINDOWS
     return 0;
 #   endif

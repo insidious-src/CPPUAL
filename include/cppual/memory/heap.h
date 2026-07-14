@@ -52,9 +52,8 @@ public:
         return size > sizeof (free_block) ? size - sizeof (free_block) : size_type ();
     }
 
-    constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
-    constexpr base_reference       owner ()       noexcept { return _M_gOwner      ; }
-    constexpr base_const_reference owner () const noexcept { return _M_gOwner      ; }
+    constexpr bool               is_shared () const noexcept { return _M_bIsMemShared; }
+    constexpr abs_base_reference     owner ()       noexcept { return _M_gOwner      ; }
 
 private:
     struct header     { size_type size, adjust;           };
@@ -101,9 +100,8 @@ public:
         return size > sizeof (header) ? size - sizeof (header) : size_type ();
     }
 
-    constexpr bool             is_shared () const noexcept { return _M_bIsMemShared; }
-    constexpr base_reference       owner ()       noexcept { return _M_gOwner      ; }
-    constexpr base_const_reference owner () const noexcept { return _M_gOwner      ; }
+    constexpr bool               is_shared () const noexcept { return _M_bIsMemShared; }
+    constexpr abs_base_reference     owner ()       noexcept { return _M_gOwner      ; }
 
 private:
     void* do_allocate   (size_type size, align_type align);

@@ -1,4 +1,4 @@
-#include <cppual/json/json_adaptor.h>
+#include <cppual/json/strict_json.h>
 
 #include <cppual/json/filereadstream.h>
 #include <cppual/json/filewritestream.h>
@@ -17,8 +17,8 @@ namespace cppual::json {
 // ======================================================================
 
 doc_parser::doc_parser(string_type const& file_path, doc_type type)
-: Document(),
-  _M_type (type)
+: Document (),
+  _M_type  (type)
 {
     std::ifstream file(file_path.c_str());
 

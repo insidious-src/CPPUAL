@@ -23,9 +23,9 @@
 #define CPPUAL_COMPUTE_INSTANCE_H_
 #ifdef __cplusplus
 
-#include <cppual/types.h>
-#include <cppual/resource.h>
-#include <cppual/noncopyable.h>
+#include <cppual/types>
+#include <cppual/resource>
+#include <cppual/noncopyable>
 #include <cppual/compute/devtask.h>
 #include <cppual/compute/behaviour.h>
 
@@ -33,7 +33,7 @@
 
 namespace cppual { namespace compute {
 
-class program : public object<resource_type::program>
+class program : public object
 {
 public:
     typedef std::size_t size_type;

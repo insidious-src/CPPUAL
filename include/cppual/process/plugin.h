@@ -105,37 +105,46 @@ public:
     constexpr ~dyn_loader () noexcept
     { if (policy () != resolve_policy::statically) detach (); }
 
-    constexpr bool contains (string_view const& gName) const noexcept
-    { return get_address (gName) != nullptr; }
+    template <str_view_like U>
+    constexpr bool contains (U const& gName) const noexcept
+    { return get_address (gName.data ()) != nullptr; }
 
-    consteval fn_proxy_type operator [] (string_view const& fn_name) const noexcept
+    constexpr bool contains (char_ptr pName) const noexcept
+    { return get_address (pName) != nullptr; }
+
+    template <str_view_like U>
+    consteval fn_proxy_type operator [] (U const& fn_name) const noexcept
     { return  fn_proxy_type (*this, fn_name); }
 
     consteval fn_proxy_type operator [] (char_ptr fn_name) const noexcept
     {  return fn_proxy_type (*this, fn_name); }
 
+    template <non_function T = void, str_view_like U>
+    constexpr T* import (U const& pName) const
+    { return static_cast<T*> (get_address (pName.data ())); }
+
     template <non_function T = void>
-    constexpr T* import (string_view const& pName) const
+    constexpr T* import (char_ptr pName) const
     { return static_cast<T*> (get_address (pName)); }
 
-    //template <non_const_fn_sig F = void()>
-    //constexpr F import (string_view const& pName) const
-    //{ return direct_cast<F> (get_function (pName)); }
+    template <typename R, typename... Args, str_view_like U>
+    constexpr function_type<R, Args...> import (U const& pName) const
+    { return *direct_cast<function_ptr<R, Args...>> (get_function (pName.data ())); }
 
     template <typename R, typename... Args>
-    constexpr function_type<R, Args...> import (string_view const& pName) const
+    constexpr function_type<R, Args...> import (char_ptr pName) const
     { return *direct_cast<function_ptr<R, Args...>> (get_function (pName)); }
 
-    template <c_const_str STR, typename... Args>
-    constexpr auto invoke (STR fn_name, Args&&... args) const
+    template <typename R = void, typename... Args, c_const_str STR>
+    constexpr auto invoke (STR fn_name, Args&&... args, R*) const
     {
-        using R = abi::type_t<abi::name_of_hash_v<char_hash (fn_name)>>;
-        return (fn_cast<R(Args...)> (get_function (fn_name)))(std::forward<Args> (args)...);
+        return (direct_cast<function_ptr<R, Args...>> (get_function (fn_name.data ())))
+               (std::forward<Args> (args)...);
     }
 
 private:
-    pointer        get_address  (string_view const& name) const;
-    generic_fn_ptr get_function (string_view const& name) const;
+    pointer        get_address  (char_ptr name) const;
+    generic_fn_ptr get_function (char_ptr name) const;
 
 private:
     handle_type    _M_pHandle  { };

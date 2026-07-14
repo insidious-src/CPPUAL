@@ -197,7 +197,7 @@ public:
     // =========================================================
 
     template <const_pointer STR = "void">
-    using type_t =
+    using type_of =
     std::conditional_t<char_hash<STR> () == char_hash (name_of<char> ()), char,
     std::conditional_t<char_hash<STR> () == char_hash (name_of<cchar> ()), cchar,
     std::conditional_t<char_hash<STR> () == char_hash (name_of<uchar> ()), uchar,
@@ -239,7 +239,7 @@ public:
     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;
 
 public:
-    size_type _M_type_hash { char_hash (name_of<void> ()) };
+    size_type _M_type_hash { };
 };
 
 // =========================================================
@@ -405,18 +405,35 @@ constexpr auto operator <=> (function_rtti<N1> const& lh, function_rtti<N2> cons
 
 //! Type name extraction
 template <rtti const Type>
-using type_t = rtti::type_t<Type.name ()>;
-
-template <rtti::const_pointer STR>
-using type_from_str_t = rtti::type_t<STR>;
+using type_of = rtti::type_of<Type.name ()>;
 
 //! Type convertability check and extraction - argument convertable on std::forward
 template <typename From, rtti const To>
-using type_convertable_t = std::enable_if_t<std::convertible_to<From, type_t<To>>, type_t<To>>;
+using type_convertable_to = std::enable_if_t<std::convertible_to<From, type_of<To>>, type_of<To>>;
+
+// =========================================================
+
+namespace array {
+
+template <rtti const Array[], rtti::size_type I>
+using type_of = type_of<Array[I]>;
+
+} // namespace array
+
+namespace cstring {
+
+template <rtti::const_pointer STR>
+using type_of = rtti::type_of<STR>;
+
+} // namespace cstring
+
+namespace convertable {
 
 //! Argument type extraction from ABI array
-template <rtti const Array[], typename From, rtti::size_type I = 0>
-using arg_type_t = abi::type_convertable_t<From, Array[I]>;
+template <rtti const Array[], typename From, rtti::size_type I>
+using type_of = type_convertable_to<From, Array[I]>;
+
+} // namespace convertable
 
 // =========================================================
 

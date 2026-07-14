@@ -23,15 +23,16 @@
 #define CPPUAL_GFX_DRAW_H_
 #ifdef __cplusplus
 
-#include <cppual/bitset.h>
-#include <cppual/string.h>
-#include <cppual/resource.h>
+#include <cppual/string>
+#include <cppual/bitflags>
+#include <cppual/resource>
 #include <cppual/gfx/coord.h>
 #include <cppual/gfx/color.h>
-#include <cppual/containers.h>
-#include <cppual/noncopyable.h>
-#include <cppual/memory/allocator.h>
+#include <cppual/containers>
+#include <cppual/noncopyable>
+#include <cppual/memory_allocator>
 
+#include <type_traits>
 #include <memory>
 #include <mutex>
 
@@ -89,7 +90,7 @@ enum class polygon_face : u8
 
 struct  context_interface   ;
 struct  surface_interface   ;
-struct  drawable_interface;
+struct  drawable_interface  ;
 struct  drawable3d_interface;
 struct  painter_interface   ;
 struct  draw_factory        ;
@@ -99,11 +100,11 @@ typedef std::shared_ptr<painter_interface>    shared_painter   ;
 typedef std::shared_ptr<draw_factory>         shared_factory   ;
 typedef std::shared_ptr<context_interface>    shared_context   ;
 typedef std::shared_ptr<surface_interface>    shared_surface   ;
-typedef std::shared_ptr<drawable_interface> shared_drawable2d;
+typedef std::shared_ptr<drawable_interface>   shared_drawable2d;
 typedef std::shared_ptr<drawable3d_interface> shared_drawable3d;
 typedef std::weak_ptr  <context_interface>    weak_context     ;
 typedef std::weak_ptr  <surface_interface>    weak_surface     ;
-typedef std::weak_ptr  <drawable_interface> weak_drawable2d  ;
+typedef std::weak_ptr  <drawable_interface>   weak_drawable2d  ;
 typedef std::weak_ptr  <drawable3d_interface> weak_drawable3d  ;
 
 // ====================================================
@@ -289,14 +290,33 @@ class SHARED_API transform
 public:
     typedef transform self_type;
 
+    typedef union depth
+    {
+        double z    ;
+        u64    layer;
+    }
+    const const_depth;
+
     constexpr transform (rect const& gRect,
-                         float z,
+                         u64 layer,
                          shared_surface const& surface,
                          float rotate = .0f) noexcept
-    : _M_rect    (gRect  ),
-      _M_surface (surface),
-      _M_z_depth (z      ),
-      _M_rotate  (rotate )
+    : _M_rect    (gRect  )
+    , _M_surface (surface)
+    , _M_depth   (layer  )
+    , _M_rotate  (rotate )
+    , _M_is_3d   (false  )
+    { }
+
+    constexpr transform (rect const& gRect,
+                         double z,
+                         shared_surface const& surface,
+                         float rotate = .0f) noexcept
+    : _M_rect    (gRect  )
+    , _M_surface (surface)
+    , _M_depth   (z      )
+    , _M_rotate  (rotate )
+    , _M_is_3d   (true   )
     { }
 
     constexpr transform ()                             noexcept = default;
@@ -306,15 +326,15 @@ public:
     inline    self_type& operator = (self_type const&) noexcept = default;
 
     constexpr rect           geometry () const noexcept { return _M_rect              ; }
-    constexpr float          z_depth  () const noexcept { return _M_z_depth           ; }
     constexpr shared_surface surface  () const noexcept { return _M_surface           ; }
     constexpr shared_context context  () const noexcept { return _M_surface->context(); }
     constexpr float          rotation () const noexcept { return _M_rotate            ; }
+    constexpr depth          z_depth  () const noexcept { return _M_depth             ; }
 
 private:
     rect           _M_rect    { };
     shared_surface _M_surface { };
-    float          _M_z_depth { };
+    depth          _M_depth   { };
     float          _M_rotate  { };
 };
 

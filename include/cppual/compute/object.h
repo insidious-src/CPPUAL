@@ -24,7 +24,6 @@
 #ifdef __cplusplus
 
 #include <cppual/types>
-#include <cppual/bitflags>
 #include <cppual/resource>
 #include <cppual/containers>
 
@@ -34,45 +33,44 @@ namespace cppual::compute {
 
 // =========================================================
 
-/// application instance info
-class host_connection ;
-class device          ;
-/// device and queue load balancing
-class behaviour       ;
-/// different types of devices in one queue
-class mixed_queue     ;
-/// thread queue
-class host_queue      ;
-class device_queue    ;
-class device_surface  ;
-class pipeline        ;
-class image           ;
-/// render passes and states
-class render          ;
-class command         ;
-class command_sequence;
-class event           ;
+//! application instance info
+class host_connection;
+class device         ;
+//! device and queue load balancing
+class behaviour      ;
+//! different types of devices in one queue
+class mixed_queue    ;
+//! thread queue
+class host_queue     ;
+class device_queue   ;
+class device_surface ;
+class pipeline       ;
+class buffer         ;
+//! render passes and states
+class render         ;
+class code           ;
+class program        ;
+class event          ;
 
 // =========================================================
 
-template <resource_type R>
 class SHARED_API object : public resource<void, void*>
 {
 public:
-    typedef object<R>             self_type  ;
+    typedef object                self_type  ;
     typedef resource<void, void*> base_type  ;
-    typedef std::size_t           size_type  ;
-    typedef string                string_type;
-
-    constexpr object () noexcept = default;
+    typedef fstring               string_type;
 
     constexpr operator handle_type::value_type () const noexcept
     { return handle<handle_type::value_type> (); }
 
 protected:
-    constexpr object (handle_type handle) noexcept
-    : base_type (handle, R)
+    constexpr object (handle_type handle, resource_type res) noexcept
+    : base_type (handle, res)
     { }
+
+private:
+    constexpr object () noexcept = delete;
 };
 
 // =========================================================

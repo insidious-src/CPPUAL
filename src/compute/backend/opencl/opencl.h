@@ -29,6 +29,7 @@
 #include <cppual/resource>
 #include <cppual/containers>
 #include <cppual/noncopyable>
+#include <cppual/circular_queue>
 #include <cppual/compute/object.h>
 #include <cppual/compute/device.h>
 #include <cppual/compute/backend_iface.h>
@@ -169,10 +170,10 @@ template <non_void T>
 inline constexpr cbool is_cl_object_v = is_cl_object<T>::value;
 
 template <typename T>
-using CLObject = std::enable_if_t<is_cl_object_v<T>, T>;
+concept cl_object = is_cl_object_v<T>;
 
 template <typename T>
-concept cl_object_t = is_cl_object_v<T>;
+using CLObject = std::enable_if_t<is_cl_object_v<T>, T>;
 
 // =========================================================
 
@@ -269,9 +270,9 @@ template <class Function, class Object, class AuxInfo>
 struct bound_info_function
 {
     bound_info_function(Function function, Object object, AuxInfo aux_info)
-    : _M_function(function),
-      _M_object  (object  ),
-      _M_aux_info(aux_info)
+    : _M_function(function)
+    , _M_object  (object  )
+    , _M_aux_info(aux_info)
     {
     }
 
@@ -451,9 +452,9 @@ struct get_object_info_impl<string_type>
 
 //! specialization for vector<T>
 template <class T>
-struct get_object_info_impl< dyn_array<T> >
+struct get_object_info_impl< circular_queue<T> >
 {
-    typedef dyn_array<T> value_type;
+    typedef circular_queue<T> value_type;
 
     template <class Function>
     value_type operator()(Function function) const
@@ -510,9 +511,9 @@ struct get_object_info_impl< dyn_array<T> >
 };
 
 template <>
-struct get_object_info_impl< dyn_array<platform_id_type*> >
+struct get_object_info_impl <circular_queue<platform_id_type*>>
 {
-    typedef dyn_array<platform_id_type*> value_type;
+    typedef circular_queue<platform_id_type*> value_type;
 
     template <class Function>
     value_type operator()(Function function) const
@@ -534,9 +535,9 @@ struct get_object_info_impl< dyn_array<platform_id_type*> >
 };
 
 template <>
-struct get_object_info_impl< dyn_array<device_type*> >
+struct get_object_info_impl <circular_queue<device_type*>>
 {
-    typedef dyn_array<device_type*> value_type;
+    typedef circular_queue<device_type*> value_type;
 
     template <class Function, class Info>
     value_type operator()(Function function, Info info) const
@@ -587,63 +588,35 @@ constexpr T get_object_info(Function f, Object o, Info i, AuxInfo j, const size_
 //! simplified implementation for managing opencl handles & a polymorphic interface
 //! ================================================================================
 
-template <resource_type T>
-class resource_object : public object<T>
+template <resource_type R>
+class resource_object : public object
 {
 public:
-    typedef resource_object<T>       self_type  ;
-    typedef object<T>                base_type  ;
-    typedef CLObject<conv_type_t<T>> value_type ;
-    typedef value_type*              pointer    ;
-    typedef std::size_t              size_type  ;
-    typedef resource_handle          handle_type;
+    typedef resource_object          self_type     ;
+    typedef object                   base_type     ;
+    typedef CLObject<conv_type_t<R>> object_type   ;
+    typedef value_type*              object_pointer;
 
     constexpr resource_object (self_type&&) = default;
     constexpr self_type& operator = (self_type&&) = default;
 
-    constexpr pointer handle () const noexcept
-    {
-        return base_type::template handle<pointer> ();
-    }
+    constexpr object_pointer handle () const noexcept
+    { return base_type::template handle<object_pointer> (); }
 
 protected:
-    constexpr explicit resource_object (pointer handle) noexcept : base_type (handle) { }
+    constexpr resource_object () noexcept
+    : base_type (create_object (), R)
+    { }
 
 private:
-    resource_object  () = delete;
+    static object_pointer create_object () noexcept;
 };
 
 // =========================================================
 
-// template <>
-// class resource_object<resource_type::context> : public context_interface
-// {
-// public:
-//     typedef resource_object<resource_type::context> self_type  ;
-//     typedef context_interface                       base_type  ;
-//     typedef CLObject<context_type>                  value_type ;
-//     typedef value_type*                             pointer    ;
-//     typedef std::size_t                             size_type  ;
-//     typedef resource_handle                         handle_type;
-
-//     resource_object  () = delete;
-//     ~resource_object () noexcept;
-
-//     constexpr resource_object (self_type&&) = default;
-//     constexpr self_type& operator = (self_type&&) = default;
-
-//     constexpr pointer handle () const noexcept
-//     {
-//         return base_type::handle<pointer> ();
-//     }
-
-// protected:
-//     explicit resource_object (pointer handle) noexcept;
-// };
+} // namespace CL
 
 // =========================================================
-
-} // namespace CL
 
 #endif // __cplusplus
 #endif // CPPUAL_COMPUTE_BACKEND_OPENCL_H_

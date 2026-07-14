@@ -41,15 +41,15 @@ namespace cppual::compute {
 typedef enum device_type
 {
     none        =      0,
-    cpu         = 1 << 0,
-    gpu         = 1 << 1,
-    gpgpu       = 1 << 2,
-    specialized = 1 << 3,
-    any         = cpu | gpu | gpgpu | specialized
+    cpu         = 1 << 0, // central processing unit
+    gpu         = 1 << 1, // graphics processing unit
+    ppu         = 1 << 2, // parallel processing unit
+    specialized = 1 << 3, // ex. DSP, NPU, etc.
+    any         = cpu | gpu | ppu | specialized
 }
 const const_device;
 
-typedef enum class backend_type : u8
+typedef enum class backend_type : byte
 {
     native,
     vulkan,
@@ -59,7 +59,7 @@ typedef enum class backend_type : u8
 }
 const const_backend;
 
-typedef enum class il_type : u8
+typedef enum class il_type : byte
 {
     none   =      0,
     native = 1 << 0,
@@ -71,7 +71,7 @@ typedef enum class il_type : u8
 }
 const const_il;
 
-typedef enum class memory_cat : u8
+typedef enum class memory_cat : byte
 {
     restricted ,
     specialized,
@@ -79,7 +79,7 @@ typedef enum class memory_cat : u8
 }
 const const_memory_cat;
 
-typedef enum class memory_access : u8
+typedef enum class memory_access : byte
 {
     read_only ,
     write_only,
@@ -190,14 +190,14 @@ private:
 
 // =========================================================
 
-class SHARED_API device_interface : public object<resource_type::device>
+class SHARED_API device_interface : public object
 {
 public:
-    typedef device_interface              self_type   ;
-    typedef object<resource_type::device> base_type   ;
-    typedef resource_version              version_type;
+    typedef device_interface self_type   ;
+    typedef object           base_type   ;
+    typedef resource_version version_type;
 
-    enum class profile_type : u8
+    enum class profile_type : byte
     {
         full,
         embedded
@@ -219,23 +219,27 @@ public:
     virtual u32             compute_units_count   () const = 0;
 
 protected:
-    using object<resource_type::device>::object;
+    constexpr device_interface ()
+    : object (nullptr, resource_type::device)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API context_interface : public object<resource_type::context>
+class SHARED_API context_interface : public object
 {
 protected:
-    using object<resource_type::context>::object;
+    constexpr context_interface ()
+    : object (nullptr, resource_type::context)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API memory_interface : public object<resource_type::buffer>
+class SHARED_API memory_interface : public object
 {
 public:
-    typedef enum class address_space : u8
+    typedef enum class address_space : byte
     {
         global_memory ,
         local_memory  ,
@@ -261,87 +265,109 @@ public:
     typedef bitset<memory_flag> memory_flags;
 
 protected:
-    using object<resource_type::buffer>::object;
+    constexpr memory_interface ()
+    : object (nullptr, resource_type::memory_chunk)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API cmd_seq_interface : public object<resource_type::program>
+class SHARED_API cmd_seq_interface : public object
 {
 protected:
-    using object<resource_type::program>::object;
+    constexpr cmd_seq_interface ()
+    : object (nullptr, resource_type::program)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API image_interface : public object<resource_type::image>
+class SHARED_API image_interface : public object
 {
 protected:
-    using object<resource_type::image>::object;
+    constexpr image_interface ()
+    : object (nullptr, resource_type::image)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API pipeline_interface : public object<resource_type::pipeline>
+class SHARED_API pipeline_interface : public object
 {
 protected:
-    using object<resource_type::pipeline>::object;
+    constexpr pipeline_interface ()
+    : object (nullptr, resource_type::pipeline)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API render_pass_interface : public object<resource_type::render_pass>
+class SHARED_API render_pass_interface : public object
 {
 protected:
-    using object<resource_type::render_pass>::object;
+    constexpr render_pass_interface ()
+    : object (nullptr, resource_type::render_pass)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API shader_interface : public object<resource_type::source_code>
+class SHARED_API shader_interface : public object
 {
 protected:
-    using object<resource_type::source_code>::object;
+    constexpr shader_interface ()
+    : object (nullptr, resource_type::source_code)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API descriptor_pool_interface : public object<resource_type::descriptor_pool>
+class SHARED_API descriptor_pool_interface : public object
 {
 protected:
-    using object<resource_type::descriptor_pool>::object;
+    constexpr descriptor_pool_interface ()
+    : object (nullptr, resource_type::descriptor_pool)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API event_interface : public object<resource_type::event>
+class SHARED_API event_interface : public object
 {
 protected:
-    using object<resource_type::event>::object;
+    constexpr event_interface ()
+    : object (nullptr, resource_type::event)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API state_interface : public object<resource_type::state>
+class SHARED_API state_interface : public object
 {
 protected:
-    using object<resource_type::state>::object;
+    constexpr state_interface ()
+    : object (nullptr, resource_type::state)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API queue_interface : public object<resource_type::queue>
+class SHARED_API queue_interface : public object
 {
 protected:
-    using object<resource_type::queue>::object;
+    constexpr queue_interface ()
+    : object (nullptr, resource_type::queue)
+    { }
 };
 
 // =========================================================
 
-class SHARED_API sampler_interface : public object<resource_type::sampler>
+class SHARED_API sampler_interface : public object
 {
 protected:
-    using object<resource_type::sampler>::object;
+    constexpr sampler_interface ()
+    : object (nullptr, resource_type::sampler)
+    { }
 };
 
 // =========================================================

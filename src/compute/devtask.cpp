@@ -24,20 +24,25 @@
 namespace cppual { namespace compute {
 
 device_queue::device_queue ()
+: base_type     (nullptr, resource_type::queue)
+, _M_pDevice    ()
+, _M_eQueueType ()
 {
 
 }
 
 device_queue::device_queue (device& dev, engine_type exec_engine_type)
-: _M_pDevice    (&dev),
-  _M_eQueueType (exec_engine_type)
+: base_type     (nullptr, resource_type::queue)
+, _M_pDevice    (&dev)
+, _M_eQueueType (exec_engine_type)
 {
 
 }
 
 device_queue::device_queue (device_queue&& obj)
-: _M_pDevice    (obj._M_pDevice   ),
-  _M_eQueueType (obj._M_eQueueType)
+: base_type     (nullptr, resource_type::queue)
+, _M_pDevice    (obj._M_pDevice   )
+, _M_eQueueType (obj._M_eQueueType)
 {
     obj._M_pDevice    = nullptr       ;
     obj._M_eQueueType = engine_type ();

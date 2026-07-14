@@ -32,6 +32,7 @@
 #include <cppual/containers>
 #include <cppual/meta_functional>
 
+#include <compare>
 #include <cassert>
 #include <cstring>
 #include <utility>
@@ -266,7 +267,7 @@ private:
 
     constexpr self_type& operator = (null_ptr) noexcept
     {
-        _M_pObj = nullptr;
+        //_M_pObj = nullptr;
         _M_fn   = nullptr;
         return  * this   ;
     }
@@ -414,7 +415,7 @@ public:
 
 template <typename R, typename... Args>
 constexpr auto operator == (closure<R, Args...> const& lh, null_ptr) noexcept
-{ return lh._M_fn == nullptr || lh._M_pObj == nullptr; }
+{ return lh._M_fn == nullptr; }
 
 
 template <typename R, typename... Args>
@@ -423,7 +424,7 @@ constexpr auto operator != (closure<R, Args...> const& lh, null_ptr) noexcept
 
 template <typename R, typename... Args>
 constexpr auto operator == (null_ptr, closure<R, Args...> const& rh) noexcept
-{ return nullptr == rh._M_fn || nullptr == rh._M_pObj; }
+{ return nullptr == rh._M_fn; }
 
 template <typename R, typename... Args>
 constexpr auto operator != (null_ptr, closure<R, Args...> const& rh) noexcept
@@ -466,8 +467,9 @@ public:
     typedef base_type::size_type                 size_type        ;
     typedef size_type const                      const_size       ;
     typedef closure_type::pointer                pointer          ;
+    typedef closure_type::const_pointer          const_pointer    ;
     typedef closure_type::value_type             value_type       ;
-    typedef std::array<byte, def_capture_size_v> storage_type     ;
+    typedef closure_type::const_value            const_value      ;
     typedef closure_type* self_type::*           safe_bool        ;
     typedef base_type::return_type               return_type      ;
 
@@ -494,7 +496,7 @@ public:
     { }
 
     template <size_type SZ>
-    consteval function (self_type_t<SZ> const& rh) noexcept
+    consteval function (self_type_t<SZ> const& /*rh*/) noexcept
     {
         static_assert (false, "Cannot convert from non-const function to const function!");
     }
@@ -610,6 +612,38 @@ private:
     template <fn_sig, size_type>
     friend class function;
 
+    template <typename FN, size_type SZ>
+    friend constexpr bool operator == (function<FN, SZ> const&, null_ptr) noexcept;
+
+    template <typename FN, size_type SZ>
+    friend constexpr bool operator == (null_ptr, function<FN, SZ> const&) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ>
+    friend constexpr auto operator <=> (function<R_(Args_...), SZ> const&, R_(&)(Args_...)) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ>
+    friend constexpr auto operator <=> (R_(&)(Args_...),
+                                        function<R_(Args_...), SZ> const&) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ1, size_type SZ2>
+    friend constexpr bool operator == (function<R_(Args_...), SZ1> const& lh,
+                                       function<R_(Args_...), SZ2> const& rh) noexcept;
+
+    template <typename R_, typename... Args_>
+    friend constexpr bool operator == (function<R_(Args_...) const> const&,
+                                       function<R_(Args_...) const> const&) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ>
+    friend constexpr bool operator == (function<R_(Args_...) const> const&,
+                                       function<R_(Args_...),   SZ> const&) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ>
+    friend constexpr bool operator == (function<R_(Args_...),   SZ> const&,
+                                       function<R_(Args_...) const> const&) noexcept;
+
+    template <typename FN, size_type SZ1, size_type SZ2>
+    friend constexpr auto operator <=> (function<FN, SZ1> const&, function<FN, SZ2> const&);
+
 public:
     closure_type _M_closure;
 };
@@ -621,44 +655,44 @@ template <typename R, typename... Args, std::size_t N>
 class SHARED_API function <R(Args...), N> : public function<R(Args...) const>
 {
 public:
-    typedef function<R(Args...), N>                 self_type        ;
-    typedef function<R(Args...) const>              base_type        ;
-    typedef base_type::value_type                   value_type       ;
-    typedef base_type::pointer                      pointer          ;
-    typedef base_type::size_type                    size_type        ;
-    typedef base_type::const_size                   const_size       ;
-    typedef base_type::closure_type                 closure_type     ;
-    typedef base_type::const_closure                const_closure    ;
-    typedef std::array<byte, max_capture_size_v<N>> storage_type     ;
-    typedef storage_type &                          storage_ref      ;
-    typedef storage_type const&                     storage_const_ref;
-    typedef storage_type * self_type::*             safe_bool        ;
-    typedef base_type::return_type                  return_type      ;
+    typedef function<R(Args...), N>     self_type        ;
+    typedef function<R(Args...) const>  base_type        ;
+    typedef base_type::pointer          pointer          ;
+    typedef base_type::const_pointer    const_pointer    ;
+    typedef base_type::value_type       value_type       ;
+    typedef base_type::const_value      const_value      ;
+    typedef base_type::size_type        size_type        ;
+    typedef base_type::const_size       const_size       ;
+    typedef base_type::closure_type     closure_type     ;
+    typedef base_type::const_closure    const_closure    ;
+    typedef std::array<byte, N>         storage_type     ;
+    typedef storage_type &              storage_ref      ;
+    typedef storage_type const&         storage_const_ref;
+    typedef storage_type * self_type::* safe_bool        ;
+    typedef base_type::return_type      return_type      ;
 
     using base_type::operator ();
     using base_type::arity      ;
-    using base_type::bind       ;
-    using base_type::get_closure;
 
-    using static_fn_ref = R(&)(Args...);
+    using static_fn_ref = return_type(&)(Args...);
 
     template <size_type SZ>
-    using self_type_t = function<R(Args...), max_capture_size_v<SZ>>;
+    using self_type_t = function<return_type(Args...), max_capture_size_v<SZ>>;
 
     template <structure C>
-    using mem_fn_type = fn_ptr_t<C, R(Args...)>;
+    using mem_fn_type = fn_ptr_t<C, return_type(Args...)>;
 
     template <structure C>
     using mem_fn_pair = closure_type::template member_pair_t<C>;
 
     template <structure C>
-    using const_mem_fn_type = fn_ptr_t<C, R(Args...) const>;
+    using const_mem_fn_type = fn_ptr_t<C, return_type(Args...) const>;
 
     template <structure C>
     using const_mem_fn_pair = closure_type::template const_member_pair_t<C>;
 
     //! lambda storage size in bytes
-    consteval static size_type size () noexcept { return max_capture_size_v<N>; }
+    static consteval size_type size () noexcept { return max_capture_size_v<N>; }
 
     //! make function class trivially copyable
     constexpr function ()                              noexcept = default;
@@ -839,6 +873,9 @@ public:
     { return get_closure () != nullptr ? &self_type::_M_storage : nullptr; }
 
 private:
+    using base_type::get_closure;
+
+private:
     consteval function (pointer      const  obj,
                         value_type   const  fn ,
                         storage_type const& lsz = storage_type ()) noexcept
@@ -897,6 +934,38 @@ private:
     template <fn_sig, size_type>
     friend class function;
 
+    template <typename FN, size_type SZ>
+    friend constexpr bool operator == (function<FN, SZ> const&, null_ptr) noexcept;
+
+    template <typename FN, size_type SZ>
+    friend constexpr bool operator == (null_ptr, function<FN, SZ> const&) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ>
+    friend constexpr auto operator <=> (function<R_(Args_...), SZ> const&, R_(&)(Args_...)) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ>
+    friend constexpr auto operator <=> (R_(&)(Args_...),
+                                        function<R_(Args_...), SZ> const&) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ1, size_type SZ2>
+    friend constexpr bool operator == (function<R_(Args_...), SZ1> const& lh,
+                                       function<R_(Args_...), SZ2> const& rh) noexcept;
+
+    template <typename R_, typename... Args_>
+    friend constexpr bool operator == (function<R_(Args_...) const> const&,
+                                       function<R_(Args_...) const> const&) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ>
+    friend constexpr bool operator == (function<R_(Args_...) const> const&,
+                                       function<R_(Args_...),   SZ> const&) noexcept;
+
+    template <typename R_, typename... Args_, size_type SZ>
+    friend constexpr bool operator == (function<R_(Args_...),   SZ> const&,
+                                       function<R_(Args_...) const> const&) noexcept;
+
+    template <typename FN, size_type SZ1, size_type SZ2>
+    friend constexpr auto operator <=> (function<FN, SZ1> const&, function<FN, SZ2> const&);
+
 public:
     //! bytes for storage of capture lambda
     storage_type _M_storage;
@@ -952,7 +1021,7 @@ template <typename FN, std::size_t SZ1, std::size_t SZ2>
 constexpr auto operator <=> (function<FN, SZ1> const& lh, function<FN, SZ2> const& rh)
 { return lh._M_closure <=> rh._M_closure; }
 
-//! ====================================================
+// ====================================================
 
 //! static function make_fn
 template <typename R, typename... Args>
@@ -1102,19 +1171,19 @@ consteval function<Out> fn_cast (R(& static_fn_ref)(Args...)) noexcept
 }
 
 template <non_const_fn_sig Out, structure C, typename R, typename... Args>
-consteval function<Out> fn_cast (C& obj, R(C::* member_fn)(Args...)) noexcept
+consteval function<Out> fn_cast (C& obj, R(C::* mem_fn)(Args...)) noexcept
 {
     return function<Out>
     (fn_cast_helper<Out, R(Args...)>::fn_cast (function<R(Args...)>
-    (obj, member_fn)));
+    (obj, mem_fn)));
 }
 
 template <const_fn_sig Out, structure C, typename R, typename... Args>
-consteval function<Out> fn_cast (C& obj, R(C::* const_member_fn)(Args...) const) noexcept
+consteval function<Out> fn_cast (C& obj, R(C::* const_mem_fn)(Args...) const) noexcept
 {
     return function<Out>
     (fn_cast_helper<Out, R(Args...) const>::fn_cast (function<R(Args...) const>
-    (obj, const_member_fn)));
+    (obj, const_mem_fn)));
 }
 
 // ====================================================

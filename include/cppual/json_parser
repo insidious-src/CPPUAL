@@ -20,4 +20,4 @@
  */
 
 #include <cppual/dom/json_parser.h>
-#include <cppual/json/json_adaptor.h>
+#include <cppual/json/strict_json.h>

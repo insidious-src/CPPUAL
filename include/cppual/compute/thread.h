@@ -52,9 +52,19 @@ const const_thread_priority;
 
 // =========================================================
 
+namespace this_thread {
+
+thread_handle handle    () noexcept;
+void		  exit      ();
+int			  sleep_for (uint millisec);
+
+} //! namespace this_thread
+
+// =========================================================
+
 namespace main_thread {
 
-resource_handle handle       () noexcept;
+thread_handle   handle       () noexcept;
 thread_priority priority     ();
 int			    set_priority (thread_priority priority);
 
@@ -62,17 +72,8 @@ int			    set_priority (thread_priority priority);
 
 // =========================================================
 
-namespace this_thread {
-
-resource_handle handle    () noexcept;
-void		    exit      ();
-int			    sleep_for (uint millisec);
-
-} //! namespace this_thread
-
-// =========================================================
-
-class thread : public non_copyable
+//! thread class made to be inhereted from
+class SHARED_API thread : public non_copyable
 {
 public:
     typedef thread             self_type    ;
@@ -81,13 +82,17 @@ public:
     typedef std::atomic_size_t atomic_size_t;
     typedef std::atomic_bool   atomic_bool  ;
 
-    class id final
+    // =========================================================
+
+    //! id class made to be inhereted from
+    class id
     {
     public:
-        typedef id            self_type  ;
-        typedef thread_handle handle_type;
+        typedef id                    self_type  ;
+        typedef thread_handle         handle_type;
+        typedef handle_type::res_type res_type   ;
 
-        constexpr id ()                                    noexcept = default;
+        consteval id ()                                    noexcept = default;
         constexpr id (self_type &&)                        noexcept = default;
         constexpr id (self_type const&)                    noexcept = default;
         constexpr self_type& operator = (self_type &&)     noexcept = default;
@@ -97,20 +102,22 @@ public:
         : _M_handle  (h)
         { }
 
+        constexpr handle_type handle () const noexcept
+        { return _M_handle; }
+
+        constexpr res_type resource () const noexcept
+        { return _M_handle; }
+
     private:
-        static bool thread_handles_equal (resource_handle h1, resource_handle h2);
+        static bool thread_handles_equal (handle_type h1, handle_type h2);
 
-        friend
-        constexpr bool operator == (self_type, self_type) noexcept;
-
-        friend
-        constexpr bool operator  < (self_type, self_type) noexcept;
-
-        friend class thread;
+        friend constexpr bool operator == (self_type const&, self_type const&) noexcept;
 
     private:
         handle_type _M_handle { };
     };
+
+    // =========================================================
 
     thread  () noexcept;
     ~thread ();
@@ -139,25 +146,29 @@ private:
 
 // =========================================================
 
-constexpr bool operator == (thread::id x, thread::id y) noexcept
-{ return thread::id::thread_handles_equal (x._M_handle, y._M_handle); }
+constexpr bool operator == (thread::id const& x, thread::id const& y) noexcept
+{ return thread::id::thread_handles_equal (x.handle (), y.handle ()); }
 
-constexpr bool operator < (thread::id x, thread::id y) noexcept
-{ return x._M_handle < y._M_handle; }
-
-constexpr bool operator != (thread::id x, thread::id y) noexcept
+constexpr bool operator != (thread::id const& x, thread::id const& y) noexcept
 { return !(x == y); }
 
-constexpr bool operator <= (thread::id x, thread::id y) noexcept
-{ return !(y < x); }
+constexpr bool operator < (thread::id const& x, thread::id const& y) noexcept
+{ return x.handle () < y.handle (); }
 
-constexpr bool operator > (thread::id x, thread::id y) noexcept
-{ return y < x; }
+constexpr bool operator <= (thread::id const& x, thread::id const& y) noexcept
+{ return y.handle () <= x.handle (); }
 
-constexpr bool operator >= (thread::id x, thread::id y) noexcept
+constexpr bool operator > (thread::id const& x, thread::id const& y) noexcept
+{ return !(y <= x); }
+
+constexpr bool operator >= (thread::id const& x, thread::id const& y) noexcept
 { return !(x < y); }
 
+// =========================================================
+
 } //! namespace compute
+
+// =========================================================
 
 #endif // __cplusplus
 #endif // CPPUAL_PROCESS_THREAD

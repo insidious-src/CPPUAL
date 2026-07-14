@@ -35,8 +35,11 @@ namespace cppual {
 
 // =========================================================
 
-class   resource_handle                    ;
-typedef resource_handle resource_connection;
+template <non_void U = void*>
+class rc_handle;
+
+using resource_handle     = rc_handle<>;
+using resource_connection = rc_handle<>;
 
 // =========================================================
 
@@ -45,7 +48,7 @@ typedef enum class resource_type : u32
     null            =       0,
     instance        = 1 <<  0,
     device          = 1 <<  1,
-    buffer          = 1 <<  2,
+    memory_chunk    = 1 <<  2,
     image           = 1 <<  3,
     font            = 1 <<  4,
     macro           = 1 <<  5,
@@ -78,64 +81,78 @@ typedef bitset<resource_type> resource_types;
 
 // =========================================================
 
-template <typename T>
+template <typename T, typename U = void*>
 concept resource_handle_c = void_t<T> || ptr<T> || integer<T> || structure<T> ||
-                            are_same<T, resource_connection>;
+                            are_same<T, rc_handle<U>>;
 
-template <typename T>
-concept resource_handle_h = ptr<T> || integer<T> || are_same<T, resource_handle>;
+template <typename T, typename U = void*>
+concept resource_handle_h = ptr<T> || integer<T> || are_same<T, rc_handle<U>>;
 
 // =========================================================
 
-class SHARED_API resource_handle
+template <non_void U>
+class SHARED_API rc_handle
 {
 public:
-    union   handle_value                           ;
-    typedef resource_handle           self_type    ;
+    union   handle_union                           ;
+    typedef rc_handle<U>              self_type    ;
     typedef uptr                      value_type   ;
     typedef value_type const          const_value  ;
     typedef void *                    pointer      ;
     typedef cvoid*                    const_pointer;
-    typedef handle_value self_type::* safe_bool    ;
+    typedef remove_cref_t<U>          res_type     ;
+    typedef res_type const            const_res    ;
+    typedef handle_union self_type::* safe_bool    ;
 
     inline constexpr static const_value npos = static_cast<value_type> (-1);
 
-    typedef union handle_value
+    typedef union handle_union
     {
-        value_type value { };
+        res_type   res   { };
+        value_type value    ;
         pointer    ptr      ;
 
-        consteval handle_value () noexcept = default;
-        constexpr handle_value (value_type _handle) noexcept : value (_handle) { }
-        constexpr handle_value (pointer    _handle) noexcept : ptr   (_handle) { }
-        constexpr handle_value (std::nullptr_t    ) noexcept : ptr   ()        { }
+        consteval handle_union () noexcept = default;
+        constexpr handle_union (value_type _handle) noexcept : value (_handle) { }
+        constexpr handle_union (pointer    _handle) noexcept : ptr   (_handle) { }
+        consteval handle_union (null_ptr          ) noexcept : ptr   ()        { }
 
-        constexpr handle_value& operator = (value_type handle) noexcept
+        template <typename>
+        requires (!are_same<res_type, value_type> && !are_same<res_type, pointer>)
+        constexpr handle_union (res_type _handle) noexcept : res (_handle) { }
+
+        constexpr handle_union& operator = (value_type handle) noexcept
         { value = handle; return *this; }
 
-        constexpr handle_value& operator = (pointer handle) noexcept
+        constexpr handle_union& operator = (pointer handle) noexcept
         { ptr = handle; return *this; }
 
-        constexpr handle_value& operator = (std::nullptr_t) noexcept
+        constexpr handle_union& operator = (null_ptr) noexcept
         { ptr = nullptr; return *this; }
     }
-    const const_handle;
+    const const_handle_union;
 
-    consteval resource_handle () noexcept = default;
-    constexpr resource_handle (value_type handle) noexcept : _M_handle (handle) { }
-    constexpr resource_handle (pointer    handle) noexcept : _M_handle (handle) { }
-    constexpr resource_handle (std::nullptr_t   ) noexcept : _M_handle ()       { }
+    consteval rc_handle ()                  noexcept = default;
+    constexpr rc_handle (value_type handle) noexcept : _M_handle (handle) { }
+    constexpr rc_handle (pointer    handle) noexcept : _M_handle (handle) { }
+    constexpr rc_handle (null_ptr         ) noexcept : _M_handle ()       { }
 
-    constexpr resource_handle (self_type &&)           noexcept = default;
-    constexpr resource_handle (self_type const&)       noexcept = default;
+    constexpr rc_handle (self_type &&)                noexcept = default;
+    constexpr rc_handle (self_type const&)            noexcept = default;
     constexpr self_type& operator = (self_type &&)     noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
     template <integer T>
-    constexpr resource_handle (T const _handle) noexcept
+    constexpr rc_handle (T const _handle) noexcept
     : _M_handle (unsigned_integer<T> ? _handle : static_cast<value_type> (_handle))
+    { static_assert (sizeof (T) <= sizeof (value_type), "T is bigger than the size of uptr!"); }
+
+    template <typename = void>
+    requires (!are_same<res_type, value_type> && !are_same<res_type, pointer>)
+    constexpr operator res_type () const noexcept
     {
-        static_assert (sizeof (T) <= sizeof (value_type), "T is bigger than the size of uptr!");
+        if constexpr (std::is_pointer_v<res_type>) return *_M_handle.res;
+        return _M_handle.res;
     }
 
     constexpr operator pointer    () const noexcept { return _M_handle.ptr  ; }
@@ -197,10 +214,10 @@ public:
     constexpr bool operator == (self_type const&, self_type const&) noexcept;
 
     friend
-    constexpr bool operator == (self_type const&, std::nullptr_t) noexcept;
+    constexpr bool operator == (self_type const&, null_ptr) noexcept;
 
     friend
-    constexpr bool operator == (std::nullptr_t, self_type const&) noexcept;
+    constexpr bool operator == (null_ptr, self_type const&) noexcept;
 
     friend
     constexpr bool operator == (self_type const&, const_value) noexcept;
@@ -214,53 +231,89 @@ public:
     friend
     constexpr bool operator == (const_pointer, self_type const&) noexcept;
 
+    friend
+    constexpr bool operator  < (self_type const&, self_type const&) noexcept;
+
+    friend
+    constexpr bool operator <= (self_type const&, self_type const&) noexcept;
+
 private:
-    handle_value _M_handle { };
+    handle_union _M_handle { };
 };
 
 // =========================================================
 
-constexpr bool operator == (resource_handle const& lh, resource_handle const& rh) noexcept
+template <typename U>
+constexpr bool operator == (rc_handle<U> const& lh, rc_handle<U> const& rh) noexcept
 { return lh._M_handle.value == rh._M_handle.value; }
 
-constexpr bool operator == (resource_handle const& lh, std::nullptr_t) noexcept
+template <typename U>
+constexpr bool operator == (rc_handle<U> const& lh, null_ptr) noexcept
 { return lh._M_handle.ptr == nullptr; }
 
-constexpr bool operator == (std::nullptr_t, resource_handle const& rh) noexcept
+template <typename U>
+constexpr bool operator == (null_ptr, rc_handle<U> const& rh) noexcept
 { return rh._M_handle.ptr == nullptr; }
 
-constexpr bool operator == (resource_handle const& lh, resource_handle::const_value val) noexcept
+template <typename U>
+constexpr bool operator == (rc_handle<U> const& lh, resource_handle::const_value val) noexcept
 { return lh._M_handle.value == val; }
 
-constexpr bool operator == (resource_handle::const_value val, resource_handle const& rh) noexcept
+template <typename U>
+constexpr bool operator == (resource_handle::const_value val, rc_handle<U> const& rh) noexcept
 { return rh._M_handle.value == val; }
 
-constexpr bool operator == (resource_handle const& lh, resource_handle::const_pointer ptr) noexcept
+template <typename U>
+constexpr bool operator == (rc_handle<U> const& lh, resource_handle::const_pointer ptr) noexcept
 { return lh._M_handle.ptr == ptr; }
 
-constexpr bool operator == (resource_handle::const_pointer ptr, resource_handle const& rh) noexcept
+template <typename U>
+constexpr bool operator == (resource_handle::const_pointer ptr, rc_handle<U> const& rh) noexcept
 { return rh._M_handle.ptr == ptr; }
 
-constexpr bool operator != (resource_handle const& lh, resource_handle const& rh) noexcept
+template <typename U>
+constexpr bool operator != (rc_handle<U> const& lh, rc_handle<U> const& rh) noexcept
 { return !(lh == rh); }
 
-constexpr bool operator != (resource_handle const& lh, std::nullptr_t) noexcept
+template <typename U>
+constexpr bool operator != (rc_handle<U> const& lh, null_ptr) noexcept
 { return !(lh == nullptr); }
 
-constexpr bool operator != (std::nullptr_t, resource_handle const& rh) noexcept
+template <typename U>
+constexpr bool operator != (null_ptr, rc_handle<U> const& rh) noexcept
 { return !(rh == nullptr); }
 
-constexpr bool operator != (resource_handle const& lh, resource_handle::const_value val) noexcept
+template <typename U>
+constexpr bool operator != (rc_handle<U> const& lh, resource_handle::const_value val) noexcept
 { return !(lh == val); }
 
-constexpr bool operator != (resource_handle::const_value val, resource_handle const& rh) noexcept
+template <typename U>
+constexpr bool operator != (resource_handle::const_value val, rc_handle<U> const& rh) noexcept
 { return !(rh == val); }
 
-constexpr bool operator != (resource_handle const& lh, resource_handle::const_pointer ptr) noexcept
+template <typename U>
+constexpr bool operator != (rc_handle<U> const& lh, resource_handle::const_pointer ptr) noexcept
 { return !(lh == ptr); }
 
-constexpr bool operator != (resource_handle::const_pointer ptr, resource_handle const& rh) noexcept
+template <typename U>
+constexpr bool operator != (resource_handle::const_pointer ptr, rc_handle<U> const& rh) noexcept
 { return !(rh == ptr); }
+
+template <typename U>
+constexpr bool operator < (rc_handle<U> const& lh, rc_handle<U> const& rh) noexcept
+{ return lh._M_handle.value < rh._M_handle.value; }
+
+template <typename U>
+constexpr bool operator <= (rc_handle<U> const& lh, rc_handle<U> const& rh) noexcept
+{ return lh._M_handle.value <= rh._M_handle.value; }
+
+template <typename U>
+constexpr bool operator > (rc_handle<U> const& lh, rc_handle<U> const& rh) noexcept
+{ return !(lh._M_handle.value <= rh._M_handle.value); }
+
+template <typename U>
+constexpr bool operator >= (rc_handle<U> const& lh, rc_handle<U> const& rh) noexcept
+{ return !(lh._M_handle.value < rh._M_handle.value); }
 
 // =========================================================
 
@@ -277,6 +330,7 @@ public:
     typedef remove_cref_t<C>        connection_type ;
     typedef connection_type const   const_connection;
     typedef remove_cref_t<H>        value_type      ;
+    typedef value_type const        const_value     ;
     typedef resource_handle         handle_type     ;
     typedef handle_type const       const_handle    ;
     typedef ptrdiff                 difference_type ;
@@ -342,7 +396,7 @@ public:
     constexpr resource_type type () const noexcept
     { return _M_eResType; }
 
-    constexpr explicit operator safe_bool () const noexcept
+    constexpr operator safe_bool () const noexcept
     { return valid () ? this : nullptr; }
 
     template <typename C_, typename H_, handle_type::value_type NULL_V_>
@@ -419,7 +473,7 @@ public:
     constexpr resource_type type () const noexcept
     { return _M_eResType; }
 
-    consteval explicit operator safe_bool () const noexcept
+    consteval operator safe_bool () const noexcept
     { return valid () ? this : nullptr; }
 
     template <class ID_, handle_type::value_type NULL_V_>
@@ -460,22 +514,22 @@ struct SHARED_API resource_version
     typedef value_type const const_value;
     typedef string           string_type;
 
-    typedef enum class version_parts : u8
+    typedef enum class version_parts : byte
     {
         only_major = 1,
         to_minor      ,
         to_patch      ,
         all
     }
-    const const_parts;
+    const const_ver_parts;
 
     consteval resource_version ()                      noexcept = default;
     constexpr resource_version (self_type &&)          noexcept = default;
-    constexpr resource_version (self_type const&)      noexcept = default;
+    consteval resource_version (self_type const&)      noexcept = default;
     constexpr self_type& operator = (self_type &&)     noexcept = default;
     constexpr self_type& operator = (self_type const&) noexcept = default;
 
-    constexpr resource_version (const_value _major,
+    consteval resource_version (const_value _major,
                                 const_value _minor,
                                 const_value _patch = value_type (),
                                 const_value _rev   = value_type ()) noexcept
@@ -485,7 +539,7 @@ struct SHARED_API resource_version
       revision (_rev  )
     { }
 
-    constexpr string_type to_string (const_parts parts = version_parts::all) const noexcept
+    constexpr string_type to_string (const_ver_parts parts = version_parts::all) const noexcept
     {
         ostringstream stream;
 
@@ -519,16 +573,16 @@ constexpr bool operator <= (resource_version const& lh, resource_version::const_
 { return lh.major <= uMajor; }
 
 constexpr bool operator > (resource_version const& lh, resource_version const& rh) noexcept
-{ return (lh.major > rh.major || lh.minor > rh.minor); }
+{ return !(lh <= rh); }
 
 constexpr bool operator > (resource_version const& lh, resource_version::const_value uMajor) noexcept
-{ return lh.major > uMajor; }
+{ return !(lh <= uMajor); }
 
 constexpr bool operator >= (resource_version const& lh, resource_version const& rh) noexcept
-{ return (lh.major >= rh.major && lh.minor >= rh.minor); }
+{ return !(lh < rh); }
 
 constexpr bool operator >= (resource_version const& lh, resource_version::const_value uMajor) noexcept
-{ return lh.major >= uMajor; }
+{ return !(lh < uMajor); }
 
 constexpr bool operator == (resource_version const& lh, resource_version const& rh) noexcept
 { return (lh.major == rh.major && lh.minor == rh.minor); }

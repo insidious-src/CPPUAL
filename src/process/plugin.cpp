@@ -164,18 +164,18 @@ void dyn_loader::detach () noexcept
     _M_pHandle = nullptr;
 }
 
-dyn_loader::pointer dyn_loader::get_address (string_view const& pName) const
+dyn_loader::pointer dyn_loader::get_address (char_ptr pName) const
 {
 #   ifdef OS_STD_POSIX
 
-    void* pAddr = ::dlsym (_M_pHandle, pName.data ());
+    void* pAddr = ::dlsym (_M_pHandle, pName);
     if (!pAddr) std::cerr << ::dlerror () << std::endl;
     return pAddr;
 
 #   elif defined (OS_WINDOWS)
 
     auto const convert =
-    direct_cast<void*> (::GetProcAddress (_M_pHandle.get<::HMODULE> (), pName.data ()));
+    direct_cast<void*> (::GetProcAddress (_M_pHandle.get<::HMODULE> (), pName));
 
     if (!convert)
         std::cerr << "error: " << ::GetLastError () << "\naddress not found!" << std::endl;
@@ -184,12 +184,12 @@ dyn_loader::pointer dyn_loader::get_address (string_view const& pName) const
 #   endif
 }
 
-dyn_loader::generic_fn_ptr dyn_loader::get_function (string_view const& pName) const
+dyn_loader::generic_fn_ptr dyn_loader::get_function (char_ptr pName) const
 {
 #   ifdef OS_STD_POSIX
 
     generic_fn_ptr const fn =
-    direct_cast<generic_fn_ptr> (::dlsym (_M_pHandle, pName.data ()));
+    direct_cast<generic_fn_ptr> (::dlsym (_M_pHandle, pName));
 
     if (fn == nullptr)
     {
@@ -202,7 +202,7 @@ dyn_loader::generic_fn_ptr dyn_loader::get_function (string_view const& pName) c
 #   elif defined (OS_WINDOWS)
 
     generic_fn_ptr const fn =
-    direct_cast<generic_fn_ptr> (::GetProcAddress (_M_pHandle.get<::HMODULE> (), pName.data ()));
+    direct_cast<generic_fn_ptr> (::GetProcAddress (_M_pHandle.get<::HMODULE> (), pName));
 
     if (fn == nullptr)
     {

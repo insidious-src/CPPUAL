@@ -29,14 +29,19 @@
 #include <cppual/concepts>
 #include <cppual/iterator>
 
-#include <atomic>
-#include <memory>
-#include <cstring>
-#include <iterator>
-#include <algorithm>
 #include <type_traits>
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <atomic>
+
+#include <cstring>
+
+// ====================================================
 
 namespace cppual {
+
+// ====================================================
 
 template <non_void T, allocator_like A = memory::allocator<T>, bool Atomic = false>
 class circular_queue;
@@ -47,18 +52,15 @@ template <non_void T, allocator_like A>
 class SHARED_API circular_queue <T, A, false> : private A
 {
 public:
-    static_assert (move_constructible<T>, "T is not move constructible!");
-    static_assert (move_assignable   <T>, "T is not move assignable!"   );
-
     typedef circular_queue<T, A, false>           self_type             ;
     typedef memory::allocator_traits<A>           traits_type           ;
     typedef traits_type::allocator_type           allocator_type        ;
     typedef remove_cref_t<T>                      value_type            ;
     typedef value_type const                      const_value           ;
-    typedef value_type *                          pointer               ;
-    typedef value_type const*                     const_pointer         ;
-    typedef value_type &                          reference             ;
-    typedef value_type const&                     const_reference       ;
+    typedef value_type  *                         pointer               ;
+    typedef const_value *                         const_pointer         ;
+    typedef value_type  &                         reference             ;
+    typedef const_value &                         const_reference       ;
     typedef traits_type::size_type                size_type             ;
     typedef size_type const                       const_size            ;
     typedef traits_type::difference_type          difference_type       ;
@@ -70,7 +72,9 @@ public:
     typedef std::pair<const_pointer, size_type>   const_array_range     ;
     typedef std::pair<iterator, bool>             iterator_pair         ;
 
-    inline constexpr static size_type const npos = size_type (-1);
+    static_assert (movable<value_type>, "value_type is NOT movable!");
+
+    inline constexpr static const_size npos = size_type (-1);
 
     self_type& operator = (self_type const&);
 
@@ -88,52 +92,52 @@ public:
     constexpr void            pop_back      () { if (!empty ()) _pop_back  (); }
 
     constexpr iterator begin () noexcept
-    { return  iterator (*this, size_type ()); }
+    {  return iterator (*this, size_type ()); }
 
     constexpr const_iterator begin () const noexcept
-    { return const_iterator (*this, size_type ()); }
+    {  return const_iterator (*this, size_type ()); }
 
     constexpr const_iterator cbegin () noexcept
-    { return const_iterator (*this, size_type ()); }
+    {  return const_iterator (*this, size_type ()); }
 
     constexpr const_iterator cbegin () const noexcept
-    { return const_iterator (*this, size_type ()); }
+    {  return const_iterator (*this, size_type ()); }
 
     constexpr iterator end () noexcept
-    { return iterator (*this, size ()); }
+    {  return iterator (*this, size ()); }
 
     constexpr const_iterator end () const noexcept
-    { return const_iterator (*this, size ()); }
+    {  return const_iterator (*this, size ()); }
 
     constexpr const_iterator cend () noexcept
-    { return const_iterator (*this, size ()); }
+    {  return const_iterator (*this, size ()); }
 
     constexpr const_iterator cend () const noexcept
-    { return const_iterator (*this, size ()); }
+    {  return const_iterator (*this, size ()); }
 
     constexpr reverse_iterator rbegin () noexcept
-    { return reverse_iterator (iterator (*this, size () - 1)); }
+    {  return reverse_iterator (iterator (*this, size () - 1)); }
 
     constexpr const_reverse_iterator rbegin () const noexcept
-    { return const_reverse_iterator (const_iterator (*this, size () - 1)); }
+    {  return const_reverse_iterator (const_iterator (*this, size () - 1)); }
 
     constexpr const_reverse_iterator crbegin () noexcept
-    { return const_reverse_iterator (const_iterator (*this, size () - 1)); }
+    {  return const_reverse_iterator (const_iterator (*this, size () - 1)); }
 
     constexpr const_reverse_iterator crbegin () const noexcept
-    { return const_reverse_iterator (const_iterator (*this, size () - 1)); }
+    {  return const_reverse_iterator (const_iterator (*this, size () - 1)); }
 
     constexpr reverse_iterator rend () noexcept
-    { return reverse_iterator (iterator (*this, npos)); }
+    {  return reverse_iterator (iterator (*this, npos)); }
 
     constexpr const_reverse_iterator rend () const noexcept
-    { return const_reverse_iterator (const_iterator (*this, npos)); }
+    {  return const_reverse_iterator (const_iterator (*this, npos)); }
 
     constexpr const_reverse_iterator crend () noexcept
-    { return const_reverse_iterator (const_iterator (*this, npos)); }
+    {  return const_reverse_iterator (const_iterator (*this, npos)); }
 
     constexpr const_reverse_iterator crend () const noexcept
-    { return const_reverse_iterator (const_iterator (*this, npos)); }
+    {  return const_reverse_iterator (const_iterator (*this, npos)); }
 
     constexpr circular_queue () noexcept = default;
 
@@ -209,7 +213,7 @@ public:
 
     constexpr ~circular_queue () noexcept
     {
-        if (!capacity()) return;
+        if (!capacity ()) return;
 
         clear ();
         allocator_type::deallocate (_M_pArray, _M_uCapacity);
@@ -268,16 +272,16 @@ public:
 
     constexpr size_type size () const noexcept
     {
-        return !empty () && capacity () ?
-                    static_cast<size_type> ((((_M_endPos - _M_beginPos) + _capacity()) % _capacity()) + 1) :
-                    size_type ();
+        return /*!empty () && */capacity () ?
+                static_cast<size_type> ((((_M_endPos - _M_beginPos) + _capacity ()) % _capacity ()) + 1) :
+                size_type ();
     }
 
     constexpr bool is_linearized () const noexcept
     { return _M_beginPos <= _M_endPos; }
 
     constexpr bool empty () const noexcept
-    { return _M_beginPos == nullptr || _M_endPos == nullptr; }
+    { return _M_beginPos == _M_endPos && _M_endPos == nullptr; }
 
     bool full () const noexcept
     { return _M_beginPos == normalize (_M_endPos + 1); }
@@ -397,7 +401,7 @@ private:
 
     constexpr size_type index_to_subscript (size_type uIdx) const noexcept
     {
-        return !empty () && capacity () ?
+        return /*!empty () && */capacity () ?
                     static_cast<size_type> (((_M_beginPos + uIdx) - _M_pArray) % _capacity ()) :
                     npos;
     }
@@ -516,10 +520,6 @@ template <non_void T, allocator_like A>
 class SHARED_API circular_queue <T, A, true> : private A, public non_copyable
 {
 public:
-    static_assert (!std::is_void_v<T>              , "T is void");
-    static_assert ( std::is_move_constructible_v<T>, "T is not move constructible!");
-    static_assert ( std::is_move_assignable_v<T>   , "T is not move assignable!");
-
     typedef circular_queue<T, A, true>   self_type      ;
     typedef std::allocator_traits<A>     traits_type    ;
     typedef traits_type::allocator_type  allocator_type ;
@@ -532,9 +532,11 @@ public:
     typedef std::atomic_size_t           atomic_size    ;
     typedef traits_type::size_type       size_type      ;
     typedef traits_type::size_type const const_size     ;
-    typedef traits_type::difference_type ifference_type ;
+    typedef traits_type::difference_type difference_type;
 
-    inline constexpr static size_type const npos = size_type (-1);
+    static_assert (movable<value_type>, "value_type is NOT movable!");
+
+    inline constexpr static const_size npos = size_type (-1);
 
     circular_queue () noexcept;
 
@@ -624,10 +626,6 @@ template <non_void T, std::size_t N>
 class SHARED_API uniform_queue : public non_copyable
 {
 public:
-    static_assert (!std::is_void_v              <T>, "T is void");
-    static_assert ( std::is_move_constructible_v<T>, "T is not move constructible!");
-    static_assert ( std::is_move_assignable_v   <T>, "T is not move assignable!");
-
     typedef uniform_queue<T, N> self_type      ;
     typedef remove_cref_t<T>    value_type     ;
     typedef value_type const    const_value    ;
@@ -639,14 +637,16 @@ public:
     typedef size_type const     const_size     ;
     typedef std::ptrdiff_t      difference_type;
 
-    inline constexpr static size_type const npos = size_type (-1);
+    static_assert (movable<value_type>, "value_type is NOT movable!");
+
+    inline constexpr static const_size npos = size_type (-1);
 
     constexpr size_type size () const noexcept
     {
-        const_size uBeginPos = _M_uReadPos.load  (std::memory_order_relaxed);
+        const_size uBeginPos = _M_uReadPos .load (std::memory_order_relaxed);
         const_size uEndPos   = _M_uWritePos.load (std::memory_order_relaxed);
 
-        return ((uEndPos - uBeginPos) + capacity()) % capacity();
+        return ((uEndPos - uBeginPos) + capacity ()) % capacity ();
     }
 
     constexpr bool is_linearized () const noexcept

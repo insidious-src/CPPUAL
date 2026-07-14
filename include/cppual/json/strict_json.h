@@ -1,5 +1,5 @@
-#ifndef CPPUAL_JSON_ADAPTOR_H
-#define CPPUAL_JSON_ADAPTOR_H
+#ifndef CPPUAL_STRICT_JSON_H
+#define CPPUAL_STRICT_JSON_H
 
 #undef  JSON_HAS_STDSTRING
 #define JSON_HAS_STDSTRING 1
@@ -2262,4 +2262,4 @@ constexpr std::ostream& operator << (std::ostream& stream, value_reference<doc_p
 } // namespace Json
 
 
-#endif // CPPUAL_JSON_ADAPTOR_H
+#endif // CPPUAL_STRICT_JSON_H

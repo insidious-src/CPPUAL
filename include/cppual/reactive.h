@@ -76,7 +76,7 @@ public:
     typedef signal<void(arg_type), A>    base_type      ;
     typedef memory::allocator_traits<A>  alloc_traits   ;
     typedef alloc_traits::allocator_type allocator_type ;
-    typedef remove_cvref_t<T>            value_type     ;
+    typedef remove_cref_t<T>             value_type     ;
     typedef value_type const             const_value    ;
     typedef value_type &                 reference      ;
     typedef value_type &&                move_reference ;
@@ -88,6 +88,9 @@ public:
 
     static_assert (equality_comparable<value_type>, "value_type is NOT equality comparable!");
     static_assert (copyable_movable   <value_type>, "value_type is NOT copyable nor movable!");
+
+    using base_type::empty;
+    using base_type::clear;
 
     template <structure C>
     using mem_fn_t = fn_ptr_t<C, void(arg_type)>;
@@ -196,12 +199,6 @@ public:
 
     constexpr const_reference get () const noexcept
     { return _M_value; }
-
-    constexpr bool empty () const noexcept
-    { return base_type::empty (); }
-
-    constexpr void clear () noexcept
-    { base_type::clear (); }
 
     //! reactive (signal/slot) connect
     constexpr self_type& operator << (fn_type&& fn) const

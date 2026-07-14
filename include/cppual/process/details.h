@@ -24,6 +24,7 @@
 #ifdef __cplusplus
 
 #include <cppual/decl>
+#include <cppual/resource>
 
 #ifdef OS_STD_POSIX
 #   include <pthread.h>
@@ -37,9 +38,9 @@
 namespace cppual::process {
 
 #ifdef OS_STD_POSIX
-typedef pid_t  process_handle;
+typedef rc_handle<pid_t>  process_handle;
 #elif defined (OS_WINDOWS)
-typedef HANDLE process_handle;
+typedef rc_handle<HANDLE> process_handle;
 #endif
 
 } //! namespace process
@@ -47,20 +48,20 @@ typedef HANDLE process_handle;
 namespace cppual::compute {
 
 #ifdef OS_STD_POSIX
-typedef pthread_t       thread_handle;
-typedef pthread_mutex_t mutex_object ;
+typedef rc_handle<pthread_t>       thread_handle;
+typedef rc_handle<pthread_mutex_t> mutex_handle ;
 #elif defined (OS_WINDOWS)
-typedef DWORD  thread_handle;
-typedef HANDLE mutex_object ;
+typedef rc_handle<DWORD>  thread_handle;
+typedef rc_handle<HANDLE> mutex_handle ;
 #endif
 
 struct task_traits final
 {
 #ifdef OS_WINDOWS
-    HANDLE          _M_pEvent;
+    rc_handle<HANDLE>          _M_pEvent;
 #elif defined (OS_STD_POSIX)
-    pthread_cond_t  _M_gReady;
-    pthread_mutex_t _M_gLock ;
+    rc_handle<pthread_cond_t>  _M_gReady;
+    rc_handle<pthread_mutex_t> _M_gLock ;
 #endif
 };
 

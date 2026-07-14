@@ -23,7 +23,11 @@
 
 #include <thread>
 
-namespace cppual { namespace compute {
+// =========================================================
+
+namespace cppual::compute {
+
+// =========================================================
 
 namespace { // optimize for internal unit usage
 
@@ -49,11 +53,40 @@ enum result
 
 // =========================================================
 
+void this_thread::exit ()
+{
+#ifdef OS_WINDOWS
+#elif defined (OS_STD_POSIX)
+    ::pthread_exit (nullptr);
+#endif
+}
+
+int this_thread::sleep_for (uint uMillisec)
+{
+#ifdef OS_WINDOWS
+    ::Sleep (uMillisec);
+    return static_cast<int> (uMillisec);
+#elif defined (OS_STD_POSIX)
+    return ::usleep (uMillisec * 1000);
+#endif
+}
+
+thread_handle this_thread::handle () noexcept
+{
+#ifdef OS_WINDOWS
+    return ::GetCurrentThreadId ();
+#elif defined (OS_STD_POSIX)
+    return ::pthread_self ();
+#endif
+}
+
+// =========================================================
+
 namespace main_thread {
 
-static const resource_handle main_thread_handle = this_thread::handle ();
+static const thread_handle main_thread_handle = this_thread::handle ();
 
-resource_handle handle () noexcept
+thread_handle handle () noexcept
 {
     return main_thread::main_thread_handle;
 }
@@ -126,41 +159,12 @@ int set_priority (thread_priority ePrio)
 
 // =========================================================
 
-void this_thread::exit ()
-{
-#ifdef OS_WINDOWS
-#elif defined (OS_STD_POSIX)
-    ::pthread_exit (nullptr);
-#endif
-}
-
-int this_thread::sleep_for (uint uMillisec)
-{
-#ifdef OS_WINDOWS
-    ::Sleep (uMillisec);
-    return static_cast<int> (uMillisec);
-#elif defined (OS_STD_POSIX)
-    return ::usleep (uMillisec * 1000);
-#endif
-}
-
-resource_handle this_thread::handle () noexcept
-{
-#ifdef OS_WINDOWS
-    return ::GetCurrentThreadId ();
-#elif defined (OS_STD_POSIX)
-    return ::pthread_self ();
-#endif
-}
-
-// =========================================================
-
-bool thread::id::thread_handles_equal (resource_handle pth1, resource_handle pth2)
+bool thread::id::thread_handles_equal (handle_type pth1, handle_type pth2)
 {
 #ifdef OS_WINDOWS
     return (pth1 == pth2);
 #elif defined (OS_STD_POSIX)
-    return ::pthread_equal (pth1.get<thread_handle> (), pth2.get<thread_handle> ());
+    return ::pthread_equal (pth1, pth2);
 #endif
 }
 
@@ -196,6 +200,8 @@ bool thread::start (fn_type&        gFunc,
                     thread_priority ePrio,
                     size_type       uStackSize)
 {
+    auto thread_id = _M_gId.resource ();
+
 #   ifdef OS_STD_POSIX
 
     ::pthread_attr_t attr { };
@@ -208,7 +214,7 @@ bool thread::start (fn_type&        gFunc,
             ::pthread_attr_setdetachstate (&attr, !bJoinable ?
                                            PTHREAD_CREATE_JOINABLE :
                                            PTHREAD_CREATE_DETACHED) != 0 ||
-            ::pthread_create (&_M_gId._M_handle, &attr, &bind, &gFunc) != 0)
+            ::pthread_create (&thread_id, &attr, &bind, &gFunc) != 0)
     {
         ::pthread_attr_destroy (&attr);
         return false;
@@ -231,7 +237,7 @@ void thread::cancel ()
 {
 #   ifdef OS_WINDOWS
 #   elif defined (OS_STD_POSIX) && !defined (OS_ANDROID)
-    ::pthread_cancel (_M_gId._M_handle);
+    ::pthread_cancel (_M_gId.resource ());
 #   endif
 }
 
@@ -239,17 +245,17 @@ void thread::join ()
 {
 #   ifdef OS_WINDOWS
 #   elif defined (OS_STD_POSIX)
-    ::pthread_join (_M_gId._M_handle, nullptr);
+    ::pthread_join (_M_gId.resource (), nullptr);
 #   endif
 }
 
 void thread::detach ()
 {
-    if (_M_gId._M_handle and _M_bIsJoinable.load ())
+    if (_M_gId.handle () && _M_bIsJoinable.load ())
     {
 #       ifdef OS_WINDOWS
 #       elif defined (OS_STD_POSIX)
-        ::pthread_detach (_M_gId._M_handle);
+        ::pthread_detach (_M_gId.resource ());
 #       endif
 
         _M_bIsJoinable.store (false);
@@ -291,13 +297,13 @@ int thread::set_priority (thread_priority ePrio)
     default:
     {
         ::sched_param gParam;
-        ::pthread_getschedparam (_M_gId._M_handle, &nPrio, &gParam);
+        ::pthread_getschedparam (_M_gId.resource (), &nPrio, &gParam);
         nPrio = gParam.sched_priority;
     }
         break;
     }
 
-    switch (::pthread_setschedprio (_M_gId._M_handle, nPrio))
+    switch (::pthread_setschedprio (_M_gId.resource (), nPrio))
     {
     case ENOTSUP: case EINVAL:
         return error_invalid;
@@ -316,4 +322,8 @@ int thread::set_priority (thread_priority ePrio)
     return error_unknown;
 }
 
-} } // Concurency
+// =========================================================
+
+} // namespace compute
+
+// =========================================================

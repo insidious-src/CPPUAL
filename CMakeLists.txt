@@ -347,7 +347,7 @@ set(CPPUAL_JSON_HEADERS
     )
 
 add_library(cppual-json SHARED
-    "src/json/json_adaptor.cpp"
+    "src/json/strict_json.cpp"
     "include/cppual/json/msinttypes/inttypes.h"
     "include/cppual/json/msinttypes/stdint.h"
 

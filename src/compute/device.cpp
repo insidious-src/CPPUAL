@@ -104,7 +104,7 @@ device::size_type device::max_alloc_size () const
     return _M_pDev->max_memory_alloc_size ();
 }
 
-u32 device::compute_units () const
+u32 device::compute_units_count () const
 {
     if (_M_pDev == nullptr) assign_dev_from_cat ();
     return _M_pDev->compute_units_count ();

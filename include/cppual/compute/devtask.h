@@ -32,9 +32,12 @@ namespace cppual::compute {
 
 // =========================================================
 
-class device_queue : public object<resource_type::queue>
+class device_queue : public object
 {
 public:
+    typedef device_queue self_type;
+    typedef object       base_type;
+
     typedef enum class engine_type : u8
     {
         none      =      0,
