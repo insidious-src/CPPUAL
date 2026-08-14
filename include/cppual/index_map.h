@@ -45,6 +45,12 @@ concept integer_or_void = unsigned_integer<K> || void_t<K>;
 
 // ====================================================
 
+template <integer Key>
+constexpr std::size_t get (Key k, std::size_t capacity) noexcept
+{ return (k + (k % capacity)) % capacity; }
+
+// ====================================================
+
 //! A vector-based map with O(1) lookup time, using a modulo hash function to compute indices.
 template <integer_or_void K, non_void V, allocator_like A = memory::allocator<std::pair<K const, V>>>
 class dyn_index_map : public std::vector<std::pair<K const, V>, A>
@@ -61,8 +67,8 @@ public:
     typedef value_type const&                     const_reference       ;
     typedef value_type &                          reference             ;
     typedef memory::allocator_traits<A>           alloc_traits          ;
-    typedef alloc_traits::allocator_type          allocator_type        ;
-    typedef alloc_traits::size_type               size_type             ;
+    typedef base_type::allocator_type             allocator_type        ;
+    typedef base_type::size_type                  size_type             ;
     typedef size_type const                       const_size            ;
     typedef ptrdiff                               difference_type       ;
     typedef fstring_view                          string_view           ;
@@ -77,7 +83,7 @@ public:
     // ====================================================
 
     static_assert (are_same<value_type, typename allocator_type::value_type>,
-        "value_type must be the same as allocator_type::value_type!");
+                  "value_type must be the same as allocator_type::value_type!");
 
     // ====================================================
 
@@ -98,10 +104,6 @@ public:
     using base_type::end;
     using base_type::cbegin;
     using base_type::cend;
-    using base_type::rbegin;
-    using base_type::rend;
-    using base_type::crbegin;
-    using base_type::crend;
     using base_type::reserve;
     using base_type::max_size;
     using base_type::clear;
@@ -124,7 +126,6 @@ public:
     iterator emplace (const_iterator pos, Args&&... args);
     void push_back (const_reference val);
     void push_back (value_type&& val);
-    void reserve (size_type count);
     template <typename... Args>
     void emplace_back (Args&&... args);
     template <typename... Args>
@@ -325,27 +326,27 @@ public:
 
     template <auto Key> requires (integer<decltype (Key)>)
     consteval size_type get_index () const noexcept
-    { return (Key % size () + Key) % capacity (); }
+    { return get (Key, capacity ()); }
 
     template <char_ptr Key>
     consteval size_type get_index () const noexcept
-    { return get_index<char_hash<Key> ()> () % capacity (); }
+    { return get_index<char_hash<Key> ()> (); }
 
     template <auto Key> requires (str_view_like<decltype (Key)>)
     constexpr size_type get_index () const noexcept
-    { return get_index<char_hash<Key.data (), Key.size ()>> () % capacity (); }
+    { return get_index<char_hash<Key.data (), Key.size ()>> (); }
 
     template <str_view_like U>
     constexpr size_type get_index (U const& name) const noexcept
-    { return get_index (char_hash (name.data (), name.size ())) % capacity (); }
+    { return get_index (char_hash (name.data (), name.size ())); }
 
     template <c_const_str Key>
     constexpr size_type get_index (Key name) const noexcept
-    { return get_index (char_hash (name)) % capacity (); }
+    { return get_index (char_hash (name)); }
 
     template <integer Key>
     constexpr size_type get_index (Key k) const noexcept
-    { return (k % size () + k) % capacity (); }
+    { return get (k, capacity ()); }
 };
 
 // ====================================================
@@ -364,8 +365,8 @@ public:
     typedef value_type const&                     const_reference       ;
     typedef value_type &                          reference             ;
     typedef memory::allocator_traits<A>           alloc_traits          ;
-    typedef alloc_traits::allocator_type          allocator_type        ;
-    typedef alloc_traits::size_type               size_type             ;
+    typedef base_type::allocator_type             allocator_type        ;
+    typedef base_type::size_type                  size_type             ;
     typedef size_type const                       const_size            ;
     typedef ptrdiff                               difference_type       ;
     typedef fstring_view                          string_view           ;
@@ -413,7 +414,6 @@ public:
 
     void push (const_reference val);
     void push (value_type&& val);
-    void reserve (size_type count);
     template <typename... Args>
     void emplace (Args&&... args);
     template <typename... Args>
@@ -608,7 +608,7 @@ public:
 
     template <key_type Key>
     consteval size_type get_index () const noexcept
-    { return (Key % size () + Key) % capacity (); }
+    { return get (Key, capacity ()); }
 
     template <char_ptr Key>
     consteval size_type get_index () const noexcept
@@ -628,7 +628,7 @@ public:
 
     template <integer Key>
     constexpr size_type get_index (Key k) const noexcept
-    { return (k % size () + k) % capacity (); }
+    { return get (k, capacity ()); }
 };
 
 // ====================================================

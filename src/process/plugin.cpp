@@ -168,14 +168,14 @@ dyn_loader::pointer dyn_loader::get_address (char_ptr pName) const
 {
 #   ifdef OS_STD_POSIX
 
-    void* pAddr = ::dlsym (_M_pHandle, pName);
+    pointer pAddr = ::dlsym (_M_pHandle, pName);
     if (!pAddr) std::cerr << ::dlerror () << std::endl;
     return pAddr;
 
 #   elif defined (OS_WINDOWS)
 
     auto const convert =
-    direct_cast<void*> (::GetProcAddress (_M_pHandle.get<::HMODULE> (), pName));
+    direct_cast<pointer> (::GetProcAddress (_M_pHandle.get<::HMODULE> (), pName));
 
     if (!convert)
         std::cerr << "error: " << ::GetLastError () << "\naddress not found!" << std::endl;

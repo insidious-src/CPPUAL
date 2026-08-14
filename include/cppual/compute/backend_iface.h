@@ -266,7 +266,7 @@ public:
 
 protected:
     constexpr memory_interface ()
-    : object (nullptr, resource_type::memory_chunk)
+    : object (nullptr, resource_type::memory)
     { }
 };
 

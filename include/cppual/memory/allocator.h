@@ -56,8 +56,8 @@ namespace cppual::memory {
 //! extend the capacity of the allocated memory (allocating more fixed memory).
 class memory_resource_adaptor;
 using std::scoped_allocator_adaptor;
-template <non_void T> class allocator;
-template <non_void T> using polymorphic_allocator = allocator<T>;
+template <typename T> class allocator;
+template <typename T> using polymorphic_allocator = allocator<T>;
 
 // =========================================================
 
@@ -165,20 +165,9 @@ public:
     virtual constexpr bool is_lock_free () const noexcept
     { return true; }
 
-    //! is using mutex for synchronization
-    constexpr bool is_using_mutex () const noexcept
-    { return is_thread_safe () && !is_lock_free (); }
-
-    //! is atomic (lock free and thread safe)
-    constexpr bool is_atomic () const noexcept
-    { return is_thread_safe () && is_lock_free (); }
-
     //! is inter-process shared memory
     virtual constexpr bool is_shared () const noexcept
     { return false; }
-
-    constexpr bool is_owned () const noexcept
-    { return &owner () != this; }
 
     //! upstream memory_resource owner or self
     virtual constexpr abs_base_reference owner () noexcept
@@ -195,6 +184,17 @@ public:
     //! upstream memory_resource owner or self
     constexpr abs_base_reference upstream_resource () noexcept
     { return owner (); }
+
+    //! is using mutex for synchronization
+    constexpr bool is_using_mutex () const noexcept
+    { return is_thread_safe () && !is_lock_free (); }
+
+    //! is atomic (lock free and thread safe)
+    constexpr bool is_atomic () const noexcept
+    { return is_thread_safe () && is_lock_free (); }
+
+    constexpr bool is_owned () const noexcept
+    { return &owner () != this; }
 
     constexpr
     pointer
@@ -263,7 +263,7 @@ std::thread::id SHARED_FN_API main_thread_id () noexcept;
 // =========================================================
 
 //! redefined polymorphic memory allocator
-template <non_void T>
+template <typename T>
 class SHARED_API allocator
 {
 public:
@@ -296,63 +296,64 @@ public:
 
     inline constexpr static const_align max_align = memory_resource::max_align;
 
-    template <non_void U>
+    template <typename U>
     using self_type_t = allocator<U>;
 
-    template <non_void U>
+    template <typename U>
     struct rebind { typedef allocator<U> other; };
 
-    template <non_void U>
+    template <typename U>
     using rebind_t = rebind<U>::other;
 
     // =========================================================
 
+    //! TODO: consteval
     constexpr allocator () noexcept = default;
 
     constexpr allocator (resource_reference res) noexcept
     : _M_pRc (&res)
     { }
 
-    template <non_void U>
+    template <typename U>
     constexpr allocator (self_type_t<U> const& rh) noexcept
     : _M_pRc (rh._M_pRc)
     { }
 
-    template <non_void U>
+    template <typename U>
     constexpr allocator (self_type_t<U>&& rh) noexcept
     : _M_pRc (rh._M_pRc)
     { rh._M_pRc = &null_resource (); }
 
-    template <non_void U>
+    template <typename U>
     constexpr allocator (std::allocator<U> const&) noexcept
     : _M_pRc (&new_delete_resource ())
     { }
 
-    template <non_void U>
+    template <typename U>
     constexpr allocator (std::allocator<U>&&) noexcept
     : _M_pRc (&new_delete_resource ())
     { }
 
-    template <non_void U>
+    template <typename U>
     constexpr allocator (std::pmr::polymorphic_allocator<U> const& rh) noexcept
     : _M_pRc (&dyn_cast<resource_type> (*rh.resource ()))
     { }
 
-    template <non_void U>
+    template <typename U>
     constexpr allocator (std::pmr::polymorphic_allocator<U>&& rh) noexcept
     : _M_pRc (&dyn_cast<resource_type> (*rh.resource ()))
     { rh = std::pmr::polymorphic_allocator<U> (&null_resource ()); }
 
     // =========================================================
 
-    template <non_void U>
+    template <typename U>
     constexpr self_type& operator = (self_type_t<U> const& rh) noexcept
     {
         if (this != &rh) _M_pRc = rh._M_pRc;
         return *this;
     }
 
-    template <non_void U>
+    template <typename U>
     constexpr self_type& operator = (self_type_t<U>&& rh) noexcept
     {
         if (this != &rh)
@@ -370,24 +371,32 @@ public:
         return *this;
     }
 
-    template <non_void U>
+    template <typename U>
     constexpr self_type& operator = (std::allocator<U> const&) noexcept
     {
         _M_pRc = &new_delete_resource ();
         return *this;
     }
 
-    template <non_void U>
+    template <typename U>
     constexpr self_type& operator = (std::allocator<U>&&) noexcept
     {
         _M_pRc = &new_delete_resource ();
         return *this;
     }
 
-    template <non_void U>
+    template <typename U>
     constexpr self_type& operator = (std::pmr::polymorphic_allocator<U> const& rh) noexcept
     {
         _M_pRc = &dyn_cast<resource_type> (*rh.resource ());
+        return *this;
+    }
+
+    template <typename U>
+    constexpr self_type& operator = (std::pmr::polymorphic_allocator<U>&& rh) noexcept
+    {
+        _M_pRc = &dyn_cast<resource_type> (*rh.resource ());
+        rh     = std::pmr::polymorphic_allocator<U> (&null_resource ());
         return *this;
     }
 
@@ -417,7 +426,7 @@ public:
     {  return resource ().owner (); }
 
 
-    inline resource_reference init_resource () const noexcept
+    constexpr resource_reference init_resource () const noexcept
     {
         return _M_pRc != nullptr ? *_M_pRc : *(_M_pRc = &get_default_thread_resource ());
     }
@@ -519,13 +528,13 @@ public:
     constexpr self_type select_on_container_copy_construction () const noexcept
     { return  self_type (*this); }
 
-    template <non_void>
+    template <typename>
     friend class allocator;
 
-    template <non_void U>
+    template <typename U>
     friend constexpr void swap (self_type_t<U>&, self_type_t<U>&) noexcept;
 
-    template <non_void U1, non_void U2>
+    template <typename U1, typename U2>
     friend constexpr void swap (self_type_t<U1>&, self_type_t<U2>&) noexcept;
 
 private:
@@ -536,91 +545,91 @@ private:
 //! allocator comparisons
 //! =========================================================
 
-template <non_void T>
+template <typename T>
 constexpr bool operator == (allocator<T> const& lh, allocator<T> const& rh) noexcept
 {
     return &lh.resource () == &rh.resource () || lh.resource ().is_equal (rh.resource ());
 }
 
-template <non_void T>
+template <typename T>
 constexpr bool operator != (allocator<T> const& lh, allocator<T> const& rh) noexcept
 { return !(lh == rh); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator == (allocator<T1> const& lh, allocator<T2> const& rh) noexcept
 {
     return &lh.resource () == &rh.resource () || lh.resource ().is_equal (rh.resource ());
 }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator != (allocator<T1> const& lh, allocator<T2> const& rh) noexcept
 { return !(lh == rh); }
 
 // =========================================================
 
-template <non_void T>
+template <typename T>
 constexpr bool operator == (allocator<T> const& lh, std::allocator<T> const&) noexcept
 { return &lh.resource () == &new_delete_resource (); }
 
-template <non_void T>
+template <typename T>
 constexpr bool operator != (allocator<T> const& lh, std::allocator<T> const& rh) noexcept
 { return !(lh == rh); }
 
-template <non_void T>
+template <typename T>
 constexpr bool operator == (std::allocator<T> const&, allocator<T> const& rh) noexcept
 { return &rh.resource () == &new_delete_resource (); }
 
-template <non_void T>
+template <typename T>
 constexpr bool operator != (std::allocator<T> const& lh, allocator<T> const& rh) noexcept
 { return !(lh == rh); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator == (allocator<T1> const& lh, std::allocator<T2> const&) noexcept
 { return &lh.resource () == &new_delete_resource (); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator != (allocator<T1> const& lh, std::allocator<T2> const& rh) noexcept
 { return !(lh == rh); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator == (std::allocator<T1> const&, allocator<T2> const& rh) noexcept
 { return &rh.resource () == &new_delete_resource (); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator != (std::allocator<T1> const& lh, allocator<T2> const& rh) noexcept
 { return !(lh == rh); }
 
 // =========================================================
 
-template <non_void T>
+template <typename T>
 constexpr bool operator == (allocator<T> const& lh, std::pmr::polymorphic_allocator<T> const& rh) noexcept
 { return &lh.resource () == rh.resource () || rh.resource ()->is_equal (lh.resource ()); }
 
-template <non_void T>
+template <typename T>
 constexpr bool operator != (allocator<T> const& lh, std::pmr::polymorphic_allocator<T> const& rh) noexcept
 { return !(lh == rh); }
 
-template <non_void T>
+template <typename T>
 constexpr bool operator == (std::pmr::polymorphic_allocator<T> const& lh, allocator<T> const& rh) noexcept
 { return lh.resource () == &rh.resource () || lh.resource ()->is_equal (rh.resource ()); }
 
-template <non_void T>
+template <typename T>
 constexpr bool operator != (std::pmr::polymorphic_allocator<T> const& lh, allocator<T> const& rh) noexcept
 { return !(lh == rh); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator == (allocator<T1> const& lh, std::pmr::polymorphic_allocator<T2> const& rh) noexcept
 { return &lh.resource () == rh.resource () || rh.resource ()->is_equal (lh.resource ()); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator != (allocator<T1> const& lh, std::pmr::polymorphic_allocator<T2> const& rh) noexcept
 { return !(lh == rh); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator == (std::pmr::polymorphic_allocator<T1> const& lh, allocator<T2> const& rh) noexcept
 { return lh.resource () == &rh.resource () || lh.resource ()->is_equal (rh.resource ()); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr bool operator != (std::pmr::polymorphic_allocator<T1> const& lh, allocator<T2> const& rh) noexcept
 { return !(lh == rh); }
 
@@ -628,11 +637,11 @@ constexpr bool operator != (std::pmr::polymorphic_allocator<T1> const& lh, alloc
 //! allocator swap
 //! =========================================================
 
-template <non_void T>
+template <typename T>
 constexpr void swap (allocator<T>& lh, allocator<T>& rh) noexcept
 { std::swap (lh._M_pRc, rh._M_pRc); }
 
-template <non_void T1, non_void T2>
+template <typename T1, typename T2>
 constexpr void swap (allocator<T1>& lh, allocator<T2>& rh) noexcept
 { std::swap (lh._M_pRc, rh._M_pRc); }
 

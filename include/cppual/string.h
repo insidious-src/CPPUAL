@@ -47,11 +47,6 @@ namespace cppual {
 
 // ====================================================
 
-template <typename A>
-concept allocator_or_void = allocator_like<A> || void_t<A>;
-
-// ====================================================
-
 template <symbolic_char T = char>
 struct locale_traits;
 

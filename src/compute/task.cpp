@@ -82,6 +82,7 @@ public:
     typedef host_queue::write_lock write_lock;
     typedef host_queue::read_lock  read_lock ;
     typedef host_queue::mutex_type mutex_type;
+    typedef host_queue::size_type  size_type ;
 
     assign_queue (host_queue& gTasks) : _M_queue (gTasks)
     {
@@ -104,9 +105,13 @@ public:
         {
             write_lock lock (_M_queue._M_gQueueMutex);
 
-            if (_M_queue._M_uNumAssigned > 0 && (--_M_queue._M_uNumAssigned) == 0)
+            switch (--_M_queue._M_uNumAssigned)
             {
+            case size_type (-1):
+                _M_queue._M_uNumAssigned = 0;
+            case 0:
                 _M_queue._M_eState = host_queue::inactive;
+                break;
             }
         }
 

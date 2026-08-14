@@ -43,12 +43,12 @@ namespace cppual {
 
 // ====================================================
 
-template <non_void T, allocator_like A = memory::allocator<T>, bool Atomic = false>
+template <typename T, allocator_like A = memory::allocator<T>, bool Atomic = false>
 class circular_queue;
 
 // ====================================================
 
-template <non_void T, allocator_like A>
+template <typename T, allocator_like A>
 class SHARED_API circular_queue <T, A, false> : private A
 {
 public:
@@ -421,7 +421,7 @@ private:
 
 // ====================================================
 
-template <non_void T, allocator_like A>
+template <typename T, allocator_like A>
 circular_queue<T, A, false>::self_type&
 circular_queue<T, A, false>::operator = (self_type const& gObj)
 {
@@ -457,7 +457,7 @@ circular_queue<T, A, false>::operator = (self_type const& gObj)
     return *this;
 }
 
-template <non_void T, allocator_like A>
+template <typename T, allocator_like A>
 void circular_queue<T, A, false>::resize (size_type uNewCapacity)
 {
     if (capacity () >= uNewCapacity) return;
@@ -469,7 +469,7 @@ void circular_queue<T, A, false>::resize (size_type uNewCapacity)
     swap (gObj);
 }
 
-template <non_void T, allocator_like A>
+template <typename T, allocator_like A>
 void circular_queue<T, A, false>::erase (const_iterator gIt)
 {
     if (empty () || gIt < cbegin () || cend () <= gIt)
@@ -500,7 +500,7 @@ void circular_queue<T, A, false>::erase (const_iterator gIt)
     }
 }
 
-template <non_void T, allocator_like A>
+template <typename T, allocator_like A>
 void circular_queue<T, A, false>::dispose ()
 {
     if (!capacity ()) return;
@@ -516,7 +516,7 @@ void circular_queue<T, A, false>::dispose ()
 
 //! [UNFINISHED] feature complete lock-free multi-producer/multi-consumer bidirectional queue
 //! ex. game messaging queue
-template <non_void T, allocator_like A>
+template <typename T, allocator_like A>
 class SHARED_API circular_queue <T, A, true> : private A, public non_copyable
 {
 public:
@@ -622,7 +622,7 @@ private:
 
 //! [UNFINISHED] lock-free circular queue (1 producer / 1 consumer)
 //! ex. sufficient for event handling
-template <non_void T, std::size_t N>
+template <typename T, std::size_t N>
 class SHARED_API uniform_queue : public non_copyable
 {
 public:

@@ -244,30 +244,6 @@ public:
 
 // =========================================================
 
-template <typename U>
-inline constexpr static rtti::const_pointer const name_of_v = rtti::name_of<U> ();
-
-template <typename U>
-inline constexpr static rtti::string_view const name_of_sv_v = rtti::name_of<U> ();
-
-template <typename U>
-inline constexpr static rtti::string_type const name_of_str_v = rtti::name_of<U> ();
-
-template <rtti::size_type Hash>
-inline constexpr static rtti::const_pointer const name_of_hash_v = rtti::name_of (Hash);
-
-template <rtti::size_type Hash>
-inline constexpr static rtti::string_view const name_of_hash_sv_v = rtti::name_of (Hash);
-
-template <rtti::size_type Hash>
-inline constexpr static rtti::string_type const name_of_hash_str_v = rtti::name_of (Hash);
-
-template <typename U>
-inline constexpr static rtti::const_size type_hash_v = char_hash<rtti::name_of<U> ()> ();
-
-// =========================================================
-
-
 consteval bool operator == (rtti const& lh, rtti const& rh) noexcept
 {
     return lh.hash_code () == rh.hash_code ();
@@ -290,7 +266,7 @@ public:
     typedef function<void()>                    fn_type        ;
     typedef fn_type &                           fn_ref         ;
     typedef fn_type const&                      fn_const_ref   ;
-    typedef abi::rtti                           rtti_type      ;
+    typedef rtti                                rtti_type      ;
     typedef static_array<rtti_type, arity_v<N>> array_type     ;
     typedef array_type &                        array_ref      ;
     typedef array_type const&                   array_const_ref;
@@ -301,9 +277,6 @@ public:
 
     template <size_type SZ>
     using self_type_t = function_rtti<arity_v<SZ>>;
-
-    consteval static size_type arity () noexcept
-    { return N; }
 
     constexpr function_rtti () noexcept
     : _M_fn ()
@@ -359,6 +332,9 @@ public:
     constexpr explicit operator safe_bool () const noexcept
     { return _M_fn != nullptr ? &self_type::_M_fn : nullptr; }
 
+    consteval static size_type arity () noexcept
+    { return N; }
+
     constexpr fn_const_ref           fn () const noexcept { return _M_fn       ; }
     constexpr array_const_ref arg_types () const noexcept { return _M_arg_types; }
     constexpr rtti_type     return_type () const noexcept { return _M_ret_type ; }
@@ -413,6 +389,29 @@ using type_convertable_to = std::enable_if_t<std::convertible_to<From, type_of<T
 
 // =========================================================
 
+template <typename U>
+inline constexpr static rtti::const_pointer const name_of_v = rtti::name_of<U> ();
+
+template <typename U>
+inline constexpr static rtti::string_view const name_of_sv_v = rtti::name_of<U> ();
+
+template <typename U>
+inline constexpr static rtti::string_type const name_of_str_v = rtti::name_of<U> ();
+
+template <rtti::size_type Hash>
+inline constexpr static rtti::const_pointer const name_of_hash_v = rtti::name_of (Hash);
+
+template <rtti::size_type Hash>
+inline constexpr static rtti::string_view const name_of_hash_sv_v = rtti::name_of (Hash);
+
+template <rtti::size_type Hash>
+inline constexpr static rtti::string_type const name_of_hash_str_v = rtti::name_of (Hash);
+
+template <typename U>
+inline constexpr static rtti::const_size type_hash_v = char_hash<rtti::name_of<U> ()> ();
+
+// =========================================================
+
 namespace array {
 
 template <rtti const Array[], rtti::size_type I>
@@ -420,12 +419,16 @@ using type_of = type_of<Array[I]>;
 
 } // namespace array
 
+// =========================================================
+
 namespace cstring {
 
 template <rtti::const_pointer STR>
 using type_of = rtti::type_of<STR>;
 
 } // namespace cstring
+
+// =========================================================
 
 namespace convertable {
 

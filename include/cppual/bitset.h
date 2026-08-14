@@ -92,21 +92,21 @@ public:
     typedef value_type const                   const_value;
     typedef std::underlying_type_t<value_type> int_type   ;
     typedef int_type const                     const_int  ;
+    typedef std::size_t                        size_type  ;
+    typedef size_type const                    const_size ;
 
-    inline static constexpr std::size_t capacity = (sizeof (int_type) * 8) + sizeof (char);
+    inline static constexpr const_size capacity = (sizeof (int_type) * 8) + sizeof (byte);
 
 public:
     typedef bitset<T>                             self_type             ;
     typedef fstring_view                          string_view           ;
     typedef fstring                               string_type           ;
-    typedef remove_const_t<decltype (capacity)>   size_type             ;
-    typedef size_type const                       const_size            ;
     typedef reference_proxy<T>                    ref_proxy_type        ;
     typedef set_bit_iterator<T>                   iterator              ;
     typedef set_bit_iterator<T const>             const_iterator        ;
     typedef std::reverse_iterator<iterator>       reverse_iterator      ;
     typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
-    typedef std::array<char, capacity>            str_vector_type       ;
+    typedef static_array<byte, capacity>          str_vector_type       ;
 
     inline static constexpr const_size npos = static_cast<size_type> (-1);
 
@@ -317,7 +317,7 @@ public:
         result.reserve (size ());
 
         for (size_type i = 0; i < size (); ++i)
-        { result[(size () - 1) - i] = test (static_cast<int_type> (1) << i) ? '1' : '0'; }
+        { result[(size () - 1) - i] = test (_M_flags << i) ? '1' : '0'; }
 
         return result;
     }

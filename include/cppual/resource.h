@@ -48,7 +48,7 @@ typedef enum class resource_type : u32
     null            =       0,
     instance        = 1 <<  0,
     device          = 1 <<  1,
-    memory_chunk    = 1 <<  2,
+    memory          = 1 <<  2,
     image           = 1 <<  3,
     font            = 1 <<  4,
     macro           = 1 <<  5,
@@ -338,6 +338,7 @@ public:
 
     inline constexpr static const handle_type::const_value npos = NULL_V;
 
+    //! TODO: consteval
     constexpr resource () noexcept = default;
 
     constexpr resource (self_type&& rc) noexcept
@@ -427,6 +428,7 @@ public:
 
     inline constexpr static handle_type::const_value npos = NULL_V;
 
+    //! TODO: consteval
     constexpr resource () noexcept = default;
 
     constexpr explicit resource (const_handle  handle,

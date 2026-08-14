@@ -26,6 +26,7 @@
 #include <cppual/decl>
 #include <cppual/signal>
 #include <cppual/concepts>
+#include <cppual/containers>
 #include <cppual/meta_functional>
 #include <cppual/memory_allocator>
 
@@ -35,35 +36,48 @@ namespace cppual {
 
 // =========================================================
 
+template <symbolic_char T, structure E, allocator_or_void A>
+class cow_string;
+
+// =========================================================
+
 template <non_void T, allocator_like = memory::allocator<function<void(arg_t<T>)>>>
 class reactive;
 
 // =========================================================
 
-typedef reactive<byte>    reactive_byte   ;
-typedef reactive<bool>    reactive_bool   ;
-typedef reactive<char>    reactive_char   ;
-typedef reactive<char8>   reactive_char8  ;
-typedef reactive<char16>  reactive_char16 ;
-typedef reactive<char32>  reactive_char32 ;
-typedef reactive<wchar>   reactive_wchar  ;
-typedef reactive<short>   reactive_short  ;
-typedef reactive<i16>     reactive_i16    ;
-typedef reactive<ushort>  reactive_ushort ;
-typedef reactive<u16>     reactive_u16    ;
-typedef reactive<int>     reactive_int    ;
-typedef reactive<i32>     reactive_i32    ;
-typedef reactive<uint>    reactive_uint   ;
-typedef reactive<u32>     reactive_u32    ;
-typedef reactive<long>    reactive_long   ;
-typedef reactive<i64>     reactive_i64    ;
-typedef reactive<ulong>   reactive_ulong  ;
-typedef reactive<u64>     reactive_u64    ;
-typedef reactive<long64>  reactive_long64 ;
-typedef reactive<ulong64> reactive_ulong64;
-typedef reactive<float>   reactive_float  ;
-typedef reactive<double>  reactive_double ;
-typedef reactive<ldouble> reactive_ldouble;
+typedef reactive<byte>       reactive_byte      ;
+typedef reactive<bool>       reactive_bool      ;
+typedef reactive<char>       reactive_char      ;
+typedef reactive<char8>      reactive_char8     ;
+typedef reactive<char16>     reactive_char16    ;
+typedef reactive<char32>     reactive_char32    ;
+typedef reactive<wchar>      reactive_wchar     ;
+typedef reactive<short>      reactive_short     ;
+typedef reactive<i16>        reactive_i16       ;
+typedef reactive<ushort>     reactive_ushort    ;
+typedef reactive<u16>        reactive_u16       ;
+typedef reactive<int>        reactive_int       ;
+typedef reactive<i32>        reactive_i32       ;
+typedef reactive<uint>       reactive_uint      ;
+typedef reactive<u32>        reactive_u32       ;
+typedef reactive<long>       reactive_long      ;
+typedef reactive<i64>        reactive_i64       ;
+typedef reactive<ulong>      reactive_ulong     ;
+typedef reactive<u64>        reactive_u64       ;
+typedef reactive<long64>     reactive_long64    ;
+typedef reactive<ulong64>    reactive_ulong64   ;
+typedef reactive<float>      reactive_float     ;
+typedef reactive<double>     reactive_double    ;
+typedef reactive<ldouble>    reactive_ldouble   ;
+typedef reactive<fstring>    reactive_fstring   ;
+typedef reactive<fu8string>  reactive_fu8string ;
+typedef reactive<fu16string> reactive_fu16string;
+typedef reactive<fu32string> reactive_fu32string;
+typedef reactive<string>     reactive_string    ;
+typedef reactive<u8string>   reactive_u8string  ;
+typedef reactive<u16string>  reactive_u16string ;
+typedef reactive<u32string>  reactive_u32string ;
 
 // =========================================================
 
@@ -278,7 +292,7 @@ public:
     }
 
     //! callable object reactive (signal/slot) connect
-    template <callable C, std::enable_if_t<!functional<C>, void>>
+    template <callable C, std::enable_if_t<!functional<C> && !are_same<C, self_type>, void>>
     constexpr self_type& operator << (C& obj) const
     {
         static_assert (std::is_same_v<void, callable_return_t<C, arg_type>>,

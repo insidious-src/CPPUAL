@@ -111,7 +111,8 @@ public:
     private:
         static bool thread_handles_equal (handle_type h1, handle_type h2);
 
-        friend constexpr bool operator == (self_type const&, self_type const&) noexcept;
+        friend
+        constexpr bool operator == (self_type const&, self_type const&) noexcept;
 
     private:
         handle_type _M_handle { };

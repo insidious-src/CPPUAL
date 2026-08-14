@@ -31,6 +31,7 @@
 
 #include <iterator>
 #include <vector>
+//#include <array>
 
 // =========================================================
 
@@ -62,7 +63,7 @@ inline constexpr static const std::size_t reserve_slot_count_v = 5;
 
 // =========================================================
 
-template <non_void R, typename... Args, slot_allocator A>
+template <typename R, typename... Args, slot_allocator A>
 class SHARED_API signal <R(Args...), A> : public circular_queue<function<R(Args...)>, A>
 {
 public:
@@ -117,19 +118,26 @@ public:
     }
 
     //! emit signal to connected slots
-    collector_type operator () (Args... args) const
+    std::conditional_t<void_t<return_type>, void, collector_type>
+    operator () (Args... args) const
     {
-        collector_type collection (return_allocator (this->get_allocator ()));
-
-        if (!empty ()) collection.reserve (size ());
-
-        for (const_reference slot : *this)
+        if constexpr (void_t<return_type>)
         {
-            if (slot != nullptr)
-                collection.emplace_back (std::move (slot (std::forward<Args> (args)...)));
+            for (const_reference slot : *this) slot (std::forward<Args> (args)...);
         }
+        else
+        {
+            collector_type collection (return_allocator (this->get_allocator ()));
 
-        return std::move (collection);
+            if (!empty ()) collection.reserve (size ());
+
+            for (const_reference slot : *this)
+            {
+                collection.emplace_back (std::move (slot (std::forward<Args> (args)...)));
+            }
+
+            return std::move (collection);
+        }
     }
 
     //! (signal/slot) connect
@@ -173,121 +181,6 @@ public:
     {
         connect (*this, obj);
         return *this;
-    }
-
-    template <fn_sig, slot_allocator>
-    friend class signal;
-};
-
-// =========================================================
-
-template <typename... Args, slot_allocator A>
-class SHARED_API signal <void(Args...), A> : public circular_queue<function<void(Args...)>, A>
-{
-public:
-    typedef signal<void(Args...), A>                   self_type             ;
-    typedef circular_queue<function<void(Args...)>, A> base_type             ;
-    typedef memory::allocator_traits<A>                traits_type           ;
-    typedef traits_type::allocator_type                allocator_type        ;
-    typedef traits_type::size_type                     size_type             ;
-    typedef size_type const                            const_size            ;
-    typedef base_type::value_type                      value_type            ;
-    typedef value_type &                               reference             ;
-    typedef value_type const&                          const_reference       ;
-    typedef circular_queue<value_type, allocator_type> container_type        ;
-    typedef container_type&                            container_ref         ;
-    typedef container_type const&                      container_const_ref   ;
-    typedef container_type::iterator                   iterator              ;
-    typedef container_type::const_iterator             const_iterator        ;
-    typedef std::reverse_iterator<iterator>            reverse_iterator      ;
-    typedef std::reverse_iterator<const_iterator>      const_reverse_iterator;
-    typedef container_type::const_iterator             slot_type             ;
-    typedef value_type::return_type                    return_type           ;
-
-    using scoped_connection_type = scoped_connection<void(Args...), allocator_type>;
-    using static_fn_ref          = void(&)(Args...);
-
-    using base_type::empty        ;
-    using base_type::size         ;
-    using base_type::reserve      ;
-    using base_type::begin        ;
-    using base_type::end          ;
-    using base_type::cbegin       ;
-    using base_type::cend         ;
-    using base_type::rbegin       ;
-    using base_type::rend         ;
-    using base_type::crbegin      ;
-    using base_type::crend        ;
-    using base_type::push_back    ;
-    using base_type::emplace_back ;
-    using base_type::push_front   ;
-    using base_type::emplace_front;
-    using base_type::pop_back     ;
-    using base_type::pop_front    ;
-    using base_type::clear        ;
-
-    constexpr signal (allocator_type const& ator      = allocator_type (),
-                      size_type             reserve_n = reserve_slot_count_v) noexcept
-    : base_type (ator)
-    {
-        if (reserve_n) reserve (reserve_n);
-    }
-
-    //! emit signal to connected slots
-    constexpr return_type operator () (Args... args) const
-    {
-        for (const_reference slot : *this)
-            if (slot != nullptr) slot (std::forward<Args> (args)...);
-    }
-
-    /// (signal/slot) connect
-    constexpr self_type& operator << (value_type&& fn) const
-    {
-        connect (*this, std::move (fn));
-        return   *this;
-    }
-
-    /// (signal/slot) connect
-    constexpr self_type& operator << (const_reference fn) const
-    {
-        connect (*this, fn);
-        return   *this;
-    }
-
-    /// (signal/slot) connect
-    constexpr self_type& operator << (static_fn_ref fn) const
-    {
-        connect (*this, fn);
-        return   *this;
-    }
-
-    /// callable object (signal/slot) connect
-    template <class_and_non_functional C>
-    constexpr self_type& operator << (std::pair<C&, return_type (C::*)(Args...)> pair) const
-    {
-        connect (pair.first, pair.second);
-        return *this;
-    }
-
-    /// callable object (signal/slot) connect
-    template <class_and_non_functional C>
-    constexpr self_type& operator << (std::pair<C&, return_type (C::*)(Args...) const> pair) const
-    {
-        connect (pair.first, pair.second);
-        return *this;
-    }
-
-    /// callable object (signal/slot) connect
-    template <callable_class C, std::enable_if_t<!is_functional_v<C>, void>>
-    constexpr self_type& operator << (C& obj) const
-    {
-        if (this == &obj) return *this;
-
-        static_assert (std::is_same_v<return_type, callable_return_t<C, Args...>>,
-                       "C::operator () return type is NOT void!");
-
-        connect (*this, obj);
-        return   *this;
     }
 
     template <fn_sig, slot_allocator>
@@ -352,7 +245,7 @@ public:
     constexpr void operator () (Args... args) const
     {
         for (const_reference slot : *this)
-            if (slot != nullptr && !(slot (std::forward<Args> (args)...))) return;
+            if (!(slot (std::forward<Args> (args)...))) return;
     }
 
     /// (signal/slot) connect

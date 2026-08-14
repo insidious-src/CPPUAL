@@ -134,3 +134,7 @@
 * drop openal
 * drop sndfile
 * transparent filesystem management (using protocols)
+
+## Notes ##
+* Extreme Optimization
+* Associative  Connections (between neurons -> synapses) > another type of extreme optimization

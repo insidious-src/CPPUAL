@@ -39,7 +39,7 @@
 
 namespace std::pmr {
 
-template <typename T>
+template <typename>
 class polymorphic_allocator;
 class memory_resource      ;
 
@@ -64,7 +64,7 @@ namespace memory {
 class memory_resource;
 
 //! redefined polymorphic memory allocator
-template <non_void> class allocator;
+template <typename> class allocator;
 
 } //! namespace cppual::memory
 
@@ -1104,6 +1104,8 @@ concept str_view_like = requires (T& t)
     { t[0]         } -> are_same<typename T::reference>    ;
 };
 
+// ====================================================
+
 //! Comparison concepts
 template <typename T>
 concept equality_comparable = std::equality_comparable<T>;
@@ -1250,9 +1252,13 @@ using is_allocator_t = is_allocator<A>::type;
 template <structure A>
 inline constexpr cbool is_allocator_v = is_allocator<A>::value;
 
+// ====================================================
+
 //! polymorphic allocator concept type
 template <typename A>
 using AllocatorType = std::enable_if_t<is_allocator_v<A>, A>;
+
+// ====================================================
 
 //! polymorphic allocator concept
 template <typename A>
@@ -1271,6 +1277,11 @@ concept allocator_like = is_allocator_v<A> || requires (A& ator)
     { ator.max_size () } -> are_same<typename A::size_type>;
     { ator.select_on_container_copy_construction () } -> are_same<A>;
 };
+
+// ====================================================
+
+template <typename A>
+concept allocator_or_void = allocator_like<A> || void_t<A>;
 
 //! ====================================================
 //! OLD STYLE CONCEPTS AS TYPE TRAITS
